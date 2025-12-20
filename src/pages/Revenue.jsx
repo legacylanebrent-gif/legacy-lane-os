@@ -189,16 +189,19 @@ export default function Revenue() {
             <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Revenue by Type</CardTitle>
+                  <CardTitle>Revenue by Monetization Layer</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {Object.entries(
                       revenueEvents.reduce((acc, e) => {
-                        acc[e.revenue_type] = (acc[e.revenue_type] || 0) + (e.net_amount || 0);
+                        const layer = e.monetization_layer || e.revenue_type || 'other';
+                        acc[layer] = (acc[layer] || 0) + (e.net_amount || 0);
                         return acc;
                       }, {})
-                    ).map(([type, amount]) => (
+                    )
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([type, amount]) => (
                       <div key={type} className="flex items-center justify-between">
                         <span className="text-sm text-slate-600 capitalize">{type.replace(/_/g, ' ')}</span>
                         <span className="font-semibold text-navy-900">${amount.toLocaleString()}</span>

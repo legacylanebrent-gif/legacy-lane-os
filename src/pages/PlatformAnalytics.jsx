@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DollarSign, TrendingUp, Users, Package, ShoppingBag, GraduationCap, Home } from 'lucide-react';
 import DivisionPerformance from '@/components/financial/DivisionPerformance';
 import PartnerLeaderboard from '@/components/financial/PartnerLeaderboard';
+import MonetizationStack from '@/components/financial/MonetizationStack';
 
 export default function PlatformAnalytics() {
   const [revenueEvents, setRevenueEvents] = useState([]);
@@ -114,13 +115,18 @@ export default function PlatformAnalytics() {
           </Card>
         </div>
 
-        <Tabs defaultValue="divisions">
+        <Tabs defaultValue="monetization">
           <TabsList>
+            <TabsTrigger value="monetization">Monetization Stack</TabsTrigger>
             <TabsTrigger value="divisions">Division Performance</TabsTrigger>
             <TabsTrigger value="partners">Partner Leaderboard</TabsTrigger>
             <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="monetization" className="mt-6">
+            <MonetizationStack revenueEvents={revenueEvents} />
+          </TabsContent>
 
           <TabsContent value="divisions" className="mt-6">
             <DivisionPerformance revenueByDivision={revenueByDivision} />
