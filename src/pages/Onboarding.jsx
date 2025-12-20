@@ -37,6 +37,7 @@ const ROLE_CATEGORIES = {
     title: 'Consumer Services',
     subtitle: 'Find, buy, and sell',
     roles: [
+      { value: 'consumer', label: 'Consumer', icon: ShoppingBag, description: 'General consumer access' },
       { value: 'executor', label: 'Executor / Family', icon: Users, description: 'Estate help' },
       { value: 'home_seller', label: 'Home Seller', icon: Home, description: 'Sell property' },
       { value: 'buyer', label: 'Buyer', icon: ShoppingBag, description: 'Browse & purchase' },
@@ -90,7 +91,7 @@ export default function Onboarding() {
       if (selectedRoles.includes('investor')) {
         divisions.push('investment');
       }
-      if (selectedRoles.some(r => ['buyer', 'diy_seller', 'downsizer', 'consignor'].includes(r))) {
+      if (selectedRoles.some(r => ['consumer', 'buyer', 'diy_seller', 'downsizer', 'consignor'].includes(r))) {
         divisions.push('marketplace');
       }
       if (selectedRoles.some(r => ['estate_sale_operator', 'real_estate_agent', 'investor'].includes(r))) {

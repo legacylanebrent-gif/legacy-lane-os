@@ -350,6 +350,11 @@ export default function Settings() {
                       <Badge>Coach</Badge>
                       <Badge>Vendor</Badge>
                       <Badge>Consumer</Badge>
+                      <Badge>Executor</Badge>
+                      <Badge>Home Seller</Badge>
+                      <Badge>Buyer</Badge>
+                      <Badge>Downsizer</Badge>
+                      <Badge>DIY Seller</Badge>
                     </div>
                   </div>
 
