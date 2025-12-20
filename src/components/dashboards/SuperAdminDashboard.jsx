@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, DollarSign, TrendingUp, BookOpen, Home, Package } from 'lucide-react';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function SuperAdminDashboard({ user }) {
   const [stats, setStats] = useState({
@@ -53,7 +54,8 @@ export default function SuperAdminDashboard({ user }) {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <AdminLayout currentPage="Dashboard">
+      <div className="p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
           Platform Overview
