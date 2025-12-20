@@ -53,9 +53,10 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  // Route to appropriate dashboard based on primary role
+  // Route to appropriate dashboard based on primary account type
   const renderDashboard = () => {
-    switch (user.primary_role) {
+    const accountType = user.primary_account_type || user.primary_role;
+    switch (accountType) {
       case 'super_admin':
       case 'platform_ops':
       case 'growth_team':
@@ -63,19 +64,20 @@ export default function Dashboard() {
       case 'education_admin':
       case 'finance_admin':
         return <SuperAdminDashboard user={user} />;
-      
+
       case 'estate_sale_operator':
         return <EstateSaleOperatorDashboard user={user} />;
-      
+
       case 'real_estate_agent':
         return <RealEstateAgentDashboard user={user} />;
-      
+
       case 'investor':
         return <InvestorDashboard user={user} />;
-      
+
       case 'coach':
         return <CoachDashboard user={user} />;
-      
+
+      case 'consumer':
       case 'executor':
       case 'home_seller':
       case 'buyer':

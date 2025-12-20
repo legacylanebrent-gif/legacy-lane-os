@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, UserCircle, Mail, Phone, Building2, Calendar } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus } from 'lucide-react';
+import AddUserModal from '@/components/admin/AddUserModal';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,7 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -46,7 +48,9 @@ export default function AdminUsers() {
     }
 
     if (selectedRole !== 'all') {
-      filtered = filtered.filter(user => user.primary_role === selectedRole);
+      filtered = filtered.filter(user => 
+        user.primary_account_type === selectedRole || user.primary_role === selectedRole
+      );
     }
 
     setFilteredUsers(filtered);
@@ -103,10 +107,25 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
-        <p className="text-slate-600">{users.length} total users</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
+          <p className="text-slate-600">{users.length} total users</p>
+        </div>
+        <Button 
+          onClick={() => setShowAddModal(true)}
+          className="bg-orange-600 hover:bg-orange-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add User
+        </Button>
       </div>
+
+      <AddUserModal 
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={loadUsers}
+      />
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -148,9 +167,9 @@ export default function AdminUsers() {
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-semibold text-slate-900">{user.full_name}</h3>
-                        {user.primary_role && (
-                          <Badge className={getRoleBadgeColor(user.primary_role)}>
-                            {user.primary_role.replace('_', ' ')}
+                        {(user.primary_account_type || user.primary_role) && (
+                          <Badge className={getRoleBadgeColor(user.primary_account_type || user.primary_role)}>
+                            {(user.primary_account_type || user.primary_role).replace(/_/g, ' ')}
                           </Badge>
                         )}
                       </div>
@@ -179,11 +198,11 @@ export default function AdminUsers() {
                       </div>
                     </div>
 
-                    {user.roles && user.roles.length > 0 && (
+                    {(user.account_types || user.roles) && (user.account_types || user.roles).length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {user.roles.map((role, idx) => (
+                        {(user.account_types || user.roles).map((role, idx) => (
                           <Badge key={idx} variant="outline" className="text-xs">
-                            {role.replace('_', ' ')}
+                            {role.replace(/_/g, ' ')}
                           </Badge>
                         ))}
                       </div>

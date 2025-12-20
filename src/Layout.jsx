@@ -109,12 +109,13 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // Admin users use AdminLayout
-  if (user?.primary_role === 'super_admin' || 
-      user?.primary_role === 'platform_ops' || 
-      user?.primary_role === 'growth_team' ||
-      user?.primary_role === 'partnerships' ||
-      user?.primary_role === 'education_admin' ||
-      user?.primary_role === 'finance_admin') {
+  const accountType = user?.primary_account_type || user?.primary_role;
+  if (accountType === 'super_admin' || 
+      accountType === 'platform_ops' || 
+      accountType === 'growth_team' ||
+      accountType === 'partnerships' ||
+      accountType === 'education_admin' ||
+      accountType === 'finance_admin') {
     return (
       <AdminLayout currentPage={currentPageName} user={user}>
         {children}

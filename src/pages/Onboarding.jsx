@@ -102,8 +102,8 @@ export default function Onboarding() {
       }
 
       await base44.auth.updateMe({
-        roles: selectedRoles,
-        primary_role: primaryRole,
+        account_types: selectedRoles,
+        primary_account_type: primaryRole,
         phone: profileData.phone,
         company_name: profileData.company_name,
         service_areas: profileData.service_areas,
