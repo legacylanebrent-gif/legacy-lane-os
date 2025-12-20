@@ -44,6 +44,13 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     },
     company_name: '',
     company_logo_url: '',
+    light_logo_url: '',
+    dark_logo_url: '',
+    team_logo_url: '',
+    brokerage_name: '',
+    dre_license: '',
+    mls_id: '',
+    team_name: '',
     company_phone: '',
     company_email: '',
     company_website: '',
@@ -63,6 +70,9 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
   });
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingLightLogo, setUploadingLightLogo] = useState(false);
+  const [uploadingDarkLogo, setUploadingDarkLogo] = useState(false);
+  const [uploadingTeamLogo, setUploadingTeamLogo] = useState(false);
 
   const processImage = (file, maxSize = 500, quality = 0.85) => {
     return new Promise((resolve, reject) => {
@@ -126,6 +136,57 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     }
   };
 
+  const handleLightLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLightLogo(true);
+    try {
+      const processedFile = await processImage(file, 500, 0.85);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
+      setFormData({ ...formData, light_logo_url: file_url });
+    } catch (error) {
+      console.error('Error uploading light logo:', error);
+      alert('Failed to upload logo: ' + error.message);
+    } finally {
+      setUploadingLightLogo(false);
+    }
+  };
+
+  const handleDarkLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingDarkLogo(true);
+    try {
+      const processedFile = await processImage(file, 500, 0.85);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
+      setFormData({ ...formData, dark_logo_url: file_url });
+    } catch (error) {
+      console.error('Error uploading dark logo:', error);
+      alert('Failed to upload logo: ' + error.message);
+    } finally {
+      setUploadingDarkLogo(false);
+    }
+  };
+
+  const handleTeamLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingTeamLogo(true);
+    try {
+      const processedFile = await processImage(file, 500, 0.85);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
+      setFormData({ ...formData, team_logo_url: file_url });
+    } catch (error) {
+      console.error('Error uploading team logo:', error);
+      alert('Failed to upload logo: ' + error.message);
+    } finally {
+      setUploadingTeamLogo(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -176,6 +237,13 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         },
         company_name: '',
         company_logo_url: '',
+        light_logo_url: '',
+        dark_logo_url: '',
+        team_logo_url: '',
+        brokerage_name: '',
+        dre_license: '',
+        mls_id: '',
+        team_name: '',
         company_phone: '',
         company_email: '',
         company_website: '',
@@ -318,59 +386,196 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                   {formData.primary_account_type === 'coach' && 'Coaching Business Details'}
                 </h3>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="company_name">Company Name</Label>
-                <Input
-                  id="company_name"
-                  value={formData.company_name}
-                  onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                />
-              </div>
+            {formData.primary_account_type === 'real_estate_agent' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="brokerage_name">Brokerage Name</Label>
+                    <Input
+                      id="brokerage_name"
+                      value={formData.brokerage_name}
+                      onChange={(e) => setFormData({...formData, brokerage_name: e.target.value})}
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="years_in_business">Years in Business</Label>
-                <Input
-                  id="years_in_business"
-                  type="number"
-                  value={formData.years_in_business}
-                  onChange={(e) => setFormData({...formData, years_in_business: e.target.value})}
-                />
-              </div>
-            </div>
+                  <div>
+                    <Label htmlFor="team_name">Team Name (Optional)</Label>
+                    <Input
+                      id="team_name"
+                      value={formData.team_name}
+                      onChange={(e) => setFormData({...formData, team_name: e.target.value})}
+                    />
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="company_phone">Company Phone</Label>
-                <Input
-                  id="company_phone"
-                  type="tel"
-                  value={formData.company_phone}
-                  onChange={(e) => setFormData({...formData, company_phone: e.target.value})}
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="dre_license">DRE License #</Label>
+                    <Input
+                      id="dre_license"
+                      value={formData.dre_license}
+                      onChange={(e) => setFormData({...formData, dre_license: e.target.value})}
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="company_email">Company Email</Label>
-                <Input
-                  id="company_email"
-                  type="email"
-                  value={formData.company_email}
-                  onChange={(e) => setFormData({...formData, company_email: e.target.value})}
-                />
-              </div>
-            </div>
+                  <div>
+                    <Label htmlFor="mls_id">MLS ID</Label>
+                    <Input
+                      id="mls_id"
+                      value={formData.mls_id}
+                      onChange={(e) => setFormData({...formData, mls_id: e.target.value})}
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <Label htmlFor="company_website">Company Website</Label>
-              <Input
-                id="company_website"
-                type="url"
-                placeholder="https://example.com"
-                value={formData.company_website}
-                onChange={(e) => setFormData({...formData, company_website: e.target.value})}
-              />
-            </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="company_phone">Phone</Label>
+                    <Input
+                      id="company_phone"
+                      type="tel"
+                      value={formData.company_phone}
+                      onChange={(e) => setFormData({...formData, company_phone: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="company_email">Email</Label>
+                    <Input
+                      id="company_email"
+                      type="email"
+                      value={formData.company_email}
+                      onChange={(e) => setFormData({...formData, company_email: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="company_website">Website</Label>
+                  <Input
+                    id="company_website"
+                    type="url"
+                    placeholder="https://example.com"
+                    value={formData.company_website}
+                    onChange={(e) => setFormData({...formData, company_website: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-4 border-t pt-4 mt-4">
+                  <h4 className="font-semibold text-sm">Brand Logos</h4>
+                  
+                  <div>
+                    <Label htmlFor="light_logo">Light Logo (for dark backgrounds)</Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        id="light_logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLightLogoUpload}
+                        disabled={uploadingLightLogo}
+                        className="flex-1"
+                      />
+                      {uploadingLightLogo && <span className="text-sm text-gray-500">Uploading...</span>}
+                      {formData.light_logo_url && !uploadingLightLogo && (
+                        <img src={formData.light_logo_url} alt="Light logo preview" className="h-12 w-12 object-contain rounded border bg-slate-800 p-1" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="dark_logo">Dark Logo (for light backgrounds)</Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        id="dark_logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDarkLogoUpload}
+                        disabled={uploadingDarkLogo}
+                        className="flex-1"
+                      />
+                      {uploadingDarkLogo && <span className="text-sm text-gray-500">Uploading...</span>}
+                      {formData.dark_logo_url && !uploadingDarkLogo && (
+                        <img src={formData.dark_logo_url} alt="Dark logo preview" className="h-12 w-12 object-contain rounded border" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="team_logo">Team Logo</Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        id="team_logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleTeamLogoUpload}
+                        disabled={uploadingTeamLogo}
+                        className="flex-1"
+                      />
+                      {uploadingTeamLogo && <span className="text-sm text-gray-500">Uploading...</span>}
+                      {formData.team_logo_url && !uploadingTeamLogo && (
+                        <img src={formData.team_logo_url} alt="Team logo preview" className="h-12 w-12 object-contain rounded border" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="company_name">Company Name</Label>
+                    <Input
+                      id="company_name"
+                      value={formData.company_name}
+                      onChange={(e) => setFormData({...formData, company_name: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="years_in_business">Years in Business</Label>
+                    <Input
+                      id="years_in_business"
+                      type="number"
+                      value={formData.years_in_business}
+                      onChange={(e) => setFormData({...formData, years_in_business: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="company_phone">Company Phone</Label>
+                    <Input
+                      id="company_phone"
+                      type="tel"
+                      value={formData.company_phone}
+                      onChange={(e) => setFormData({...formData, company_phone: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="company_email">Company Email</Label>
+                    <Input
+                      id="company_email"
+                      type="email"
+                      value={formData.company_email}
+                      onChange={(e) => setFormData({...formData, company_email: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="company_website">Company Website</Label>
+                  <Input
+                    id="company_website"
+                    type="url"
+                    placeholder="https://example.com"
+                    value={formData.company_website}
+                    onChange={(e) => setFormData({...formData, company_website: e.target.value})}
+                  />
+                </div>
+              </>
+            )}
 
             {formData.primary_account_type === 'estate_sale_operator' && (
               <div>
@@ -418,7 +623,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             </div>
 
-            {['estate_sale_operator', 'real_estate_agent'].includes(formData.primary_account_type) && (
+            {formData.primary_account_type === 'estate_sale_operator' && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="business_license">Business License Number</Label>
@@ -429,19 +634,17 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                   />
                 </div>
 
-                {formData.primary_account_type === 'estate_sale_operator' && (
-                  <div>
-                    <Label htmlFor="commission_rate">Default Commission %</Label>
-                    <Input
-                      id="commission_rate"
-                      type="number"
-                      step="0.01"
-                      placeholder="25"
-                      value={formData.default_commission_rate}
-                      onChange={(e) => setFormData({...formData, default_commission_rate: e.target.value})}
-                    />
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="commission_rate">Default Commission %</Label>
+                  <Input
+                    id="commission_rate"
+                    type="number"
+                    step="0.01"
+                    placeholder="25"
+                    value={formData.default_commission_rate}
+                    onChange={(e) => setFormData({...formData, default_commission_rate: e.target.value})}
+                  />
+                </div>
               </div>
             )}
 
@@ -467,7 +670,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             )}
 
-            {['estate_sale_operator', 'real_estate_agent', 'vendor'].includes(formData.primary_account_type) && (
+            {formData.primary_account_type === 'real_estate_agent' && (
               <div>
                 <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
                 <Input
@@ -481,27 +684,55 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             )}
 
-            <div>
-              <Label htmlFor="specializations">
-                {formData.primary_account_type === 'estate_sale_operator' && 'Specializations (comma separated)'}
-                {formData.primary_account_type === 'real_estate_agent' && 'Property Specializations (comma separated)'}
-                {formData.primary_account_type === 'vendor' && 'Services Offered (comma separated)'}
-                {formData.primary_account_type === 'coach' && 'Expertise Areas (comma separated)'}
-              </Label>
-              <Input
-                id="specializations"
-                placeholder={
-                  formData.primary_account_type === 'estate_sale_operator' ? 'Estate Sales, Downsizing, Consignment' :
-                  formData.primary_account_type === 'real_estate_agent' ? 'Residential, Commercial, Luxury Homes' :
-                  formData.primary_account_type === 'vendor' ? 'Moving, Cleaning, Hauling' :
-                  'Real Estate, Marketing, Sales'
-                }
-                onChange={(e) => setFormData({
-                  ...formData, 
-                  specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                })}
-              />
-            </div>
+            {['estate_sale_operator', 'vendor'].includes(formData.primary_account_type) && (
+              <div>
+                <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
+                <Input
+                  id="service_areas"
+                  placeholder="Los Angeles, Orange County, San Diego"
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  })}
+                />
+              </div>
+            )}
+
+            {formData.primary_account_type === 'real_estate_agent' && (
+              <div>
+                <Label htmlFor="specializations">Property Specializations (comma separated)</Label>
+                <Input
+                  id="specializations"
+                  placeholder="Residential, Luxury Homes, Investment Properties, Probate Sales"
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  })}
+                />
+              </div>
+            )}
+
+            {['estate_sale_operator', 'vendor', 'coach'].includes(formData.primary_account_type) && (
+              <div>
+                <Label htmlFor="specializations">
+                  {formData.primary_account_type === 'estate_sale_operator' && 'Specializations (comma separated)'}
+                  {formData.primary_account_type === 'vendor' && 'Services Offered (comma separated)'}
+                  {formData.primary_account_type === 'coach' && 'Expertise Areas (comma separated)'}
+                </Label>
+                <Input
+                  id="specializations"
+                  placeholder={
+                    formData.primary_account_type === 'estate_sale_operator' ? 'Estate Sales, Downsizing, Consignment' :
+                    formData.primary_account_type === 'vendor' ? 'Moving, Cleaning, Hauling' :
+                    'Real Estate, Marketing, Sales'
+                  }
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  })}
+                />
+              </div>
+            )}
               </div>
             </>
           )}
