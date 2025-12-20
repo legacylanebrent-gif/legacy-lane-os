@@ -163,10 +163,12 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
             </Select>
           </div>
 
-          <Separator />
+          {formData.primary_account_type && (
+            <>
+              <Separator />
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Personal Information</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Personal Information</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -239,10 +241,17 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
             </div>
           </div>
 
-          <Separator />
+          {['estate_sale_operator', 'real_estate_agent', 'vendor', 'coach'].includes(formData.primary_account_type) && (
+            <>
+              <Separator />
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Company Details</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">
+                  {formData.primary_account_type === 'estate_sale_operator' && 'Estate Sale Company Details'}
+                  {formData.primary_account_type === 'real_estate_agent' && 'Real Estate Business Details'}
+                  {formData.primary_account_type === 'vendor' && 'Vendor Company Details'}
+                  {formData.primary_account_type === 'coach' && 'Coaching Business Details'}
+                </h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -324,73 +333,128 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="business_license">Business License Number</Label>
-                <Input
-                  id="business_license"
-                  value={formData.business_license}
-                  onChange={(e) => setFormData({...formData, business_license: e.target.value})}
-                />
-              </div>
+            {['estate_sale_operator', 'real_estate_agent'].includes(formData.primary_account_type) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="business_license">Business License Number</Label>
+                  <Input
+                    id="business_license"
+                    value={formData.business_license}
+                    onChange={(e) => setFormData({...formData, business_license: e.target.value})}
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="commission_rate">Default Commission %</Label>
-                <Input
-                  id="commission_rate"
-                  type="number"
-                  step="0.01"
-                  placeholder="25"
-                  value={formData.default_commission_rate}
-                  onChange={(e) => setFormData({...formData, default_commission_rate: e.target.value})}
-                />
+                {formData.primary_account_type === 'estate_sale_operator' && (
+                  <div>
+                    <Label htmlFor="commission_rate">Default Commission %</Label>
+                    <Input
+                      id="commission_rate"
+                      type="number"
+                      step="0.01"
+                      placeholder="25"
+                      value={formData.default_commission_rate}
+                      onChange={(e) => setFormData({...formData, default_commission_rate: e.target.value})}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="insurance_provider">Insurance Provider</Label>
-                <Input
-                  id="insurance_provider"
-                  value={formData.insurance_provider}
-                  onChange={(e) => setFormData({...formData, insurance_provider: e.target.value})}
-                />
-              </div>
+            {['estate_sale_operator', 'vendor'].includes(formData.primary_account_type) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="insurance_provider">Insurance Provider</Label>
+                  <Input
+                    id="insurance_provider"
+                    value={formData.insurance_provider}
+                    onChange={(e) => setFormData({...formData, insurance_provider: e.target.value})}
+                  />
+                </div>
 
+                <div>
+                  <Label htmlFor="insurance_policy">Policy Number</Label>
+                  <Input
+                    id="insurance_policy"
+                    value={formData.insurance_policy_number}
+                    onChange={(e) => setFormData({...formData, insurance_policy_number: e.target.value})}
+                  />
+                </div>
+              </div>
+            )}
+
+            {['estate_sale_operator', 'real_estate_agent', 'vendor'].includes(formData.primary_account_type) && (
               <div>
-                <Label htmlFor="insurance_policy">Policy Number</Label>
+                <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
                 <Input
-                  id="insurance_policy"
-                  value={formData.insurance_policy_number}
-                  onChange={(e) => setFormData({...formData, insurance_policy_number: e.target.value})}
+                  id="service_areas"
+                  placeholder="Los Angeles, Orange County, San Diego"
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  })}
                 />
               </div>
-            </div>
+            )}
 
             <div>
-              <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
-              <Input
-                id="service_areas"
-                placeholder="Los Angeles, Orange County, San Diego"
-                onChange={(e) => setFormData({
-                  ...formData, 
-                  service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="specializations">Specializations (comma separated)</Label>
+              <Label htmlFor="specializations">
+                {formData.primary_account_type === 'estate_sale_operator' && 'Specializations (comma separated)'}
+                {formData.primary_account_type === 'real_estate_agent' && 'Property Specializations (comma separated)'}
+                {formData.primary_account_type === 'vendor' && 'Services Offered (comma separated)'}
+                {formData.primary_account_type === 'coach' && 'Expertise Areas (comma separated)'}
+              </Label>
               <Input
                 id="specializations"
-                placeholder="Estate Sales, Downsizing, Consignment"
+                placeholder={
+                  formData.primary_account_type === 'estate_sale_operator' ? 'Estate Sales, Downsizing, Consignment' :
+                  formData.primary_account_type === 'real_estate_agent' ? 'Residential, Commercial, Luxury Homes' :
+                  formData.primary_account_type === 'vendor' ? 'Moving, Cleaning, Hauling' :
+                  'Real Estate, Marketing, Sales'
+                }
                 onChange={(e) => setFormData({
                   ...formData, 
                   specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                 })}
               />
             </div>
-          </div>
+              </div>
+            </>
+          )}
+
+          {formData.primary_account_type === 'investor' && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Investment Profile</h3>
+                
+                <div>
+                  <Label htmlFor="investment_focus">Investment Focus (comma separated)</Label>
+                  <Input
+                    id="investment_focus"
+                    placeholder="Fix & Flip, Buy & Hold, Wholesale"
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="service_areas">Target Markets (comma separated)</Label>
+                  <Input
+                    id="service_areas"
+                    placeholder="Los Angeles, Orange County, Riverside"
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    })}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+            </>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
