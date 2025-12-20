@@ -17,6 +17,8 @@ import Leads from './pages/Leads';
 import LeadCapture from './pages/LeadCapture';
 import Revenue from './pages/Revenue';
 import PlatformAnalytics from './pages/PlatformAnalytics';
+import Vendors from './pages/Vendors';
+import VendorDetail from './pages/VendorDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +42,8 @@ export const PAGES = {
     "LeadCapture": LeadCapture,
     "Revenue": Revenue,
     "PlatformAnalytics": PlatformAnalytics,
+    "Vendors": Vendors,
+    "VendorDetail": VendorDetail,
 }
 
 export const pagesConfig = {
