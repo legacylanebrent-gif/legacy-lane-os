@@ -28,6 +28,7 @@ import AdminVendors from './pages/AdminVendors';
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminLeads from './pages/AdminLeads';
 import AdminTransactions from './pages/AdminTransactions';
+import AdminPackages from './pages/AdminPackages';
 import __Layout from './Layout.jsx';
 
 
@@ -62,6 +63,7 @@ export const PAGES = {
     "AdminCampaigns": AdminCampaigns,
     "AdminLeads": AdminLeads,
     "AdminTransactions": AdminTransactions,
+    "AdminPackages": AdminPackages,
 }
 
 export const pagesConfig = {
