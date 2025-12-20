@@ -3,12 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import SuperAdminDashboard from '../components/dashboards/SuperAdminDashboard';
-import EstateSaleOperatorDashboard from '../components/dashboards/EstateSaleOperatorDashboard';
-import RealEstateAgentDashboard from '../components/dashboards/RealEstateAgentDashboard';
-import InvestorDashboard from '../components/dashboards/InvestorDashboard';
-import ConsumerDashboard from '../components/dashboards/ConsumerDashboard';
-import CoachDashboard from '../components/dashboards/CoachDashboard';
+import SuperAdminDashboard from '@/components/dashboards/SuperAdminDashboard';
+import EstateSaleOperatorDashboard from '@/components/dashboards/EstateSaleOperatorDashboard';
+import RealEstateAgentDashboard from '@/components/dashboards/RealEstateAgentDashboard';
+import InvestorDashboard from '@/components/dashboards/InvestorDashboard';
+import ConsumerDashboard from '@/components/dashboards/ConsumerDashboard';
+import CoachDashboard from '@/components/dashboards/CoachDashboard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
