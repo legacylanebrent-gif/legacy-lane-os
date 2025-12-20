@@ -267,13 +267,13 @@ export default function Onboarding() {
 
                 {['estate_sale_operator', 'real_estate_agent', 'vendor'].some(r => selectedRoles.includes(r)) && (
                   <div>
-                    <Label htmlFor="areas">Service Areas (comma separated)</Label>
+                    <Label htmlFor="areas">Service Areas (optional)</Label>
                     <Input
                       id="areas"
                       placeholder="e.g., Los Angeles, Orange County, San Diego"
                       onChange={(e) => setProfileData({
                         ...profileData, 
-                        service_areas: e.target.value.split(',').map(s => s.trim())
+                        service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                       })}
                     />
                   </div>
