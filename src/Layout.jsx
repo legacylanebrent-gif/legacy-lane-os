@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
+import AdminLayout from '@/components/admin/AdminLayout';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
   Users, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin
