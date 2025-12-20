@@ -56,14 +56,14 @@ export default function SuperAdminDashboard({ user }) {
   return (
     <AdminLayout currentPage="Dashboard">
       <div className="p-6 lg:p-8 space-y-8">
-      <div>
+        <div>
         <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
           Platform Overview
         </h1>
         <p className="text-slate-600">Welcome back, {user.full_name}</p>
-      </div>
+        </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {statCards.map((stat, index) => (
           <Card key={index} className="relative overflow-hidden">
             <div className={`absolute top-0 right-0 w-32 h-32 ${stat.color} opacity-10 rounded-full transform translate-x-12 -translate-y-12`} />
@@ -78,9 +78,9 @@ export default function SuperAdminDashboard({ user }) {
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-xl font-serif text-navy-900">Recent Activity</CardTitle>
@@ -98,8 +98,8 @@ export default function SuperAdminDashboard({ user }) {
             <p className="text-slate-500">Admin actions coming soon...</p>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
     </AdminLayout>
   );
 }
