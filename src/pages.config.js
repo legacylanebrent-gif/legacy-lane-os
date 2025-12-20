@@ -5,6 +5,8 @@ import Courses from './pages/Courses';
 import MyCourses from './pages/MyCourses';
 import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
+import BrowseItems from './pages/BrowseItems';
+import MyListings from './pages/MyListings';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +18,8 @@ export const PAGES = {
     "MyCourses": MyCourses,
     "CourseDetail": CourseDetail,
     "CourseLearning": CourseLearning,
+    "BrowseItems": BrowseItems,
+    "MyListings": MyListings,
 }
 
 export const pagesConfig = {
