@@ -51,6 +51,14 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     dre_license: '',
     mls_id: '',
     team_name: '',
+    investment_entity_name: '',
+    investment_strategies: [],
+    years_investing: '',
+    portfolio_size: '',
+    average_deal_size: '',
+    target_property_types: [],
+    funding_capacity: '',
+    seeking_partnerships: false,
     company_phone: '',
     company_email: '',
     company_website: '',
@@ -244,6 +252,14 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         dre_license: '',
         mls_id: '',
         team_name: '',
+        investment_entity_name: '',
+        investment_strategies: [],
+        years_investing: '',
+        portfolio_size: '',
+        average_deal_size: '',
+        target_property_types: [],
+        funding_capacity: '',
+        seeking_partnerships: false,
         company_phone: '',
         company_email: '',
         company_website: '',
@@ -743,15 +759,82 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Investment Profile</h3>
                 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="investment_entity_name">Investment Entity/LLC Name</Label>
+                    <Input
+                      id="investment_entity_name"
+                      placeholder="ABC Investments LLC"
+                      value={formData.investment_entity_name}
+                      onChange={(e) => setFormData({...formData, investment_entity_name: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="years_investing">Years Investing</Label>
+                    <Input
+                      id="years_investing"
+                      type="number"
+                      placeholder="5"
+                      value={formData.years_investing}
+                      onChange={(e) => setFormData({...formData, years_investing: e.target.value})}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="investment_focus">Investment Focus (comma separated)</Label>
+                  <Label htmlFor="investment_strategies">Investment Strategies (comma separated)</Label>
                   <Input
-                    id="investment_focus"
-                    placeholder="Fix & Flip, Buy & Hold, Wholesale"
+                    id="investment_strategies"
+                    placeholder="Fix & Flip, Buy & Hold, Wholesale, BRRRR"
                     onChange={(e) => setFormData({
                       ...formData, 
-                      specializations: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                      investment_strategies: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                     })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="target_property_types">Target Property Types (comma separated)</Label>
+                  <Input
+                    id="target_property_types"
+                    placeholder="Single Family, Multi-Family, Condos, Commercial"
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      target_property_types: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="portfolio_size">Current Portfolio Size</Label>
+                    <Input
+                      id="portfolio_size"
+                      placeholder="12 properties"
+                      value={formData.portfolio_size}
+                      onChange={(e) => setFormData({...formData, portfolio_size: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="average_deal_size">Average Deal Size</Label>
+                    <Input
+                      id="average_deal_size"
+                      placeholder="$250,000"
+                      value={formData.average_deal_size}
+                      onChange={(e) => setFormData({...formData, average_deal_size: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="funding_capacity">Funding Capacity</Label>
+                  <Input
+                    id="funding_capacity"
+                    placeholder="$500,000 - $1,000,000"
+                    value={formData.funding_capacity}
+                    onChange={(e) => setFormData({...formData, funding_capacity: e.target.value})}
                   />
                 </div>
 
@@ -765,6 +848,19 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                       service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                     })}
                   />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="seeking_partnerships"
+                    checked={formData.seeking_partnerships}
+                    onChange={(e) => setFormData({...formData, seeking_partnerships: e.target.checked})}
+                    className="rounded"
+                  />
+                  <Label htmlFor="seeking_partnerships" className="cursor-pointer">
+                    Open to Joint Ventures / Partnerships
+                  </Label>
                 </div>
               </div>
             </>
