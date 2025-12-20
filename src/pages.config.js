@@ -7,6 +7,9 @@ import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
 import BrowseItems from './pages/BrowseItems';
 import MyListings from './pages/MyListings';
+import Campaigns from './pages/Campaigns';
+import CampaignBuilder from './pages/CampaignBuilder';
+import Analytics from './pages/Analytics';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +23,9 @@ export const PAGES = {
     "CourseLearning": CourseLearning,
     "BrowseItems": BrowseItems,
     "MyListings": MyListings,
+    "Campaigns": Campaigns,
+    "CampaignBuilder": CampaignBuilder,
+    "Analytics": Analytics,
 }
 
 export const pagesConfig = {
