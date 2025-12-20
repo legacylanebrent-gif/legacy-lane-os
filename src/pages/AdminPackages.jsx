@@ -20,7 +20,8 @@ export default function AdminPackages() {
     { value: 'investor', label: 'Investor' },
     { value: 'vendor', label: 'Vendor' },
     { value: 'consignor', label: 'Consignor' },
-    { value: 'buyer', label: 'Buyer' }
+    { value: 'buyer', label: 'Buyer' },
+    { value: 'diy_seller', label: 'DIY Seller' }
   ];
 
   useEffect(() => {
@@ -95,7 +96,7 @@ export default function AdminPackages() {
       />
 
       <Tabs value={selectedAccountType} onValueChange={setSelectedAccountType}>
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
           {accountTypes.map(type => (
             <TabsTrigger key={type.value} value={type.value} className="text-xs lg:text-sm">
               {type.label}
