@@ -22,12 +22,6 @@ export default function Dashboard() {
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
-      
-      if (!userData.onboarding_completed) {
-        navigate('/onboarding');
-        return;
-      }
-      
       setUser(userData);
     } catch (error) {
       console.error('Error loading user:', error);
