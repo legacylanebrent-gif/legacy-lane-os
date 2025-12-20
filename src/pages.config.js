@@ -22,6 +22,7 @@ import VendorDetail from './pages/VendorDetail';
 import Settings from './pages/Settings';
 import AdminUsers from './pages/AdminUsers';
 import AdminEstateSales from './pages/AdminEstateSales';
+import AdminMarketplace from './pages/AdminMarketplace';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "Settings": Settings,
     "AdminUsers": AdminUsers,
     "AdminEstateSales": AdminEstateSales,
+    "AdminMarketplace": AdminMarketplace,
 }
 
 export const pagesConfig = {
