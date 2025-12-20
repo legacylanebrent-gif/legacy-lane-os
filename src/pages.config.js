@@ -15,6 +15,8 @@ import Pipeline from './pages/Pipeline';
 import ContactDetail from './pages/ContactDetail';
 import Leads from './pages/Leads';
 import LeadCapture from './pages/LeadCapture';
+import Revenue from './pages/Revenue';
+import PlatformAnalytics from './pages/PlatformAnalytics';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +38,8 @@ export const PAGES = {
     "ContactDetail": ContactDetail,
     "Leads": Leads,
     "LeadCapture": LeadCapture,
+    "Revenue": Revenue,
+    "PlatformAnalytics": PlatformAnalytics,
 }
 
 export const pagesConfig = {
