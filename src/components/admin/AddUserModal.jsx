@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import VendorFields from './VendorFields';
 
 const ACCOUNT_TYPES = [
   { value: 'super_admin', label: 'Super Admin' },
@@ -59,6 +60,34 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     target_property_types: [],
     funding_capacity: '',
     seeking_partnerships: false,
+    vendor_type: '',
+    vendor_certifications: [],
+    vendor_licenses: [],
+    bonded: false,
+    insured: false,
+    crew_size: '',
+    equipment_owned: [],
+    response_time_hours: '',
+    emergency_services: false,
+    warranty_offered: '',
+    minimum_project_size: '',
+    average_project_cost: '',
+    payment_terms: '',
+    disposal_method: '',
+    truck_capacity: '',
+    storage_available: false,
+    packing_services: false,
+    bar_number: '',
+    practice_areas: [],
+    cpa_license: '',
+    tax_specialties: [],
+    staging_inventory: '',
+    design_styles: [],
+    contractor_specialties: [],
+    photography_packages: [],
+    drone_certified: false,
+    inspection_types: [],
+    report_turnaround: '',
     company_phone: '',
     company_email: '',
     company_website: '',
@@ -260,6 +289,34 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         target_property_types: [],
         funding_capacity: '',
         seeking_partnerships: false,
+        vendor_type: '',
+        vendor_certifications: [],
+        vendor_licenses: [],
+        bonded: false,
+        insured: false,
+        crew_size: '',
+        equipment_owned: [],
+        response_time_hours: '',
+        emergency_services: false,
+        warranty_offered: '',
+        minimum_project_size: '',
+        average_project_cost: '',
+        payment_terms: '',
+        disposal_method: '',
+        truck_capacity: '',
+        storage_available: false,
+        packing_services: false,
+        bar_number: '',
+        practice_areas: [],
+        cpa_license: '',
+        tax_specialties: [],
+        staging_inventory: '',
+        design_styles: [],
+        contractor_specialties: [],
+        photography_packages: [],
+        drone_certified: false,
+        inspection_types: [],
+        report_turnaround: '',
         company_phone: '',
         company_email: '',
         company_website: '',
@@ -390,7 +447,19 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
             </div>
           </div>
 
-          {['estate_sale_operator', 'real_estate_agent', 'vendor', 'coach'].includes(formData.primary_account_type) && (
+          {formData.primary_account_type === 'vendor' && (
+            <>
+              <Separator />
+              <VendorFields 
+                formData={formData}
+                setFormData={setFormData}
+                uploadingLogo={uploadingLogo}
+                handleLogoUpload={handleLogoUpload}
+              />
+            </>
+          )}
+
+          {['estate_sale_operator', 'real_estate_agent', 'coach'].includes(formData.primary_account_type) && (
             <>
               <Separator />
 
@@ -398,7 +467,6 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                 <h3 className="text-lg font-semibold">
                   {formData.primary_account_type === 'estate_sale_operator' && 'Estate Sale Company Details'}
                   {formData.primary_account_type === 'real_estate_agent' && 'Real Estate Business Details'}
-                  {formData.primary_account_type === 'vendor' && 'Vendor Company Details'}
                   {formData.primary_account_type === 'coach' && 'Coaching Business Details'}
                 </h3>
             
@@ -700,7 +768,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             )}
 
-            {['estate_sale_operator', 'vendor'].includes(formData.primary_account_type) && (
+            {['estate_sale_operator'].includes(formData.primary_account_type) && (
               <div>
                 <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
                 <Input
@@ -728,18 +796,16 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </div>
             )}
 
-            {['estate_sale_operator', 'vendor', 'coach'].includes(formData.primary_account_type) && (
+            {['estate_sale_operator', 'coach'].includes(formData.primary_account_type) && (
               <div>
                 <Label htmlFor="specializations">
                   {formData.primary_account_type === 'estate_sale_operator' && 'Specializations (comma separated)'}
-                  {formData.primary_account_type === 'vendor' && 'Services Offered (comma separated)'}
                   {formData.primary_account_type === 'coach' && 'Expertise Areas (comma separated)'}
                 </Label>
                 <Input
                   id="specializations"
                   placeholder={
                     formData.primary_account_type === 'estate_sale_operator' ? 'Estate Sales, Downsizing, Consignment' :
-                    formData.primary_account_type === 'vendor' ? 'Moving, Cleaning, Hauling' :
                     'Real Estate, Marketing, Sales'
                   }
                   onChange={(e) => setFormData({
