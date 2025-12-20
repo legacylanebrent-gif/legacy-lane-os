@@ -12,6 +12,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Revenue', path: 'Revenue', icon: DollarSign },
   { label: 'Users', path: 'AdminUsers', icon: Users },
+  { label: 'Packages', path: 'AdminPackages', icon: Package },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
