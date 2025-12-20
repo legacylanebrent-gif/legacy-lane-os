@@ -50,6 +50,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     insurance_provider: '',
     insurance_policy_number: '',
     years_in_business: '',
+    default_commission_rate: '',
     service_areas: [],
     specializations: [],
     company_address: {
@@ -117,6 +118,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         insurance_provider: '',
         insurance_policy_number: '',
         years_in_business: '',
+        default_commission_rate: '',
         service_areas: [],
         specializations: [],
         company_address: {
@@ -329,6 +331,18 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                   id="business_license"
                   value={formData.business_license}
                   onChange={(e) => setFormData({...formData, business_license: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="commission_rate">Default Commission %</Label>
+                <Input
+                  id="commission_rate"
+                  type="number"
+                  step="0.01"
+                  placeholder="25"
+                  value={formData.default_commission_rate}
+                  onChange={(e) => setFormData({...formData, default_commission_rate: e.target.value})}
                 />
               </div>
             </div>
