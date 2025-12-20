@@ -24,6 +24,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminEstateSales from './pages/AdminEstateSales';
 import AdminMarketplace from './pages/AdminMarketplace';
 import AdminCourses from './pages/AdminCourses';
+import AdminVendors from './pages/AdminVendors';
 import __Layout from './Layout.jsx';
 
 
@@ -54,6 +55,7 @@ export const PAGES = {
     "AdminEstateSales": AdminEstateSales,
     "AdminMarketplace": AdminMarketplace,
     "AdminCourses": AdminCourses,
+    "AdminVendors": AdminVendors,
 }
 
 export const pagesConfig = {
