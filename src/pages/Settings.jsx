@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Save, Globe, DollarSign, Users, Bell, Shield, Mail, Palette, Zap } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
-
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -498,11 +496,5 @@ export default function Settings() {
     </div>
   );
 
-  return user?.primary_role === 'super_admin' ? (
-    <AdminLayout currentPage="Settings">
-      <SettingsContent />
-    </AdminLayout>
-  ) : (
-    <SettingsContent />
-  );
+  return <SettingsContent />;
 }
