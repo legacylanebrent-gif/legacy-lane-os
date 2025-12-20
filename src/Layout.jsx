@@ -107,6 +107,16 @@ export default function Layout({ children, currentPageName }) {
     return children;
   }
 
+  // Admin users use AdminLayout instead
+  if (user?.primary_role === 'super_admin' || 
+      user?.primary_role === 'platform_ops' || 
+      user?.primary_role === 'growth_team' ||
+      user?.primary_role === 'partnerships' ||
+      user?.primary_role === 'education_admin' ||
+      user?.primary_role === 'finance_admin') {
+    return children;
+  }
+
   const userInitials = user?.full_name
     ?.split(' ')
     .map(n => n[0])
