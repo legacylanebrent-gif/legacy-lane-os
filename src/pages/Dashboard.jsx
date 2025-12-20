@@ -88,7 +88,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
       {renderDashboard()}
     </div>
   );

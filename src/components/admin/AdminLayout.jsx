@@ -32,9 +32,9 @@ export default function AdminLayout({ children, currentPage }) {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Left Navigation */}
-      <aside className="w-64 bg-navy-900 text-white flex flex-col">
-        <div className="p-6 border-b border-navy-800">
-          <h2 className="text-xl font-serif font-bold text-gold-400">Admin Console</h2>
+      <aside className="w-64 bg-slate-800 text-white flex flex-col">
+        <div className="p-6 border-b border-slate-700">
+          <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
           <p className="text-xs text-slate-400 mt-1">Legacy Lane OS</p>
         </div>
         
@@ -49,8 +49,8 @@ export default function AdminLayout({ children, currentPage }) {
                   variant="ghost"
                   className={`w-full justify-start ${
                     active
-                      ? 'bg-gold-600 text-white hover:bg-gold-700'
-                      : 'text-slate-300 hover:bg-navy-800 hover:text-white'
+                      ? 'bg-orange-600 text-white hover:bg-orange-700'
+                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4 mr-3" />

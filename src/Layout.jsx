@@ -129,28 +129,28 @@ export default function Layout({ children, currentPageName }) {
     .toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
       {/* Top Navigation */}
-      <nav className="bg-navy-900 border-b border-navy-800 sticky top-0 z-50">
+      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-gold-400 hover:text-gold-300 hover:bg-navy-800"
+                className="lg:hidden text-orange-400 hover:text-orange-300 hover:bg-slate-700"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
               
               <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">LL</span>
                 </div>
                 <div className="hidden sm:block">
                   <h1 className="text-xl font-serif font-bold text-white">Legacy Lane</h1>
-                  <p className="text-xs text-gold-400">Operating System</p>
+                  <p className="text-xs text-orange-400">Operating System</p>
                 </div>
               </Link>
             </div>
@@ -158,10 +158,10 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-navy-800">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-slate-700">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.profile_image_url} />
-                      <AvatarFallback className="bg-gold-600 text-white">{userInitials}</AvatarFallback>
+                      <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
                     </Avatar>
                     <span className="hidden sm:inline">{user?.full_name}</span>
                     <ChevronDown className="h-4 w-4" />
@@ -209,8 +209,8 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'Dashboard' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'Dashboard' 
-                        ? 'bg-navy-900 text-white hover:bg-navy-800' 
-                        : 'hover:bg-sage-50'
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
                     }`}
                   >
                     <Home className="w-5 h-5 mr-3" />
@@ -235,8 +235,8 @@ export default function Layout({ children, currentPageName }) {
                             variant="ghost"
                             className={`w-full justify-start ${
                               currentPageName === page.name
-                                ? 'bg-sage-100 text-sage-700'
-                                : 'hover:bg-sage-50'
+                                ? 'bg-cyan-100 text-cyan-700'
+                                : 'hover:bg-cyan-50'
                             }`}
                           >
                             <page.icon className="w-4 h-4 mr-3" />
