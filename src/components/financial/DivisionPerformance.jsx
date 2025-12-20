@@ -11,11 +11,23 @@ const DIVISION_CONFIG = {
   education: { label: 'Education', icon: GraduationCap, color: 'text-indigo-600' }
 };
 
-export default function DivisionPerformance({ revenueByDivision }) {
+export default function DivisionPerformance({ revenueByDivision = {} }) {
   const totalRevenue = Object.values(revenueByDivision).reduce((sum, val) => sum + val, 0);
 
   const sortedDivisions = Object.entries(revenueByDivision)
+    .filter(([division]) => division && division !== 'undefined')
     .sort(([, a], [, b]) => b - a);
+
+  if (sortedDivisions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <TrendingUp className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+          <p className="text-slate-500">No division revenue data available yet</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
