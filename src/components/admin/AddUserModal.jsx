@@ -43,6 +43,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
       zip: ''
     },
     company_name: '',
+    company_logo_url: '',
     company_phone: '',
     company_email: '',
     company_website: '',
@@ -111,6 +112,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
           zip: ''
         },
         company_name: '',
+        company_logo_url: '',
         company_phone: '',
         company_email: '',
         company_website: '',
@@ -306,6 +308,19 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                 onChange={(e) => setFormData({...formData, company_website: e.target.value})}
               />
             </div>
+
+            {formData.primary_account_type === 'estate_sale_operator' && (
+              <div>
+                <Label htmlFor="company_logo">Company Logo URL</Label>
+                <Input
+                  id="company_logo"
+                  type="url"
+                  placeholder="https://example.com/logo.png"
+                  value={formData.company_logo_url}
+                  onChange={(e) => setFormData({...formData, company_logo_url: e.target.value})}
+                />
+              </div>
+            )}
 
             <div className="space-y-3">
               <Label>Company Address</Label>
