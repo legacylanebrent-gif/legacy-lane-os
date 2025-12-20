@@ -110,7 +110,7 @@ export default function Onboarding() {
         divisions_access: [...new Set(divisions)]
       });
 
-      navigate('/dashboard');
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Error completing onboarding:', error);
     } finally {
