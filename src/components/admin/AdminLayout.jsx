@@ -1,0 +1,71 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from '@/components/ui/button';
+import { 
+  LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap
+} from 'lucide-react';
+
+const ADMIN_NAV_ITEMS = [
+  { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
+  { label: 'Revenue', path: 'Revenue', icon: DollarSign },
+  { label: 'Users', path: 'AdminUsers', icon: Users },
+  { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
+  { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
+  { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
+  { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
+  { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
+  { label: 'Leads', path: 'AdminLeads', icon: Award },
+  { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
+  { label: 'Settings', path: 'Settings', icon: Settings }
+];
+
+export default function AdminLayout({ children, currentPage }) {
+  const location = useLocation();
+  
+  const isActive = (path) => {
+    return location.pathname.includes(path) || currentPage === path;
+  };
+
+  return (
+    <div className="flex h-screen bg-slate-50">
+      {/* Left Navigation */}
+      <aside className="w-64 bg-navy-900 text-white flex flex-col">
+        <div className="p-6 border-b border-navy-800">
+          <h2 className="text-xl font-serif font-bold text-gold-400">Admin Console</h2>
+          <p className="text-xs text-slate-400 mt-1">Legacy Lane OS</p>
+        </div>
+        
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          {ADMIN_NAV_ITEMS.map(item => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            
+            return (
+              <Link key={item.path} to={createPageUrl(item.path)}>
+                <Button
+                  variant="ghost"
+                  className={`w-full justify-start ${
+                    active
+                      ? 'bg-gold-600 text-white hover:bg-gold-700'
+                      : 'text-slate-300 hover:bg-navy-800 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-3" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  );
+}

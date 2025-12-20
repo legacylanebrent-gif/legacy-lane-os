@@ -19,6 +19,7 @@ import Revenue from './pages/Revenue';
 import PlatformAnalytics from './pages/PlatformAnalytics';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/VendorDetail';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "PlatformAnalytics": PlatformAnalytics,
     "Vendors": Vendors,
     "VendorDetail": VendorDetail,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
