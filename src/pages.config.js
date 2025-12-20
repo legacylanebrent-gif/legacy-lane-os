@@ -13,6 +13,8 @@ import Analytics from './pages/Analytics';
 import CRM from './pages/CRM';
 import Pipeline from './pages/Pipeline';
 import ContactDetail from './pages/ContactDetail';
+import Leads from './pages/Leads';
+import LeadCapture from './pages/LeadCapture';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +34,8 @@ export const PAGES = {
     "CRM": CRM,
     "Pipeline": Pipeline,
     "ContactDetail": ContactDetail,
+    "Leads": Leads,
+    "LeadCapture": LeadCapture,
 }
 
 export const pagesConfig = {
