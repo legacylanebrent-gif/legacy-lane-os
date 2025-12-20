@@ -62,6 +62,23 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     }
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, company_logo_url: file_url });
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      alert('Failed to upload logo: ' + error.message);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -311,14 +328,21 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
 
             {formData.primary_account_type === 'estate_sale_operator' && (
               <div>
-                <Label htmlFor="company_logo">Company Logo URL</Label>
-                <Input
-                  id="company_logo"
-                  type="url"
-                  placeholder="https://example.com/logo.png"
-                  value={formData.company_logo_url}
-                  onChange={(e) => setFormData({...formData, company_logo_url: e.target.value})}
-                />
+                <Label htmlFor="company_logo">Company Logo</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    id="company_logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                    className="flex-1"
+                  />
+                  {uploadingLogo && <span className="text-sm text-gray-500">Uploading...</span>}
+                  {formData.company_logo_url && !uploadingLogo && (
+                    <img src={formData.company_logo_url} alt="Logo preview" className="h-12 w-12 object-contain rounded border" />
+                  )}
+                </div>
               </div>
             )}
 
