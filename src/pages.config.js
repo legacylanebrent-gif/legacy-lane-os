@@ -20,6 +20,7 @@ import PlatformAnalytics from './pages/PlatformAnalytics';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/VendorDetail';
 import Settings from './pages/Settings';
+import AdminUsers from './pages/AdminUsers';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "Vendors": Vendors,
     "VendorDetail": VendorDetail,
     "Settings": Settings,
+    "AdminUsers": AdminUsers,
 }
 
 export const pagesConfig = {
