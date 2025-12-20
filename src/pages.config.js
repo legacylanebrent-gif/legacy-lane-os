@@ -10,6 +10,9 @@ import MyListings from './pages/MyListings';
 import Campaigns from './pages/Campaigns';
 import CampaignBuilder from './pages/CampaignBuilder';
 import Analytics from './pages/Analytics';
+import CRM from './pages/CRM';
+import Pipeline from './pages/Pipeline';
+import ContactDetail from './pages/ContactDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +29,9 @@ export const PAGES = {
     "Campaigns": Campaigns,
     "CampaignBuilder": CampaignBuilder,
     "Analytics": Analytics,
+    "CRM": CRM,
+    "Pipeline": Pipeline,
+    "ContactDetail": ContactDetail,
 }
 
 export const pagesConfig = {
