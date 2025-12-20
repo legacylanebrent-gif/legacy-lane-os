@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 
 export default function AdminUsers() {
@@ -14,6 +17,8 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
+  const [selectedDivision, setSelectedDivision] = useState('all');
+  const [onboardingFilter, setOnboardingFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
@@ -22,7 +27,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     filterUsers();
-  }, [searchQuery, selectedRole, users]);
+  }, [searchQuery, selectedRole, selectedDivision, onboardingFilter, users]);
 
   const loadUsers = async () => {
     try {
@@ -40,21 +45,48 @@ export default function AdminUsers() {
     let filtered = users;
 
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(user =>
-        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        user.full_name?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query) ||
+        user.company_name?.toLowerCase().includes(query) ||
+        user.brokerage_name?.toLowerCase().includes(query) ||
+        user.phone?.includes(query) ||
+        user.id?.toLowerCase().includes(query)
       );
     }
 
     if (selectedRole !== 'all') {
       filtered = filtered.filter(user => 
-        user.primary_account_type === selectedRole || user.primary_role === selectedRole
+        user.primary_account_type === selectedRole || 
+        user.primary_role === selectedRole ||
+        user.account_types?.includes(selectedRole)
       );
+    }
+
+    if (selectedDivision !== 'all') {
+      filtered = filtered.filter(user => 
+        user.divisions_access?.includes(selectedDivision)
+      );
+    }
+
+    if (onboardingFilter === 'completed') {
+      filtered = filtered.filter(user => user.onboarding_completed === true);
+    } else if (onboardingFilter === 'pending') {
+      filtered = filtered.filter(user => !user.onboarding_completed);
     }
 
     setFilteredUsers(filtered);
   };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedRole('all');
+    setSelectedDivision('all');
+    setOnboardingFilter('all');
+  };
+
+  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedDivision !== 'all' || onboardingFilter !== 'all';
 
   const getRoleBadgeColor = (role) => {
     const colors = {
@@ -80,6 +112,10 @@ export default function AdminUsers() {
     { value: 'all', label: 'All Roles' },
     { value: 'super_admin', label: 'Super Admin' },
     { value: 'platform_ops', label: 'Platform Ops' },
+    { value: 'growth_team', label: 'Growth Team' },
+    { value: 'partnerships', label: 'Partnerships' },
+    { value: 'education_admin', label: 'Education Admin' },
+    { value: 'finance_admin', label: 'Finance Admin' },
     { value: 'estate_sale_operator', label: 'Estate Sale Operator' },
     { value: 'real_estate_agent', label: 'Real Estate Agent' },
     { value: 'investor', label: 'Investor' },
@@ -92,6 +128,16 @@ export default function AdminUsers() {
     { value: 'downsizer', label: 'Downsizer' },
     { value: 'diy_seller', label: 'DIY Seller' },
     { value: 'consignor', label: 'Consignor' }
+  ];
+
+  const divisionOptions = [
+    { value: 'all', label: 'All Divisions' },
+    { value: 'estate_services', label: 'Estate Services' },
+    { value: 'real_estate', label: 'Real Estate' },
+    { value: 'investment', label: 'Investment' },
+    { value: 'marketplace', label: 'Marketplace' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'education', label: 'Education' }
   ];
 
   if (loading) {
@@ -110,7 +156,10 @@ export default function AdminUsers() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
-          <p className="text-slate-600">{users.length} total users</p>
+          <p className="text-slate-600">
+            {filteredUsers.length} of {users.length} users
+            {hasActiveFilters && ' (filtered)'}
+          </p>
         </div>
         <Button 
           onClick={() => setShowAddModal(true)}
@@ -127,108 +176,186 @@ export default function AdminUsers() {
         onSuccess={loadUsers}
       />
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <Input
-            placeholder="Search by name, email, or company..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <select
-          value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
-          className="px-4 py-2 border border-slate-300 rounded-lg bg-white"
-        >
-          {roleOptions.map(option => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-      </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-5 h-5 text-slate-600" />
+              <CardTitle>Search & Filters</CardTitle>
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear All
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Input
+              placeholder="Search by name, email, company, brokerage, phone, or user ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Account Role</Label>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Division Access</Label>
+              <Select value={selectedDivision} onValueChange={setSelectedDivision}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Divisions" />
+                </SelectTrigger>
+                <SelectContent>
+                  {divisionOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Onboarding Status</Label>
+              <Tabs value={onboardingFilter} onValueChange={setOnboardingFilter}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                  <TabsTrigger value="completed" className="text-xs">Complete</TabsTrigger>
+                  <TabsTrigger value="pending" className="text-xs">Pending</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4">
-        {filteredUsers.map(user => {
-          const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-          
-          return (
-            <Card key={user.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={user.profile_image_url} />
-                    <AvatarFallback className="bg-orange-600 text-white text-xl">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-slate-900">{user.full_name}</h3>
-                        {(user.primary_account_type || user.primary_role) && (
-                          <Badge className={getRoleBadgeColor(user.primary_account_type || user.primary_role)}>
-                            {(user.primary_account_type || user.primary_role).replace(/_/g, ' ')}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-cyan-600" />
-                          {user.email}
+        {filteredUsers.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <UserCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500 font-medium mb-2">No users found</p>
+              <p className="text-sm text-slate-400 mb-4">Try adjusting your search or filters</p>
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredUsers.map(user => {
+            const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+            
+            return (
+              <Card key={user.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={user.profile_image_url} />
+                      <AvatarFallback className="bg-orange-600 text-white text-xl">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                          <h3 className="text-xl font-semibold text-slate-900">{user.full_name}</h3>
+                          {(user.primary_account_type || user.primary_role) && (
+                            <Badge className={getRoleBadgeColor(user.primary_account_type || user.primary_role)}>
+                              {(user.primary_account_type || user.primary_role).replace(/_/g, ' ')}
+                            </Badge>
+                          )}
+                          {!user.onboarding_completed && (
+                            <Badge variant="outline" className="text-orange-600 border-orange-300">
+                              Pending Setup
+                            </Badge>
+                          )}
                         </div>
-                        {user.phone && (
+                        
+                        <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-600">
                           <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-cyan-600" />
-                            {user.phone}
+                            <Mail className="w-4 h-4 text-cyan-600" />
+                            {user.email}
+                          </div>
+                          {user.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-4 h-4 text-cyan-600" />
+                              {user.phone}
+                            </div>
+                          )}
+                          {(user.company_name || user.brokerage_name) && (
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4 text-cyan-600" />
+                              {user.company_name || user.brokerage_name}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-cyan-600" />
+                            Joined {new Date(user.created_date).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+
+                      {(user.account_types || user.roles) && (user.account_types || user.roles).length > 1 && (
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-xs text-slate-500 font-medium">Additional Roles:</span>
+                          {(user.account_types || user.roles).filter(r => r !== user.primary_account_type && r !== user.primary_role).map((role, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {role.replace(/_/g, ' ')}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        {user.divisions_access && user.divisions_access.length > 0 && (
+                          <div className="text-xs text-slate-500">
+                            <span className="font-medium">Divisions:</span> {user.divisions_access.map(d => d.replace(/_/g, ' ')).join(', ')}
                           </div>
                         )}
-                        {user.company_name && (
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-cyan-600" />
-                            {user.company_name}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-cyan-600" />
-                          Joined {new Date(user.created_date).toLocaleDateString()}
+                        <div className="text-xs text-slate-400 font-mono ml-auto">
+                          ID: {user.id.slice(0, 12)}
                         </div>
                       </div>
                     </div>
-
-                    {(user.account_types || user.roles) && (user.account_types || user.roles).length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {(user.account_types || user.roles).map((role, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {role.replace(/_/g, ' ')}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {user.divisions_access && user.divisions_access.length > 0 && (
-                      <div className="text-xs text-slate-500">
-                        <span className="font-medium">Divisions:</span> {user.divisions_access.join(', ')}
-                      </div>
-                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
-
-      {filteredUsers.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <UserCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">No users found matching your criteria</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
