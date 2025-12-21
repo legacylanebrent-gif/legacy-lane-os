@@ -168,8 +168,9 @@ export default function AdminVendors() {
         </select>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {filteredVendors.map(vendor => (
+      {filteredVendors.length > 0 ? (
+        <div className="grid lg:grid-cols-2 gap-6">
+          {filteredVendors.map(vendor => (
           <Card 
             key={vendor.id} 
             className="hover:shadow-lg transition-shadow cursor-pointer"
@@ -279,20 +280,9 @@ export default function AdminVendors() {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
-
-      {filteredVendors.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Briefcase className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">No vendors found</p>
-          </CardContent>
-        </Card>
-      ))}
-      </div>
-
-      {filteredVendors.length === 0 && (
+          ))}
+        </div>
+      ) : (
         <Card>
           <CardContent className="p-12 text-center">
             <Briefcase className="w-16 h-16 text-slate-300 mx-auto mb-4" />
