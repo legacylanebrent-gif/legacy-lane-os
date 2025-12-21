@@ -18,17 +18,17 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [userLocation, setUserLocation] = useState(null);
+  const [filterByLocation, setFilterByLocation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     loadData();
-    getUserLocation();
   }, []);
 
   useEffect(() => {
     filterSales();
-  }, [searchQuery, sales, userLocation, zipCode]);
+  }, [searchQuery, sales, userLocation, filterByLocation]);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -38,6 +38,7 @@ export default function Home() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
+          setFilterByLocation(true);
         },
         (error) => {
           console.log('Geolocation error:', error);
@@ -83,6 +84,7 @@ export default function Home() {
       if (data.results && data.results[0]) {
         const location = data.results[0].geometry.location;
         setUserLocation({ lat: location.lat, lng: location.lng });
+        setFilterByLocation(true);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
@@ -104,26 +106,39 @@ export default function Home() {
     }
   };
 
+  const handleUseMyLocation = () => {
+    getUserLocation();
+  };
+
   const filterSales = () => {
     let filtered = [...sales];
 
-    // Filter by location if available
+    // Add distance to all sales if location is available
     if (userLocation) {
-      filtered = filtered
-        .map(sale => {
-          if (sale.location && sale.location.lat && sale.location.lng) {
-            const distance = calculateDistance(
-              userLocation.lat,
-              userLocation.lng,
-              sale.location.lat,
-              sale.location.lng
-            );
-            return { ...sale, distance };
-          }
-          return { ...sale, distance: 999999 };
-        })
-        .sort((a, b) => a.distance - b.distance)
-        .filter(sale => sale.distance < 25); // Within 25 miles
+      filtered = filtered.map(sale => {
+        if (sale.location && sale.location.lat && sale.location.lng) {
+          const distance = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            sale.location.lat,
+            sale.location.lng
+          );
+          return { ...sale, distance };
+        }
+        return { ...sale, distance: null };
+      });
+
+      // Filter by distance only if explicitly requested
+      if (filterByLocation) {
+        filtered = filtered.filter(sale => sale.distance !== null && sale.distance < 25);
+      }
+
+      // Sort by distance
+      filtered.sort((a, b) => {
+        if (a.distance === null) return 1;
+        if (b.distance === null) return -1;
+        return a.distance - b.distance;
+      });
     }
 
     // Filter by search query
@@ -234,13 +249,20 @@ export default function Home() {
                 onClick={handleZipSearch}
                 className="bg-cyan-600 hover:bg-cyan-700 h-12 px-6"
               >
-                Find Local Sales
+                Search ZIP
+              </Button>
+              <Button 
+                onClick={handleUseMyLocation}
+                variant="outline"
+                className="h-12 px-6"
+              >
+                Use My Location
               </Button>
             </div>
 
-            {userLocation && (
+            {filterByLocation && userLocation && (
               <div className="text-sm text-slate-600 text-center">
-                📍 Showing sales near your location
+                📍 Showing sales within 25 miles of your location
               </div>
             )}
           </div>
@@ -271,7 +293,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-serif font-bold text-slate-900">
-              {userLocation ? 'Local Estate Sales Near You' : searchQuery ? 'Search Results' : 'Featured Estate Sales'}
+              {filterByLocation ? 'Local Estate Sales Near You' : searchQuery ? 'Search Results' : 'Featured Estate Sales'}
             </h3>
             <div className="text-slate-600">
               {filteredSales.length} {filteredSales.length === 1 ? 'sale' : 'sales'} found
@@ -316,7 +338,7 @@ export default function Home() {
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
                           <span className="truncate">
                             {sale.property_address?.city}, {sale.property_address?.state}
-                            {sale.distance && sale.distance < 999999 && (
+                            {sale.distance !== null && sale.distance !== undefined && (
                               <span className="ml-2 text-xs text-orange-600 font-semibold">
                                 ({sale.distance.toFixed(1)} mi)
                               </span>
