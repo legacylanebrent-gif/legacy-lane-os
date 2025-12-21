@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  Search, MapPin, Calendar, Heart, User, LogIn,
+  Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
   TrendingUp, Home as HomeIcon, DollarSign
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -33,6 +34,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -65,6 +67,15 @@ export default function Home() {
       // Check if user is authenticated
       const authenticated = await base44.auth.isAuthenticated();
       setIsAuthenticated(authenticated);
+
+      if (authenticated) {
+        try {
+          const user = await base44.auth.me();
+          setCurrentUser(user);
+        } catch (error) {
+          console.log('Could not load user');
+        }
+      }
 
       // Load estate sales (public access)
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
@@ -216,15 +227,34 @@ export default function Home() {
               </div>
             </Link>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {isAuthenticated ? (
-                <Button
-                  onClick={() => window.location.href = createPageUrl('Dashboard')}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Dashboard
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.location.href = createPageUrl('Dashboard')}
+                    title="Dashboard"
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.location.href = createPageUrl('Messages')}
+                    title="Messages"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                  </Button>
+                  {currentUser && <NotificationsDropdown user={currentUser} />}
+                  <Button
+                    variant="ghost"
+                    onClick={() => window.location.href = createPageUrl('Dashboard')}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button

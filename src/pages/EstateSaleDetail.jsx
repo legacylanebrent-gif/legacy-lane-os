@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import MessageModal from '@/components/messaging/MessageModal';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -232,12 +233,35 @@ END:VCALENDAR`;
               </div>
             </Link>
 
-            <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to All Sales
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              {currentUser && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.location.href = createPageUrl('Dashboard')}
+                    title="Dashboard"
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.location.href = createPageUrl('Messages')}
+                    title="Messages"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                  </Button>
+                  <NotificationsDropdown user={currentUser} />
+                </>
+              )}
+              <Link to={createPageUrl('Home')}>
+                <Button variant="ghost" className="gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to All Sales
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
