@@ -78,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
   }
 
   const [user, setUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function Layout({ children, currentPageName }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -198,9 +198,8 @@ export default function Layout({ children, currentPageName }) {
         <aside className={`
           fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] 
           bg-white border-r border-slate-200 z-40
-          transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          w-64
+          transition-all duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-0'}
         `}>
           <div className="p-6 overflow-y-auto h-full">
             <div className="space-y-6">
@@ -299,6 +298,9 @@ export default function Layout({ children, currentPageName }) {
             onClick={() => setSidebarOpen(false)}
           />
         )}
+
+        {/* Sidebar spacer for desktop when closed */}
+        {!sidebarOpen && <div className="hidden lg:block w-0" />}
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-0">
