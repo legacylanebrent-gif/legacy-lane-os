@@ -36,6 +36,7 @@ import BusinessProfile from './pages/BusinessProfile';
 import SearchByState from './pages/SearchByState';
 import StateCities from './pages/StateCities';
 import Operators from './pages/Operators';
+import OperatorPackages from './pages/OperatorPackages';
 import __Layout from './Layout.jsx';
 
 
@@ -78,6 +79,7 @@ export const PAGES = {
     "SearchByState": SearchByState,
     "StateCities": StateCities,
     "Operators": Operators,
+    "OperatorPackages": OperatorPackages,
 }
 
 export const pagesConfig = {
