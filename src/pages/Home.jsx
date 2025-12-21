@@ -16,16 +16,35 @@ export default function Home() {
   const [sales, setSales] = useState([]);
   const [filteredSales, setFilteredSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     loadData();
+    getUserLocation();
   }, []);
 
   useEffect(() => {
     filterSales();
-  }, [searchQuery, sales]);
+  }, [searchQuery, sales, userLocation, zipCode]);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+        }
+      );
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -45,20 +64,80 @@ export default function Home() {
     }
   };
 
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3959; // Radius of Earth in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const geocodeZipCode = async (zip) => {
+    try {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${await getGoogleMapsKey()}`);
+      const data = await response.json();
+      if (data.results && data.results[0]) {
+        const location = data.results[0].geometry.location;
+        setUserLocation({ lat: location.lat, lng: location.lng });
+      }
+    } catch (error) {
+      console.error('Error geocoding zip:', error);
+    }
+  };
+
+  const getGoogleMapsKey = async () => {
+    try {
+      const response = await base44.functions.invoke('getConfig', {});
+      return response.data.GOOGLE_MAPS_API_KEY;
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const handleZipSearch = () => {
+    if (zipCode.trim()) {
+      geocodeZipCode(zipCode.trim());
+    }
+  };
+
   const filterSales = () => {
-    if (!searchQuery.trim()) {
-      setFilteredSales(sales);
-      return;
+    let filtered = [...sales];
+
+    // Filter by location if available
+    if (userLocation) {
+      filtered = filtered
+        .map(sale => {
+          if (sale.location) {
+            const distance = calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              sale.location.lat,
+              sale.location.lng
+            );
+            return { ...sale, distance };
+          }
+          return { ...sale, distance: 999999 };
+        })
+        .sort((a, b) => a.distance - b.distance)
+        .filter(sale => sale.distance < 100); // Within 100 miles
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = sales.filter(sale =>
-      sale.title?.toLowerCase().includes(query) ||
-      sale.property_address?.city?.toLowerCase().includes(query) ||
-      sale.property_address?.state?.toLowerCase().includes(query) ||
-      sale.property_address?.zip?.includes(query) ||
-      sale.categories?.some(cat => cat.toLowerCase().includes(query))
-    );
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(sale =>
+        sale.title?.toLowerCase().includes(query) ||
+        sale.property_address?.city?.toLowerCase().includes(query) ||
+        sale.property_address?.state?.toLowerCase().includes(query) ||
+        sale.property_address?.zip?.includes(query) ||
+        sale.categories?.some(cat => cat.toLowerCase().includes(query))
+      );
+    }
+
     setFilteredSales(filtered);
   };
 
@@ -128,7 +207,7 @@ export default function Home() {
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto space-y-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
@@ -138,6 +217,32 @@ export default function Home() {
                 className="pl-12 h-14 text-lg shadow-lg border-2 border-slate-200 focus:border-orange-500"
               />
             </div>
+
+            {/* Zip Code Search */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Input
+                  placeholder="Enter ZIP code to find sales near you..."
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleZipSearch()}
+                  className="pl-12 h-12 shadow-md"
+                />
+              </div>
+              <Button 
+                onClick={handleZipSearch}
+                className="bg-cyan-600 hover:bg-cyan-700 h-12 px-6"
+              >
+                Find Local Sales
+              </Button>
+            </div>
+
+            {userLocation && (
+              <div className="text-sm text-slate-600 text-center">
+                📍 Showing sales near your location
+              </div>
+            )}
           </div>
 
           {/* Quick Stats */}
@@ -166,7 +271,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-serif font-bold text-slate-900">
-              {searchQuery ? 'Search Results' : 'Featured Estate Sales'}
+              {userLocation ? 'Local Estate Sales Near You' : searchQuery ? 'Search Results' : 'Featured Estate Sales'}
             </h3>
             <div className="text-slate-600">
               {filteredSales.length} {filteredSales.length === 1 ? 'sale' : 'sales'} found
@@ -211,6 +316,11 @@ export default function Home() {
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
                           <span className="truncate">
                             {sale.property_address?.city}, {sale.property_address?.state}
+                            {sale.distance && sale.distance < 999999 && (
+                              <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                ({sale.distance.toFixed(1)} mi)
+                              </span>
+                            )}
                           </span>
                         </div>
 
