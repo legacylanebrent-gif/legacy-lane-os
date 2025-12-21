@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
-  Printer, Mail, FileDown, Plus
+  Printer, Mail, FileDown, Plus, X
 } from 'lucide-react';
 import {
   Select,
