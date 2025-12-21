@@ -227,10 +227,10 @@ export default function AdminPackages() {
                         </div>
                       )}
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
                         <Button
                           variant="outline"
-                          className="flex-1 mt-4"
+                          className="w-full mt-4"
                           onClick={() => handleEdit(pkg)}
                         >
                           <Edit className="w-4 h-4 mr-2" />
@@ -238,7 +238,7 @@ export default function AdminPackages() {
                         </Button>
                         <Button
                           variant="outline"
-                          className="flex-1 mt-4 text-red-600 border-red-300 hover:bg-red-50"
+                          className="w-full text-red-600 border-red-300 hover:bg-red-50"
                           onClick={() => handleDelete(pkg)}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
