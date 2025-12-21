@@ -57,6 +57,16 @@ export default function EstateSaleFinder() {
   }, [estates, searchQuery]);
 
   const getUserLocation = () => {
+    // Check if browsing by state/city - skip geocoding
+    const urlParams = new URLSearchParams(window.location.search);
+    const stateParam = urlParams.get('state');
+    const cityParam = urlParams.get('city');
+    
+    if (stateParam && cityParam) {
+      loadEstates();
+      return;
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -93,8 +103,24 @@ export default function EstateSaleFinder() {
   const loadEstates = async () => {
     try {
       setLoading(true);
+      
+      // Check if coming from state/city selection
+      const urlParams = new URLSearchParams(window.location.search);
+      const stateParam = urlParams.get('state');
+      const cityParam = urlParams.get('city');
+
       const data = await base44.entities.EstateSale.list('-created_date', 100);
-      setEstates(data);
+      
+      // Filter by region if state and city are specified
+      if (stateParam && cityParam) {
+        const regionFiltered = data.filter(e => 
+          e.property_address?.state === stateParam && 
+          e.property_address?.region === decodeURIComponent(cityParam)
+        );
+        setEstates(regionFiltered);
+      } else {
+        setEstates(data);
+      }
     } catch (error) {
       console.error('Error loading estates:', error);
     } finally {
@@ -138,7 +164,14 @@ export default function EstateSaleFinder() {
                 Estate Sale Finder
               </h1>
               <p className="text-slate-600">
-                Discover {estates.length} estate sales in your area
+                {(() => {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const cityParam = urlParams.get('city');
+                  if (cityParam) {
+                    return `${estates.length} estate sales in ${decodeURIComponent(cityParam)}`;
+                  }
+                  return `Discover ${estates.length} estate sales in your area`;
+                })()}
               </p>
             </div>
             
