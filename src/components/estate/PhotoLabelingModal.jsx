@@ -16,6 +16,7 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
   const [editedUsedPrice, setEditedUsedPrice] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [rescanning, setRescanning] = useState(false);
 
   React.useEffect(() => {
     if (open && image && !suggestions) {
@@ -77,6 +78,68 @@ Be specific and practical. Focus on the main item in the photo.`;
       alert(`Failed to analyze photo: ${errorMsg}. Please try again.`);
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const handleRescan = async () => {
+    if (!editedName || editedName.trim() === '') {
+      alert('Please enter an item name first');
+      return;
+    }
+
+    setRescanning(true);
+    try {
+      let imageUrl = image.url;
+      if (typeof imageUrl === 'object' && imageUrl.url) {
+        imageUrl = imageUrl.url;
+      }
+      if (typeof image === 'string') {
+        imageUrl = image;
+      }
+
+      const prompt = `You are analyzing a photo from an estate sale to help label and price items.
+
+The user has identified this item as: "${editedName}"
+
+Look at this estate sale photo and provide:
+1. A refined, accurate name for the item (3-5 words max) - use the user's input as guidance
+2. A detailed description (1-2 sentences about condition, style, features)
+3. Two realistic price estimates:
+   - New price: What this item would cost brand new in a store
+   - Used price: A realistic estate sale price based on condition
+
+Be specific and practical. Focus on the main item in the photo that matches "${editedName}".`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        file_urls: [imageUrl],
+        response_json_schema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            description: { type: "string" },
+            new_price: { type: "number", description: "Estimated retail price if brand new" },
+            used_price: { type: "number", description: "Realistic estate sale price" },
+            suggested_categories: { 
+              type: "array",
+              items: { type: "string" },
+              description: "Relevant categories from: Furniture, Art & Collectibles, Jewelry, Antiques, Electronics, Home Decor, Kitchen & Dining, Tools & Equipment, Books & Media, Clothing & Accessories, Outdoor & Garden, Other"
+            }
+          }
+        }
+      });
+
+      setSuggestions(result);
+      setEditedName(result.name || editedName);
+      setEditedNewPrice(result.new_price?.toString() || editedNewPrice);
+      setEditedUsedPrice(result.used_price?.toString() || editedUsedPrice);
+      setEditedDescription(result.description || editedDescription);
+      setSelectedCategories(result.suggested_categories || selectedCategories);
+    } catch (error) {
+      console.error('Error rescanning photo:', error);
+      alert('Failed to rescan photo. Please try again.');
+    } finally {
+      setRescanning(false);
     }
   };
 
@@ -299,11 +362,26 @@ Be specific and practical. Focus on the main item in the photo.`;
               <div className="space-y-4">
                 <div>
                   <Label>Item Name *</Label>
-                  <Input
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    placeholder="Enter item name"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      placeholder="Enter item name"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleRescan}
+                      disabled={rescanning || !editedName}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {rescanning ? 'Rescanning...' : 'Rescan'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Edit the name and click Rescan for more accurate results
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
