@@ -55,12 +55,12 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
   });
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !step === 1) return;
 
     const loadGoogleMaps = async () => {
       try {
         if (window.google?.maps?.places) {
-          initAutocomplete();
+          setTimeout(initAutocomplete, 100);
           return;
         }
 
@@ -76,7 +76,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
         script.async = true;
-        script.onload = initAutocomplete;
+        script.onload = () => setTimeout(initAutocomplete, 100);
         document.head.appendChild(script);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
@@ -85,6 +85,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
     const initAutocomplete = () => {
       if (!addressInputRef.current || !window.google?.maps?.places) return;
+
+      // Clear any existing autocomplete
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
 
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         addressInputRef.current,
@@ -104,7 +109,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [open]);
+  }, [open, step]);
 
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current?.getPlace();
@@ -285,10 +290,18 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" style={{ zIndex: 50 }}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <style>{`
           .pac-container {
             z-index: 99999 !important;
+            position: fixed !important;
+          }
+          .pac-item {
+            cursor: pointer !important;
+            padding: 8px !important;
+          }
+          .pac-item:hover {
+            background-color: #f3f4f6 !important;
           }
         `}</style>
         <DialogHeader>
