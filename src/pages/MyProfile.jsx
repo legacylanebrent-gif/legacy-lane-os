@@ -139,6 +139,24 @@ export default function MyProfile() {
     }
   };
 
+  const handleVenmoQRUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingVenmo(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ venmo_qr_code: file_url });
+      setUser({...user, venmo_qr_code: file_url});
+      alert('Venmo QR code updated!');
+    } catch (error) {
+      console.error('Error uploading Venmo QR code:', error);
+      alert('Failed to upload Venmo QR code');
+    } finally {
+      setUploadingVenmo(false);
+    }
+  };
+
   const getTierColor = (tier) => {
     const colors = {
       basic: 'bg-slate-100 text-slate-700 border-slate-300',
@@ -281,6 +299,64 @@ export default function MyProfile() {
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save Profile'}
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Venmo QR Code Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Venmo QR Code
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Upload your Venmo QR code to make it easy for customers to pay you
+              </p>
+              
+              {user?.venmo_qr_code && (
+                <div className="flex justify-center">
+                  <img 
+                    src={user.venmo_qr_code} 
+                    alt="Venmo QR Code" 
+                    className="w-64 h-64 object-contain border-2 border-slate-200 rounded-lg p-4 bg-white"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleVenmoQRUpload}
+                  className="hidden"
+                  id="venmo-qr-upload"
+                  disabled={uploadingVenmo}
+                />
+                <Button 
+                  variant="outline"
+                  disabled={uploadingVenmo}
+                  onClick={() => document.getElementById('venmo-qr-upload').click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadingVenmo ? 'Uploading...' : user?.venmo_qr_code ? 'Change QR Code' : 'Upload QR Code'}
+                </Button>
+                {user?.venmo_qr_code && (
+                  <Button 
+                    variant="ghost"
+                    onClick={async () => {
+                      if (confirm('Remove Venmo QR code?')) {
+                        await base44.auth.updateMe({ venmo_qr_code: null });
+                        setUser({...user, venmo_qr_code: null});
+                      }
+                    }}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
