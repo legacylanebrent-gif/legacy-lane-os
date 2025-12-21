@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, ArrowLeft } from 'lucide-react';
 
 export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
@@ -69,8 +71,31 @@ export default function OperatorPackages() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-6">
+              <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="font-medium">Back Home</span>
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">LL</span>
+                </div>
+                <div>
+                  <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
+                  <p className="text-xs text-orange-600">Estate Sale Operators</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto py-12 px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4">
