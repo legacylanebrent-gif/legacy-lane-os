@@ -37,6 +37,9 @@ import SearchByState from './pages/SearchByState';
 import StateCities from './pages/StateCities';
 import Operators from './pages/Operators';
 import OperatorPackages from './pages/OperatorPackages';
+import DIYSaleSignup from './pages/DIYSaleSignup';
+import AgentSignup from './pages/AgentSignup';
+import VendorSignup from './pages/VendorSignup';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +83,9 @@ export const PAGES = {
     "StateCities": StateCities,
     "Operators": Operators,
     "OperatorPackages": OperatorPackages,
+    "DIYSaleSignup": DIYSaleSignup,
+    "AgentSignup": AgentSignup,
+    "VendorSignup": VendorSignup,
 }
 
 export const pagesConfig = {
