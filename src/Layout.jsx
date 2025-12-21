@@ -231,7 +231,20 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
-              </div>
+                <Link to={createPageUrl('MyReferrals')}>
+                  <Button 
+                    variant={currentPageName === 'MyReferrals' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'MyReferrals' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <Users className="w-5 h-5 mr-3" />
+                    My Referrals
+                  </Button>
+                </Link>
+                </div>
 
               {user?.divisions_access?.map(divisionKey => {
                 const division = DIVISION_CONFIG[divisionKey];
