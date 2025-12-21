@@ -617,7 +617,8 @@ export default function Home() {
                         <div className="flex items-center gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
                           <span className="truncate">
-                            {sale.property_address?.city}, {sale.property_address?.state}
+                            {sale.property_address?.street && `${sale.property_address.street}, `}
+                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
                             {sale.distance !== null && sale.distance !== undefined && (
                               <span className="ml-2 text-xs text-orange-600 font-semibold">
                                 ({sale.distance.toFixed(1)} mi)
@@ -746,7 +747,8 @@ export default function Home() {
                         <div className="flex items-center gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
                           <span className="truncate">
-                            {sale.property_address?.city}, {sale.property_address?.state}
+                            {sale.property_address?.street && `${sale.property_address.street}, `}
+                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
                             {sale.distance !== null && sale.distance !== undefined && (
                               <span className="ml-2 text-xs text-orange-600 font-semibold">
                                 ({sale.distance.toFixed(1)} mi)
