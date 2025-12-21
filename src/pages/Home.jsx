@@ -36,6 +36,7 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [routeSales, setRouteSales] = useState([]);
+  const [savedSales, setSavedSales] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -46,6 +47,8 @@ export default function Home() {
   const loadRoute = () => {
     const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
     setRouteSales(route);
+    const saved = JSON.parse(localStorage.getItem('savedSales') || '[]');
+    setSavedSales(saved);
   };
 
   useEffect(() => {
@@ -180,6 +183,32 @@ export default function Home() {
     if (sale.property_address) {
       const address = `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`;
       window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(address)}`, '_blank');
+    }
+  };
+
+  const handleSaveSale = async (e, saleId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const saved = JSON.parse(localStorage.getItem('savedSales') || '[]');
+    if (saved.includes(saleId)) {
+      const updated = saved.filter(id => id !== saleId);
+      localStorage.setItem('savedSales', JSON.stringify(updated));
+      setSavedSales(updated);
+    } else {
+      saved.push(saleId);
+      localStorage.setItem('savedSales', JSON.stringify(saved));
+      setSavedSales(saved);
+      // Update save count
+      try {
+        const sale = sales.find(s => s.id === saleId);
+        if (sale) {
+          await base44.entities.EstateSale.update(saleId, {
+            saves: (sale.saves || 0) + 1
+          });
+        }
+      } catch (error) {
+        console.log('Could not update save count');
+      }
     }
   };
 
@@ -454,10 +483,13 @@ export default function Home() {
                         <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
                           National Featured
                         </Badge>
-                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
-                          <Heart className="w-4 h-4 text-slate-600" />
+                        <button 
+                          onClick={(e) => handleSaveSale(e, sale.id)}
+                          className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                        >
+                          <Heart className={`w-4 h-4 ${savedSales.includes(sale.id) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} />
                         </button>
-                      </div>
+                        </div>
                     )}
                     <CardContent className="p-5">
                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
@@ -567,10 +599,13 @@ export default function Home() {
                         <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">
                           Local Featured
                         </Badge>
-                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
-                          <Heart className="w-4 h-4 text-slate-600" />
+                        <button 
+                          onClick={(e) => handleSaveSale(e, sale.id)}
+                          className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                        >
+                          <Heart className={`w-4 h-4 ${savedSales.includes(sale.id) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} />
                         </button>
-                      </div>
+                        </div>
                     )}
                     <CardContent className="p-5">
                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">
@@ -693,10 +728,13 @@ export default function Home() {
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
-                          <Heart className="w-4 h-4 text-slate-600" />
+                        <button 
+                          onClick={(e) => handleSaveSale(e, sale.id)}
+                          className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                        >
+                          <Heart className={`w-4 h-4 ${savedSales.includes(sale.id) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} />
                         </button>
-                      </div>
+                        </div>
                     )}
                     <CardContent className="p-5">
                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
