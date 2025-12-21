@@ -21,6 +21,7 @@ export default function MyProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [uploadingVenmo, setUploadingVenmo] = useState(false);
   
   const [profileData, setProfileData] = useState({
     full_name: '',
