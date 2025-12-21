@@ -878,17 +878,40 @@ Only include items with confidence > 0.3. If no items match well, return an empt
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-slate-900">
-                  {bundleMode ? 'Add New Transaction' : 'Add New Transaction'}
+                  {bundleMode ? 'Bundle Transaction' : photoMode ? 'Add from Photos' : 'Add New Transaction'}
                 </h3>
-                <Button 
-                  variant={bundleMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setBundleMode(!bundleMode)}
-                  className={bundleMode ? "bg-purple-600 hover:bg-purple-700" : ""}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  {bundleMode ? 'Bundle Mode' : 'Create Bundle'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={photoMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setPhotoMode(!photoMode);
+                      setBundleMode(false);
+                      if (!photoMode) {
+                        setItemName('');
+                        setPrice('');
+                        setSelectedPhoto(null);
+                        setPhotoSearchQuery('');
+                      }
+                    }}
+                    className={photoMode ? "bg-cyan-600 hover:bg-cyan-700" : ""}
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {photoMode ? 'Photo Mode' : 'From Photos'}
+                  </Button>
+                  <Button 
+                    variant={bundleMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setBundleMode(!bundleMode);
+                      setPhotoMode(false);
+                    }}
+                    className={bundleMode ? "bg-purple-600 hover:bg-purple-700" : ""}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {bundleMode ? 'Bundle Mode' : 'Create Bundle'}
+                  </Button>
+                </div>
               </div>
 
               {photoMode ? (
