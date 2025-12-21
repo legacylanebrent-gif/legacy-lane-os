@@ -410,7 +410,7 @@ END:VCALENDAR`;
           {/* Sidebar - Right Column */}
           <div className="space-y-6">
             {/* Sale Details */}
-            <Card className="sticky top-24">
+            <Card>
               <CardContent className="p-6 space-y-6">
                 {/* Address */}
                 <div>
