@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
-  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark
+  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
