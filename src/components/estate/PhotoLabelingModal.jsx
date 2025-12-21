@@ -80,14 +80,46 @@ Be specific and practical. Focus on the main item in the photo.`;
     }
   };
 
-  const handleApproveLabel = () => {
-    onApprove(imageIndex, {
-      name: editedName,
-      description: editedDescription,
-      price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-      categories: selectedCategories
-    }, false);
-    resetAndClose();
+  const handleApproveLabel = async () => {
+    try {
+      // Save to product database
+      let imageUrl = image.url;
+      if (typeof imageUrl === 'object' && imageUrl.url) {
+        imageUrl = imageUrl.url;
+      }
+      if (typeof image === 'string') {
+        imageUrl = image;
+      }
+
+      await base44.entities.ProductDatabase.create({
+        thumbnail_url: imageUrl,
+        title: editedName,
+        description: editedDescription,
+        suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+        suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        sale_id: saleId,
+        categories: selectedCategories
+      });
+
+      onApprove(imageIndex, {
+        name: editedName,
+        description: editedDescription,
+        price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        categories: selectedCategories
+      }, false);
+      resetAndClose();
+    } catch (error) {
+      console.error('Error saving to product database:', error);
+      // Still approve the label even if database save fails
+      onApprove(imageIndex, {
+        name: editedName,
+        description: editedDescription,
+        price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        categories: selectedCategories
+      }, false);
+      resetAndClose();
+    }
   };
 
   const handleApproveAndCreateItem = async () => {
@@ -102,7 +134,7 @@ Be specific and practical. Focus on the main item in the photo.`;
       }
 
       // Create inventory item
-      await base44.entities.Item.create({
+      const createdItem = await base44.entities.Item.create({
         title: editedName,
         description: editedDescription,
         price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
@@ -113,6 +145,19 @@ Be specific and practical. Focus on the main item in the photo.`;
         category: selectedCategories[0] || 'estate_items',
         condition: 'good',
         tags: selectedCategories
+      });
+
+      // Save to product database with item_id
+      await base44.entities.ProductDatabase.create({
+        thumbnail_url: imageUrl,
+        title: editedName,
+        description: editedDescription,
+        suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+        suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+        item_id: createdItem.id,
+        sale_id: saleId,
+        categories: selectedCategories
       });
 
       onApprove(imageIndex, {
