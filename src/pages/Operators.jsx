@@ -1,68 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { US_STATES } from '@/components/data/USStates';
-import { Search, MapPin, Building2, Star, Phone, Globe, ArrowRight, Briefcase } from 'lucide-react';
+import { MapPin, Building2, BookOpen, Briefcase, MessageSquare, Quote } from 'lucide-react';
+
+const testimonials = [
+  {
+    name: "Sarah M.",
+    location: "Miami, FL",
+    text: "Thanks for your website and help getting someone to handle my mother's estate sale. The company I found was professional and exceeded expectations!",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop"
+  },
+  {
+    name: "Robert T.",
+    location: "Austin, TX",
+    text: "I secured a great company through Legacy Lane. Thanks for all your help! You guys are fantastic and made the process so easy.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop"
+  },
+  {
+    name: "Jennifer L.",
+    location: "Chicago, IL",
+    text: "Hired one of your companies! I'm very pleased with their professionalism and the results they delivered for our estate sale.",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop"
+  }
+];
 
 export default function Operators() {
-  const [operators, setOperators] = useState([]);
-  const [filteredOperators, setFilteredOperators] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedState, setSelectedState] = useState('');
 
-  useEffect(() => {
-    loadOperators();
-  }, []);
-
-  useEffect(() => {
-    filterOperators();
-  }, [operators, searchQuery, selectedState]);
-
-  const loadOperators = async () => {
-    try {
-      const users = await base44.entities.User.list();
-      const operatorUsers = users.filter(u => 
-        u.primary_account_type === 'estate_sale_operator' || 
-        u.primary_role === 'estate_sale_operator'
-      );
-      setOperators(operatorUsers);
-    } catch (error) {
-      console.error('Error loading operators:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterOperators = () => {
-    let filtered = operators;
-
-    // Filter by state
+  const handleStateSearch = () => {
     if (selectedState) {
-      filtered = filtered.filter(op => 
-        op.service_states?.includes(selectedState) || 
-        op.state === selectedState
-      );
+      window.location.href = createPageUrl('StateCities') + `?state=${selectedState}`;
     }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(op =>
-        op.company_name?.toLowerCase().includes(query) ||
-        op.full_name?.toLowerCase().includes(query) ||
-        op.company_description?.toLowerCase().includes(query) ||
-        op.city?.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredOperators(filtered);
   };
 
   return (
