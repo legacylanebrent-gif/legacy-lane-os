@@ -363,7 +363,7 @@ END:VCALENDAR`;
                         </>
                       )}
                     </div>
-                  <div className="p-4 grid grid-cols-6 gap-2">
+                    <div className="p-4 grid grid-cols-6 gap-2">
                     {sale.images.map((image, index) => (
                       <div key={index} className="relative">
                         <button
