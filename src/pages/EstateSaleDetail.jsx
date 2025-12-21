@@ -388,6 +388,49 @@ END:VCALENDAR`;
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Image Modal */}
+              <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
+                  <div className="relative flex items-center justify-center bg-black min-h-[90vh]">
+                    <img
+                      src={sale.images[selectedImage]}
+                      alt={sale.title}
+                      className="max-h-[90vh] max-w-full object-contain"
+                    />
+                    {currentUser && (
+                      <button
+                        onClick={() => toggleImageSave(selectedImage)}
+                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
+                      >
+                        <Heart 
+                          className={`w-6 h-6 ${savedImages.includes(selectedImage) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} 
+                        />
+                      </button>
+                    )}
+                    {sale.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setSelectedImage(prev => prev === 0 ? sale.images.length - 1 : prev - 1)}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all"
+                        >
+                          <ChevronLeft className="w-6 h-6 text-slate-900" />
+                        </button>
+                        <button
+                          onClick={() => setSelectedImage(prev => prev === sale.images.length - 1 ? 0 : prev + 1)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all"
+                        >
+                          <ChevronRight className="w-6 h-6 text-slate-900" />
+                        </button>
+                      </>
+                    )}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+                      {selectedImage + 1} / {sale.images.length}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
             )}
 
             {/* Description */}
