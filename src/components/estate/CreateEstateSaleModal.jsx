@@ -469,45 +469,40 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     }));
   };
 
-  const handlePhotoLabelApprove = async (index, labelData, addedToInventory) => {
-    // Update state
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.map((img, i) => 
-        i === index ? { 
-          ...img, 
-          name: labelData.name,
-          description: labelData.description,
-          price: labelData.price,
-          categories: labelData.categories
-        } : img
-      )
-    }));
+  const handlePhotoLabelApprove = (index, labelData, addedToInventory) => {
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        images: (prev.images || []).map((img, i) => 
+          i === index ? { 
+            ...img, 
+            name: labelData.name,
+            description: labelData.description,
+            price: labelData.price,
+            categories: labelData.categories
+          } : img
+        )
+      };
 
-    // Auto-save to database immediately after
-    if (sale?.id) {
-      try {
-        // Wait a tick to let state update
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Get the current formData directly
-        setFormData(async (currentFormData) => {
+      // Auto-save to database
+      if (sale?.id) {
+        (async () => {
           try {
             const user = await base44.auth.me();
             const data = {
-              ...currentFormData,
+              ...updated,
               operator_id: sale.operator_id || user.id,
               operator_name: sale.operator_name || user.full_name,
               status: sale.status || 'draft',
-              estimated_value: currentFormData.estimated_value ? parseFloat(currentFormData.estimated_value) : null,
-              commission_rate: currentFormData.commission_rate ? parseFloat(currentFormData.commission_rate) : null,
-              national_featured_price: currentFormData.national_featured_price ? parseFloat(currentFormData.national_featured_price) : null,
-              local_featured_price: currentFormData.local_featured_price ? parseFloat(currentFormData.local_featured_price) : null,
+              estimated_value: updated.estimated_value ? parseFloat(updated.estimated_value) : null,
+              commission_rate: updated.commission_rate ? parseFloat(updated.commission_rate) : null,
+              national_featured_price: updated.national_featured_price ? parseFloat(updated.national_featured_price) : null,
+              local_featured_price: updated.local_featured_price ? parseFloat(updated.local_featured_price) : null,
               property_address: {
-                ...currentFormData.property_address,
-                formatted_address: `${currentFormData.property_address.street}, ${currentFormData.property_address.city}, ${currentFormData.property_address.state} ${currentFormData.property_address.zip}`
+                ...updated.property_address,
+                formatted_address: `${updated.property_address.street}, ${updated.property_address.city}, ${updated.property_address.state} ${updated.property_address.zip}`
               },
-              images: currentFormData.images
+              images: updated.images
             };
             await base44.entities.EstateSale.update(sale.id, data);
             console.log('AI label saved successfully');
@@ -515,12 +510,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
             console.error('Auto-save failed:', error);
             alert('Failed to save AI labels: ' + error.message);
           }
-          return currentFormData;
-        });
-      } catch (error) {
-        console.error('Auto-save failed:', error);
+        })();
       }
-    }
+
+      return updated;
+    });
   };
 
   const handleBulkEdit = (updates) => {
