@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import SignTemplateModal from './SignTemplateModal';
+import PhotoLabelingModal from './PhotoLabelingModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,6 +60,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   });
 
   const [editingImage, setEditingImage] = useState(null);
+  const [labelingImage, setLabelingImage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -402,6 +404,18 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     }));
   };
 
+  const handlePhotoLabelApprove = (index, labelData, addedToInventory) => {
+    updateImageDetails(index, {
+      name: labelData.name,
+      description: labelData.description,
+      price: labelData.price
+    });
+    
+    if (addedToInventory) {
+      alert('Item added to inventory!');
+    }
+  };
+
 
 
   const addSaleDate = () => {
@@ -596,6 +610,15 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           onClose={() => setShowSignTemplate(false)}
           sale={sale}
           operator={operator}
+        />
+
+        <PhotoLabelingModal
+          open={labelingImage !== null}
+          onClose={() => setLabelingImage(null)}
+          image={labelingImage !== null ? formData.images[labelingImage] : null}
+          imageIndex={labelingImage}
+          saleId={sale?.id}
+          onApprove={handlePhotoLabelApprove}
         />
 
         <Tabs value={step.toString()} className="w-full">
@@ -930,51 +953,70 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                                       style={{ transform: `rotate(${image.rotation}deg)` }}
                                     />
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="h-7 w-7 p-0"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          rotateImage(index);
-                                        }}
-                                      >
-                                        <RotateCw className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="h-7 w-7 p-0"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingImage(index);
-                                        }}
-                                      >
-                                        <Edit2 className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        className="h-7 w-7 p-0"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          removeImage(index);
-                                        }}
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </Button>
+                                     <Button
+                                       variant="secondary"
+                                       size="sm"
+                                       className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         setLabelingImage(index);
+                                       }}
+                                       title="AI Label & Price"
+                                     >
+                                       <Sparkles className="w-3 h-3" />
+                                     </Button>
+                                     <Button
+                                       variant="secondary"
+                                       size="sm"
+                                       className="h-7 w-7 p-0"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         rotateImage(index);
+                                       }}
+                                     >
+                                       <RotateCw className="w-3 h-3" />
+                                     </Button>
+                                     <Button
+                                       variant="secondary"
+                                       size="sm"
+                                       className="h-7 w-7 p-0"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         setEditingImage(index);
+                                       }}
+                                     >
+                                       <Edit2 className="w-3 h-3" />
+                                     </Button>
+                                     <Button
+                                       variant="destructive"
+                                       size="sm"
+                                       className="h-7 w-7 p-0"
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         removeImage(index);
+                                       }}
+                                     >
+                                       <X className="w-3 h-3" />
+                                     </Button>
                                     </div>
                                     {selectedImages.includes(index) && (
                                       <div className="absolute inset-0 bg-orange-500/20 rounded-lg pointer-events-none" />
                                     )}
                                   </div>
-                                  <Input
-                                    placeholder="Photo name"
-                                    value={image.name}
-                                    onChange={(e) => updateImageDetails(index, { name: e.target.value })}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-xs"
-                                  />
+                                  <div className="space-y-1">
+                                   <Input
+                                     placeholder="Photo name"
+                                     value={image.name}
+                                     onChange={(e) => updateImageDetails(index, { name: e.target.value })}
+                                     onClick={(e) => e.stopPropagation()}
+                                     className="text-xs"
+                                   />
+                                   {image.price && (
+                                     <div className="text-xs font-semibold text-green-600">
+                                       ${parseFloat(image.price).toFixed(2)}
+                                     </div>
+                                   )}
+                                  </div>
                                 </div>
                               )}
                             </Draggable>
