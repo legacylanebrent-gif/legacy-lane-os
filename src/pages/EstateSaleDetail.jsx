@@ -264,17 +264,38 @@ END:VCALENDAR`;
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleSave}
-                    className={saved ? 'text-red-600' : ''}
-                  >
-                    <Heart className={`w-5 h-5 ${saved ? 'fill-current' : ''}`} />
-                  </Button>
                   <Button variant="outline" size="icon" onClick={handleShare}>
                     <Share2 className="w-5 h-5" />
                   </Button>
+                  {currentUser && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleAddToCalendar}
+                        title="Add to Calendar"
+                      >
+                        <Calendar className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        variant={isInRoute ? 'default' : 'outline'}
+                        size="icon"
+                        onClick={handleAddToRoute}
+                        className={isInRoute ? 'bg-cyan-600 hover:bg-cyan-700' : ''}
+                        title={isInRoute ? 'In Route' : 'Add to Route'}
+                      >
+                        <MapPin className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleSave}
+                        className={saved ? 'text-red-600' : ''}
+                      >
+                        <Heart className={`w-5 h-5 ${saved ? 'fill-current' : ''}`} />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -289,28 +310,6 @@ END:VCALENDAR`;
                 </span>
               </div>
             </div>
-
-            {/* Action Buttons for Logged In Users */}
-            {currentUser && (
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline"
-                  onClick={handleAddToCalendar}
-                  className="flex-1"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Add to Calendar
-                </Button>
-                <Button 
-                  variant={isInRoute ? 'default' : 'outline'}
-                  onClick={handleAddToRoute}
-                  className={`flex-1 ${isInRoute ? 'bg-cyan-600 hover:bg-cyan-700' : ''}`}
-                >
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {isInRoute ? 'In Route' : 'Add to Route'}
-                </Button>
-              </div>
-            )}
 
             {/* Image Gallery */}
             {sale.images && sale.images.length > 0 && (
