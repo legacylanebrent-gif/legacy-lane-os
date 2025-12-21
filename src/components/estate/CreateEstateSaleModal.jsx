@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import SignTemplateModal from './SignTemplateModal';
 import PhotoLabelingModal from './PhotoLabelingModal';
 import BulkEditPhotosModal from './BulkEditPhotosModal';
+import BatchLabelModal from './BatchLabelModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -63,6 +64,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [editingImage, setEditingImage] = useState(null);
   const [labelingImage, setLabelingImage] = useState(null);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [showBatchLabel, setShowBatchLabel] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -826,6 +828,43 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           onApply={handleBulkEdit}
         />
 
+        <BatchLabelModal
+          open={showBatchLabel}
+          onClose={() => setShowBatchLabel(false)}
+          images={formData.images}
+          saleId={sale?.id}
+          onLabelsApplied={(updatedImages) => {
+            setFormData(prev => ({ ...prev, images: updatedImages }));
+
+            // Auto-save to database
+            if (sale?.id) {
+              setTimeout(async () => {
+                try {
+                  const user = await base44.auth.me();
+                  const data = {
+                    ...formData,
+                    images: updatedImages,
+                    operator_id: sale.operator_id || user.id,
+                    operator_name: sale.operator_name || user.full_name,
+                    status: sale.status || 'draft',
+                    estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
+                    commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+                    national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
+                    local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
+                    property_address: {
+                      ...formData.property_address,
+                      formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+                    }
+                  };
+                  await base44.entities.EstateSale.update(sale.id, data);
+                } catch (error) {
+                  console.error('Auto-save failed:', error);
+                }
+              }, 500);
+            }
+          }}
+        />
+
         {/* Take Another Photo Prompt */}
         <Dialog open={showCameraPrompt} onOpenChange={setShowCameraPrompt}>
           <DialogContent className="sm:max-w-md">
@@ -1113,20 +1152,31 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   </div>
                   <div className="flex gap-2">
                     {formData.images.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (selectedImages.length === formData.images.length) {
-                            setSelectedImages([]);
-                          } else {
-                            setSelectedImages(formData.images.map((_, idx) => idx));
-                          }
-                        }}
-                        className="gap-2"
-                      >
-                        {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowBatchLabel(true)}
+                          className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Batch AI Label
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedImages.length === formData.images.length) {
+                              setSelectedImages([]);
+                            } else {
+                              setSelectedImages(formData.images.map((_, idx) => idx));
+                            }
+                          }}
+                          className="gap-2"
+                        >
+                          {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      </>
                     )}
                     {selectedImages.length > 0 && (
                       <>
