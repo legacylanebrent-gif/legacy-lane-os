@@ -215,14 +215,24 @@ export default function AdminPackages() {
                         </div>
                       )}
 
-                      <Button
-                        variant="outline"
-                        className="w-full mt-4"
-                        onClick={() => handleEdit(pkg)}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Package
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1 mt-4"
+                          onClick={() => handleEdit(pkg)}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Package
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 mt-4 text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={() => handleDelete(pkg)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 );})
