@@ -62,13 +62,16 @@ Be specific and practical. Focus on the main item in the photo.`;
           }
         });
 
-        // Auto-save to estate sale images - update in database immediately
+        // Update images array with new labels
         const updatedImages = [...images];
         updatedImages[imageIndex] = {
           ...updatedImages[imageIndex],
           name: result.name || '',
           description: result.description || ''
         };
+        
+        // Update parent component state immediately
+        onLabelsApplied(updatedImages);
         
         // Save to database immediately
         if (saleId) {
@@ -83,8 +86,6 @@ Be specific and practical. Focus on the main item in the photo.`;
             console.error('Error saving labels to database:', error);
           }
         }
-        
-        onLabelsApplied(updatedImages);
 
         // Save to product database
         try {
