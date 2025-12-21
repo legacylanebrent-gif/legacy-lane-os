@@ -17,6 +17,7 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
   const [editedDescription, setEditedDescription] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [rescanning, setRescanning] = useState(false);
+  const [itemSaved, setItemSaved] = useState(false);
 
   React.useEffect(() => {
     if (open && image && !suggestions) {
@@ -360,12 +361,15 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
           description: editedDescription,
           price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
           categories: selectedCategories
-        }, true);
+          }, true);
 
-        // Auto-close after 2 seconds
-        setTimeout(() => {
+          // Show saved confirmation
+          setItemSaved(true);
+
+          // Auto-close after 2 seconds
+          setTimeout(() => {
           resetAndClose();
-        }, 2000);
+          }, 2000);
         } catch (error) {
         console.error('Error creating item:', error);
         alert('Failed to create inventory item');
@@ -379,6 +383,7 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
     setEditedUsedPrice('');
     setEditedDescription('');
     setSelectedCategories([]);
+    setItemSaved(false);
     onClose();
   };
 
@@ -409,6 +414,21 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Saved Confirmation */}
+          {itemSaved && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <Check className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-green-900">Item Added to Inventory!</p>
+                  <p className="text-sm text-green-700">Your item has been saved successfully</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Photo Display */}
           <div className="relative flex justify-center">
             <img
