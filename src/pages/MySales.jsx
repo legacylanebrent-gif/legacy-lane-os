@@ -223,11 +223,11 @@ export default function MySales() {
               )}
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {filteredSales.map(sale => (
-                <Card key={sale.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card key={sale.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col md:flex-row">
                   {sale.images && sale.images.length > 0 && (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-48 md:h-auto md:w-64 overflow-hidden flex-shrink-0">
                       <img
                         src={sale.images[0]}
                         alt={sale.title}
@@ -238,7 +238,7 @@ export default function MySales() {
                       </Badge>
                     </div>
                   )}
-                  <CardContent className="p-5">
+                  <CardContent className="p-5 flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-lg font-semibold text-slate-900 flex-1">
                         {sale.title}
