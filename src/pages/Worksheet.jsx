@@ -11,6 +11,7 @@ import {
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
   Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins
 } from 'lucide-react';
+import VenmoPaymentModal from '@/components/payment/VenmoPaymentModal';
 import {
   Select,
   SelectContent,
@@ -65,6 +66,10 @@ export default function Worksheet() {
   const [expenseReceipt, setExpenseReceipt] = useState(null);
   const [isReimbursable, setIsReimbursable] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
+
+  // Venmo payment modal state
+  const [showVenmoModal, setShowVenmoModal] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -268,9 +273,25 @@ export default function Worksheet() {
       return;
     }
 
+    const total = parseFloat(bundlePrice);
+    const bundleNotes = `Bundle: ${bundleItems.map(item => `${item.name} ($${item.price.toFixed(2)})`).join(', ')}`;
+
+    // If Venmo payment, show modal first
+    if (paymentMethod === 'venmo') {
+      setPendingTransaction({
+        item_name: bundleName,
+        quantity: 1,
+        price: total,
+        total: total,
+        notes: bundleNotes
+      });
+      setShowVenmoModal(true);
+      return;
+    }
+
+    // Process non-Venmo bundle transactions directly
     setSubmitting(true);
     try {
-      const total = parseFloat(bundlePrice);
       const commissionRate = sale.commission_rate || 20;
       const companyAmount = total * (commissionRate / 100);
       const sellerAmount = total - companyAmount;
@@ -282,7 +303,7 @@ export default function Worksheet() {
         price: total,
         total: total,
         payment_method: paymentMethod,
-        notes: `Bundle: ${bundleItems.map(item => `${item.name} ($${item.price.toFixed(2)})`).join(', ')}`,
+        notes: bundleNotes,
         transaction_date: new Date().toISOString(),
         seller_amount: sellerAmount,
         company_amount: companyAmount
@@ -311,21 +332,42 @@ export default function Worksheet() {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const total = parseFloat(price) * quantity;
-      const commissionRate = sale.commission_rate || 20;
-      const companyAmount = total * (commissionRate / 100);
-      const sellerAmount = total - companyAmount;
+    const total = parseFloat(price) * quantity;
 
-      await base44.entities.Transaction.create({
-        sale_id: sale.id,
+    // If Venmo payment, show modal first
+    if (paymentMethod === 'venmo') {
+      setPendingTransaction({
         item_name: itemName,
         quantity: quantity,
         price: parseFloat(price),
         total: total,
-        payment_method: paymentMethod,
-        notes: notes,
+        notes: notes
+      });
+      setShowVenmoModal(true);
+      return;
+    }
+
+    // Process non-Venmo transactions directly
+    await processTransaction({
+      item_name: itemName,
+      quantity: quantity,
+      price: parseFloat(price),
+      total: total,
+      payment_method: paymentMethod,
+      notes: notes
+    });
+  };
+
+  const processTransaction = async (transactionData) => {
+    setSubmitting(true);
+    try {
+      const commissionRate = sale.commission_rate || 20;
+      const companyAmount = transactionData.total * (commissionRate / 100);
+      const sellerAmount = transactionData.total - companyAmount;
+
+      await base44.entities.Transaction.create({
+        sale_id: sale.id,
+        ...transactionData,
         transaction_date: new Date().toISOString(),
         seller_amount: sellerAmount,
         company_amount: companyAmount
@@ -337,6 +379,8 @@ export default function Worksheet() {
       setPrice('');
       setPaymentMethod('cash');
       setNotes('');
+      setPendingTransaction(null);
+      setShowVenmoModal(false);
 
       // Reload transactions
       await loadData();
@@ -345,6 +389,15 @@ export default function Worksheet() {
       alert('Failed to add transaction');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVenmoPaymentConfirm = async () => {
+    if (pendingTransaction) {
+      await processTransaction({
+        ...pendingTransaction,
+        payment_method: 'venmo'
+      });
     }
   };
 
@@ -378,6 +431,20 @@ export default function Worksheet() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+      {/* Venmo Payment Modal */}
+      <VenmoPaymentModal
+        open={showVenmoModal}
+        onClose={() => {
+          setShowVenmoModal(false);
+          setPendingTransaction(null);
+          setSubmitting(false);
+        }}
+        amount={pendingTransaction?.total || 0}
+        venmoQRCode={user?.venmo_qr_code}
+        onConfirm={handleVenmoPaymentConfirm}
+        loading={submitting}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
