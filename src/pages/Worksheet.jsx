@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
-  Printer, Mail, FileDown, Plus, X
+  Printer, Mail, FileDown, Plus, X, Edit, Check
 } from 'lucide-react';
 import {
   Select,
@@ -45,6 +45,8 @@ export default function Worksheet() {
 
   // Expense form state
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editedTransaction, setEditedTransaction] = useState(null);
   const [expenseCategory, setExpenseCategory] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [expenseVendor, setExpenseVendor] = useState('');
@@ -90,6 +92,51 @@ export default function Worksheet() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction.id);
+    setEditedTransaction({ ...transaction });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTransaction(null);
+    setEditedTransaction(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editedTransaction.item_name || !editedTransaction.price || editedTransaction.price <= 0) {
+      alert('Please enter valid item name and price');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const total = parseFloat(editedTransaction.price) * editedTransaction.quantity;
+      const commissionRate = sale.commission_rate || 20;
+      const companyAmount = total * (commissionRate / 100);
+      const sellerAmount = total - companyAmount;
+
+      await base44.entities.Transaction.update(editedTransaction.id, {
+        item_name: editedTransaction.item_name,
+        quantity: editedTransaction.quantity,
+        price: parseFloat(editedTransaction.price),
+        total: total,
+        payment_method: editedTransaction.payment_method,
+        notes: editedTransaction.notes,
+        seller_amount: sellerAmount,
+        company_amount: companyAmount
+      });
+
+      setEditingTransaction(null);
+      setEditedTransaction(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      alert('Failed to update transaction');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -622,26 +669,115 @@ export default function Worksheet() {
                   {transactions.map((transaction) => (
                     <div 
                       key={transaction.id}
-                      className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                      className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                     >
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-900">{transaction.item_name}</p>
-                        <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
-                          <span>Qty: {transaction.quantity}</span>
-                          <span>•</span>
-                          <span>${transaction.price.toFixed(2)} each</span>
-                          <span>•</span>
-                          <span className="capitalize">{transaction.payment_method.replace('_', ' ')}</span>
+                      {editingTransaction === transaction.id ? (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Item Name</Label>
+                              <Input
+                                value={editedTransaction.item_name}
+                                onChange={(e) => setEditedTransaction({...editedTransaction, item_name: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Price</Label>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={editedTransaction.price}
+                                onChange={(e) => setEditedTransaction({...editedTransaction, price: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Quantity</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={editedTransaction.quantity}
+                                onChange={(e) => setEditedTransaction({...editedTransaction, quantity: parseInt(e.target.value) || 1})}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Payment Method</Label>
+                              <Select 
+                                value={editedTransaction.payment_method} 
+                                onValueChange={(value) => setEditedTransaction({...editedTransaction, payment_method: value})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="cash">Cash</SelectItem>
+                                  <SelectItem value="credit_card">Credit Card</SelectItem>
+                                  <SelectItem value="venmo">Venmo</SelectItem>
+                                  <SelectItem value="zelle">Zelle</SelectItem>
+                                  <SelectItem value="check">Check</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">Notes</Label>
+                            <Input
+                              value={editedTransaction.notes || ''}
+                              onChange={(e) => setEditedTransaction({...editedTransaction, notes: e.target.value})}
+                            />
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelEdit}
+                            >
+                              <X className="w-3 h-3 mr-1" />
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={handleSaveEdit}
+                              disabled={submitting}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <Check className="w-3 h-3 mr-1" />
+                              {submitting ? 'Saving...' : 'Save'}
+                            </Button>
+                          </div>
                         </div>
-                        {transaction.notes && (
-                          <p className="text-sm text-slate-500 mt-1">{transaction.notes}</p>
-                        )}
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="text-xl font-bold text-green-600">
-                          ${transaction.total.toFixed(2)}
-                        </p>
-                      </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-slate-900">{transaction.item_name}</p>
+                            <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
+                              <span>Qty: {transaction.quantity}</span>
+                              <span>•</span>
+                              <span>${transaction.price.toFixed(2)} each</span>
+                              <span>•</span>
+                              <span className="capitalize">{transaction.payment_method.replace('_', ' ')}</span>
+                            </div>
+                            {transaction.notes && (
+                              <p className="text-sm text-slate-500 mt-1">{transaction.notes}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 ml-4">
+                            <div className="text-right">
+                              <p className="text-xl font-bold text-green-600">
+                                ${transaction.total.toFixed(2)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditTransaction(transaction)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
