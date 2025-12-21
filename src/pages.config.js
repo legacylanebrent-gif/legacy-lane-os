@@ -50,6 +50,8 @@ import SaleStatistics from './pages/SaleStatistics';
 import PrintSigns from './pages/PrintSigns';
 import SaleExport from './pages/SaleExport';
 import MyProfile from './pages/MyProfile';
+import MyReferrals from './pages/MyReferrals';
+import ReferralLanding from './pages/ReferralLanding';
 import __Layout from './Layout.jsx';
 
 
@@ -106,6 +108,8 @@ export const PAGES = {
     "PrintSigns": PrintSigns,
     "SaleExport": SaleExport,
     "MyProfile": MyProfile,
+    "MyReferrals": MyReferrals,
+    "ReferralLanding": ReferralLanding,
 }
 
 export const pagesConfig = {
