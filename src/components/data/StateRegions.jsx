@@ -518,6 +518,48 @@ export const STATE_REGIONS = {
       "Hilo", "Honolulu", "Kahului / Wailuku", "Kapaa"
     ],
     smallerCities: []
+  },
+  NH: {
+    name: "New Hampshire",
+    code: "NH",
+    largerCities: [
+      "Concord", "Keene", "Laconia", "Lebanon", "Manchester / Nashua",
+      "Rochester / Portsmouth"
+    ],
+    smallerCities: []
+  },
+  ME: {
+    name: "Maine",
+    code: "ME",
+    largerCities: [
+      "Augusta", "Bangor", "Lewiston", "Portland", "Rockland"
+    ],
+    smallerCities: []
+  },
+  RI: {
+    name: "Rhode Island",
+    code: "RI",
+    largerCities: [
+      "Providence"
+    ],
+    smallerCities: []
+  },
+  MT: {
+    name: "Montana",
+    code: "MT",
+    largerCities: [
+      "Billings", "Bozeman", "Butte", "Glendive", "Great Falls", "Helena",
+      "Kalispell", "Missoula"
+    ],
+    smallerCities: []
+  },
+  DE: {
+    name: "Delaware",
+    code: "DE",
+    largerCities: [
+      "Dover", "Seaford", "Wilmington"
+    ],
+    smallerCities: []
   }
   // Additional states will be added via the scraping function
 };
