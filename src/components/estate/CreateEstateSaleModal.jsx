@@ -20,7 +20,7 @@ const CATEGORIES = [
   'Books & Media', 'Clothing & Accessories', 'Outdoor & Garden', 'Other'
 ];
 
-export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
+export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -62,6 +62,31 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     start_time: '9:00 AM',
     end_time: '5:00 PM'
   });
+
+  useEffect(() => {
+    if (sale) {
+      setFormData({
+        title: sale.title || '',
+        description: sale.description || '',
+        property_address: sale.property_address || { street: '', city: '', state: '', zip: '' },
+        location: sale.location || null,
+        sale_dates: sale.sale_dates || [],
+        status: sale.status || 'draft',
+        images: (sale.images || []).map(url => ({ url, name: '', description: '', rotation: 0 })),
+        categories: sale.categories || [],
+        estimated_value: sale.estimated_value || '',
+        commission_rate: sale.commission_rate || '',
+        special_notes: sale.special_notes || '',
+        parking_info: sale.parking_info || '',
+        payment_methods: sale.payment_methods || ['cash', 'credit_card', 'venmo'],
+        national_featured: sale.national_featured || false,
+        local_featured: sale.local_featured || false,
+        national_featured_price: sale.national_featured_price || '',
+        local_featured_price: sale.local_featured_price || ''
+      });
+      setAddressInput(sale.property_address?.street || '');
+    }
+  }, [sale]);
 
   const [predictions, setPredictions] = useState([]);
   const [showPredictions, setShowPredictions] = useState(false);
@@ -385,11 +410,13 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
       const data = {
         ...formData,
-        operator_id: user.id,
-        operator_name: user.full_name,
-        status: publishNow ? 'upcoming' : 'draft',
+        operator_id: sale?.operator_id || user.id,
+        operator_name: sale?.operator_name || user.full_name,
+        status: publishNow ? 'upcoming' : (sale?.status || 'draft'),
         estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
+        local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
         property_address: {
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
@@ -397,13 +424,18 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         images: formData.images.map(img => img.url)
       };
 
-      await base44.entities.EstateSale.create(data);
+      if (sale?.id) {
+        await base44.asServiceRole.entities.EstateSale.update(sale.id, data);
+      } else {
+        await base44.entities.EstateSale.create(data);
+      }
+
       onSuccess();
       onClose();
       resetForm();
     } catch (error) {
-      console.error('Error creating estate sale:', error);
-      alert('Failed to create estate sale: ' + error.message);
+      console.error('Error saving estate sale:', error);
+      alert('Failed to save estate sale: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -473,7 +505,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         }
       }}>
         <DialogHeader>
-          <DialogTitle className="text-2xl">Create Estate Sale</DialogTitle>
+          <DialogTitle className="text-2xl">{sale?.id ? 'Edit Estate Sale' : 'Create Estate Sale'}</DialogTitle>
         </DialogHeader>
 
         <Tabs value={step.toString()} className="w-full">

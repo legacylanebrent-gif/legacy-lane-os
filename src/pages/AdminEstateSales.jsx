@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal, Plus } from 'lucide-react';
+import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal, Plus, MoreVertical, Edit2, Trash2, ExternalLink } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 
 export default function AdminEstateSales() {
@@ -24,6 +25,8 @@ export default function AdminEstateSales() {
   const [maxValue, setMaxValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingSale, setEditingSale] = useState(null);
+  const [viewingSale, setViewingSale] = useState(null);
 
   useEffect(() => {
     loadSales();
@@ -159,6 +162,18 @@ export default function AdminEstateSales() {
     return acc;
   }, {});
 
+  const handleDelete = async (saleId) => {
+    if (!confirm('Are you sure you want to delete this estate sale?')) return;
+    
+    try {
+      await base44.asServiceRole.entities.EstateSale.delete(saleId);
+      await loadSales();
+    } catch (error) {
+      console.error('Error deleting estate sale:', error);
+      alert('Failed to delete estate sale');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const configs = {
       draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700' },
@@ -202,10 +217,100 @@ export default function AdminEstateSales() {
       </div>
 
       <CreateEstateSaleModal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        open={showCreateModal || editingSale !== null}
+        onClose={() => {
+          setShowCreateModal(false);
+          setEditingSale(null);
+        }}
         onSuccess={loadSales}
+        sale={editingSale}
       />
+
+      {viewingSale && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setViewingSale(null)}>
+          <Card className="max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>{viewingSale.title}</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setViewingSale(null)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              {getStatusBadge(viewingSale.status)}
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {viewingSale.images && viewingSale.images.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {viewingSale.images.slice(0, 6).map((img, idx) => (
+                    <img key={idx} src={img} alt="" className="w-full h-32 object-cover rounded-lg" />
+                  ))}
+                </div>
+              )}
+              
+              <div>
+                <h4 className="font-semibold mb-2">Description</h4>
+                <p className="text-slate-600">{viewingSale.description || 'No description'}</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Address</h4>
+                <p className="text-slate-600">{viewingSale.property_address?.formatted_address}</p>
+              </div>
+
+              {viewingSale.sale_dates && viewingSale.sale_dates.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Sale Dates</h4>
+                  {viewingSale.sale_dates.map((date, idx) => (
+                    <p key={idx} className="text-slate-600">
+                      {new Date(date.date).toLocaleDateString()} • {date.start_time} - {date.end_time}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {viewingSale.categories && viewingSale.categories.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Categories</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingSale.categories.map((cat, idx) => (
+                      <Badge key={idx} variant="outline">{cat}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                {viewingSale.estimated_value && (
+                  <div>
+                    <p className="text-sm text-slate-500">Estimated Value</p>
+                    <p className="text-lg font-semibold">${viewingSale.estimated_value.toLocaleString()}</p>
+                  </div>
+                )}
+                {viewingSale.commission_rate && (
+                  <div>
+                    <p className="text-sm text-slate-500">Commission Rate</p>
+                    <p className="text-lg font-semibold">{viewingSale.commission_rate}%</p>
+                  </div>
+                )}
+              </div>
+
+              {viewingSale.special_notes && (
+                <div>
+                  <h4 className="font-semibold mb-2">Special Notes</h4>
+                  <p className="text-slate-600">{viewingSale.special_notes}</p>
+                </div>
+              )}
+
+              {viewingSale.parking_info && (
+                <div>
+                  <h4 className="font-semibold mb-2">Parking Info</h4>
+                  <p className="text-slate-600">{viewingSale.parking_info}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -363,9 +468,35 @@ export default function AdminEstateSales() {
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">{sale.title}</h3>
                     {getStatusBadge(sale.status)}
                   </div>
-                  {sale.premium_listing && (
-                    <Badge className="bg-orange-600 text-white">Premium</Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {sale.premium_listing && (
+                      <Badge className="bg-orange-600 text-white">Premium</Badge>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setViewingSale(sale)}>
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingSale(sale)}>
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDelete(sale.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
 
                 <div className="space-y-2 text-sm text-slate-600">
