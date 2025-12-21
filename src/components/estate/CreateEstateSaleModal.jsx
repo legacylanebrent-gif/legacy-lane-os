@@ -309,8 +309,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="1" onClick={() => setStep(1)}>Basic Info</TabsTrigger>
             <TabsTrigger value="2" disabled={!canProceedToStep2} onClick={() => setStep(2)}>Schedule</TabsTrigger>
-            <TabsTrigger value="3" disabled={!canProceedToStep3} onClick={() => setStep(3)}>Details</TabsTrigger>
-            <TabsTrigger value="4" disabled={!canProceedToStep3} onClick={() => setStep(4)}>Media</TabsTrigger>
+            <TabsTrigger value="3" disabled={!canProceedToStep3} onClick={() => setStep(3)}>Media</TabsTrigger>
+            <TabsTrigger value="4" disabled={!canProceedToStep3} onClick={() => setStep(4)}>Details</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -496,6 +496,70 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
           {step === 3 && (
             <>
               <div>
+                <Label className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  Estate Sale Photos
+                </Label>
+                <p className="text-sm text-slate-600 mb-3">Upload photos of featured items and the property</p>
+
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                    disabled={uploadingImages}
+                  />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-sm text-slate-600">
+                      {uploadingImages ? 'Uploading...' : 'Click to upload images or drag and drop'}
+                    </p>
+                  </label>
+                </div>
+
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    {formData.images.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={url} 
+                          alt={`Estate sale ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                  Back
+                </Button>
+                <Button 
+                  onClick={() => setStep(4)}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                >
+                  Continue to Details
+                </Button>
+              </div>
+              </>
+              )}
+
+              {step === 4 && (
+              <>
+              <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
@@ -610,70 +674,6 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                  Back
-                </Button>
-                <Button 
-                  onClick={() => setStep(4)}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
-                >
-                  Continue to Media
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <div>
-                <Label className="flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4" />
-                  Estate Sale Photos
-                </Label>
-                <p className="text-sm text-slate-600 mb-3">Upload photos of featured items and the property</p>
-
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                    disabled={uploadingImages}
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-sm text-slate-600">
-                      {uploadingImages ? 'Uploading...' : 'Click to upload images or drag and drop'}
-                    </p>
-                  </label>
-                </div>
-
-                {formData.images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    {formData.images.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img 
-                          src={url} 
-                          alt={`Estate sale ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
                   Back
                 </Button>
@@ -693,8 +693,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   {loading ? 'Publishing...' : 'Publish Now'}
                 </Button>
               </div>
-            </>
-          )}
+              </>
+              )}
         </div>
       </DialogContent>
     </Dialog>
