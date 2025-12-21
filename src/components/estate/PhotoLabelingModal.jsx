@@ -44,6 +44,7 @@ Look at this estate sale photo and provide:
 3. Two realistic price estimates:
    - New price: What this item would cost brand new in a store
    - Used price: A realistic estate sale price based on condition
+4. The sources/websites used for price comparisons (e.g., Amazon, eBay, Wayfair, etc.)
 
 Be specific and practical. Focus on the main item in the photo.`;
 
@@ -144,6 +145,7 @@ Look at this estate sale photo and provide:
 3. Two realistic price estimates:
    - New price: What this item would cost brand new in a store
    - Used price: A realistic estate sale price based on condition
+4. The sources/websites used for price comparisons (e.g., Amazon, eBay, Wayfair, etc.)
 
 Be specific and practical. Focus on the main item in the photo that matches "${editedName}".`;
 
@@ -435,6 +437,18 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
                       <span className="text-slate-600 font-semibold">
                         ${suggestions.used_price.toFixed(2)}
                       </span>
+                    </div>
+                  )}
+                  {suggestions.price_sources && suggestions.price_sources.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-purple-200">
+                      <p className="text-xs text-slate-500 mb-1">Price comps from:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {suggestions.price_sources.map((source, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs bg-white">
+                            {source}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
