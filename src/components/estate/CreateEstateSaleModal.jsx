@@ -346,7 +346,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                     ...updated.property_address,
                     formatted_address: `${updated.property_address.street}, ${updated.property_address.city}, ${updated.property_address.state} ${updated.property_address.zip}`
                   },
-                  images: updated.images.map(img => img.url)
+                  images: updated.images
                 };
                 await base44.entities.EstateSale.update(sale.id, data);
               } catch (error) {
@@ -619,7 +619,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
         },
-        images: formData.images.map(img => img.url)
+        images: formData.images
       };
 
       if (sale?.id) {
@@ -659,7 +659,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
         },
-        images: formData.images.map(img => img.url)
+        images: formData.images
       };
 
       if (sale?.id) {
