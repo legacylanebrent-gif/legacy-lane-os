@@ -11,6 +11,17 @@ import {
   TrendingUp, Home as HomeIcon, DollarSign
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet default marker icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function Home() {
   const [sales, setSales] = useState([]);
@@ -245,6 +256,51 @@ export default function Home() {
           <p className="text-xl text-slate-600 mb-8">
             Find treasures, furniture, antiques, and more near you
           </p>
+
+          {/* Map Section */}
+          {(localFeatured.length > 0 || regularSales.length > 0) && (
+            <div className="max-w-5xl mx-auto mb-8">
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-slate-200">
+                <MapContainer
+                  center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
+                  zoom={userLocation ? 10 : 4}
+                  style={{ height: '400px', width: '100%' }}
+                  className="z-0"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {localFeatured.map(sale => 
+                    sale.location && sale.location.lat && sale.location.lng && (
+                      <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                        <Popup>
+                          <div className="text-sm">
+                            <strong className="text-cyan-600">{sale.title}</strong>
+                            <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                            {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )
+                  )}
+                  {regularSales.map(sale => 
+                    sale.location && sale.location.lat && sale.location.lng && (
+                      <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                        <Popup>
+                          <div className="text-sm">
+                            <strong>{sale.title}</strong>
+                            <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                            {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )
+                  )}
+                </MapContainer>
+              </div>
+            </div>
+          )}
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto space-y-4">
