@@ -29,6 +29,8 @@ export default function EstateSaleDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [savedImages, setSavedImages] = useState([]);
+  const [isInRoute, setIsInRoute] = useState(false);
 
   useEffect(() => {
     loadSaleData();
@@ -48,6 +50,10 @@ export default function EstateSaleDetail() {
       try {
         const user = await base44.auth.me();
         setCurrentUser(user);
+        
+        // Check if sale is in route
+        const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+        setIsInRoute(route.includes(saleId));
       } catch (error) {
         // User not logged in
       }
@@ -122,6 +128,74 @@ export default function EstateSaleDetail() {
         console.log('Share cancelled or failed');
       }
     }
+  };
+
+  const handleAddToCalendar = () => {
+    if (!sale.sale_dates || sale.sale_dates.length === 0) return;
+    
+    const firstDate = sale.sale_dates[0];
+    const startDate = new Date(firstDate.date + 'T' + convertTo24Hour(firstDate.start_time));
+    const endDate = new Date(firstDate.date + 'T' + convertTo24Hour(firstDate.end_time));
+    
+    const formatDate = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${sale.title}
+DESCRIPTION:Estate Sale at ${sale.property_address?.street || ''}
+LOCATION:${sale.property_address?.formatted_address || ''}
+END:VEVENT
+END:VCALENDAR`;
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const convertTo24Hour = (time12h) => {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') hours = '00';
+    if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+    return `${hours.padStart(2, '0')}:${minutes || '00'}:00`;
+  };
+
+  const handleEmailOperator = () => {
+    const subject = encodeURIComponent(`Inquiry about ${sale.title}`);
+    const body = encodeURIComponent(`Hi,\n\nI'm interested in the estate sale: ${sale.title}\nLocation: ${sale.property_address?.formatted_address || ''}\n\nPlease let me know if you have any additional information.\n\nThank you!`);
+    window.location.href = `mailto:${operator?.email || ''}?subject=${subject}&body=${body}`;
+  };
+
+  const handleAddToRoute = () => {
+    const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+    if (isInRoute) {
+      const updated = route.filter(id => id !== sale.id);
+      localStorage.setItem('estateRoute', JSON.stringify(updated));
+      setIsInRoute(false);
+      alert('Removed from route');
+    } else {
+      route.push(sale.id);
+      localStorage.setItem('estateRoute', JSON.stringify(route));
+      setIsInRoute(true);
+      alert('Added to route');
+    }
+  };
+
+  const toggleImageSave = (index) => {
+    setSavedImages(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
   };
 
   if (loading) {
@@ -220,28 +294,44 @@ export default function EstateSaleDetail() {
             {sale.images && sale.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
-                  <div className="aspect-video bg-slate-100 overflow-hidden rounded-t-lg">
+                  <div className="aspect-video bg-slate-100 overflow-hidden rounded-t-lg relative">
                     <img
                       src={sale.images[selectedImage]}
                       alt={sale.title}
                       className="w-full h-full object-cover"
                     />
+                    {currentUser && (
+                      <button
+                        onClick={() => toggleImageSave(selectedImage)}
+                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                      >
+                        <Heart 
+                          className={`w-6 h-6 ${savedImages.includes(selectedImage) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} 
+                        />
+                      </button>
+                    )}
                   </div>
                   <div className="p-4 grid grid-cols-6 gap-2">
                     {sale.images.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImage(index)}
-                        className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                          selectedImage === index ? 'border-orange-600' : 'border-slate-200'
-                        }`}
-                      >
-                        <img
-                          src={image}
-                          alt={`View ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
-                      </button>
+                      <div key={index} className="relative">
+                        <button
+                          onClick={() => setSelectedImage(index)}
+                          className={`w-full aspect-square rounded-lg overflow-hidden border-2 ${
+                            selectedImage === index ? 'border-orange-600' : 'border-slate-200'
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            alt={`View ${index + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          />
+                        </button>
+                        {currentUser && savedImages.includes(index) && (
+                          <div className="absolute top-1 right-1">
+                            <Heart className="w-4 h-4 fill-red-600 text-red-600" />
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </CardContent>
@@ -431,9 +521,45 @@ export default function EstateSaleDetail() {
                   )}
                 </div>
 
-                <Button className="w-full mt-4 bg-orange-600 hover:bg-orange-700">
-                  Message Seller
-                </Button>
+                {currentUser && (
+                  <>
+                    <Button 
+                      onClick={handleEmailOperator}
+                      className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
+                    >
+                      Email Operator
+                    </Button>
+
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleAddToCalendar}
+                        className="w-full"
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Add to Calendar
+                      </Button>
+                      <Button 
+                        variant={isInRoute ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={handleAddToRoute}
+                        className={`w-full ${isInRoute ? 'bg-cyan-600 hover:bg-cyan-700' : ''}`}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {isInRoute ? 'In Route' : 'Add to Route'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+                {!currentUser && (
+                  <Button 
+                    onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
+                  >
+                    Sign In to Contact
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
