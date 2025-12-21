@@ -53,6 +53,7 @@ import MyReferrals from './pages/MyReferrals';
 import ReferralLanding from './pages/ReferralLanding';
 import MyRewards from './pages/MyRewards';
 import AdminRewards from './pages/AdminRewards';
+import VIPEvent from './pages/VIPEvent';
 import __Layout from './Layout.jsx';
 
 
@@ -112,6 +113,7 @@ export const PAGES = {
     "ReferralLanding": ReferralLanding,
     "MyRewards": MyRewards,
     "AdminRewards": AdminRewards,
+    "VIPEvent": VIPEvent,
 }
 
 export const pagesConfig = {
