@@ -38,6 +38,8 @@ export default function Home() {
   const [routeSales, setRouteSales] = useState([]);
   const [savedSales, setSavedSales] = useState([]);
   const [operators, setOperators] = useState({});
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalEstimatedValue, setTotalEstimatedValue] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -92,6 +94,12 @@ export default function Home() {
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
       const activeSales = salesData.filter(s => s.status === 'upcoming' || s.status === 'active');
       setSales(activeSales);
+
+      // Calculate real-time stats
+      const itemsCount = activeSales.reduce((sum, sale) => sum + (sale.total_items || 0), 0);
+      const estimatedValue = activeSales.reduce((sum, sale) => sum + (sale.estimated_value || 0), 0);
+      setTotalItems(itemsCount);
+      setTotalEstimatedValue(estimatedValue);
       
       // Load operator company names
       try {
@@ -449,13 +457,17 @@ export default function Home() {
             </div>
             <div className="bg-white rounded-lg p-6 shadow-md">
               <TrendingUp className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
-              <div className="text-3xl font-bold text-slate-900">50K+</div>
+              <div className="text-3xl font-bold text-slate-900">
+                {totalItems > 0 ? totalItems.toLocaleString() : '0'}
+              </div>
               <div className="text-slate-600">Items Available</div>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-md">
               <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <div className="text-3xl font-bold text-slate-900">$2M+</div>
-              <div className="text-slate-600">Savings Found</div>
+              <div className="text-3xl font-bold text-slate-900">
+                {totalEstimatedValue > 0 ? `$${(totalEstimatedValue / 1000000).toFixed(1)}M` : '$0'}
+              </div>
+              <div className="text-slate-600">Total Value</div>
             </div>
           </div>
         </div>
