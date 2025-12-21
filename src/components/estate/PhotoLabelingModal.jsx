@@ -12,7 +12,8 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
   const [analyzing, setAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
   const [editedName, setEditedName] = useState('');
-  const [editedPrice, setEditedPrice] = useState('');
+  const [editedNewPrice, setEditedNewPrice] = useState('');
+  const [editedUsedPrice, setEditedUsedPrice] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
 
@@ -39,7 +40,9 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
 Look at this estate sale photo and provide:
 1. A clear, concise name for the item (3-5 words max)
 2. A brief description (1-2 sentences about condition, style, features)
-3. A realistic estimated price range for this item at an estate sale
+3. Two realistic price estimates:
+   - New price: What this item would cost brand new in a store
+   - Used price: A realistic estate sale price based on condition
 
 Be specific and practical. Focus on the main item in the photo.`;
 
@@ -51,9 +54,8 @@ Be specific and practical. Focus on the main item in the photo.`;
           properties: {
             name: { type: "string" },
             description: { type: "string" },
-            estimated_price_low: { type: "number" },
-            estimated_price_high: { type: "number" },
-            suggested_price: { type: "number" },
+            new_price: { type: "number", description: "Estimated retail price if brand new" },
+            used_price: { type: "number", description: "Realistic estate sale price" },
             suggested_categories: { 
               type: "array",
               items: { type: "string" },
@@ -65,7 +67,8 @@ Be specific and practical. Focus on the main item in the photo.`;
 
       setSuggestions(result);
       setEditedName(result.name || '');
-      setEditedPrice(result.suggested_price?.toString() || '');
+      setEditedNewPrice(result.new_price?.toString() || '');
+      setEditedUsedPrice(result.used_price?.toString() || '');
       setEditedDescription(result.description || '');
       setSelectedCategories(result.suggested_categories || []);
     } catch (error) {
@@ -81,7 +84,7 @@ Be specific and practical. Focus on the main item in the photo.`;
     onApprove(imageIndex, {
       name: editedName,
       description: editedDescription,
-      price: editedPrice ? parseFloat(editedPrice) : null,
+      price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
       categories: selectedCategories
     }, false);
     resetAndClose();
@@ -102,7 +105,7 @@ Be specific and practical. Focus on the main item in the photo.`;
       await base44.entities.Item.create({
         title: editedName,
         description: editedDescription,
-        price: editedPrice ? parseFloat(editedPrice) : null,
+        price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
         estate_sale_id: saleId,
         seller_id: (await base44.auth.me()).id,
         images: [imageUrl],
@@ -115,7 +118,7 @@ Be specific and practical. Focus on the main item in the photo.`;
       onApprove(imageIndex, {
         name: editedName,
         description: editedDescription,
-        price: editedPrice ? parseFloat(editedPrice) : null,
+        price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
         categories: selectedCategories
       }, true);
       resetAndClose();
@@ -128,7 +131,8 @@ Be specific and practical. Focus on the main item in the photo.`;
   const resetAndClose = () => {
     setSuggestions(null);
     setEditedName('');
-    setEditedPrice('');
+    setEditedNewPrice('');
+    setEditedUsedPrice('');
     setEditedDescription('');
     setSelectedCategories([]);
     onClose();
@@ -182,14 +186,22 @@ Be specific and practical. Focus on the main item in the photo.`;
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="font-semibold text-purple-900">AI Suggestions</span>
+                  <span className="font-semibold text-purple-900">AI Price Suggestions</span>
                 </div>
                 <div className="grid gap-2 text-sm">
-                  {suggestions.estimated_price_low && suggestions.estimated_price_high && (
+                  {suggestions.new_price && (
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">Price Range</Badge>
-                      <span className="text-slate-600">
-                        ${suggestions.estimated_price_low} - ${suggestions.estimated_price_high}
+                      <Badge variant="outline" className="text-xs bg-green-50">New Price</Badge>
+                      <span className="text-slate-600 font-semibold">
+                        ${suggestions.new_price.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {suggestions.used_price && (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs bg-orange-50">Estate Sale Price</Badge>
+                      <span className="text-slate-600 font-semibold">
+                        ${suggestions.used_price.toFixed(2)}
                       </span>
                     </div>
                   )}
@@ -207,18 +219,33 @@ Be specific and practical. Focus on the main item in the photo.`;
                   />
                 </div>
 
-                <div>
-                  <Label>Price ($)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={editedPrice}
-                    onChange={(e) => setEditedPrice(e.target.value)}
-                    placeholder="0.00"
-                  />
-                  <p className="text-xs text-slate-600 mt-1">
-                    Leave empty if not pricing this item yet
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>New Price ($)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editedNewPrice}
+                      onChange={(e) => setEditedNewPrice(e.target.value)}
+                      placeholder="0.00"
+                    />
+                    <p className="text-xs text-slate-600 mt-1">
+                      Retail price when new
+                    </p>
+                  </div>
+                  <div>
+                    <Label>Estate Sale Price ($)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editedUsedPrice}
+                      onChange={(e) => setEditedUsedPrice(e.target.value)}
+                      placeholder="0.00"
+                    />
+                    <p className="text-xs text-slate-600 mt-1">
+                      Your sale price
+                    </p>
+                  </div>
                 </div>
 
                 <div>
