@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
@@ -28,6 +28,7 @@ const ADMIN_NAV_ITEMS = [
 
 export default function AdminLayout({ children, currentPage }) {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const isActive = (path) => {
     return location.pathname.includes(path) || currentPage === path;
@@ -35,8 +36,22 @@ export default function AdminLayout({ children, currentPage }) {
 
   return (
     <div className="flex h-screen bg-slate-50">
+      {/* Hamburger Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="bg-slate-800 text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </div>
+
       {/* Left Navigation */}
-      <aside className="w-64 bg-slate-800 text-white flex flex-col">
+      <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 ${
+        sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
+      }`}>
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
           <p className="text-xs text-slate-400 mt-1">Legacy Lane OS</p>
