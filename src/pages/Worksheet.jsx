@@ -203,7 +203,7 @@ export default function Worksheet() {
             <Card className="bg-white shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Seller Total (80%)</span>
+                  <span className="text-sm text-slate-600">Seller Total ({sellerPercentage}%)</span>
                   <Users className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="text-2xl font-bold text-blue-600">
@@ -215,7 +215,7 @@ export default function Worksheet() {
             <Card className="bg-white shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Company Total (20%)</span>
+                  <span className="text-sm text-slate-600">Company Total ({commissionRate}%)</span>
                   <Building2 className="w-4 h-4 text-purple-600" />
                 </div>
                 <div className="text-2xl font-bold text-purple-600">
