@@ -42,11 +42,15 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
           imageUrl = imageUrl.url;
         }
 
-        const prompt = `You are analyzing a photo from an estate sale to help label items.
+        const prompt = `You are analyzing a photo from an estate sale to help label and price items.
 
 Look at this estate sale photo and provide:
 1. A clear, concise name for the item (3-5 words max)
 2. A brief description (1-2 sentences about condition, style, features)
+3. Two realistic price estimates:
+   - New price: What this item would cost brand new in a store
+   - Used price: A realistic estate sale price based on condition
+4. Detailed price comparisons from specific sources with actual prices found on each site
 
 Be specific and practical. Focus on the main item in the photo.`;
 
@@ -57,7 +61,26 @@ Be specific and practical. Focus on the main item in the photo.`;
             type: "object",
             properties: {
               name: { type: "string" },
-              description: { type: "string" }
+              description: { type: "string" },
+              new_price: { type: "number", description: "Estimated retail price if brand new" },
+              used_price: { type: "number", description: "Realistic estate sale price" },
+              price_comparisons: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    source: { type: "string", description: "Website name (e.g., Amazon, eBay, Wayfair)" },
+                    price: { type: "number", description: "Price found on this website" },
+                    condition: { type: "string", description: "New or Used" }
+                  }
+                },
+                description: "Detailed price comparisons from different websites"
+              },
+              suggested_categories: { 
+                type: "array",
+                items: { type: "string" },
+                description: "Relevant categories from: Furniture, Art & Collectibles, Jewelry, Antiques, Electronics, Home Decor, Kitchen & Dining, Tools & Equipment, Books & Media, Clothing & Accessories, Outdoor & Garden, Other"
+              }
             }
           }
         });
@@ -67,7 +90,9 @@ Be specific and practical. Focus on the main item in the photo.`;
         updatedImages[imageIndex] = {
           ...updatedImages[imageIndex],
           name: result.name || '',
-          description: result.description || ''
+          description: result.description || '',
+          price: result.used_price ? parseFloat(result.used_price) : null,
+          categories: result.suggested_categories || []
         };
         
         // Update parent component state immediately
@@ -97,7 +122,10 @@ Be specific and practical. Focus on the main item in the photo.`;
           const saveData = {
             title: result.name || '',
             description: result.description || '',
-            categories: []
+            suggested_new_price: result.new_price ? parseFloat(result.new_price) : null,
+            suggested_used_price: result.used_price ? parseFloat(result.used_price) : null,
+            actual_price: result.used_price ? parseFloat(result.used_price) : null,
+            categories: result.suggested_categories || []
           };
 
           if (existingEntries.length > 0) {
