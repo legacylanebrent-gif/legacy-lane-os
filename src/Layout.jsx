@@ -104,7 +104,7 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // Pages that don't need layout
-  if (['Onboarding'].includes(currentPageName)) {
+  if (['Onboarding', 'EstateSaleDetail'].includes(currentPageName)) {
     return children;
   }
 
