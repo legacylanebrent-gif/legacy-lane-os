@@ -356,6 +356,63 @@ export const STATE_REGIONS = {
       "Jennings", "Minden", "Morgan City", "Natchitoches", "New Iberia",
       "Opelousas / Eunice", "Ruston"
     ]
+  },
+  KY: {
+    name: "Kentucky",
+    code: "KY",
+    largerCities: [
+      "Bowling Green", "Cincinnati / Middletown, OH", "Elizabethtown",
+      "Hopkinsville / Clarksville", "Huntington / Ashland", "Lexington",
+      "Louisville", "Owensboro"
+    ],
+    smallerCities: [
+      "Central City", "Corbin", "Danville", "Frankfort", "Glasgow", "London",
+      "Madisonville", "Mayfield", "Maysville", "Middlesborough", "Mount Sterling",
+      "Murray", "Paducah", "Richmond", "Somerset"
+    ]
+  },
+  OR: {
+    name: "Oregon",
+    code: "OR",
+    largerCities: [
+      "Albany / Lebanon", "Bend", "Corvallis", "Eugene", "Grants Pass",
+      "Medford / Ashland", "Portland / Vancouver", "Salem"
+    ],
+    smallerCities: [
+      "Astoria", "Coos Bay", "Klamath Falls", "Pendleton / Hermiston", "Roseburg"
+    ]
+  },
+  OK: {
+    name: "Oklahoma",
+    code: "OK",
+    largerCities: [
+      "Enid", "Fort Smith, AR", "Lawton", "Oklahoma City", "Tulsa"
+    ],
+    smallerCities: [
+      "Ada", "Altus", "Ardmore", "Bartlesville", "Duncan", "Durant", "McAlester",
+      "Miami", "Muskogee", "Ponca City", "Shawnee", "Stillwater", "Tahlequah"
+    ]
+  },
+  CT: {
+    name: "Connecticut",
+    code: "CT",
+    largerCities: [
+      "Bridgeport / Stamford / Norwalk", "Danbury", "Hartford",
+      "New Haven / Milford", "New London", "Torrington", "Waterbury", "Willimantic"
+    ],
+    smallerCities: []
+  },
+  IA: {
+    name: "Iowa",
+    code: "IA",
+    largerCities: [
+      "Ames", "Cedar Rapids", "Davenport", "Des Moines", "Dubuque", "Iowa City",
+      "Omaha / Council Bluffs", "Sioux City", "Waterloo"
+    ],
+    smallerCities: [
+      "Clinton", "Corning", "Fort Dodge", "Marshalltown", "Mason City",
+      "Muscatine", "Newton", "Ottumwa"
+    ]
   }
   // Additional states will be added via the scraping function
 };
