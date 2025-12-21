@@ -12,13 +12,13 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Revenue', path: 'Revenue', icon: DollarSign },
   { label: 'Users', path: 'AdminUsers', icon: Users },
-  { label: 'Packages', path: 'AdminPackages', icon: Package },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
   { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
   { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
   { label: 'Leads', path: 'AdminLeads', icon: Award },
+  { label: 'Packages', path: 'AdminPackages', icon: Package },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
