@@ -4,11 +4,12 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Revenue', path: 'Revenue', icon: DollarSign },
   { label: 'Users', path: 'AdminUsers', icon: Users },
