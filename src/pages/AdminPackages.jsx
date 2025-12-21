@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Check, DollarSign, Package } from 'lucide-react';
+import { Plus, Edit, Check, DollarSign, Package, Trash2 } from 'lucide-react';
 import PackageModal from '@/components/admin/PackageModal';
 
 export default function AdminPackages() {
@@ -48,6 +48,18 @@ export default function AdminPackages() {
   const handleAdd = (accountType) => {
     setEditingPackage({ account_type: accountType });
     setShowModal(true);
+  };
+
+  const handleDelete = async (pkg) => {
+    if (!confirm('Are you sure you want to delete this package?')) return;
+    
+    try {
+      await base44.entities.SubscriptionPackage.delete(pkg.id);
+      await loadPackages();
+    } catch (error) {
+      console.error('Error deleting package:', error);
+      alert('Failed to delete package');
+    }
   };
 
   const getTierColor = (tier) => {
