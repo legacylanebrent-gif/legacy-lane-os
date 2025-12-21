@@ -488,6 +488,10 @@ export default function AdminEstateSales() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => window.open(createPageUrl('EstateSaleDetail') + '?id=' + sale.id, '_blank')}>
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Sale Page
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setViewingSale(sale)}>
                           <ExternalLink className="w-4 h-4 mr-2" />
                           View Details
