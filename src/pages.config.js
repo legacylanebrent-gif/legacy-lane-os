@@ -33,6 +33,7 @@ import Home from './pages/Home';
 import EstateSaleDetail from './pages/EstateSaleDetail';
 import Messages from './pages/Messages';
 import BusinessProfile from './pages/BusinessProfile';
+import SearchByState from './pages/SearchByState';
 import __Layout from './Layout.jsx';
 
 
@@ -72,6 +73,7 @@ export const PAGES = {
     "EstateSaleDetail": EstateSaleDetail,
     "Messages": Messages,
     "BusinessProfile": BusinessProfile,
+    "SearchByState": SearchByState,
 }
 
 export const pagesConfig = {

@@ -470,6 +470,34 @@ export default function Home() {
               <div className="text-slate-600">Total Value</div>
             </div>
           </div>
+
+          {/* Search by State CTA */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <Link to={createPageUrl('SearchByState')}>
+              <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all cursor-pointer group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <MapPin className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-2xl font-serif font-bold text-white mb-1">
+                        Browse Sales by State
+                      </h3>
+                      <p className="text-cyan-100">
+                        Find estate sales in all 50 states
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-white group-hover:translate-x-2 transition-transform">
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
