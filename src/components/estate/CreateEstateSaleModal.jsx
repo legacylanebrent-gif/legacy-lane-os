@@ -826,11 +826,15 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                                   <div 
                                     className={`relative group cursor-pointer rounded-lg ${
                                       selectedImages.includes(index) ? 'ring-4 ring-orange-500' : ''
-                                    } ${snapshot.isDragging ? 'opacity-50' : ''}`}
-                                    onClick={() => toggleImageSelection(index)}
+                                    }`}
+                                    onClick={(e) => {
+                                      if (!snapshot.isDragging) {
+                                        toggleImageSelection(index);
+                                      }
+                                    }}
                                   >
-                                    <div {...provided.dragHandleProps} className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <div className="bg-white/90 rounded p-1">
+                                    <div {...provided.dragHandleProps} className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+                                      <div className="bg-white/90 rounded p-1 shadow-sm">
                                         <GripVertical className="w-4 h-4 text-slate-600" />
                                       </div>
                                     </div>
