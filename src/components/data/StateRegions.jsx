@@ -169,6 +169,63 @@ export const STATE_REGIONS = {
       "Coldwater", "Escanaba", "Houghton", "Marquette", "Mount Pleasant",
       "Owosso", "Port Huron", "Sault Ste. Marie", "Sturgis", "Traverse City"
     ]
+  },
+  NJ: {
+    name: "New Jersey",
+    code: "NJ",
+    largerCities: [
+      "Atlantic City", "New York, NY", "Northern New Jersey",
+      "Ocean City / Cape May", "Trenton / Ewing (Central NJ)",
+      "Vineland / Millville / Bridgeton"
+    ],
+    smallerCities: []
+  },
+  VA: {
+    name: "Virginia",
+    code: "VA",
+    largerCities: [
+      "Blacksburg / Christiansburg / Radford", "Charlottesville", "Harrisonburg",
+      "Kingsport / Bristol", "Lynchburg", "Norfolk / Virginia Beach / Newport News",
+      "Richmond", "Roanoke", "Staunton / Waynesboro", "Washington DC", "Winchester"
+    ],
+    smallerCities: [
+      "Bluefield", "Danville", "Fairfax / Arlington / Alexandria", "Martinsville"
+    ]
+  },
+  WA: {
+    name: "Washington",
+    code: "WA",
+    largerCities: [
+      "Bellingham", "Bremerton", "Longview", "Mount Vernon / Anacortes",
+      "Olympia", "Portland / Vancouver", "Richland / Kennewick / Pasco",
+      "Seattle / Tacoma / Bellevue", "Spokane", "Wenatchee", "Yakima"
+    ],
+    smallerCities: [
+      "Aberdeen", "Centralia", "Ellensburg", "Moses Lake", "Oak Harbor",
+      "Port Angeles", "Pullman", "Shelton"
+    ]
+  },
+  AZ: {
+    name: "Arizona",
+    code: "AZ",
+    largerCities: [
+      "Flagstaff", "Lake Havasu City / Kingman", "Phoenix", "Prescott",
+      "Sierra Vista / Douglas", "Tucson", "Yuma"
+    ],
+    smallerCities: [
+      "Nogales", "Payson", "Safford", "Show Low"
+    ]
+  },
+  MA: {
+    name: "Massachusetts",
+    code: "MA",
+    largerCities: [
+      "Barnstable Town", "Boston", "New Bedford", "Pittsfield", "Springfield",
+      "Worcester"
+    ],
+    smallerCities: [
+      "Beverly / Gloucester", "Brockton", "Lowell", "Plymouth"
+    ]
   }
   // Additional states will be added via the scraping function
 };
