@@ -62,13 +62,28 @@ Be specific and practical. Focus on the main item in the photo.`;
           }
         });
 
-        // Auto-save to estate sale images
+        // Auto-save to estate sale images - update in database immediately
         const updatedImages = [...images];
         updatedImages[imageIndex] = {
           ...updatedImages[imageIndex],
           name: result.name || '',
           description: result.description || ''
         };
+        
+        // Save to database immediately
+        if (saleId) {
+          try {
+            const saleData = await base44.entities.EstateSale.filter({ id: saleId });
+            if (saleData.length > 0) {
+              await base44.entities.EstateSale.update(saleId, {
+                images: updatedImages
+              });
+            }
+          } catch (error) {
+            console.error('Error saving labels to database:', error);
+          }
+        }
+        
         onLabelsApplied(updatedImages);
 
         // Save to product database
