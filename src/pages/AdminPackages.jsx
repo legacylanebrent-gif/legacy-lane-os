@@ -154,15 +154,29 @@ export default function AdminPackages() {
                         <div className="flex items-baseline gap-2">
                           <DollarSign className="w-5 h-5 text-slate-500 mt-1" />
                           <div>
-                            <div className="text-3xl font-bold text-slate-900">${pkg.monthly_price}</div>
-                            <div className="text-sm text-slate-600">per month</div>
+                            {pkg.pricing_model === 'per_item' ? (
+                              <>
+                                <div className="text-3xl font-bold text-slate-900">${pkg.per_item_price}</div>
+                                <div className="text-sm text-slate-600">per item</div>
+                                {pkg.platform_fee_percentage && (
+                                  <div className="text-sm text-slate-600 mt-1">
+                                    + {pkg.platform_fee_percentage}% platform fee
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <div className="text-3xl font-bold text-slate-900">${pkg.monthly_price}</div>
+                                <div className="text-sm text-slate-600">per month</div>
+                                {pkg.annual_price && (
+                                  <div className="mt-2 text-sm text-slate-600">
+                                    ${pkg.annual_price}/year (save ${(pkg.monthly_price * 12 - pkg.annual_price).toFixed(0)})
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </div>
                         </div>
-                        {pkg.annual_price && (
-                          <div className="mt-2 text-sm text-slate-600">
-                            ${pkg.annual_price}/year (save ${(pkg.monthly_price * 12 - pkg.annual_price).toFixed(0)})
-                          </div>
-                        )}
                       </div>
 
                       {pkg.limits && (

@@ -14,8 +14,11 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
     account_type: '',
     package_name: '',
     tier_level: 'basic',
+    pricing_model: 'subscription',
     monthly_price: '',
     annual_price: '',
+    per_item_price: '',
+    platform_fee_percentage: '',
     description: '',
     features: [],
     limits: {
@@ -37,8 +40,11 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
         account_type: pkg.account_type || '',
         package_name: pkg.package_name || '',
         tier_level: pkg.tier_level || 'basic',
+        pricing_model: pkg.pricing_model || 'subscription',
         monthly_price: pkg.monthly_price || '',
         annual_price: pkg.annual_price || '',
+        per_item_price: pkg.per_item_price || '',
+        platform_fee_percentage: pkg.platform_fee_percentage || '',
         description: pkg.description || '',
         features: pkg.features || [],
         limits: pkg.limits || {
@@ -61,8 +67,10 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
     try {
       const data = {
         ...formData,
-        monthly_price: parseFloat(formData.monthly_price),
-        annual_price: formData.annual_price ? parseFloat(formData.annual_price) : null
+        monthly_price: formData.monthly_price ? parseFloat(formData.monthly_price) : null,
+        annual_price: formData.annual_price ? parseFloat(formData.annual_price) : null,
+        per_item_price: formData.per_item_price ? parseFloat(formData.per_item_price) : null,
+        platform_fee_percentage: formData.platform_fee_percentage ? parseFloat(formData.platform_fee_percentage) : null
       };
 
       if (pkg?.id) {
@@ -147,31 +155,73 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="monthly_price">Monthly Price ($) *</Label>
-              <Input
-                id="monthly_price"
-                type="number"
-                step="0.01"
-                value={formData.monthly_price}
-                onChange={(e) => setFormData({...formData, monthly_price: e.target.value})}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="annual_price">Annual Price ($)</Label>
-              <Input
-                id="annual_price"
-                type="number"
-                step="0.01"
-                value={formData.annual_price}
-                onChange={(e) => setFormData({...formData, annual_price: e.target.value})}
-                placeholder="Optional"
-              />
-            </div>
+          <div>
+            <Label htmlFor="pricing_model">Pricing Model *</Label>
+            <Select
+              value={formData.pricing_model}
+              onValueChange={(value) => setFormData({...formData, pricing_model: value})}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="subscription">Subscription (Monthly/Annual)</SelectItem>
+                <SelectItem value="per_item">Per Item</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {formData.pricing_model === 'subscription' ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="monthly_price">Monthly Price ($)</Label>
+                <Input
+                  id="monthly_price"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthly_price}
+                  onChange={(e) => setFormData({...formData, monthly_price: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="annual_price">Annual Price ($)</Label>
+                <Input
+                  id="annual_price"
+                  type="number"
+                  step="0.01"
+                  value={formData.annual_price}
+                  onChange={(e) => setFormData({...formData, annual_price: e.target.value})}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="per_item_price">Price Per Item ($)</Label>
+                <Input
+                  id="per_item_price"
+                  type="number"
+                  step="0.01"
+                  value={formData.per_item_price}
+                  onChange={(e) => setFormData({...formData, per_item_price: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="platform_fee">Platform Fee (%)</Label>
+                <Input
+                  id="platform_fee"
+                  type="number"
+                  step="0.1"
+                  value={formData.platform_fee_percentage}
+                  onChange={(e) => setFormData({...formData, platform_fee_percentage: e.target.value})}
+                  placeholder="e.g., 5"
+                />
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3 border-t pt-4">
             <Label>Package Limits</Label>
