@@ -72,6 +72,11 @@ const DIVISION_CONFIG = {
 };
 
 export default function Layout({ children, currentPageName }) {
+  // Pages that don't need layout or authentication
+  if (['Onboarding', 'EstateSaleDetail', 'EstateSaleFinder'].includes(currentPageName)) {
+    return children;
+  }
+
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -101,11 +106,6 @@ export default function Layout({ children, currentPageName }) {
         <div className="animate-pulse text-navy-900 text-xl font-serif">Loading...</div>
       </div>
     );
-  }
-
-  // Pages that don't need layout
-  if (['Onboarding', 'EstateSaleDetail'].includes(currentPageName)) {
-    return children;
   }
 
   // Admin users use AdminLayout
