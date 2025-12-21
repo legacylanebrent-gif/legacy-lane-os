@@ -814,17 +814,17 @@ export default function Worksheet() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm">Seller Payment Method</Label>
-                    <Select defaultValue="not_paid">
+                    <Select defaultValue="not_yet_paid">
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="not_paid">Not Yet Paid</SelectItem>
+                        <SelectItem value="not_yet_paid">Not Yet Paid</SelectItem>
                         <SelectItem value="check">Check</SelectItem>
-                        <SelectItem value="ach">ACH Transfer</SelectItem>
+                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="cash">Cash</SelectItem>
                         <SelectItem value="venmo">Venmo</SelectItem>
                         <SelectItem value="zelle">Zelle</SelectItem>
-                        <SelectItem value="cash">Cash</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
