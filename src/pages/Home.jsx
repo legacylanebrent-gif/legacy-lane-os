@@ -304,16 +304,6 @@ export default function Home() {
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto space-y-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <Input
-                placeholder="Search by location, category, or keyword..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 text-lg shadow-lg border-2 border-slate-200 focus:border-orange-500"
-              />
-            </div>
-
             {/* Zip Code Search */}
             <div className="flex gap-2">
               <div className="relative flex-1">
