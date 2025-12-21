@@ -14,7 +14,8 @@ import { format } from 'date-fns';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
-  const [estateSales, setEstateSales] = useState([]);
+  const [currentSales, setCurrentSales] = useState([]);
+  const [pastSales, setPastSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,9 +45,15 @@ export default function BusinessProfile() {
 
       // Load related estate sales if estate sale operator
       if (businessUser.primary_account_type === 'estate_sale_operator') {
-        const allSales = await base44.entities.EstateSale.list('-created_date', 50);
+        const allSales = await base44.entities.EstateSale.list('-created_date', 100);
         const operatorSales = allSales.filter(s => s.operator_id === businessId);
-        setEstateSales(operatorSales);
+        
+        // Separate current and past sales
+        const current = operatorSales.filter(s => s.status === 'upcoming' || s.status === 'active');
+        const past = operatorSales.filter(s => s.status === 'completed' || s.status === 'cancelled');
+        
+        setCurrentSales(current);
+        setPastSales(past);
       }
     } catch (error) {
       console.error('Error loading business:', error);
@@ -195,8 +202,8 @@ export default function BusinessProfile() {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-slate-900">{estateSales.length}</div>
-                    <div className="text-sm text-slate-600">Estate Sales</div>
+                    <div className="text-2xl font-bold text-slate-900">{currentSales.length + pastSales.length}</div>
+                    <div className="text-sm text-slate-600">Total Sales</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">
@@ -218,23 +225,24 @@ export default function BusinessProfile() {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="sales" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="sales">Estate Sales</TabsTrigger>
+        <Tabs defaultValue="current" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+            <TabsTrigger value="current">Current Sales</TabsTrigger>
+            <TabsTrigger value="past">Past Sales</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
           </TabsList>
 
-          {/* Estate Sales Tab */}
-          <TabsContent value="sales" className="space-y-4">
-            {estateSales.length === 0 ? (
+          {/* Current Sales Tab */}
+          <TabsContent value="current" className="space-y-4">
+            {currentSales.length === 0 ? (
               <Card className="p-12 text-center">
                 <HomeIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500 text-lg">No estate sales yet</p>
+                <p className="text-slate-500 text-lg">No current estate sales</p>
               </Card>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {estateSales.map(sale => (
+                {currentSales.map(sale => (
                   <Link
                     key={sale.id}
                     to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
@@ -248,11 +256,61 @@ export default function BusinessProfile() {
                             alt={sale.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                          {sale.status === 'active' && (
-                            <Badge className="absolute top-3 right-3 bg-green-600 text-white">
-                              Active Now
-                            </Badge>
+                          <Badge className={`absolute top-3 right-3 ${sale.status === 'active' ? 'bg-green-600' : 'bg-blue-600'} text-white`}>
+                            {sale.status === 'active' ? 'Active Now' : 'Upcoming'}
+                          </Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-5">
+                        <h4 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
+                          {sale.title}
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <MapPin className="w-4 h-4 text-cyan-600" />
+                            <span>{sale.property_address?.city}, {sale.property_address?.state}</span>
+                          </div>
+                          {sale.sale_dates && sale.sale_dates.length > 0 && (
+                            <div className="flex items-center gap-2 text-slate-600">
+                              <Calendar className="w-4 h-4 text-orange-600" />
+                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                            </div>
                           )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Past Sales Tab */}
+          <TabsContent value="past" className="space-y-4">
+            {pastSales.length === 0 ? (
+              <Card className="p-12 text-center">
+                <HomeIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-500 text-lg">No past estate sales</p>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastSales.map(sale => (
+                  <Link
+                    key={sale.id}
+                    to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
+                    className="block group"
+                  >
+                    <Card className="overflow-hidden hover:shadow-xl transition-shadow opacity-90">
+                      {sale.images && sale.images.length > 0 && (
+                        <div className="relative h-48 overflow-hidden">
+                          <img
+                            src={sale.images[0]}
+                            alt={sale.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 grayscale-[30%]"
+                          />
+                          <Badge className="absolute top-3 right-3 bg-slate-600 text-white">
+                            {sale.status === 'completed' ? 'Completed' : 'Cancelled'}
+                          </Badge>
                         </div>
                       )}
                       <CardContent className="p-5">
