@@ -30,6 +30,7 @@ import AdminLeads from './pages/AdminLeads';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminPackages from './pages/AdminPackages';
 import Home from './pages/Home';
+import EstateSaleDetail from './pages/EstateSaleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "AdminTransactions": AdminTransactions,
     "AdminPackages": AdminPackages,
     "Home": Home,
+    "EstateSaleDetail": EstateSaleDetail,
 }
 
 export const pagesConfig = {
