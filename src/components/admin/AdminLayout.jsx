@@ -31,7 +31,7 @@ export default function AdminLayout({ children, currentPage }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const isActive = (path) => {
-    return location.pathname.includes(path) || currentPage === path;
+    return currentPage === path;
   };
 
   return (
