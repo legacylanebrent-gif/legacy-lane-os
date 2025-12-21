@@ -460,7 +460,16 @@ export default function AdminEstateSales() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {filteredSales.map(sale => (
-          <Card key={sale.id} className="hover:shadow-lg transition-shadow">
+          <Card key={sale.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+            {sale.images && sale.images.length > 0 && (
+              <div className="h-48 overflow-hidden">
+                <img 
+                  src={sale.images[0]} 
+                  alt={sale.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
