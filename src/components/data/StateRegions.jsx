@@ -560,8 +560,48 @@ export const STATE_REGIONS = {
       "Dover", "Seaford", "Wilmington"
     ],
     smallerCities: []
+  },
+  SD: {
+    name: "South Dakota",
+    code: "SD",
+    largerCities: [
+      "Aberdeen", "Brookings", "Rapid City", "Sioux Falls", "Watertown"
+    ],
+    smallerCities: []
+  },
+  ND: {
+    name: "North Dakota",
+    code: "ND",
+    largerCities: [
+      "Bismarck", "Fargo", "Grand Forks", "Minot"
+    ],
+    smallerCities: []
+  },
+  AK: {
+    name: "Alaska",
+    code: "AK",
+    largerCities: [
+      "Anchorage", "Fairbanks", "Juneau"
+    ],
+    smallerCities: []
+  },
+  VT: {
+    name: "Vermont",
+    code: "VT",
+    largerCities: [
+      "Bennington", "Burlington", "Montpelier", "Rutland"
+    ],
+    smallerCities: []
+  },
+  WY: {
+    name: "Wyoming",
+    code: "WY",
+    largerCities: [
+      "Casper", "Cheyenne", "Gillette", "Laramie", "Riverton", "Rock Springs",
+      "Sheridan"
+    ],
+    smallerCities: []
   }
-  // Additional states will be added via the scraping function
 };
 
 // Helper function to get all cities for a state
