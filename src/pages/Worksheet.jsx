@@ -40,6 +40,7 @@ export default function Worksheet() {
   const [bundleName, setBundleName] = useState('');
   const [bundleItems, setBundleItems] = useState([]);
   const [bundleItemInput, setBundleItemInput] = useState('');
+  const [bundleItemPrice, setBundleItemPrice] = useState('');
   const [bundlePrice, setBundlePrice] = useState('');
 
   // Expense form state
@@ -142,14 +143,26 @@ export default function Worksheet() {
   };
 
   const addBundleItem = () => {
-    if (bundleItemInput.trim()) {
-      setBundleItems([...bundleItems, bundleItemInput.trim()]);
+    if (bundleItemInput.trim() && bundleItemPrice && parseFloat(bundleItemPrice) > 0) {
+      const newItems = [...bundleItems, { name: bundleItemInput.trim(), price: parseFloat(bundleItemPrice) }];
+      setBundleItems(newItems);
+      
+      // Auto-calculate bundle price
+      const total = newItems.reduce((sum, item) => sum + item.price, 0);
+      setBundlePrice(total.toFixed(2));
+      
       setBundleItemInput('');
+      setBundleItemPrice('');
     }
   };
 
   const removeBundleItem = (index) => {
-    setBundleItems(bundleItems.filter((_, i) => i !== index));
+    const newItems = bundleItems.filter((_, i) => i !== index);
+    setBundleItems(newItems);
+    
+    // Recalculate bundle price
+    const total = newItems.reduce((sum, item) => sum + item.price, 0);
+    setBundlePrice(total > 0 ? total.toFixed(2) : '');
   };
 
   const handleSaveBundle = async () => {
@@ -172,7 +185,7 @@ export default function Worksheet() {
         price: total,
         total: total,
         payment_method: paymentMethod,
-        notes: `Bundle: ${bundleItems.join(', ')}`,
+        notes: `Bundle: ${bundleItems.map(item => `${item.name} ($${item.price.toFixed(2)})`).join(', ')}`,
         transaction_date: new Date().toISOString(),
         seller_amount: sellerAmount,
         company_amount: companyAmount
@@ -424,6 +437,16 @@ export default function Worksheet() {
                         onKeyPress={(e) => e.key === 'Enter' && addBundleItem()}
                         className="flex-1"
                       />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="Price"
+                        value={bundleItemPrice}
+                        onChange={(e) => setBundleItemPrice(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addBundleItem()}
+                        className="w-32"
+                      />
                       <Button
                         type="button"
                         onClick={addBundleItem}
@@ -437,7 +460,10 @@ export default function Worksheet() {
                       <div className="mt-2 space-y-1">
                         {bundleItems.map((item, index) => (
                           <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                            <span className="text-sm">{item}</span>
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className="text-sm">{item.name}</span>
+                              <span className="text-sm font-semibold text-green-600">${item.price.toFixed(2)}</span>
+                            </div>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -463,7 +489,9 @@ export default function Worksheet() {
                       placeholder="0.00"
                       value={bundlePrice}
                       onChange={(e) => setBundlePrice(e.target.value)}
+                      className="font-semibold text-lg"
                     />
+                    <p className="text-xs text-slate-600 mt-1">Auto-calculated from items, or enter manually</p>
                   </div>
 
                   <Button 
