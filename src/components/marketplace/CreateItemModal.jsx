@@ -15,7 +15,7 @@ const CATEGORIES = [
 
 const CONDITIONS = ['new', 'excellent', 'good', 'fair', 'poor'];
 
-export default function CreateItemModal({ onClose, onSuccess }) {
+export default function CreateItemModal({ open, onClose, onSuccess, item, saleId }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -40,10 +40,12 @@ export default function CreateItemModal({ onClose, onSuccess }) {
         price: parseFloat(formData.price),
         seller_id: user.id,
         seller_name: user.full_name,
+        estate_sale_id: saleId,
         status: 'available'
       });
 
       onSuccess();
+      onClose();
     } catch (error) {
       console.error('Error creating item:', error);
     } finally {
@@ -67,11 +69,7 @@ export default function CreateItemModal({ onClose, onSuccess }) {
   };
 
   return (
-    <Dialog open onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-navy-900">
