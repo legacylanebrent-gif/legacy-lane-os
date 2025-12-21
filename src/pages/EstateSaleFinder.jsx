@@ -40,12 +40,15 @@ function MapUpdater({ center, zoom }) {
 export default function EstateSaleFinder() {
   const [estates, setEstates] = useState([]);
   const [filteredEstates, setFilteredEstates] = useState([]);
+  const [featuredEstates, setFeaturedEstates] = useState([]);
+  const [regularEstates, setRegularEstates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]); // Default to LA
   const [selectedEstate, setSelectedEstate] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
+  const [isBrowsingByRegion, setIsBrowsingByRegion] = useState(false);
 
   useEffect(() => {
     getUserLocation();
@@ -113,13 +116,23 @@ export default function EstateSaleFinder() {
       
       // Filter by region if state and city are specified
       if (stateParam && cityParam) {
+        setIsBrowsingByRegion(true);
         const regionFiltered = data.filter(e => 
           e.property_address?.state === stateParam && 
           e.property_address?.region === decodeURIComponent(cityParam)
         );
         setEstates(regionFiltered);
+        
+        // Separate featured and regular sales
+        const featured = regionFiltered.filter(e => e.local_featured);
+        const regular = regionFiltered.filter(e => !e.local_featured);
+        setFeaturedEstates(featured);
+        setRegularEstates(regular);
       } else {
+        setIsBrowsingByRegion(false);
         setEstates(data);
+        setFeaturedEstates([]);
+        setRegularEstates([]);
       }
     } catch (error) {
       console.error('Error loading estates:', error);
@@ -240,14 +253,57 @@ export default function EstateSaleFinder() {
                 </p>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEstates.map((estate) => (
-                  <EstateSaleCard
-                    key={estate.id}
-                    estate={estate}
-                    onClick={() => handleEstateClick(estate)}
-                  />
-                ))}
+              <div className="space-y-12">
+                {/* Featured Sales Section - only when browsing by region */}
+                {isBrowsingByRegion && featuredEstates.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-2 h-8 bg-gradient-to-b from-cyan-500 to-cyan-600 rounded-full"></div>
+                      <h2 className="text-2xl font-serif font-bold text-slate-900">Featured Sales in This Area</h2>
+                    </div>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {featuredEstates.map((estate) => (
+                        <EstateSaleCard
+                          key={estate.id}
+                          estate={estate}
+                          onClick={() => handleEstateClick(estate)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Regular Sales Section */}
+                {isBrowsingByRegion && regularEstates.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-2 h-8 bg-gradient-to-b from-slate-400 to-slate-500 rounded-full"></div>
+                      <h2 className="text-2xl font-serif font-bold text-slate-900">All Sales</h2>
+                    </div>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {regularEstates.map((estate) => (
+                        <EstateSaleCard
+                          key={estate.id}
+                          estate={estate}
+                          onClick={() => handleEstateClick(estate)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Non-region browsing - show all filtered */}
+                {!isBrowsingByRegion && (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredEstates.map((estate) => (
+                      <EstateSaleCard
+                        key={estate.id}
+                        estate={estate}
+                        onClick={() => handleEstateClick(estate)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
