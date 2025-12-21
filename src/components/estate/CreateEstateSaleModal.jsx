@@ -476,10 +476,6 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       price: labelData.price,
       categories: labelData.categories
     });
-    
-    if (addedToInventory) {
-      alert('Item added to inventory!');
-    }
   };
 
   const handleBulkEdit = (updates) => {

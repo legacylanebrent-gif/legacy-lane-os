@@ -196,20 +196,24 @@ Be specific and practical. Focus on the main item in the photo.`;
           sale_id: saleId,
           categories: selectedCategories
         });
-      }
+        }
 
-      onApprove(imageIndex, {
-        name: editedName,
-        description: editedDescription,
-        price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-        categories: selectedCategories
-      }, true);
-      resetAndClose();
-    } catch (error) {
-      console.error('Error creating item:', error);
-      alert('Failed to create inventory item');
-    }
-  };
+        onApprove(imageIndex, {
+          name: editedName,
+          description: editedDescription,
+          price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          categories: selectedCategories
+        }, true);
+
+        // Auto-close after 2 seconds
+        setTimeout(() => {
+          resetAndClose();
+        }, 2000);
+        } catch (error) {
+        console.error('Error creating item:', error);
+        alert('Failed to create inventory item');
+        }
+        };
 
   const resetAndClose = () => {
     setSuggestions(null);
