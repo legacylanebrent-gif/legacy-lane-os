@@ -467,6 +467,57 @@ export const STATE_REGIONS = {
       "Coffeyville", "Dodge City", "Emporia", "Garden City", "Great Bend", "Hays",
       "Hutchinson", "McPherson", "Pittsburg", "Salina", "Winfield"
     ]
+  },
+  NM: {
+    name: "New Mexico",
+    code: "NM",
+    largerCities: [
+      "Albuquerque", "Farmington", "Las Cruces", "Santa Fe"
+    ],
+    smallerCities: [
+      "Alamogordo", "Carlsbad / Artesia", "Clovis", "Deming", "Espanola",
+      "Gallup", "Hobbs", "Las Vegas", "Roswell", "Silver City", "Taos"
+    ]
+  },
+  NE: {
+    name: "Nebraska",
+    code: "NE",
+    largerCities: [
+      "Grand Island", "Lincoln", "Omaha / Council Bluffs", "Sioux City, IA"
+    ],
+    smallerCities: [
+      "Columbus", "Fremont", "Hastings", "Kearney", "Lexington", "Norfolk",
+      "North Platte", "Scottsbluff"
+    ]
+  },
+  WV: {
+    name: "West Virginia",
+    code: "WV",
+    largerCities: [
+      "Beckley", "Charleston", "Huntington / Ashland", "Morgantown", "Parkersburg",
+      "Wheeling"
+    ],
+    smallerCities: [
+      "Bluefield", "Clarksburg", "Fairmont", "Oak Hill", "Weston"
+    ]
+  },
+  ID: {
+    name: "Idaho",
+    code: "ID",
+    largerCities: [
+      "Boise", "Coeur d'Alene", "Idaho Falls", "Lewiston", "Pocatello", "Twin Falls"
+    ],
+    smallerCities: [
+      "Blackfoot", "Burley", "Moscow", "Mountain Home", "Rexburg"
+    ]
+  },
+  HI: {
+    name: "Hawaii",
+    code: "HI",
+    largerCities: [
+      "Hilo", "Honolulu", "Kahului / Wailuku", "Kapaa"
+    ],
+    smallerCities: []
   }
   // Additional states will be added via the scraping function
 };
