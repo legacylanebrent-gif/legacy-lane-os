@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
-  Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins
+  Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins, Truck
 } from 'lucide-react';
 import VenmoPaymentModal from '@/components/payment/VenmoPaymentModal';
 import {
@@ -28,6 +28,8 @@ export default function Worksheet() {
   const [transactions, setTransactions] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [shipments, setShipments] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [activeTab, setActiveTab] = useState('transactions');
   
   // Transaction form state
@@ -53,6 +55,28 @@ export default function Worksheet() {
   const [offerPhone, setOfferPhone] = useState('');
   const [offerEmail, setOfferEmail] = useState('');
   const [offerNotes, setOfferNotes] = useState('');
+
+  // Shipping form state
+  const [showSmallShipForm, setShowSmallShipForm] = useState(false);
+  const [showLargeShipForm, setShowLargeShipForm] = useState(false);
+  const [shipItemName, setShipItemName] = useState('');
+  const [shipBuyerName, setShipBuyerName] = useState('');
+  const [shipBuyerEmail, setShipBuyerEmail] = useState('');
+  const [shipBuyerPhone, setShipBuyerPhone] = useState('');
+  const [shipStreet, setShipStreet] = useState('');
+  const [shipCity, setShipCity] = useState('');
+  const [shipState, setShipState] = useState('');
+  const [shipZip, setShipZip] = useState('');
+  const [shipCarrier, setShipCarrier] = useState('usps');
+  const [shipTracking, setShipTracking] = useState('');
+  const [shipCost, setShipCost] = useState('');
+  const [shipNotes, setShipNotes] = useState('');
+  const [shipLength, setShipLength] = useState('');
+  const [shipWidth, setShipWidth] = useState('');
+  const [shipHeight, setShipHeight] = useState('');
+  const [shipWeight, setShipWeight] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState('');
+  const [vendorQuote, setVendorQuote] = useState('');
 
   // Expense form state
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -111,6 +135,14 @@ export default function Worksheet() {
       // Load offers
       const offerData = await base44.entities.Offer.filter({ sale_id: saleId }, '-created_date');
       setOffers(offerData);
+
+      // Load shipments
+      const shipmentData = await base44.entities.Shipment.filter({ sale_id: saleId }, '-created_date');
+      setShipments(shipmentData);
+
+      // Load vendors for large item delivery
+      const vendorData = await base44.entities.Vendor.list();
+      setVendors(vendorData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -406,6 +438,129 @@ export default function Worksheet() {
     }
   };
 
+  const handleAddSmallShipment = async () => {
+    if (!shipItemName.trim() || !shipBuyerName.trim() || !shipStreet.trim() || !shipCity.trim() || !shipState.trim() || !shipZip.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await base44.entities.Shipment.create({
+        sale_id: sale.id,
+        item_name: shipItemName,
+        size_category: 'small',
+        buyer_name: shipBuyerName,
+        buyer_email: shipBuyerEmail,
+        buyer_phone: shipBuyerPhone,
+        shipping_address: {
+          street: shipStreet,
+          city: shipCity,
+          state: shipState,
+          zip: shipZip
+        },
+        carrier: shipCarrier,
+        tracking_number: shipTracking,
+        shipping_cost: shipCost ? parseFloat(shipCost) : null,
+        notes: shipNotes,
+        dimensions: {
+          length: shipLength ? parseFloat(shipLength) : null,
+          width: shipWidth ? parseFloat(shipWidth) : null,
+          height: shipHeight ? parseFloat(shipHeight) : null,
+          weight: shipWeight ? parseFloat(shipWeight) : null
+        },
+        status: shipTracking ? 'shipped' : 'pending'
+      });
+
+      // Clear form
+      setShipItemName('');
+      setShipBuyerName('');
+      setShipBuyerEmail('');
+      setShipBuyerPhone('');
+      setShipStreet('');
+      setShipCity('');
+      setShipState('');
+      setShipZip('');
+      setShipCarrier('usps');
+      setShipTracking('');
+      setShipCost('');
+      setShipNotes('');
+      setShipLength('');
+      setShipWidth('');
+      setShipHeight('');
+      setShipWeight('');
+      setShowSmallShipForm(false);
+
+      await loadData();
+    } catch (error) {
+      console.error('Error adding shipment:', error);
+      alert('Failed to add shipment');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAddLargeShipment = async () => {
+    if (!shipItemName.trim() || !shipBuyerName.trim() || !shipStreet.trim() || !shipCity.trim() || !shipState.trim() || !shipZip.trim() || !selectedVendor) {
+      alert('Please fill in all required fields and select a vendor');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await base44.entities.Shipment.create({
+        sale_id: sale.id,
+        item_name: shipItemName,
+        size_category: 'large',
+        buyer_name: shipBuyerName,
+        buyer_email: shipBuyerEmail,
+        buyer_phone: shipBuyerPhone,
+        shipping_address: {
+          street: shipStreet,
+          city: shipCity,
+          state: shipState,
+          zip: shipZip
+        },
+        carrier: 'vendor',
+        vendor_id: selectedVendor,
+        vendor_quote: vendorQuote ? parseFloat(vendorQuote) : null,
+        notes: shipNotes,
+        dimensions: {
+          length: shipLength ? parseFloat(shipLength) : null,
+          width: shipWidth ? parseFloat(shipWidth) : null,
+          height: shipHeight ? parseFloat(shipHeight) : null,
+          weight: shipWeight ? parseFloat(shipWeight) : null
+        },
+        status: vendorQuote ? 'quoted' : 'pending'
+      });
+
+      // Clear form
+      setShipItemName('');
+      setShipBuyerName('');
+      setShipBuyerEmail('');
+      setShipBuyerPhone('');
+      setShipStreet('');
+      setShipCity('');
+      setShipState('');
+      setShipZip('');
+      setSelectedVendor('');
+      setVendorQuote('');
+      setShipNotes('');
+      setShipLength('');
+      setShipWidth('');
+      setShipHeight('');
+      setShipWeight('');
+      setShowLargeShipForm(false);
+
+      await loadData();
+    } catch (error) {
+      console.error('Error adding large shipment:', error);
+      alert('Failed to add shipment');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const totalRevenue = transactions.reduce((sum, t) => sum + (t.total || 0), 0);
   const sellerTotal = transactions.reduce((sum, t) => sum + (t.seller_amount || 0), 0);
   const companyTotal = transactions.reduce((sum, t) => sum + (t.company_amount || 0), 0);
@@ -501,6 +656,10 @@ export default function Worksheet() {
           <TabsTrigger value="expenses">
             <Building2 className="w-4 h-4 mr-2" />
             Expenses
+          </TabsTrigger>
+          <TabsTrigger value="shipping">
+            <Truck className="w-4 h-4 mr-2" />
+            Shipping
           </TabsTrigger>
           <TabsTrigger value="profit">
             <Receipt className="w-4 h-4 mr-2" />
@@ -1383,6 +1542,529 @@ export default function Worksheet() {
               <p className="text-slate-500 text-lg">No expenses recorded for this sale</p>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="shipping" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Total Shipments</div>
+                <div className="text-2xl font-bold text-slate-900">{shipments.length}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Small Items</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {shipments.filter(s => s.size_category === 'small').length}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Large Items</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {shipments.filter(s => s.size_category === 'large').length}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Shipped</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {shipments.filter(s => s.status === 'shipped' || s.status === 'delivered').length}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Small Items Section */}
+          <Card className="bg-white shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Small Items (USPS / FedEx / UPS)</h3>
+                  <p className="text-sm text-slate-600">Items that can be shipped via standard carriers</p>
+                </div>
+                {!showSmallShipForm && (
+                  <Button 
+                    onClick={() => setShowSmallShipForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Small Item
+                  </Button>
+                )}
+              </div>
+
+              {showSmallShipForm && (
+                <div className="mb-6 border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-slate-900">New Small Item Shipment</h4>
+                    <Button variant="ghost" size="sm" onClick={() => setShowSmallShipForm(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Item Name <span className="text-red-500">*</span></Label>
+                      <Input
+                        placeholder="e.g., Antique Vase, Jewelry Box..."
+                        value={shipItemName}
+                        onChange={(e) => setShipItemName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>Buyer Name <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="John Doe"
+                          value={shipBuyerName}
+                          onChange={(e) => setShipBuyerName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          value={shipBuyerEmail}
+                          onChange={(e) => setShipBuyerEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Phone</Label>
+                        <Input
+                          placeholder="(555) 123-4567"
+                          value={shipBuyerPhone}
+                          onChange={(e) => setShipBuyerPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Street Address <span className="text-red-500">*</span></Label>
+                      <Input
+                        placeholder="123 Main St"
+                        value={shipStreet}
+                        onChange={(e) => setShipStreet(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>City <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="City"
+                          value={shipCity}
+                          onChange={(e) => setShipCity(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>State <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="State"
+                          value={shipState}
+                          onChange={(e) => setShipState(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>ZIP <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="12345"
+                          value={shipZip}
+                          onChange={(e) => setShipZip(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Carrier <span className="text-red-500">*</span></Label>
+                        <Select value={shipCarrier} onValueChange={setShipCarrier}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="usps">USPS</SelectItem>
+                            <SelectItem value="fedex">FedEx</SelectItem>
+                            <SelectItem value="ups">UPS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Tracking Number</Label>
+                        <Input
+                          placeholder="1234567890"
+                          value={shipTracking}
+                          onChange={(e) => setShipTracking(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-3">
+                      <div>
+                        <Label>Length (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="12"
+                          value={shipLength}
+                          onChange={(e) => setShipLength(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Width (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="8"
+                          value={shipWidth}
+                          onChange={(e) => setShipWidth(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Height (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="6"
+                          value={shipHeight}
+                          onChange={(e) => setShipHeight(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Weight (lbs)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="5"
+                          value={shipWeight}
+                          onChange={(e) => setShipWeight(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Shipping Cost</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="15.00"
+                          value={shipCost}
+                          onChange={(e) => setShipCost(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Notes</Label>
+                      <Input
+                        placeholder="Additional notes..."
+                        value={shipNotes}
+                        onChange={(e) => setShipNotes(e.target.value)}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handleAddSmallShipment}
+                      disabled={submitting}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      {submitting ? 'Adding...' : 'Add Small Item Shipment'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Small Items List */}
+              <div className="space-y-3">
+                {shipments.filter(s => s.size_category === 'small').length > 0 ? (
+                  shipments.filter(s => s.size_category === 'small').map((shipment) => (
+                    <div key={shipment.id} className="border border-slate-200 rounded-lg p-4 hover:bg-slate-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <p className="font-medium text-slate-900">{shipment.item_name}</p>
+                            <Badge className={
+                              shipment.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                              shipment.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }>
+                              {shipment.status}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-slate-600 space-y-1">
+                            <div>To: {shipment.buyer_name}</div>
+                            <div>{shipment.shipping_address.street}, {shipment.shipping_address.city}, {shipment.shipping_address.state} {shipment.shipping_address.zip}</div>
+                            <div className="flex items-center gap-3">
+                              <span className="uppercase font-semibold">{shipment.carrier}</span>
+                              {shipment.tracking_number && (
+                                <>
+                                  <span>•</span>
+                                  <span>Tracking: {shipment.tracking_number}</span>
+                                </>
+                              )}
+                              {shipment.shipping_cost && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-green-600 font-semibold">${shipment.shipping_cost.toFixed(2)}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-slate-500 py-8">No small item shipments yet</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Large Items Section */}
+          <Card className="bg-white shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Large Items (Vendor Delivery)</h3>
+                  <p className="text-sm text-slate-600">Items requiring vendor delivery quotes</p>
+                </div>
+                {!showLargeShipForm && (
+                  <Button 
+                    onClick={() => setShowLargeShipForm(true)}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Large Item
+                  </Button>
+                )}
+              </div>
+
+              {showLargeShipForm && (
+                <div className="mb-6 border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-slate-900">New Large Item Shipment</h4>
+                    <Button variant="ghost" size="sm" onClick={() => setShowLargeShipForm(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Item Name <span className="text-red-500">*</span></Label>
+                      <Input
+                        placeholder="e.g., Oak Dining Table, Piano..."
+                        value={shipItemName}
+                        onChange={(e) => setShipItemName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>Buyer Name <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="John Doe"
+                          value={shipBuyerName}
+                          onChange={(e) => setShipBuyerName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          value={shipBuyerEmail}
+                          onChange={(e) => setShipBuyerEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Phone</Label>
+                        <Input
+                          placeholder="(555) 123-4567"
+                          value={shipBuyerPhone}
+                          onChange={(e) => setShipBuyerPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Delivery Address <span className="text-red-500">*</span></Label>
+                      <Input
+                        placeholder="123 Main St"
+                        value={shipStreet}
+                        onChange={(e) => setShipStreet(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>City <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="City"
+                          value={shipCity}
+                          onChange={(e) => setShipCity(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>State <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="State"
+                          value={shipState}
+                          onChange={(e) => setShipState(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>ZIP <span className="text-red-500">*</span></Label>
+                        <Input
+                          placeholder="12345"
+                          value={shipZip}
+                          onChange={(e) => setShipZip(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-3">
+                      <div>
+                        <Label>Length (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="72"
+                          value={shipLength}
+                          onChange={(e) => setShipLength(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Width (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="36"
+                          value={shipWidth}
+                          onChange={(e) => setShipWidth(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Height (in)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="30"
+                          value={shipHeight}
+                          onChange={(e) => setShipHeight(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Weight (lbs)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="150"
+                          value={shipWeight}
+                          onChange={(e) => setShipWeight(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Select Vendor <span className="text-red-500">*</span></Label>
+                        <Select value={selectedVendor} onValueChange={setSelectedVendor}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a vendor..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {vendors.length > 0 ? (
+                              vendors.map((vendor) => (
+                                <SelectItem key={vendor.id} value={vendor.id}>
+                                  {vendor.business_name || vendor.contact_name}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="none" disabled>No vendors available</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Vendor Quote</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="150.00"
+                          value={vendorQuote}
+                          onChange={(e) => setVendorQuote(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Notes</Label>
+                      <Input
+                        placeholder="Special handling instructions..."
+                        value={shipNotes}
+                        onChange={(e) => setShipNotes(e.target.value)}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handleAddLargeShipment}
+                      disabled={submitting}
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                    >
+                      {submitting ? 'Adding...' : 'Request Vendor Delivery Quote'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Large Items List */}
+              <div className="space-y-3">
+                {shipments.filter(s => s.size_category === 'large').length > 0 ? (
+                  shipments.filter(s => s.size_category === 'large').map((shipment) => {
+                    const vendor = vendors.find(v => v.id === shipment.vendor_id);
+                    return (
+                      <div key={shipment.id} className="border border-slate-200 rounded-lg p-4 hover:bg-slate-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="font-medium text-slate-900">{shipment.item_name}</p>
+                              <Badge className={
+                                shipment.status === 'quoted' ? 'bg-blue-100 text-blue-700' :
+                                shipment.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }>
+                                {shipment.status}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-slate-600 space-y-1">
+                              <div>To: {shipment.buyer_name}</div>
+                              <div>{shipment.shipping_address.street}, {shipment.shipping_address.city}, {shipment.shipping_address.state} {shipment.shipping_address.zip}</div>
+                              <div className="flex items-center gap-3 mt-2">
+                                <span className="font-semibold">Vendor: {vendor?.business_name || vendor?.contact_name || 'Unknown'}</span>
+                                {shipment.vendor_quote && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-purple-600 font-semibold">Quote: ${shipment.vendor_quote.toFixed(2)}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-slate-500 py-8">No large item shipments yet</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="profit" className="space-y-6">
