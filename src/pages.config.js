@@ -45,6 +45,10 @@ import Inventory from './pages/Inventory';
 import Worksheet from './pages/Worksheet';
 import SaleInventory from './pages/SaleInventory';
 import Attendance from './pages/Attendance';
+import SaleTasks from './pages/SaleTasks';
+import SaleStatistics from './pages/SaleStatistics';
+import PrintSigns from './pages/PrintSigns';
+import SaleExport from './pages/SaleExport';
 import __Layout from './Layout.jsx';
 
 
@@ -96,6 +100,10 @@ export const PAGES = {
     "Worksheet": Worksheet,
     "SaleInventory": SaleInventory,
     "Attendance": Attendance,
+    "SaleTasks": SaleTasks,
+    "SaleStatistics": SaleStatistics,
+    "PrintSigns": PrintSigns,
+    "SaleExport": SaleExport,
 }
 
 export const pagesConfig = {

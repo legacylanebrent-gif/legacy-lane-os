@@ -329,6 +329,46 @@ export default function MySales() {
                             Attendance
                           </Link>
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}>
+                            Tasks
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}>
+                            Statistics
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}>
+                            Print Signs
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}>
+                            Export
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
