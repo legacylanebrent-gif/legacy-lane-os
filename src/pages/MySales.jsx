@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
+import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import { 
   Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-  Package, Edit, TrendingUp
+  Package, Edit, TrendingUp, Star
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -28,6 +29,8 @@ export default function MySales() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingSale, setEditingSale] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [showVIPModal, setShowVIPModal] = useState(false);
+  const [selectedSale, setSelectedSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -138,6 +141,16 @@ export default function MySales() {
           setEditingSale(null);
         }}
         sale={editingSale}
+        onSuccess={loadData}
+      />
+
+      <CreateVIPEventModal
+        open={showVIPModal}
+        onClose={() => {
+          setShowVIPModal(false);
+          setSelectedSale(null);
+        }}
+        sale={selectedSale}
         onSuccess={loadData}
       />
 
@@ -370,6 +383,23 @@ export default function MySales() {
                           <Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}>
                             Export
                           </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={async () => {
+                            const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id });
+                            if (events.length > 0) {
+                              window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id;
+                            } else {
+                              setSelectedSale(sale);
+                              setShowVIPModal(true);
+                            }
+                          }}
+                          className="w-full"
+                        >
+                          <Star className="w-3 h-3 mr-1" />
+                          VIP Event
                         </Button>
                       </div>
                     </div>
