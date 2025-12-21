@@ -23,7 +23,8 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
   }, [open]);
 
   const processBatch = async (startIndex) => {
-    const currentImages = workingImages.length > 0 ? workingImages : images;
+    // Use local variable to accumulate changes within the loop
+    let currentImages = workingImages.length > 0 ? [...workingImages] : [...images];
     const unlabeledImages = currentImages.filter(img => !img.name || img.name.trim() === '');
     const endIndex = Math.min(startIndex + BATCH_SIZE, unlabeledImages.length);
     const batchImages = unlabeledImages.slice(startIndex, endIndex);
@@ -40,7 +41,8 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
 
     for (let i = 0; i < batchImages.length; i++) {
       const image = batchImages[i];
-      const imageIndex = currentImages.indexOf(image);
+      // Find index in the current working array
+      const imageIndex = currentImages.findIndex(img => img.url === image.url);
       
       setProgress(prev => ({ ...prev, current: i + 1 }));
 
@@ -93,31 +95,24 @@ Be specific and practical. Focus on the main item in the photo.`;
           }
         });
 
-        // Update images array with new labels
-        const updatedImages = [...currentImages];
-        updatedImages[imageIndex] = {
-          ...updatedImages[imageIndex],
+        // Update the local array (not state yet - that's async)
+        currentImages[imageIndex] = {
+          ...currentImages[imageIndex],
           name: result.name || '',
           description: result.description || '',
           price: result.used_price ? parseFloat(result.used_price) : null,
           categories: result.suggested_categories || []
         };
         
-        // Update working state
-        setWorkingImages(updatedImages);
-        
-        // Update parent component state immediately
-        onLabelsApplied(updatedImages);
+        // Update parent component state immediately with current array
+        onLabelsApplied([...currentImages]);
         
         // Save to database immediately
         if (saleId) {
           try {
-            const saleData = await base44.entities.EstateSale.filter({ id: saleId });
-            if (saleData.length > 0) {
-              await base44.entities.EstateSale.update(saleId, {
-                images: updatedImages
-              });
-            }
+            await base44.entities.EstateSale.update(saleId, {
+              images: currentImages
+            });
           } catch (error) {
             console.error('Error saving labels to database:', error);
           }
@@ -171,6 +166,9 @@ Be specific and practical. Focus on the main item in the photo.`;
       }
     }
 
+    // Update state with final array after loop completes
+    setWorkingImages(currentImages);
+    
     setResults(prev => [...prev, ...batchResults]);
     setProcessing(false);
     setCurrentBatch(startIndex + BATCH_SIZE);
