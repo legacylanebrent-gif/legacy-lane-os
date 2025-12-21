@@ -243,31 +243,11 @@ export default function MySales() {
                       <h3 className="text-lg font-semibold text-slate-900 flex-1">
                         {sale.title}
                       </h3>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(sale)}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
-                              <Eye className="w-4 h-4 mr-2" />
-                              View
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(sale.id)}
-                            className="text-red-600"
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                        <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </Button>
                     </div>
 
                     <div className="space-y-2 text-sm">
@@ -287,7 +267,7 @@ export default function MySales() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-4 pt-3 border-t">
+                      <div className="flex items-center gap-4 pt-3 border-t mb-3">
                         <div className="flex items-center gap-1 text-slate-600">
                           <Eye className="w-4 h-4" />
                           <span>{sale.views || 0}</span>
@@ -304,6 +284,51 @@ export default function MySales() {
                             </span>
                           </div>
                         )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEdit(sale)}
+                          className="w-full"
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
+                            <DollarSign className="w-3 h-3 mr-1" />
+                            Worksheet
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}>
+                            <Package className="w-3 h-3 mr-1" />
+                            Inventory
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}>
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            Attendance
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

@@ -42,6 +42,9 @@ import AgentSignup from './pages/AgentSignup';
 import VendorSignup from './pages/VendorSignup';
 import MySales from './pages/MySales';
 import Inventory from './pages/Inventory';
+import Worksheet from './pages/Worksheet';
+import SaleInventory from './pages/SaleInventory';
+import Attendance from './pages/Attendance';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +93,9 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "MySales": MySales,
     "Inventory": Inventory,
+    "Worksheet": Worksheet,
+    "SaleInventory": SaleInventory,
+    "Attendance": Attendance,
 }
 
 export const pagesConfig = {
