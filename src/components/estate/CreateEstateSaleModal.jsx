@@ -541,15 +541,25 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       const imageUrls = formData.images.slice(0, 5).map(img => img.url);
       const prompt = `Create a compelling estate sale description for "${formData.title}" located at ${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state}. ${formData.categories.length > 0 ? `Categories include: ${formData.categories.join(', ')}.` : ''} Write 2-3 engaging paragraphs that highlight the sale's unique features and appeal to potential buyers.`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
+      const requestParams = {
         prompt,
-        file_urls: imageUrls.length > 0 ? imageUrls : undefined
-      });
+        add_context_from_internet: false
+      };
 
-      setFormData(prev => ({
-        ...prev,
-        description: result
-      }));
+      if (imageUrls.length > 0) {
+        requestParams.file_urls = imageUrls;
+      }
+
+      const result = await base44.integrations.Core.InvokeLLM(requestParams);
+
+      if (result && typeof result === 'string') {
+        setFormData(prev => ({
+          ...prev,
+          description: result
+        }));
+      } else {
+        throw new Error('Invalid response from AI');
+      }
     } catch (error) {
       console.error('Error generating description:', error);
       alert('Failed to generate description: ' + (error.message || 'Unknown error'));
