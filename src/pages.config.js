@@ -40,6 +40,8 @@ import OperatorPackages from './pages/OperatorPackages';
 import DIYSaleSignup from './pages/DIYSaleSignup';
 import AgentSignup from './pages/AgentSignup';
 import VendorSignup from './pages/VendorSignup';
+import MySales from './pages/MySales';
+import Inventory from './pages/Inventory';
 import __Layout from './Layout.jsx';
 
 
@@ -86,6 +88,8 @@ export const PAGES = {
     "DIYSaleSignup": DIYSaleSignup,
     "AgentSignup": AgentSignup,
     "VendorSignup": VendorSignup,
+    "MySales": MySales,
+    "Inventory": Inventory,
 }
 
 export const pagesConfig = {

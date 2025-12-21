@@ -23,9 +23,9 @@ const DIVISION_CONFIG = {
     label: 'Estate Services',
     icon: Home,
     pages: [
-      { name: 'EstateSaleFinder', label: 'Find Estate Sales', icon: MapPin },
-      { name: 'MyEstateSales', label: 'My Estate Sales', icon: Building2 },
-      { name: 'Inventory', label: 'Inventory', icon: ShoppingBag }
+      { name: 'MySales', label: 'My Sales', icon: Building2 },
+      { name: 'Inventory', label: 'Inventory', icon: ShoppingBag },
+      { name: 'Messages', label: 'Messages', icon: Users }
     ]
   },
   real_estate: {
