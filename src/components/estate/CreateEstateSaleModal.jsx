@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import SignTemplateModal from './SignTemplateModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +27,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [showSignTemplate, setShowSignTemplate] = useState(false);
+  const [operator, setOperator] = useState(null);
   const addressInputRef = useRef(null);
   const autocompleteRef = useRef(null);
 
@@ -65,6 +68,19 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     start_time: '9:00 AM',
     end_time: '5:00 PM'
   });
+
+  useEffect(() => {
+    loadOperator();
+  }, []);
+
+  const loadOperator = async () => {
+    try {
+      const userData = await base44.auth.me();
+      setOperator(userData);
+    } catch (error) {
+      console.error('Error loading operator:', error);
+    }
+  };
 
   useEffect(() => {
     if (sale) {
@@ -561,8 +577,26 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         }
       }}>
         <DialogHeader>
-          <DialogTitle className="text-2xl">{sale?.id ? 'Edit Estate Sale' : 'Create Estate Sale'}</DialogTitle>
+          <DialogTitle className="text-2xl flex items-center justify-between">
+            <span>{sale?.id ? 'Edit Estate Sale' : 'Create Estate Sale'}</span>
+            {sale?.id && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSignTemplate(true)}
+              >
+                Sign Templates
+              </Button>
+            )}
+          </DialogTitle>
         </DialogHeader>
+
+        <SignTemplateModal
+          open={showSignTemplate}
+          onClose={() => setShowSignTemplate(false)}
+          sale={sale}
+          operator={operator}
+        />
 
         <Tabs value={step.toString()} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
