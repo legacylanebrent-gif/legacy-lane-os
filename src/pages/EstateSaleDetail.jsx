@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -290,11 +290,33 @@ END:VCALENDAR`;
               </div>
             </div>
 
+            {/* Action Buttons for Logged In Users */}
+            {currentUser && (
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  onClick={handleAddToCalendar}
+                  className="flex-1"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Add to Calendar
+                </Button>
+                <Button 
+                  variant={isInRoute ? 'default' : 'outline'}
+                  onClick={handleAddToRoute}
+                  className={`flex-1 ${isInRoute ? 'bg-cyan-600 hover:bg-cyan-700' : ''}`}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  {isInRoute ? 'In Route' : 'Add to Route'}
+                </Button>
+              </div>
+            )}
+
             {/* Image Gallery */}
             {sale.images && sale.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
-                  <div className="aspect-video bg-slate-100 overflow-hidden rounded-t-lg relative">
+                  <div className="aspect-video bg-slate-100 overflow-hidden rounded-t-lg relative group">
                     <img
                       src={sale.images[selectedImage]}
                       alt={sale.title}
@@ -303,12 +325,28 @@ END:VCALENDAR`;
                     {currentUser && (
                       <button
                         onClick={() => toggleImageSave(selectedImage)}
-                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors"
+                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
                       >
                         <Heart 
                           className={`w-6 h-6 ${savedImages.includes(selectedImage) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} 
                         />
                       </button>
+                    )}
+                    {sale.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setSelectedImage(prev => prev === 0 ? sale.images.length - 1 : prev - 1)}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <ChevronLeft className="w-6 h-6 text-slate-900" />
+                        </button>
+                        <button
+                          onClick={() => setSelectedImage(prev => prev === sale.images.length - 1 ? 0 : prev + 1)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <ChevronRight className="w-6 h-6 text-slate-900" />
+                        </button>
+                      </>
                     )}
                   </div>
                   <div className="p-4 grid grid-cols-6 gap-2">
@@ -522,35 +560,12 @@ END:VCALENDAR`;
                 </div>
 
                 {currentUser && (
-                  <>
-                    <Button 
-                      onClick={handleEmailOperator}
-                      className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
-                    >
-                      Email Operator
-                    </Button>
-
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleAddToCalendar}
-                        className="w-full"
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Add to Calendar
-                      </Button>
-                      <Button 
-                        variant={isInRoute ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={handleAddToRoute}
-                        className={`w-full ${isInRoute ? 'bg-cyan-600 hover:bg-cyan-700' : ''}`}
-                      >
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {isInRoute ? 'In Route' : 'Add to Route'}
-                      </Button>
-                    </div>
-                  </>
+                  <Button 
+                    onClick={handleEmailOperator}
+                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
+                  >
+                    Email Operator
+                  </Button>
                 )}
                 {!currentUser && (
                   <Button 
