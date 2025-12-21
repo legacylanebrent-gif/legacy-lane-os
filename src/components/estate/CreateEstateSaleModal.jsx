@@ -773,10 +773,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           selectedImages={selectedImages}
           images={formData.images}
           onApply={handleBulkEdit}
-          />
+        />
 
-          {/* Take Another Photo Prompt */}
-          <Dialog open={showCameraPrompt} onOpenChange={setShowCameraPrompt}>
+        {/* Take Another Photo Prompt */}
+        <Dialog open={showCameraPrompt} onOpenChange={setShowCameraPrompt}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Photo Saved!</DialogTitle>
@@ -801,7 +801,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
               </div>
             </div>
           </DialogContent>
-          </Dialog>
+        </Dialog>
 
         <Tabs value={step.toString()} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
@@ -1102,35 +1102,58 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   </div>
                 </div>
 
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center mb-4">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/jpg,image/png,image/gif"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                    disabled={uploadingImages}
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-sm text-slate-600">
-                      {uploadingImages ? 'Processing and uploading...' : 'Click to upload images (JPG, PNG, GIF)'}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      WebP format not supported - please convert to JPG or PNG
-                    </p>
-                  </label>
-
-                  {uploadingImages && uploadProgress.total > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
-                      <p className="text-xs text-slate-600">
-                        Processing {uploadProgress.current} of {uploadProgress.total} images... ({uploadProgress.successful} successful)
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => handleImageUpload(e, true)}
+                      className="hidden"
+                      id="camera-upload"
+                      disabled={uploadingImages}
+                    />
+                    <label htmlFor="camera-upload" className="cursor-pointer">
+                      <Camera className="w-10 h-10 text-blue-600 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-blue-900">
+                        Take Photo
                       </p>
-                    </div>
-                  )}
+                      <p className="text-xs text-blue-600 mt-1">
+                        Open camera directly
+                      </p>
+                    </label>
+                  </div>
+
+                  <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/jpg,image/png,image/gif"
+                      onChange={(e) => handleImageUpload(e, false)}
+                      className="hidden"
+                      id="image-upload"
+                      disabled={uploadingImages}
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Upload className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-green-900">
+                        Choose Files
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">
+                        Select from gallery
+                      </p>
+                    </label>
+                  </div>
                 </div>
+
+                {uploadingImages && uploadProgress.total > 0 && (
+                  <div className="mb-4 space-y-2 p-3 bg-slate-50 rounded-lg">
+                    <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
+                    <p className="text-xs text-slate-600 text-center">
+                      Processing {uploadProgress.current} of {uploadProgress.total} images... ({uploadProgress.successful} successful)
+                    </p>
+                  </div>
+                )}
 
                 {formData.images.length > 0 && (
                   <DragDropContext onDragEnd={handleDragEnd}>
