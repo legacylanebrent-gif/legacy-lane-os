@@ -315,6 +315,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
             rotation: 0
           });
           setUploadProgress(prev => ({ ...prev, successful: prev.successful + 1 }));
+          
+          // Add delay between uploads to avoid rate limiting (except for last file)
+          if (i < files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         } catch (error) {
           console.error('Error processing file:', file.name, error);
           errors.push(`${file.name}: ${error.message}`);
