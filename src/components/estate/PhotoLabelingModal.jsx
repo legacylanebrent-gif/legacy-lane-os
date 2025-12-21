@@ -25,6 +25,15 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
   const analyzePhoto = async () => {
     setAnalyzing(true);
     try {
+      // Handle different image URL formats
+      let imageUrl = image.url;
+      if (typeof imageUrl === 'object' && imageUrl.url) {
+        imageUrl = imageUrl.url;
+      }
+      if (typeof image === 'string') {
+        imageUrl = image;
+      }
+
       const prompt = `You are analyzing a photo from an estate sale to help label and price items.
 
 Look at this estate sale photo and provide:
@@ -36,7 +45,7 @@ Be specific and practical. Focus on the main item in the photo.`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
-        file_urls: [image.url],
+        file_urls: [imageUrl],
         response_json_schema: {
           type: "object",
           properties: {
@@ -61,7 +70,8 @@ Be specific and practical. Focus on the main item in the photo.`;
       setSelectedCategories(result.suggested_categories || []);
     } catch (error) {
       console.error('Error analyzing photo:', error);
-      alert('Failed to analyze photo. Please try again.');
+      const errorMsg = error?.message || error?.toString() || 'Unknown error';
+      alert(`Failed to analyze photo: ${errorMsg}. Please try again.`);
     } finally {
       setAnalyzing(false);
     }
@@ -79,6 +89,15 @@ Be specific and practical. Focus on the main item in the photo.`;
 
   const handleApproveAndCreateItem = async () => {
     try {
+      // Handle different image URL formats
+      let imageUrl = image.url;
+      if (typeof imageUrl === 'object' && imageUrl.url) {
+        imageUrl = imageUrl.url;
+      }
+      if (typeof image === 'string') {
+        imageUrl = image;
+      }
+
       // Create inventory item
       await base44.entities.Item.create({
         title: editedName,
@@ -86,7 +105,7 @@ Be specific and practical. Focus on the main item in the photo.`;
         price: editedPrice ? parseFloat(editedPrice) : null,
         estate_sale_id: saleId,
         seller_id: (await base44.auth.me()).id,
-        images: [image.url],
+        images: [imageUrl],
         status: 'available',
         category: selectedCategories[0] || 'estate_items',
         condition: 'good',
@@ -145,7 +164,7 @@ Be specific and practical. Focus on the main item in the photo.`;
           {/* Photo Display */}
           <div className="relative">
             <img
-              src={image.url}
+              src={typeof image.url === 'string' ? image.url : (image.url?.url || image)}
               alt="Item photo"
               className="w-full h-96 object-contain bg-slate-100 rounded-lg"
               style={{ transform: `rotate(${image.rotation || 0}deg)` }}
