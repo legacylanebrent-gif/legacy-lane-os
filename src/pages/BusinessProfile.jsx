@@ -17,6 +17,8 @@ export default function BusinessProfile() {
   const [currentSales, setCurrentSales] = useState([]);
   const [pastSales, setPastSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
 
   useEffect(() => {
     loadBusinessData();
@@ -24,6 +26,14 @@ export default function BusinessProfile() {
 
   const loadBusinessData = async () => {
     try {
+      // Check if user is logged in
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (error) {
+        // User not logged in
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       const businessId = urlParams.get('id');
 
