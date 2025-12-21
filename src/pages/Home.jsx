@@ -829,6 +829,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CTAs */}
+      <section className="py-12 px-4">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-6">
+          <Link to={createPageUrl('OperatorPackages')}>
+            <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <HomeIcon className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    List Your Company
+                  </h3>
+                  <p className="text-orange-100">
+                    Join our network of estate sale professionals
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          <Link to={createPageUrl('SearchByState')}>
+            <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <MapPin className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    Browse Sales by State
+                  </h3>
+                  <p className="text-cyan-100">
+                    Find estate sales in all 50 states
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-slate-900 text-white py-12 px-4 mt-20">
         <div className="max-w-7xl mx-auto text-center">
