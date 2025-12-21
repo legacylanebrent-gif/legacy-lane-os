@@ -417,6 +417,24 @@ export default function Worksheet() {
         company_amount: companyAmount
       });
 
+      // Update ProductDatabase with final sold price
+      try {
+        const productEntries = await base44.entities.ProductDatabase.filter({
+          sale_id: sale.id,
+          title: transactionData.item_name
+        });
+
+        if (productEntries.length > 0) {
+          // Update the first matching entry with sold price
+          await base44.entities.ProductDatabase.update(productEntries[0].id, {
+            final_sold_price: transactionData.price,
+            sold_date: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.log('Could not update product database:', error);
+      }
+
       // Clear form
       setItemName('');
       setQuantity(1);
