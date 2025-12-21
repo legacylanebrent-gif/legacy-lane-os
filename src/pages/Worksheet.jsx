@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
-  Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins, Truck
+  Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins, Truck, Camera
 } from 'lucide-react';
 import VenmoPaymentModal from '@/components/payment/VenmoPaymentModal';
 import {
@@ -47,6 +47,13 @@ export default function Worksheet() {
   const [bundleItemInput, setBundleItemInput] = useState('');
   const [bundleItemPrice, setBundleItemPrice] = useState('');
   const [bundlePrice, setBundlePrice] = useState('');
+
+  // Photo mode state
+  const [photoMode, setPhotoMode] = useState(false);
+  const [photoSearchQuery, setPhotoSearchQuery] = useState('');
+  const [photoSuggestions, setPhotoSuggestions] = useState([]);
+  const [searchingPhotos, setSearchingPhotos] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // Offer form state
   const [offerItemName, setOfferItemName] = useState('');
@@ -438,6 +445,100 @@ export default function Worksheet() {
     }
   };
 
+  const searchPhotosByName = async (query) => {
+    if (!query || query.length < 2) {
+      setPhotoSuggestions([]);
+      return;
+    }
+
+    setSearchingPhotos(true);
+    try {
+      // Get images from the sale
+      const images = sale.images || [];
+      
+      // If no images or no metadata, return empty
+      if (images.length === 0) {
+        setPhotoSuggestions([]);
+        setSearchingPhotos(false);
+        return;
+      }
+
+      // Use AI to match the query with image names/descriptions
+      const prompt = `You are helping an estate sale operator find items from their sale photos.
+
+The operator is searching for: "${query}"
+
+Available items from photos:
+${images.map((img, idx) => `${idx + 1}. ${img.name || 'Unnamed item'} - ${img.description || 'No description'}`).join('\n')}
+
+Return a JSON array of the top matching items (max 5). For each match, include:
+- index: the item number from the list above
+- name: the item name
+- description: the item description
+- confidence: how confident you are this matches the search (0-1)
+- suggested_price: if you can infer a reasonable price from the description or name, suggest it, otherwise null
+
+Only include items with confidence > 0.3. If no items match well, return an empty array.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            matches: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  index: { type: "number" },
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  confidence: { type: "number" },
+                  suggested_price: { type: "number" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const matches = result?.matches || [];
+      
+      // Map back to actual images with their data
+      const suggestions = matches.map(match => {
+        const imageData = images[match.index - 1];
+        return {
+          ...match,
+          imageUrl: imageData?.url || imageData,
+          name: match.name,
+          description: match.description,
+          suggested_price: match.suggested_price
+        };
+      });
+
+      setPhotoSuggestions(suggestions);
+    } catch (error) {
+      console.error('Error searching photos:', error);
+      setPhotoSuggestions([]);
+    } finally {
+      setSearchingPhotos(false);
+    }
+  };
+
+  const handlePhotoSearch = (query) => {
+    setPhotoSearchQuery(query);
+    searchPhotosByName(query);
+  };
+
+  const selectPhotoItem = (suggestion) => {
+    setSelectedPhoto(suggestion);
+    setItemName(suggestion.name);
+    if (suggestion.suggested_price) {
+      setPrice(suggestion.suggested_price.toString());
+    }
+    setPhotoSuggestions([]);
+  };
+
   const handleAddSmallShipment = async () => {
     if (!shipItemName.trim() || !shipBuyerName.trim() || !shipStreet.trim() || !shipCity.trim() || !shipState.trim() || !shipZip.trim()) {
       alert('Please fill in all required fields');
@@ -790,7 +891,171 @@ export default function Worksheet() {
                 </Button>
               </div>
 
-              {bundleMode ? (
+              {photoMode ? (
+                <div className="space-y-4 border-2 border-cyan-200 rounded-lg p-4 bg-cyan-50">
+                  <div>
+                    <Label>
+                      Search Items from Photos <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        placeholder="Start typing item name... (e.g., 'dining table', 'vase')"
+                        value={photoSearchQuery}
+                        onChange={(e) => handlePhotoSearch(e.target.value)}
+                        className="pr-10"
+                      />
+                      {searchingPhotos && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin h-4 w-4 border-2 border-cyan-600 border-t-transparent rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {photoSuggestions.length > 0 && (
+                      <div className="mt-2 border border-cyan-300 rounded-lg bg-white shadow-lg max-h-64 overflow-y-auto">
+                        {photoSuggestions.map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => selectPhotoItem(suggestion)}
+                            className="w-full flex items-start gap-3 p-3 hover:bg-cyan-50 border-b last:border-b-0 text-left"
+                          >
+                            {suggestion.imageUrl && (
+                              <img 
+                                src={typeof suggestion.imageUrl === 'string' ? suggestion.imageUrl : suggestion.imageUrl.url}
+                                alt={suggestion.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <div className="font-medium text-slate-900">{suggestion.name}</div>
+                              {suggestion.description && (
+                                <div className="text-sm text-slate-600 line-clamp-2">{suggestion.description}</div>
+                              )}
+                              {suggestion.suggested_price && (
+                                <div className="text-sm font-semibold text-green-600 mt-1">
+                                  Suggested: ${suggestion.suggested_price.toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedPhoto && (
+                      <div className="mt-3 p-3 bg-white border border-cyan-300 rounded-lg flex items-center gap-3">
+                        {selectedPhoto.imageUrl && (
+                          <img 
+                            src={typeof selectedPhoto.imageUrl === 'string' ? selectedPhoto.imageUrl : selectedPhoto.imageUrl.url}
+                            alt={selectedPhoto.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-slate-900">Selected: {selectedPhoto.name}</div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPhoto(null);
+                            setItemName('');
+                            setPrice('');
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label>
+                      Item Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="Item name (auto-filled from photo)"
+                      value={itemName}
+                      onChange={(e) => setItemName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>
+                        Quantity <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>
+                        Payment <span className="text-red-500">*</span>
+                      </Label>
+                      <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="credit_card">Credit Card</SelectItem>
+                          <SelectItem value="venmo">Venmo</SelectItem>
+                          <SelectItem value="zelle">Zelle</SelectItem>
+                          <SelectItem value="check">Check</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>
+                      Price <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00 (auto-filled or override)"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                    />
+                    <p className="text-xs text-slate-600 mt-1">Price auto-filled from photo metadata, or enter your own</p>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Total</span>
+                      <span className="text-2xl font-bold text-slate-900">
+                        ${currentTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Notes (optional)</Label>
+                    <Input
+                      placeholder="Additional notes..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleAddTransaction}
+                    disabled={submitting}
+                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-12 text-base font-semibold"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    {submitting ? 'Adding...' : 'Add Transaction'}
+                  </Button>
+                </div>
+              ) : bundleMode ? (
                 <div className="space-y-4 border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
                   <div>
                     <Label>
