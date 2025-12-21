@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const addressInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -50,6 +52,82 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     start_time: '9:00 AM',
     end_time: '5:00 PM'
   });
+
+  useEffect(() => {
+    if (!open || !addressInputRef.current) return;
+
+    const loadGoogleMaps = async () => {
+      if (window.google?.maps?.places) {
+        initAutocomplete();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.onload = initAutocomplete;
+      document.head.appendChild(script);
+    };
+
+    const initAutocomplete = () => {
+      if (!addressInputRef.current || !window.google?.maps?.places) return;
+
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        addressInputRef.current,
+        { types: ['address'] }
+      );
+
+      autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
+    };
+
+    loadGoogleMaps();
+
+    return () => {
+      if (autocompleteRef.current) {
+        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [open]);
+
+  const handlePlaceSelect = () => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place?.address_components) return;
+
+    let street = '';
+    let city = '';
+    let state = '';
+    let zip = '';
+
+    place.address_components.forEach((component) => {
+      const types = component.types;
+      
+      if (types.includes('street_number')) {
+        street = component.long_name + ' ';
+      }
+      if (types.includes('route')) {
+        street += component.long_name;
+      }
+      if (types.includes('locality')) {
+        city = component.long_name;
+      }
+      if (types.includes('administrative_area_level_1')) {
+        state = component.short_name;
+      }
+      if (types.includes('postal_code')) {
+        zip = component.long_name;
+      }
+    });
+
+    setFormData(prev => ({
+      ...prev,
+      property_address: {
+        street: street.trim(),
+        city,
+        state,
+        zip
+      }
+    }));
+  };
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -226,7 +304,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   Property Address *
                 </Label>
                 <Input
-                  placeholder="Street Address"
+                  ref={addressInputRef}
+                  placeholder="Start typing address..."
                   value={formData.property_address.street}
                   onChange={(e) => setFormData({
                     ...formData,
