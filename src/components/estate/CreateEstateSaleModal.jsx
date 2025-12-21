@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import SignTemplateModal from './SignTemplateModal';
 import PhotoLabelingModal from './PhotoLabelingModal';
+import BulkEditPhotosModal from './BulkEditPhotosModal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,6 +62,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
 
   const [editingImage, setEditingImage] = useState(null);
   const [labelingImage, setLabelingImage] = useState(null);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -408,12 +410,53 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     updateImageDetails(index, {
       name: labelData.name,
       description: labelData.description,
-      price: labelData.price
+      price: labelData.price,
+      categories: labelData.categories
     });
     
     if (addedToInventory) {
       alert('Item added to inventory!');
     }
+  };
+
+  const handleBulkEdit = (updates) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, idx) => {
+        if (!selectedImages.includes(idx)) return img;
+
+        let updatedImg = { ...img };
+
+        // Apply categories
+        if (updates.categories) {
+          const existingCategories = img.categories || [];
+          updatedImg.categories = [...new Set([...existingCategories, ...updates.categories])];
+        }
+
+        // Apply price adjustment
+        if (updates.priceAdjustment && img.price) {
+          const currentPrice = parseFloat(img.price);
+          const { type, value } = updates.priceAdjustment;
+          
+          switch (type) {
+            case 'add':
+              updatedImg.price = currentPrice + value;
+              break;
+            case 'subtract':
+              updatedImg.price = Math.max(0, currentPrice - value);
+              break;
+            case 'set':
+              updatedImg.price = value;
+              break;
+            case 'multiply':
+              updatedImg.price = currentPrice * value;
+              break;
+          }
+        }
+
+        return updatedImg;
+      })
+    }));
   };
 
 
@@ -619,6 +662,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           imageIndex={labelingImage}
           saleId={sale?.id}
           onApprove={handlePhotoLabelApprove}
+        />
+
+        <BulkEditPhotosModal
+          open={showBulkEdit}
+          onClose={() => setShowBulkEdit(false)}
+          selectedImages={selectedImages}
+          images={formData.images}
+          onApply={handleBulkEdit}
         />
 
         <Tabs value={step.toString()} className="w-full">
@@ -874,15 +925,26 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   </div>
                   <div className="flex gap-2">
                     {selectedImages.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={removeSelectedImages}
-                        className="gap-2 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Selected
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowBulkEdit(true)}
+                          className="gap-2 text-orange-600 hover:text-orange-700"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          Bulk Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={removeSelectedImages}
+                          className="gap-2 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete Selected
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -1014,6 +1076,20 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                                    {image.price && (
                                      <div className="text-xs font-semibold text-green-600">
                                        ${parseFloat(image.price).toFixed(2)}
+                                     </div>
+                                   )}
+                                   {image.categories && image.categories.length > 0 && (
+                                     <div className="flex flex-wrap gap-1">
+                                       {image.categories.slice(0, 2).map((cat, i) => (
+                                         <Badge key={i} className="text-xs py-0 px-1 bg-purple-100 text-purple-700">
+                                           {cat}
+                                         </Badge>
+                                       ))}
+                                       {image.categories.length > 2 && (
+                                         <Badge className="text-xs py-0 px-1 bg-slate-100 text-slate-600">
+                                           +{image.categories.length - 2}
+                                         </Badge>
+                                       )}
                                      </div>
                                    )}
                                   </div>

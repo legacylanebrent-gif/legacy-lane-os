@@ -14,6 +14,7 @@ export default function PhotoLabelingModal({ open, onClose, image, imageIndex, s
   const [editedName, setEditedName] = useState('');
   const [editedPrice, setEditedPrice] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   React.useEffect(() => {
     if (open && image && !suggestions) {
@@ -43,7 +44,12 @@ Be specific and practical. Focus on the main item in the photo.`;
             description: { type: "string" },
             estimated_price_low: { type: "number" },
             estimated_price_high: { type: "number" },
-            suggested_price: { type: "number" }
+            suggested_price: { type: "number" },
+            suggested_categories: { 
+              type: "array",
+              items: { type: "string" },
+              description: "Relevant categories from: Furniture, Art & Collectibles, Jewelry, Antiques, Electronics, Home Decor, Kitchen & Dining, Tools & Equipment, Books & Media, Clothing & Accessories, Outdoor & Garden, Other"
+            }
           }
         }
       });
@@ -52,6 +58,7 @@ Be specific and practical. Focus on the main item in the photo.`;
       setEditedName(result.name || '');
       setEditedPrice(result.suggested_price?.toString() || '');
       setEditedDescription(result.description || '');
+      setSelectedCategories(result.suggested_categories || []);
     } catch (error) {
       console.error('Error analyzing photo:', error);
       alert('Failed to analyze photo. Please try again.');
@@ -64,7 +71,8 @@ Be specific and practical. Focus on the main item in the photo.`;
     onApprove(imageIndex, {
       name: editedName,
       description: editedDescription,
-      price: editedPrice ? parseFloat(editedPrice) : null
+      price: editedPrice ? parseFloat(editedPrice) : null,
+      categories: selectedCategories
     }, false);
     resetAndClose();
   };
@@ -80,14 +88,16 @@ Be specific and practical. Focus on the main item in the photo.`;
         seller_id: (await base44.auth.me()).id,
         images: [image.url],
         status: 'available',
-        category: 'estate_items',
-        condition: 'good'
+        category: selectedCategories[0] || 'estate_items',
+        condition: 'good',
+        tags: selectedCategories
       });
 
       onApprove(imageIndex, {
         name: editedName,
         description: editedDescription,
-        price: editedPrice ? parseFloat(editedPrice) : null
+        price: editedPrice ? parseFloat(editedPrice) : null,
+        categories: selectedCategories
       }, true);
       resetAndClose();
     } catch (error) {
@@ -101,8 +111,23 @@ Be specific and practical. Focus on the main item in the photo.`;
     setEditedName('');
     setEditedPrice('');
     setEditedDescription('');
+    setSelectedCategories([]);
     onClose();
   };
+
+  const toggleCategory = (category) => {
+    setSelectedCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const CATEGORIES = [
+    'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
+    'Electronics', 'Home Decor', 'Kitchen & Dining', 'Tools & Equipment',
+    'Books & Media', 'Clothing & Accessories', 'Outdoor & Garden', 'Other'
+  ];
 
   if (!image) return null;
 
@@ -185,6 +210,32 @@ Be specific and practical. Focus on the main item in the photo.`;
                     placeholder="Item description"
                     rows={3}
                   />
+                </div>
+
+                <div>
+                  <Label>Categories</Label>
+                  {suggestions?.suggested_categories && suggestions.suggested_categories.length > 0 && (
+                    <p className="text-xs text-purple-600 mb-2 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      AI suggested: {suggestions.suggested_categories.join(', ')}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {CATEGORIES.map(category => (
+                      <Badge
+                        key={category}
+                        variant={selectedCategories.includes(category) ? 'default' : 'outline'}
+                        className={`cursor-pointer ${
+                          selectedCategories.includes(category)
+                            ? 'bg-purple-600 hover:bg-purple-700'
+                            : 'hover:bg-slate-100'
+                        }`}
+                        onClick={() => toggleCategory(category)}
+                      >
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
 
