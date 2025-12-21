@@ -61,10 +61,10 @@ export default function AdminPackages() {
   };
 
   const filteredPackages = packages
-    .filter(pkg => pkg.account_type === selectedAccountType)
+    .filter(pkg => pkg.data?.account_type === selectedAccountType)
     .sort((a, b) => {
       const tierOrder = { basic: 1, pro: 2, premium: 3 };
-      return tierOrder[a.tier_level] - tierOrder[b.tier_level];
+      return tierOrder[a.data?.tier_level] - tierOrder[b.data?.tier_level];
     });
 
   if (loading) {
@@ -130,49 +130,51 @@ export default function AdminPackages() {
                   </Button>
                 </div>
               ) : (
-                filteredPackages.map(pkg => (
-                  <Card key={pkg.id} className={`relative ${pkg.featured ? 'border-2 border-orange-500' : ''}`}>
-                    {pkg.featured && (
+                filteredPackages.map(pkg => {
+                  const pkgData = pkg.data || pkg;
+                  return (
+                  <Card key={pkg.id} className={`relative ${pkgData.featured ? 'border-2 border-orange-500' : ''}`}>
+                    {pkgData.featured && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                         <Badge className="bg-orange-600">Recommended</Badge>
                       </div>
                     )}
                     <CardHeader>
                       <div className="flex items-start justify-between mb-3">
-                        <Badge className={getTierColor(pkg.tier_level)}>
-                          {pkg.tier_level}
+                        <Badge className={getTierColor(pkgData.tier_level)}>
+                          {pkgData.tier_level}
                         </Badge>
-                        {!pkg.is_active && (
+                        {!pkgData.is_active && (
                           <Badge variant="outline" className="text-red-600 border-red-300">
                             Inactive
                           </Badge>
                         )}
                       </div>
-                      <CardTitle className="text-2xl">{pkg.package_name}</CardTitle>
-                      <p className="text-sm text-slate-600 mt-2">{pkg.description}</p>
+                      <CardTitle className="text-2xl">{pkgData.package_name}</CardTitle>
+                      <p className="text-sm text-slate-600 mt-2">{pkgData.description}</p>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="border-t pt-4">
                         <div className="flex items-baseline gap-2">
                           <DollarSign className="w-5 h-5 text-slate-500 mt-1" />
                           <div>
-                            {pkg.pricing_model === 'per_item' ? (
+                            {pkgData.pricing_model === 'per_item' ? (
                               <>
-                                <div className="text-3xl font-bold text-slate-900">${pkg.per_item_price}</div>
+                                <div className="text-3xl font-bold text-slate-900">${pkgData.per_item_price}</div>
                                 <div className="text-sm text-slate-600">per item</div>
-                                {pkg.platform_fee_percentage && (
+                                {pkgData.platform_fee_percentage && (
                                   <div className="text-sm text-slate-600 mt-1">
-                                    + {pkg.platform_fee_percentage}% platform fee
+                                    + {pkgData.platform_fee_percentage}% platform fee
                                   </div>
                                 )}
                               </>
                             ) : (
                               <>
-                                <div className="text-3xl font-bold text-slate-900">${pkg.monthly_price}</div>
+                                <div className="text-3xl font-bold text-slate-900">${pkgData.monthly_price}</div>
                                 <div className="text-sm text-slate-600">per month</div>
-                                {pkg.annual_price && (
+                                {pkgData.annual_price && (
                                   <div className="mt-2 text-sm text-slate-600">
-                                    ${pkg.annual_price}/year (save ${(pkg.monthly_price * 12 - pkg.annual_price).toFixed(0)})
+                                    ${pkgData.annual_price}/year (save ${(pkgData.monthly_price * 12 - pkgData.annual_price).toFixed(0)})
                                   </div>
                                 )}
                               </>
@@ -181,10 +183,10 @@ export default function AdminPackages() {
                         </div>
                       </div>
 
-                      {pkg.limits && (
+                      {pkgData.limits && (
                         <div className="space-y-2 border-t pt-4">
                           <p className="text-sm font-semibold text-slate-700">Limits:</p>
-                          {Object.entries(pkg.limits).map(([key, value]) => (
+                          {Object.entries(pkgData.limits).map(([key, value]) => (
                             value && (
                               <div key={key} className="text-sm text-slate-600 flex items-center gap-2">
                                 <Check className="w-4 h-4 text-green-600" />
@@ -195,10 +197,10 @@ export default function AdminPackages() {
                         </div>
                       )}
 
-                      {pkg.features && pkg.features.length > 0 && (
+                      {pkgData.features && pkgData.features.length > 0 && (
                         <div className="space-y-2 border-t pt-4">
                           <p className="text-sm font-semibold text-slate-700">Features:</p>
-                          {pkg.features.map((feature, idx) => (
+                          {pkgData.features.map((feature, idx) => (
                             <div key={idx} className="text-sm text-slate-600 flex items-start gap-2">
                               <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                               <span>{feature}</span>
@@ -217,7 +219,7 @@ export default function AdminPackages() {
                       </Button>
                     </CardContent>
                   </Card>
-                ))
+                );})
               )}
             </div>
           </TabsContent>
