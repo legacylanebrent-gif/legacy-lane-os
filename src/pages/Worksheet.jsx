@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
-  Printer, Mail, FileDown, Plus, X, Edit, Check
+  Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins
 } from 'lucide-react';
 import {
   Select,
@@ -25,6 +25,7 @@ export default function Worksheet() {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [activeTab, setActiveTab] = useState('transactions');
   
   // Transaction form state
@@ -42,6 +43,14 @@ export default function Worksheet() {
   const [bundleItemInput, setBundleItemInput] = useState('');
   const [bundleItemPrice, setBundleItemPrice] = useState('');
   const [bundlePrice, setBundlePrice] = useState('');
+
+  // Offer form state
+  const [offerItemName, setOfferItemName] = useState('');
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerFullName, setOfferFullName] = useState('');
+  const [offerPhone, setOfferPhone] = useState('');
+  const [offerEmail, setOfferEmail] = useState('');
+  const [offerNotes, setOfferNotes] = useState('');
 
   // Expense form state
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -88,6 +97,10 @@ export default function Worksheet() {
       // Load expenses
       const expenseData = await base44.entities.Expense.filter({ sale_id: saleId }, '-created_date');
       setExpenses(expenseData);
+
+      // Load offers
+      const offerData = await base44.entities.Offer.filter({ sale_id: saleId }, '-created_date');
+      setOffers(offerData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -135,6 +148,43 @@ export default function Worksheet() {
     } catch (error) {
       console.error('Error updating transaction:', error);
       alert('Failed to update transaction');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAddOffer = async () => {
+    if (!offerItemName.trim() || !offerAmount || offerAmount <= 0 || !offerFullName.trim()) {
+      alert('Please enter item name, offer amount, and full name');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await base44.entities.Offer.create({
+        sale_id: sale.id,
+        item_name: offerItemName,
+        offer_amount: parseFloat(offerAmount),
+        full_name: offerFullName,
+        phone: offerPhone,
+        email: offerEmail,
+        notes: offerNotes,
+        status: 'pending'
+      });
+
+      // Clear form
+      setOfferItemName('');
+      setOfferAmount('');
+      setOfferFullName('');
+      setOfferPhone('');
+      setOfferEmail('');
+      setOfferNotes('');
+
+      // Reload offers
+      await loadData();
+    } catch (error) {
+      console.error('Error adding offer:', error);
+      alert('Failed to add offer');
     } finally {
       setSubmitting(false);
     }
@@ -312,6 +362,9 @@ export default function Worksheet() {
   const reimbursableCount = expenses.filter(e => e.is_reimbursable).length;
   const nonReimbursableCount = expenses.filter(e => !e.is_reimbursable).length;
 
+  const totalOffers = offers.reduce((sum, o) => sum + (o.offer_amount || 0), 0);
+  const pendingOffers = offers.filter(o => o.status === 'pending').length;
+
   if (loading) {
     return (
       <div className="p-8">
@@ -368,6 +421,10 @@ export default function Worksheet() {
           <TabsTrigger value="transactions">
             <DollarSign className="w-4 h-4 mr-2" />
             Transactions
+          </TabsTrigger>
+          <TabsTrigger value="offers">
+            <HandCoins className="w-4 h-4 mr-2" />
+            Offers
           </TabsTrigger>
           <TabsTrigger value="expenses">
             <Building2 className="w-4 h-4 mr-2" />
@@ -441,7 +498,20 @@ export default function Worksheet() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-600">Total Offers</span>
+                  <HandCoins className="w-4 h-4 text-amber-600" />
+                </div>
+                <div className="text-2xl font-bold text-amber-600">
+                  ${totalOffers.toFixed(2)}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">{pendingOffers} pending</div>
+              </CardContent>
+            </Card>
+            </div>
 
           {/* Add Transaction Form */}
           <Card className="bg-white shadow-md">
@@ -798,6 +868,151 @@ export default function Worksheet() {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="offers" className="space-y-6">
+          {/* Add Offer Form */}
+          <Card className="bg-white shadow-md">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">Add New Offer</h3>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Item <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Item name..."
+                      value={offerItemName}
+                      onChange={(e) => setOfferItemName(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Offer Amount <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={offerAmount}
+                      onChange={(e) => setOfferAmount(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="John Doe"
+                      value={offerFullName}
+                      onChange={(e) => setOfferFullName(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Phone
+                    </label>
+                    <Input
+                      placeholder="(555) 123-4567"
+                      value={offerPhone}
+                      onChange={(e) => setOfferPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Email
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="john@example.com"
+                      value={offerEmail}
+                      onChange={(e) => setOfferEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Notes (optional)
+                  </label>
+                  <Input
+                    placeholder="Additional notes..."
+                    value={offerNotes}
+                    onChange={(e) => setOfferNotes(e.target.value)}
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleAddOffer}
+                  disabled={submitting}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white h-12 text-base font-semibold"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  {submitting ? 'Adding...' : 'Add Offer'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Offers List */}
+          {offers.length > 0 && (
+            <Card className="bg-white shadow-md">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Offers</h3>
+                <div className="space-y-3">
+                  {offers.map((offer) => (
+                    <div 
+                      key={offer.id}
+                      className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">{offer.item_name}</p>
+                        <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
+                          <span>{offer.full_name}</span>
+                          {offer.phone && (
+                            <>
+                              <span>•</span>
+                              <span>{offer.phone}</span>
+                            </>
+                          )}
+                          {offer.email && (
+                            <>
+                              <span>•</span>
+                              <span>{offer.email}</span>
+                            </>
+                          )}
+                        </div>
+                        {offer.notes && (
+                          <p className="text-sm text-slate-500 mt-1">{offer.notes}</p>
+                        )}
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-xl font-bold text-amber-600">
+                          ${offer.offer_amount.toFixed(2)}
+                        </p>
+                        <Badge className={`mt-1 ${
+                          offer.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          offer.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {offer.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="expenses" className="space-y-6">
