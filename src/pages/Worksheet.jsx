@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, Plus, Minus, Trash2, DollarSign, ShoppingCart, 
-  CreditCard, Receipt, Calculator
+  CreditCard, Receipt, Calculator, Package
 } from 'lucide-react';
 
 export default function Worksheet() {
