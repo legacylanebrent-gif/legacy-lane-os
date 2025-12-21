@@ -454,6 +454,9 @@ export default function Home() {
                         <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
                           National Featured
                         </Badge>
+                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
+                          <Heart className="w-4 h-4 text-slate-600" />
+                        </button>
                       </div>
                     )}
                     <CardContent className="p-5">
@@ -500,10 +503,6 @@ export default function Home() {
                       )}
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
-                          <span>{sale.views || 0} views</span>
-                          <Heart className="w-4 h-4" />
-                        </div>
                         <div className="flex gap-2">
                           <Button
                             onClick={(e) => handleAddToRoute(e, sale.id)}
@@ -568,6 +567,9 @@ export default function Home() {
                         <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">
                           Local Featured
                         </Badge>
+                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
+                          <Heart className="w-4 h-4 text-slate-600" />
+                        </button>
                       </div>
                     )}
                     <CardContent className="p-5">
@@ -619,10 +621,6 @@ export default function Home() {
                       )}
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
-                          <span>{sale.views || 0} views</span>
-                          <Heart className="w-4 h-4" />
-                        </div>
                         <div className="flex gap-2">
                           <Button
                             onClick={(e) => handleAddToRoute(e, sale.id)}
@@ -695,6 +693,9 @@ export default function Home() {
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
+                        <button className="absolute top-3 left-3 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors">
+                          <Heart className="w-4 h-4 text-slate-600" />
+                        </button>
                       </div>
                     )}
                     <CardContent className="p-5">
@@ -746,10 +747,6 @@ export default function Home() {
                       )}
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
-                          <span>{sale.views || 0} views</span>
-                          <Heart className="w-4 h-4" />
-                        </div>
                         <div className="flex gap-2">
                           <Button
                             onClick={(e) => handleAddToRoute(e, sale.id)}
