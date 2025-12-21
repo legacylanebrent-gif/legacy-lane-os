@@ -115,6 +115,8 @@ export default function Worksheet() {
   const companyTotal = transactions.reduce((sum, t) => sum + (t.company_amount || 0), 0);
   const totalItemsSold = transactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
   const currentTotal = price && quantity ? (parseFloat(price) * quantity) : 0;
+  const commissionRate = sale?.commission_rate || 20;
+  const sellerPercentage = 100 - commissionRate;
 
   if (loading) {
     return (
