@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   MapPin, Phone, Mail, Globe, Star, Calendar, Building2, 
-  ArrowLeft, CheckCircle, TrendingUp, Home as HomeIcon
+  ArrowLeft, CheckCircle, TrendingUp, Home as HomeIcon, MessageSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
+import MessageModal from '@/components/messaging/MessageModal';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -420,10 +421,19 @@ export default function BusinessProfile() {
               Contact {business.company_name || business.full_name} to learn more about their services
             </p>
             <div className="flex gap-4 justify-center">
+              {currentUser && (
+                <Button 
+                  onClick={() => setMessageModalOpen(true)}
+                  className="bg-cyan-600 hover:bg-cyan-700 gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Message Company
+                </Button>
+              )}
               {business.phone && (
                 <Button 
                   onClick={() => window.location.href = `tel:${business.phone}`}
-                  className="bg-cyan-600 hover:bg-cyan-700 gap-2"
+                  className="bg-orange-600 hover:bg-orange-700 gap-2"
                 >
                   <Phone className="w-4 h-4" />
                   Call Now
@@ -443,6 +453,15 @@ export default function BusinessProfile() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Message Modal */}
+      {currentUser && business && (
+        <MessageModal
+          open={messageModalOpen}
+          onClose={() => setMessageModalOpen(false)}
+          recipient={business}
+        />
+      )}
     </div>
   );
 }
