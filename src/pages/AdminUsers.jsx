@@ -66,8 +66,7 @@ export default function AdminUsers() {
 
     if (selectedRole !== 'all') {
       filtered = filtered.filter(user => 
-        user.primary_account_type === selectedRole || 
-        user.primary_role === selectedRole ||
+        user.primary_account_type === selectedRole ||
         user.account_types?.includes(selectedRole)
       );
     }
@@ -116,8 +115,8 @@ export default function AdminUsers() {
     return colors[role] || 'bg-slate-100 text-slate-700';
   };
 
-  const roleOptions = [
-    { value: 'all', label: 'All Roles' },
+  const accountTypeOptions = [
+    { value: 'all', label: 'All Account Types' },
     { value: 'super_admin', label: 'Super Admin' },
     { value: 'platform_ops', label: 'Platform Ops' },
     { value: 'growth_team', label: 'Growth Team' },
@@ -217,13 +216,13 @@ export default function AdminUsers() {
 
           <div className="grid md:grid-cols-3 gap-4">
             <div>
-              <Label className="text-xs text-slate-600 mb-2 block">Account Role</Label>
+              <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Roles" />
+                  <SelectValue placeholder="All Account Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roleOptions.map(option => (
+                  {accountTypeOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -299,9 +298,9 @@ export default function AdminUsers() {
                       <div>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-xl font-semibold text-slate-900">{user.full_name}</h3>
-                          {(user.primary_account_type || user.primary_role) && (
-                            <Badge className={getRoleBadgeColor(user.primary_account_type || user.primary_role)}>
-                              {(user.primary_account_type || user.primary_role).replace(/_/g, ' ')}
+                          {user.primary_account_type && (
+                            <Badge className={getRoleBadgeColor(user.primary_account_type)}>
+                              {user.primary_account_type.replace(/_/g, ' ')}
                             </Badge>
                           )}
                           {!user.onboarding_completed && (
@@ -335,12 +334,12 @@ export default function AdminUsers() {
                         </div>
                       </div>
 
-                      {(user.account_types || user.roles) && (user.account_types || user.roles).length > 1 && (
+                      {user.account_types && user.account_types.length > 1 && (
                         <div className="flex flex-wrap gap-2">
-                          <span className="text-xs text-slate-500 font-medium">Additional Roles:</span>
-                          {(user.account_types || user.roles).filter(r => r !== user.primary_account_type && r !== user.primary_role).map((role, idx) => (
+                          <span className="text-xs text-slate-500 font-medium">Additional Account Types:</span>
+                          {user.account_types.filter(r => r !== user.primary_account_type).map((type, idx) => (
                             <Badge key={idx} variant="outline" className="text-xs">
-                              {role.replace(/_/g, ' ')}
+                              {type.replace(/_/g, ' ')}
                             </Badge>
                           ))}
                         </div>
