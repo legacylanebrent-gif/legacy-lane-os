@@ -229,7 +229,9 @@ export default function MySales() {
                   {sale.images && sale.images.length > 0 && (
                     <div className="relative h-48 md:h-auto md:w-64 overflow-hidden flex-shrink-0">
                       <img
-                        src={sale.images[0]}
+                        src={typeof sale.images[0] === 'string' 
+                          ? sale.images[0] 
+                          : sale.images[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
                         alt={sale.title}
                         className="w-full h-full object-cover"
                       />
