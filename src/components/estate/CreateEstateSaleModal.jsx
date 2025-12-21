@@ -51,7 +51,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
   const [editingImage, setEditingImage] = useState(null);
   const [labelingImages, setLabelingImages] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -229,15 +229,16 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     if (files.length === 0) return;
 
     setUploadingImages(true);
-    setUploadProgress({ current: 0, total: files.length });
+    setUploadProgress({ current: 0, total: files.length, successful: 0 });
 
     try {
       const imageObjects = [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        setUploadProgress(prev => ({ ...prev, current: i + 1 }));
+
         try {
-          setUploadProgress({ current: i + 1, total: files.length });
           const processedFile = await processImage(file);
           const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
           imageObjects.push({
@@ -246,6 +247,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
             description: '',
             rotation: 0
           });
+          setUploadProgress(prev => ({ ...prev, successful: prev.successful + 1 }));
         } catch (error) {
           console.error('Error processing file:', file.name, error);
         }
@@ -257,16 +259,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
           images: [...prev.images, ...imageObjects]
         }));
       }
-
-      if (imageObjects.length < files.length) {
-        alert(`Successfully uploaded ${imageObjects.length} of ${files.length} images`);
-      }
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('Failed to upload images: ' + error.message);
     } finally {
       setUploadingImages(false);
-      setUploadProgress({ current: 0, total: 0 });
+      setUploadProgress({ current: 0, total: 0, successful: 0 });
     }
   };
 
@@ -640,6 +637,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                     <Label className="flex items-center gap-2">
                       <ImageIcon className="w-4 h-4" />
                       Estate Sale Photos
+                      {formData.images.length > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {formData.images.length} {formData.images.length === 1 ? 'photo' : 'photos'}
+                        </Badge>
+                      )}
                     </Label>
                     <p className="text-sm text-slate-600">Photos will be auto-resized to 1200px max, 75% quality, WebP format</p>
                   </div>
@@ -678,14 +680,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                     <div className="mt-4 space-y-2">
                       <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
                       <p className="text-xs text-slate-600">
-                        Uploading {uploadProgress.current} of {uploadProgress.total} images...
+                        Processing {uploadProgress.current} of {uploadProgress.total} images... ({uploadProgress.successful} successful)
                       </p>
                     </div>
                   )}
                 </div>
 
                 {formData.images.length > 0 && (
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-8 gap-3">
                     {formData.images.map((image, index) => (
                       <div key={index} className="space-y-2">
                         <div className="relative group">
