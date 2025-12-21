@@ -174,7 +174,7 @@ export default function AdminPackages() {
                     <CardContent className="space-y-4">
                       <div className="border-t pt-4">
                         <div className="flex items-baseline gap-2">
-                          <DollarSign className="w-5 h-5 text-slate-500 mt-1" />
+                          <CreditCard className="w-5 h-5 text-slate-500 mt-1" />
                           <div>
                             {pkgData.pricing_model === 'per_item' ? (
                               <>
