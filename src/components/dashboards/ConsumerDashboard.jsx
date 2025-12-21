@@ -11,11 +11,25 @@ import { formatDistanceToNow } from 'date-fns';
 
 export default function ConsumerDashboard({ user }) {
   const [recentActivity, setRecentActivity] = useState([]);
+  const [recommendations, setRecommendations] = useState({ sales: [], items: [] });
   const [loading, setLoading] = useState(true);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
 
   useEffect(() => {
     loadRecentActivity();
+    loadRecommendations();
   }, []);
+
+  const loadRecommendations = async () => {
+    try {
+      const response = await base44.functions.invoke('getRecommendations', {});
+      setRecommendations(response.data);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
 
   const loadRecentActivity = async () => {
     try {
@@ -168,6 +182,129 @@ export default function ConsumerDashboard({ user }) {
           );
         })}
       </div>
+
+      {/* AI Recommendations */}
+      <Card className="bg-gradient-to-br from-orange-50 to-cyan-50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-serif text-navy-900 flex items-center gap-2">
+              ✨ Recommended For You
+            </CardTitle>
+            <Badge className="bg-gradient-to-r from-orange-600 to-orange-700 text-white">
+              AI Powered
+            </Badge>
+          </div>
+          <p className="text-sm text-slate-600 mt-2">
+            Personalized suggestions based on your interests and activity
+          </p>
+        </CardHeader>
+        <CardContent>
+          {loadingRecommendations ? (
+            <div className="space-y-4">
+              <div className="animate-pulse space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-24 bg-white rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Recommended Sales */}
+              {recommendations.sales.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-navy-900 mb-3 flex items-center gap-2">
+                    <Home className="w-5 h-5 text-orange-600" />
+                    Estate Sales You'll Love
+                  </h3>
+                  <div className="space-y-3">
+                    {recommendations.sales.slice(0, 3).map(sale => (
+                      <Link
+                        key={sale.id}
+                        to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
+                        className="block"
+                      >
+                        <Card className="hover:shadow-lg transition-all border-2 border-transparent hover:border-orange-200">
+                          <CardContent className="p-4">
+                            <div className="flex gap-4">
+                              {sale.images?.[0] && (
+                                <img
+                                  src={sale.images[0]}
+                                  alt={sale.title}
+                                  className="w-20 h-20 rounded-lg object-cover"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-navy-900 mb-1">
+                                  {sale.title}
+                                </h4>
+                                <p className="text-xs text-slate-600 mb-2 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {sale.property_address?.city}, {sale.property_address?.state}
+                                </p>
+                                <p className="text-xs text-cyan-600 italic">
+                                  💡 {sale.recommendation_reason}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recommended Items */}
+              {recommendations.items.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-navy-900 mb-3 flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5 text-green-600" />
+                    Marketplace Items For You
+                  </h3>
+                  <div className="space-y-3">
+                    {recommendations.items.slice(0, 3).map(item => (
+                      <Card key={item.id} className="hover:shadow-lg transition-all border-2 border-transparent hover:border-green-200">
+                        <CardContent className="p-4">
+                          <div className="flex gap-4">
+                            {item.images?.[0] && (
+                              <img
+                                src={item.images[0]}
+                                alt={item.title}
+                                className="w-20 h-20 rounded-lg object-cover"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-navy-900 mb-1">
+                                {item.title}
+                              </h4>
+                              <p className="text-sm font-bold text-green-600 mb-2">
+                                ${item.price.toFixed(2)}
+                              </p>
+                              <p className="text-xs text-cyan-600 italic">
+                                💡 {item.recommendation_reason}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recommendations.sales.length === 0 && recommendations.items.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-3">🤖</div>
+                  <p className="text-slate-600 mb-2">Start exploring to get personalized recommendations</p>
+                  <p className="text-sm text-slate-500">
+                    Save estate sales and browse items to help our AI learn your preferences
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
