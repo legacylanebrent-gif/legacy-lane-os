@@ -173,7 +173,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        img.onload = async () => {
+        img.onload = () => {
           try {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -198,9 +198,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
             canvas.toBlob(
               (blob) => {
-                resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+                if (!blob) {
+                  reject(new Error('Failed to create blob'));
+                  return;
+                }
+                const processedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
                   type: 'image/webp'
-                }));
+                });
+                resolve(processedFile);
               },
               'image/webp',
               0.75
@@ -209,10 +214,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
             reject(error);
           }
         };
-        img.onerror = reject;
+        img.onerror = () => reject(new Error('Failed to load image'));
         img.src = e.target.result;
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsDataURL(file);
     });
   };
@@ -223,25 +228,36 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
     setUploadingImages(true);
     try {
-      const uploadPromises = files.map(async (file) => {
-        const processedFile = await processImage(file);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
-        return {
-          url: file_url,
-          name: '',
-          description: '',
-          rotation: 0
-        };
-      });
+      const imageObjects = [];
 
-      const imageObjects = await Promise.all(uploadPromises);
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...imageObjects]
-      }));
+      for (const file of files) {
+        try {
+          const processedFile = await processImage(file);
+          const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
+          imageObjects.push({
+            url: file_url,
+            name: '',
+            description: '',
+            rotation: 0
+          });
+        } catch (error) {
+          console.error('Error processing file:', file.name, error);
+        }
+      }
+
+      if (imageObjects.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...imageObjects]
+        }));
+      }
+
+      if (imageObjects.length < files.length) {
+        alert(`Successfully uploaded ${imageObjects.length} of ${files.length} images`);
+      }
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('Failed to upload images');
+      alert('Failed to upload images: ' + error.message);
     } finally {
       setUploadingImages(false);
     }
