@@ -36,7 +36,7 @@ export default function EstateSaleDetail() {
         return;
       }
 
-      const saleData = await base44.entities.EstateSale.list();
+      const saleData = await base44.asServiceRole.entities.EstateSale.list();
       const foundSale = saleData.find(s => s.id === saleId);
       
       if (!foundSale) {
