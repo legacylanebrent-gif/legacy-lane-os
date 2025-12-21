@@ -1,12 +1,29 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, Printer } from 'lucide-react';
+import { Download, Printer, ArrowRight, ArrowLeft } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+const SIGN_TEMPLATES = [
+  { id: 'main', label: 'Main Sale Sign' },
+  { id: 'do_not_enter', label: 'Do Not Enter' },
+  { id: 'no_bathroom', label: 'No Bathroom' },
+  { id: 'not_for_sale', label: 'Not For Sale' },
+  { id: 'garage_right', label: 'Garage →' },
+  { id: 'garage_left', label: 'Garage ←' },
+  { id: 'basement_right', label: 'Basement →' },
+  { id: 'basement_left', label: 'Basement ←' },
+  { id: 'venmo_qr', label: 'Venmo QR Code' },
+  { id: 'sale_starts', label: 'Sale Starts At' },
+  { id: 'parking_here', label: 'Parking Here' },
+  { id: 'no_parking', label: 'No Parking Here' },
+  { id: 'doors_open', label: 'Doors Open At' }
+];
+
 export default function SignTemplateModal({ open, onClose, sale, operator }) {
   const templateRef = useRef(null);
+  const [selectedTemplate, setSelectedTemplate] = useState('main');
 
   const handlePrint = () => {
     window.print();
@@ -31,19 +48,165 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, 8.5, 11);
-      pdf.save(`${sale?.title || 'estate-sale'}-sign.pdf`);
+      const template = SIGN_TEMPLATES.find(t => t.id === selectedTemplate);
+      pdf.save(`${template?.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}-sign.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
       alert('Failed to export PDF');
     }
   };
 
+  const renderTemplateContent = () => {
+    switch (selectedTemplate) {
+      case 'main':
+        return (
+          <div className="text-center">
+            <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4">
+              {sale?.title || 'Estate Sale'}
+            </h1>
+            {sale?.property_address && (
+              <p className="text-2xl text-slate-700 mb-6">
+                {sale.property_address.street}
+                <br />
+                {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
+              </p>
+            )}
+            {sale?.sale_dates && sale.sale_dates.length > 0 && (
+              <div className="mt-8 space-y-2">
+                {sale.sale_dates.map((date, idx) => (
+                  <p key={idx} className="text-xl text-slate-800">
+                    {new Date(date.date).toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                    <br />
+                    {date.start_time} - {date.end_time}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'do_not_enter':
+        return (
+          <h1 className="text-8xl font-bold text-red-600 text-center">
+            DO NOT ENTER
+          </h1>
+        );
+      
+      case 'no_bathroom':
+        return (
+          <h1 className="text-7xl font-bold text-slate-900 text-center">
+            NO BATHROOM
+          </h1>
+        );
+      
+      case 'not_for_sale':
+        return (
+          <h1 className="text-7xl font-bold text-slate-900 text-center">
+            NOT FOR SALE
+          </h1>
+        );
+      
+      case 'garage_right':
+        return (
+          <div className="flex items-center justify-center gap-8">
+            <h1 className="text-8xl font-bold text-slate-900">GARAGE</h1>
+            <ArrowRight className="w-48 h-48 text-slate-900" strokeWidth={3} />
+          </div>
+        );
+      
+      case 'garage_left':
+        return (
+          <div className="flex items-center justify-center gap-8">
+            <ArrowLeft className="w-48 h-48 text-slate-900" strokeWidth={3} />
+            <h1 className="text-8xl font-bold text-slate-900">GARAGE</h1>
+          </div>
+        );
+      
+      case 'basement_right':
+        return (
+          <div className="flex items-center justify-center gap-8">
+            <h1 className="text-8xl font-bold text-slate-900">BASEMENT</h1>
+            <ArrowRight className="w-48 h-48 text-slate-900" strokeWidth={3} />
+          </div>
+        );
+      
+      case 'basement_left':
+        return (
+          <div className="flex items-center justify-center gap-8">
+            <ArrowLeft className="w-48 h-48 text-slate-900" strokeWidth={3} />
+            <h1 className="text-8xl font-bold text-slate-900">BASEMENT</h1>
+          </div>
+        );
+      
+      case 'venmo_qr':
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-6xl font-bold text-blue-600 mb-8">
+              We Accept Venmo
+            </h1>
+            {operator?.venmo_qr_code ? (
+              <img 
+                src={operator.venmo_qr_code} 
+                alt="Venmo QR Code"
+                className="mx-auto max-w-md max-h-96 object-contain"
+              />
+            ) : (
+              <div className="w-96 h-96 mx-auto border-4 border-dashed border-slate-300 flex items-center justify-center">
+                <p className="text-slate-500">No Venmo QR Code Uploaded</p>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'sale_starts':
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-6xl font-bold text-slate-900">SALE STARTS AT</h1>
+            <p className="text-8xl font-bold text-green-600">
+              {sale?.sale_dates?.[0]?.start_time || '9:00 AM'}
+            </p>
+          </div>
+        );
+      
+      case 'parking_here':
+        return (
+          <h1 className="text-8xl font-bold text-green-600 text-center">
+            PARKING HERE
+          </h1>
+        );
+      
+      case 'no_parking':
+        return (
+          <h1 className="text-7xl font-bold text-red-600 text-center">
+            NO PARKING HERE
+          </h1>
+        );
+      
+      case 'doors_open':
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-6xl font-bold text-slate-900">DOORS OPEN AT</h1>
+            <p className="text-8xl font-bold text-blue-600">
+              {sale?.sale_dates?.[0]?.start_time || '9:00 AM'}
+            </p>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Sign Template</span>
+            <span>Sign Templates</span>
             <div className="flex gap-2">
               <Button onClick={handlePrint} variant="outline" size="sm">
                 <Printer className="w-4 h-4 mr-2" />
@@ -57,76 +220,68 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
           </DialogTitle>
         </DialogHeader>
 
-        {/* Letter-sized template: 8.5" x 11" at 96 DPI = 816px x 1056px */}
-        <div className="bg-slate-100 p-6 flex items-center justify-center">
-          <div 
-            ref={templateRef}
-            className="bg-white shadow-lg relative"
-            style={{
-              width: '816px',
-              height: '1056px',
-              padding: '48px'
-            }}
-          >
-            {/* Main content area - 90% of page */}
-            <div style={{ height: '90%' }} className="flex items-center justify-center">
-              <div className="text-center">
-                <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4">
-                  {sale?.title || 'Estate Sale'}
-                </h1>
-                {sale?.property_address && (
-                  <p className="text-2xl text-slate-700 mb-6">
-                    {sale.property_address.street}
-                    <br />
-                    {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
-                  </p>
-                )}
-                {sale?.sale_dates && sale.sale_dates.length > 0 && (
-                  <div className="mt-8 space-y-2">
-                    {sale.sale_dates.map((date, idx) => (
-                      <p key={idx} className="text-xl text-slate-800">
-                        {new Date(date.date).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
-                        <br />
-                        {date.start_time} - {date.end_time}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+        <div className="flex gap-6">
+          {/* Template selector */}
+          <div className="w-48 space-y-1">
+            {SIGN_TEMPLATES.map((template) => (
+              <Button
+                key={template.id}
+                variant={selectedTemplate === template.id ? "default" : "ghost"}
+                className={`w-full justify-start text-sm ${
+                  selectedTemplate === template.id ? "bg-orange-600 hover:bg-orange-700" : ""
+                }`}
+                onClick={() => setSelectedTemplate(template.id)}
+              >
+                {template.label}
+              </Button>
+            ))}
+          </div>
 
-            {/* Operator info - 10% of page, lower right corner */}
+          {/* Letter-sized template: 8.5" x 11" at 96 DPI = 816px x 1056px */}
+          <div className="bg-slate-100 p-6 flex items-center justify-center flex-1">
             <div 
-              className="absolute bottom-12 right-12 text-right"
-              style={{ maxWidth: '300px' }}
+              ref={templateRef}
+              className="bg-white shadow-lg relative"
+              style={{
+                width: '816px',
+                height: '1056px',
+                padding: '48px'
+              }}
             >
-              <div className="space-y-1">
-                {operator?.company_logo && (
-                  <img 
-                    src={operator.company_logo} 
-                    alt="Company Logo"
-                    className="ml-auto mb-2 max-h-12 max-w-32 object-contain"
-                  />
-                )}
-                {operator?.company_name && (
-                  <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
-                )}
-                {operator?.company_address && (
-                  <p className="text-xs text-slate-700">{operator.company_address}</p>
-                )}
-                {operator?.phone && (
-                  <p className="text-xs text-slate-700">{operator.phone}</p>
-                )}
-                {operator?.email && (
-                  <p className="text-xs text-slate-700">{operator.email}</p>
-                )}
-                {operator?.company_website && (
-                  <p className="text-xs text-slate-700">{operator.company_website}</p>
-                )}
+              {/* Main content area - 90% of page */}
+              <div style={{ height: '90%' }} className="flex items-center justify-center">
+                {renderTemplateContent()}
+              </div>
+
+              {/* Operator info - 10% of page, lower right corner */}
+              <div 
+                className="absolute bottom-12 right-12 text-right"
+                style={{ maxWidth: '300px' }}
+              >
+                <div className="space-y-1">
+                  {operator?.company_logo && (
+                    <img 
+                      src={operator.company_logo} 
+                      alt="Company Logo"
+                      className="ml-auto mb-2 max-h-12 max-w-32 object-contain"
+                    />
+                  )}
+                  {operator?.company_name && (
+                    <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
+                  )}
+                  {operator?.company_address && (
+                    <p className="text-xs text-slate-700">{operator.company_address}</p>
+                  )}
+                  {operator?.phone && (
+                    <p className="text-xs text-slate-700">{operator.phone}</p>
+                  )}
+                  {operator?.email && (
+                    <p className="text-xs text-slate-700">{operator.email}</p>
+                  )}
+                  {operator?.company_website && (
+                    <p className="text-xs text-slate-700">{operator.company_website}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
