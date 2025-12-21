@@ -1162,7 +1162,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                         <div 
                           {...provided.droppableProps}
                           ref={provided.innerRef}
-                          className="grid grid-cols-6 gap-3"
+                          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"
                         >
                           {formData.images.map((image, index) => (
                             <Draggable key={index} draggableId={`image-${index}`} index={index}>
