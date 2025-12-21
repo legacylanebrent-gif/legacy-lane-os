@@ -16,8 +16,15 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
 
   const BATCH_SIZE = 10;
 
+  React.useEffect(() => {
+    if (open) {
+      setWorkingImages([...images]);
+    }
+  }, [open]);
+
   const processBatch = async (startIndex) => {
-    const unlabeledImages = images.filter(img => !img.name || img.name.trim() === '');
+    const currentImages = workingImages.length > 0 ? workingImages : images;
+    const unlabeledImages = currentImages.filter(img => !img.name || img.name.trim() === '');
     const endIndex = Math.min(startIndex + BATCH_SIZE, unlabeledImages.length);
     const batchImages = unlabeledImages.slice(startIndex, endIndex);
 
@@ -180,6 +187,7 @@ Be specific and practical. Focus on the main item in the photo.`;
     setResults([]);
     setCurrentBatch(0);
     setCompleted(false);
+    setWorkingImages([...images]);
     await processBatch(0);
   };
 
