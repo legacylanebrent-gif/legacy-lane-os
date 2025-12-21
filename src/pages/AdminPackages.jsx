@@ -31,9 +31,8 @@ export default function AdminPackages() {
   const loadPackages = async () => {
     try {
       const data = await base44.asServiceRole.entities.SubscriptionPackage.list();
-      // Handle both direct data array and wrapped response
-      const packagesData = Array.isArray(data) ? data : (data?.data || []);
-      setPackages(packagesData);
+      console.log('Loaded packages:', data);
+      setPackages(data || []);
     } catch (error) {
       console.error('Error loading packages:', error);
     } finally {
@@ -61,11 +60,18 @@ export default function AdminPackages() {
   };
 
   const filteredPackages = packages
-    .filter(pkg => pkg.data?.account_type === selectedAccountType)
+    .filter(pkg => {
+      const accountType = pkg.data?.account_type || pkg.account_type;
+      return accountType === selectedAccountType;
+    })
     .sort((a, b) => {
       const tierOrder = { basic: 1, pro: 2, premium: 3 };
-      return tierOrder[a.data?.tier_level] - tierOrder[b.data?.tier_level];
+      const tierA = a.data?.tier_level || a.tier_level;
+      const tierB = b.data?.tier_level || b.tier_level;
+      return tierOrder[tierA] - tierOrder[tierB];
     });
+  
+  console.log('Filtered packages:', filteredPackages.length, 'for account type:', selectedAccountType);
 
   if (loading) {
     return (
