@@ -779,7 +779,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                         </Badge>
                       )}
                     </Label>
-                    <p className="text-sm text-slate-600">Drag to reorder • Click to select • Photos will be auto-resized to 1200px max, 75% quality, WebP format</p>
+                    <p className="text-sm text-slate-600">Drag to reorder • Click to select/deselect • Photos are resized for best online viewing</p>
                   </div>
                   <div className="flex gap-2">
                     {selectedImages.length > 0 && (
