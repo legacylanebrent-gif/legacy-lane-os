@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2, Camera } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { STATE_REGIONS } from '@/components/data/StateRegions';
 
@@ -66,6 +66,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [showCameraPrompt, setShowCameraPrompt] = useState(false);
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -288,7 +289,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     });
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e, isCamera = false) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
@@ -361,12 +362,24 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       if (errors.length > 0) {
         alert(`Some files could not be uploaded:\n\n${errors.join('\n')}`);
       }
+
+      // Show prompt for another photo if using camera
+      if (isCamera && imageObjects.length > 0) {
+        setShowCameraPrompt(true);
+      }
     } catch (error) {
       console.error('Error uploading images:', error);
     } finally {
       setUploadingImages(false);
       setUploadProgress({ current: 0, total: 0, successful: 0 });
+      // Clear the input
+      e.target.value = '';
     }
+  };
+
+  const handleTakeAnother = () => {
+    setShowCameraPrompt(false);
+    document.getElementById('camera-upload')?.click();
   };
 
   const removeImage = (index) => {
@@ -760,7 +773,35 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           selectedImages={selectedImages}
           images={formData.images}
           onApply={handleBulkEdit}
-        />
+          />
+
+          {/* Take Another Photo Prompt */}
+          <Dialog open={showCameraPrompt} onOpenChange={setShowCameraPrompt}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Photo Saved!</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-600">Your photo has been saved. Would you like to take another?</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCameraPrompt(false)}
+                  className="flex-1"
+                >
+                  Done
+                </Button>
+                <Button
+                  onClick={handleTakeAnother}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Take Another
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+          </Dialog>
 
         <Tabs value={step.toString()} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
