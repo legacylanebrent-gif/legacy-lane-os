@@ -388,36 +388,61 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const labelImagesWithAI = async () => {
     if (formData.images.length === 0) return;
 
+    // Only label unlabeled images
+    const unlabeledIndices = formData.images
+      .map((img, idx) => (!img.name ? idx : -1))
+      .filter(idx => idx !== -1);
+
+    if (unlabeledIndices.length === 0) {
+      alert('All images already have labels');
+      return;
+    }
+
     setLabelingImages(true);
     try {
-      const imageUrls = formData.images.map(img => img.url);
+      // Process in batches of 10 images
+      const batchSize = 10;
+      const batches = [];
+      for (let i = 0; i < unlabeledIndices.length; i += batchSize) {
+        batches.push(unlabeledIndices.slice(i, i + batchSize));
+      }
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analyze these estate sale photos and provide a short, descriptive name for each image (max 3-4 words). Return a JSON array of strings, one label per image in order.`,
-        file_urls: imageUrls,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            labels: {
-              type: "array",
-              items: { type: "string" }
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        const imageUrls = batch.map(idx => formData.images[idx].url);
+
+        const result = await base44.integrations.Core.InvokeLLM({
+          prompt: `Analyze these estate sale photos and provide a short, descriptive name for each image (max 3-4 words). Return a JSON array of strings, one label per image in order.`,
+          file_urls: imageUrls,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              labels: {
+                type: "array",
+                items: { type: "string" }
+              }
             }
           }
-        }
-      });
+        });
 
-      if (result.labels && Array.isArray(result.labels)) {
-        setFormData(prev => ({
-          ...prev,
-          images: prev.images.map((img, i) => ({
-            ...img,
-            name: img.name || result.labels[i] || ''
-          }))
-        }));
+        if (result.labels && Array.isArray(result.labels)) {
+          setFormData(prev => ({
+            ...prev,
+            images: prev.images.map((img, i) => {
+              const batchIdx = batch.indexOf(i);
+              if (batchIdx !== -1 && result.labels[batchIdx]) {
+                return { ...img, name: result.labels[batchIdx] };
+              }
+              return img;
+            })
+          }));
+        }
       }
+
+      alert(`Successfully labeled ${unlabeledIndices.length} images`);
     } catch (error) {
       console.error('Error labeling images:', error);
-      alert('Failed to label images with AI');
+      alert('Failed to label images with AI: ' + (error.message || 'Unknown error'));
     } finally {
       setLabelingImages(false);
     }
@@ -527,7 +552,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       }));
     } catch (error) {
       console.error('Error generating description:', error);
-      alert('Failed to generate description');
+      alert('Failed to generate description: ' + (error.message || 'Unknown error'));
     } finally {
       setGeneratingDescription(false);
     }
