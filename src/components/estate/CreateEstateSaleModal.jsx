@@ -546,7 +546,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       };
 
       if (sale?.id) {
-        await base44.asServiceRole.entities.EstateSale.update(sale.id, data);
+        await base44.entities.EstateSale.update(sale.id, data);
       } else {
         await base44.entities.EstateSale.create(data);
       }
