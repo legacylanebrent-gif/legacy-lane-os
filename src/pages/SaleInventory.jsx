@@ -20,6 +20,7 @@ export default function SaleInventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
 
   useEffect(() => {
     loadData();
