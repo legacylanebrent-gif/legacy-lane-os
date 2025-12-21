@@ -31,7 +31,9 @@ export default function AdminPackages() {
   const loadPackages = async () => {
     try {
       const data = await base44.asServiceRole.entities.SubscriptionPackage.list();
-      setPackages(data);
+      // Handle both direct data array and wrapped response
+      const packagesData = Array.isArray(data) ? data : (data?.data || []);
+      setPackages(packagesData);
     } catch (error) {
       console.error('Error loading packages:', error);
     } finally {
