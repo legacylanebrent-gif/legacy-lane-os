@@ -67,7 +67,11 @@ export default function CreateItemModal({ onClose, onSuccess }) {
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog open onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-navy-900">
