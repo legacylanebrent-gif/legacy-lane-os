@@ -157,7 +157,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
             location
           }));
 
-          setAddressInput(place.formatted_address || '');
+          setAddressInput(street.trim());
           setShowPredictions(false);
         }
       }
