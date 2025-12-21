@@ -494,6 +494,24 @@ export default function Worksheet() {
                     <p className="text-xs text-slate-600 mt-1">Auto-calculated from items, or enter manually</p>
                   </div>
 
+                  <div>
+                    <Label>
+                      Payment Method <span className="text-red-500">*</span>
+                    </Label>
+                    <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="credit_card">Credit Card</SelectItem>
+                        <SelectItem value="venmo">Venmo</SelectItem>
+                        <SelectItem value="zelle">Zelle</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <Button 
                     onClick={handleSaveBundle}
                     disabled={submitting}
