@@ -54,19 +54,32 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
   });
 
   useEffect(() => {
-    if (!open || !addressInputRef.current) return;
+    if (!open) return;
 
     const loadGoogleMaps = async () => {
-      if (window.google?.maps?.places) {
-        initAutocomplete();
-        return;
-      }
+      try {
+        if (window.google?.maps?.places) {
+          initAutocomplete();
+          return;
+        }
 
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.onload = initAutocomplete;
-      document.head.appendChild(script);
+        // Get API key from backend
+        const { data } = await base44.functions.invoke('getConfig');
+        const apiKey = data.GOOGLE_MAPS_API_KEY;
+
+        if (!apiKey) {
+          console.error('Google Maps API key not found');
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.async = true;
+        script.onload = initAutocomplete;
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error('Error loading Google Maps:', error);
+      }
     };
 
     const initAutocomplete = () => {
