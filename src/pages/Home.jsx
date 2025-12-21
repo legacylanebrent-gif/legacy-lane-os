@@ -614,9 +614,9 @@ export default function Home() {
                       </h4>
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
-                          <span className="truncate">
+                        <div className="flex items-start gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                          <span>
                             {sale.property_address?.street && `${sale.property_address.street}, `}
                             {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
                             {sale.distance !== null && sale.distance !== undefined && (
@@ -744,9 +744,9 @@ export default function Home() {
                       </h4>
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
-                          <span className="truncate">
+                        <div className="flex items-start gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                          <span>
                             {sale.property_address?.street && `${sale.property_address.street}, `}
                             {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
                             {sale.distance !== null && sale.distance !== undefined && (
