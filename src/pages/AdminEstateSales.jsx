@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal } from 'lucide-react';
 
 export default function AdminEstateSales() {
   const [sales, setSales] = useState([]);
   const [filteredSales, setFilteredSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [cityFilter, setCityFilter] = useState('all');
+  const [operatorFilter, setOperatorFilter] = useState('all');
+  const [premiumFilter, setPremiumFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState('all');
+  const [minValue, setMinValue] = useState('');
+  const [maxValue, setMaxValue] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +28,7 @@ export default function AdminEstateSales() {
 
   useEffect(() => {
     filterSales();
-  }, [searchQuery, statusFilter, sales]);
+  }, [searchQuery, statusFilter, cityFilter, operatorFilter, premiumFilter, dateRangeFilter, minValue, maxValue, sales]);
 
   const loadSales = async () => {
     try {
@@ -35,26 +45,116 @@ export default function AdminEstateSales() {
   const filterSales = () => {
     let filtered = sales;
 
+    // Text search
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(sale =>
-        sale.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sale.property_address?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sale.operator_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        sale.title?.toLowerCase().includes(query) ||
+        sale.description?.toLowerCase().includes(query) ||
+        sale.property_address?.street?.toLowerCase().includes(query) ||
+        sale.property_address?.city?.toLowerCase().includes(query) ||
+        sale.property_address?.state?.toLowerCase().includes(query) ||
+        sale.property_address?.zip?.includes(query) ||
+        sale.operator_name?.toLowerCase().includes(query) ||
+        sale.categories?.some(cat => cat.toLowerCase().includes(query)) ||
+        sale.id?.toLowerCase().includes(query)
       );
     }
 
+    // Status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(sale => sale.status === statusFilter);
+    }
+
+    // City filter
+    if (cityFilter !== 'all') {
+      filtered = filtered.filter(sale => sale.property_address?.city === cityFilter);
+    }
+
+    // Operator filter
+    if (operatorFilter !== 'all') {
+      filtered = filtered.filter(sale => sale.operator_id === operatorFilter);
+    }
+
+    // Premium filter
+    if (premiumFilter === 'premium') {
+      filtered = filtered.filter(sale => sale.premium_listing === true);
+    } else if (premiumFilter === 'standard') {
+      filtered = filtered.filter(sale => !sale.premium_listing);
+    }
+
+    // Date range filter
+    if (dateRangeFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter(sale => {
+        if (!sale.sale_dates || sale.sale_dates.length === 0) return false;
+        const saleDate = new Date(sale.sale_dates[0].date);
+        
+        if (dateRangeFilter === 'today') {
+          return saleDate.toDateString() === now.toDateString();
+        } else if (dateRangeFilter === 'this_week') {
+          const weekFromNow = new Date(now);
+          weekFromNow.setDate(now.getDate() + 7);
+          return saleDate >= now && saleDate <= weekFromNow;
+        } else if (dateRangeFilter === 'this_month') {
+          return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
+        } else if (dateRangeFilter === 'next_month') {
+          const nextMonth = new Date(now);
+          nextMonth.setMonth(now.getMonth() + 1);
+          return saleDate.getMonth() === nextMonth.getMonth() && saleDate.getFullYear() === nextMonth.getFullYear();
+        }
+        return true;
+      });
+    }
+
+    // Value range filter
+    if (minValue) {
+      const min = parseFloat(minValue);
+      filtered = filtered.filter(sale => 
+        (sale.estimated_value && sale.estimated_value >= min) || 
+        (sale.actual_revenue && sale.actual_revenue >= min)
+      );
+    }
+    if (maxValue) {
+      const max = parseFloat(maxValue);
+      filtered = filtered.filter(sale => 
+        (sale.estimated_value && sale.estimated_value <= max) || 
+        (sale.actual_revenue && sale.actual_revenue <= max)
+      );
     }
 
     setFilteredSales(filtered);
   };
 
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setCityFilter('all');
+    setOperatorFilter('all');
+    setPremiumFilter('all');
+    setDateRangeFilter('all');
+    setMinValue('');
+    setMaxValue('');
+  };
+
+  const hasActiveFilters = searchQuery || statusFilter !== 'all' || cityFilter !== 'all' || 
+    operatorFilter !== 'all' || premiumFilter !== 'all' || dateRangeFilter !== 'all' || 
+    minValue || maxValue;
+
+  // Get unique cities and operators for filters
+  const uniqueCities = [...new Set(sales.map(s => s.property_address?.city).filter(Boolean))].sort();
+  const uniqueOperators = [...new Set(sales.map(s => ({ id: s.operator_id, name: s.operator_name })).filter(o => o.id))];
+  const uniqueOperatorsMap = uniqueOperators.reduce((acc, op) => {
+    if (!acc[op.id]) acc[op.id] = op.name;
+    return acc;
+  }, {});
+
   const getStatusBadge = (status) => {
     const configs = {
+      draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700' },
       upcoming: { label: 'Upcoming', className: 'bg-blue-100 text-blue-700' },
       active: { label: 'Active', className: 'bg-green-100 text-green-700' },
-      completed: { label: 'Completed', className: 'bg-slate-100 text-slate-700' },
+      completed: { label: 'Completed', className: 'bg-purple-100 text-purple-700' },
       cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-700' }
     };
     const config = configs[status] || configs.upcoming;
@@ -74,33 +174,146 @@ export default function AdminEstateSales() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Estate Sales Management</h1>
-        <p className="text-slate-600">{sales.length} total estate sales</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Estate Sales Management</h1>
+          <p className="text-slate-600">
+            {filteredSales.length} of {sales.length} estate sales
+            {hasActiveFilters && ' (filtered)'}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <Input
-            placeholder="Search by title, city, or operator..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-slate-300 rounded-lg bg-white"
-        >
-          <option value="all">All Status</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-5 h-5 text-slate-600" />
+              <CardTitle>Search & Filters</CardTitle>
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear All
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Input
+              placeholder="Search by title, description, address, operator, categories, or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">City</Label>
+              <Select value={cityFilter} onValueChange={setCityFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Cities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Cities</SelectItem>
+                  {uniqueCities.map(city => (
+                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Operator</Label>
+              <Select value={operatorFilter} onValueChange={setOperatorFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Operators" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Operators</SelectItem>
+                  {Object.entries(uniqueOperatorsMap).map(([id, name]) => (
+                    <SelectItem key={id} value={id}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Listing Type</Label>
+              <Tabs value={premiumFilter} onValueChange={setPremiumFilter}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                  <TabsTrigger value="premium" className="text-xs">Premium</TabsTrigger>
+                  <TabsTrigger value="standard" className="text-xs">Standard</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Sale Date</Label>
+              <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Dates" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Dates</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="this_week">This Week</SelectItem>
+                  <SelectItem value="this_month">This Month</SelectItem>
+                  <SelectItem value="next_month">Next Month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Min Value ($)</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={minValue}
+                onChange={(e) => setMinValue(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Max Value ($)</Label>
+              <Input
+                type="number"
+                placeholder="1,000,000"
+                value={maxValue}
+                onChange={(e) => setMaxValue(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {filteredSales.map(sale => (
