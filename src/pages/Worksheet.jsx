@@ -35,6 +35,13 @@ export default function Worksheet() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Bundle mode state
+  const [bundleMode, setBundleMode] = useState(false);
+  const [bundleName, setBundleName] = useState('');
+  const [bundleItems, setBundleItems] = useState([]);
+  const [bundleItemInput, setBundleItemInput] = useState('');
+  const [bundlePrice, setBundlePrice] = useState('');
+
   // Expense form state
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [expenseCategory, setExpenseCategory] = useState('');
@@ -129,6 +136,60 @@ export default function Worksheet() {
     } catch (error) {
       console.error('Error adding expense:', error);
       alert('Failed to add expense');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const addBundleItem = () => {
+    if (bundleItemInput.trim()) {
+      setBundleItems([...bundleItems, bundleItemInput.trim()]);
+      setBundleItemInput('');
+    }
+  };
+
+  const removeBundleItem = (index) => {
+    setBundleItems(bundleItems.filter((_, i) => i !== index));
+  };
+
+  const handleSaveBundle = async () => {
+    if (!bundleName.trim() || bundleItems.length === 0 || !bundlePrice || parseFloat(bundlePrice) <= 0) {
+      alert('Please enter bundle name, at least one item, and a valid price');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const total = parseFloat(bundlePrice);
+      const commissionRate = sale.commission_rate || 20;
+      const companyAmount = total * (commissionRate / 100);
+      const sellerAmount = total - companyAmount;
+
+      await base44.entities.Transaction.create({
+        sale_id: sale.id,
+        item_name: bundleName,
+        quantity: 1,
+        price: total,
+        total: total,
+        payment_method: paymentMethod,
+        notes: `Bundle: ${bundleItems.join(', ')}`,
+        transaction_date: new Date().toISOString(),
+        seller_amount: sellerAmount,
+        company_amount: companyAmount
+      });
+
+      // Reset bundle form
+      setBundleName('');
+      setBundleItems([]);
+      setBundleItemInput('');
+      setBundlePrice('');
+      setBundleMode(false);
+
+      // Reload transactions
+      await loadData();
+    } catch (error) {
+      console.error('Error saving bundle:', error);
+      alert('Failed to save bundle');
     } finally {
       setSubmitting(false);
     }
@@ -326,14 +387,96 @@ export default function Worksheet() {
           <Card className="bg-white shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-slate-900">Add New Transaction</h3>
-                <Button variant="outline" size="sm">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {bundleMode ? 'Add New Transaction' : 'Add New Transaction'}
+                </h3>
+                <Button 
+                  variant={bundleMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setBundleMode(!bundleMode)}
+                  className={bundleMode ? "bg-purple-600 hover:bg-purple-700" : ""}
+                >
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Bundle
+                  {bundleMode ? 'Bundle Mode' : 'Create Bundle'}
                 </Button>
               </div>
 
-              <div className="space-y-4">
+              {bundleMode ? (
+                <div className="space-y-4 border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                  <div>
+                    <Label>
+                      Bundle Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="e.g., Kitchen Bundle, Living Room Set..."
+                      value={bundleName}
+                      onChange={(e) => setBundleName(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Add Items to Bundle</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Item name..."
+                        value={bundleItemInput}
+                        onChange={(e) => setBundleItemInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addBundleItem()}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        onClick={addBundleItem}
+                        size="icon"
+                        className="bg-slate-900 hover:bg-slate-800"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {bundleItems.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {bundleItems.map((item, index) => (
+                          <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                            <span className="text-sm">{item}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeBundleItem(index)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label>
+                      Bundle Price <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={bundlePrice}
+                      onChange={(e) => setBundlePrice(e.target.value)}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleSaveBundle}
+                    disabled={submitting}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white h-12 text-base font-semibold"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    {submitting ? 'Saving...' : 'Save Bundle'}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Item <span className="text-red-500">*</span>
@@ -418,10 +561,11 @@ export default function Worksheet() {
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   {submitting ? 'Adding...' : 'Add Transaction'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  </Button>
+                  </div>
+                  )}
+                  </CardContent>
+                  </Card>
 
           {/* Transaction List */}
           {transactions.length > 0 && (
