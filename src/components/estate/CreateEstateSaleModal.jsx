@@ -539,7 +539,20 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     setGeneratingDescription(true);
     try {
       const imageUrls = formData.images.slice(0, 5).map(img => img.url);
-      const prompt = `Create a compelling estate sale description for "${formData.title}" located at ${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state}. ${formData.categories.length > 0 ? `Categories include: ${formData.categories.join(', ')}.` : ''} Write 2-3 engaging paragraphs that highlight the sale's unique features and appeal to potential buyers.`;
+      const prompt = `You are writing a marketing description for an estate sale listing.
+
+  Estate Sale Details:
+  - Title: ${formData.title}
+  - Location: ${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state}
+  ${formData.categories.length > 0 ? `- Featured Categories: ${formData.categories.join(', ')}` : ''}
+  ${imageUrls.length > 0 ? `- Photos of the estate sale items are attached for reference` : ''}
+
+  Write a compelling 2-3 paragraph description for this estate sale that will attract potential buyers. Focus on:
+  1. The overall estate sale event and what buyers can expect
+  2. The types and quality of items available
+  3. Why buyers should attend this sale
+
+  Do not describe individual items in detail - focus on the overall estate sale experience and appeal.`;
 
       const requestParams = {
         prompt,
