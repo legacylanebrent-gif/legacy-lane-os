@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin
 } from 'lucide-react';
 import {
   DropdownMenu,
