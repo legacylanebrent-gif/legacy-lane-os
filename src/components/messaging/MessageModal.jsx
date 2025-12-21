@@ -5,16 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Send, X, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function MessageModal({ open, onClose, recipient, relatedEntity }) {
+export default function MessageModal({ open, onClose, recipient, relatedEntity, savedImages, allImages }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [conversationId, setConversationId] = useState(null);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
 
   useEffect(() => {
     if (open && recipient) {
@@ -87,9 +89,16 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity }
         messageData.related_entity_id = relatedEntity.id;
       }
 
+      // Add selected photos to message
+      if (selectedPhotos.length > 0) {
+        const photoUrls = selectedPhotos.map(idx => allImages[idx]);
+        messageData.message += '\n\n📷 Attached Photos:\n' + photoUrls.join('\n');
+      }
+
       const created = await base44.entities.Message.create(messageData);
       setMessages([...messages, created]);
       setNewMessage('');
+      setSelectedPhotos([]);
     } catch (error) {
       console.error('Error sending message:', error);
       alert('Failed to send message');
@@ -157,6 +166,51 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity }
                 }
               }}
             />
+
+            {savedImages && savedImages.length > 0 && allImages && (
+              <div className="border rounded-lg p-3 bg-slate-50">
+                <div className="flex items-center gap-2 mb-3">
+                  <ImageIcon className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm font-medium text-slate-700">
+                    Attach Saved Photos ({selectedPhotos.length} selected)
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {savedImages.map((imageIndex) => (
+                    <div key={imageIndex} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedPhotos(prev =>
+                            prev.includes(imageIndex)
+                              ? prev.filter(i => i !== imageIndex)
+                              : [...prev, imageIndex]
+                          );
+                        }}
+                        className={`w-full aspect-square rounded-lg overflow-hidden border-2 ${
+                          selectedPhotos.includes(imageIndex)
+                            ? 'border-orange-600 ring-2 ring-orange-200'
+                            : 'border-slate-200'
+                        }`}
+                      >
+                        <img
+                          src={allImages[imageIndex]}
+                          alt={`Photo ${imageIndex + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                      <div className="absolute top-1 right-1">
+                        <Checkbox
+                          checked={selectedPhotos.includes(imageIndex)}
+                          className="bg-white"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500">Press Ctrl+Enter to send</span>
               <Button
@@ -165,7 +219,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity }
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 <Send className="w-4 h-4 mr-2" />
-                Send
+                Send {selectedPhotos.length > 0 && `(${selectedPhotos.length} photo${selectedPhotos.length > 1 ? 's' : ''})`}
               </Button>
             </div>
           </div>

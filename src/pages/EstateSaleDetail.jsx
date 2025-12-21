@@ -701,6 +701,8 @@ END:VCALENDAR`;
           onClose={() => setMessageModalOpen(false)}
           recipient={operator}
           relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
+          savedImages={savedImages}
+          allImages={sale.images}
         />
       )}
     </div>
