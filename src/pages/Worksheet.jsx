@@ -76,8 +76,9 @@ export default function Worksheet() {
     setSubmitting(true);
     try {
       const total = parseFloat(price) * quantity;
-      const sellerAmount = total * 0.8;
-      const companyAmount = total * 0.2;
+      const commissionRate = sale.commission_rate || 20;
+      const companyAmount = total * (commissionRate / 100);
+      const sellerAmount = total - companyAmount;
 
       await base44.entities.Transaction.create({
         sale_id: sale.id,
