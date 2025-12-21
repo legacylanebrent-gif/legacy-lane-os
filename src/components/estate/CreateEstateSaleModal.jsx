@@ -223,6 +223,16 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
 
   const processImage = async (file) => {
     return new Promise((resolve, reject) => {
+      // Check file type
+      const fileType = file.type.toLowerCase();
+      const fileName = file.name.toLowerCase();
+      
+      // Reject unsupported formats
+      if (fileType === 'image/webp' || fileName.endsWith('.webp')) {
+        reject(new Error('WebP format is not supported. Please convert to JPG or PNG first.'));
+        return;
+      }
+
       const img = new Image();
       const reader = new FileReader();
 
@@ -283,6 +293,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     setUploadingImages(true);
     setUploadProgress({ current: 0, total: files.length, successful: 0 });
 
+    const errors = [];
+
     try {
       const imageObjects = [];
 
@@ -302,6 +314,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           setUploadProgress(prev => ({ ...prev, successful: prev.successful + 1 }));
         } catch (error) {
           console.error('Error processing file:', file.name, error);
+          errors.push(`${file.name}: ${error.message}`);
         }
       }
 
@@ -310,6 +323,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           ...prev,
           images: [...prev.images, ...imageObjects]
         }));
+      }
+
+      if (errors.length > 0) {
+        alert(`Some files could not be uploaded:\n\n${errors.join('\n')}`);
       }
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -953,7 +970,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   <input
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
                     onChange={handleImageUpload}
                     className="hidden"
                     id="image-upload"
@@ -962,7 +979,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   <label htmlFor="image-upload" className="cursor-pointer">
                     <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
                     <p className="text-sm text-slate-600">
-                      {uploadingImages ? 'Processing and uploading...' : 'Click to upload images'}
+                      {uploadingImages ? 'Processing and uploading...' : 'Click to upload images (JPG, PNG, GIF)'}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      WebP format not supported - please convert to JPG or PNG
                     </p>
                   </label>
 
