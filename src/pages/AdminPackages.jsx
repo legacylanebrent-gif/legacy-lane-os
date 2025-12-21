@@ -30,7 +30,7 @@ export default function AdminPackages() {
 
   const loadPackages = async () => {
     try {
-      const data = await base44.asServiceRole.entities.SubscriptionPackage.list();
+      const data = await base44.entities.SubscriptionPackage.list();
       console.log('Loaded packages:', data);
       setPackages(data || []);
     } catch (error) {
