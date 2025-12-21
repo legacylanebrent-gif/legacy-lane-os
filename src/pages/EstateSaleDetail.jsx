@@ -581,6 +581,37 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
 
+            {/* Saved Photos */}
+            {currentUser && savedImages.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-600 fill-red-600" />
+                    Saved Photos ({savedImages.length})
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {savedImages.map((imageIndex) => (
+                      <button
+                        key={imageIndex}
+                        onClick={() => {
+                          setSelectedImage(imageIndex);
+                          setModalOpen(true);
+                        }}
+                        className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-200 hover:border-red-600 transition-colors group"
+                      >
+                        <img
+                          src={sale.images[imageIndex]}
+                          alt={`Saved photo ${imageIndex + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Operator Info */}
             <Card>
               <CardContent className="p-6">
