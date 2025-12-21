@@ -1,0 +1,539 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle
+} from 'lucide-react';
+
+export default function MyProfile() {
+  const [user, setUser] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  const [profileData, setProfileData] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    company_name: '',
+    company_description: '',
+    business_address: '',
+    website_url: '',
+    profile_image_url: ''
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    email_new_leads: true,
+    email_new_messages: true,
+    email_sale_reminders: true,
+    email_marketing_updates: false,
+    sms_new_leads: false,
+    sms_new_messages: true,
+    sms_sale_reminders: true
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const userData = await base44.auth.me();
+      setUser(userData);
+      
+      setProfileData({
+        full_name: userData.full_name || '',
+        email: userData.email || '',
+        phone: userData.phone || '',
+        company_name: userData.company_name || '',
+        company_description: userData.company_description || '',
+        business_address: userData.business_address || '',
+        website_url: userData.website_url || '',
+        profile_image_url: userData.profile_image_url || ''
+      });
+
+      if (userData.notification_settings) {
+        setNotificationSettings({ ...notificationSettings, ...userData.notification_settings });
+      }
+
+      // Load subscription
+      const subscriptions = await base44.entities.Subscription.filter({ user_id: userData.id });
+      if (subscriptions.length > 0) {
+        setSubscription(subscriptions[0]);
+      }
+
+      // Load available packages
+      const accountType = userData.primary_account_type;
+      if (accountType) {
+        const packagesData = await base44.entities.SubscriptionPackage.filter({ 
+          account_type: accountType,
+          is_active: true 
+        });
+        setPackages(packagesData.sort((a, b) => {
+          const order = { basic: 1, pro: 2, premium: 3 };
+          return order[a.tier_level] - order[b.tier_level];
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      await base44.auth.updateMe(profileData);
+      alert('Profile updated successfully!');
+      await loadData();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setSaving(true);
+    try {
+      await base44.auth.updateMe({ notification_settings: notificationSettings });
+      alert('Notification settings updated!');
+    } catch (error) {
+      console.error('Error saving notifications:', error);
+      alert('Failed to update notifications');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setSaving(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setProfileData({ ...profileData, profile_image_url: file_url });
+      await base44.auth.updateMe({ profile_image_url: file_url });
+      alert('Profile image updated!');
+      await loadData();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getTierColor = (tier) => {
+    const colors = {
+      basic: 'bg-slate-100 text-slate-700 border-slate-300',
+      pro: 'bg-cyan-100 text-cyan-700 border-cyan-300',
+      premium: 'bg-orange-100 text-orange-700 border-orange-300'
+    };
+    return colors[tier] || 'bg-slate-100 text-slate-700';
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-slate-200 rounded w-1/4"></div>
+          <div className="h-96 bg-slate-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div>
+        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Profile</h1>
+        <p className="text-slate-600">Manage your account settings and preferences</p>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+        </TabsList>
+
+        {/* Profile Tab */}
+        <TabsContent value="profile" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Profile Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-6">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={profileData.profile_image_url} />
+                  <AvatarFallback className="bg-orange-600 text-white text-3xl">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <Label htmlFor="image-upload" className="cursor-pointer">
+                    <Button variant="outline" size="sm" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Photo
+                      </span>
+                    </Button>
+                  </Label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">JPG, PNG or GIF. Max 5MB</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Full Name</Label>
+                  <Input
+                    value={profileData.full_name}
+                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    value={profileData.email}
+                    disabled
+                    className="bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <Label>Website</Label>
+                  <Input
+                    value={profileData.website_url}
+                    onChange={(e) => setProfileData({ ...profileData, website_url: e.target.value })}
+                    placeholder="https://yourwebsite.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Company/Business Name</Label>
+                <Input
+                  value={profileData.company_name}
+                  onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label>Business Description</Label>
+                <Textarea
+                  value={profileData.company_description}
+                  onChange={(e) => setProfileData({ ...profileData, company_description: e.target.value })}
+                  rows={4}
+                  placeholder="Tell customers about your business..."
+                />
+              </div>
+
+              <div>
+                <Label>Business Address</Label>
+                <Input
+                  value={profileData.business_address}
+                  onChange={(e) => setProfileData({ ...profileData, business_address: e.target.value })}
+                  placeholder="123 Main St, City, State ZIP"
+                />
+              </div>
+
+              <Button 
+                onClick={handleSaveProfile} 
+                disabled={saving}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Profile'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Notification Preferences
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Email Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">New Leads</Label>
+                      <p className="text-sm text-slate-500">Get notified when new leads come in</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.email_new_leads}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, email_new_leads: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">New Messages</Label>
+                      <p className="text-sm text-slate-500">Get notified about new messages</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.email_new_messages}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, email_new_messages: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Sale Reminders</Label>
+                      <p className="text-sm text-slate-500">Reminders about upcoming sales</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.email_sale_reminders}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, email_sale_reminders: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Marketing Updates</Label>
+                      <p className="text-sm text-slate-500">News, tips, and special offers</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.email_marketing_updates}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, email_marketing_updates: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">SMS Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">New Leads</Label>
+                      <p className="text-sm text-slate-500">Text alerts for new leads</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.sms_new_leads}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, sms_new_leads: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">New Messages</Label>
+                      <p className="text-sm text-slate-500">Text alerts for messages</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.sms_new_messages}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, sms_new_messages: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Sale Reminders</Label>
+                      <p className="text-sm text-slate-500">SMS reminders about sales</p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings.sms_sale_reminders}
+                      onCheckedChange={(checked) => 
+                        setNotificationSettings({ ...notificationSettings, sms_sale_reminders: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleSaveNotifications} 
+                disabled={saving}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Preferences'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Subscription Tab */}
+        <TabsContent value="subscription" className="space-y-6 mt-6">
+          {subscription && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-600" />
+                  Current Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-1">
+                      {subscription.plan_type.replace(/_/g, ' ')}
+                    </h3>
+                    <Badge className={getTierColor(subscription.tier)}>
+                      {subscription.tier} tier
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-slate-900">${subscription.price}</div>
+                    <div className="text-sm text-slate-600">per {subscription.billing_period}</div>
+                  </div>
+                </div>
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Check className="w-4 h-4 text-green-600" />
+                    Status: <Badge variant="outline" className="text-green-600">{subscription.status}</Badge>
+                  </div>
+                  {subscription.renewal_date && (
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Check className="w-4 h-4 text-green-600" />
+                      Renews on {new Date(subscription.renewal_date).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Available Plans
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-4">
+                {packages.map(pkg => {
+                  const isCurrentPlan = subscription?.tier === pkg.tier_level;
+                  
+                  return (
+                    <Card 
+                      key={pkg.id} 
+                      className={`relative ${isCurrentPlan ? 'border-2 border-orange-500' : ''}`}
+                    >
+                      {isCurrentPlan && (
+                        <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-600">
+                          Current Plan
+                        </Badge>
+                      )}
+                      <CardContent className="p-6">
+                        <div className="text-center mb-4">
+                          <Badge className={getTierColor(pkg.tier_level)}>
+                            {pkg.tier_level}
+                          </Badge>
+                          <h3 className="text-xl font-bold text-slate-900 mt-2 mb-1">
+                            {pkg.package_name}
+                          </h3>
+                          <p className="text-sm text-slate-600 mb-4">{pkg.description}</p>
+                          <div className="text-3xl font-bold text-slate-900 mb-1">
+                            ${pkg.monthly_price}
+                          </div>
+                          <div className="text-sm text-slate-600">per month</div>
+                          {pkg.annual_price && (
+                            <div className="text-xs text-cyan-600 mt-1">
+                              ${pkg.annual_price}/year (save ${(pkg.monthly_price * 12 - pkg.annual_price).toFixed(0)})
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2 mb-6">
+                          {pkg.features?.slice(0, 5).map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2 text-sm">
+                              <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                              <span className="text-slate-600">{feature}</span>
+                            </div>
+                          ))}
+                          {pkg.features?.length > 5 && (
+                            <p className="text-xs text-slate-500">
+                              +{pkg.features.length - 5} more features
+                            </p>
+                          )}
+                        </div>
+
+                        {!isCurrentPlan && (
+                          <Button 
+                            className="w-full"
+                            variant={pkg.tier_level === 'premium' ? 'default' : 'outline'}
+                          >
+                            {subscription && pkg.tier_level === 'premium' ? (
+                              <>
+                                <ArrowUpCircle className="w-4 h-4 mr-2" />
+                                Upgrade
+                              </>
+                            ) : subscription && pkg.tier_level === 'basic' ? (
+                              <>
+                                <ArrowDownCircle className="w-4 h-4 mr-2" />
+                                Downgrade
+                              </>
+                            ) : (
+                              'Select Plan'
+                            )}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {packages.length === 0 && (
+                <p className="text-center text-slate-500 py-8">
+                  No subscription packages available at this time.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

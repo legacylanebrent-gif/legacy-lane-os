@@ -49,6 +49,7 @@ import SaleTasks from './pages/SaleTasks';
 import SaleStatistics from './pages/SaleStatistics';
 import PrintSigns from './pages/PrintSigns';
 import SaleExport from './pages/SaleExport';
+import MyProfile from './pages/MyProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -104,6 +105,7 @@ export const PAGES = {
     "SaleStatistics": SaleStatistics,
     "PrintSigns": PrintSigns,
     "SaleExport": SaleExport,
+    "MyProfile": MyProfile,
 }
 
 export const pagesConfig = {
