@@ -162,12 +162,12 @@ Be specific and practical. Focus on the main item in the photo.`;
 
         <div className="space-y-6">
           {/* Photo Display */}
-          <div className="relative">
+          <div className="relative flex justify-center">
             <img
               src={typeof image.url === 'string' ? image.url : (image.url?.url || image)}
               alt="Item photo"
-              className="w-full h-96 object-contain bg-slate-100 rounded-lg"
-              style={{ transform: `rotate(${image.rotation || 0}deg)` }}
+              className="object-contain bg-slate-100 rounded-lg"
+              style={{ transform: `rotate(${image.rotation || 0}deg)`, maxWidth: '20%', maxHeight: '200px' }}
             />
           </div>
 
