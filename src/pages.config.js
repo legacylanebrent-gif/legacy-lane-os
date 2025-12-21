@@ -31,6 +31,7 @@ import AdminTransactions from './pages/AdminTransactions';
 import AdminPackages from './pages/AdminPackages';
 import Home from './pages/Home';
 import EstateSaleDetail from './pages/EstateSaleDetail';
+import Messages from './pages/Messages';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +69,7 @@ export const PAGES = {
     "AdminPackages": AdminPackages,
     "Home": Home,
     "EstateSaleDetail": EstateSaleDetail,
+    "Messages": Messages,
 }
 
 export const pagesConfig = {

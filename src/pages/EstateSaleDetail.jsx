@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import MessageModal from '@/components/messaging/MessageModal';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -33,6 +34,7 @@ export default function EstateSaleDetail() {
   const [savedImages, setSavedImages] = useState([]);
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
 
   useEffect(() => {
     loadSaleData();
@@ -171,10 +173,8 @@ END:VCALENDAR`;
     return `${hours.padStart(2, '0')}:${minutes || '00'}:00`;
   };
 
-  const handleEmailOperator = () => {
-    const subject = encodeURIComponent(`Inquiry about ${sale.title}`);
-    const body = encodeURIComponent(`Hi,\n\nI'm interested in the estate sale: ${sale.title}\nLocation: ${sale.property_address?.formatted_address || ''}\n\nPlease let me know if you have any additional information.\n\nThank you!`);
-    window.location.href = `mailto:${operator?.email || ''}?subject=${subject}&body=${body}`;
+  const handleMessageOperator = () => {
+    setMessageModalOpen(true);
   };
 
   const handleAddToRoute = () => {
@@ -649,10 +649,11 @@ END:VCALENDAR`;
 
                 {currentUser && (
                   <Button 
-                    onClick={handleEmailOperator}
-                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
+                    onClick={handleMessageOperator}
+                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700 gap-2"
                   >
-                    Email Operator
+                    <MessageSquare className="w-4 h-4" />
+                    Message Operator
                   </Button>
                 )}
                 {!currentUser && (
@@ -668,6 +669,16 @@ END:VCALENDAR`;
           </div>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {currentUser && operator && (
+        <MessageModal
+          open={messageModalOpen}
+          onClose={() => setMessageModalOpen(false)}
+          recipient={operator}
+          relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
+        />
+      )}
     </div>
   );
 }
