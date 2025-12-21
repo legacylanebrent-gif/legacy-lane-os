@@ -524,6 +524,47 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     }));
   };
 
+  const saveDraft = async () => {
+    setLoading(true);
+    try {
+      const user = await base44.auth.me();
+
+      const data = {
+        ...formData,
+        operator_id: sale?.operator_id || user.id,
+        operator_name: sale?.operator_name || user.full_name,
+        status: sale?.status || 'draft',
+        estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
+        commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
+        local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
+        property_address: {
+          ...formData.property_address,
+          formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+        },
+        images: formData.images.map(img => img.url)
+      };
+
+      if (sale?.id) {
+        await base44.entities.EstateSale.update(sale.id, data);
+      } else {
+        const created = await base44.entities.EstateSale.create(data);
+        // Update sale object so subsequent saves are updates
+        if (created && created.id) {
+          sale = created;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error saving estate sale:', error);
+      alert('Failed to save estate sale: ' + error.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (publishNow = false) => {
     setLoading(true);
     try {
@@ -816,11 +857,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
               </div>
 
               <Button 
-                onClick={() => setStep(2)} 
-                disabled={!canProceedToStep2}
+                onClick={async () => {
+                  const saved = await saveDraft();
+                  if (saved) setStep(2);
+                }} 
+                disabled={!canProceedToStep2 || loading}
                 className="w-full bg-orange-600 hover:bg-orange-700"
               >
-                Continue to Schedule
+                {loading ? 'Saving...' : 'Continue to Schedule'}
               </Button>
             </>
           )}
@@ -911,11 +955,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep(3)} 
-                  disabled={!canProceedToStep3}
+                  onClick={async () => {
+                    const saved = await saveDraft();
+                    if (saved) setStep(3);
+                  }} 
+                  disabled={!canProceedToStep3 || loading}
                   className="flex-1 bg-orange-600 hover:bg-orange-700"
                 >
-                  Continue to Details
+                  {loading ? 'Saving...' : 'Continue to Details'}
                 </Button>
               </div>
             </>
@@ -1180,10 +1227,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep(4)}
+                  onClick={async () => {
+                    const saved = await saveDraft();
+                    if (saved) setStep(4);
+                  }}
+                  disabled={loading}
                   className="flex-1 bg-orange-600 hover:bg-orange-700"
                 >
-                  Continue to Details
+                  {loading ? 'Saving...' : 'Continue to Details'}
                 </Button>
               </div>
             </>
