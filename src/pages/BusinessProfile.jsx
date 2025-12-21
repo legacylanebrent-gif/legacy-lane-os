@@ -54,18 +54,28 @@ export default function BusinessProfile() {
 
       setBusiness(businessUser);
 
-      // Load related estate sales if estate sale operator
-      if (businessUser.primary_account_type === 'estate_sale_operator') {
-        const allSales = await base44.entities.EstateSale.list('-created_date', 100);
-        const operatorSales = allSales.filter(s => s.operator_id === businessId);
-        
-        // Separate current and past sales
-        const current = operatorSales.filter(s => s.status === 'upcoming' || s.status === 'active');
-        const past = operatorSales.filter(s => s.status === 'completed' || s.status === 'cancelled');
-        
-        setCurrentSales(current);
-        setPastSales(past);
-      }
+      // Load related estate sales - check for any operator role
+      const allSales = await base44.entities.EstateSale.list('-created_date', 100);
+      const operatorSales = allSales.filter(s => s.operator_id === businessId);
+      
+      console.log('Loading sales for business:', businessId);
+      console.log('Total sales found:', allSales.length);
+      console.log('Operator sales found:', operatorSales.length);
+      console.log('Operator sales:', operatorSales);
+      
+      // Separate current and past sales
+      const current = operatorSales.filter(s => 
+        s.status === 'upcoming' || s.status === 'active' || s.status === 'draft'
+      );
+      const past = operatorSales.filter(s => 
+        s.status === 'completed' || s.status === 'cancelled'
+      );
+      
+      console.log('Current sales:', current.length);
+      console.log('Past sales:', past.length);
+      
+      setCurrentSales(current);
+      setPastSales(past);
     } catch (error) {
       console.error('Error loading business:', error);
     } finally {
