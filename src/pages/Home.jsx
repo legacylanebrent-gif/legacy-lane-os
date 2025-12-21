@@ -14,11 +14,12 @@ import { format } from 'date-fns';
 
 export default function Home() {
   const [sales, setSales] = useState([]);
-  const [filteredSales, setFilteredSales] = useState([]);
+  const [nationalFeatured, setNationalFeatured] = useState([]);
+  const [localFeatured, setLocalFeatured] = useState([]);
+  const [regularSales, setRegularSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [userLocation, setUserLocation] = useState(null);
-  const [filterByLocation, setFilterByLocation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -28,8 +29,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    filterSales();
-  }, [searchQuery, sales, userLocation, filterByLocation]);
+    organizeSales();
+  }, [searchQuery, sales, userLocation]);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -85,7 +86,6 @@ export default function Home() {
       if (data.results && data.results[0]) {
         const location = data.results[0].geometry.location;
         setUserLocation({ lat: location.lat, lng: location.lng });
-        setFilterByLocation(true);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
@@ -109,10 +109,10 @@ export default function Home() {
 
   const handleUseMyLocation = () => {
     if (userLocation) {
-      // Already have location, just filter
-      setFilterByLocation(true);
+      // Already have location, re-organize
+      organizeSales();
     } else {
-      // Get location and filter
+      // Get location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -120,7 +120,6 @@ export default function Home() {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             });
-            setFilterByLocation(true);
           },
           (error) => {
             console.log('Geolocation error:', error);
@@ -131,12 +130,12 @@ export default function Home() {
     }
   };
 
-  const filterSales = () => {
-    let filtered = [...sales];
+  const organizeSales = () => {
+    let allSales = [...sales];
 
     // Add distance to all sales if location is available
     if (userLocation) {
-      filtered = filtered.map(sale => {
+      allSales = allSales.map(sale => {
         if (sale.location && sale.location.lat && sale.location.lng) {
           const distance = calculateDistance(
             userLocation.lat,
@@ -148,24 +147,12 @@ export default function Home() {
         }
         return { ...sale, distance: null };
       });
-
-      // Filter by distance only if explicitly requested
-      if (filterByLocation) {
-        filtered = filtered.filter(sale => sale.distance !== null && sale.distance < 25);
-      }
-
-      // Sort by distance
-      filtered.sort((a, b) => {
-        if (a.distance === null) return 1;
-        if (b.distance === null) return -1;
-        return a.distance - b.distance;
-      });
     }
 
-    // Filter by search query
+    // Apply search filter if present
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(sale =>
+      allSales = allSales.filter(sale =>
         sale.title?.toLowerCase().includes(query) ||
         sale.property_address?.city?.toLowerCase().includes(query) ||
         sale.property_address?.state?.toLowerCase().includes(query) ||
@@ -174,7 +161,24 @@ export default function Home() {
       );
     }
 
-    setFilteredSales(filtered);
+    // Separate into categories
+    const national = allSales.filter(s => s.national_featured);
+    const local = allSales.filter(s => !s.national_featured && s.local_featured);
+    const regular = allSales.filter(s => !s.national_featured && !s.local_featured);
+
+    // For local featured and regular: filter by distance if location available
+    const filterByDistance = (salesList) => {
+      if (userLocation) {
+        return salesList
+          .filter(s => s.distance !== null && s.distance < 25)
+          .sort((a, b) => a.distance - b.distance);
+      }
+      return salesList;
+    };
+
+    setNationalFeatured(national);
+    setLocalFeatured(filterByDistance(local));
+    setRegularSales(filterByDistance(regular));
   };
 
   if (loading) {
@@ -281,9 +285,9 @@ export default function Home() {
               </Button>
             </div>
 
-            {filterByLocation && userLocation && (
+            {userLocation && (
               <div className="text-sm text-slate-600 text-center">
-                📍 Showing sales within 25 miles of your location
+                📍 Showing local sales within 25 miles of your location
               </div>
             )}
           </div>
@@ -309,26 +313,210 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Estate Sales Grid */}
+      {/* Nationally Featured Sales */}
+      {nationalFeatured.length > 0 && (
+        <section className="py-12 px-4 bg-gradient-to-r from-orange-50 to-amber-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-3xl font-serif font-bold text-slate-900">
+                  🌟 Nationally Featured Sales
+                </h3>
+                <p className="text-slate-600 mt-1">Premium estate sales from across the country</p>
+              </div>
+              <div className="text-slate-600">
+                {nationalFeatured.length} {nationalFeatured.length === 1 ? 'sale' : 'sales'}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {nationalFeatured.map(sale => (
+                <Link
+                  key={sale.id}
+                  to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
+                  className="block group"
+                >
+                  <Card className="overflow-hidden hover:shadow-xl transition-shadow border-2 border-orange-200">
+                    {sale.images && sale.images.length > 0 && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={sale.images[0]}
+                          alt={sale.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
+                          National Featured
+                        </Badge>
+                      </div>
+                    )}
+                    <CardContent className="p-5">
+                      <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
+                        {sale.title}
+                      </h4>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
+                          <span className="truncate">
+                            {sale.property_address?.city}, {sale.property_address?.state}
+                          </span>
+                        </div>
+
+                        {sale.sale_dates && sale.sale_dates.length > 0 && (
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                            <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {sale.categories && sale.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {sale.categories.slice(0, 3).map((cat, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {cat}
+                            </Badge>
+                          ))}
+                          {sale.categories.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{sale.categories.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-slate-500">
+                        <span>{sale.views || 0} views</span>
+                        <Heart className="w-4 h-4" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Locally Featured Sales */}
+      {localFeatured.length > 0 && (
+        <section className="py-12 px-4 bg-gradient-to-r from-cyan-50 to-blue-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-3xl font-serif font-bold text-slate-900">
+                  📍 Featured Sales Near You
+                </h3>
+                <p className="text-slate-600 mt-1">Premium local estate sales in your area</p>
+              </div>
+              <div className="text-slate-600">
+                {localFeatured.length} {localFeatured.length === 1 ? 'sale' : 'sales'}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {localFeatured.map(sale => (
+                <Link
+                  key={sale.id}
+                  to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
+                  className="block group"
+                >
+                  <Card className="overflow-hidden hover:shadow-xl transition-shadow border-2 border-cyan-200">
+                    {sale.images && sale.images.length > 0 && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={sale.images[0]}
+                          alt={sale.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">
+                          Local Featured
+                        </Badge>
+                      </div>
+                    )}
+                    <CardContent className="p-5">
+                      <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">
+                        {sale.title}
+                      </h4>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
+                          <span className="truncate">
+                            {sale.property_address?.city}, {sale.property_address?.state}
+                            {sale.distance !== null && sale.distance !== undefined && (
+                              <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                ({sale.distance.toFixed(1)} mi)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+
+                        {sale.sale_dates && sale.sale_dates.length > 0 && (
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                            <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {sale.categories && sale.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {sale.categories.slice(0, 3).map((cat, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {cat}
+                            </Badge>
+                          ))}
+                          {sale.categories.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{sale.categories.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-slate-500">
+                        <span>{sale.views || 0} views</span>
+                        <Heart className="w-4 h-4" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Regular Local Sales */}
       <section className="py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-serif font-bold text-slate-900">
-              {filterByLocation ? 'Local Estate Sales Near You' : searchQuery ? 'Search Results' : 'Featured Estate Sales'}
-            </h3>
+            <div>
+              <h3 className="text-3xl font-serif font-bold text-slate-900">
+                {userLocation ? 'Local Estate Sales Near You' : 'All Estate Sales'}
+              </h3>
+              {userLocation && (
+                <p className="text-slate-600 mt-1">Within 25 miles of your location</p>
+              )}
+            </div>
             <div className="text-slate-600">
-              {filteredSales.length} {filteredSales.length === 1 ? 'sale' : 'sales'} found
+              {regularSales.length} {regularSales.length === 1 ? 'sale' : 'sales'}
             </div>
           </div>
 
-          {filteredSales.length === 0 ? (
+          {regularSales.length === 0 ? (
             <Card className="p-12 text-center">
               <MapPin className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500 text-lg">No estate sales found matching your search</p>
+              <p className="text-slate-500 text-lg">
+                {userLocation 
+                  ? 'No estate sales found within 25 miles. Try searching a different location.'
+                  : 'No estate sales available. Check back soon!'}
+              </p>
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSales.map(sale => (
+              {regularSales.map(sale => (
                 <Link
                   key={sale.id}
                   to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
@@ -342,11 +530,6 @@ export default function Home() {
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        {sale.premium_listing && (
-                          <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
-                            Featured
-                          </Badge>
-                        )}
                       </div>
                     )}
                     <CardContent className="p-5">
