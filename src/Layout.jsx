@@ -73,7 +73,7 @@ const DIVISION_CONFIG = {
 
 export default function Layout({ children, currentPageName }) {
   // Pages that don't need layout or authentication
-  if (['Onboarding', 'EstateSaleDetail', 'EstateSaleFinder'].includes(currentPageName)) {
+  if (['Onboarding', 'EstateSaleDetail', 'EstateSaleFinder', 'Home'].includes(currentPageName)) {
     return children;
   }
 
