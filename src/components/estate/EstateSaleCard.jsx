@@ -15,7 +15,9 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
     }
   };
 
-  const primaryImage = estate.images?.[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800';
+  const primaryImage = typeof estate.images?.[0] === 'string' 
+    ? estate.images[0] 
+    : estate.images?.[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800';
   const nextSaleDate = estate.sale_dates?.[0];
 
   return (
