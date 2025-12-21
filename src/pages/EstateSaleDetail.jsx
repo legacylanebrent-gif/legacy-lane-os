@@ -25,6 +25,7 @@ L.Icon.Default.mergeOptions({
 export default function EstateSaleDetail() {
   const [sale, setSale] = useState(null);
   const [operator, setOperator] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -41,6 +42,14 @@ export default function EstateSaleDetail() {
       if (!saleId) {
         window.location.href = createPageUrl('Home');
         return;
+      }
+
+      // Load current user
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (error) {
+        // User not logged in
       }
 
       const saleData = await base44.entities.EstateSale.list();
@@ -362,8 +371,8 @@ export default function EstateSaleDetail() {
                   </div>
                 )}
 
-                {/* Estimated Value */}
-                {sale.estimated_value && (
+                {/* Estimated Value - Only visible to operator */}
+                {sale.estimated_value && currentUser?.id === sale.operator_id && (
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                       <DollarSign className="w-5 h-5 text-green-600" />
