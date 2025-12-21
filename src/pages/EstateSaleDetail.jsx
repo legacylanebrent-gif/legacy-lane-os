@@ -101,16 +101,26 @@ export default function EstateSaleDetail() {
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: sale.title,
-        text: `Check out this estate sale: ${sale.title}`,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: sale.title,
+          text: `Check out this estate sale: ${sale.title}`,
+          url: window.location.href
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      // Fallback to clipboard if share fails
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      } catch (clipboardError) {
+        console.log('Share cancelled or failed');
+      }
     }
   };
 
