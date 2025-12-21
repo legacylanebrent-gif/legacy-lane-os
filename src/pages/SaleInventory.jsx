@@ -9,8 +9,16 @@ import { Input } from '@/components/ui/input';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 import { 
   ArrowLeft, Plus, Search, Package, DollarSign, Tag, 
-  Image as ImageIcon, ShoppingBag, Store
+  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function SaleInventory() {
   const navigate = useNavigate();
@@ -20,7 +28,6 @@ export default function SaleInventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [updatingStatus, setUpdatingStatus] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -56,6 +63,33 @@ export default function SaleInventory() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStatusUpdate = async (itemId, newStatus) => {
+    try {
+      await base44.entities.Item.update(itemId, { status: newStatus });
+      await loadData();
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update item status');
+    }
+  };
+
+  const handleDelete = async (itemId) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+    
+    try {
+      await base44.entities.Item.delete(itemId);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item');
+    }
+  };
+
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setShowCreateModal(true);
   };
 
   const getStatusColor = (status) => {
@@ -208,13 +242,62 @@ export default function SaleInventory() {
                     <ImageIcon className="w-12 h-12 text-slate-300" />
                   </div>
                 )}
-                <Badge className={`absolute top-3 right-3 ${getStatusColor(item.status)}`}>
+                <Badge className={`absolute top-3 left-3 ${getStatusColor(item.status)}`}>
                   {item.status}
                 </Badge>
-                <Badge className="absolute top-3 left-3 bg-orange-600">
-                  <ShoppingBag className="w-3 h-3 mr-1" />
-                  Marketplace
-                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute top-3 right-3 h-8 w-8 bg-white/90 hover:bg-white"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleEdit(item)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Item
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusUpdate(item.id, 'available')}
+                      disabled={item.status === 'available'}
+                    >
+                      Mark as Available
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusUpdate(item.id, 'pending')}
+                      disabled={item.status === 'pending'}
+                    >
+                      Mark as Pending
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusUpdate(item.id, 'sold')}
+                      disabled={item.status === 'sold'}
+                    >
+                      Mark as Sold
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusUpdate(item.id, 'reserved')}
+                      disabled={item.status === 'reserved'}
+                    >
+                      Mark as Reserved
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Item
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2">

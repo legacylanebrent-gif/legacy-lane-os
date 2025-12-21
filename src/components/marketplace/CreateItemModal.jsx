@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,32 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     shipping_cost: 0
   });
 
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        title: item.title || '',
+        description: item.description || '',
+        category: item.category || 'furniture',
+        condition: item.condition || 'good',
+        price: item.price || '',
+        quantity: item.quantity || 1,
+        fulfillment_options: item.fulfillment_options || ['pickup'],
+        shipping_cost: item.shipping_cost || 0
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        category: 'furniture',
+        condition: 'good',
+        price: '',
+        quantity: 1,
+        fulfillment_options: ['pickup'],
+        shipping_cost: 0
+      });
+    }
+  }, [item, open]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,19 +61,27 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     try {
       const user = await base44.auth.me();
       
-      await base44.entities.Item.create({
-        ...formData,
-        price: parseFloat(formData.price),
-        seller_id: user.id,
-        seller_name: user.full_name,
-        estate_sale_id: saleId,
-        status: 'available'
-      });
+      if (item) {
+        await base44.entities.Item.update(item.id, {
+          ...formData,
+          price: parseFloat(formData.price)
+        });
+      } else {
+        await base44.entities.Item.create({
+          ...formData,
+          price: parseFloat(formData.price),
+          seller_id: user.id,
+          seller_name: user.full_name,
+          estate_sale_id: saleId,
+          status: 'available'
+        });
+      }
 
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating item:', error);
+      console.error('Error saving item:', error);
+      alert('Failed to save item');
     } finally {
       setLoading(false);
     }
@@ -73,7 +107,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-navy-900">
-            Create New Listing
+            {item ? 'Edit Listing' : 'Create New Listing'}
           </DialogTitle>
         </DialogHeader>
 
@@ -211,7 +245,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="bg-gold-600 hover:bg-gold-700">
-              {loading ? 'Creating...' : 'Create Listing'}
+              {loading ? 'Saving...' : (item ? 'Update Listing' : 'Create Listing')}
             </Button>
           </div>
         </form>
