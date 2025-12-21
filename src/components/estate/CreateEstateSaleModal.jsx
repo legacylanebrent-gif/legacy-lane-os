@@ -470,11 +470,48 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   };
 
   const handlePhotoLabelApprove = (index, labelData, addedToInventory) => {
-    updateImageDetails(index, {
-      name: labelData.name,
-      description: labelData.description,
-      price: labelData.price,
-      categories: labelData.categories
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        images: prev.images.map((img, i) => 
+          i === index ? { 
+            ...img, 
+            name: labelData.name,
+            description: labelData.description,
+            price: labelData.price,
+            categories: labelData.categories
+          } : img
+        )
+      };
+
+      // Auto-save to database
+      if (sale?.id) {
+        setTimeout(async () => {
+          try {
+            const user = await base44.auth.me();
+            const data = {
+              ...updated,
+              operator_id: sale.operator_id || user.id,
+              operator_name: sale.operator_name || user.full_name,
+              status: sale.status || 'draft',
+              estimated_value: updated.estimated_value ? parseFloat(updated.estimated_value) : null,
+              commission_rate: updated.commission_rate ? parseFloat(updated.commission_rate) : null,
+              national_featured_price: updated.national_featured_price ? parseFloat(updated.national_featured_price) : null,
+              local_featured_price: updated.local_featured_price ? parseFloat(updated.local_featured_price) : null,
+              property_address: {
+                ...updated.property_address,
+                formatted_address: `${updated.property_address.street}, ${updated.property_address.city}, ${updated.property_address.state} ${updated.property_address.zip}`
+              },
+              images: updated.images.map(img => img.url)
+            };
+            await base44.entities.EstateSale.update(sale.id, data);
+          } catch (error) {
+            console.error('Auto-save failed:', error);
+          }
+        }, 500);
+      }
+
+      return updated;
     });
   };
 
