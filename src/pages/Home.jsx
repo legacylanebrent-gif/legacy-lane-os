@@ -37,6 +37,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState(null);
   const [routeSales, setRouteSales] = useState([]);
   const [savedSales, setSavedSales] = useState([]);
+  const [operators, setOperators] = useState({});
 
   useEffect(() => {
     loadData();
@@ -91,7 +92,18 @@ export default function Home() {
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
       const activeSales = salesData.filter(s => s.status === 'upcoming' || s.status === 'active');
       setSales(activeSales);
-      setFilteredSales(activeSales);
+      
+      // Load operator company names
+      try {
+        const users = await base44.entities.User.list();
+        const operatorMap = {};
+        users.forEach(user => {
+          operatorMap[user.id] = user.company_name || user.full_name;
+        });
+        setOperators(operatorMap);
+      } catch (error) {
+        console.log('Could not load operators');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
