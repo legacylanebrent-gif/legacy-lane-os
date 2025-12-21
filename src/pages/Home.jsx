@@ -55,7 +55,7 @@ export default function Home() {
       setIsAuthenticated(authenticated);
 
       // Load estate sales (public access)
-      const salesData = await base44.asServiceRole.entities.EstateSale.list('-created_date', 50);
+      const salesData = await base44.entities.EstateSale.list('-created_date', 50);
       const activeSales = salesData.filter(s => s.status === 'upcoming' || s.status === 'active');
       setSales(activeSales);
       setFilteredSales(activeSales);
