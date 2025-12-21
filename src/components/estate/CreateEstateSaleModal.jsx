@@ -35,6 +35,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       state: '',
       zip: ''
     },
+    location: null,
     sale_dates: [],
     status: 'draft',
     images: [],
@@ -131,6 +132,12 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       }
     });
 
+    // Extract GPS coordinates
+    const location = place.geometry?.location ? {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    } : null;
+
     setFormData(prev => ({
       ...prev,
       property_address: {
@@ -138,7 +145,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         city,
         state,
         zip
-      }
+      },
+      location
     }));
   };
 
@@ -252,6 +260,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       title: '',
       description: '',
       property_address: { street: '', city: '', state: '', zip: '' },
+      location: null,
       sale_dates: [],
       status: 'draft',
       images: [],
