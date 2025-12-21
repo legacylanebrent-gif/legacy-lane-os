@@ -23,6 +23,7 @@ import {
 export default function Worksheet() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [expenses, setExpenses] = useState([]);
