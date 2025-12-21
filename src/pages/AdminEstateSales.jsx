@@ -14,6 +14,7 @@ export default function AdminEstateSales() {
   const [filteredSales, setFilteredSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
   const [operatorFilter, setOperatorFilter] = useState('all');
   const [premiumFilter, setPremiumFilter] = useState('all');
@@ -28,7 +29,7 @@ export default function AdminEstateSales() {
 
   useEffect(() => {
     filterSales();
-  }, [searchQuery, statusFilter, cityFilter, operatorFilter, premiumFilter, dateRangeFilter, minValue, maxValue, sales]);
+  }, [searchQuery, statusFilter, stateFilter, cityFilter, operatorFilter, premiumFilter, dateRangeFilter, minValue, maxValue, sales]);
 
   const loadSales = async () => {
     try {
@@ -64,6 +65,11 @@ export default function AdminEstateSales() {
     // Status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(sale => sale.status === statusFilter);
+    }
+
+    // State filter
+    if (stateFilter !== 'all') {
+      filtered = filtered.filter(sale => sale.property_address?.state === stateFilter);
     }
 
     // City filter
@@ -129,6 +135,7 @@ export default function AdminEstateSales() {
   const clearAllFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
+    setStateFilter('all');
     setCityFilter('all');
     setOperatorFilter('all');
     setPremiumFilter('all');
@@ -137,11 +144,12 @@ export default function AdminEstateSales() {
     setMaxValue('');
   };
 
-  const hasActiveFilters = searchQuery || statusFilter !== 'all' || cityFilter !== 'all' || 
-    operatorFilter !== 'all' || premiumFilter !== 'all' || dateRangeFilter !== 'all' || 
-    minValue || maxValue;
+  const hasActiveFilters = searchQuery || statusFilter !== 'all' || stateFilter !== 'all' || 
+    cityFilter !== 'all' || operatorFilter !== 'all' || premiumFilter !== 'all' || 
+    dateRangeFilter !== 'all' || minValue || maxValue;
 
-  // Get unique cities and operators for filters
+  // Get unique states, cities and operators for filters
+  const uniqueStates = [...new Set(sales.map(s => s.property_address?.state).filter(Boolean))].sort();
   const uniqueCities = [...new Set(sales.map(s => s.property_address?.city).filter(Boolean))].sort();
   const uniqueOperators = [...new Set(sales.map(s => ({ id: s.operator_id, name: s.operator_name })).filter(o => o.id))];
   const uniqueOperatorsMap = uniqueOperators.reduce((acc, op) => {
@@ -215,7 +223,7 @@ export default function AdminEstateSales() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -229,6 +237,21 @@ export default function AdminEstateSales() {
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">State</Label>
+              <Select value={stateFilter} onValueChange={setStateFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All States" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All States</SelectItem>
+                  {uniqueStates.map(state => (
+                    <SelectItem key={state} value={state}>{state}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
