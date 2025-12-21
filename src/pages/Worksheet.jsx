@@ -733,10 +733,98 @@ export default function Worksheet() {
           )}
         </TabsContent>
 
-        <TabsContent value="profit">
-          <Card className="p-12 text-center">
-            <Receipt className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 text-lg">Profit summary coming soon</p>
+        <TabsContent value="profit" className="space-y-6">
+          <Card className="bg-white shadow-md">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">Sale Financial Summary</h3>
+
+              <div className="space-y-4">
+                {/* Total Revenue */}
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                  <span className="font-medium text-slate-900">Total Revenue</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    ${totalRevenue.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Seller Share */}
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <span className="font-medium text-slate-700">Seller Share ({sellerPercentage}%)</span>
+                  <span className="text-xl font-bold text-blue-700">
+                    ${sellerTotal.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Company Share */}
+                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <span className="font-medium text-slate-700">Company Share ({commissionRate}%)</span>
+                  <span className="text-xl font-bold text-purple-700">
+                    ${companyTotal.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Expenses Deducted */}
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="font-semibold text-slate-900 mb-3">Expenses Deducted from Company Share</h4>
+                {expenses.length > 0 ? (
+                  <div className="space-y-2">
+                    {expenses.map((expense) => (
+                      <div key={expense.id} className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 capitalize">{expense.category.replace('_', ' ')}</span>
+                        <span className="text-red-600">-${expense.amount.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">No expenses recorded</p>
+                )}
+              </div>
+
+              {/* Final Totals */}
+              <div className="mt-6 pt-6 border-t space-y-4">
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-300">
+                  <span className="font-semibold text-slate-900">Seller Total (Unchanged)</span>
+                  <span className="text-2xl font-bold text-blue-700">
+                    ${sellerTotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border-2 border-purple-300">
+                  <span className="font-semibold text-slate-900">Company Profit (After Expenses)</span>
+                  <span className="text-2xl font-bold text-purple-700">
+                    ${(companyTotal - totalExpenses).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment & Closing Details */}
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="font-semibold text-slate-900 mb-4">Payment & Closing Details</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm">Seller Payment Method</Label>
+                    <Select defaultValue="not_paid">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_paid">Not Yet Paid</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                        <SelectItem value="ach">ACH Transfer</SelectItem>
+                        <SelectItem value="venmo">Venmo</SelectItem>
+                        <SelectItem value="zelle">Zelle</SelectItem>
+                        <SelectItem value="cash">Cash</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-sm">Payment Date</Label>
+                    <Input type="date" placeholder="mm/dd/yyyy" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
