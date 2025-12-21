@@ -54,121 +54,114 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     end_time: '5:00 PM'
   });
 
+  const [predictions, setPredictions] = useState([]);
+  const [showPredictions, setShowPredictions] = useState(false);
+  const [addressInput, setAddressInput] = useState('');
+
   useEffect(() => {
     if (!open || step !== 1) return;
 
     const loadGoogleMaps = async () => {
       try {
-        if (window.google?.maps?.places && addressInputRef.current) {
-          setTimeout(initAutocomplete, 200);
-          return;
-        }
+        if (window.google?.maps?.places) return;
 
-        // Get API key from backend
         const response = await base44.functions.invoke('getConfig', {});
         const apiKey = response.data.GOOGLE_MAPS_API_KEY;
 
-        if (!apiKey) {
-          console.error('Google Maps API key not found');
-          return;
-        }
-
-        // Remove any existing script
-        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-        if (existingScript) {
-          existingScript.remove();
-        }
+        if (!apiKey) return;
 
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=Function.prototype`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
         script.async = true;
-        script.defer = true;
-        script.onload = () => {
-          setTimeout(initAutocomplete, 200);
-        };
         document.head.appendChild(script);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
       }
     };
 
-    const initAutocomplete = () => {
-      if (!addressInputRef.current || !window.google?.maps?.places) {
-        console.log('Autocomplete not ready');
-        return;
-      }
-
-      // Clear any existing autocomplete
-      if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
-
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        addressInputRef.current,
-        { 
-          types: ['address'],
-          fields: ['address_components', 'geometry', 'formatted_address']
-        }
-      );
-
-      autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
-      console.log('Autocomplete initialized');
-    };
-
     loadGoogleMaps();
-
-    return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
-      }
-    };
   }, [open, step]);
 
-  const handlePlaceSelect = () => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place?.address_components) return;
+  const handleAddressSearch = async (input) => {
+    setAddressInput(input);
+    
+    if (!input || input.length < 3) {
+      setPredictions([]);
+      setShowPredictions(false);
+      return;
+    }
 
-    let street = '';
-    let city = '';
-    let state = '';
-    let zip = '';
+    if (!window.google?.maps?.places) return;
 
-    place.address_components.forEach((component) => {
-      const types = component.types;
-      
-      if (types.includes('street_number')) {
-        street = component.long_name + ' ';
+    const service = new window.google.maps.places.AutocompleteService();
+    service.getPlacePredictions(
+      { input, types: ['address'] },
+      (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+          setPredictions(results);
+          setShowPredictions(true);
+        }
       }
-      if (types.includes('route')) {
-        street += component.long_name;
-      }
-      if (types.includes('locality')) {
-        city = component.long_name;
-      }
-      if (types.includes('administrative_area_level_1')) {
-        state = component.short_name;
-      }
-      if (types.includes('postal_code')) {
-        zip = component.long_name;
-      }
-    });
+    );
+  };
 
-    // Extract GPS coordinates
-    const location = place.geometry?.location ? {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng()
-    } : null;
+  const handleSelectPrediction = async (placeId) => {
+    if (!window.google?.maps?.places) return;
 
-    setFormData(prev => ({
-      ...prev,
-      property_address: {
-        street: street.trim(),
-        city,
-        state,
-        zip
+    const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+    service.getDetails(
+      {
+        placeId,
+        fields: ['address_components', 'geometry', 'formatted_address']
       },
-      location
-    }));
+      (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          let street = '';
+          let city = '';
+          let state = '';
+          let zip = '';
+
+          place.address_components?.forEach((component) => {
+            const types = component.types;
+            
+            if (types.includes('street_number')) {
+              street = component.long_name + ' ';
+            }
+            if (types.includes('route')) {
+              street += component.long_name;
+            }
+            if (types.includes('locality')) {
+              city = component.long_name;
+            }
+            if (types.includes('administrative_area_level_1')) {
+              state = component.short_name;
+            }
+            if (types.includes('postal_code')) {
+              zip = component.long_name;
+            }
+          });
+
+          const location = place.geometry?.location ? {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          } : null;
+
+          setFormData(prev => ({
+            ...prev,
+            property_address: {
+              street: street.trim(),
+              city,
+              state,
+              zip
+            },
+            location
+          }));
+
+          setAddressInput(place.formatted_address || '');
+          setShowPredictions(false);
+        }
+      }
+    );
   };
 
   const handleImageUpload = async (e) => {
@@ -303,20 +296,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <style>{`
-          .pac-container {
-            z-index: 99999 !important;
-            position: fixed !important;
-          }
-          .pac-item {
-            cursor: pointer !important;
-            padding: 8px !important;
-          }
-          .pac-item:hover {
-            background-color: #f3f4f6 !important;
-          }
-        `}</style>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto"  onInteractOutside={(e) => {
+        if (showPredictions) {
+          e.preventDefault();
+        }
+      }}>
         <DialogHeader>
           <DialogTitle className="text-2xl">Create Estate Sale</DialogTitle>
         </DialogHeader>
@@ -359,12 +343,33 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   <MapPin className="w-4 h-4" />
                   Property Address *
                 </Label>
-                <input
-                  ref={addressInputRef}
-                  type="text"
-                  placeholder="Start typing address..."
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
+                <div className="relative">
+                  <Input
+                    ref={addressInputRef}
+                    type="text"
+                    placeholder="Start typing address..."
+                    value={addressInput}
+                    onChange={(e) => handleAddressSearch(e.target.value)}
+                    onFocus={() => predictions.length > 0 && setShowPredictions(true)}
+                  />
+                  {showPredictions && predictions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {predictions.map((prediction) => (
+                        <button
+                          key={prediction.place_id}
+                          type="button"
+                          className="w-full text-left px-4 py-3 hover:bg-slate-100 border-b border-slate-100 last:border-b-0 cursor-pointer"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectPrediction(prediction.place_id);
+                          }}
+                        >
+                          <div className="text-sm text-slate-900">{prediction.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                   <Input
                     placeholder="City"
