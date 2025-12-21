@@ -34,6 +34,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [routeSales, setRouteSales] = useState([]);
   const [savedSales, setSavedSales] = useState([]);
@@ -42,10 +43,28 @@ export default function Home() {
   const [totalEstimatedValue, setTotalEstimatedValue] = useState(0);
 
   useEffect(() => {
-    loadData();
-    getUserLocation();
-    loadRoute();
+    checkAuthAndRedirect();
   }, []);
+
+  const checkAuthAndRedirect = async () => {
+    try {
+      const authenticated = await base44.auth.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      
+      if (authenticated) {
+        // Redirect logged-in users to their dashboard
+        window.location.href = createPageUrl('Dashboard');
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+    } finally {
+      setCheckingAuth(false);
+      loadData();
+      getUserLocation();
+      loadRoute();
+    }
+  };
 
   const loadRoute = () => {
     const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
@@ -77,18 +96,6 @@ export default function Home() {
 
   const loadData = async () => {
     try {
-      // Check if user is authenticated
-      const authenticated = await base44.auth.isAuthenticated();
-      setIsAuthenticated(authenticated);
-
-      if (authenticated) {
-        try {
-          const user = await base44.auth.me();
-          setCurrentUser(user);
-        } catch (error) {
-          console.log('Could not load user');
-        }
-      }
 
       // Load estate sales (public access)
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
@@ -283,7 +290,7 @@ export default function Home() {
     setRegularSales(filterByDistance(regular));
   };
 
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-600 text-xl">Loading...</div>
