@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import { 
   Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-  Package, Edit, MoreVertical, TrendingUp
+  Package, Edit, TrendingUp
 } from 'lucide-react';
 import {
   DropdownMenu,
