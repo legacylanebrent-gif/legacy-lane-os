@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles } from 'lucide-react';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
@@ -47,6 +47,9 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     payment_methods: ['cash', 'credit_card', 'venmo'],
     premium_listing: false
   });
+
+  const [editingImage, setEditingImage] = useState(null);
+  const [labelingImages, setLabelingImages] = useState(false);
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -164,6 +167,56 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     );
   };
 
+  const processImage = async (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.onload = async () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = img.width;
+            let height = img.height;
+            const maxSize = 1200;
+
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = (height / width) * maxSize;
+                width = maxSize;
+              } else {
+                width = (width / height) * maxSize;
+                height = maxSize;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+              (blob) => {
+                resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+                  type: 'image/webp'
+                }));
+              },
+              'image/webp',
+              0.75
+            );
+          } catch (error) {
+            reject(error);
+          }
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -171,14 +224,20 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     setUploadingImages(true);
     try {
       const uploadPromises = files.map(async (file) => {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        return file_url;
+        const processedFile = await processImage(file);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
+        return {
+          url: file_url,
+          name: '',
+          description: '',
+          rotation: 0
+        };
       });
 
-      const urls = await Promise.all(uploadPromises);
+      const imageObjects = await Promise.all(uploadPromises);
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...urls]
+        images: [...prev.images, ...imageObjects]
       }));
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -193,6 +252,62 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
     }));
+  };
+
+  const rotateImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, rotation: (img.rotation + 90) % 360 } : img
+      )
+    }));
+  };
+
+  const updateImageDetails = (index, updates) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, ...updates } : img
+      )
+    }));
+  };
+
+  const labelImagesWithAI = async () => {
+    if (formData.images.length === 0) return;
+
+    setLabelingImages(true);
+    try {
+      const imageUrls = formData.images.map(img => img.url);
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze these estate sale photos and provide a short, descriptive name for each image (max 3-4 words). Return a JSON array of strings, one label per image in order.`,
+        file_urls: imageUrls,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            labels: {
+              type: "array",
+              items: { type: "string" }
+            }
+          }
+        }
+      });
+
+      if (result.labels && Array.isArray(result.labels)) {
+        setFormData(prev => ({
+          ...prev,
+          images: prev.images.map((img, i) => ({
+            ...img,
+            name: img.name || result.labels[i] || ''
+          }))
+        }));
+      }
+    } catch (error) {
+      console.error('Error labeling images:', error);
+      alert('Failed to label images with AI');
+    } finally {
+      setLabelingImages(false);
+    }
   };
 
   const addSaleDate = () => {
@@ -254,7 +369,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
         property_address: {
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
-        }
+        },
+        images: formData.images.map(img => img.url)
       };
 
       await base44.entities.EstateSale.create(data);
@@ -496,13 +612,29 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
           {step === 3 && (
             <>
               <div>
-                <Label className="flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4" />
-                  Estate Sale Photos
-                </Label>
-                <p className="text-sm text-slate-600 mb-3">Upload photos of featured items and the property</p>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <Label className="flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />
+                      Estate Sale Photos
+                    </Label>
+                    <p className="text-sm text-slate-600">Photos will be auto-resized to 1200px max, 75% quality, WebP format</p>
+                  </div>
+                  {formData.images.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={labelImagesWithAI}
+                      disabled={labelingImages}
+                      className="gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {labelingImages ? 'Labeling...' : 'AI Label All'}
+                    </Button>
+                  )}
+                </div>
 
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center mb-4">
                   <input
                     type="file"
                     multiple
@@ -515,33 +647,92 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   <label htmlFor="image-upload" className="cursor-pointer">
                     <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
                     <p className="text-sm text-slate-600">
-                      {uploadingImages ? 'Uploading...' : 'Click to upload images or drag and drop'}
+                      {uploadingImages ? 'Processing and uploading...' : 'Click to upload images'}
                     </p>
                   </label>
                 </div>
 
                 {formData.images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    {formData.images.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img 
-                          src={url} 
-                          alt={`Estate sale ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
+                  <div className="grid grid-cols-4 gap-4">
+                    {formData.images.map((image, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="relative group">
+                          <img 
+                            src={image.url} 
+                            alt={image.name || `Photo ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                            style={{ transform: `rotate(${image.rotation}deg)` }}
+                          />
+                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => rotateImage(index)}
+                            >
+                              <RotateCw className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => setEditingImage(index)}
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => removeImage(index)}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <Input
+                          placeholder="Photo name"
+                          value={image.name}
+                          onChange={(e) => updateImageDetails(index, { name: e.target.value })}
+                          className="text-xs"
                         />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {editingImage !== null && (
+                <div className="border rounded-lg p-4 bg-slate-50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-semibold">Edit Photo Details</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingImage(null)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Name</Label>
+                    <Input
+                      value={formData.images[editingImage]?.name || ''}
+                      onChange={(e) => updateImageDetails(editingImage, { name: e.target.value })}
+                      placeholder="e.g., Antique Dining Table"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Description</Label>
+                    <Textarea
+                      value={formData.images[editingImage]?.description || ''}
+                      onChange={(e) => updateImageDetails(editingImage, { description: e.target.value })}
+                      placeholder="Additional details about this item..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
@@ -554,8 +745,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   Continue to Details
                 </Button>
               </div>
-              </>
-              )}
+            </>
+          )}
 
               {step === 4 && (
               <>
