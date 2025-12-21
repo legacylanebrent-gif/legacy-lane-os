@@ -23,15 +23,28 @@ export default function Worksheet() {
   const [sale, setSale] = useState(null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [activeTab, setActiveTab] = useState('transactions');
   
-  // Form state
+  // Transaction form state
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Expense form state
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [expenseCategory, setExpenseCategory] = useState('');
+  const [expenseAmount, setExpenseAmount] = useState('');
+  const [expenseVendor, setExpenseVendor] = useState('');
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
+  const [expensePaymentMethod, setExpensePaymentMethod] = useState('credit_card');
+  const [expenseDescription, setExpenseDescription] = useState('');
+  const [expenseReceipt, setExpenseReceipt] = useState(null);
+  const [isReimbursable, setIsReimbursable] = useState(false);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -60,10 +73,63 @@ export default function Worksheet() {
       // Load transactions
       const transData = await base44.entities.Transaction.filter({ sale_id: saleId }, '-created_date');
       setTransactions(transData);
+
+      // Load expenses
+      const expenseData = await base44.entities.Expense.filter({ sale_id: saleId }, '-created_date');
+      setExpenses(expenseData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    if (!expenseCategory || !expenseAmount || expenseAmount <= 0) {
+      alert('Please select a category and enter a valid amount');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      let receiptUrl = null;
+      if (expenseReceipt) {
+        setUploadingReceipt(true);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: expenseReceipt });
+        receiptUrl = file_url;
+        setUploadingReceipt(false);
+      }
+
+      await base44.entities.Expense.create({
+        sale_id: sale.id,
+        category: expenseCategory,
+        amount: parseFloat(expenseAmount),
+        vendor: expenseVendor,
+        date: expenseDate,
+        payment_method: expensePaymentMethod,
+        description: expenseDescription,
+        receipt_url: receiptUrl,
+        is_reimbursable: isReimbursable
+      });
+
+      // Clear form
+      setExpenseCategory('');
+      setExpenseAmount('');
+      setExpenseVendor('');
+      setExpenseDate(new Date().toISOString().split('T')[0]);
+      setExpensePaymentMethod('credit_card');
+      setExpenseDescription('');
+      setExpenseReceipt(null);
+      setIsReimbursable(false);
+      setShowExpenseForm(false);
+
+      // Reload expenses
+      await loadData();
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      alert('Failed to add expense');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -117,6 +183,12 @@ export default function Worksheet() {
   const currentTotal = price && quantity ? (parseFloat(price) * quantity) : 0;
   const commissionRate = sale?.commission_rate || 20;
   const sellerPercentage = 100 - commissionRate;
+
+  const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const reimbursableExpenses = expenses.filter(e => e.is_reimbursable).reduce((sum, e) => sum + (e.amount || 0), 0);
+  const nonReimbursableExpenses = expenses.filter(e => !e.is_reimbursable).reduce((sum, e) => sum + (e.amount || 0), 0);
+  const reimbursableCount = expenses.filter(e => e.is_reimbursable).length;
+  const nonReimbursableCount = expenses.filter(e => !e.is_reimbursable).length;
 
   if (loading) {
     return (
@@ -401,11 +473,264 @@ export default function Worksheet() {
           </div>
         </TabsContent>
 
-        <TabsContent value="expenses">
-          <Card className="p-12 text-center">
-            <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 text-lg">Expense tracking coming soon</p>
-          </Card>
+        <TabsContent value="expenses" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Total Expenses</div>
+                <div className="text-3xl font-bold text-slate-900">
+                  ${totalExpenses.toFixed(2)}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">{expenses.length} items</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Reimbursable</div>
+                <div className="text-3xl font-bold text-green-600">
+                  ${reimbursableExpenses.toFixed(2)}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">{reimbursableCount} items</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-600 mb-1">Non-Reimbursable</div>
+                <div className="text-3xl font-bold text-red-600">
+                  ${nonReimbursableExpenses.toFixed(2)}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">{nonReimbursableCount} items</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Add Expense Form */}
+          {showExpenseForm && (
+            <Card className="bg-blue-50 border-blue-200 shadow-md">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-slate-900">Add New Expense</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowExpenseForm(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Category <span className="text-red-500">*</span>
+                      </label>
+                      <Select value={expenseCategory} onValueChange={setExpenseCategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cleaning">Cleaning</SelectItem>
+                          <SelectItem value="staging">Staging</SelectItem>
+                          <SelectItem value="advertising">Advertising</SelectItem>
+                          <SelectItem value="supplies">Supplies</SelectItem>
+                          <SelectItem value="labor">Labor</SelectItem>
+                          <SelectItem value="storage">Storage</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Amount <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={expenseAmount}
+                        onChange={(e) => setExpenseAmount(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Vendor
+                      </label>
+                      <Input
+                        placeholder="Home Depot, Staples, etc."
+                        value={expenseVendor}
+                        onChange={(e) => setExpenseVendor(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Date <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={expenseDate}
+                        onChange={(e) => setExpenseDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Payment Method
+                    </label>
+                    <Select value={expensePaymentMethod} onValueChange={setExpensePaymentMethod}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="credit_card">Credit Card</SelectItem>
+                        <SelectItem value="debit_card">Debit Card</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                        <SelectItem value="company_card">Company Card</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Description
+                    </label>
+                    <Textarea
+                      placeholder="What was this expense for?"
+                      value={expenseDescription}
+                      onChange={(e) => setExpenseDescription(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Receipt
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => setExpenseReceipt(e.target.files[0])}
+                        className="flex-1"
+                      />
+                      {uploadingReceipt && <span className="text-sm text-slate-600">Uploading...</span>}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="reimbursable"
+                      checked={isReimbursable}
+                      onChange={(e) => setIsReimbursable(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="reimbursable" className="text-sm text-blue-700 cursor-pointer">
+                      This expense is reimbursable
+                    </label>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setShowExpenseForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleAddExpense}
+                      disabled={submitting || uploadingReceipt}
+                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+                    >
+                      {submitting ? 'Adding...' : 'Add Expense'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!showExpenseForm && (
+            <Button 
+              onClick={() => setShowExpenseForm(true)}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Expense
+            </Button>
+          )}
+
+          {/* Expense List */}
+          {expenses.length > 0 ? (
+            <Card className="bg-white shadow-md">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Expenses</h3>
+                <div className="space-y-3">
+                  {expenses.map((expense) => (
+                    <div 
+                      key={expense.id}
+                      className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-slate-900 capitalize">
+                            {expense.category.replace('_', ' ')}
+                          </p>
+                          {expense.is_reimbursable && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                              Reimbursable
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
+                          {expense.vendor && <span>{expense.vendor}</span>}
+                          {expense.vendor && <span>•</span>}
+                          <span>{new Date(expense.date).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span className="capitalize">{expense.payment_method.replace('_', ' ')}</span>
+                        </div>
+                        {expense.description && (
+                          <p className="text-sm text-slate-500 mt-1">{expense.description}</p>
+                        )}
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-xl font-bold text-slate-900">
+                          ${expense.amount.toFixed(2)}
+                        </p>
+                        {expense.receipt_url && (
+                          <a 
+                            href={expense.receipt_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            View Receipt
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : !showExpenseForm && (
+            <Card className="p-12 text-center">
+              <Receipt className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500 text-lg">No expenses recorded for this sale</p>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="profit">
