@@ -88,7 +88,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         addressInputRef.current,
-        { types: ['address'] }
+        { 
+          types: ['address'],
+          fields: ['address_components', 'geometry', 'formatted_address']
+        }
       );
 
       autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
@@ -282,7 +285,12 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" style={{ zIndex: 50 }}>
+        <style>{`
+          .pac-container {
+            z-index: 99999 !important;
+          }
+        `}</style>
         <DialogHeader>
           <DialogTitle className="text-2xl">Create Estate Sale</DialogTitle>
         </DialogHeader>
