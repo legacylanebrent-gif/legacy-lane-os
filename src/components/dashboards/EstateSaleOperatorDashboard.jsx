@@ -1,129 +1,300 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, DollarSign, TrendingUp, Calendar, Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
+import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
+import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
+import {
+  Home,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Eye,
+  Heart,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+} from 'lucide-react';
 
 export default function EstateSaleOperatorDashboard({ user }) {
+  const [sales, setSales] = useState([]);
   const [stats, setStats] = useState({
     totalSales: 0,
     activeSales: 0,
     upcomingSales: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    totalViews: 0,
+    totalSaves: 0,
+    unreadMessages: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingSale, setEditingSale] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    loadDashboardData();
+  }, [refreshKey]);
 
-  const loadStats = async () => {
+  const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      const sales = await base44.entities.EstateSale.filter({ operator_id: user.id });
-      
+      // Load operator's estate sales
+      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
+      const operatorSales = allSales.filter((s) => s.operator_id === user.id);
+      setSales(operatorSales);
+
+      // Calculate stats
+      const activeSales = operatorSales.filter((s) => s.status === 'active').length;
+      const upcomingSales = operatorSales.filter((s) => s.status === 'upcoming').length;
+      const totalRevenue = operatorSales.reduce(
+        (sum, s) => sum + (s.commission_earned || 0),
+        0
+      );
+      const totalViews = operatorSales.reduce((sum, s) => sum + (s.views || 0), 0);
+      const totalSaves = operatorSales.reduce((sum, s) => sum + (s.saves || 0), 0);
+
+      // Count unread messages
+      const allMessages = await base44.entities.Message.list('-created_date', 100);
+      const unreadMessages = allMessages.filter(
+        (m) => m.recipient_id === user.id && !m.read
+      ).length;
+
       setStats({
-        totalSales: sales.length,
-        activeSales: sales.filter(s => s.status === 'active').length,
-        upcomingSales: sales.filter(s => s.status === 'upcoming').length,
-        totalRevenue: sales.reduce((sum, s) => sum + (s.commission_earned || 0), 0)
+        totalSales: operatorSales.length,
+        activeSales,
+        upcomingSales,
+        totalRevenue,
+        totalViews,
+        totalSaves,
+        unreadMessages,
       });
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error('Error loading dashboard:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="p-6 lg:p-8 space-y-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
-            Estate Sales Dashboard
-          </h1>
-          <p className="text-slate-600">Manage your estate sales and inventory</p>
+  const handleEditSale = (sale) => {
+    setEditingSale(sale);
+    setCreateModalOpen(true);
+  };
+
+  const handleDeleteSale = async (sale) => {
+    if (!confirm(`Are you sure you want to delete "${sale.title}"?`)) return;
+
+    try {
+      await base44.entities.EstateSale.delete(sale.id);
+      setRefreshKey((k) => k + 1);
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      alert('Failed to delete sale');
+    }
+  };
+
+  const handleModalClose = () => {
+    setCreateModalOpen(false);
+    setEditingSale(null);
+    setRefreshKey((k) => k + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-slate-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-slate-200 rounded"></div>
+            ))}
+          </div>
         </div>
-        <Link to={createPageUrl('MyEstateSales')}>
-          <Button className="bg-gold-600 hover:bg-gold-700">
-            <Plus className="w-4 h-4 mr-2" />
-            New Estate Sale
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Estate Sale Dashboard</h1>
+          <p className="text-slate-600 mt-1">
+            Manage your estate sales and track performance
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setRefreshKey((k) => k + 1)}
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
-        </Link>
+          <Button
+            onClick={() => setCreateModalOpen(true)}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Estate Sale
+          </Button>
+        </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Sales</CardTitle>
-            <Home className="h-5 w-5 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-navy-900">{stats.totalSales}</div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Total Sales</p>
+                <p className="text-3xl font-bold text-slate-900">{stats.totalSales}</p>
+              </div>
+              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Home className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Active Sales</CardTitle>
-            <TrendingUp className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-navy-900">{stats.activeSales}</div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Active Sales</p>
+                <p className="text-3xl font-bold text-green-600">{stats.activeSales}</p>
+              </div>
+              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Upcoming</CardTitle>
-            <Calendar className="h-5 w-5 text-amber-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-navy-900">{stats.upcomingSales}</div>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Upcoming Sales</p>
+                <p className="text-3xl font-bold text-blue-600">{stats.upcomingSales}</p>
+              </div>
+              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Earned</CardTitle>
-            <DollarSign className="h-5 w-5 text-emerald-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-navy-900">
-              ${stats.totalRevenue.toLocaleString()}
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Total Revenue</p>
+                <p className="text-3xl font-bold text-green-600">
+                  ${stats.totalRevenue.toLocaleString()}
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Total Views</p>
+                <p className="text-3xl font-bold text-cyan-600">{stats.totalViews}</p>
+              </div>
+              <div className="h-12 w-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                <Eye className="w-6 h-6 text-cyan-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Total Saves</p>
+                <p className="text-3xl font-bold text-red-600">{stats.totalSaves}</p>
+              </div>
+              <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <Heart className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Unread Messages</p>
+                <p className="text-3xl font-bold text-orange-600">{stats.unreadMessages}</p>
+              </div>
+              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-orange-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-serif text-navy-900">Recent Sales</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-500">Your recent estate sales will appear here</p>
-          </CardContent>
-        </Card>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="sales" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="sales">My Estate Sales</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-serif text-navy-900">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Link to={createPageUrl('MyEstateSales')}>
-              <Button variant="outline" className="w-full justify-start">
-                <Home className="w-4 h-4 mr-2" />
-                Manage Estate Sales
-              </Button>
-            </Link>
-            <Link to={createPageUrl('Inventory')}>
-              <Button variant="outline" className="w-full justify-start">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                View Inventory
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="sales" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Estate Sales</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {sales.length === 0 ? (
+                <div className="text-center py-12">
+                  <Home className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+                  <p className="text-slate-600 mb-4">No estate sales yet</p>
+                  <Button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Your First Sale
+                  </Button>
+                </div>
+              ) : (
+                <OperatorSalesTable
+                  sales={sales}
+                  onEdit={handleEditSale}
+                  onDelete={handleDeleteSale}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="messages">
+          <OperatorMessagesWidget user={user} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Create/Edit Modal */}
+      <CreateEstateSaleModal
+        open={createModalOpen}
+        onClose={handleModalClose}
+        sale={editingSale}
+      />
     </div>
   );
 }
