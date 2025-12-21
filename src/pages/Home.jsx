@@ -520,21 +520,6 @@ export default function Home() {
                         )}
                       </div>
 
-                      {sale.categories && sale.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {sale.categories.slice(0, 3).map((cat, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {cat}
-                            </Badge>
-                          ))}
-                          {sale.categories.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{sale.categories.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex gap-2">
                           <Button
@@ -641,21 +626,6 @@ export default function Home() {
                           </div>
                         )}
                       </div>
-
-                      {sale.categories && sale.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {sale.categories.slice(0, 3).map((cat, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {cat}
-                            </Badge>
-                          ))}
-                          {sale.categories.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{sale.categories.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
 
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex gap-2">
@@ -771,21 +741,6 @@ export default function Home() {
                           </div>
                         )}
                       </div>
-
-                      {sale.categories && sale.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {sale.categories.slice(0, 3).map((cat, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {cat}
-                            </Badge>
-                          ))}
-                          {sale.categories.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{sale.categories.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
 
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex gap-2">
