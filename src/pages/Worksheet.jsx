@@ -513,7 +513,35 @@ export default function Worksheet() {
             </Card>
             </div>
 
-          {/* Add Transaction Form */}
+            {/* Payment Type Breakdown */}
+            <Card className="bg-white shadow-md">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Transactions by Payment Type</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {['cash', 'credit_card', 'venmo', 'zelle', 'check'].map(method => {
+                  const methodTransactions = transactions.filter(t => t.payment_method === method);
+                  const methodCount = methodTransactions.length;
+                  const methodTotal = methodTransactions.reduce((sum, t) => sum + (t.total || 0), 0);
+
+                  return (
+                    <div key={method} className="border rounded-lg p-3">
+                      <div className="text-xs text-slate-600 mb-1 capitalize">
+                        {method.replace('_', ' ')}
+                      </div>
+                      <div className="text-xl font-bold text-slate-900">
+                        {methodCount}
+                      </div>
+                      <div className="text-sm font-semibold text-green-600">
+                        ${methodTotal.toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+            </Card>
+
+            {/* Add Transaction Form */}
           <Card className="bg-white shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
