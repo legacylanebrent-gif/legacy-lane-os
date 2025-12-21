@@ -386,6 +386,16 @@ END:VCALENDAR`;
                           </button>
                         </>
                       )}
+                      {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          {sale.images[selectedImage]?.name && (
+                            <h4 className="text-white font-semibold text-lg">{sale.images[selectedImage].name}</h4>
+                          )}
+                          {sale.images[selectedImage]?.description && (
+                            <p className="text-white/90 text-sm mt-1">{sale.images[selectedImage].description}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="p-4 grid grid-cols-6 gap-2">
                     {sale.images.map((image, index) => (
@@ -447,6 +457,16 @@ END:VCALENDAR`;
                           <ChevronRight className="w-6 h-6 text-slate-900" />
                         </button>
                       </>
+                    )}
+                    {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                      <div className="absolute bottom-16 left-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto">
+                        {sale.images[selectedImage]?.name && (
+                          <h4 className="text-white font-semibold text-xl mb-2">{sale.images[selectedImage].name}</h4>
+                        )}
+                        {sale.images[selectedImage]?.description && (
+                          <p className="text-white/90 text-sm">{sale.images[selectedImage].description}</p>
+                        )}
+                      </div>
                     )}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
                       {selectedImage + 1} / {sale.images.length}
