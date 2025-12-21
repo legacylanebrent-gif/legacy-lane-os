@@ -91,16 +91,35 @@ Be specific and practical. Focus on the main item in the photo.`;
         imageUrl = image;
       }
 
-      await base44.entities.ProductDatabase.create({
+      // Check if entry already exists for this image
+      const existingEntries = await base44.entities.ProductDatabase.filter({
         thumbnail_url: imageUrl,
-        title: editedName,
-        description: editedDescription,
-        suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
-        suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-        actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-        sale_id: saleId,
-        categories: selectedCategories
+        sale_id: saleId
       });
+
+      if (existingEntries.length > 0) {
+        // Update existing entry with edited values
+        await base44.entities.ProductDatabase.update(existingEntries[0].id, {
+          title: editedName,
+          description: editedDescription,
+          suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+          suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          categories: selectedCategories
+        });
+      } else {
+        // Create new entry
+        await base44.entities.ProductDatabase.create({
+          thumbnail_url: imageUrl,
+          title: editedName,
+          description: editedDescription,
+          suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+          suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          sale_id: saleId,
+          categories: selectedCategories
+        });
+      }
 
       onApprove(imageIndex, {
         name: editedName,
@@ -147,18 +166,37 @@ Be specific and practical. Focus on the main item in the photo.`;
         tags: selectedCategories
       });
 
-      // Save to product database with item_id
-      await base44.entities.ProductDatabase.create({
+      // Check if entry already exists for this image
+      const existingEntries = await base44.entities.ProductDatabase.filter({
         thumbnail_url: imageUrl,
-        title: editedName,
-        description: editedDescription,
-        suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
-        suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-        actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
-        item_id: createdItem.id,
-        sale_id: saleId,
-        categories: selectedCategories
+        sale_id: saleId
       });
+
+      if (existingEntries.length > 0) {
+        // Update existing entry with edited values and item_id
+        await base44.entities.ProductDatabase.update(existingEntries[0].id, {
+          title: editedName,
+          description: editedDescription,
+          suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+          suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          item_id: createdItem.id,
+          categories: selectedCategories
+        });
+      } else {
+        // Create new entry with item_id
+        await base44.entities.ProductDatabase.create({
+          thumbnail_url: imageUrl,
+          title: editedName,
+          description: editedDescription,
+          suggested_new_price: editedNewPrice ? parseFloat(editedNewPrice) : null,
+          suggested_used_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          actual_price: editedUsedPrice ? parseFloat(editedUsedPrice) : null,
+          item_id: createdItem.id,
+          sale_id: saleId,
+          categories: selectedCategories
+        });
+      }
 
       onApprove(imageIndex, {
         name: editedName,
