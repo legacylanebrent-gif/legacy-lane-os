@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles } from 'lucide-react';
 
@@ -50,6 +51,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
   const [editingImage, setEditingImage] = useState(null);
   const [labelingImages, setLabelingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -227,11 +229,15 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     if (files.length === 0) return;
 
     setUploadingImages(true);
+    setUploadProgress({ current: 0, total: files.length });
+
     try {
       const imageObjects = [];
 
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         try {
+          setUploadProgress({ current: i + 1, total: files.length });
           const processedFile = await processImage(file);
           const { file_url } = await base44.integrations.Core.UploadFile({ file: processedFile });
           imageObjects.push({
@@ -260,6 +266,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       alert('Failed to upload images: ' + error.message);
     } finally {
       setUploadingImages(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -666,6 +673,15 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                       {uploadingImages ? 'Processing and uploading...' : 'Click to upload images'}
                     </p>
                   </label>
+
+                  {uploadingImages && uploadProgress.total > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
+                      <p className="text-xs text-slate-600">
+                        Uploading {uploadProgress.current} of {uploadProgress.total} images...
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {formData.images.length > 0 && (
