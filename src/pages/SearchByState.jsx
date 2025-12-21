@@ -55,7 +55,7 @@ export default function SearchByState() {
               {US_STATES.map((state) => (
                 <Link
                   key={state.code}
-                  to={createPageUrl('Home') + `?state=${state.code}`}
+                  to={createPageUrl('StateCities') + `?state=${state.code}`}
                   className="group"
                 >
                   <div className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-slate-200 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200">
