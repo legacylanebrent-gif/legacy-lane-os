@@ -29,6 +29,7 @@ import AdminCampaigns from './pages/AdminCampaigns';
 import AdminLeads from './pages/AdminLeads';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminPackages from './pages/AdminPackages';
+import EstateSaleDetail from './pages/EstateSaleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -64,6 +65,7 @@ export const PAGES = {
     "AdminLeads": AdminLeads,
     "AdminTransactions": AdminTransactions,
     "AdminPackages": AdminPackages,
+    "EstateSaleDetail": EstateSaleDetail,
 }
 
 export const pagesConfig = {
