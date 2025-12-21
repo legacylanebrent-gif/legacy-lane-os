@@ -95,7 +95,9 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         location: sale.location || null,
         sale_dates: sale.sale_dates || [],
         status: sale.status || 'draft',
-        images: (sale.images || []).map(url => ({ url, name: '', description: '', rotation: 0 })),
+        images: (sale.images || []).map(img => 
+          typeof img === 'string' ? { url: img, name: '', description: '', rotation: 0 } : img
+        ),
         categories: sale.categories || [],
         estimated_value: sale.estimated_value || '',
         commission_rate: sale.commission_rate || '',
