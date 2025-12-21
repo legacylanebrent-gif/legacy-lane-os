@@ -64,24 +64,26 @@ export default function VendorSignup() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-6">
-              <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="font-medium">Back Home</span>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">LL</span>
-                </div>
-                <div>
-                  <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                  <p className="text-xs text-orange-600">Vendor Network</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">LL</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
+                <p className="text-xs text-orange-600">Vendor Network</p>
               </div>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Back Link */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <Link to={createPageUrl('Home')} className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="font-medium">Back Home</span>
+        </Link>
+      </div>
 
       {/* Hero Section */}
       <section className="py-16 px-4">
