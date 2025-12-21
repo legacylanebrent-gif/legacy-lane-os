@@ -492,9 +492,31 @@ export default function Home() {
                         </div>
                       )}
 
-                      <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-slate-500">
-                        <span>{sale.views || 0} views</span>
-                        <Heart className="w-4 h-4" />
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+                          <span>{sale.views || 0} views</span>
+                          <Heart className="w-4 h-4" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={(e) => handleAddToRoute(e, sale.id)}
+                            variant="outline"
+                            size="sm"
+                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                          >
+                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                          </Button>
+                          <Button
+                            onClick={(e) => handleGetDirections(e, sale)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Navigation className="w-4 h-4 mr-1" />
+                            Directions
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -582,9 +604,31 @@ export default function Home() {
                         </div>
                       )}
 
-                      <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-slate-500">
-                        <span>{sale.views || 0} views</span>
-                        <Heart className="w-4 h-4" />
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+                          <span>{sale.views || 0} views</span>
+                          <Heart className="w-4 h-4" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={(e) => handleAddToRoute(e, sale.id)}
+                            variant="outline"
+                            size="sm"
+                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                          >
+                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                          </Button>
+                          <Button
+                            onClick={(e) => handleGetDirections(e, sale)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Navigation className="w-4 h-4 mr-1" />
+                            Directions
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -680,9 +724,31 @@ export default function Home() {
                         </div>
                       )}
 
-                      <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-slate-500">
-                        <span>{sale.views || 0} views</span>
-                        <Heart className="w-4 h-4" />
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+                          <span>{sale.views || 0} views</span>
+                          <Heart className="w-4 h-4" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={(e) => handleAddToRoute(e, sale.id)}
+                            variant="outline"
+                            size="sm"
+                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                          >
+                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                          </Button>
+                          <Button
+                            onClick={(e) => handleGetDirections(e, sale)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Navigation className="w-4 h-4 mr-1" />
+                            Directions
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
