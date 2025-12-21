@@ -12,6 +12,7 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
   const [progress, setProgress] = useState({ current: 0, total: 0, successful: 0, failed: 0 });
   const [completed, setCompleted] = useState(false);
   const [results, setResults] = useState([]);
+  const [workingImages, setWorkingImages] = useState([]);
 
   const BATCH_SIZE = 10;
 
@@ -32,7 +33,7 @@ export default function BatchLabelModal({ open, onClose, images, saleId, onLabel
 
     for (let i = 0; i < batchImages.length; i++) {
       const image = batchImages[i];
-      const imageIndex = images.indexOf(image);
+      const imageIndex = currentImages.indexOf(image);
       
       setProgress(prev => ({ ...prev, current: i + 1 }));
 
@@ -86,7 +87,7 @@ Be specific and practical. Focus on the main item in the photo.`;
         });
 
         // Update images array with new labels
-        const updatedImages = [...images];
+        const updatedImages = [...currentImages];
         updatedImages[imageIndex] = {
           ...updatedImages[imageIndex],
           name: result.name || '',
@@ -94,6 +95,9 @@ Be specific and practical. Focus on the main item in the photo.`;
           price: result.used_price ? parseFloat(result.used_price) : null,
           categories: result.suggested_categories || []
         };
+        
+        // Update working state
+        setWorkingImages(updatedImages);
         
         // Update parent component state immediately
         onLabelsApplied(updatedImages);
@@ -188,6 +192,7 @@ Be specific and practical. Focus on the main item in the photo.`;
     setResults([]);
     setCurrentBatch(0);
     setCompleted(false);
+    setWorkingImages([]);
   };
 
   const unlabeledCount = images.filter(img => !img.name || img.name.trim() === '').length;
