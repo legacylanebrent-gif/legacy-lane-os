@@ -235,13 +235,13 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   reject(new Error('Failed to create blob'));
                   return;
                 }
-                const processedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
-                  type: 'image/webp'
+                const processedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                  type: 'image/jpeg'
                 });
                 resolve(processedFile);
               },
-              'image/webp',
-              0.75
+              'image/jpeg',
+              0.85
             );
           } catch (error) {
             reject(error);
