@@ -31,11 +31,19 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
+      const currentUser = await base44.auth.me();
+      if (!currentUser) {
+        console.error('Not authenticated');
+        setLoading(false);
+        return;
+      }
       const data = await base44.asServiceRole.entities.User.list();
-      setUsers(data);
-      setFilteredUsers(data);
+      setUsers(data || []);
+      setFilteredUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
+      setUsers([]);
+      setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
