@@ -45,7 +45,7 @@ Look at this estate sale photo and provide:
 3. Two realistic price estimates:
    - New price: What this item would cost brand new in a store
    - Used price: A realistic estate sale price based on condition
-4. The sources/websites used for price comparisons (e.g., Amazon, eBay, Wayfair, etc.)
+4. Detailed price comparisons from specific sources with actual prices found on each site
 
 Be specific and practical. Focus on the main item in the photo.`;
 
@@ -59,10 +59,17 @@ Be specific and practical. Focus on the main item in the photo.`;
             description: { type: "string" },
             new_price: { type: "number", description: "Estimated retail price if brand new" },
             used_price: { type: "number", description: "Realistic estate sale price" },
-            price_sources: {
+            price_comparisons: {
               type: "array",
-              items: { type: "string" },
-              description: "Websites/sources used for price comparison (e.g., Amazon, eBay, Wayfair)"
+              items: {
+                type: "object",
+                properties: {
+                  source: { type: "string", description: "Website name (e.g., Amazon, eBay, Wayfair)" },
+                  price: { type: "number", description: "Price found on this website" },
+                  condition: { type: "string", description: "New or Used" }
+                }
+              },
+              description: "Detailed price comparisons from different websites"
             },
             suggested_categories: { 
               type: "array",
@@ -151,7 +158,7 @@ Look at this estate sale photo and provide:
 3. Two realistic price estimates:
    - New price: What this item would cost brand new in a store
    - Used price: A realistic estate sale price based on condition
-4. The sources/websites used for price comparisons (e.g., Amazon, eBay, Wayfair, etc.)
+4. Detailed price comparisons from specific sources with actual prices found on each site
 
 Be specific and practical. Focus on the main item in the photo that matches "${editedName}".`;
 
@@ -165,10 +172,17 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
             description: { type: "string" },
             new_price: { type: "number", description: "Estimated retail price if brand new" },
             used_price: { type: "number", description: "Realistic estate sale price" },
-            price_sources: {
+            price_comparisons: {
               type: "array",
-              items: { type: "string" },
-              description: "Websites/sources used for price comparison (e.g., Amazon, eBay, Wayfair)"
+              items: {
+                type: "object",
+                properties: {
+                  source: { type: "string", description: "Website name (e.g., Amazon, eBay, Wayfair)" },
+                  price: { type: "number", description: "Price found on this website" },
+                  condition: { type: "string", description: "New or Used" }
+                }
+              },
+              description: "Detailed price comparisons from different websites"
             },
             suggested_categories: { 
               type: "array",
@@ -469,14 +483,22 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
                       </span>
                     </div>
                   )}
-                  {suggestions.price_sources && suggestions.price_sources.length > 0 && (
+                  {suggestions.price_comparisons && suggestions.price_comparisons.length > 0 && (
                     <div className="mt-2 pt-2 border-t border-purple-200">
-                      <p className="text-xs text-slate-500 mb-1">Price comps from:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {suggestions.price_sources.map((source, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs bg-white">
-                            {source}
-                          </Badge>
+                      <p className="text-xs text-slate-500 mb-1">Price comparisons:</p>
+                      <div className="space-y-1">
+                        {suggestions.price_comparisons.map((comp, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-xs bg-white rounded px-2 py-1">
+                            <span className="font-medium text-slate-700">{comp.source}</span>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {comp.condition}
+                              </Badge>
+                              <span className="font-semibold text-green-600">
+                                ${comp.price.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
