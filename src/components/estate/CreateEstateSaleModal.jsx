@@ -328,14 +328,43 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
-    const items = Array.from(formData.images);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const sourceIndex = result.source.index;
+    const destIndex = result.destination.index;
 
-    setFormData(prev => ({
-      ...prev,
-      images: items
-    }));
+    // If dragging a selected item with multiple selections, move all selected items
+    if (selectedImages.includes(sourceIndex) && selectedImages.length > 1) {
+      const items = Array.from(formData.images);
+      const selectedItems = selectedImages.sort((a, b) => a - b).map(idx => items[idx]);
+
+      // Remove selected items from their current positions (in reverse order to maintain indices)
+      selectedImages.sort((a, b) => b - a).forEach(idx => items.splice(idx, 1));
+
+      // Insert all selected items at the destination
+      let insertIndex = destIndex;
+      // Adjust destination if we removed items before it
+      const removedBefore = selectedImages.filter(idx => idx < destIndex).length;
+      insertIndex -= removedBefore;
+
+      items.splice(insertIndex, 0, ...selectedItems);
+
+      setFormData(prev => ({ ...prev, images: items }));
+
+      // Update selected indices
+      const newIndices = selectedItems.map((_, i) => insertIndex + i);
+      setSelectedImages(newIndices);
+    } else {
+      // Single item drag
+      const items = Array.from(formData.images);
+      const [reorderedItem] = items.splice(sourceIndex, 1);
+      items.splice(destIndex, 0, reorderedItem);
+
+      setFormData(prev => ({ ...prev, images: items }));
+
+      // Update selected indices if item was selected
+      if (selectedImages.includes(sourceIndex)) {
+        setSelectedImages([destIndex]);
+      }
+    }
   };
 
   const rotateImage = (index) => {
@@ -813,7 +842,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                         <div 
                           {...provided.droppableProps}
                           ref={provided.innerRef}
-                          className="grid grid-cols-8 gap-3"
+                          className="grid grid-cols-6 gap-3"
                         >
                           {formData.images.map((image, index) => (
                             <Draggable key={index} draggableId={`image-${index}`} index={index}>
