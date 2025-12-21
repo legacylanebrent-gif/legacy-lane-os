@@ -226,6 +226,74 @@ export const STATE_REGIONS = {
     smallerCities: [
       "Beverly / Gloucester", "Brockton", "Lowell", "Plymouth"
     ]
+  },
+  TN: {
+    name: "Tennessee",
+    code: "TN",
+    largerCities: [
+      "Chattanooga", "Cleveland", "Hopkinsville / Clarksville", "Jackson",
+      "Johnson City", "Kingsport / Bristol", "Knoxville", "Memphis",
+      "Morristown", "Nashville"
+    ],
+    smallerCities: [
+      "Athens", "Columbia", "Cookeville", "Crossville", "Dyersburg",
+      "Greeneville", "Harriman", "La Follette", "Lawrenceburg", "McMinnville",
+      "Newport", "Paris", "Sevierville", "Shelbyville", "Tullahoma"
+    ]
+  },
+  IN: {
+    name: "Indiana",
+    code: "IN",
+    largerCities: [
+      "Anderson", "Bloomington", "Chicago, IL", "Columbus", "Crown Point",
+      "Elkhart", "Evansville", "Fort Wayne", "Indianapolis", "Kokomo",
+      "Lafayette", "Michigan City / La Porte", "Muncie", "South Bend",
+      "Terre Haute"
+    ],
+    smallerCities: [
+      "Angola", "Auburn", "Bedford", "Connersville", "Crawfordsville", "Decatur",
+      "Frankfort", "Greensburg", "Huntington", "Jasper", "Kendallville",
+      "Logansport", "Madison", "Marion", "New Castle", "North Vernon", "Peru",
+      "Plymouth", "Richmond", "Scottsburg", "Seymour", "Vincennes", "Wabash",
+      "Warsaw", "Washington"
+    ]
+  },
+  MO: {
+    name: "Missouri",
+    code: "MO",
+    largerCities: [
+      "Cape Girardeau", "Columbia", "Jefferson City", "Joplin", "Kansas City",
+      "Springfield", "St. Joseph", "St. Louis"
+    ],
+    smallerCities: [
+      "Branson", "Farmington", "Fort Leonard Wood", "Hannibal", "Kennett",
+      "Kirksville", "Lebanon", "Moberly", "Poplar Bluff", "Rolla", "Sedalia",
+      "Sikeston", "Warrensburg", "West Plains"
+    ]
+  },
+  MD: {
+    name: "Maryland",
+    code: "MD",
+    largerCities: [
+      "Annapolis", "Baltimore", "Eastern Shore", "Frederick",
+      "Potomac / Bethesda / Silver Spring", "Southern Maryland", "Washington DC",
+      "Western Maryland"
+    ],
+    smallerCities: []
+  },
+  WI: {
+    name: "Wisconsin",
+    code: "WI",
+    largerCities: [
+      "Appleton", "Eau Claire", "Fond Du Lac", "Green Bay", "Janesville / Beloit",
+      "Kenosha", "La Crosse", "Madison", "Milwaukee", "Oshkosh / Neenah",
+      "Racine", "Sheboygan", "Wausau"
+    ],
+    smallerCities: [
+      "Baraboo", "Beaver Dam", "Manitowoc", "Marinette", "Menomonie", "Merrill",
+      "Monroe", "Platteville", "Stevens Point", "Watertown / Fort Atkinson",
+      "Whitewater", "Wisconsin Rapids / Marshfield"
+    ]
   }
   // Additional states will be added via the scraping function
 };
