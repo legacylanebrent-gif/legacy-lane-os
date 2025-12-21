@@ -13,7 +13,7 @@ export default function VIPEventManager({ event }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [newInvite, setNewInvite] = useState({ name: '', email: '', phone: '' });
+  const [newInvite, setNewInvite] = useState({ name: '', email: '', phone: '', tickets_allocated: 1 });
   const [checkInCode, setCheckInCode] = useState('');
 
   useEffect(() => {
@@ -48,11 +48,12 @@ export default function VIPEventManager({ event }) {
         name: newInvite.name,
         email: newInvite.email,
         phone: newInvite.phone,
+        tickets_allocated: parseInt(newInvite.tickets_allocated) || 1,
         status: 'pending',
         invited_date: new Date().toISOString()
       });
 
-      setNewInvite({ name: '', email: '', phone: '' });
+      setNewInvite({ name: '', email: '', phone: '', tickets_allocated: 1 });
       loadData();
     } catch (error) {
       console.error('Error adding invite:', error);
@@ -101,37 +102,46 @@ Best regards`
         responded_date: new Date().toISOString()
       });
 
-      // Generate ticket
-      const ticketCode = `VIP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      await base44.entities.VIPTicket.create({
-        invite_id: invite.id,
-        event_id: event.id,
-        ticket_code: ticketCode,
-        attendee_name: invite.name,
-        attendee_email: invite.email,
-        checked_in: false
-      });
+      // Generate tickets based on allocation
+      const ticketsAllocated = invite.tickets_allocated || 1;
+      const ticketCodes = [];
 
-      // Send ticket email
+      for (let i = 0; i < ticketsAllocated; i++) {
+        const ticketCode = `VIP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        await base44.entities.VIPTicket.create({
+          invite_id: invite.id,
+          event_id: event.id,
+          ticket_code: ticketCode,
+          attendee_name: invite.name,
+          attendee_email: invite.email,
+          checked_in: false
+        });
+        ticketCodes.push(ticketCode);
+      }
+
+      // Send ticket email with all codes
+      const ticketList = ticketCodes.map((code, idx) => `Ticket ${idx + 1}: ${code}`).join('\n');
+      
       await base44.integrations.Core.SendEmail({
         to: invite.email,
-        subject: `Your VIP Ticket - ${event.title}`,
+        subject: `Your VIP Ticket${ticketsAllocated > 1 ? 's' : ''} - ${event.title}`,
         body: `Dear ${invite.name},
 
-Your RSVP has been confirmed! Here's your VIP ticket:
+Your RSVP has been confirmed! Here ${ticketsAllocated > 1 ? 'are your' : 'is your'} VIP ticket${ticketsAllocated > 1 ? 's' : ''}:
 
-Ticket Code: ${ticketCode}
+${ticketList}
+
 Event: ${event.title}
 Date: ${format(new Date(event.event_date), 'MMMM d, yyyy')}
 Time: ${event.start_time} - ${event.end_time}
 
-Please present this ticket code when you arrive at the event.
+Please present ${ticketsAllocated > 1 ? 'these ticket codes' : 'this ticket code'} when you arrive at the event.
 
 See you there!`
       });
 
       loadData();
-      alert('RSVP accepted and ticket sent!');
+      alert(`RSVP accepted and ${ticketsAllocated} ticket${ticketsAllocated > 1 ? 's' : ''} sent!`);
     } catch (error) {
       console.error('Error accepting RSVP:', error);
       alert('Failed to process RSVP');
@@ -259,7 +269,7 @@ See you there!`
               <CardTitle className="text-base">Add VIP Invite</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-5 gap-3">
                 <Input
                   placeholder="Name"
                   value={newInvite.name}
@@ -275,6 +285,13 @@ See you there!`
                   placeholder="Phone (optional)"
                   value={newInvite.phone}
                   onChange={(e) => setNewInvite({...newInvite, phone: e.target.value})}
+                />
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Tickets"
+                  value={newInvite.tickets_allocated}
+                  onChange={(e) => setNewInvite({...newInvite, tickets_allocated: e.target.value})}
                 />
                 <Button onClick={handleAddInvite} className="bg-yellow-600 hover:bg-yellow-700">
                   Add Invite
@@ -307,6 +324,9 @@ See you there!`
                       {invite.phone && (
                         <div className="text-sm text-slate-600">{invite.phone}</div>
                       )}
+                      <div className="text-xs text-slate-500 mt-1">
+                        {invite.tickets_allocated || 1} ticket{(invite.tickets_allocated || 1) > 1 ? 's' : ''} allocated
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge className={

@@ -18,7 +18,8 @@ export default function CreateVIPEventModal({ open, onClose, sale, onSuccess }) 
     event_date: null,
     start_time: '9:00 AM',
     end_time: '11:00 AM',
-    max_attendees: 50
+    max_attendees: 50,
+    tickets_per_invite: 1
   });
 
   const handleSubmit = async () => {
@@ -41,6 +42,7 @@ export default function CreateVIPEventModal({ open, onClose, sale, onSuccess }) 
         start_time: formData.start_time,
         end_time: formData.end_time,
         max_attendees: parseInt(formData.max_attendees),
+        tickets_per_invite: parseInt(formData.tickets_per_invite),
         status: 'draft'
       });
 
@@ -62,7 +64,8 @@ export default function CreateVIPEventModal({ open, onClose, sale, onSuccess }) 
       event_date: null,
       start_time: '9:00 AM',
       end_time: '11:00 AM',
-      max_attendees: 50
+      max_attendees: 50,
+      tickets_per_invite: 1
     });
   };
 
@@ -133,13 +136,25 @@ export default function CreateVIPEventModal({ open, onClose, sale, onSuccess }) 
             </div>
           </div>
 
-          <div>
-            <Label>Max Attendees</Label>
-            <Input
-              type="number"
-              value={formData.max_attendees}
-              onChange={(e) => setFormData({...formData, max_attendees: e.target.value})}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Max Attendees</Label>
+              <Input
+                type="number"
+                value={formData.max_attendees}
+                onChange={(e) => setFormData({...formData, max_attendees: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label>Tickets Per VIP</Label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.tickets_per_invite}
+                onChange={(e) => setFormData({...formData, tickets_per_invite: e.target.value})}
+              />
+              <p className="text-xs text-slate-600 mt-1">Guests per invitation</p>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4 border-t">
