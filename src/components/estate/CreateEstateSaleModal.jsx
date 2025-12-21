@@ -469,7 +469,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     }));
   };
 
-  const handlePhotoLabelApprove = (index, labelData, addedToInventory) => {
+  const handlePhotoLabelApprove = async (index, labelData, addedToInventory) => {
     setFormData(prev => {
       const updated = {
         ...prev,
@@ -483,38 +483,49 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           } : img
         )
       };
-
-      // Auto-save to database
-      if (sale?.id) {
-        (async () => {
-          try {
-            const user = await base44.auth.me();
-            const data = {
-              ...updated,
-              operator_id: sale.operator_id || user.id,
-              operator_name: sale.operator_name || user.full_name,
-              status: sale.status || 'draft',
-              estimated_value: updated.estimated_value ? parseFloat(updated.estimated_value) : null,
-              commission_rate: updated.commission_rate ? parseFloat(updated.commission_rate) : null,
-              national_featured_price: updated.national_featured_price ? parseFloat(updated.national_featured_price) : null,
-              local_featured_price: updated.local_featured_price ? parseFloat(updated.local_featured_price) : null,
-              property_address: {
-                ...updated.property_address,
-                formatted_address: `${updated.property_address.street}, ${updated.property_address.city}, ${updated.property_address.state} ${updated.property_address.zip}`
-              },
-              images: updated.images
-            };
-            await base44.entities.EstateSale.update(sale.id, data);
-            console.log('AI label saved successfully');
-          } catch (error) {
-            console.error('Auto-save failed:', error);
-            alert('Failed to save AI labels: ' + error.message);
-          }
-        })();
-      }
-
       return updated;
     });
+
+    // Auto-save to database after state update
+    if (sale?.id) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait for state to settle
+        const user = await base44.auth.me();
+        
+        // Get the updated formData with the new label
+        const currentImages = formData.images.map((img, i) => 
+          i === index ? { 
+            ...img, 
+            name: labelData.name,
+            description: labelData.description,
+            price: labelData.price,
+            categories: labelData.categories
+          } : img
+        );
+        
+        const data = {
+          ...formData,
+          images: currentImages,
+          operator_id: sale.operator_id || user.id,
+          operator_name: sale.operator_name || user.full_name,
+          status: sale.status || 'draft',
+          estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
+          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+          national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
+          local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
+          property_address: {
+            ...formData.property_address,
+            formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+          }
+        };
+        
+        await base44.entities.EstateSale.update(sale.id, data);
+        console.log('AI label saved successfully');
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+        alert('Failed to save AI labels: ' + error.message);
+      }
+    }
   };
 
   const handleBulkEdit = (updates) => {
