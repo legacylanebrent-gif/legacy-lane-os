@@ -347,7 +347,7 @@ END:VCALENDAR`;
                       onClick={() => setModalOpen(true)}
                     >
                       <img
-                        src={sale.images[selectedImage]}
+                        src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
                         alt={sale.title}
                         className="w-full h-full object-cover"
                       />
@@ -397,7 +397,7 @@ END:VCALENDAR`;
                           }`}
                         >
                           <img
-                            src={image}
+                            src={typeof image === 'string' ? image : image?.url}
                             alt={`View ${index + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform"
                           />
@@ -418,7 +418,7 @@ END:VCALENDAR`;
                 <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
                   <div className="relative flex items-center justify-center bg-black min-h-[90vh]">
                     <img
-                      src={sale.images[selectedImage]}
+                      src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
                       alt={sale.title}
                       className="max-h-[90vh] max-w-full object-contain"
                     />
@@ -624,7 +624,7 @@ END:VCALENDAR`;
                         className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-200 hover:border-red-600 transition-colors group"
                       >
                         <img
-                          src={sale.images[imageIndex]}
+                          src={typeof sale.images[imageIndex] === 'string' ? sale.images[imageIndex] : sale.images[imageIndex]?.url}
                           alt={`Saved photo ${imageIndex + 1}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
