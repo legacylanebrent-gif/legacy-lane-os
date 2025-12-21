@@ -472,12 +472,12 @@ export default function Home() {
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
                           <div className="flex items-center gap-2 text-slate-600">
                             <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div>
-                              <div>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</div>
+                            <div className="flex items-center justify-between flex-1">
+                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
                               {sale.sale_dates[0].start_time && (
-                                <div className="text-xs text-slate-500">
+                                <span className="text-xs text-slate-500">
                                   {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </div>
+                                </span>
                               )}
                             </div>
                           </div>
@@ -591,12 +591,12 @@ export default function Home() {
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
                           <div className="flex items-center gap-2 text-slate-600">
                             <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div>
-                              <div>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</div>
+                            <div className="flex items-center justify-between flex-1">
+                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
                               {sale.sale_dates[0].start_time && (
-                                <div className="text-xs text-slate-500">
+                                <span className="text-xs text-slate-500">
                                   {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </div>
+                                </span>
                               )}
                             </div>
                           </div>
@@ -718,12 +718,12 @@ export default function Home() {
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
                           <div className="flex items-center gap-2 text-slate-600">
                             <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div>
-                              <div>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</div>
+                            <div className="flex items-center justify-between flex-1">
+                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
                               {sale.sale_dates[0].start_time && (
-                                <div className="text-xs text-slate-500">
+                                <span className="text-xs text-slate-500">
                                   {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </div>
+                                </span>
                               )}
                             </div>
                           </div>
