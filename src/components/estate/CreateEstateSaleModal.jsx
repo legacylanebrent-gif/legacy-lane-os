@@ -55,28 +55,37 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
   });
 
   useEffect(() => {
-    if (!open || !step === 1) return;
+    if (!open || step !== 1) return;
 
     const loadGoogleMaps = async () => {
       try {
-        if (window.google?.maps?.places) {
-          setTimeout(initAutocomplete, 100);
+        if (window.google?.maps?.places && addressInputRef.current) {
+          setTimeout(initAutocomplete, 200);
           return;
         }
 
         // Get API key from backend
-        const { data } = await base44.functions.invoke('getConfig');
-        const apiKey = data.GOOGLE_MAPS_API_KEY;
+        const response = await base44.functions.invoke('getConfig', {});
+        const apiKey = response.data.GOOGLE_MAPS_API_KEY;
 
         if (!apiKey) {
           console.error('Google Maps API key not found');
           return;
         }
 
+        // Remove any existing script
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (existingScript) {
+          existingScript.remove();
+        }
+
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=Function.prototype`;
         script.async = true;
-        script.onload = () => setTimeout(initAutocomplete, 100);
+        script.defer = true;
+        script.onload = () => {
+          setTimeout(initAutocomplete, 200);
+        };
         document.head.appendChild(script);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
@@ -84,7 +93,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     };
 
     const initAutocomplete = () => {
-      if (!addressInputRef.current || !window.google?.maps?.places) return;
+      if (!addressInputRef.current || !window.google?.maps?.places) {
+        console.log('Autocomplete not ready');
+        return;
+      }
 
       // Clear any existing autocomplete
       if (autocompleteRef.current) {
@@ -100,6 +112,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       );
 
       autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
+      console.log('Autocomplete initialized');
     };
 
     loadGoogleMaps();
