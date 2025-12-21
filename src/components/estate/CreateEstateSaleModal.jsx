@@ -12,7 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2 } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
@@ -56,6 +57,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const [labelingImages, setLabelingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -300,6 +302,39 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
+    }));
+    setSelectedImages(prev => prev.filter(i => i !== index));
+  };
+
+  const removeSelectedImages = () => {
+    if (selectedImages.length === 0) return;
+    if (!confirm(`Delete ${selectedImages.length} selected image(s)?`)) return;
+
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => !selectedImages.includes(i))
+    }));
+    setSelectedImages([]);
+  };
+
+  const toggleImageSelection = (index) => {
+    setSelectedImages(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const items = Array.from(formData.images);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setFormData(prev => ({
+      ...prev,
+      images: items
     }));
   };
 
@@ -709,21 +744,39 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                           {formData.images.length} {formData.images.length === 1 ? 'photo' : 'photos'}
                         </Badge>
                       )}
+                      {selectedImages.length > 0 && (
+                        <Badge variant="default" className="ml-2 bg-orange-600">
+                          {selectedImages.length} selected
+                        </Badge>
+                      )}
                     </Label>
-                    <p className="text-sm text-slate-600">Photos will be auto-resized to 1200px max, 75% quality, WebP format</p>
+                    <p className="text-sm text-slate-600">Drag to reorder • Click to select • Photos will be auto-resized to 1200px max, 75% quality, WebP format</p>
                   </div>
-                  {formData.images.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={labelImagesWithAI}
-                      disabled={labelingImages}
-                      className="gap-2"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      {labelingImages ? 'Labeling...' : 'AI Label All'}
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+                    {selectedImages.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={removeSelectedImages}
+                        className="gap-2 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Selected
+                      </Button>
+                    )}
+                    {formData.images.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={labelImagesWithAI}
+                        disabled={labelingImages}
+                        className="gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        {labelingImages ? 'Labeling...' : 'AI Label All'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center mb-4">
@@ -754,52 +807,94 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                 </div>
 
                 {formData.images.length > 0 && (
-                  <div className="grid grid-cols-8 gap-3">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="relative group">
-                          <img 
-                            src={image.url} 
-                            alt={image.name || `Photo ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                            style={{ transform: `rotate(${image.rotation}deg)` }}
-                          />
-                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => rotateImage(index)}
-                            >
-                              <RotateCw className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => setEditingImage(index)}
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => removeImage(index)}
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
+                  <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="images" direction="horizontal">
+                      {(provided) => (
+                        <div 
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className="grid grid-cols-8 gap-3"
+                        >
+                          {formData.images.map((image, index) => (
+                            <Draggable key={index} draggableId={`image-${index}`} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className="space-y-2"
+                                >
+                                  <div 
+                                    className={`relative group cursor-pointer rounded-lg ${
+                                      selectedImages.includes(index) ? 'ring-4 ring-orange-500' : ''
+                                    } ${snapshot.isDragging ? 'opacity-50' : ''}`}
+                                    onClick={() => toggleImageSelection(index)}
+                                  >
+                                    <div {...provided.dragHandleProps} className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="bg-white/90 rounded p-1">
+                                        <GripVertical className="w-4 h-4 text-slate-600" />
+                                      </div>
+                                    </div>
+                                    <img 
+                                      src={image.url} 
+                                      alt={image.name || `Photo ${index + 1}`}
+                                      className="w-full h-32 object-cover rounded-lg"
+                                      style={{ transform: `rotate(${image.rotation}deg)` }}
+                                    />
+                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        className="h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          rotateImage(index);
+                                        }}
+                                      >
+                                        <RotateCw className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        className="h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingImage(index);
+                                        }}
+                                      >
+                                        <Edit2 className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="h-7 w-7 p-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          removeImage(index);
+                                        }}
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    {selectedImages.includes(index) && (
+                                      <div className="absolute inset-0 bg-orange-500/20 rounded-lg pointer-events-none" />
+                                    )}
+                                  </div>
+                                  <Input
+                                    placeholder="Photo name"
+                                    value={image.name}
+                                    onChange={(e) => updateImageDetails(index, { name: e.target.value })}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-xs"
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
                         </div>
-                        <Input
-                          placeholder="Photo name"
-                          value={image.name}
-                          onChange={(e) => updateImageDetails(index, { name: e.target.value })}
-                          className="text-xs"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 )}
               </div>
 
