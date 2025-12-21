@@ -111,7 +111,7 @@ export default function Home() {
     if (userLocation) {
       filtered = filtered
         .map(sale => {
-          if (sale.location) {
+          if (sale.location && sale.location.lat && sale.location.lng) {
             const distance = calculateDistance(
               userLocation.lat,
               userLocation.lng,
@@ -123,7 +123,7 @@ export default function Home() {
           return { ...sale, distance: 999999 };
         })
         .sort((a, b) => a.distance - b.distance)
-        .filter(sale => sale.distance < 100); // Within 100 miles
+        .filter(sale => sale.distance < 25); // Within 25 miles
     }
 
     // Filter by search query
