@@ -325,14 +325,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                   <MapPin className="w-4 h-4" />
                   Property Address *
                 </Label>
-                <Input
+                <input
                   ref={addressInputRef}
+                  type="text"
                   placeholder="Start typing address..."
-                  value={formData.property_address.street}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    property_address: {...formData.property_address, street: e.target.value}
-                  })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <div className="grid grid-cols-3 gap-3">
                   <Input
