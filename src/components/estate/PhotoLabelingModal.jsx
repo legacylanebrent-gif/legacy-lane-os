@@ -72,6 +72,43 @@ Be specific and practical. Focus on the main item in the photo.`;
       setEditedUsedPrice(result.used_price?.toString() || '');
       setEditedDescription(result.description || '');
       setSelectedCategories(result.suggested_categories || []);
+
+      // Auto-save to product database
+      try {
+        const existingEntries = await base44.entities.ProductDatabase.filter({
+          thumbnail_url: imageUrl,
+          sale_id: saleId
+        });
+
+        const saveData = {
+          title: result.name || '',
+          description: result.description || '',
+          suggested_new_price: result.new_price ? parseFloat(result.new_price) : null,
+          suggested_used_price: result.used_price ? parseFloat(result.used_price) : null,
+          actual_price: result.used_price ? parseFloat(result.used_price) : null,
+          categories: result.suggested_categories || []
+        };
+
+        if (existingEntries.length > 0) {
+          await base44.entities.ProductDatabase.update(existingEntries[0].id, saveData);
+        } else {
+          await base44.entities.ProductDatabase.create({
+            thumbnail_url: imageUrl,
+            sale_id: saleId,
+            ...saveData
+          });
+        }
+
+        // Update parent component
+        onApprove(imageIndex, {
+          name: result.name || '',
+          description: result.description || '',
+          price: result.used_price ? parseFloat(result.used_price) : null,
+          categories: result.suggested_categories || []
+        }, false);
+      } catch (error) {
+        console.error('Error auto-saving to product database:', error);
+      }
     } catch (error) {
       console.error('Error analyzing photo:', error);
       const errorMsg = error?.message || error?.toString() || 'Unknown error';
@@ -135,6 +172,51 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
       setEditedUsedPrice(result.used_price?.toString() || editedUsedPrice);
       setEditedDescription(result.description || editedDescription);
       setSelectedCategories(result.suggested_categories || selectedCategories);
+
+      // Auto-save after rescan
+      try {
+        let imageUrl = image.url;
+        if (typeof imageUrl === 'object' && imageUrl.url) {
+          imageUrl = imageUrl.url;
+        }
+        if (typeof image === 'string') {
+          imageUrl = image;
+        }
+
+        const existingEntries = await base44.entities.ProductDatabase.filter({
+          thumbnail_url: imageUrl,
+          sale_id: saleId
+        });
+
+        const saveData = {
+          title: result.name || editedName,
+          description: result.description || editedDescription,
+          suggested_new_price: result.new_price ? parseFloat(result.new_price) : (editedNewPrice ? parseFloat(editedNewPrice) : null),
+          suggested_used_price: result.used_price ? parseFloat(result.used_price) : (editedUsedPrice ? parseFloat(editedUsedPrice) : null),
+          actual_price: result.used_price ? parseFloat(result.used_price) : (editedUsedPrice ? parseFloat(editedUsedPrice) : null),
+          categories: result.suggested_categories || selectedCategories
+        };
+
+        if (existingEntries.length > 0) {
+          await base44.entities.ProductDatabase.update(existingEntries[0].id, saveData);
+        } else {
+          await base44.entities.ProductDatabase.create({
+            thumbnail_url: imageUrl,
+            sale_id: saleId,
+            ...saveData
+          });
+        }
+
+        // Update parent component
+        onApprove(imageIndex, {
+          name: result.name || editedName,
+          description: result.description || editedDescription,
+          price: result.used_price ? parseFloat(result.used_price) : (editedUsedPrice ? parseFloat(editedUsedPrice) : null),
+          categories: result.suggested_categories || selectedCategories
+        }, false);
+      } catch (error) {
+        console.error('Error auto-saving after rescan:', error);
+      }
     } catch (error) {
       console.error('Error rescanning photo:', error);
       alert('Failed to rescan photo. Please try again.');
