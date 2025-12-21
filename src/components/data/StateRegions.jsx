@@ -294,6 +294,68 @@ export const STATE_REGIONS = {
       "Monroe", "Platteville", "Stevens Point", "Watertown / Fort Atkinson",
       "Whitewater", "Wisconsin Rapids / Marshfield"
     ]
+  },
+  CO: {
+    name: "Colorado",
+    code: "CO",
+    largerCities: [
+      "Boulder", "Colorado Springs", "Denver", "Fort Collins", "Grand Junction",
+      "Greeley", "Pueblo"
+    ],
+    smallerCities: [
+      "Canon City", "Durango", "Edwards", "Fort Morgan", "Montrose"
+    ]
+  },
+  MN: {
+    name: "Minnesota",
+    code: "MN",
+    largerCities: [
+      "Duluth", "Mankato", "Minneapolis / St. Paul", "Rochester", "St. Cloud"
+    ],
+    smallerCities: [
+      "Albert Lea", "Alexandria", "Austin", "Bemidji", "Brainerd",
+      "Faribault / Northfield", "Fergus Falls", "Hutchinson", "Marshall",
+      "New Ulm", "Owatonna", "Red Wing", "Willmar", "Winona"
+    ]
+  },
+  SC: {
+    name: "South Carolina",
+    code: "SC",
+    largerCities: [
+      "Anderson", "Charleston", "Columbia", "Florence", "Greenville",
+      "Hilton Head Island / Beaufort", "Myrtle Beach", "Spartanburg", "Sumter"
+    ],
+    smallerCities: [
+      "Bennettsville", "Chester", "Dillon", "Gaffney", "Georgetown", "Greenwood",
+      "Lancaster", "Newberry", "Orangeburg", "Rock Hill", "Seneca", "Union",
+      "Walterboro"
+    ]
+  },
+  AL: {
+    name: "Alabama",
+    code: "AL",
+    largerCities: [
+      "Anniston", "Auburn", "Birmingham", "Columbus, GA", "Daphne / Fairhope",
+      "Decatur", "Dothan", "Florence", "Gadsden", "Huntsville", "Mobile",
+      "Montgomery", "Tuscaloosa"
+    ],
+    smallerCities: [
+      "Albertville", "Cullman", "Enterprise / Ozark", "Scottsboro", "Selma",
+      "Talladega / Sylacauga", "Troy", "Valley"
+    ]
+  },
+  LA: {
+    name: "Louisiana",
+    code: "LA",
+    largerCities: [
+      "Alexandria", "Baton Rouge", "Hammond", "Houma", "Lafayette",
+      "Lake Charles", "Monroe", "New Orleans", "Shreveport"
+    ],
+    smallerCities: [
+      "Abbeville", "Bastrop", "Bogalusa", "Crowley", "DeRidder", "Fort Polk",
+      "Jennings", "Minden", "Morgan City", "Natchitoches", "New Iberia",
+      "Opelousas / Eunice", "Ruston"
+    ]
   }
   // Additional states will be added via the scraping function
 };
