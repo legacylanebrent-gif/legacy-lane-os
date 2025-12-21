@@ -52,6 +52,8 @@ import SaleExport from './pages/SaleExport';
 import MyProfile from './pages/MyProfile';
 import MyReferrals from './pages/MyReferrals';
 import ReferralLanding from './pages/ReferralLanding';
+import MyRewards from './pages/MyRewards';
+import AdminRewards from './pages/AdminRewards';
 import __Layout from './Layout.jsx';
 
 
@@ -110,6 +112,8 @@ export const PAGES = {
     "MyProfile": MyProfile,
     "MyReferrals": MyReferrals,
     "ReferralLanding": ReferralLanding,
+    "MyRewards": MyRewards,
+    "AdminRewards": AdminRewards,
 }
 
 export const pagesConfig = {
