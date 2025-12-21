@@ -39,7 +39,7 @@ export default function Home() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
-          setFilterByLocation(true);
+          // Don't automatically filter, just get location for distance display
         },
         (error) => {
           console.log('Geolocation error:', error);
@@ -108,7 +108,27 @@ export default function Home() {
   };
 
   const handleUseMyLocation = () => {
-    getUserLocation();
+    if (userLocation) {
+      // Already have location, just filter
+      setFilterByLocation(true);
+    } else {
+      // Get location and filter
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+            setFilterByLocation(true);
+          },
+          (error) => {
+            console.log('Geolocation error:', error);
+            alert('Unable to get your location. Please try entering a ZIP code.');
+          }
+        );
+      }
+    }
   };
 
   const filterSales = () => {
