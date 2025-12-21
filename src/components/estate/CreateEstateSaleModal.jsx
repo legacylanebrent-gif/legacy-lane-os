@@ -567,9 +567,9 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         <Tabs value={step.toString()} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="1" onClick={() => setStep(1)}>Basic Info</TabsTrigger>
-            <TabsTrigger value="2" disabled={!canProceedToStep2} onClick={() => setStep(2)}>Schedule</TabsTrigger>
-            <TabsTrigger value="3" disabled={!canProceedToStep3} onClick={() => setStep(3)}>Media</TabsTrigger>
-            <TabsTrigger value="4" disabled={!canProceedToStep3} onClick={() => setStep(4)}>Details</TabsTrigger>
+            <TabsTrigger value="2" disabled={!sale && !canProceedToStep2} onClick={() => setStep(2)}>Schedule</TabsTrigger>
+            <TabsTrigger value="3" disabled={!sale && !canProceedToStep3} onClick={() => setStep(3)}>Media</TabsTrigger>
+            <TabsTrigger value="4" disabled={!sale && !canProceedToStep3} onClick={() => setStep(4)}>Details</TabsTrigger>
           </TabsList>
         </Tabs>
 
