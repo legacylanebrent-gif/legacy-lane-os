@@ -413,6 +413,60 @@ export const STATE_REGIONS = {
       "Clinton", "Corning", "Fort Dodge", "Marshalltown", "Mason City",
       "Muscatine", "Newton", "Ottumwa"
     ]
+  },
+  UT: {
+    name: "Utah",
+    code: "UT",
+    largerCities: [
+      "Brigham City", "Cedar City", "Logan", "Ogden / Clearfield", "Provo / Orem",
+      "Salt Lake City", "St. George"
+    ],
+    smallerCities: []
+  },
+  NV: {
+    name: "Nevada",
+    code: "NV",
+    largerCities: [
+      "Carson City", "Elko", "Gardnerville Ranchos", "Las Vegas", "Pahrump", "Reno"
+    ],
+    smallerCities: []
+  },
+  AR: {
+    name: "Arkansas",
+    code: "AR",
+    largerCities: [
+      "Fayetteville / Springdale / Rogers", "Fort Smith", "Hot Springs", "Jonesboro",
+      "Little Rock", "Memphis, TN", "Pine Bluff", "Texarkana"
+    ],
+    smallerCities: [
+      "Arkadelphia", "Batesville", "Blytheville", "Camden", "El Dorado",
+      "Forrest City", "Harrison", "Helena / West Helena", "Hope", "Magnolia",
+      "Mountain Home", "Paragould", "Russellville", "Searcy"
+    ]
+  },
+  MS: {
+    name: "Mississippi",
+    code: "MS",
+    largerCities: [
+      "Biloxi", "Hattiesburg", "Jackson", "Memphis, TN", "Pascagoula"
+    ],
+    smallerCities: [
+      "Brookhaven", "Clarksdale", "Cleveland", "Columbus", "Corinth", "Greenville",
+      "Greenwood", "Grenada", "Indianola", "Laurel", "McComb", "Meridian",
+      "Natchez", "Oxford", "Picayune", "Starkville", "Tupelo", "Vicksburg",
+      "Yazoo City"
+    ]
+  },
+  KS: {
+    name: "Kansas",
+    code: "KS",
+    largerCities: [
+      "Kansas City", "Lawrence", "Manhattan", "Topeka", "Wichita"
+    ],
+    smallerCities: [
+      "Coffeyville", "Dodge City", "Emporia", "Garden City", "Great Bend", "Hays",
+      "Hutchinson", "McPherson", "Pittsburg", "Salina", "Winfield"
+    ]
   }
   // Additional states will be added via the scraping function
 };
