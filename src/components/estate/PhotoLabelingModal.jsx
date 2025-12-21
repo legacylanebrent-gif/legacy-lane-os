@@ -159,6 +159,11 @@ Be specific and practical. Focus on the main item in the photo that matches "${e
             description: { type: "string" },
             new_price: { type: "number", description: "Estimated retail price if brand new" },
             used_price: { type: "number", description: "Realistic estate sale price" },
+            price_sources: {
+              type: "array",
+              items: { type: "string" },
+              description: "Websites/sources used for price comparison (e.g., Amazon, eBay, Wayfair)"
+            },
             suggested_categories: { 
               type: "array",
               items: { type: "string" },
