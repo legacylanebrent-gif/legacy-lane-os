@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
-  TrendingUp, Home as HomeIcon, DollarSign
+  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -35,11 +35,18 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [routeSales, setRouteSales] = useState([]);
 
   useEffect(() => {
     loadData();
     getUserLocation();
+    loadRoute();
   }, []);
+
+  const loadRoute = () => {
+    const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+    setRouteSales(route);
+  };
 
   useEffect(() => {
     organizeSales();
@@ -149,6 +156,30 @@ export default function Home() {
           }
         );
       }
+    }
+  };
+
+  const handleAddToRoute = (e, saleId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+    if (route.includes(saleId)) {
+      const updated = route.filter(id => id !== saleId);
+      localStorage.setItem('estateRoute', JSON.stringify(updated));
+      setRouteSales(updated);
+    } else {
+      route.push(saleId);
+      localStorage.setItem('estateRoute', JSON.stringify(route));
+      setRouteSales(route);
+    }
+  };
+
+  const handleGetDirections = (e, sale) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (sale.property_address) {
+      const address = `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`;
+      window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(address)}`, '_blank');
     }
   };
 
