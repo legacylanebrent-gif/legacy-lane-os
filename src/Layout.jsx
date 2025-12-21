@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -242,6 +242,19 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <Users className="w-5 h-5 mr-3" />
                     My Referrals
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('MyRewards')}>
+                  <Button 
+                    variant={currentPageName === 'MyRewards' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'MyRewards' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <Star className="w-5 h-5 mr-3" />
+                    My Rewards
                   </Button>
                 </Link>
                 </div>
