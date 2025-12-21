@@ -78,6 +78,10 @@ export default function Worksheet() {
 
   const loadData = async () => {
     try {
+      // Load current user
+      const userData = await base44.auth.me();
+      setUser(userData);
+
       const params = new URLSearchParams(window.location.search);
       const saleId = params.get('saleId');
       
