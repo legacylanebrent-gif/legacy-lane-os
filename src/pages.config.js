@@ -1,4 +1,3 @@
-import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import EstateSaleFinder from './pages/EstateSaleFinder';
 import Courses from './pages/Courses';
@@ -58,7 +57,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Onboarding": Onboarding,
     "Dashboard": Dashboard,
     "EstateSaleFinder": EstateSaleFinder,
     "Courses": Courses,
@@ -117,7 +115,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Onboarding",
+    mainPage: "Dashboard",
     Pages: PAGES,
     Layout: __Layout,
 };
