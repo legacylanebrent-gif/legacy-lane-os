@@ -835,33 +835,6 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           saleId={sale?.id}
           onLabelsApplied={(updatedImages) => {
             setFormData(prev => ({ ...prev, images: updatedImages }));
-
-            // Auto-save to database
-            if (sale?.id) {
-              setTimeout(async () => {
-                try {
-                  const user = await base44.auth.me();
-                  const data = {
-                    ...formData,
-                    images: updatedImages,
-                    operator_id: sale.operator_id || user.id,
-                    operator_name: sale.operator_name || user.full_name,
-                    status: sale.status || 'draft',
-                    estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
-                    commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
-                    national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
-                    local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
-                    property_address: {
-                      ...formData.property_address,
-                      formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
-                    }
-                  };
-                  await base44.entities.EstateSale.update(sale.id, data);
-                } catch (error) {
-                  console.error('Auto-save failed:', error);
-                }
-              }, 500);
-            }
           }}
         />
 
