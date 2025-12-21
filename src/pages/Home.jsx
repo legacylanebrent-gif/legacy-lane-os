@@ -495,6 +495,16 @@ export default function Home() {
                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
                         {sale.title}
                       </h4>
+                      
+                      {sale.operator_name && (
+                        <Link 
+                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                        >
+                          by {sale.operator_name}
+                        </Link>
+                      )}
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2 text-slate-600">
@@ -722,6 +732,16 @@ export default function Home() {
                       <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
                         {sale.title}
                       </h4>
+                      
+                      {sale.operator_name && (
+                        <Link 
+                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                        >
+                          by {sale.operator_name}
+                        </Link>
+                      )}
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2 text-slate-600">
