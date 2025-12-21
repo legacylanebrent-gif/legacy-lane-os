@@ -88,6 +88,87 @@ export const STATE_REGIONS = {
       "Macomb", "Mount Vernon", "Ottawa / Streator", "Pontiac", "Quincy",
       "Rochelle", "Sterling", "Taylorville"
     ]
+  },
+  PA: {
+    name: "Pennsylvania",
+    code: "PA",
+    largerCities: [
+      "Altoona", "Bloomsburg / Berwick", "Chambersburg", "East Stroudsburg",
+      "Erie", "Gettysburg", "Harrisburg", "Johnstown", "Lancaster", "Lebanon",
+      "Lehigh Valley", "Philadelphia", "Pittsburgh", "Reading",
+      "Scranton / Wilkes-Barre", "State College", "Williamsport", "York",
+      "Youngstown / Warren / Sharon"
+    ],
+    smallerCities: [
+      "Bradford", "Dubois", "Huntingdon", "Indiana", "Lewisburg", "Lewistown",
+      "Lock Haven", "Meadville", "New Castle", "Oil City", "Pottsville", "Sayre",
+      "Selinsgrove", "Somerset", "St. Marys", "Sunbury", "Warren"
+    ]
+  },
+  OH: {
+    name: "Ohio",
+    code: "OH",
+    largerCities: [
+      "Akron", "Canton / Massillon", "Cincinnati / Middletown", "Cleveland",
+      "Columbus", "Dayton", "Lima", "Mansfield", "Springfield", "Steubenville",
+      "Toledo", "Youngstown / Warren / Sharon"
+    ],
+    smallerCities: [
+      "Ashland", "Ashtabula", "Athens", "Bellefontaine", "Bucyrus", "Cambridge",
+      "Celina", "Chillicothe", "Coshocton", "Defiance", "East Liverpool / Salem",
+      "Findlay", "Fremont", "Greenville", "Marion", "Mount Vernon",
+      "New Philadelphia / Dover", "Norwalk", "Sandusky", "Sidney",
+      "Tiffin / Fostoria", "Urbana", "Van Wert", "Wapakoneta", "Washington",
+      "Wilmington", "Wooster", "Zanesville"
+    ]
+  },
+  GA: {
+    name: "Georgia",
+    code: "GA",
+    largerCities: [
+      "Albany", "Athens", "Atlanta", "Augusta", "Brunswick", "Columbus",
+      "Dalton", "Gainesville", "Hinesville / Fort Stewart", "Macon", "Rome",
+      "Savannah", "Valdosta", "Warner Robins"
+    ],
+    smallerCities: [
+      "Americus", "Calhoun", "Cedartown", "Cornelia", "Douglas", "Dublin",
+      "Ellijay", "Fitzgerald", "Fort Valley", "Jesup", "Lagrange",
+      "Milledgeville", "Moultrie", "St. Marys", "Statesboro", "Summerville",
+      "Thomaston", "Thomasville", "Tifton", "Toccoa", "Waycross"
+    ]
+  },
+  NC: {
+    name: "North Carolina",
+    code: "NC",
+    largerCities: [
+      "Asheville", "Burlington", "Chapel Hill / Durham", "Charlotte",
+      "Fayetteville", "Goldsboro", "Greensboro / High Point", "Greenville",
+      "Hickory / Morganton", "Jacksonville", "New Bern", "Raleigh", "Rocky Mount",
+      "Wilmington", "Winston - Salem"
+    ],
+    smallerCities: [
+      "Albemarle", "Boone", "Brevard", "Concord", "Dunn", "Elizabeth City",
+      "Forest City", "Gastonia", "Henderson", "Kill Devil Hills", "Kinston",
+      "Laurinburg", "Lexington / Thomasville", "Lincolnton", "Lumberton",
+      "Morehead City", "Mount Airy", "North Wilkesboro", "Roanoke Rapids",
+      "Rockingham", "Salisbury", "Sanford", "Shelby", "Southern Pines",
+      "Statesville / Mooresville", "Washington", "Wilson"
+    ]
+  },
+  MI: {
+    name: "Michigan",
+    code: "MI",
+    largerCities: [
+      "Ann Arbor", "Battle Creek", "Bay City", "Detroit", "Flint",
+      "Grand Rapids", "Holland / Grand Haven", "Jackson", "Kalamazoo / Portage",
+      "Lansing", "Midland", "Monroe", "Muskegon / Norton Shores",
+      "Niles / Benton Harbor", "Saginaw"
+    ],
+    smallerCities: [
+      "Adrian", "Allegan", "Alma", "Alpena", "Big Rapids", "Cadillac",
+      "Coldwater", "Escanaba", "Houghton", "Marquette", "Mount Pleasant",
+      "Owosso", "Port Huron", "Sault Ste. Marie", "Sturgis", "Traverse City"
+    ]
   }
   // Additional states will be added via the scraping function
 };
