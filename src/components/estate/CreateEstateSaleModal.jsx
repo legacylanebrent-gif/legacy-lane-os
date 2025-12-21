@@ -550,7 +550,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   const canProceedToStep3 = formData.sale_dates.length > 0;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto"  onInteractOutside={(e) => {
         if (showPredictions) {
           e.preventDefault();
