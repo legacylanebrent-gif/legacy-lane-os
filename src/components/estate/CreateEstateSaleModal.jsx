@@ -327,17 +327,6 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the estate sale, what items are available, and any special features..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows={4}
-                />
-              </div>
-
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
@@ -506,6 +495,17 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
 
           {step === 3 && (
             <>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe the estate sale, what items are available, and any special features..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={4}
+                />
+              </div>
+
               <div>
                 <Label>Categories</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
