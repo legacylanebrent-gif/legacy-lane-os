@@ -941,6 +941,22 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                     <p className="text-sm text-slate-600">Drag to reorder • Click to select/deselect • Photos are resized for best online viewing</p>
                   </div>
                   <div className="flex gap-2">
+                    {formData.images.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedImages.length === formData.images.length) {
+                            setSelectedImages([]);
+                          } else {
+                            setSelectedImages(formData.images.map((_, idx) => idx));
+                          }
+                        }}
+                        className="gap-2"
+                      >
+                        {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
+                      </Button>
+                    )}
                     {selectedImages.length > 0 && (
                       <>
                         <Button
