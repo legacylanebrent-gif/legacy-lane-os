@@ -46,12 +46,16 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     special_notes: '',
     parking_info: '',
     payment_methods: ['cash', 'credit_card', 'venmo'],
-    premium_listing: false
+    national_featured: false,
+    local_featured: false,
+    national_featured_price: '',
+    local_featured_price: ''
   });
 
   const [editingImage, setEditingImage] = useState(null);
   const [labelingImages, setLabelingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
+  const [generatingDescription, setGeneratingDescription] = useState(false);
 
   const [newDate, setNewDate] = useState({
     date: null,
@@ -405,6 +409,34 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
     }
   };
 
+  const generateDescription = async () => {
+    if (!formData.title || !formData.property_address.street) {
+      alert('Please enter a title and address first');
+      return;
+    }
+
+    setGeneratingDescription(true);
+    try {
+      const imageUrls = formData.images.slice(0, 5).map(img => img.url);
+      const prompt = `Create a compelling estate sale description for "${formData.title}" located at ${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state}. ${formData.categories.length > 0 ? `Categories include: ${formData.categories.join(', ')}.` : ''} Write 2-3 engaging paragraphs that highlight the sale's unique features and appeal to potential buyers.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        file_urls: imageUrls.length > 0 ? imageUrls : undefined
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        description: result
+      }));
+    } catch (error) {
+      console.error('Error generating description:', error);
+      alert('Failed to generate description');
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -420,7 +452,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
       special_notes: '',
       parking_info: '',
       payment_methods: ['cash', 'credit_card', 'venmo'],
-      premium_listing: false
+      national_featured: false,
+      local_featured: false,
+      national_featured_price: '',
+      local_featured_price: ''
     });
     setStep(1);
   };
@@ -785,7 +820,20 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
               {step === 4 && (
               <>
               <div>
-                <Label htmlFor="description">Description</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateDescription}
+                    disabled={generatingDescription}
+                    className="gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    {generatingDescription ? 'Generating...' : 'AI Generate'}
+                  </Button>
+                </div>
                 <Textarea
                   id="description"
                   placeholder="Describe the estate sale, what items are available, and any special features..."
@@ -885,17 +933,68 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess }) {
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="premium_listing"
-                  checked={formData.premium_listing}
-                  onChange={(e) => setFormData({...formData, premium_listing: e.target.checked})}
-                  className="rounded"
-                />
-                <Label htmlFor="premium_listing" className="cursor-pointer">
-                  Premium Listing (Featured placement)
-                </Label>
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-base font-semibold">Featured Listing Add-Ons (One-Time)</Label>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="national_featured"
+                        checked={formData.national_featured}
+                        onChange={(e) => setFormData({...formData, national_featured: e.target.checked})}
+                        className="rounded"
+                      />
+                      <Label htmlFor="national_featured" className="cursor-pointer font-medium">
+                        National Featured
+                      </Label>
+                    </div>
+                    <p className="text-xs text-slate-600">Featured placement nationwide</p>
+                    {formData.national_featured && (
+                      <div>
+                        <Label htmlFor="national_price" className="text-xs">Add-on Price ($)</Label>
+                        <Input
+                          id="national_price"
+                          type="number"
+                          step="0.01"
+                          placeholder="299.00"
+                          value={formData.national_featured_price}
+                          onChange={(e) => setFormData({...formData, national_featured_price: e.target.value})}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="local_featured"
+                        checked={formData.local_featured}
+                        onChange={(e) => setFormData({...formData, local_featured: e.target.checked})}
+                        className="rounded"
+                      />
+                      <Label htmlFor="local_featured" className="cursor-pointer font-medium">
+                        Local Featured
+                      </Label>
+                    </div>
+                    <p className="text-xs text-slate-600">Featured placement in local area</p>
+                    {formData.local_featured && (
+                      <div>
+                        <Label htmlFor="local_price" className="text-xs">Add-on Price ($)</Label>
+                        <Input
+                          id="local_price"
+                          type="number"
+                          step="0.01"
+                          placeholder="99.00"
+                          value={formData.local_featured_price}
+                          onChange={(e) => setFormData({...formData, local_featured_price: e.target.value})}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-3">
