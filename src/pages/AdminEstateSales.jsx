@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal } from 'lucide-react';
+import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal, Plus } from 'lucide-react';
+import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 
 export default function AdminEstateSales() {
   const [sales, setSales] = useState([]);
@@ -22,6 +23,7 @@ export default function AdminEstateSales() {
   const [minValue, setMinValue] = useState('');
   const [maxValue, setMaxValue] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     loadSales();
@@ -190,7 +192,20 @@ export default function AdminEstateSales() {
             {hasActiveFilters && ' (filtered)'}
           </p>
         </div>
+        <Button 
+          onClick={() => setShowCreateModal(true)}
+          className="bg-orange-600 hover:bg-orange-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Estate Sale
+        </Button>
       </div>
+
+      <CreateEstateSaleModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={loadSales}
+      />
 
       <Card>
         <CardHeader>
