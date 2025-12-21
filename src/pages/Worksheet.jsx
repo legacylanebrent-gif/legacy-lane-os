@@ -533,12 +533,22 @@ export default function Worksheet() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cleaning">Cleaning</SelectItem>
-                          <SelectItem value="staging">Staging</SelectItem>
-                          <SelectItem value="advertising">Advertising</SelectItem>
-                          <SelectItem value="supplies">Supplies</SelectItem>
-                          <SelectItem value="labor">Labor</SelectItem>
-                          <SelectItem value="storage">Storage</SelectItem>
+                          <SelectItem value="advertising_marketing">Advertising & Marketing</SelectItem>
+                          <SelectItem value="cleaning_services">Cleaning Services</SelectItem>
+                          <SelectItem value="dumpster_disposal">Dumpster & Disposal</SelectItem>
+                          <SelectItem value="equipment_rental">Equipment Rental</SelectItem>
+                          <SelectItem value="insurance">Insurance</SelectItem>
+                          <SelectItem value="labor_wages">Labor & Wages</SelectItem>
+                          <SelectItem value="meals_entertainment">Meals & Entertainment</SelectItem>
+                          <SelectItem value="permits_licenses">Permits & Licenses</SelectItem>
+                          <SelectItem value="photography">Photography</SelectItem>
+                          <SelectItem value="professional_services">Professional Services</SelectItem>
+                          <SelectItem value="security">Security</SelectItem>
+                          <SelectItem value="signage_banners">Signage & Banners</SelectItem>
+                          <SelectItem value="staging_setup">Staging & Setup</SelectItem>
+                          <SelectItem value="supplies_materials">Supplies & Materials</SelectItem>
+                          <SelectItem value="transportation_fuel">Transportation & Fuel</SelectItem>
+                          <SelectItem value="utilities">Utilities</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
