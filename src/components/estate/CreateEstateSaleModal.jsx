@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { STATE_REGIONS } from '@/components/data/StateRegions';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
@@ -35,7 +36,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       street: '',
       city: '',
       state: '',
-      zip: ''
+      zip: '',
+      region: ''
     },
     location: null,
     sale_dates: [],
@@ -69,7 +71,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       setFormData({
         title: sale.title || '',
         description: sale.description || '',
-        property_address: sale.property_address || { street: '', city: '', state: '', zip: '' },
+        property_address: sale.property_address || { street: '', city: '', state: '', zip: '', region: '' },
         location: sale.location || null,
         sale_dates: sale.sale_dates || [],
         status: sale.status || 'draft',
@@ -543,7 +545,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
   };
 
   const canProceedToStep2 = formData.title && formData.property_address.street && 
-    formData.property_address.city && formData.property_address.state;
+    formData.property_address.city && formData.property_address.state && formData.property_address.region;
 
   const canProceedToStep3 = formData.sale_dates.length > 0;
 
@@ -638,6 +640,48 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                     })}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="region">Sale Area/Region *</Label>
+                <Select 
+                  value={formData.property_address.region}
+                  onValueChange={(value) => setFormData({
+                    ...formData,
+                    property_address: {...formData.property_address, region: value}
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select the area for this sale" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.property_address.state && STATE_REGIONS[formData.property_address.state] ? (
+                      <>
+                        {STATE_REGIONS[formData.property_address.state].largerCities?.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">Larger Cities</div>
+                            {STATE_REGIONS[formData.property_address.state].largerCities.map((city) => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {STATE_REGIONS[formData.property_address.state].smallerCities?.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">Smaller Cities</div>
+                            {STATE_REGIONS[formData.property_address.state].smallerCities.map((city) => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="px-2 py-2 text-sm text-slate-500">
+                        {formData.property_address.state ? 'No regions available for this state' : 'Please select a state first'}
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-slate-600 mt-1">Select the area closest to your sale location</p>
               </div>
 
               <Button 
