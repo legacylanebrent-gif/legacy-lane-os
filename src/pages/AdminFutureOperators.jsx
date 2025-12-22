@@ -29,7 +29,7 @@ export default function AdminFutureOperators() {
 
   const loadOperators = async () => {
     try {
-      const data = await base44.entities.FutureEstateOperator.list('-created_date', 100);
+      const data = await base44.entities.FutureEstateOperator.list('-created_date', 5000);
       setOperators(data);
     } catch (error) {
       console.error('Error loading operators:', error);
