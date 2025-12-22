@@ -26,99 +26,99 @@ Deno.serve(async (req) => {
     const BATCH_SIZE = 10;
 
     // Process each city
-    for (const regionUrl of cityLinks) {
+    for (const cityUrl of cityLinks) {
       try {
-        console.log(`Fetching region: ${regionUrl}`);
-        const regionResponse = await fetch(regionUrl);
-        const regionHtml = await regionResponse.text();
+        console.log(`\nFetching city: ${cityUrl}`);
+        const cityResponse = await fetch(cityUrl);
+        const cityHtml = await cityResponse.text();
 
-        // Match company profile URLs - broader pattern to catch all variations
-        // Pattern matches: /companies/ID/anything/5-digit-zip/numbers
-        const companyLinkRegex = /href="\/companies\/ID\/([^/]+)\/(\d{5})\/(\d+)"/g;
-        const matches = [...regionHtml.matchAll(companyLinkRegex)];
-        const uniqueCompanyLinks = [...new Set(matches.map(m => `https://www.estatesales.net/companies/ID/${m[1]}/${m[2]}/${m[3]}`))];
-        console.log(`  Found ${uniqueCompanyLinks.length} companies in ${regionUrl}`);
-
-        // Process companies in parallel batches
-        for (let j = 0; j < uniqueCompanyLinks.length; j += BATCH_SIZE) {
-          const companyBatch = uniqueCompanyLinks.slice(j, j + BATCH_SIZE);
-
-          const companyPromises = companyBatch.map(async (companyUrl) => {
-            try {
-              const companyResponse = await fetch(companyUrl);
-              const companyHtml = await companyResponse.text();
-
-              const nameMatch = companyHtml.match(/<h1[^>]*>([^<]+)<\/h1>/);
-              const name = nameMatch ? nameMatch[1].trim() : null;
-
-              // Extract city and zip from URL path: /companies/ID/City/ZIP/ID
-              const urlParts = companyUrl.match(/\/companies\/ID\/([^/]+)\/(\d{5})\/\d+/);
-              const cityFromUrl = urlParts ? urlParts[1].replace(/-/g, ' ') : null;
-              const zipFromUrl = urlParts ? urlParts[2] : null;
-
-              // Try to find location in page text as backup
-              const locationMatch = companyHtml.match(/([^,\n]+),\s*([A-Z]{2})\s*(\d{5})/);
-              const city = locationMatch ? locationMatch[1].trim() : cityFromUrl;
-              const stateCode = locationMatch ? locationMatch[2] : 'ID';
-              const zipCode = locationMatch ? locationMatch[3] : zipFromUrl;
-
-              const phoneMatch = companyHtml.match(/tel:\s*\+?1?(\d{10})/);
-              const phone = phoneMatch ? phoneMatch[1].replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') : null;
-
-              const websiteMatch = companyHtml.match(/href="(http[^"]+)"[^>]*>[\s\n]*(?!Message|Facebook|Twitter|Instagram|YouTube|Pinterest)([a-zA-Z0-9\-\.]+\.[a-z]{2,})/i);
-              const website = websiteMatch ? websiteMatch[1] : null;
-
-              const memberMatch = companyHtml.match(/Member\s+Since\s+(\d{4})/);
-              const memberSince = memberMatch ? memberMatch[1] : null;
-
-              const packageMatch = companyHtml.match(/(Gold|Silver|Bronze|Platinum)\s+Package/i);
-              const packageType = packageMatch ? packageMatch[1] : null;
-
-              const facebookMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?facebook\.com\/[^"]+)"/);
-              const twitterMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?twitter\.com\/[^"]+)"/);
-              const instagramMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?instagram\.com\/[^"]+)"/);
-              const youtubeMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?youtube\.com\/[^"]+)"/);
-              const pinterestMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
-
-              if (name && city) {
-                console.log(`    ✓ Scraped: ${name} in ${city}, ${stateCode}`);
-                return {
-                  company_name: name,
-                  city: city,
-                  state: stateCode,
-                  zip_code: zipCode,
-                  phone: phone,
-                  website: website,
-                  member_since: memberSince,
-                  package_type: packageType,
-                  facebook: facebookMatch ? facebookMatch[1] : null,
-                  twitter: twitterMatch ? twitterMatch[1] : null,
-                  instagram: instagramMatch ? instagramMatch[1] : null,
-                  youtube: youtubeMatch ? youtubeMatch[1] : null,
-                  pinterest: pinterestMatch ? pinterestMatch[1] : null,
-                  source_url: companyUrl,
-                  source_state: 'ID'
-                };
-              }
-            } catch (error) {
-              console.error(`Error scraping company ${companyUrl}:`, error.message);
+        // Extract all company blocks - look for the full company card structure
+        // Each company is in an es-card with class="company-city-view-row"
+        const companyBlocks = cityHtml.split('<app-company-city-view-row');
+        console.log(`  Found ${companyBlocks.length - 1} company blocks`);
+        
+        for (let i = 1; i < companyBlocks.length; i++) {
+          const block = companyBlocks[i];
+          
+          try {
+            // Extract company name - either from link or from itemprop="name"
+            let nameMatch = block.match(/href="\/companies\/ID\/[^"]+\/\d{5}\/\d+"[^>]*>([^<]+)<\/a>/);
+            if (!nameMatch) {
+              nameMatch = block.match(/itemprop="name"[^>]*>([^<]+)</);
             }
-            return null;
-          });
-
-          const companyResults = await Promise.all(companyPromises);
-          const validCompanies = companyResults.filter(c => c !== null);
-          allCompanies.push(...validCompanies);
-          console.log(`  Scraped ${validCompanies.length} companies from batch, total: ${allCompanies.length}`);
-
-          // Save batch to database
-          if (validCompanies.length > 0) {
-            await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(validCompanies);
+            const name = nameMatch ? nameMatch[1].trim() : null;
+            
+            // Extract URL if available
+            const urlMatch = block.match(/href="(\/companies\/ID\/[^"]+\/\d{5}\/\d+)"/);
+            const companyUrl = urlMatch ? `https://www.estatesales.net${urlMatch[1]}` : null;
+            
+            // Extract city from URL or from context
+            const cityFromUrl = cityUrl.split('/').pop().replace(/-/g, ' ');
+            
+            // Extract phone
+            const phoneMatch = block.match(/itemprop="telephone"[^>]*>(\([0-9]{3}\)\s[0-9]{3}-[0-9]{4})/);
+            const phone = phoneMatch ? phoneMatch[1] : null;
+            
+            // Extract website
+            const websiteMatch = block.match(/href="(https?:\/\/[^"]+)"[^>]*target="_blank"[^>]*>([a-zA-Z0-9\-\.]+\.[a-z]{2,})/i);
+            const website = websiteMatch ? websiteMatch[1] : null;
+            
+            // Extract member since
+            const memberMatch = block.match(/Member.*Since\s+(\d{4})/i);
+            const memberSince = memberMatch ? memberMatch[1] : null;
+            
+            // Extract package type
+            const packageMatch = block.match(/alt="(Gold|Silver|Bronze|Platinum)\s+Package"/i);
+            const packageType = packageMatch ? packageMatch[1] : null;
+            
+            // Extract tagline
+            const taglineMatch = block.match(/<small[^>]*class="italic">([^<]+)</);
+            const tagline = taglineMatch ? taglineMatch[1].trim() : null;
+            
+            // Social media
+            const facebookMatch = block.match(/href="(https?:\/\/(?:www\.)?facebook\.com\/[^"]+)"/);
+            const twitterMatch = block.match(/href="(https?:\/\/(?:www\.)?twitter\.com\/[^"]+)"/);
+            const instagramMatch = block.match(/href="(https?:\/\/(?:www\.)?instagram\.com\/[^"]+)"/);
+            const youtubeMatch = block.match(/href="(https?:\/\/(?:www\.)?youtube\.com\/[^"]+)"/);
+            const pinterestMatch = block.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
+            
+            if (name) {
+              console.log(`    ✓ Parsed: ${name}${phone ? ' - ' + phone : ''}`);
+              
+              allCompanies.push({
+                company_name: name,
+                city: cityFromUrl,
+                state: 'ID',
+                phone: phone,
+                website: website,
+                member_since: memberSince,
+                package_type: packageType,
+                facebook: facebookMatch ? facebookMatch[1] : null,
+                twitter: twitterMatch ? twitterMatch[1] : null,
+                instagram: instagramMatch ? instagramMatch[1] : null,
+                youtube: youtubeMatch ? youtubeMatch[1] : null,
+                pinterest: pinterestMatch ? pinterestMatch[1] : null,
+                source_url: companyUrl,
+                source_state: 'ID'
+              });
+            }
+          } catch (error) {
+            console.error(`Error parsing company block:`, error.message);
           }
         }
+        
       } catch (error) {
-        console.error(`Error processing region ${regionUrl}:`, error.message);
+        console.error(`Error processing city ${cityUrl}:`, error.message);
       }
+    }
+    
+    console.log(`\n=== Scraped ${allCompanies.length} total companies ===`);
+    
+    // Save to database
+    if (allCompanies.length > 0) {
+      console.log('Saving to database...');
+      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
+      console.log('✓ Saved to database');
     }
 
     // Now check for and delete duplicates
