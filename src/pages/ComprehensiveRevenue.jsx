@@ -237,9 +237,9 @@ export default function ComprehensiveRevenue() {
   
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   
-  // Calculate referrals based on total operators and referrals per operator per year
+  // Calculate referrals based on 10% of total operators referring 1 deal per year
   const totalOperators = operators.length;
-  const calculatedReferralsPerMonth = (totalOperators * referralsPerOperatorPerYear) / 12;
+  const calculatedReferralsPerMonth = (totalOperators * 0.10 * referralsPerOperatorPerYear) / 12;
   const referralProjections = calculateProjections(calculatedReferralsPerMonth * avgReferralFee, referralGrowth, 120);
   
   const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
@@ -766,7 +766,7 @@ export default function ComprehensiveRevenue() {
                     <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Calculated Referrals/Month:</strong> {totalOperators.toLocaleString()} operators × {referralsPerOperatorPerYear} referral/yr ÷ 12 months = {calculatedReferralsPerMonth.toFixed(1)} referrals/month
+                    <strong>Calculated Referrals/Month:</strong> {totalOperators.toLocaleString()} operators × 10% × {referralsPerOperatorPerYear} referral/yr ÷ 12 months = {calculatedReferralsPerMonth.toFixed(1)} referrals/month
                   </div>
                 </div>
 
