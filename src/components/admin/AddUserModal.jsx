@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import VendorFields from './VendorFields';
+import VendorSubcategoryDropdown from './VendorSubcategoryDropdown';
 
 const ACCOUNT_TYPES = [
   { value: 'super_admin', label: 'Super Admin' },
@@ -368,6 +369,10 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </SelectContent>
             </Select>
           </div>
+
+          {formData.primary_account_type === 'vendor' && (
+            <VendorSubcategoryDropdown formData={formData} setFormData={setFormData} />
+          )}
 
           {formData.primary_account_type && (
             <>
