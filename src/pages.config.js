@@ -25,6 +25,7 @@ import DIYSaleSignup from './pages/DIYSaleSignup';
 import Dashboard from './pages/Dashboard';
 import EstateSaleDetail from './pages/EstateSaleDetail';
 import EstateSaleFinder from './pages/EstateSaleFinder';
+import FutureOperatorsAnalytics from './pages/FutureOperatorsAnalytics';
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
 import LeadCapture from './pages/LeadCapture';
@@ -55,7 +56,7 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import FutureOperatorsAnalytics from './pages/FutureOperatorsAnalytics';
+import ComprehensiveRevenue from './pages/ComprehensiveRevenue';
 import __Layout from './Layout.jsx';
 
 
@@ -87,6 +88,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "EstateSaleDetail": EstateSaleDetail,
     "EstateSaleFinder": EstateSaleFinder,
+    "FutureOperatorsAnalytics": FutureOperatorsAnalytics,
     "Home": Home,
     "Inventory": Inventory,
     "LeadCapture": LeadCapture,
@@ -117,7 +119,7 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "FutureOperatorsAnalytics": FutureOperatorsAnalytics,
+    "ComprehensiveRevenue": ComprehensiveRevenue,
 }
 
 export const pagesConfig = {
