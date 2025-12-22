@@ -1,3 +1,4 @@
+import AdminAdvertisingPackages from './pages/AdminAdvertisingPackages';
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCourses from './pages/AdminCourses';
 import AdminEstateSales from './pages/AdminEstateSales';
@@ -57,11 +58,11 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import AdminAdvertisingPackages from './pages/AdminAdvertisingPackages';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminAdvertisingPackages": AdminAdvertisingPackages,
     "AdminCampaigns": AdminCampaigns,
     "AdminCourses": AdminCourses,
     "AdminEstateSales": AdminEstateSales,
@@ -121,7 +122,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "AdminAdvertisingPackages": AdminAdvertisingPackages,
 }
 
 export const pagesConfig = {
