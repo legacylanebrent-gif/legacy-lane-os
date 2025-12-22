@@ -41,88 +41,7 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     }
   };
 
-  // Calculate revenue based on operator subscription
-  const calculateRevenue = () => {
-    // Base subscription revenue allocation per sale
-    const subscriptionRevenue = {
-      'operator_basic': { price: 49, salesPerMonth: 1, name: 'Basic' },
-      'operator_pro': { price: 99, salesPerMonth: 2, name: 'Pro' },
-      'operator_enterprise': { price: 249, salesPerMonth: 5, name: 'Enterprise' },
-      'agent_basic': { price: 149, salesPerMonth: 3, name: 'Agent Basic' },
-      'agent_pro': { price: 299, salesPerMonth: 5, name: 'Agent Pro' }
-    };
-
-    // Use actual operator subscription
-    let packageType, subscription;
-    
-    if (operatorSubscription) {
-      const planType = operatorSubscription.plan_type;
-      
-      // Always use actual price and billing from subscription entity
-      const actualPrice = operatorSubscription.price;
-      const actualPlan = subscriptionRevenue[planType];
-      
-      subscription = {
-        price: actualPrice,
-        salesPerMonth: actualPlan?.salesPerMonth || 2,
-        name: actualPlan?.name || planType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      };
-      
-      packageType = subscription.name;
-    } else {
-      // Default to Pro if no subscription found
-      packageType = 'Pro';
-      subscription = { price: 99, salesPerMonth: 2, name: 'Pro' };
-    }
-
-    const perSaleRevenue = subscription.price / subscription.salesPerMonth;
-    
-    const revenueSources = [
-      {
-        label: `${packageType} Package`,
-        detail: operatorSubscription 
-          ? `Seller Subscription $${subscription.price}/month` 
-          : `Seller Subscription $${subscription.price}/month (default - no subscription found)`,
-        amount: perSaleRevenue,
-        type: 'subscription'
-      }
-    ];
-
-    // Add any premium listing fees
-    if (sale.national_featured) {
-      revenueSources.push({
-        label: 'National Featured Listing',
-        detail: 'Premium placement',
-        amount: sale.national_featured_price || 299,
-        type: 'upsell'
-      });
-    }
-
-    if (sale.local_featured) {
-      revenueSources.push({
-        label: 'Local Featured Listing',
-        detail: 'Regional placement',
-        amount: sale.local_featured_price || 99,
-        type: 'upsell'
-      });
-    }
-
-    // Add text campaign or other add-ons
-    const hasTextCampaign = Math.random() > 0.7; // Mock for demo
-    if (hasTextCampaign) {
-      revenueSources.push({
-        label: 'Text Campaign',
-        detail: 'Marketing add-on',
-        amount: 29.00,
-        type: 'addon'
-      });
-    }
-
-    return revenueSources;
-  };
-
-  const revenueSources = calculateRevenue();
-  const totalRevenue = revenueSources.reduce((sum, source) => sum + source.amount, 0);
+  const totalRevenue = 0;
   
   // Tech costs from the other component
   const actualTechCost = techCosts.actual || 0;
@@ -174,31 +93,6 @@ export default function ProfitAnalysis({ sale, techCosts }) {
       {expanded && (
         <div className="mt-3 space-y-3">
           <div className="bg-white rounded-lg border border-slate-200">
-            {/* Revenue Sources */}
-            <div className="p-3 bg-blue-50 border-b">
-              <div className="font-semibold text-sm text-slate-900">Revenue Sources</div>
-            </div>
-
-            {revenueSources.map((source, idx) => (
-              <div key={idx} className="grid grid-cols-2 gap-2 p-3 text-sm border-b hover:bg-slate-50">
-                <div>
-                  <div className="text-slate-700">{source.label}</div>
-                  <div className="text-xs text-slate-500">{source.detail}</div>
-                  {source.isRecurring && (
-                    <div className="text-xs text-blue-600 mt-1">Recurring revenue</div>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold text-green-700">${source.amount.toFixed(2)}</div>
-                </div>
-              </div>
-            ))}
-
-            <div className="grid grid-cols-2 gap-2 p-3 bg-blue-50 font-bold text-sm">
-              <div className="text-slate-900">Total Revenue</div>
-              <div className="text-right text-green-700">${totalRevenue.toFixed(2)}</div>
-            </div>
-
             {/* Costs */}
             <div className="p-3 bg-red-50 border-t">
               <div className="font-semibold text-sm text-slate-900">Costs</div>
