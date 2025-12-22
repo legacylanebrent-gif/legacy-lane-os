@@ -512,7 +512,7 @@ export default function IncomingLeads() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px] overflow-y-auto">
                     <SelectItem value="probate">Probate</SelectItem>
                     <SelectItem value="divorce">Divorce</SelectItem>
                     <SelectItem value="downsizing">Downsizing</SelectItem>
