@@ -35,6 +35,8 @@ export default function IncomingLeads() {
     home_size: '',
     gated_community: false,
     sales_allowed: '',
+    amount_to_sell: '',
+    interested_in_full_service: '',
     timeline: '',
     notes: '',
     score: 50
@@ -104,6 +106,8 @@ export default function IncomingLeads() {
         home_size: formData.home_size,
         gated_community: formData.gated_community,
         sales_allowed: formData.sales_allowed,
+        amount_to_sell: formData.amount_to_sell,
+        interested_in_full_service: formData.interested_in_full_service,
         timeline: formData.timeline,
         score: parseInt(formData.score),
         contact_name: formData.contact_name,
@@ -167,6 +171,8 @@ export default function IncomingLeads() {
       home_size: '',
       gated_community: false,
       sales_allowed: '',
+      amount_to_sell: '',
+      interested_in_full_service: '',
       timeline: '',
       notes: '',
       score: 50
@@ -605,6 +611,39 @@ export default function IncomingLeads() {
                   </Select>
                 </div>
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>How much is to be sold?</Label>
+                <Select value={formData.amount_to_sell} onValueChange={(value) => setFormData({ ...formData, amount_to_sell: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All (90-100%)</SelectItem>
+                    <SelectItem value="most">Most (50-90%)</SelectItem>
+                    <SelectItem value="some">Some (&lt;50%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Interested in full service?</Label>
+                <Select value={formData.interested_in_full_service} onValueChange={(value) => setFormData({ ...formData, interested_in_full_service: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                    <SelectItem value="unsure">Unsure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-600 -mt-2">
+              <span className="font-medium">Full service:</span> Estate sale, home sale, and cleanout
             </div>
 
             <div>
