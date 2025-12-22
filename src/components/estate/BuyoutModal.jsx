@@ -149,13 +149,10 @@ export default function BuyoutModal({ open, onClose, sale }) {
     setLabelingStatus({ current: 0, total: images.length, completed: false });
 
     const labeled = [];
+    const BATCH_SIZE = 3; // Process 3 images at a time
 
     try {
-      for (let i = 0; i < images.length; i++) {
-        setLabelingStatus(prev => ({ ...prev, current: i + 1 }));
-
-        try {
-          const prompt = `You are analyzing a photo of an item from an estate sale for a buyout valuation.
+      const prompt = `You are analyzing a photo of an item from an estate sale for a buyout valuation.
 
 Look at this photo and provide:
 1. A specific name for this item (be descriptive but concise)
@@ -175,44 +172,55 @@ Return ONLY valid JSON in this exact format:
   "pricing_sources": "Amazon: $150, eBay used: $80"
 }`;
 
-          const result = await base44.integrations.Core.InvokeLLM({
-            prompt,
-            file_urls: [images[i].url],
-            add_context_from_internet: true,
-            response_json_schema: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                description: { type: "string" },
-                suggested_new_price: { type: "number" },
-                suggested_used_price: { type: "number" },
-                pricing_sources: { type: "string" }
-              },
-              required: ["name", "description", "suggested_new_price", "suggested_used_price", "pricing_sources"]
-            }
-          });
+      // Process in batches
+      for (let i = 0; i < images.length; i += BATCH_SIZE) {
+        const batch = images.slice(i, i + BATCH_SIZE);
+        
+        const batchPromises = batch.map(async (img, batchIndex) => {
+          try {
+            const result = await base44.integrations.Core.InvokeLLM({
+              prompt,
+              file_urls: [img.url],
+              add_context_from_internet: true,
+              response_json_schema: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  suggested_new_price: { type: "number" },
+                  suggested_used_price: { type: "number" },
+                  pricing_sources: { type: "string" }
+                },
+                required: ["name", "description", "suggested_new_price", "suggested_used_price", "pricing_sources"]
+              }
+            });
 
-          labeled.push({
-            ...images[i],
-            name: result.name,
-            description: result.description,
-            suggested_new_price: result.suggested_new_price,
-            suggested_used_price: result.suggested_used_price,
-            pricing_sources: result.pricing_sources
-          });
+            setLabelingStatus(prev => ({ ...prev, current: prev.current + 1 }));
 
-          await new Promise(resolve => setTimeout(resolve, 500));
-        } catch (error) {
-          console.error('Error labeling image:', error);
-          labeled.push({
-            ...images[i],
-            name: 'Unlabeled Item',
-            description: 'Failed to analyze',
-            suggested_new_price: 0,
-            suggested_used_price: 0,
-            pricing_sources: 'N/A'
-          });
-        }
+            return {
+              ...img,
+              name: result.name,
+              description: result.description,
+              suggested_new_price: result.suggested_new_price,
+              suggested_used_price: result.suggested_used_price,
+              pricing_sources: result.pricing_sources
+            };
+          } catch (error) {
+            console.error('Error labeling image:', error);
+            setLabelingStatus(prev => ({ ...prev, current: prev.current + 1 }));
+            return {
+              ...img,
+              name: 'Unlabeled Item',
+              description: 'Failed to analyze',
+              suggested_new_price: 0,
+              suggested_used_price: 0,
+              pricing_sources: 'N/A'
+            };
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        labeled.push(...batchResults);
       }
 
       setLabeledItems(labeled);
