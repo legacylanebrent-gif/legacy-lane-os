@@ -656,7 +656,10 @@ export default function IncomeTracker() {
                     <tr key={inc.id || idx} className="border-b hover:bg-slate-50">
                       <td className="p-3 text-sm">{format(new Date(inc.income_date), 'MMM d, yyyy')}</td>
                       <td className="p-3">
-                        <div className="font-medium text-slate-900 whitespace-pre-line">{inc.source}</div>
+                        <div className="font-medium text-slate-900">{inc.source.split('\n')[0]}</div>
+                        {inc.source.includes('\n') && (
+                          <div className="text-xs text-slate-500">{inc.source.split('\n')[1]}</div>
+                        )}
                         {inc.description && (
                           <div className="text-xs text-slate-500">{inc.description}</div>
                         )}
