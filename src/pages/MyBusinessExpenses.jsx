@@ -796,7 +796,7 @@ export default function MyBusinessExpenses() {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]" position="popper" side="bottom" align="start">
                   {CATEGORY_OPTIONS.map(cat => (
                     <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                   ))}
