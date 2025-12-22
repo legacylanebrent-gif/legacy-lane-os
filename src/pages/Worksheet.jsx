@@ -483,6 +483,7 @@ export default function Worksheet() {
       return;
     }
 
+    const currentQuery = query;
     setPhotoSuggestions([]);
     setSearchingPhotos(true);
     try {
@@ -534,6 +535,11 @@ Only include items with confidence > 0.3. If no items match well, return an empt
           }
         }
       });
+
+      // Only update if this is still the current query
+      if (photoSearchQuery !== currentQuery) {
+        return;
+      }
 
       const matches = result?.matches || [];
       
