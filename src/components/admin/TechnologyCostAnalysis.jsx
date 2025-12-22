@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-export default function TechnologyCostAnalysis({ sale }) {
+export default function TechnologyCostAnalysis({ sale, onCostsCalculated }) {
   const [expanded, setExpanded] = useState(false);
 
   // Calculate costs based on sale data
@@ -95,6 +95,13 @@ export default function TechnologyCostAnalysis({ sale }) {
   const totalScenario = Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.scenario) || 0), 0);
 
   const netMargin = (sale.actual_revenue || 0) - totalActual;
+
+  // Notify parent of cost calculations
+  React.useEffect(() => {
+    if (onCostsCalculated) {
+      onCostsCalculated({ actual: totalActual, scenario: totalScenario });
+    }
+  }, [totalActual, totalScenario, onCostsCalculated]);
 
   return (
     <div className="border-t pt-4 mt-4">

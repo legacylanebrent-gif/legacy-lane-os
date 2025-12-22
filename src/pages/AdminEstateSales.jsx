@@ -11,6 +11,7 @@ import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizont
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import TechnologyCostAnalysis from '@/components/admin/TechnologyCostAnalysis';
+import ProfitAnalysis from '@/components/admin/ProfitAnalysis';
 import { createPageUrl } from '@/utils';
 
 export default function AdminEstateSales() {
@@ -29,6 +30,7 @@ export default function AdminEstateSales() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingSale, setEditingSale] = useState(null);
   const [viewingSale, setViewingSale] = useState(null);
+  const [saleTechCosts, setSaleTechCosts] = useState({});
 
   useEffect(() => {
     loadSales();
@@ -567,7 +569,16 @@ export default function AdminEstateSales() {
                   </div>
                 )}
 
-                <TechnologyCostAnalysis sale={sale} />
+                <TechnologyCostAnalysis 
+                  sale={sale} 
+                  onCostsCalculated={(costs) => {
+                    setSaleTechCosts(prev => ({ ...prev, [sale.id]: costs }));
+                  }}
+                />
+                <ProfitAnalysis 
+                  sale={sale} 
+                  techCosts={saleTechCosts[sale.id] || { actual: 0, scenario: 0 }}
+                />
               </div>
             </CardContent>
           </Card>
