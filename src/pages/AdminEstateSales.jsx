@@ -462,9 +462,9 @@ export default function AdminEstateSales() {
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
         {filteredSales.map(sale => (
-          <Card key={sale.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+          <Card key={sale.id} className="hover:shadow-lg transition-shadow overflow-hidden w-full">
             {sale.images && sale.images.length > 0 && (
               <div className="h-48 overflow-hidden">
                 <img 
