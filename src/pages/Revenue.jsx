@@ -24,7 +24,7 @@ export default function Revenue() {
   
   // Marketplace Transaction Fee Inputs
   const [avgTransactionValue, setAvgTransactionValue] = useState(250);
-  const [transactionFeePercent, setTransactionFeePercent] = useState(3);
+  const [transactionFeePercent, setTransactionFeePercent] = useState(10);
   const [transactionsPerMonth, setTransactionsPerMonth] = useState(100);
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(20);
   
