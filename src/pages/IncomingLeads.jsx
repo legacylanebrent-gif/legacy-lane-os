@@ -181,6 +181,7 @@ export default function IncomingLeads() {
       relocation: { label: 'Relocation', className: 'bg-cyan-100 text-cyan-700' },
       foreclosure: { label: 'Foreclosure', className: 'bg-orange-100 text-orange-700' },
       investment: { label: 'Investment', className: 'bg-green-100 text-green-700' },
+      estate: { label: 'Estate', className: 'bg-amber-100 text-amber-700' },
       standard: { label: 'Standard', className: 'bg-slate-100 text-slate-700' }
     };
     const config = configs[situation] || configs.standard;
@@ -519,6 +520,7 @@ export default function IncomingLeads() {
                     <SelectItem value="relocation">Relocation</SelectItem>
                     <SelectItem value="foreclosure">Foreclosure</SelectItem>
                     <SelectItem value="investment">Investment</SelectItem>
+                    <SelectItem value="estate">Estate</SelectItem>
                     <SelectItem value="standard">Standard</SelectItem>
                   </SelectContent>
                 </Select>
