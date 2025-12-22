@@ -49,6 +49,8 @@ export default function AdminFutureOperators() {
     }
   };
 
+  const allStates = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'];
+
   const filteredOperators = operators.filter(op => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = !searchQuery || (
@@ -63,7 +65,6 @@ export default function AdminFutureOperators() {
     return matchesSearch && matchesState && matchesPackage;
   });
 
-  const uniqueStates = [...new Set(operators.map(op => op.state).filter(Boolean))].sort();
   const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
 
   const getPackageColor = (packageType) => {
@@ -167,7 +168,7 @@ export default function AdminFutureOperators() {
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px] overflow-y-auto">
                   <SelectItem value="all">All States</SelectItem>
-                  {uniqueStates.map(state => (
+                  {allStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
                 </SelectContent>
