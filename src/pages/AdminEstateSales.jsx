@@ -178,6 +178,15 @@ export default function AdminEstateSales() {
     }
   };
 
+  const handleCostsCalculated = (saleId, costs) => {
+    setSaleTechCosts(prev => {
+      if (prev[saleId]?.actual === costs.actual && prev[saleId]?.scenario === costs.scenario) {
+        return prev;
+      }
+      return { ...prev, [saleId]: costs };
+    });
+  };
+
   const getStatusBadge = (status) => {
     const configs = {
       draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700' },
@@ -571,14 +580,7 @@ export default function AdminEstateSales() {
 
                 <TechnologyCostAnalysis 
                   sale={sale} 
-                  onCostsCalculated={React.useCallback((costs) => {
-                    setSaleTechCosts(prev => {
-                      if (prev[sale.id]?.actual === costs.actual && prev[sale.id]?.scenario === costs.scenario) {
-                        return prev;
-                      }
-                      return { ...prev, [sale.id]: costs };
-                    });
-                  }, [sale.id])}
+                  onCostsCalculated={(costs) => handleCostsCalculated(sale.id, costs)}
                 />
                 <ProfitAnalysis 
                   sale={sale} 
