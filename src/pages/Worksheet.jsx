@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   ArrowLeft, DollarSign, Users, Building2, Package, Receipt, 
   Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins, Truck, Camera
