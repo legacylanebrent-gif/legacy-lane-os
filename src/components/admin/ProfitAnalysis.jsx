@@ -14,18 +14,25 @@ export default function ProfitAnalysis({ sale, techCosts }) {
 
   const loadOperatorSubscription = async () => {
     if (!sale.operator_id) {
+      console.log('No operator_id on sale');
       setLoading(false);
       return;
     }
 
     try {
+      console.log('Fetching subscription for operator:', sale.operator_id);
       const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
         user_id: sale.operator_id,
         status: 'active'
       });
       
+      console.log('Found subscriptions:', subscriptions);
+      
       if (subscriptions.length > 0) {
         setOperatorSubscription(subscriptions[0]);
+        console.log('Using subscription:', subscriptions[0]);
+      } else {
+        console.log('No active subscription found for operator');
       }
     } catch (error) {
       console.error('Error loading operator subscription:', error);
@@ -40,7 +47,7 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     const subscriptionRevenue = {
       'operator_basic': { price: 49, salesPerMonth: 1, name: 'Basic' },
       'operator_pro': { price: 99, salesPerMonth: 2, name: 'Pro' },
-      'operator_enterprise': { price: 299, salesPerMonth: 5, name: 'Enterprise' },
+      'operator_enterprise': { price: 249, salesPerMonth: 5, name: 'Enterprise' },
       'agent_basic': { price: 149, salesPerMonth: 3, name: 'Agent Basic' },
       'agent_pro': { price: 299, salesPerMonth: 5, name: 'Agent Pro' }
     };
