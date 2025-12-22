@@ -66,11 +66,13 @@ export default function ComprehensiveRevenue() {
   const [localFeaturePercentOperators, setLocalFeaturePercentOperators] = useState(() => loadValue('localFeaturePercentOperators', 20));
   
   // Advertising Revenue Inputs
-  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 500));
-  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 1500));
-  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 3000));
+  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
+  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 49));
+  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 179));
   const [adNewPerMonth, setAdNewPerMonth] = useState(() => loadValue('adNewPerMonth', 10));
-  const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 8));
+  const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 0));
+  const [adGrowth, setAdGrowth] = useState(() => loadValue('adGrowth', 3));
+  const [adNewPerCityPerMonth, setAdNewPerCityPerMonth] = useState(() => loadValue('adNewPerCityPerMonth', 1));
 
   useEffect(() => {
     loadOperators();
@@ -85,7 +87,7 @@ export default function ComprehensiveRevenue() {
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturePercentOperators, localFeaturePercentOperators,
-      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
+      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -98,7 +100,7 @@ export default function ComprehensiveRevenue() {
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturePercentOperators, localFeaturePercentOperators,
-    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
+    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
   ]);
 
   const loadOperators = async () => {
@@ -250,8 +252,10 @@ export default function ComprehensiveRevenue() {
   const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
   const featureProjections = calculateProjections(totalFeatureRevenuePerMonth, featureGrowth, 120);
   
-  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
-  const adProjections = adData.projections;
+  // Calculate advertising based on cities: total cities * new advertisers per city per month
+  const calculatedAdNewPerMonth = totalCities * adNewPerCityPerMonth;
+  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, calculatedAdNewPerMonth, adChurnRate);
+  const adProjections = calculateProjections(adData.projections[0], adGrowth, 120);
 
   // Create operator projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
@@ -910,26 +914,35 @@ export default function ComprehensiveRevenue() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Calculated New Advertisers/Month:</strong> {totalCities.toLocaleString()} cities × {adNewPerCityPerMonth} advertiser/city = {calculatedAdNewPerMonth.toLocaleString()} advertisers/month
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                   <div>
-                    <Label>Basic Ad Space Price ($)</Label>
+                    <Label>Basic Ad Price ($)</Label>
                     <Input type="number" value={adBasicPrice} onChange={(e) => setAdBasicPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Pro Ad Space Price ($)</Label>
+                    <Label>Pro Ad Price ($)</Label>
                     <Input type="number" value={adProPrice} onChange={(e) => setAdProPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Premium Ad Space Price ($)</Label>
+                    <Label>Premium Ad Price ($)</Label>
                     <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>New Advertisers/Month</Label>
-                    <Input type="number" value={adNewPerMonth} onChange={(e) => setAdNewPerMonth(Number(e.target.value))} />
+                    <Label>New Advertisers Per City/Month</Label>
+                    <Input type="number" value={adNewPerCityPerMonth} onChange={(e) => setAdNewPerCityPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Monthly Churn Rate (%)</Label>
-                    <Input type="number" value={adChurnRate} onChange={(e) => setAdChurnRate(Number(e.target.value))} />
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={adGrowth} onChange={(e) => setAdGrowth(Number(e.target.value))} />
                   </div>
                 </div>
 
