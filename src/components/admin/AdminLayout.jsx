@@ -23,9 +23,9 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
   { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
+  { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
   { label: 'Monthly Packages', path: 'AdminPackages', icon: Package },
   { label: 'Advertising Packages', path: 'AdminAdvertisingPackages', icon: Package },
-  { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
