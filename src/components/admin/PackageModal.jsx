@@ -121,7 +121,7 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
                 id="package_name"
                 value={formData.package_name}
                 onChange={(e) => setFormData({...formData, package_name: e.target.value})}
-                placeholder="Starter, Professional, Enterprise"
+                placeholder="Growth, Professional, Enterprise"
                 required
               />
             </div>
