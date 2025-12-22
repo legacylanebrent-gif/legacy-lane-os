@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
@@ -20,6 +20,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
+  { label: 'Support Tickets', path: 'AdminTickets', icon: MessageSquare },
   { label: 'Monthly Packages', path: 'AdminPackages', icon: Package },
   { label: 'Advertising Packages', path: 'AdminAdvertisingPackages', icon: Package },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
