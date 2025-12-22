@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
+import BuyoutModal from '@/components/estate/BuyoutModal';
 import { 
   Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-  Package, Edit, TrendingUp, Star
+  Package, Edit, TrendingUp, Star, Briefcase
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -31,6 +32,8 @@ export default function MySales() {
   const [activeTab, setActiveTab] = useState('all');
   const [showVIPModal, setShowVIPModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
+  const [showBuyoutModal, setShowBuyoutModal] = useState(false);
+  const [buyoutSale, setBuyoutSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -152,6 +155,15 @@ export default function MySales() {
         }}
         sale={selectedSale}
         onSuccess={loadData}
+      />
+
+      <BuyoutModal
+        open={showBuyoutModal}
+        onClose={() => {
+          setShowBuyoutModal(false);
+          setBuyoutSale(null);
+        }}
+        sale={buyoutSale}
       />
 
       {/* Stats Cards */}
@@ -400,6 +412,18 @@ export default function MySales() {
                         >
                           <Star className="w-3 h-3 mr-1" />
                           VIP Event
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            setBuyoutSale(sale);
+                            setShowBuyoutModal(true);
+                          }}
+                          className="w-full border-orange-600 text-orange-600 hover:bg-orange-50"
+                        >
+                          <Briefcase className="w-3 h-3 mr-1" />
+                          Buyout
                         </Button>
                       </div>
                     </div>
