@@ -863,6 +863,27 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Estate Sale Request CTA Bar */}
+      <section className="py-6 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center justify-between p-6 gap-4">
+              <div className="text-center md:text-left flex-1">
+                <p className="text-white text-lg font-medium">
+                  Need help finding a company? We've made it easy. We'll contact the companies for you!
+                </p>
+              </div>
+              <Button
+                onClick={() => window.location.href = createPageUrl('LeadCapture')}
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-6 text-lg font-semibold shadow-lg whitespace-nowrap"
+              >
+                Submit A Sale Request
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Sign Up CTAs */}
       <section className="py-12 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
