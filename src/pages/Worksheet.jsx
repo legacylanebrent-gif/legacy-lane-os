@@ -209,6 +209,18 @@ export default function Worksheet() {
     }
   };
 
+  const handleDeleteTransaction = async (transactionId) => {
+    if (!confirm('Are you sure you want to delete this transaction?')) return;
+    
+    try {
+      await base44.entities.Transaction.delete(transactionId);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Failed to delete transaction');
+    }
+  };
+
   const handleAddOffer = async () => {
     if (!offerItemName.trim() || !offerAmount || offerAmount <= 0 || !offerFullName.trim()) {
       alert('Please enter item name, offer amount, and full name');
@@ -1520,7 +1532,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                               <p className="text-sm text-slate-500 mt-1">{transaction.notes}</p>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 ml-4">
+                          <div className="flex items-center gap-2 ml-4">
                             <div className="text-right">
                               <p className="text-xl font-bold text-green-600">
                                 ${transaction.total.toFixed(2)}
@@ -1532,6 +1544,14 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                               onClick={() => handleEditTransaction(transaction)}
                             >
                               <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTransaction(transaction.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <X className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
