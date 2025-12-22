@@ -483,6 +483,7 @@ export default function Worksheet() {
       return;
     }
 
+    setPhotoSuggestions([]);
     setSearchingPhotos(true);
     try {
       // Get images from the sale
