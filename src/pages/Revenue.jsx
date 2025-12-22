@@ -13,52 +13,81 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState('subscriptions');
   
+  // Load saved values from localStorage or use defaults
+  const loadValue = (key, defaultValue) => {
+    const saved = localStorage.getItem(`revenue_${key}`);
+    return saved !== null ? JSON.parse(saved) : defaultValue;
+  };
+
   // Operator Subscription Inputs
-  const [subBasicPrice, setSubBasicPrice] = useState(49);
-  const [subProPrice, setSubProPrice] = useState(99);
-  const [subPremiumPrice, setSubPremiumPrice] = useState(199);
-  const [subNewPerMonth, setSubNewPerMonth] = useState(25);
-  const [subChurnRate, setSubChurnRate] = useState(5);
+  const [subBasicPrice, setSubBasicPrice] = useState(() => loadValue('subBasicPrice', 49));
+  const [subProPrice, setSubProPrice] = useState(() => loadValue('subProPrice', 99));
+  const [subPremiumPrice, setSubPremiumPrice] = useState(() => loadValue('subPremiumPrice', 199));
+  const [subNewPerMonth, setSubNewPerMonth] = useState(() => loadValue('subNewPerMonth', 25));
+  const [subChurnRate, setSubChurnRate] = useState(() => loadValue('subChurnRate', 5));
 
   // Vendor Subscription Inputs
-  const [vendorSubPrice, setVendorSubPrice] = useState(79);
-  const [vendorNewPerMonth, setVendorNewPerMonth] = useState(15);
-  const [vendorChurnRate, setVendorChurnRate] = useState(4);
+  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
+  const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
+  const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
 
   // Agent Subscription Inputs
-  const [agentSubPrice, setAgentSubPrice] = useState(149);
-  const [agentNewPerMonth, setAgentNewPerMonth] = useState(10);
-  const [agentChurnRate, setAgentChurnRate] = useState(3);
-  
+  const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
+  const [agentNewPerMonth, setAgentNewPerMonth] = useState(() => loadValue('agentNewPerMonth', 10));
+  const [agentChurnRate, setAgentChurnRate] = useState(() => loadValue('agentChurnRate', 3));
 
-  
   // Marketplace Transaction Fee Inputs
-  const [avgTransactionValue, setAvgTransactionValue] = useState(250);
-  const [transactionFeePercent, setTransactionFeePercent] = useState(10);
-  const [transactionsPerMonth, setTransactionsPerMonth] = useState(100);
-  const [marketplaceGrowth, setMarketplaceGrowth] = useState(20);
+  const [avgTransactionValue, setAvgTransactionValue] = useState(() => loadValue('avgTransactionValue', 250));
+  const [transactionFeePercent, setTransactionFeePercent] = useState(() => loadValue('transactionFeePercent', 10));
+  const [transactionsPerMonth, setTransactionsPerMonth] = useState(() => loadValue('transactionsPerMonth', 100));
+  const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 20));
   
   // Course Sales Inputs
-  const [avgCoursePrice, setAvgCoursePrice] = useState(199);
-  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(15);
-  const [courseGrowth, setCourseGrowth] = useState(10);
+  const [avgCoursePrice, setAvgCoursePrice] = useState(() => loadValue('avgCoursePrice', 199));
+  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(() => loadValue('courseSalesPerMonth', 15));
+  const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 10));
   
   // Referral Fee Inputs
-  const [avgReferralFee, setAvgReferralFee] = useState(500);
-  const [referralsPerMonth, setReferralsPerMonth] = useState(8);
-  const [referralGrowth, setReferralGrowth] = useState(12);
-  
+  const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 500));
+  const [referralsPerMonth, setReferralsPerMonth] = useState(() => loadValue('referralsPerMonth', 8));
+  const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 12));
 
-  
   // Premium Placement Inputs
-  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(299);
-  const [localFeaturePrice, setLocalFeaturePrice] = useState(99);
-  const [featuresPerMonth, setFeaturesPerMonth] = useState(12);
-  const [featureGrowth, setFeatureGrowth] = useState(15);
+  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 299));
+  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 99));
+  const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
+  const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
   
   // Advertising Revenue Inputs
-  const [avgAdRevenue, setAvgAdRevenue] = useState(3000);
-  const [adGrowth, setAdGrowth] = useState(25);
+  const [avgAdRevenue, setAvgAdRevenue] = useState(() => loadValue('avgAdRevenue', 3000));
+  const [adGrowth, setAdGrowth] = useState(() => loadValue('adGrowth', 25));
+
+  // Auto-save to localStorage whenever values change
+  useEffect(() => {
+    const values = {
+      subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate,
+      vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+      agentSubPrice, agentNewPerMonth, agentChurnRate,
+      avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
+      avgCoursePrice, courseSalesPerMonth, courseGrowth,
+      avgReferralFee, referralsPerMonth, referralGrowth,
+      nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
+      avgAdRevenue, adGrowth
+    };
+    
+    Object.entries(values).forEach(([key, value]) => {
+      localStorage.setItem(`revenue_${key}`, JSON.stringify(value));
+    });
+  }, [
+    subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate,
+    vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+    agentSubPrice, agentNewPerMonth, agentChurnRate,
+    avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
+    avgCoursePrice, courseSalesPerMonth, courseGrowth,
+    avgReferralFee, referralsPerMonth, referralGrowth,
+    nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
+    avgAdRevenue, adGrowth
+  ]);
 
   const calculateProjections = (monthlyBase, growthPercent, months) => {
     const projections = [];
