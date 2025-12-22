@@ -100,13 +100,20 @@ export default function IncomeTracker() {
       // Load transactions from worksheets for all sales
       const transactions = await base44.entities.Transaction.filter({ created_by: user.email });
       
-      // Group transactions by sale and sum company_amount (20% commission)
+      // Create a map of sale IDs to their commission rates
+      const saleCommissionRates = {};
+      estateSales.forEach(sale => {
+        saleCommissionRates[sale.id] = sale.commission_rate || 0.40; // Default to 40% if not set
+      });
+      
+      // Group transactions by sale and sum company_amount using actual commission rate
       const saleIncomeMap = {};
       transactions.forEach(txn => {
         if (!saleIncomeMap[txn.sale_id]) {
           saleIncomeMap[txn.sale_id] = 0;
         }
-        saleIncomeMap[txn.sale_id] += txn.company_amount || (txn.total * 0.20);
+        const commissionRate = saleCommissionRates[txn.sale_id] || 0.40;
+        saleIncomeMap[txn.sale_id] += txn.company_amount || (txn.total * commissionRate);
       });
 
       // Create automated income entries from worksheet transactions
