@@ -40,20 +40,26 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     const subscriptionRevenue = {
       'operator_basic': { price: 49, salesPerMonth: 1, name: 'Basic' },
       'operator_pro': { price: 99, salesPerMonth: 2, name: 'Pro' },
+      'operator_enterprise': { price: 299, salesPerMonth: 5, name: 'Enterprise' },
       'agent_basic': { price: 149, salesPerMonth: 3, name: 'Agent Basic' },
       'agent_pro': { price: 299, salesPerMonth: 5, name: 'Agent Pro' }
     };
 
-    // Use actual operator subscription or default
+    // Use actual operator subscription
     let packageType, subscription;
     
     if (operatorSubscription) {
       const planType = operatorSubscription.plan_type;
-      subscription = subscriptionRevenue[planType] || { 
-        price: operatorSubscription.price || 99, 
-        salesPerMonth: 2, 
-        name: planType 
-      };
+      subscription = subscriptionRevenue[planType];
+      
+      if (!subscription) {
+        // Fallback for unknown plan types
+        subscription = { 
+          price: operatorSubscription.price || 99, 
+          salesPerMonth: 2, 
+          name: planType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+        };
+      }
       packageType = subscription.name;
     } else {
       // Default to Pro if no subscription found
