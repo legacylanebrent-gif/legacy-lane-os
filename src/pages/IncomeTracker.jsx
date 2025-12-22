@@ -491,7 +491,7 @@ export default function IncomeTracker() {
             <div className="space-y-3">
               <div className="p-4 bg-white rounded-lg border-2 border-orange-300">
                 <p className="text-sm text-slate-600 mb-1">Total Tax Liability</p>
-                <p className="text-3xl font-bold text-orange-600">${taxes.totalTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-bold text-orange-600">${taxes.totalTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 <p className="text-xs text-slate-500 mt-1">Effective rate: {taxes.effectiveRate.toFixed(2)}%</p>
               </div>
 
