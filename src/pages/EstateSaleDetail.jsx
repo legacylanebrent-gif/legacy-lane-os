@@ -632,6 +632,25 @@ END:VCALENDAR`;
                     </p>
                   </div>
                 )}
+
+                {/* AI Price Value - Only visible to operator */}
+                {currentUser?.id === sale.operator_id && (() => {
+                  const totalAIPrice = (sale.images || []).reduce((sum, img) => {
+                    const price = typeof img === 'object' && img.price ? parseFloat(img.price) : 0;
+                    return sum + price;
+                  }, 0);
+                  return totalAIPrice > 0 ? (
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-purple-600" />
+                        AI Price Value
+                      </h3>
+                      <p className="text-2xl font-bold text-purple-600">
+                        ${totalAIPrice.toLocaleString()}
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
               </CardContent>
             </Card>
 
