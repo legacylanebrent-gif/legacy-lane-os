@@ -119,16 +119,22 @@ export default function IncomeTracker() {
       // Create automated income entries from worksheet transactions
       const automatedIncome = estateSales
         .filter(sale => saleIncomeMap[sale.id] > 0)
-        .map(sale => ({
-          id: `auto-sale-${sale.id}`,
-          income_date: sale.sale_dates?.[0]?.date || sale.created_date,
-          source: sale.title,
-          amount: saleIncomeMap[sale.id],
-          category: 'estate_sale',
-          description: `Commission from estate sale worksheet`,
-          reference_id: sale.id,
-          is_automated: true
-        }));
+        .map(sale => {
+          const address = sale.property_address?.formatted_address || 
+                         (sale.property_address?.city && sale.property_address?.state 
+                           ? `${sale.property_address.city}, ${sale.property_address.state}` 
+                           : '');
+          return {
+            id: `auto-sale-${sale.id}`,
+            income_date: sale.sale_dates?.[0]?.date || sale.created_date,
+            source: sale.title,
+            amount: saleIncomeMap[sale.id],
+            category: 'estate_sale',
+            description: address ? `${address}\nCommission from estate sale worksheet` : `Commission from estate sale worksheet`,
+            reference_id: sale.id,
+            is_automated: true
+          };
+        });
 
       const allIncome = [...incomeData, ...automatedIncome];
       setIncome(allIncome);
