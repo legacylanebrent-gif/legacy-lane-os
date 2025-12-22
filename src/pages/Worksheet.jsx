@@ -536,11 +536,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
         }
       });
 
-      // Only update if the user hasn't typed something else
-      if (currentQuery !== photoSearchQuery) {
-        return;
-      }
-
       const matches = result?.matches || [];
       
       // Map back to actual images with their data
