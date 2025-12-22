@@ -124,11 +124,6 @@ Deno.serve(async (req) => {
             }
             }
     
-    // Save all companies to database
-    if (allCompanies.length > 0) {
-      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
-    }
-    
     return Response.json({ 
       success: true,
       total_companies: allCompanies.length,
