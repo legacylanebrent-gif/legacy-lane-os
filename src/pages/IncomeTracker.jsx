@@ -120,10 +120,9 @@ export default function IncomeTracker() {
       const automatedIncome = estateSales
         .filter(sale => saleIncomeMap[sale.id] > 0)
         .map(sale => {
-          const address = sale.property_address?.formatted_address || 
-                         (sale.property_address?.city && sale.property_address?.state 
-                           ? `${sale.property_address.city}, ${sale.property_address.state}` 
-                           : '');
+          const address = [sale.property_address?.street, sale.property_address?.city]
+            .filter(Boolean)
+            .join(', ');
           return {
             id: `auto-sale-${sale.id}`,
             income_date: sale.sale_dates?.[0]?.date || sale.created_date,
