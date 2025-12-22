@@ -59,8 +59,11 @@ export default function Revenue() {
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
   
   // Advertising Revenue Inputs
-  const [avgAdRevenue, setAvgAdRevenue] = useState(() => loadValue('avgAdRevenue', 3000));
-  const [adGrowth, setAdGrowth] = useState(() => loadValue('adGrowth', 25));
+  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 500));
+  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 1500));
+  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 3000));
+  const [adNewPerMonth, setAdNewPerMonth] = useState(() => loadValue('adNewPerMonth', 10));
+  const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 8));
 
   // Auto-save to localStorage whenever values change
   useEffect(() => {
@@ -72,7 +75,7 @@ export default function Revenue() {
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
-      avgAdRevenue, adGrowth
+      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -86,7 +89,7 @@ export default function Revenue() {
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
-    avgAdRevenue, adGrowth
+    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
   ]);
 
   const calculateProjections = (monthlyBase, growthPercent, months) => {
@@ -99,20 +102,20 @@ export default function Revenue() {
     return projections;
   };
 
-  const calculateSubscriptionRevenue = (months) => {
+  const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate) => {
     const projections = [];
-    let basicSubs = Math.floor(subNewPerMonth * 0.5);
-    let proSubs = Math.floor(subNewPerMonth * 0.3);
-    let premiumSubs = Math.floor(subNewPerMonth * 0.2);
+    let basicSubs = Math.floor(newPerMonth * 0.5);
+    let proSubs = Math.floor(newPerMonth * 0.3);
+    let premiumSubs = Math.floor(newPerMonth * 0.2);
     
     for (let i = 0; i < months; i++) {
-      const churnFactor = (1 - subChurnRate / 100);
-      const revenue = (basicSubs * subBasicPrice + proSubs * subProPrice + premiumSubs * subPremiumPrice) * churnFactor;
+      const churnFactor = (1 - churnRate / 100);
+      const revenue = (basicSubs * basicPrice + proSubs * proPrice + premiumSubs * premiumPrice) * churnFactor;
       projections.push(revenue);
       
-      basicSubs = Math.floor(basicSubs * churnFactor + subNewPerMonth * 0.5);
-      proSubs = Math.floor(proSubs * churnFactor + subNewPerMonth * 0.3);
-      premiumSubs = Math.floor(premiumSubs * churnFactor + subNewPerMonth * 0.2);
+      basicSubs = Math.floor(basicSubs * churnFactor + newPerMonth * 0.5);
+      proSubs = Math.floor(proSubs * churnFactor + newPerMonth * 0.3);
+      premiumSubs = Math.floor(premiumSubs * churnFactor + newPerMonth * 0.2);
     }
     return projections;
   };
@@ -136,14 +139,14 @@ export default function Revenue() {
   };
 
   // Calculate all revenue streams
-  const subProjections = calculateSubscriptionRevenue(120);
+  const subProjections = calculateSubscriptionRevenue(120, subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate);
   const vendorSubProjections = calculateSimpleSubRevenue(vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
   const agentSubProjections = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
   const featureProjections = calculateProjections(featuresPerMonth * ((nationalFeaturePrice + localFeaturePrice) / 2), featureGrowth, 120);
-  const adProjections = calculateProjections(avgAdRevenue, adGrowth, 120);
+  const adProjections = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
 
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
@@ -826,18 +829,30 @@ export default function Revenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Megaphone className="w-5 h-5 text-teal-600" />
-                  Advertising Revenue Calculator
+                  Advertising Space Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Avg Monthly Ad Revenue ($)</Label>
-                    <Input type="number" value={avgAdRevenue} onChange={(e) => setAvgAdRevenue(Number(e.target.value))} />
+                    <Label>Basic Ad Space Price ($)</Label>
+                    <Input type="number" value={adBasicPrice} onChange={(e) => setAdBasicPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Monthly Growth Rate (%)</Label>
-                    <Input type="number" value={adGrowth} onChange={(e) => setAdGrowth(Number(e.target.value))} />
+                    <Label>Pro Ad Space Price ($)</Label>
+                    <Input type="number" value={adProPrice} onChange={(e) => setAdProPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Premium Ad Space Price ($)</Label>
+                    <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>New Advertisers/Month</Label>
+                    <Input type="number" value={adNewPerMonth} onChange={(e) => setAdNewPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Churn Rate (%)</Label>
+                    <Input type="number" value={adChurnRate} onChange={(e) => setAdChurnRate(Number(e.target.value))} />
                   </div>
                 </div>
 
