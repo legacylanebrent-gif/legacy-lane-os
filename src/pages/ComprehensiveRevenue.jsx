@@ -80,7 +80,7 @@ export default function ComprehensiveRevenue() {
       agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
-      avgReferralFee, referralsPerMonth, referralGrowth,
+      avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
     };
@@ -93,7 +93,7 @@ export default function ComprehensiveRevenue() {
     agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
-    avgReferralFee, referralsPerMonth, referralGrowth,
+    avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
   ]);
