@@ -779,7 +779,7 @@ export default function Revenue() {
                     <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Features Per Month</Label>
+                    <Label>Features Per Month (avg of national & local pricing)</Label>
                     <Input type="number" value={featuresPerMonth} onChange={(e) => setFeaturesPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
