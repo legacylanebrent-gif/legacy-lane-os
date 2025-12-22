@@ -32,7 +32,9 @@ export default function IncomingLeads() {
     contact_name: '',
     contact_email: '',
     contact_phone: '',
-    estimated_value: '',
+    home_size: '',
+    gated_community: false,
+    sales_allowed: '',
     timeline: '',
     notes: '',
     score: 50
@@ -99,7 +101,9 @@ export default function IncomingLeads() {
         intent: 'estate_sale',
         situation: formData.situation || 'standard',
         property_address: formData.property_address,
-        estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
+        home_size: formData.home_size,
+        gated_community: formData.gated_community,
+        sales_allowed: formData.sales_allowed,
         timeline: formData.timeline,
         score: parseInt(formData.score),
         contact_name: formData.contact_name,
@@ -160,7 +164,9 @@ export default function IncomingLeads() {
       contact_name: '',
       contact_email: '',
       contact_phone: '',
-      estimated_value: '',
+      home_size: '',
+      gated_community: false,
+      sales_allowed: '',
       timeline: '',
       notes: '',
       score: 50
@@ -545,13 +551,20 @@ export default function IncomingLeads() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Estimated Value</Label>
-                <Input
-                  type="number"
-                  value={formData.estimated_value}
-                  onChange={(e) => setFormData({ ...formData, estimated_value: e.target.value })}
-                  placeholder="50000"
-                />
+                <Label>Size of Home</Label>
+                <Select value={formData.home_size} onValueChange={(value) => setFormData({ ...formData, home_size: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select size..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] overflow-y-auto">
+                    <SelectItem value="1-2_bedroom">1-2 Bedroom House</SelectItem>
+                    <SelectItem value="3-4_bedroom">3-4 Bedroom House</SelectItem>
+                    <SelectItem value="5+_bedroom">5+ Bedroom House</SelectItem>
+                    <SelectItem value="apartment_condo">Apartment or Condo</SelectItem>
+                    <SelectItem value="storefront_business">Storefront or Business</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Lead Score (0-100)</Label>
@@ -563,6 +576,35 @@ export default function IncomingLeads() {
                   onChange={(e) => setFormData({ ...formData, score: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="gated_community"
+                  checked={formData.gated_community}
+                  onChange={(e) => setFormData({ ...formData, gated_community: e.target.checked, sales_allowed: '' })}
+                  className="w-4 h-4 text-orange-600 border-slate-300 rounded focus:ring-orange-500"
+                />
+                <Label htmlFor="gated_community" className="cursor-pointer">Gated Community?</Label>
+              </div>
+
+              {formData.gated_community && (
+                <div>
+                  <Label>Are sales allowed?</Label>
+                  <Select value={formData.sales_allowed} onValueChange={(value) => setFormData({ ...formData, sales_allowed: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                      <SelectItem value="unsure">Unsure</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div>
