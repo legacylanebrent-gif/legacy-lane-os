@@ -12,7 +12,7 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 const PACKAGE_PRICES = {
   'Gold': 299,
   'Silver': 149,
-  'Bronze': 79,
+  'Bronze': 35,
   'Platinum': 499,
   'Basic': 0
 };
@@ -206,7 +206,13 @@ export default function ComprehensiveRevenue() {
     const displayName = name === 'Unknown' ? 'Basic' : name;
     const monthlyRevenue = value * (PACKAGE_PRICES[displayName] || 0);
     // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
-    const perSaleRevenue = displayName === 'Basic' ? value * 99 * 8 / 12 : 0;
+    // Bronze operators: $35/month + $64 per sale × 1.25 sales/month
+    let perSaleRevenue = 0;
+    if (displayName === 'Basic') {
+      perSaleRevenue = value * 99 * 8 / 12;
+    } else if (displayName === 'Bronze') {
+      perSaleRevenue = value * 64 * 1.25;
+    }
     return {
       name: displayName,
       value,
@@ -228,7 +234,13 @@ export default function ComprehensiveRevenue() {
     const packageType = op.package_type === 'Unknown' ? 'Basic' : op.package_type;
     const monthlyPrice = PACKAGE_PRICES[packageType] || 0;
     // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
-    const perSaleRevenue = packageType === 'Basic' ? 99 * 8 / 12 : 0;
+    // Bronze operators: $35/month + $64 per sale × 1.25 sales/month
+    let perSaleRevenue = 0;
+    if (packageType === 'Basic') {
+      perSaleRevenue = 99 * 8 / 12;
+    } else if (packageType === 'Bronze') {
+      perSaleRevenue = 64 * 1.25;
+    }
     return sum + monthlyPrice + perSaleRevenue;
   }, 0);
 
@@ -494,6 +506,7 @@ export default function ComprehensiveRevenue() {
                         <div className="text-xs text-slate-500">
                           {pkg.value} operators
                           {pkg.name === 'Basic' && ' ($99/sale × 8 sales/yr)'}
+                          {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
                         </div>
                       </div>
                     </div>
