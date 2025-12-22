@@ -155,18 +155,22 @@ export default function BuyoutModal({ open, onClose, sale }) {
         setLabelingStatus(prev => ({ ...prev, current: i + 1 }));
 
         try {
-          const prompt = `You are analyzing an item photo from an estate sale for a buyout valuation.
+          const prompt = `You are analyzing a photo of an item from an estate sale.
 
-Analyze this photo and provide:
-1. Item name (be specific but concise)
-2. Brief description (2-3 sentences about condition, notable features)
-3. Estimated fair market value in USD (be realistic for estate sale items)
+Look at this photo and provide:
+1. A specific name for this item (be descriptive but concise)
+2. A brief description highlighting key features, condition, and any notable details
+3. The estimated NEW retail price (what this would cost brand new)
+4. The suggested ESTATE SALE price (typically 30-50% of new retail value, accounting for condition)
+
+Focus on being accurate and realistic with pricing.
 
 Return ONLY valid JSON in this exact format:
 {
   "name": "Item name here",
   "description": "Description here",
-  "price": 150.00
+  "suggested_new_price": 150.00,
+  "suggested_used_price": 75.00
 }`;
 
           const result = await base44.integrations.Core.InvokeLLM({
@@ -177,9 +181,10 @@ Return ONLY valid JSON in this exact format:
               properties: {
                 name: { type: "string" },
                 description: { type: "string" },
-                price: { type: "number" }
+                suggested_new_price: { type: "number" },
+                suggested_used_price: { type: "number" }
               },
-              required: ["name", "description", "price"]
+              required: ["name", "description", "suggested_new_price", "suggested_used_price"]
             }
           });
 
@@ -187,7 +192,8 @@ Return ONLY valid JSON in this exact format:
             ...images[i],
             name: result.name,
             description: result.description,
-            price: result.price
+            suggested_new_price: result.suggested_new_price,
+            suggested_used_price: result.suggested_used_price
           });
 
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -197,7 +203,8 @@ Return ONLY valid JSON in this exact format:
             ...images[i],
             name: 'Unlabeled Item',
             description: 'Failed to analyze',
-            price: 0
+            suggested_new_price: 0,
+            suggested_used_price: 0
           });
         }
       }
@@ -213,7 +220,7 @@ Return ONLY valid JSON in this exact format:
   };
 
   const getTotalValue = () => {
-    return labeledItems.reduce((sum, item) => sum + (item.price || 0), 0);
+    return labeledItems.reduce((sum, item) => sum + (item.suggested_used_price || 0), 0);
   };
 
   const getOfferAmount = () => {
@@ -350,9 +357,12 @@ Return ONLY valid JSON in this exact format:
                         <h4 className="font-semibold text-slate-900">{item.name}</h4>
                         <p className="text-xs text-slate-600 line-clamp-1">{item.description}</p>
                       </div>
-                      <Badge className="bg-green-600 text-white">
-                        ${item.price?.toFixed(2) || '0.00'}
-                      </Badge>
+                      <div className="text-right">
+                        <div className="text-xs text-slate-500 line-through">${item.suggested_new_price?.toFixed(2) || '0.00'}</div>
+                        <Badge className="bg-green-600 text-white">
+                          ${item.suggested_used_price?.toFixed(2) || '0.00'}
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -413,14 +423,42 @@ Offer Percentage: ${offerPercentage}%
 Buyout Offer: $${getOfferAmount().toFixed(2)}
 
 Items:
-${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.price?.toFixed(2)}`).join('\n')}`;
+${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.suggested_used_price?.toFixed(2)}`).join('\n')}`;
                       
                       navigator.clipboard.writeText(summary);
                       alert('Buyout summary copied to clipboard!');
                     }}
-                    className="flex-1 bg-orange-600 hover:bg-orange-700"
+                    variant="outline"
+                    className="flex-1"
                   >
                     Copy Summary
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const itemsList = labeledItems.map((item, i) => 
+                          `${i + 1}. ${item.name} - Retail: $${item.suggested_new_price?.toFixed(2)}, Estate: $${item.suggested_used_price?.toFixed(2)}`
+                        ).join('\n');
+
+                        await base44.entities.Offer.create({
+                          sale_id: sale?.id,
+                          item_name: `Buyout Offer - ${labeledItems.length} Items`,
+                          offer_amount: getOfferAmount(),
+                          full_name: 'Estate Buyout',
+                          notes: `Buyout Analysis:\n\nTotal Items: ${labeledItems.length}\nTotal Estate Value: $${getTotalValue().toFixed(2)}\nOffer Percentage: ${offerPercentage}%\nOffer Amount: $${getOfferAmount().toFixed(2)}\n\nItems:\n${itemsList}`,
+                          status: 'pending'
+                        });
+
+                        alert('Buyout offer saved successfully!');
+                        handleClose();
+                      } catch (error) {
+                        console.error('Error saving buyout:', error);
+                        alert('Failed to save buyout offer');
+                      }
+                    }}
+                    className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  >
+                    Save Buyout
                   </Button>
                 </div>
               </div>
