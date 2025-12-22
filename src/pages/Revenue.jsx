@@ -38,11 +38,7 @@ export default function Revenue() {
   const [referralsPerMonth, setReferralsPerMonth] = useState(8);
   const [referralGrowth, setReferralGrowth] = useState(12);
   
-  // Vendor Commission Inputs
-  const [avgVendorDeal, setAvgVendorDeal] = useState(2000);
-  const [vendorCommission, setVendorCommission] = useState(15);
-  const [vendorDealsPerMonth, setVendorDealsPerMonth] = useState(5);
-  const [vendorGrowth, setVendorGrowth] = useState(8);
+
   
   // Premium Placement Inputs
   const [nationalFeaturePrice, setNationalFeaturePrice] = useState(299);
@@ -92,13 +88,12 @@ export default function Revenue() {
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
-  const vendorProjections = calculateProjections(vendorDealsPerMonth * avgVendorDeal * (vendorCommission / 100), vendorGrowth, 120);
   const featureProjections = calculateProjections(featuresPerMonth * ((nationalFeaturePrice + localFeaturePrice) / 2), featureGrowth, 120);
   const adProjections = calculateProjections(avgAdRevenue, adGrowth, 120);
 
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + marketplaceProjections[i] + courseProjections[i] + 
-    referralProjections[i] + vendorProjections[i] + featureProjections[i] + adProjections[i]
+    referralProjections[i] + featureProjections[i] + adProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -107,7 +102,6 @@ export default function Revenue() {
     Marketplace: Math.round(marketplaceProjections[i]),
     Courses: Math.round(courseProjections[i]),
     Referrals: Math.round(referralProjections[i]),
-    Vendors: Math.round(vendorProjections[i]),
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
     Total: Math.round(totalProjections[i])
@@ -122,7 +116,6 @@ export default function Revenue() {
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
     { name: 'Courses', value: getYearProjection(courseProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
-    { name: 'Vendors', value: getYearProjection(vendorProjections, 3) },
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
   ];
@@ -134,7 +127,6 @@ export default function Revenue() {
       Marketplace: getYearProjection(marketplaceProjections, 3),
       Courses: getYearProjection(courseProjections, 3),
       Referrals: getYearProjection(referralProjections, 3),
-      Vendors: getYearProjection(vendorProjections, 3),
       Features: getYearProjection(featureProjections, 3),
       Advertising: getYearProjection(adProjections, 3),
     },
@@ -144,7 +136,6 @@ export default function Revenue() {
       Marketplace: getYearProjection(marketplaceProjections, 5),
       Courses: getYearProjection(courseProjections, 5),
       Referrals: getYearProjection(referralProjections, 5),
-      Vendors: getYearProjection(vendorProjections, 5),
       Features: getYearProjection(featureProjections, 5),
       Advertising: getYearProjection(adProjections, 5),
     },
@@ -154,7 +145,6 @@ export default function Revenue() {
       Marketplace: getYearProjection(marketplaceProjections, 10),
       Courses: getYearProjection(courseProjections, 10),
       Referrals: getYearProjection(referralProjections, 10),
-      Vendors: getYearProjection(vendorProjections, 10),
       Features: getYearProjection(featureProjections, 10),
       Advertising: getYearProjection(adProjections, 10),
     }
@@ -221,7 +211,6 @@ export default function Revenue() {
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Courses" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
-                <Area type="monotone" dataKey="Vendors" stackId="1" stroke="#ec4899" fill="#ec4899" />
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
               </AreaChart>
@@ -281,7 +270,7 @@ export default function Revenue() {
 
         {/* Revenue Stream Calculators */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-2">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-2">
             <TabsTrigger value="subscriptions">
               <Users className="w-4 h-4 mr-1" />
               Subscriptions
@@ -297,10 +286,6 @@ export default function Revenue() {
             <TabsTrigger value="referrals">
               <Award className="w-4 h-4 mr-1" />
               Referrals
-            </TabsTrigger>
-            <TabsTrigger value="vendors">
-              <Package className="w-4 h-4 mr-1" />
-              Vendors
             </TabsTrigger>
             <TabsTrigger value="features">
               <Sparkles className="w-4 h-4 mr-1" />
@@ -558,70 +543,6 @@ export default function Revenue() {
                     <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                     <Legend />
                     <Line type="monotone" dataKey="Referrals" stroke="#f59e0b" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Vendors Tab */}
-          <TabsContent value="vendors">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-pink-600" />
-                  Vendor Commission Calculator
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                  <div>
-                    <Label>Avg Vendor Deal ($)</Label>
-                    <Input type="number" value={avgVendorDeal} onChange={(e) => setAvgVendorDeal(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Commission Rate (%)</Label>
-                    <Input type="number" value={vendorCommission} onChange={(e) => setVendorCommission(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Deals Per Month</Label>
-                    <Input type="number" value={vendorDealsPerMonth} onChange={(e) => setVendorDealsPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Monthly Growth Rate (%)</Label>
-                    <Input type="number" value={vendorGrowth} onChange={(e) => setVendorGrowth(Number(e.target.value))} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
-                    <div className="text-2xl font-bold text-cyan-600">
-                      ${(getYearProjection(vendorProjections, 3) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      ${(getYearProjection(vendorProjections, 5) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      ${(getYearProjection(vendorProjections, 10) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                </div>
-
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={chartData.slice(0, 36)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                    <Legend />
-                    <Line type="monotone" dataKey="Vendors" stroke="#ec4899" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
