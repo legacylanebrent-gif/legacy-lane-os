@@ -13,7 +13,8 @@ const PACKAGE_PRICES = {
   'Gold': 299,
   'Silver': 149,
   'Bronze': 79,
-  'Platinum': 499
+  'Platinum': 499,
+  'Basic': 0
 };
 
 export default function ComprehensiveRevenue() {
@@ -201,11 +202,17 @@ export default function ComprehensiveRevenue() {
     return acc;
   }, {});
 
-  const packageData = Object.entries(packageCounts).map(([name, value]) => ({
-    name,
-    value,
-    revenue: value * (PACKAGE_PRICES[name] || 0)
-  }));
+  const packageData = Object.entries(packageCounts).map(([name, value]) => {
+    const displayName = name === 'Unknown' ? 'Basic' : name;
+    const monthlyRevenue = value * (PACKAGE_PRICES[displayName] || 0);
+    // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
+    const perSaleRevenue = displayName === 'Basic' ? value * 99 * 8 / 12 : 0;
+    return {
+      name: displayName,
+      value,
+      revenue: monthlyRevenue + perSaleRevenue
+    };
+  });
 
   const stateCounts = operators.reduce((acc, op) => {
     const state = op.state || 'Unknown';
@@ -218,8 +225,11 @@ export default function ComprehensiveRevenue() {
   const totalCities = uniqueCities.size;
 
   const currentOperatorMonthlyRevenue = operators.reduce((sum, op) => {
-    const price = PACKAGE_PRICES[op.package_type] || 0;
-    return sum + price;
+    const packageType = op.package_type === 'Unknown' ? 'Basic' : op.package_type;
+    const monthlyPrice = PACKAGE_PRICES[packageType] || 0;
+    // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
+    const perSaleRevenue = packageType === 'Basic' ? 99 * 8 / 12 : 0;
+    return sum + monthlyPrice + perSaleRevenue;
   }, 0);
 
   const currentOperatorYearlyRevenue = currentOperatorMonthlyRevenue * 12;
@@ -481,7 +491,10 @@ export default function ComprehensiveRevenue() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
-                        <div className="text-xs text-slate-500">{pkg.value} operators</div>
+                        <div className="text-xs text-slate-500">
+                          {pkg.value} operators
+                          {pkg.name === 'Basic' && ' ($99/sale × 8 sales/yr)'}
+                        </div>
                       </div>
                     </div>
                   ))}
