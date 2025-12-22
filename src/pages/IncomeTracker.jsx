@@ -409,7 +409,7 @@ export default function IncomeTracker() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Total Income</p>
-                <p className="text-3xl font-bold text-green-600">${taxes.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-bold text-green-600">${taxes.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-green-600" />
@@ -423,7 +423,7 @@ export default function IncomeTracker() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Total Expenses</p>
-                <p className="text-3xl font-bold text-red-600">${taxes.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-bold text-red-600">${taxes.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                 <TrendingDown className="w-6 h-6 text-red-600" />
@@ -437,7 +437,7 @@ export default function IncomeTracker() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Net Profit</p>
-                <p className="text-3xl font-bold text-cyan-600">${taxes.netIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                <p className="text-3xl font-bold text-cyan-600">${taxes.netIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-cyan-600" />
@@ -474,17 +474,17 @@ export default function IncomeTracker() {
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-white rounded-lg">
                 <span className="text-sm font-medium text-slate-700">Self-Employment Tax (15.3%)</span>
-                <span className="font-bold text-slate-900">${taxes.selfEmploymentTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-slate-900">${taxes.selfEmploymentTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-white rounded-lg">
                 <span className="text-sm font-medium text-slate-700">Federal Income Tax (Progressive)</span>
-                <span className="font-bold text-slate-900">${taxes.federalTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-slate-900">${taxes.federalTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-white rounded-lg">
                 <span className="text-sm font-medium text-slate-700">
                   State Tax ({taxes.userState} - {(taxes.stateRate * 100).toFixed(1)}%)
                 </span>
-                <span className="font-bold text-slate-900">${taxes.stateTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-slate-900">${taxes.stateTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
 
@@ -498,11 +498,11 @@ export default function IncomeTracker() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-white rounded-lg">
                   <p className="text-xs text-slate-600 mb-1">Quarterly Payment</p>
-                  <p className="text-lg font-bold text-slate-900">${(taxes.totalTax / 4).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-slate-900">${(taxes.totalTax / 4).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 <div className="p-3 bg-white rounded-lg">
                   <p className="text-xs text-slate-600 mb-1">Monthly Estimate</p>
-                  <p className="text-lg font-bold text-slate-900">${(taxes.totalTax / 12).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-slate-900">${(taxes.totalTax / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -660,7 +660,7 @@ export default function IncomeTracker() {
                         {INCOME_CATEGORY_OPTIONS.find(c => c.value === inc.category)?.label}
                       </td>
                       <td className="p-3 text-right font-semibold text-green-600">
-                        ${inc.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        ${inc.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="p-3 text-center">
                         {inc.is_automated ? (
