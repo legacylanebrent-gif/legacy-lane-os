@@ -321,39 +321,41 @@ export default function Layout({ children, currentPageName }) {
                           </Button>
                         </Link>
                       ))}
+                      {/* Add Income Tracker and Business Expenses after Leads in Real Estate division */}
+                      {divisionKey === 'real_estate' && (
+                        <>
+                          <Link to={createPageUrl('IncomeTracker')}>
+                            <Button 
+                              variant="ghost"
+                              className={`w-full justify-start ${
+                                currentPageName === 'IncomeTracker' 
+                                  ? 'bg-cyan-100 text-cyan-700' 
+                                  : 'hover:bg-cyan-50'
+                              }`}
+                            >
+                              <TrendingUp className="w-4 h-4 mr-3" />
+                              Income Tracker
+                            </Button>
+                          </Link>
+                          <Link to={createPageUrl('MyBusinessExpenses')}>
+                            <Button 
+                              variant="ghost"
+                              className={`w-full justify-start ${
+                                currentPageName === 'MyBusinessExpenses' 
+                                  ? 'bg-cyan-100 text-cyan-700' 
+                                  : 'hover:bg-cyan-50'
+                              }`}
+                            >
+                              <FileText className="w-4 h-4 mr-3" />
+                              Business Expenses
+                            </Button>
+                          </Link>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
               })}
-
-              <div className="space-y-1 mt-6">
-                <Link to={createPageUrl('IncomeTracker')}>
-                  <Button 
-                    variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'IncomeTracker' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <TrendingUp className="w-5 h-5 mr-3" />
-                    Income Tracker
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyBusinessExpenses')}>
-                  <Button 
-                    variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyBusinessExpenses' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <FileText className="w-5 h-5 mr-3" />
-                    Business Expenses
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         </aside>
