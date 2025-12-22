@@ -239,6 +239,12 @@ export default function AdminEstateSales() {
             {filteredSales.length} of {sales.length} estate sales
             {hasActiveFilters && ' (filtered)'}
           </p>
+          <details className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+            <summary className="cursor-pointer font-semibold">Debug: Subscriptions Map ({Object.keys(operatorSubscriptions).length} loaded)</summary>
+            <pre className="mt-2 overflow-auto max-h-40 bg-white p-2 rounded">
+              {JSON.stringify(operatorSubscriptions, null, 2)}
+            </pre>
+          </details>
         </div>
         <Button 
           onClick={() => setShowCreateModal(true)}
