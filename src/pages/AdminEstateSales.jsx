@@ -50,18 +50,30 @@ export default function AdminEstateSales() {
       // Fetch all subscriptions and filter for active ones
       try {
         const allSubs = await base44.asServiceRole.entities.Subscription.list();
+        console.log('🔍 Total subscriptions fetched:', allSubs.length);
+        console.log('🔍 Sample subscription structure:', allSubs[0]);
 
         const subscriptionsMap = {};
+        let activeCount = 0;
+        let mappedCount = 0;
+
         allSubs.forEach(sub => {
+          console.log('🔍 Processing sub:', { status: sub.status, user_id: sub.user_id, full: sub });
           // Only include active subscriptions
           if (sub.status === 'active') {
+            activeCount++;
             // Try all possible user_id locations
             const userId = sub.user_id || sub.data?.user_id;
             if (userId) {
+              mappedCount++;
               subscriptionsMap[userId] = sub;
             }
           }
         });
+
+        console.log('🔍 Active subscriptions:', activeCount);
+        console.log('🔍 Mapped subscriptions:', mappedCount);
+        console.log('🔍 Final subscriptions map:', subscriptionsMap);
 
         setOperatorSubscriptions(subscriptionsMap);
       } catch (error) {
