@@ -233,6 +233,17 @@ export default function AdminEstateSales() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
+      <div className="bg-yellow-100 border-2 border-yellow-600 p-4 rounded-lg mb-4">
+        <div className="font-bold text-sm mb-2">🐛 DEBUG: Subscriptions Loaded: {Object.keys(operatorSubscriptions).length}</div>
+        <div className="text-xs font-mono max-h-48 overflow-auto bg-white p-2 rounded">
+          {Object.entries(operatorSubscriptions).map(([userId, sub]) => (
+            <div key={userId} className="border-b py-1">
+              UserID: {userId} | Price: ${sub.price || sub.data?.price} | Plan: {sub.plan_type || sub.data?.plan_type}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Estate Sales Management</h1>
@@ -240,12 +251,6 @@ export default function AdminEstateSales() {
             {filteredSales.length} of {sales.length} estate sales
             {hasActiveFilters && ' (filtered)'}
           </p>
-          <details className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-            <summary className="cursor-pointer font-semibold">Debug: Subscriptions Map ({Object.keys(operatorSubscriptions).length} loaded)</summary>
-            <pre className="mt-2 overflow-auto max-h-40 bg-white p-2 rounded">
-              {JSON.stringify(operatorSubscriptions, null, 2)}
-            </pre>
-          </details>
         </div>
         <Button 
           onClick={() => setShowCreateModal(true)}
