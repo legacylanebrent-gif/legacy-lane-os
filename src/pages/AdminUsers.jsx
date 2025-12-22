@@ -147,8 +147,6 @@ export default function AdminUsers() {
     { value: 'executor', label: 'Executor' },
     { value: 'home_seller', label: 'Home Seller' },
     { value: 'buyer', label: 'Buyer' },
-    { value: 'downsizer', label: 'Downsizer' },
-    { value: 'diy_seller', label: 'DIY Seller' },
     { value: 'consignor', label: 'Consignor' }
   ];
 

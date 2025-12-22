@@ -26,9 +26,7 @@ const ACCOUNT_TYPES = [
   { value: 'consumer', label: 'Consumer' },
   { value: 'executor', label: 'Executor' },
   { value: 'home_seller', label: 'Home Seller' },
-  { value: 'buyer', label: 'Buyer' },
-  { value: 'downsizer', label: 'Downsizer' },
-  { value: 'diy_seller', label: 'DIY Seller' }
+  { value: 'buyer', label: 'Buyer' }
 ];
 
 export default function AddUserModal({ open, onClose, onSuccess }) {
