@@ -47,9 +47,9 @@ export default function ComprehensiveRevenue() {
   const [transactionsPerCityPerMonth, setTransactionsPerCityPerMonth] = useState(() => loadValue('transactionsPerCityPerMonth', 15));
   
   // Course Sales Inputs
-  const [avgCoursePrice, setAvgCoursePrice] = useState(() => loadValue('avgCoursePrice', 199));
-  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(() => loadValue('courseSalesPerMonth', 15));
-  const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 10));
+  const [avgCoursePrice, setAvgCoursePrice] = useState(() => loadValue('avgCoursePrice', 49));
+  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(() => loadValue('courseSalesPerMonth', 30));
+  const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 5));
   
   // Referral Fee Inputs
   const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 500));
