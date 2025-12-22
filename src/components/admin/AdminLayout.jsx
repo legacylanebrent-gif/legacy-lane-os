@@ -14,6 +14,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
+  { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
