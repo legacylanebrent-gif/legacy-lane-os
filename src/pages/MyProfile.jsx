@@ -13,7 +13,7 @@ import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { 
   User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
-  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight
 } from 'lucide-react';
 
 export default function MyProfile() {
@@ -366,6 +366,30 @@ export default function MyProfile() {
                 )}
               </div>
             </CardContent>
+          </Card>
+
+          {/* Business Expenses Link */}
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 hover:shadow-lg transition-all cursor-pointer">
+            <Link to={createPageUrl('MyBusinessExpenses')}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                        Business Expenses
+                      </h3>
+                      <p className="text-sm text-slate-600">
+                        Track expenses, scan receipts, and export for taxes
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-orange-600" />
+                </div>
+              </CardContent>
+            </Link>
           </Card>
         </TabsContent>
 
