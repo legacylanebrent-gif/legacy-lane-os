@@ -559,6 +559,10 @@ Only include items with confidence > 0.3. If no items match well, return an empt
 
   const handlePhotoSearch = (query) => {
     setPhotoSearchQuery(query);
+    if (!query || query.length < 2) {
+      setPhotoSuggestions([]);
+      return;
+    }
     searchPhotosByName(query);
   };
 
@@ -569,6 +573,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
       setPrice(suggestion.suggested_price.toString());
     }
     setPhotoSuggestions([]);
+    setPhotoSearchQuery('');
   };
 
   const searchOfferPhotosByName = async (query) => {
