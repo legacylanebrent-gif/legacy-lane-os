@@ -452,7 +452,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(subProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(subQuantities[11])} subscribers
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -523,7 +532,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(vendorSubProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(vendorSubQuantities[11])} subscribers
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -594,7 +612,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(agentSubProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(agentSubQuantities[11])} subscribers
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -669,7 +696,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(marketplaceProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(marketplaceQuantities, 1)).toLocaleString()} transactions
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -740,7 +776,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(courseProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(courseQuantities, 1)).toLocaleString()} sales
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -811,7 +856,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(referralProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(referralQuantities, 1)).toLocaleString()} referrals
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -886,7 +940,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(featureProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(featureQuantities, 1)).toLocaleString()} features
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
@@ -965,7 +1028,16 @@ export default function Revenue() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(adProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(adQuantities[11])} advertisers
+                    </div>
+                  </div>
                   <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
                     <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
                     <div className="text-2xl font-bold text-cyan-600">
