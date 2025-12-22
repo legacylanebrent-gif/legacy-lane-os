@@ -23,16 +23,9 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     const revenueSources = [
       {
         label: `${packageType} Package`,
-        detail: `($${subscription.price}/mo ÷ ${subscription.salesPerMonth} sales)`,
+        detail: `Seller Subscription $${subscription.price}/month`,
         amount: subscription.perSale,
         type: 'subscription'
-      },
-      {
-        label: `Seller Subscription ${packageType} Package`,
-        detail: `$${subscription.price}/month`,
-        amount: subscription.price,
-        type: 'recurring',
-        isRecurring: true
       }
     ];
 
