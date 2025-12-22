@@ -47,25 +47,24 @@ export default function AdminEstateSales() {
       setSales(data);
       setFilteredSales(data);
       
-      // Fetch subscriptions for all unique operators
-      const uniqueOperatorIds = [...new Set(data.map(s => s.operator_id).filter(Boolean))];
-      const subscriptionsMap = {};
-      
-      for (const operatorId of uniqueOperatorIds) {
-        try {
-          const subs = await base44.asServiceRole.entities.Subscription.filter({
-            user_id: operatorId,
-            status: 'active'
-          });
-          if (subs.length > 0) {
-            subscriptionsMap[operatorId] = subs[0];
+      // Fetch all active subscriptions at once
+      try {
+        const allSubs = await base44.asServiceRole.entities.Subscription.filter({
+          status: 'active'
+        });
+
+        const subscriptionsMap = {};
+        allSubs.forEach(sub => {
+          const userId = sub.data?.user_id || sub.user_id;
+          if (userId) {
+            subscriptionsMap[userId] = sub;
           }
-        } catch (error) {
-          console.error(`Error loading subscription for operator ${operatorId}:`, error);
-        }
+        });
+
+        setOperatorSubscriptions(subscriptionsMap);
+      } catch (error) {
+        console.error('Error loading subscriptions:', error);
       }
-      
-      setOperatorSubscriptions(subscriptionsMap);
     } catch (error) {
       console.error('Error loading estate sales:', error);
     } finally {

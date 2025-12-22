@@ -6,8 +6,10 @@ import { base44 } from '@/api/base44Client';
 export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Revenue Calculations
-  const monthlySubscription = operatorSubscription?.price || operatorSubscription?.data?.price || 0;
+  // Revenue Calculations - handle both direct and nested data structure
+  const subData = operatorSubscription?.data || operatorSubscription;
+  const monthlySubscription = subData?.price || 0;
+  const planType = subData?.plan_type || 'Unknown';
   const nationalFeatureRevenue = sale.national_featured_price || 0;
   const localFeatureRevenue = sale.local_featured_price || 0;
   const emailCampaignRevenue = sale.email_campaign_price || 0;
@@ -87,7 +89,7 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
                 <div className="text-slate-700">Monthly Subscription</div>
                 <div className="text-right">
                   <div className="text-green-600 font-semibold">${monthlySubscription.toFixed(2)}</div>
-                  <div className="text-xs text-slate-500">{operatorSubscription.plan_type || operatorSubscription.data?.plan_type}</div>
+                  <div className="text-xs text-slate-500">{planType}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-green-600">${monthlySubscription.toFixed(2)}</div>

@@ -17,6 +17,7 @@ import BusinessProfile from './pages/BusinessProfile';
 import CRM from './pages/CRM';
 import CampaignBuilder from './pages/CampaignBuilder';
 import Campaigns from './pages/Campaigns';
+import ComprehensiveRevenue from './pages/ComprehensiveRevenue';
 import ContactDetail from './pages/ContactDetail';
 import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
@@ -56,7 +57,6 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import ComprehensiveRevenue from './pages/ComprehensiveRevenue';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +80,7 @@ export const PAGES = {
     "CRM": CRM,
     "CampaignBuilder": CampaignBuilder,
     "Campaigns": Campaigns,
+    "ComprehensiveRevenue": ComprehensiveRevenue,
     "ContactDetail": ContactDetail,
     "CourseDetail": CourseDetail,
     "CourseLearning": CourseLearning,
@@ -119,7 +120,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "ComprehensiveRevenue": ComprehensiveRevenue,
 }
 
 export const pagesConfig = {
