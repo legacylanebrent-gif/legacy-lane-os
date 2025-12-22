@@ -24,8 +24,29 @@ export default function FutureOperatorsAnalytics() {
   const loadOperators = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.FutureEstateOperator.filter({}, '-created_date', 100000);
-      setOperators(data);
+      let allOperators = [];
+      let skip = 0;
+      const batchSize = 5000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const batch = await base44.entities.FutureEstateOperator.filter({}, '-created_date', batchSize, skip);
+        
+        if (batch.length === 0) {
+          hasMore = false;
+        } else {
+          allOperators = [...allOperators, ...batch];
+          skip += batchSize;
+          
+          // If we got less than batchSize, we've reached the end
+          if (batch.length < batchSize) {
+            hasMore = false;
+          }
+        }
+      }
+
+      console.log(`Loaded ${allOperators.length} total operators`);
+      setOperators(allOperators);
     } catch (error) {
       console.error('Error loading operators:', error);
     } finally {
