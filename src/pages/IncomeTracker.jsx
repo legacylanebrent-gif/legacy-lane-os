@@ -94,17 +94,31 @@ export default function IncomeTracker() {
       // Load manual income entries
       const incomeData = await base44.entities.Income.filter({ created_by: user.email }, '-income_date');
       
-      // Load automated income from estate sales
+      // Load estate sales
       const estateSales = await base44.entities.EstateSale.filter({ operator_id: user.id });
+      
+      // Load transactions from worksheets for all sales
+      const transactions = await base44.entities.Transaction.filter({ created_by: user.email });
+      
+      // Group transactions by sale and sum company_amount (20% commission)
+      const saleIncomeMap = {};
+      transactions.forEach(txn => {
+        if (!saleIncomeMap[txn.sale_id]) {
+          saleIncomeMap[txn.sale_id] = 0;
+        }
+        saleIncomeMap[txn.sale_id] += txn.company_amount || (txn.total * 0.20);
+      });
+
+      // Create automated income entries from worksheet transactions
       const automatedIncome = estateSales
-        .filter(sale => sale.actual_revenue > 0)
+        .filter(sale => saleIncomeMap[sale.id] > 0)
         .map(sale => ({
           id: `auto-sale-${sale.id}`,
           income_date: sale.sale_dates?.[0]?.date || sale.created_date,
           source: sale.title,
-          amount: sale.actual_revenue,
+          amount: saleIncomeMap[sale.id],
           category: 'estate_sale',
-          description: `Revenue from estate sale`,
+          description: `Commission from estate sale worksheet`,
           reference_id: sale.id,
           is_automated: true
         }));
@@ -112,9 +126,24 @@ export default function IncomeTracker() {
       const allIncome = [...incomeData, ...automatedIncome];
       setIncome(allIncome);
 
-      // Load expenses for tax calculation
-      const expensesData = await base44.entities.BusinessExpense.filter({ created_by: user.email });
-      setExpenses(expensesData);
+      // Load business expenses
+      const businessExpensesData = await base44.entities.BusinessExpense.filter({ created_by: user.email });
+      
+      // Load sale-specific expenses
+      const saleExpensesData = await base44.entities.Expense.filter({ created_by: user.email });
+      
+      // Combine all expenses for tax calculation
+      const allExpenses = [
+        ...businessExpensesData,
+        ...saleExpensesData.map(e => ({
+          ...e,
+          expense_date: e.date,
+          tax_deductible: true,
+          business_use_percentage: 100
+        }))
+      ];
+      
+      setExpenses(allExpenses);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

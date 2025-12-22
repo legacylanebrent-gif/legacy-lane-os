@@ -7,6 +7,7 @@ import AdminLeads from './pages/AdminLeads';
 import AdminMarketplace from './pages/AdminMarketplace';
 import AdminPackages from './pages/AdminPackages';
 import AdminRewards from './pages/AdminRewards';
+import AdminTickets from './pages/AdminTickets';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminUsers from './pages/AdminUsers';
 import AdminVendors from './pages/AdminVendors';
@@ -29,16 +30,19 @@ import EstateSaleDetail from './pages/EstateSaleDetail';
 import EstateSaleFinder from './pages/EstateSaleFinder';
 import FutureOperatorsAnalytics from './pages/FutureOperatorsAnalytics';
 import Home from './pages/Home';
+import IncomeTracker from './pages/IncomeTracker';
 import Inventory from './pages/Inventory';
 import LeadCapture from './pages/LeadCapture';
 import Leads from './pages/Leads';
 import Messages from './pages/Messages';
+import MyBusinessExpenses from './pages/MyBusinessExpenses';
 import MyCourses from './pages/MyCourses';
 import MyListings from './pages/MyListings';
 import MyProfile from './pages/MyProfile';
 import MyReferrals from './pages/MyReferrals';
 import MyRewards from './pages/MyRewards';
 import MySales from './pages/MySales';
+import MyTickets from './pages/MyTickets';
 import OperatorPackages from './pages/OperatorPackages';
 import Operators from './pages/Operators';
 import Pipeline from './pages/Pipeline';
@@ -58,10 +62,6 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import MyTickets from './pages/MyTickets';
-import AdminTickets from './pages/AdminTickets';
-import MyBusinessExpenses from './pages/MyBusinessExpenses';
-import IncomeTracker from './pages/IncomeTracker';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "AdminMarketplace": AdminMarketplace,
     "AdminPackages": AdminPackages,
     "AdminRewards": AdminRewards,
+    "AdminTickets": AdminTickets,
     "AdminTransactions": AdminTransactions,
     "AdminUsers": AdminUsers,
     "AdminVendors": AdminVendors,
@@ -97,16 +98,19 @@ export const PAGES = {
     "EstateSaleFinder": EstateSaleFinder,
     "FutureOperatorsAnalytics": FutureOperatorsAnalytics,
     "Home": Home,
+    "IncomeTracker": IncomeTracker,
     "Inventory": Inventory,
     "LeadCapture": LeadCapture,
     "Leads": Leads,
     "Messages": Messages,
+    "MyBusinessExpenses": MyBusinessExpenses,
     "MyCourses": MyCourses,
     "MyListings": MyListings,
     "MyProfile": MyProfile,
     "MyReferrals": MyReferrals,
     "MyRewards": MyRewards,
     "MySales": MySales,
+    "MyTickets": MyTickets,
     "OperatorPackages": OperatorPackages,
     "Operators": Operators,
     "Pipeline": Pipeline,
@@ -126,10 +130,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "MyTickets": MyTickets,
-    "AdminTickets": AdminTickets,
-    "MyBusinessExpenses": MyBusinessExpenses,
-    "IncomeTracker": IncomeTracker,
 }
 
 export const pagesConfig = {
