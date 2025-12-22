@@ -195,6 +195,16 @@ export default function AdminPackages() {
                                     + ${pkgData.per_item_price} per sale listing
                                   </div>
                                 )}
+                                {pkgData.per_lead_price !== undefined && pkgData.per_lead_price !== null && (
+                                  <div className="text-sm text-slate-600 mt-1">
+                                    + ${pkgData.per_lead_price} per lead
+                                  </div>
+                                )}
+                                {pkgData.referral_fee_percentage && (
+                                  <div className="text-sm text-slate-600 mt-1">
+                                    + {pkgData.referral_fee_percentage}% referral fee per closed client
+                                  </div>
+                                )}
                                 {pkgData.annual_price && (
                                   <div className="mt-2 text-sm text-slate-600">
                                     ${pkgData.annual_price}/year (save ${(pkgData.monthly_price * 12 - pkgData.annual_price).toFixed(0)})
