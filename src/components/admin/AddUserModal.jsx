@@ -933,6 +933,24 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
                     Open to Joint Ventures / Partnerships
                   </Label>
                 </div>
+
+                <div>
+                  <Label htmlFor="company_logo">Company Logo</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      id="company_logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      disabled={uploadingLogo}
+                      className="flex-1"
+                    />
+                    {uploadingLogo && <span className="text-sm text-gray-500">Uploading...</span>}
+                    {formData.company_logo_url && !uploadingLogo && (
+                      <img src={formData.company_logo_url} alt="Logo preview" className="h-12 w-12 object-contain rounded border" />
+                    )}
+                  </div>
+                </div>
               </div>
             </>
           )}
