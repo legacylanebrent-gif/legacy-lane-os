@@ -88,20 +88,29 @@ export default function TechnologyCostAnalysis({ sale, onCostsCalculated }) {
     return costs;
   };
 
-  const costs = calculateCosts();
+  const costs = React.useMemo(() => calculateCosts(), [sale.views, sale.images?.length]);
   
-  const totalEstimate = Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.estimate) || 0), 0);
-  const totalActual = Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.actual) || 0), 0);
-  const totalScenario = Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.scenario) || 0), 0);
+  const totalEstimate = React.useMemo(() => 
+    Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.estimate) || 0), 0),
+    [costs]
+  );
+  const totalActual = React.useMemo(() => 
+    Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.actual) || 0), 0),
+    [costs]
+  );
+  const totalScenario = React.useMemo(() => 
+    Object.values(costs).reduce((sum, item) => sum + (parseFloat(item.scenario) || 0), 0),
+    [costs]
+  );
 
   const netMargin = (sale.actual_revenue || 0) - totalActual;
 
-  // Notify parent of cost calculations
+  // Notify parent of cost calculations only when values change
   React.useEffect(() => {
     if (onCostsCalculated) {
       onCostsCalculated({ actual: totalActual, scenario: totalScenario });
     }
-  }, [totalActual, totalScenario, onCostsCalculated]);
+  }, [totalActual, totalScenario]);
 
   return (
     <div className="border-t pt-4 mt-4">

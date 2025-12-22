@@ -571,9 +571,14 @@ export default function AdminEstateSales() {
 
                 <TechnologyCostAnalysis 
                   sale={sale} 
-                  onCostsCalculated={(costs) => {
-                    setSaleTechCosts(prev => ({ ...prev, [sale.id]: costs }));
-                  }}
+                  onCostsCalculated={React.useCallback((costs) => {
+                    setSaleTechCosts(prev => {
+                      if (prev[sale.id]?.actual === costs.actual && prev[sale.id]?.scenario === costs.scenario) {
+                        return prev;
+                      }
+                      return { ...prev, [sale.id]: costs };
+                    });
+                  }, [sale.id])}
                 />
                 <ProfitAnalysis 
                   sale={sale} 
