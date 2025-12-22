@@ -536,8 +536,8 @@ Only include items with confidence > 0.3. If no items match well, return an empt
         }
       });
 
-      // Only update if this is still the current query
-      if (photoSearchQuery !== currentQuery) {
+      // Only update if the user hasn't typed something else
+      if (currentQuery !== photoSearchQuery) {
         return;
       }
 
