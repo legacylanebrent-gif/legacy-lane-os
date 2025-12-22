@@ -10,8 +10,8 @@ import {
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Profile', path: 'MyProfile', icon: User },
-  { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Business Expenses', path: 'MyBusinessExpenses', icon: FileText },
+  { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
   { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
