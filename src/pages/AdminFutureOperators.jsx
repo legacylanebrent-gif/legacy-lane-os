@@ -42,7 +42,7 @@ export default function AdminFutureOperators() {
 
   const loadTotalCount = async () => {
     try {
-      const allData = await base44.entities.FutureEstateOperator.list('-created_date', 10000);
+      const allData = await base44.entities.FutureEstateOperator.list('-created_date', 50000);
       setTotalCount(allData.length);
     } catch (error) {
       console.error('Error loading total count:', error);
@@ -52,18 +52,12 @@ export default function AdminFutureOperators() {
   const loadOperators = async () => {
     setLoading(true);
     try {
-      let data;
-      if (stateFilter === 'all') {
-        // Load only a small subset when viewing all
-        data = await base44.entities.FutureEstateOperator.list('-created_date', 100);
-      } else {
-        // Filter by state on the server
-        data = await base44.entities.FutureEstateOperator.filter(
-          { state: stateFilter },
-          '-created_date',
-          1000
-        );
-      }
+      // Filter by state on the server
+      const data = await base44.entities.FutureEstateOperator.filter(
+        { state: stateFilter },
+        '-created_date',
+        1000
+      );
       setOperators(data);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -100,10 +94,6 @@ export default function AdminFutureOperators() {
   };
 
   const handleImportCompanies = async () => {
-    if (!stateFilter || stateFilter === 'all') {
-      alert('Please select a specific state to import companies');
-      return;
-    }
 
     const functionName = `scrape${stateFilter}Operators`;
     
@@ -190,7 +180,6 @@ export default function AdminFutureOperators() {
                   <SelectValue placeholder="All States" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px] overflow-y-auto">
-                  <SelectItem value="all">All States</SelectItem>
                   {allStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -209,27 +198,24 @@ export default function AdminFutureOperators() {
                 </SelectContent>
               </Select>
               
-              {stateFilter !== 'all' && (
-                <Button 
-                  onClick={handleImportCompanies}
-                  disabled={importing}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  {importing ? 'Importing...' : 'Import and Update Companies'}
-                </Button>
-              )}
+              <Button 
+                onClick={handleImportCompanies}
+                disabled={importing}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {importing ? 'Importing...' : 'Import and Update Companies'}
+              </Button>
               
-              {(stateFilter !== 'all' || packageFilter !== 'all') && (
+              {packageFilter !== 'all' && (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => {
-                    setStateFilter('all');
                     setPackageFilter('all');
                   }}
                 >
-                  Clear Filters
+                  Clear Filter
                 </Button>
               )}
             </div>
