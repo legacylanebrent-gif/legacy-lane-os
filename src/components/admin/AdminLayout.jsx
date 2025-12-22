@@ -9,13 +9,13 @@ import {
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
   { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
   { label: 'Leads', path: 'AdminLeads', icon: Award },
   { label: 'Users', path: 'AdminUsers', icon: Users },
-  { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
