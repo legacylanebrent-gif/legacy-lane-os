@@ -9,8 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { start_index = 0, cities_per_batch = 5 } = await req.json().catch(() => ({}));
+
     const stateUrl = 'https://www.estatesales.net/companies/GA';
-    console.log(`Fetching state page: ${stateUrl}`);
+    console.log(`Fetching state page: ${stateUrl} (batch starting at city ${start_index})`);
     
     const stateResponse = await fetch(stateUrl);
     const stateHtml = await stateResponse.text();
@@ -27,8 +29,14 @@ Deno.serve(async (req) => {
     const allCompanies = [];
     const BATCH_SIZE = 10;
 
+    // Process cities in batches
+    const citiesToProcess = uniqueCityLinks.slice(start_index, start_index + cities_per_batch);
+    const hasMore = start_index + cities_per_batch < uniqueCityLinks.length;
+    
+    console.log(`Processing cities ${start_index + 1}-${start_index + citiesToProcess.length} of ${uniqueCityLinks.length}`);
+
     // Process each city
-    for (const cityUrl of uniqueCityLinks) {
+    for (const cityUrl of citiesToProcess) {
       try {
         console.log(`Fetching city: ${cityUrl}`);
         const cityResponse = await fetch(cityUrl);
@@ -125,7 +133,12 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true,
       total_companies: allCompanies.length,
-      companies: allCompanies
+      companies: allCompanies,
+      total_cities: uniqueCityLinks.length,
+      processed_cities: citiesToProcess.length,
+      start_index: start_index,
+      next_start_index: hasMore ? start_index + cities_per_batch : null,
+      has_more: hasMore
     });
     
   } catch (error) {
