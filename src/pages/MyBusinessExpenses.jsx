@@ -860,7 +860,7 @@ export default function MyBusinessExpenses() {
 
       {/* Add Mileage Modal */}
       <Dialog open={showMileageModal} onOpenChange={setShowMileageModal}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">
               <Car className="w-6 h-6 text-blue-600" />
