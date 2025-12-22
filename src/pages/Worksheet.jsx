@@ -592,19 +592,27 @@ Only include items with confidence > 0.3. If no items match well, return an empt
     setPhotoSearchQuery('');
   };
 
-  const searchOfferPhotosByName = async (query) => {
+  const offerSearchRequestId = React.useRef(0);
+
+  const handleOfferPhotoSearch = async (query) => {
+    setOfferPhotoQuery(query);
+    setOfferPhotoSuggestions([]);
+    
     if (!query || query.length < 2) {
-      setOfferPhotoSuggestions([]);
+      setSearchingOfferPhotos(false);
       return;
     }
 
+    const requestId = ++offerSearchRequestId.current;
     setSearchingOfferPhotos(true);
+    
     try {
       const images = sale.images || [];
       
       if (images.length === 0) {
-        setOfferPhotoSuggestions([]);
-        setSearchingOfferPhotos(false);
+        if (offerSearchRequestId.current === requestId) {
+          setSearchingOfferPhotos(false);
+        }
         return;
       }
 
@@ -646,6 +654,10 @@ Only include items with confidence > 0.3. If no items match well, return an empt
         }
       });
 
+      if (offerSearchRequestId.current !== requestId) {
+        return;
+      }
+
       const matches = result?.matches || [];
       
       const suggestions = matches.map(match => {
@@ -662,15 +674,14 @@ Only include items with confidence > 0.3. If no items match well, return an empt
       setOfferPhotoSuggestions(suggestions);
     } catch (error) {
       console.error('Error searching photos:', error);
-      setOfferPhotoSuggestions([]);
+      if (offerSearchRequestId.current === requestId) {
+        setOfferPhotoSuggestions([]);
+      }
     } finally {
-      setSearchingOfferPhotos(false);
+      if (offerSearchRequestId.current === requestId) {
+        setSearchingOfferPhotos(false);
+      }
     }
-  };
-
-  const handleOfferPhotoSearch = (query) => {
-    setOfferPhotoQuery(query);
-    searchOfferPhotosByName(query);
   };
 
   const selectOfferPhotoItem = (suggestion) => {
