@@ -74,9 +74,9 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
       };
 
       if (pkg?.id) {
-        await base44.asServiceRole.entities.SubscriptionPackage.update(pkg.id, data);
+        await base44.entities.SubscriptionPackage.update(pkg.id, data);
       } else {
-        await base44.asServiceRole.entities.SubscriptionPackage.create(data);
+        await base44.entities.SubscriptionPackage.create(data);
       }
 
       onSuccess();
