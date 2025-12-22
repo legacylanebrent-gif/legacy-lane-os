@@ -126,10 +126,10 @@ export default function IncomeTracker() {
           return {
             id: `auto-sale-${sale.id}`,
             income_date: sale.sale_dates?.[0]?.date || sale.created_date,
-            source: sale.title,
+            source: address ? `${sale.title}\n${address}` : sale.title,
             amount: saleIncomeMap[sale.id],
             category: 'estate_sale',
-            description: address ? `${address}\nCommission from estate sale worksheet` : `Commission from estate sale worksheet`,
+            description: `Commission from estate sale worksheet`,
             reference_id: sale.id,
             is_automated: true
           };
@@ -656,7 +656,7 @@ export default function IncomeTracker() {
                     <tr key={inc.id || idx} className="border-b hover:bg-slate-50">
                       <td className="p-3 text-sm">{format(new Date(inc.income_date), 'MMM d, yyyy')}</td>
                       <td className="p-3">
-                        <div className="font-medium text-slate-900">{inc.source}</div>
+                        <div className="font-medium text-slate-900 whitespace-pre-line">{inc.source}</div>
                         {inc.description && (
                           <div className="text-xs text-slate-500">{inc.description}</div>
                         )}
