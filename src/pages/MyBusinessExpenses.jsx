@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, Upload, DollarSign, TrendingUp, Calendar, Download, 
-  FileText, Repeat, Receipt, X, Filter
+  FileText, Repeat, Receipt, X, Filter, Car
 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
@@ -47,6 +47,7 @@ export default function MyBusinessExpenses() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [showMileageModal, setShowMileageModal] = useState(false);
   const [dateFilter, setDateFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
@@ -72,6 +73,16 @@ export default function MyBusinessExpenses() {
     category: 'software_subscriptions',
     recurring_frequency: 'monthly',
     description: ''
+  });
+
+  const [mileageData, setMileageData] = useState({
+    expense_date: new Date().toISOString().split('T')[0],
+    starting_location: '',
+    ending_location: '',
+    miles_driven: '',
+    rate_per_mile: '0.67',
+    purpose: '',
+    round_trip: false
   });
 
   const [newTag, setNewTag] = useState('');
@@ -236,6 +247,44 @@ export default function MyBusinessExpenses() {
     }
   };
 
+  const handleAddMileage = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const miles = parseFloat(mileageData.miles_driven) * (mileageData.round_trip ? 2 : 1);
+      const totalAmount = miles * parseFloat(mileageData.rate_per_mile);
+
+      await base44.entities.BusinessExpense.create({
+        expense_date: mileageData.expense_date,
+        vendor_name: 'Vehicle Mileage',
+        amount: totalAmount,
+        category: 'auto_expenses',
+        description: `${mileageData.starting_location} → ${mileageData.ending_location}\n${miles} miles @ $${mileageData.rate_per_mile}/mile\nPurpose: ${mileageData.purpose}`,
+        payment_method: 'cash',
+        tax_deductible: true,
+        tags: ['mileage', mileageData.round_trip ? 'round-trip' : 'one-way']
+      });
+
+      setShowMileageModal(false);
+      setMileageData({
+        expense_date: new Date().toISOString().split('T')[0],
+        starting_location: '',
+        ending_location: '',
+        miles_driven: '',
+        rate_per_mile: '0.67',
+        purpose: '',
+        round_trip: false
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error adding mileage:', error);
+      alert('Failed to add mileage');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       expense_date: new Date().toISOString().split('T')[0],
@@ -350,6 +399,14 @@ export default function MyBusinessExpenses() {
           >
             <Receipt className="w-4 h-4 mr-2" />
             Scan Receipt
+          </Button>
+          <Button
+            onClick={() => setShowMileageModal(true)}
+            variant="outline"
+            className="border-blue-600 text-blue-700 hover:bg-blue-50"
+          >
+            <Car className="w-4 h-4 mr-2" />
+            Add Mileage
           </Button>
           <Button
             onClick={() => setShowRecurringModal(true)}
@@ -739,6 +796,123 @@ export default function MyBusinessExpenses() {
             <div className="flex gap-3 justify-end pt-4 border-t">
               <Button type="button" variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
               <Button type="submit" className="bg-orange-600 hover:bg-orange-700">Add Expense</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Mileage Modal */}
+      <Dialog open={showMileageModal} onOpenChange={setShowMileageModal}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Car className="w-6 h-6 text-blue-600" />
+              Add Mileage
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleAddMileage} className="space-y-4 mt-4">
+            <div>
+              <Label>Date *</Label>
+              <Input
+                type="date"
+                value={mileageData.expense_date}
+                onChange={(e) => setMileageData({ ...mileageData, expense_date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Starting Location *</Label>
+                <Input
+                  value={mileageData.starting_location}
+                  onChange={(e) => setMileageData({ ...mileageData, starting_location: e.target.value })}
+                  placeholder="e.g., Home, Office"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Ending Location *</Label>
+                <Input
+                  value={mileageData.ending_location}
+                  onChange={(e) => setMileageData({ ...mileageData, ending_location: e.target.value })}
+                  placeholder="e.g., Client Site"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Miles Driven *</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={mileageData.miles_driven}
+                  onChange={(e) => setMileageData({ ...mileageData, miles_driven: e.target.value })}
+                  placeholder="0.0"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Rate per Mile *</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={mileageData.rate_per_mile}
+                  onChange={(e) => setMileageData({ ...mileageData, rate_per_mile: e.target.value })}
+                  placeholder="0.67"
+                  required
+                />
+                <p className="text-xs text-slate-500 mt-1">2024 IRS rate: $0.67/mile</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="round_trip"
+                checked={mileageData.round_trip}
+                onChange={(e) => setMileageData({ ...mileageData, round_trip: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="round_trip" className="cursor-pointer">
+                Round Trip (doubles mileage)
+              </Label>
+            </div>
+
+            <div>
+              <Label>Purpose *</Label>
+              <Textarea
+                value={mileageData.purpose}
+                onChange={(e) => setMileageData({ ...mileageData, purpose: e.target.value })}
+                placeholder="Business purpose of this trip..."
+                rows={3}
+                required
+              />
+            </div>
+
+            {mileageData.miles_driven && mileageData.rate_per_mile && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">Total Deduction:</span>
+                  <span className="text-2xl font-bold text-blue-700">
+                    ${(parseFloat(mileageData.miles_driven) * (mileageData.round_trip ? 2 : 1) * parseFloat(mileageData.rate_per_mile)).toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1">
+                  {(parseFloat(mileageData.miles_driven) * (mileageData.round_trip ? 2 : 1)).toFixed(1)} miles @ ${mileageData.rate_per_mile}/mile
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => setShowMileageModal(false)}>Cancel</Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                <Car className="w-4 h-4 mr-2" />
+                Add Mileage
+              </Button>
             </div>
           </form>
         </DialogContent>
