@@ -29,6 +29,20 @@ const INCOME_CATEGORY_OPTIONS = [
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#ef4444', '#f59e0b', '#06b6d4', '#ec4899'];
 
+// State income tax rates (2024 - flat or average rate for simplicity)
+const STATE_TAX_RATES = {
+  'AL': 0.05, 'AK': 0, 'AZ': 0.045, 'AR': 0.055, 'CA': 0.093,
+  'CO': 0.044, 'CT': 0.0699, 'DE': 0.066, 'FL': 0, 'GA': 0.0575,
+  'HI': 0.11, 'ID': 0.058, 'IL': 0.0495, 'IN': 0.0323, 'IA': 0.06,
+  'KS': 0.057, 'KY': 0.05, 'LA': 0.0425, 'ME': 0.0715, 'MD': 0.0575,
+  'MA': 0.05, 'MI': 0.0425, 'MN': 0.0985, 'MS': 0.05, 'MO': 0.054,
+  'MT': 0.0675, 'NE': 0.0684, 'NV': 0, 'NH': 0, 'NJ': 0.1075,
+  'NM': 0.059, 'NY': 0.109, 'NC': 0.0475, 'ND': 0.029, 'OH': 0.0399,
+  'OK': 0.05, 'OR': 0.099, 'PA': 0.0307, 'RI': 0.0599, 'SC': 0.07,
+  'SD': 0, 'TN': 0, 'TX': 0, 'UT': 0.0485, 'VT': 0.0875, 'VA': 0.0575,
+  'WA': 0, 'WV': 0.065, 'WI': 0.0765, 'WY': 0
+};
+
 // Tax brackets for 2024 (simplified for self-employed)
 const TAX_RATES = {
   federal: [
@@ -40,8 +54,7 @@ const TAX_RATES = {
     { min: 243725, max: 609350, rate: 0.35 },
     { min: 609350, max: Infinity, rate: 0.37 }
   ],
-  selfEmployment: 0.153, // 15.3% for Social Security and Medicare
-  estimatedState: 0.05 // Average state tax, can be adjusted
+  selfEmployment: 0.153 // 15.3% for Social Security and Medicare
 };
 
 export default function IncomeTracker() {
@@ -246,8 +259,21 @@ export default function IncomeTracker() {
       if (remainingIncome <= 0) break;
     }
 
-    // Estimated state tax
-    const stateTax = netIncome * TAX_RATES.estimatedState;
+    // Get state tax rate from user's business address
+    let stateRate = 0.05; // Default 5% if state not found
+    let userState = 'Unknown';
+    
+    if (currentUser?.business_address) {
+      // Try to extract state from business_address string
+      const stateMatch = currentUser.business_address.match(/\b([A-Z]{2})\b/);
+      if (stateMatch) {
+        userState = stateMatch[1];
+        stateRate = STATE_TAX_RATES[userState] || 0.05;
+      }
+    }
+
+    // Calculate state tax
+    const stateTax = netIncome * stateRate;
 
     const totalTax = selfEmploymentTax + federalTax + stateTax;
 
@@ -259,7 +285,9 @@ export default function IncomeTracker() {
       federalTax,
       stateTax,
       totalTax,
-      effectiveRate: netIncome > 0 ? (totalTax / netIncome) * 100 : 0
+      effectiveRate: netIncome > 0 ? (totalTax / netIncome) * 100 : 0,
+      userState,
+      stateRate
     };
   };
 
@@ -417,7 +445,9 @@ export default function IncomeTracker() {
                 <span className="font-bold text-slate-900">${taxes.federalTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-white rounded-lg">
-                <span className="text-sm font-medium text-slate-700">State Tax (Est. 5%)</span>
+                <span className="text-sm font-medium text-slate-700">
+                  State Tax ({taxes.userState} - {(taxes.stateRate * 100).toFixed(1)}%)
+                </span>
                 <span className="font-bold text-slate-900">${taxes.stateTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
