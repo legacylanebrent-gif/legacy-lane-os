@@ -58,10 +58,12 @@ export default function ComprehensiveRevenue() {
   const [referralsPerOperatorPerYear, setReferralsPerOperatorPerYear] = useState(() => loadValue('referralsPerOperatorPerYear', 1));
 
   // Premium Placement Inputs
-  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 299));
-  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 99));
+  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 179));
+  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 97));
   const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
-  const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
+  const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 5));
+  const [nationalFeaturePercentOperators, setNationalFeaturePercentOperators] = useState(() => loadValue('nationalFeaturePercentOperators', 1));
+  const [localFeaturePercentOperators, setLocalFeaturePercentOperators] = useState(() => loadValue('localFeaturePercentOperators', 20));
   
   // Advertising Revenue Inputs
   const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 500));
@@ -82,7 +84,7 @@ export default function ComprehensiveRevenue() {
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
-      nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
+      nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturePercentOperators, localFeaturePercentOperators,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
     };
     
@@ -95,7 +97,7 @@ export default function ComprehensiveRevenue() {
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
-    nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
+    nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturePercentOperators, localFeaturePercentOperators,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
   ]);
 
@@ -242,7 +244,11 @@ export default function ComprehensiveRevenue() {
   const calculatedReferralsPerMonth = (totalOperators * 0.10 * referralsPerOperatorPerYear) / 12;
   const referralProjections = calculateProjections(calculatedReferralsPerMonth * avgReferralFee, referralGrowth, 120);
   
-  const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
+  // Calculate features based on operator percentages: 1% national, 20% local per year
+  const nationalFeaturesPerMonth = (totalOperators * (nationalFeaturePercentOperators / 100)) / 12;
+  const localFeaturesPerMonth = (totalOperators * (localFeaturePercentOperators / 100)) / 12;
+  const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
+  const featureProjections = calculateProjections(totalFeatureRevenuePerMonth, featureGrowth, 120);
   
   const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
   const adProjections = adData.projections;
@@ -829,7 +835,19 @@ export default function ComprehensiveRevenue() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                  </div>
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>National Features/Month:</strong> {totalOperators.toLocaleString()} operators × {nationalFeaturePercentOperators}% ÷ 12 months = {nationalFeaturesPerMonth.toFixed(1)} national/month
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Local Features/Month:</strong> {totalOperators.toLocaleString()} operators × {localFeaturePercentOperators}% ÷ 12 months = {localFeaturesPerMonth.toFixed(1)} local/month
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                   <div>
                     <Label>National Feature Price ($)</Label>
                     <Input type="number" value={nationalFeaturePrice} onChange={(e) => setNationalFeaturePrice(Number(e.target.value))} />
@@ -839,8 +857,12 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Features Per Month</Label>
-                    <Input type="number" value={featuresPerMonth} onChange={(e) => setFeaturesPerMonth(Number(e.target.value))} />
+                    <Label>National % of Operators/Year</Label>
+                    <Input type="number" value={nationalFeaturePercentOperators} onChange={(e) => setNationalFeaturePercentOperators(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Local % of Operators/Year</Label>
+                    <Input type="number" value={localFeaturePercentOperators} onChange={(e) => setLocalFeaturePercentOperators(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
