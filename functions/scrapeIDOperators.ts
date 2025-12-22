@@ -9,25 +9,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Idaho regions
-    const idRegions = [
-      'https://www.estatesales.net/companies/ID/Boise',
-      'https://www.estatesales.net/companies/ID/Coeur-d-Alene',
-      'https://www.estatesales.net/companies/ID/Idaho-Falls',
-      'https://www.estatesales.net/companies/ID/Lewiston',
-      'https://www.estatesales.net/companies/ID/Meridian',
-      'https://www.estatesales.net/companies/ID/Nampa',
-      'https://www.estatesales.net/companies/ID/Pocatello',
-      'https://www.estatesales.net/companies/ID/Twin-Falls'
-    ];
-
-    console.log(`Processing ${idRegions.length} ID regions`);
+    // Fetch the main ID page to get all cities dynamically
+    console.log('Fetching main ID page to extract cities...');
+    const mainPageResponse = await fetch('https://www.estatesales.net/companies/ID');
+    const mainPageHtml = await mainPageResponse.text();
+    
+    // Extract all city links
+    const cityLinkRegex = /href="(\/companies\/ID\/[^"]+)"/g;
+    const cityLinks = [...mainPageHtml.matchAll(cityLinkRegex)]
+      .map(m => `https://www.estatesales.net${m[1]}`)
+      .filter((url, idx, arr) => arr.indexOf(url) === idx); // unique only
+    
+    console.log(`Found ${cityLinks.length} ID cities to process`);
     
     const allCompanies = [];
     const BATCH_SIZE = 10;
 
-    // Process each region
-    for (const regionUrl of idRegions) {
+    // Process each city
+    for (const regionUrl of cityLinks) {
       try {
         console.log(`Fetching region: ${regionUrl}`);
         const regionResponse = await fetch(regionUrl);
