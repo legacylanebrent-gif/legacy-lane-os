@@ -6,16 +6,10 @@ import { base44 } from '@/api/base44Client';
 export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }) {
   const [expanded, setExpanded] = useState(false);
 
-  console.log('ProfitAnalysis - sale.operator_id:', sale.operator_id);
-  console.log('ProfitAnalysis - operatorSubscription:', operatorSubscription);
-
   // Revenue Calculations - handle both direct and nested data structure
   const subData = operatorSubscription?.data || operatorSubscription;
   const monthlySubscription = subData?.price || 0;
   const planType = subData?.plan_type || 'Unknown';
-  
-  console.log('ProfitAnalysis - subData:', subData);
-  console.log('ProfitAnalysis - monthlySubscription:', monthlySubscription);
   const nationalFeatureRevenue = sale.national_featured_price || 0;
   const localFeatureRevenue = sale.local_featured_price || 0;
   const emailCampaignRevenue = sale.email_campaign_price || 0;
@@ -76,6 +70,24 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
             {/* Revenue */}
             <div className="p-3 bg-green-50 border-t">
               <div className="font-semibold text-sm text-slate-900">Revenue Sources</div>
+            </div>
+
+            <div className="p-3 text-xs bg-blue-50 border-b">
+              <div className="font-mono">
+                <div>Operator ID: {sale.operator_id || 'NONE'}</div>
+                <div>Operator Name: {sale.operator_name || 'NONE'}</div>
+                <div>Subscription Object: {operatorSubscription ? 'EXISTS' : 'NULL'}</div>
+                {operatorSubscription && (
+                  <>
+                    <div>Sub.data exists: {operatorSubscription.data ? 'YES' : 'NO'}</div>
+                    <div>Sub.data.price: {operatorSubscription.data?.price || 'NONE'}</div>
+                    <div>Sub.data.user_id: {operatorSubscription.data?.user_id || 'NONE'}</div>
+                    <div>Sub.price: {operatorSubscription.price || 'NONE'}</div>
+                    <div>Sub.user_id: {operatorSubscription.user_id || 'NONE'}</div>
+                    <div>Calculated monthlySubscription: ${monthlySubscription}</div>
+                  </>
+                )}
+              </div>
             </div>
 
             {!sale.operator_id && (

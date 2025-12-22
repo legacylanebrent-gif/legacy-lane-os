@@ -53,18 +53,14 @@ export default function AdminEstateSales() {
           status: 'active'
         });
 
-        console.log('ALL SUBSCRIPTIONS:', allSubs);
-
         const subscriptionsMap = {};
         allSubs.forEach(sub => {
           const userId = sub.data?.user_id || sub.user_id;
-          console.log('Processing subscription - userId:', userId, 'sub:', sub);
           if (userId) {
             subscriptionsMap[userId] = sub;
           }
         });
 
-        console.log('FINAL SUBSCRIPTIONS MAP:', subscriptionsMap);
         setOperatorSubscriptions(subscriptionsMap);
       } catch (error) {
         console.error('Error loading subscriptions:', error);
