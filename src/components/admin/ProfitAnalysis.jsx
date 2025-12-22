@@ -41,7 +41,14 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     }
   };
 
-  const totalRevenue = 0;
+  // Revenue Calculations
+  const monthlySubscription = operatorSubscription?.price || 0;
+  const nationalFeatureRevenue = sale.national_featured_price || 0;
+  const localFeatureRevenue = sale.local_featured_price || 0;
+  const emailCampaignRevenue = sale.email_campaign_price || 0;
+  const smsCampaignRevenue = sale.sms_campaign_price || 0;
+  
+  const totalRevenue = monthlySubscription + nationalFeatureRevenue + localFeatureRevenue + emailCampaignRevenue + smsCampaignRevenue;
   
   // Tech costs from the other component
   const actualTechCost = techCosts.actual || 0;
@@ -93,6 +100,87 @@ export default function ProfitAnalysis({ sale, techCosts }) {
       {expanded && (
         <div className="mt-3 space-y-3">
           <div className="bg-white rounded-lg border border-slate-200">
+            {/* Revenue */}
+            <div className="p-3 bg-green-50 border-t">
+              <div className="font-semibold text-sm text-slate-900">Revenue Sources</div>
+            </div>
+
+            {operatorSubscription && (
+              <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
+                <div className="text-slate-700">Monthly Subscription</div>
+                <div className="text-right">
+                  <div className="text-green-600 font-semibold">${monthlySubscription.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">{operatorSubscription.plan_type}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-green-600">${monthlySubscription.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">Recurring</div>
+                </div>
+              </div>
+            )}
+
+            {nationalFeatureRevenue > 0 && (
+              <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
+                <div className="text-slate-700">National Featured</div>
+                <div className="text-right">
+                  <div className="text-green-600 font-semibold">${nationalFeatureRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">One-time</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-green-600">${nationalFeatureRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">Add-on</div>
+                </div>
+              </div>
+            )}
+
+            {localFeatureRevenue > 0 && (
+              <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
+                <div className="text-slate-700">Local Featured</div>
+                <div className="text-right">
+                  <div className="text-green-600 font-semibold">${localFeatureRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">One-time</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-green-600">${localFeatureRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">Add-on</div>
+                </div>
+              </div>
+            )}
+
+            {emailCampaignRevenue > 0 && (
+              <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
+                <div className="text-slate-700">Email Campaign</div>
+                <div className="text-right">
+                  <div className="text-green-600 font-semibold">${emailCampaignRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">One-time</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-green-600">${emailCampaignRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">Add-on</div>
+                </div>
+              </div>
+            )}
+
+            {smsCampaignRevenue > 0 && (
+              <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
+                <div className="text-slate-700">SMS Campaign</div>
+                <div className="text-right">
+                  <div className="text-green-600 font-semibold">${smsCampaignRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">One-time</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-green-600">${smsCampaignRevenue.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">Add-on</div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-3 gap-2 p-3 bg-green-50 font-bold text-sm border-b">
+              <div className="text-slate-900">Total Revenue</div>
+              <div className="text-right text-green-700">${totalRevenue.toFixed(2)}</div>
+              <div className="text-right text-green-700">${totalRevenue.toFixed(2)}</div>
+            </div>
+
             {/* Costs */}
             <div className="p-3 bg-red-50 border-t">
               <div className="font-semibold text-sm text-slate-900">Costs</div>
