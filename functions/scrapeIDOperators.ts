@@ -32,11 +32,11 @@ Deno.serve(async (req) => {
         const regionResponse = await fetch(regionUrl);
         const regionHtml = await regionResponse.text();
 
-        // Match company profile URLs - looking for links to company pages
-        // Pattern: href="/companies/ID/CityName/ZIP/CompanyID"
-        const companyLinkRegex = /href="(\/companies\/ID\/[^"]+\/\d{5}\/\d+)"/g;
-        const relativeLinks = [...regionHtml.matchAll(companyLinkRegex)].map(m => m[1]);
-        const uniqueCompanyLinks = [...new Set(relativeLinks)].map(link => `https://www.estatesales.net${link}`);
+        // Match company profile URLs - broader pattern to catch all variations
+        // Pattern matches: /companies/ID/anything/5-digit-zip/numbers
+        const companyLinkRegex = /href="\/companies\/ID\/([^/]+)\/(\d{5})\/(\d+)"/g;
+        const matches = [...regionHtml.matchAll(companyLinkRegex)];
+        const uniqueCompanyLinks = [...new Set(matches.map(m => `https://www.estatesales.net/companies/ID/${m[1]}/${m[2]}/${m[3]}`))];
         console.log(`  Found ${uniqueCompanyLinks.length} companies in ${regionUrl}`);
 
         // Process companies in parallel batches
