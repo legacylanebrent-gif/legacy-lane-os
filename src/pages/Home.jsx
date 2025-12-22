@@ -52,9 +52,13 @@ export default function Home() {
       setIsAuthenticated(authenticated);
       
       if (authenticated) {
-        // Redirect logged-in users to their dashboard
-        window.location.href = createPageUrl('Dashboard');
-        return;
+        // Load user data but don't redirect - allow viewing Home page
+        try {
+          const user = await base44.auth.me();
+          setCurrentUser(user);
+        } catch (error) {
+          console.error('Error loading user:', error);
+        }
       }
     } catch (error) {
       console.error('Error checking authentication:', error);
