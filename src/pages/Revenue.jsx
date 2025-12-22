@@ -285,7 +285,7 @@ export default function Revenue() {
             </TabsTrigger>
             <TabsTrigger value="referrals">
               <Award className="w-4 h-4 mr-1" />
-              Referrals
+              Leads & Referrals
             </TabsTrigger>
             <TabsTrigger value="features">
               <Sparkles className="w-4 h-4 mr-1" />
@@ -495,7 +495,7 @@ export default function Revenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-amber-600" />
-                  Referral Fee Calculator
+                  Leads & Referral Fee Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>
