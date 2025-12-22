@@ -229,6 +229,32 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
+                <Link to={createPageUrl('MySales')}>
+                  <Button 
+                    variant={currentPageName === 'MySales' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'MySales' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <Building2 className="w-5 h-5 mr-3" />
+                    My Sales
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('BrowseItems')}>
+                  <Button 
+                    variant={currentPageName === 'BrowseItems' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'BrowseItems' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <ShoppingBag className="w-5 h-5 mr-3" />
+                    Marketplace
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('IncomeTracker')}>
                   <Button 
                     variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
