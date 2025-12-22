@@ -196,9 +196,9 @@ export default function MyProfile() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="sales">My Sales</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          <TabsTrigger value="sales">My Sales</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
