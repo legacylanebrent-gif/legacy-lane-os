@@ -14,25 +14,18 @@ export default function ProfitAnalysis({ sale, techCosts }) {
 
   const loadOperatorSubscription = async () => {
     if (!sale.operator_id) {
-      console.log('No operator_id on sale');
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Fetching subscription for operator:', sale.operator_id);
       const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
         user_id: sale.operator_id,
         status: 'active'
       });
       
-      console.log('Found subscriptions:', subscriptions);
-      
       if (subscriptions.length > 0) {
         setOperatorSubscription(subscriptions[0]);
-        console.log('Using subscription:', subscriptions[0]);
-      } else {
-        console.log('No active subscription found for operator');
       }
     } catch (error) {
       console.error('Error loading operator subscription:', error);
@@ -104,6 +97,18 @@ export default function ProfitAnalysis({ sale, techCosts }) {
             <div className="p-3 bg-green-50 border-t">
               <div className="font-semibold text-sm text-slate-900">Revenue Sources</div>
             </div>
+
+            {!sale.operator_id && (
+              <div className="p-3 text-xs text-amber-600 bg-amber-50 border-b">
+                ⚠️ No operator assigned to this sale. Please assign an operator to see subscription revenue.
+              </div>
+            )}
+
+            {sale.operator_id && !operatorSubscription && !loading && (
+              <div className="p-3 text-xs text-amber-600 bg-amber-50 border-b">
+                ⚠️ No active subscription found for operator {sale.operator_name || sale.operator_id}
+              </div>
+            )}
 
             {operatorSubscription && (
               <div className="grid grid-cols-3 gap-2 p-3 text-xs border-b hover:bg-slate-50">
