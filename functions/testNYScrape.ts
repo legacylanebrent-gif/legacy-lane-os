@@ -18,8 +18,8 @@ Deno.serve(async (req) => {
     
     console.log(`State page HTML length: ${stateHtml.length}`);
     
-    // Extract city/region links (relative format)
-    const cityLinkRegex = /href="(\/companies\/NY\/[^/]+)"/g;
+    // Extract city/region links (relative format) - clean the URLs properly
+    const cityLinkRegex = /href="(\/companies\/NY\/[^"<>]+?)(?:"|<)/g;
     const relativeLinks = [...stateHtml.matchAll(cityLinkRegex)].map(m => m[1]);
     const uniqueCityLinks = [...new Set(relativeLinks)].filter(link => {
       // Exclude company profiles (which have /ZIP/CompanyID)
