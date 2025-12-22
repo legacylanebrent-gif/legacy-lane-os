@@ -17,7 +17,6 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
-  const [selectedDivision, setSelectedDivision] = useState('all');
   const [onboardingFilter, setOnboardingFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -27,7 +26,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     filterUsers();
-  }, [searchQuery, selectedRole, selectedDivision, onboardingFilter, users]);
+  }, [searchQuery, selectedRole, onboardingFilter, users]);
 
   const loadUsers = async () => {
     try {
@@ -71,12 +70,6 @@ export default function AdminUsers() {
       );
     }
 
-    if (selectedDivision !== 'all') {
-      filtered = filtered.filter(user => 
-        user.divisions_access?.includes(selectedDivision)
-      );
-    }
-
     if (onboardingFilter === 'completed') {
       filtered = filtered.filter(user => user.onboarding_completed === true);
     } else if (onboardingFilter === 'pending') {
@@ -89,11 +82,10 @@ export default function AdminUsers() {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedRole('all');
-    setSelectedDivision('all');
     setOnboardingFilter('all');
   };
 
-  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedDivision !== 'all' || onboardingFilter !== 'all';
+  const hasActiveFilters = searchQuery || selectedRole !== 'all' || onboardingFilter !== 'all';
 
   const getRoleBadgeColor = (role) => {
     const colors = {
@@ -137,15 +129,7 @@ export default function AdminUsers() {
     { value: 'consignor', label: 'Consignor' }
   ];
 
-  const divisionOptions = [
-    { value: 'all', label: 'All Divisions' },
-    { value: 'estate_services', label: 'Estate Services' },
-    { value: 'real_estate', label: 'Real Estate' },
-    { value: 'investment', label: 'Investment' },
-    { value: 'marketplace', label: 'Marketplace' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'education', label: 'Education' }
-  ];
+
 
   if (loading) {
     return (
@@ -214,7 +198,7 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -223,22 +207,6 @@ export default function AdminUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   {accountTypeOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-xs text-slate-600 mb-2 block">Division Access</Label>
-              <Select value={selectedDivision} onValueChange={setSelectedDivision}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Divisions" />
-                </SelectTrigger>
-                <SelectContent>
-                  {divisionOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
