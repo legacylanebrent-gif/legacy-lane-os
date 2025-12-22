@@ -17,16 +17,23 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('all');
+  const [subcategories, setSubcategories] = useState([]);
   const [onboardingFilter, setOnboardingFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadUsers();
+    loadSubcategories();
   }, []);
 
   useEffect(() => {
     filterUsers();
-  }, [searchQuery, selectedRole, onboardingFilter, users]);
+  }, [searchQuery, selectedRole, selectedSubcategory, onboardingFilter, users]);
+
+  useEffect(() => {
+    setSelectedSubcategory('all');
+  }, [selectedRole]);
 
   const loadUsers = async () => {
     try {
@@ -45,6 +52,15 @@ export default function AdminUsers() {
       setFilteredUsers([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSubcategories = async () => {
+    try {
+      const data = await base44.entities.AccountSubcategory.list();
+      setSubcategories(data || []);
+    } catch (error) {
+      console.error('Error loading subcategories:', error);
     }
   };
 
@@ -70,6 +86,12 @@ export default function AdminUsers() {
       );
     }
 
+    if (selectedSubcategory !== 'all') {
+      filtered = filtered.filter(user => 
+        user.account_subcategory === selectedSubcategory
+      );
+    }
+
     if (onboardingFilter === 'completed') {
       filtered = filtered.filter(user => user.onboarding_completed === true);
     } else if (onboardingFilter === 'pending') {
@@ -82,10 +104,11 @@ export default function AdminUsers() {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedRole('all');
+    setSelectedSubcategory('all');
     setOnboardingFilter('all');
   };
 
-  const hasActiveFilters = searchQuery || selectedRole !== 'all' || onboardingFilter !== 'all';
+  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedSubcategory !== 'all' || onboardingFilter !== 'all';
 
   const getRoleBadgeColor = (role) => {
     const colors = {
@@ -128,6 +151,10 @@ export default function AdminUsers() {
     { value: 'diy_seller', label: 'DIY Seller' },
     { value: 'consignor', label: 'Consignor' }
   ];
+
+  const filteredSubcategories = selectedRole === 'all' 
+    ? [] 
+    : subcategories.filter(sub => sub.account_type === selectedRole);
 
 
 
@@ -198,7 +225,7 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -209,6 +236,27 @@ export default function AdminUsers() {
                   {accountTypeOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Subcategory</Label>
+              <Select 
+                value={selectedSubcategory} 
+                onValueChange={setSelectedSubcategory}
+                disabled={selectedRole === 'all' || filteredSubcategories.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Subcategories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Subcategories</SelectItem>
+                  {filteredSubcategories.map(sub => (
+                    <SelectItem key={sub.id} value={sub.subcategory_name}>
+                      {sub.subcategory_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
