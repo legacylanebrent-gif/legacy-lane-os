@@ -50,7 +50,7 @@ export default function AdminEstateSales() {
       
       // Fetch all subscriptions and filter for active ones
       try {
-        const allSubs = await base44.asServiceRole.entities.Subscription.list();
+        const allSubs = await base44.entities.Subscription.list();
 
         const subscriptionsMap = {};
         let activeCount = 0;
@@ -228,7 +228,7 @@ export default function AdminEstateSales() {
     if (!confirm('Are you sure you want to delete this estate sale?')) return;
     
     try {
-      await base44.asServiceRole.entities.EstateSale.delete(saleId);
+      await base44.entities.EstateSale.delete(saleId);
       await loadSales();
     } catch (error) {
       console.error('Error deleting estate sale:', error);
