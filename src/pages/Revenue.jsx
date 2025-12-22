@@ -2,238 +2,830 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DollarSign, TrendingUp, Target, Clock, Zap, BarChart3 } from 'lucide-react';
-import RevenueChart from '@/components/financial/RevenueChart';
-import ConversionFunnel from '@/components/financial/ConversionFunnel';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { DollarSign, TrendingUp, Users, ShoppingBag, Award, BookOpen, Briefcase, Megaphone, Sparkles, Package } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+
+const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
 
 export default function Revenue() {
-  const [revenueEvents, setRevenueEvents] = useState([]);
-  const [deals, setDeals] = useState([]);
-  const [campaigns, setCampaigns] = useState([]);
-  const [leads, setLeads] = useState([]);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState('month');
+  const [activeTab, setActiveTab] = useState('subscriptions');
+  
+  // Subscription Revenue Inputs
+  const [subBasicPrice, setSubBasicPrice] = useState(49);
+  const [subProPrice, setSubProPrice] = useState(99);
+  const [subPremiumPrice, setSubPremiumPrice] = useState(199);
+  const [subNewPerMonth, setSubNewPerMonth] = useState(25);
+  const [subChurnRate, setSubChurnRate] = useState(5);
+  
+  // Estate Sale Commission Inputs
+  const [avgEstateSaleValue, setAvgEstateSaleValue] = useState(15000);
+  const [commissionRate, setCommissionRate] = useState(20);
+  const [salesPerMonth, setSalesPerMonth] = useState(10);
+  const [growthRate, setGrowthRate] = useState(15);
+  
+  // Marketplace Transaction Fee Inputs
+  const [avgTransactionValue, setAvgTransactionValue] = useState(250);
+  const [transactionFeePercent, setTransactionFeePercent] = useState(3);
+  const [transactionsPerMonth, setTransactionsPerMonth] = useState(100);
+  const [marketplaceGrowth, setMarketplaceGrowth] = useState(20);
+  
+  // Course Sales Inputs
+  const [avgCoursePrice, setAvgCoursePrice] = useState(199);
+  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(15);
+  const [courseGrowth, setCourseGrowth] = useState(10);
+  
+  // Referral Fee Inputs
+  const [avgReferralFee, setAvgReferralFee] = useState(500);
+  const [referralsPerMonth, setReferralsPerMonth] = useState(8);
+  const [referralGrowth, setReferralGrowth] = useState(12);
+  
+  // Vendor Commission Inputs
+  const [avgVendorDeal, setAvgVendorDeal] = useState(2000);
+  const [vendorCommission, setVendorCommission] = useState(15);
+  const [vendorDealsPerMonth, setVendorDealsPerMonth] = useState(5);
+  const [vendorGrowth, setVendorGrowth] = useState(8);
+  
+  // Premium Placement Inputs
+  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(299);
+  const [localFeaturePrice, setLocalFeaturePrice] = useState(99);
+  const [featuresPerMonth, setFeaturesPerMonth] = useState(12);
+  const [featureGrowth, setFeatureGrowth] = useState(15);
+  
+  // Advertising Revenue Inputs
+  const [avgAdRevenue, setAvgAdRevenue] = useState(3000);
+  const [adGrowth, setAdGrowth] = useState(25);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const userData = await base44.auth.me();
-      setUser(userData);
-
-      const [revenueData, dealData, campaignData, leadData] = await Promise.all([
-        base44.entities.RevenueEvent.filter({ user_id: userData.id }),
-        base44.entities.Deal.filter({ owner_id: userData.id }),
-        base44.entities.Campaign.filter({ creator_id: userData.id }),
-        base44.entities.Lead.filter({ routed_to: userData.id })
-      ]);
-
-      setRevenueEvents(revenueData);
-      setDeals(dealData);
-      setCampaigns(campaignData);
-      setLeads(leadData);
-    } catch (error) {
-      console.error('Error loading financial data:', error);
-    } finally {
-      setLoading(false);
+  const calculateProjections = (monthlyBase, growthPercent, months) => {
+    const projections = [];
+    let current = monthlyBase;
+    for (let i = 0; i < months; i++) {
+      projections.push(current);
+      current = current * (1 + growthPercent / 100);
     }
+    return projections;
   };
 
-  // Calculate metrics
-  const totalRevenue = revenueEvents.reduce((sum, e) => sum + (e.net_amount || 0), 0);
-  const wonDeals = deals.filter(d => d.stage === 'won');
-  const avgDealValue = wonDeals.length > 0 ? wonDeals.reduce((sum, d) => sum + (d.value || 0), 0) / wonDeals.length : 0;
-  
-  const conversionRate = leads.length > 0 ? (wonDeals.length / leads.length) * 100 : 0;
-  
-  const avgCloseTime = wonDeals.length > 0 
-    ? wonDeals.reduce((sum, d) => {
-        if (!d.created_date || !d.actual_close_date) return sum;
-        const days = Math.floor((new Date(d.actual_close_date) - new Date(d.created_date)) / (1000 * 60 * 60 * 24));
-        return sum + days;
-      }, 0) / wonDeals.length
-    : 0;
+  const calculateSubscriptionRevenue = (months) => {
+    const projections = [];
+    let basicSubs = Math.floor(subNewPerMonth * 0.5);
+    let proSubs = Math.floor(subNewPerMonth * 0.3);
+    let premiumSubs = Math.floor(subNewPerMonth * 0.2);
+    
+    for (let i = 0; i < months; i++) {
+      const churnFactor = (1 - subChurnRate / 100);
+      const revenue = (basicSubs * subBasicPrice + proSubs * subProPrice + premiumSubs * subPremiumPrice) * churnFactor;
+      projections.push(revenue);
+      
+      basicSubs = Math.floor(basicSubs * churnFactor + subNewPerMonth * 0.5);
+      proSubs = Math.floor(proSubs * churnFactor + subNewPerMonth * 0.3);
+      premiumSubs = Math.floor(premiumSubs * churnFactor + subNewPerMonth * 0.2);
+    }
+    return projections;
+  };
 
-  const totalCampaignSpent = campaigns.reduce((sum, c) => sum + (c.spent || 0), 0);
-  const costPerLead = leads.length > 0 ? totalCampaignSpent / leads.length : 0;
-  
-  const campaignRevenue = campaigns.reduce((sum, c) => sum + (c.metrics?.revenue || 0), 0);
-  const campaignROI = totalCampaignSpent > 0 ? ((campaignRevenue - totalCampaignSpent) / totalCampaignSpent) * 100 : 0;
+  const getYearProjection = (projections, year) => {
+    const endMonth = year * 12;
+    return projections.slice(0, endMonth).reduce((sum, val) => sum + val, 0);
+  };
+
+  // Calculate all revenue streams
+  const subProjections = calculateSubscriptionRevenue(120);
+  const estateProjections = calculateProjections(salesPerMonth * avgEstateSaleValue * (commissionRate / 100), growthRate, 120);
+  const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
+  const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
+  const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
+  const vendorProjections = calculateProjections(vendorDealsPerMonth * avgVendorDeal * (vendorCommission / 100), vendorGrowth, 120);
+  const featureProjections = calculateProjections(featuresPerMonth * ((nationalFeaturePrice + localFeaturePrice) / 2), featureGrowth, 120);
+  const adProjections = calculateProjections(avgAdRevenue, adGrowth, 120);
+
+  const totalProjections = subProjections.map((_, i) => 
+    subProjections[i] + estateProjections[i] + marketplaceProjections[i] + courseProjections[i] + 
+    referralProjections[i] + vendorProjections[i] + featureProjections[i] + adProjections[i]
+  );
+
+  const chartData = Array.from({ length: 36 }, (_, i) => ({
+    month: `M${i + 1}`,
+    Subscriptions: Math.round(subProjections[i]),
+    'Estate Sales': Math.round(estateProjections[i]),
+    Marketplace: Math.round(marketplaceProjections[i]),
+    Courses: Math.round(courseProjections[i]),
+    Referrals: Math.round(referralProjections[i]),
+    Vendors: Math.round(vendorProjections[i]),
+    Features: Math.round(featureProjections[i]),
+    Advertising: Math.round(adProjections[i]),
+    Total: Math.round(totalProjections[i])
+  }));
+
+  const year3Total = getYearProjection(totalProjections, 3);
+  const year5Total = getYearProjection(totalProjections, 5);
+  const year10Total = getYearProjection(totalProjections, 10);
+
+  const pieData = [
+    { name: 'Subscriptions', value: getYearProjection(subProjections, 3) },
+    { name: 'Estate Sales', value: getYearProjection(estateProjections, 3) },
+    { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
+    { name: 'Courses', value: getYearProjection(courseProjections, 3) },
+    { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
+    { name: 'Vendors', value: getYearProjection(vendorProjections, 3) },
+    { name: 'Features', value: getYearProjection(featureProjections, 3) },
+    { name: 'Advertising', value: getYearProjection(adProjections, 3) },
+  ];
+
+  const yearlyComparisonData = [
+    {
+      year: 'Year 3',
+      Subscriptions: getYearProjection(subProjections, 3),
+      'Estate Sales': getYearProjection(estateProjections, 3),
+      Marketplace: getYearProjection(marketplaceProjections, 3),
+      Courses: getYearProjection(courseProjections, 3),
+      Referrals: getYearProjection(referralProjections, 3),
+      Vendors: getYearProjection(vendorProjections, 3),
+      Features: getYearProjection(featureProjections, 3),
+      Advertising: getYearProjection(adProjections, 3),
+    },
+    {
+      year: 'Year 5',
+      Subscriptions: getYearProjection(subProjections, 5),
+      'Estate Sales': getYearProjection(estateProjections, 5),
+      Marketplace: getYearProjection(marketplaceProjections, 5),
+      Courses: getYearProjection(courseProjections, 5),
+      Referrals: getYearProjection(referralProjections, 5),
+      Vendors: getYearProjection(vendorProjections, 5),
+      Features: getYearProjection(featureProjections, 5),
+      Advertising: getYearProjection(adProjections, 5),
+    },
+    {
+      year: 'Year 10',
+      Subscriptions: getYearProjection(subProjections, 10),
+      'Estate Sales': getYearProjection(estateProjections, 10),
+      Marketplace: getYearProjection(marketplaceProjections, 10),
+      Courses: getYearProjection(courseProjections, 10),
+      Referrals: getYearProjection(referralProjections, 10),
+      Vendors: getYearProjection(vendorProjections, 10),
+      Features: getYearProjection(featureProjections, 10),
+      Advertising: getYearProjection(adProjections, 10),
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
-              Revenue & Performance
-            </h1>
-            <p className="text-slate-600">Track your financial metrics and growth</p>
-          </div>
-          <Select value={timeframe} onValueChange={setTimeframe}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="quarter">This Quarter</SelectItem>
-              <SelectItem value="year">This Year</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="mb-8">
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
+          <p className="text-slate-600">Model your revenue streams with 3, 5, and 10-year projections</p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Total Revenue</CardTitle>
-              <DollarSign className="h-5 w-5 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">${totalRevenue.toLocaleString()}</div>
-              <p className="text-xs text-slate-500 mt-1">{revenueEvents.length} transactions</p>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">3-Year Projection</span>
+                <TrendingUp className="w-5 h-5 opacity-75" />
+              </div>
+              <div className="text-3xl font-bold mb-1">${(year3Total / 1000000).toFixed(2)}M</div>
+              <div className="text-xs opacity-75">Cumulative Revenue</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Conversion Rate</CardTitle>
-              <Target className="h-5 w-5 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">{conversionRate.toFixed(1)}%</div>
-              <p className="text-xs text-slate-500 mt-1">{wonDeals.length} / {leads.length} leads</p>
+          <Card className="bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">5-Year Projection</span>
+                <Sparkles className="w-5 h-5 opacity-75" />
+              </div>
+              <div className="text-3xl font-bold mb-1">${(year5Total / 1000000).toFixed(2)}M</div>
+              <div className="text-xs opacity-75">Cumulative Revenue</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Avg Deal Value</CardTitle>
-              <TrendingUp className="h-5 w-5 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">${avgDealValue.toLocaleString()}</div>
-              <p className="text-xs text-slate-500 mt-1">From {wonDeals.length} closed deals</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Avg Close Time</CardTitle>
-              <Clock className="h-5 w-5 text-amber-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">{Math.round(avgCloseTime)} days</div>
-              <p className="text-xs text-slate-500 mt-1">Average deal lifecycle</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Cost Per Lead</CardTitle>
-              <Zap className="h-5 w-5 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">${costPerLead.toFixed(2)}</div>
-              <p className="text-xs text-slate-500 mt-1">${totalCampaignSpent.toLocaleString()} spent</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Campaign ROI</CardTitle>
-              <BarChart3 className="h-5 w-5 text-indigo-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-navy-900">{campaignROI.toFixed(0)}%</div>
-              <p className="text-xs text-slate-500 mt-1">${campaignRevenue.toLocaleString()} generated</p>
+          <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">10-Year Projection</span>
+                <Award className="w-5 h-5 opacity-75" />
+              </div>
+              <div className="text-3xl font-bold mb-1">${(year10Total / 1000000).toFixed(2)}M</div>
+              <div className="text-xs opacity-75">Cumulative Revenue</div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="revenue">
-          <TabsList>
-            <TabsTrigger value="revenue">Revenue Trends</TabsTrigger>
-            <TabsTrigger value="conversion">Conversion Funnel</TabsTrigger>
-            <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
+        {/* Main Charts */}
+        <Card>
+          <CardHeader>
+            <CardTitle>36-Month Revenue Projection by Stream</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                <Legend />
+                <Area type="monotone" dataKey="Subscriptions" stackId="1" stroke="#0891b2" fill="#0891b2" />
+                <Area type="monotone" dataKey="Estate Sales" stackId="1" stroke="#f97316" fill="#f97316" />
+                <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
+                <Area type="monotone" dataKey="Courses" stackId="1" stroke="#10b981" fill="#10b981" />
+                <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
+                <Area type="monotone" dataKey="Vendors" stackId="1" stroke="#ec4899" fill="#ec4899" />
+                <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
+                <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>3-Year Revenue Mix</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Year Comparison */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cumulative Revenue Comparison</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={yearlyComparisonData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
+                  <Tooltip formatter={(value) => `$${(value / 1000000).toFixed(2)}M`} />
+                  <Bar dataKey="Subscriptions" fill="#0891b2" />
+                  <Bar dataKey="Estate Sales" fill="#f97316" />
+                  <Bar dataKey="Marketplace" fill="#8b5cf6" />
+                  <Bar dataKey="Courses" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Stream Calculators */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2">
+            <TabsTrigger value="subscriptions">
+              <Users className="w-4 h-4 mr-1" />
+              Subscriptions
+            </TabsTrigger>
+            <TabsTrigger value="estate">
+              <Briefcase className="w-4 h-4 mr-1" />
+              Estate Sales
+            </TabsTrigger>
+            <TabsTrigger value="marketplace">
+              <ShoppingBag className="w-4 h-4 mr-1" />
+              Marketplace
+            </TabsTrigger>
+            <TabsTrigger value="courses">
+              <BookOpen className="w-4 h-4 mr-1" />
+              Courses
+            </TabsTrigger>
+            <TabsTrigger value="referrals">
+              <Award className="w-4 h-4 mr-1" />
+              Referrals
+            </TabsTrigger>
+            <TabsTrigger value="vendors">
+              <Package className="w-4 h-4 mr-1" />
+              Vendors
+            </TabsTrigger>
+            <TabsTrigger value="features">
+              <Sparkles className="w-4 h-4 mr-1" />
+              Features
+            </TabsTrigger>
+            <TabsTrigger value="advertising">
+              <Megaphone className="w-4 h-4 mr-1" />
+              Ads
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="revenue" className="mt-6">
+          {/* Subscriptions Tab */}
+          <TabsContent value="subscriptions">
             <Card>
               <CardHeader>
-                <CardTitle>Revenue Over Time</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-cyan-600" />
+                  Subscription Revenue Calculator
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <RevenueChart events={revenueEvents} timeframe={timeframe} />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Basic Plan Price ($)</Label>
+                    <Input type="number" value={subBasicPrice} onChange={(e) => setSubBasicPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Pro Plan Price ($)</Label>
+                    <Input type="number" value={subProPrice} onChange={(e) => setSubProPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Premium Plan Price ($)</Label>
+                    <Input type="number" value={subPremiumPrice} onChange={(e) => setSubPremiumPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>New Subscribers/Month</Label>
+                    <Input type="number" value={subNewPerMonth} onChange={(e) => setSubNewPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Churn Rate (%)</Label>
+                    <Input type="number" value={subChurnRate} onChange={(e) => setSubChurnRate(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(subProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(subProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(subProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Subscriptions" stroke="#0891b2" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="conversion" className="mt-6">
+          {/* Estate Sales Tab */}
+          <TabsContent value="estate">
             <Card>
               <CardHeader>
-                <CardTitle>Lead to Deal Conversion</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-orange-600" />
+                  Estate Sale Commission Calculator
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ConversionFunnel leads={leads} deals={deals} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Estate Sale Value ($)</Label>
+                    <Input type="number" value={avgEstateSaleValue} onChange={(e) => setAvgEstateSaleValue(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Commission Rate (%)</Label>
+                    <Input type="number" value={commissionRate} onChange={(e) => setCommissionRate(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Sales Per Month</Label>
+                    <Input type="number" value={salesPerMonth} onChange={(e) => setSalesPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={growthRate} onChange={(e) => setGrowthRate(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(estateProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(estateProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(estateProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Estate Sales" stroke="#f97316" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="breakdown" className="mt-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue by Monetization Layer</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {Object.entries(
-                      revenueEvents.reduce((acc, e) => {
-                        const layer = e.monetization_layer || e.revenue_type || 'other';
-                        acc[layer] = (acc[layer] || 0) + (e.net_amount || 0);
-                        return acc;
-                      }, {})
-                    )
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([type, amount]) => (
-                      <div key={type} className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600 capitalize">{type.replace(/_/g, ' ')}</span>
-                        <span className="font-semibold text-navy-900">${amount.toLocaleString()}</span>
-                      </div>
-                    ))}
+          {/* Marketplace Tab */}
+          <TabsContent value="marketplace">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-purple-600" />
+                  Marketplace Transaction Fee Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Transaction Value ($)</Label>
+                    <Input type="number" value={avgTransactionValue} onChange={(e) => setAvgTransactionValue(Number(e.target.value))} />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <Label>Transaction Fee (%)</Label>
+                    <Input type="number" value={transactionFeePercent} onChange={(e) => setTransactionFeePercent(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Transactions Per Month</Label>
+                    <Input type="number" value={transactionsPerMonth} onChange={(e) => setTransactionsPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={marketplaceGrowth} onChange={(e) => setMarketplaceGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Transactions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {revenueEvents.slice(0, 5).map(event => (
-                      <div key={event.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div>
-                          <p className="text-sm font-medium text-navy-900 capitalize">
-                            {event.revenue_type?.replace(/_/g, ' ')}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {new Date(event.transaction_date || event.created_date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span className="font-bold text-green-600">+${event.net_amount?.toLocaleString()}</span>
-                      </div>
-                    ))}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(marketplaceProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(marketplaceProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(marketplaceProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Marketplace" stroke="#8b5cf6" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Courses Tab */}
+          <TabsContent value="courses">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-green-600" />
+                  Course Sales Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Course Price ($)</Label>
+                    <Input type="number" value={avgCoursePrice} onChange={(e) => setAvgCoursePrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Sales Per Month</Label>
+                    <Input type="number" value={courseSalesPerMonth} onChange={(e) => setCourseSalesPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={courseGrowth} onChange={(e) => setCourseGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(courseProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(courseProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(courseProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Courses" stroke="#10b981" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Referrals Tab */}
+          <TabsContent value="referrals">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-600" />
+                  Referral Fee Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Referral Fee ($)</Label>
+                    <Input type="number" value={avgReferralFee} onChange={(e) => setAvgReferralFee(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Referrals Per Month</Label>
+                    <Input type="number" value={referralsPerMonth} onChange={(e) => setReferralsPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={referralGrowth} onChange={(e) => setReferralGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(referralProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(referralProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(referralProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Referrals" stroke="#f59e0b" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Vendors Tab */}
+          <TabsContent value="vendors">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-pink-600" />
+                  Vendor Commission Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Vendor Deal ($)</Label>
+                    <Input type="number" value={avgVendorDeal} onChange={(e) => setAvgVendorDeal(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Commission Rate (%)</Label>
+                    <Input type="number" value={vendorCommission} onChange={(e) => setVendorCommission(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Deals Per Month</Label>
+                    <Input type="number" value={vendorDealsPerMonth} onChange={(e) => setVendorDealsPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={vendorGrowth} onChange={(e) => setVendorGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(vendorProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(vendorProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(vendorProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Vendors" stroke="#ec4899" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Features Tab */}
+          <TabsContent value="features">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
+                  Premium Feature Placement Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  <div>
+                    <Label>National Feature Price ($)</Label>
+                    <Input type="number" value={nationalFeaturePrice} onChange={(e) => setNationalFeaturePrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Local Feature Price ($)</Label>
+                    <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Features Per Month</Label>
+                    <Input type="number" value={featuresPerMonth} onChange={(e) => setFeaturesPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={featureGrowth} onChange={(e) => setFeatureGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(featureProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(featureProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(featureProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Features" stroke="#3b82f6" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Advertising Tab */}
+          <TabsContent value="advertising">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-teal-600" />
+                  Advertising Revenue Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <Label>Avg Monthly Ad Revenue ($)</Label>
+                    <Input type="number" value={avgAdRevenue} onChange={(e) => setAvgAdRevenue(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={adGrowth} onChange={(e) => setAdGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(adProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(adProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(adProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.slice(0, 36)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="Advertising" stroke="#14b8a6" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
