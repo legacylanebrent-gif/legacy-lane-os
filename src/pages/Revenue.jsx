@@ -104,6 +104,7 @@ export default function Revenue() {
 
   const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate) => {
     const projections = [];
+    const quantities = [];
     let basicSubs = Math.floor(newPerMonth * 0.5);
     let proSubs = Math.floor(newPerMonth * 0.3);
     let premiumSubs = Math.floor(newPerMonth * 0.2);
@@ -111,26 +112,30 @@ export default function Revenue() {
     for (let i = 0; i < months; i++) {
       const churnFactor = (1 - churnRate / 100);
       const revenue = (basicSubs * basicPrice + proSubs * proPrice + premiumSubs * premiumPrice) * churnFactor;
+      const totalSubs = basicSubs + proSubs + premiumSubs;
       projections.push(revenue);
+      quantities.push(totalSubs);
       
       basicSubs = Math.floor(basicSubs * churnFactor + newPerMonth * 0.5);
       proSubs = Math.floor(proSubs * churnFactor + newPerMonth * 0.3);
       premiumSubs = Math.floor(premiumSubs * churnFactor + newPerMonth * 0.2);
     }
-    return projections;
+    return { projections, quantities };
   };
 
   const calculateSimpleSubRevenue = (price, newPerMonth, churnRate, months) => {
     const projections = [];
+    const quantities = [];
     let subs = newPerMonth;
     
     for (let i = 0; i < months; i++) {
       const churnFactor = (1 - churnRate / 100);
       const revenue = subs * price * churnFactor;
       projections.push(revenue);
+      quantities.push(subs);
       subs = Math.floor(subs * churnFactor + newPerMonth);
     }
-    return projections;
+    return { projections, quantities };
   };
 
   const getYearProjection = (projections, year) => {
@@ -139,14 +144,33 @@ export default function Revenue() {
   };
 
   // Calculate all revenue streams
-  const subProjections = calculateSubscriptionRevenue(120, subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate);
-  const vendorSubProjections = calculateSimpleSubRevenue(vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
-  const agentSubProjections = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
+  const subData = calculateSubscriptionRevenue(120, subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate);
+  const subProjections = subData.projections;
+  const subQuantities = subData.quantities;
+  
+  const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
+  const vendorSubProjections = vendorSubData.projections;
+  const vendorSubQuantities = vendorSubData.quantities;
+  
+  const agentSubData = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
+  const agentSubProjections = agentSubData.projections;
+  const agentSubQuantities = agentSubData.quantities;
+  
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
+  const marketplaceQuantities = calculateProjections(transactionsPerMonth, marketplaceGrowth, 120);
+  
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
+  const courseQuantities = calculateProjections(courseSalesPerMonth, courseGrowth, 120);
+  
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
+  const referralQuantities = calculateProjections(referralsPerMonth, referralGrowth, 120);
+  
   const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
-  const adProjections = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
+  const featureQuantities = calculateProjections(featuresPerMonth, featureGrowth, 120);
+  
+  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
+  const adProjections = adData.projections;
+  const adQuantities = adData.quantities;
 
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
@@ -157,13 +181,21 @@ export default function Revenue() {
   const chartData = Array.from({ length: 36 }, (_, i) => ({
     month: `M${i + 1}`,
     'Operator Subs': Math.round(subProjections[i]),
+    'Operator Subs Qty': Math.round(subQuantities[i]),
     'Vendor Subs': Math.round(vendorSubProjections[i]),
+    'Vendor Subs Qty': Math.round(vendorSubQuantities[i]),
     'Agent Subs': Math.round(agentSubProjections[i]),
+    'Agent Subs Qty': Math.round(agentSubQuantities[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
+    'Marketplace Qty': Math.round(marketplaceQuantities[i]),
     Courses: Math.round(courseProjections[i]),
+    'Courses Qty': Math.round(courseQuantities[i]),
     Referrals: Math.round(referralProjections[i]),
+    'Referrals Qty': Math.round(referralQuantities[i]),
     Features: Math.round(featureProjections[i]),
+    'Features Qty': Math.round(featureQuantities[i]),
     Advertising: Math.round(adProjections[i]),
+    'Advertising Qty': Math.round(adQuantities[i]),
     Total: Math.round(totalProjections[i])
   }));
 
@@ -426,17 +458,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(subProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(subQuantities[35])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(subProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(subQuantities[59])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(subProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(subQuantities[119])} subscribers
                     </div>
                   </div>
                 </div>
@@ -445,10 +486,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Operator Subs" stroke="#8b5cf6" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Operator Subs" name="Revenue" stroke="#8b5cf6" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Operator Subs Qty" name="Subscribers" stroke="#c4b5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -486,17 +529,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(vendorSubProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(vendorSubQuantities[35])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(vendorSubProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(vendorSubQuantities[59])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(vendorSubProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(vendorSubQuantities[119])} subscribers
                     </div>
                   </div>
                 </div>
@@ -505,10 +557,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Vendor Subs" stroke="#a78bfa" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Vendor Subs" name="Revenue" stroke="#a78bfa" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Vendor Subs Qty" name="Subscribers" stroke="#ddd6fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -546,17 +600,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(agentSubProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(agentSubQuantities[35])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(agentSubProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(agentSubQuantities[59])} subscribers
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(agentSubProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(agentSubQuantities[119])} subscribers
                     </div>
                   </div>
                 </div>
@@ -565,10 +628,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Agent Subs" stroke="#c4b5fd" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Agent Subs" name="Revenue" stroke="#c4b5fd" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Agent Subs Qty" name="Subscribers" stroke="#ede9fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -610,17 +675,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(marketplaceProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(marketplaceQuantities, 3)).toLocaleString()} transactions
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(marketplaceProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(marketplaceQuantities, 5)).toLocaleString()} transactions
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(marketplaceProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(marketplaceQuantities, 10)).toLocaleString()} transactions
                     </div>
                   </div>
                 </div>
@@ -629,10 +703,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Marketplace" stroke="#8b5cf6" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Marketplace" name="Revenue" stroke="#10b981" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Marketplace Qty" name="Transactions" stroke="#6ee7b7" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -670,17 +746,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(courseProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(courseQuantities, 3)).toLocaleString()} sales
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(courseProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(courseQuantities, 5)).toLocaleString()} sales
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(courseProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(courseQuantities, 10)).toLocaleString()} sales
                     </div>
                   </div>
                 </div>
@@ -689,10 +774,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Courses" stroke="#10b981" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Courses" name="Revenue" stroke="#0891b2" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Courses Qty" name="Sales" stroke="#67e8f9" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -730,17 +817,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(referralProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(referralQuantities, 3)).toLocaleString()} referrals
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(referralProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(referralQuantities, 5)).toLocaleString()} referrals
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(referralProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(referralQuantities, 10)).toLocaleString()} referrals
                     </div>
                   </div>
                 </div>
@@ -749,10 +845,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Referrals" stroke="#f59e0b" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Referrals" name="Revenue" stroke="#f59e0b" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Referrals Qty" name="Referrals" stroke="#fcd34d" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -794,17 +892,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(featureProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(featureQuantities, 3)).toLocaleString()} features
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(featureProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(featureQuantities, 5)).toLocaleString()} features
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(featureProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(getYearProjection(featureQuantities, 10)).toLocaleString()} features
                     </div>
                   </div>
                 </div>
@@ -813,10 +920,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Features" stroke="#3b82f6" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Features" name="Revenue" stroke="#3b82f6" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Features Qty" name="Features" stroke="#93c5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -862,17 +971,26 @@ export default function Revenue() {
                     <div className="text-2xl font-bold text-cyan-600">
                       ${(getYearProjection(adProjections, 3) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(adQuantities[35])} advertisers
+                    </div>
                   </div>
                   <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
                     <div className="text-2xl font-bold text-purple-600">
                       ${(getYearProjection(adProjections, 5) / 1000000).toFixed(2)}M
                     </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(adQuantities[59])} advertisers
+                    </div>
                   </div>
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(adProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {Math.round(adQuantities[119])} advertisers
                     </div>
                   </div>
                 </div>
@@ -881,10 +999,12 @@ export default function Revenue() {
                   <LineChart data={chartData.slice(0, 36)}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                    <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="Advertising" stroke="#14b8a6" strokeWidth={3} />
+                    <Line yAxisId="left" type="monotone" dataKey="Advertising" name="Revenue" stroke="#14b8a6" strokeWidth={3} />
+                    <Line yAxisId="right" type="monotone" dataKey="Advertising Qty" name="Advertisers" stroke="#5eead4" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
