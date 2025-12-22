@@ -1,30 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, TrendingUp, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { base44 } from '@/api/base44Client';
 
 export default function ProfitAnalysis({ sale, techCosts }) {
   const [expanded, setExpanded] = useState(false);
+  const [operatorSubscription, setOperatorSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadOperatorSubscription();
+  }, [sale.operator_id]);
+
+  const loadOperatorSubscription = async () => {
+    if (!sale.operator_id) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
+        user_id: sale.operator_id,
+        status: 'active'
+      });
+      
+      if (subscriptions.length > 0) {
+        setOperatorSubscription(subscriptions[0]);
+      }
+    } catch (error) {
+      console.error('Error loading operator subscription:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate revenue based on operator subscription
   const calculateRevenue = () => {
-    // Base subscription revenue allocation
-    // Assuming operator has a subscription that covers multiple sales per month
+    // Base subscription revenue allocation per sale
     const subscriptionRevenue = {
-      'Platinum': { price: 179, salesPerMonth: 3, perSale: 59.67 },
-      'Gold': { price: 99, salesPerMonth: 2, perSale: 49.50 },
-      'Silver': { price: 49, salesPerMonth: 1, perSale: 49.00 },
-      'Bronze': { price: 29, salesPerMonth: 1, perSale: 29.00 }
+      'operator_basic': { price: 49, salesPerMonth: 1, name: 'Basic' },
+      'operator_pro': { price: 99, salesPerMonth: 2, name: 'Pro' },
+      'agent_basic': { price: 149, salesPerMonth: 3, name: 'Agent Basic' },
+      'agent_pro': { price: 299, salesPerMonth: 5, name: 'Agent Pro' }
     };
 
-    // Default to Platinum for calculation
-    const packageType = 'Platinum';
-    const subscription = subscriptionRevenue[packageType];
+    // Use actual operator subscription or default
+    let packageType, subscription;
+    
+    if (operatorSubscription) {
+      const planType = operatorSubscription.plan_type;
+      subscription = subscriptionRevenue[planType] || { 
+        price: operatorSubscription.price || 99, 
+        salesPerMonth: 2, 
+        name: planType 
+      };
+      packageType = subscription.name;
+    } else {
+      // Default to Pro if no subscription found
+      packageType = 'Pro';
+      subscription = { price: 99, salesPerMonth: 2, name: 'Pro' };
+    }
+
+    const perSaleRevenue = subscription.price / subscription.salesPerMonth;
     
     const revenueSources = [
       {
         label: `${packageType} Package`,
         detail: `Seller Subscription $${subscription.price}/month`,
-        amount: subscription.perSale,
+        amount: perSaleRevenue,
         type: 'subscription'
       }
     ];
