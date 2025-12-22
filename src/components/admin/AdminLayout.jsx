@@ -65,21 +65,26 @@ export default function AdminLayout({ children, currentPage }) {
           {ADMIN_NAV_ITEMS.map(item => {
             const Icon = item.icon;
             const active = isActive(item.path);
-            
+
             return (
-              <Link key={item.path} to={createPageUrl(item.path)}>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${
-                    active
-                      ? 'bg-orange-600 text-white hover:bg-orange-700'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 mr-3" />
-                  {item.label}
-                </Button>
-              </Link>
+              <React.Fragment key={item.path}>
+                {item.label === 'Users' && (
+                  <div className="w-[80%] mx-auto my-3 border-t border-slate-600" />
+                )}
+                <Link to={createPageUrl(item.path)}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${
+                      active
+                        ? 'bg-orange-600 text-white hover:bg-orange-700'
+                        : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mr-3" />
+                    {item.label}
+                  </Button>
+                </Link>
+              </React.Fragment>
             );
           })}
         </nav>
