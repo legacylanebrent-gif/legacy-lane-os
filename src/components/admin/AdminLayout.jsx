@@ -19,14 +19,14 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
-  { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
-  { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
-  { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
-  { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
   { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
   { label: 'Monthly Packages', path: 'AdminPackages', icon: Package },
   { label: 'Advertising Packages', path: 'AdminAdvertisingPackages', icon: Package },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
+  { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
+  { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
+  { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
+  { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
 
