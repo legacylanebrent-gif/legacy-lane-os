@@ -32,7 +32,6 @@ export default function AdminEstateSales() {
   const [viewingSale, setViewingSale] = useState(null);
   const [saleTechCosts, setSaleTechCosts] = useState({});
   const [operatorSubscriptions, setOperatorSubscriptions] = useState({});
-  const [debugInfo, setDebugInfo] = useState({});
 
   useEffect(() => {
     loadSales();
@@ -59,50 +58,18 @@ export default function AdminEstateSales() {
         const sampleSubs = [];
 
         allSubs.forEach(sub => {
-          allStatuses.push(sub.status);
-          if (sampleSubs.length < 3) {
-            sampleSubs.push({
-              id: sub.id,
-              status: sub.status,
-              user_id: sub.user_id,
-              data_user_id: sub.data?.user_id,
-              plan: sub.plan_type,
-              price: sub.price
-            });
-          }
-
           if (sub.status === 'active') {
-            activeCount++;
             const userId = sub.user_id || sub.data?.user_id;
             if (userId) {
-              mappedCount++;
               subscriptionsMap[userId] = sub;
             }
           }
         });
 
-        setDebugInfo({
-          total: allSubs.length,
-          activeCount,
-          mappedCount,
-          allStatuses,
-          sampleSubs,
-          error: null,
-          fetchSuccess: true
-        });
-
         setOperatorSubscriptions(subscriptionsMap);
-      } catch (error) {
-        setDebugInfo({
-          total: 0,
-          activeCount: 0,
-          mappedCount: 0,
-          allStatuses: [],
-          sampleSubs: [],
-          error: error.message,
-          fetchSuccess: false
-        });
-      }
+        } catch (error) {
+        console.error('Error loading subscriptions:', error);
+        }
     } catch (error) {
       console.error('Error loading estate sales:', error);
     } finally {
