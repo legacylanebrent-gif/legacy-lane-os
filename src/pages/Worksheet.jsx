@@ -453,6 +453,10 @@ export default function Worksheet() {
       setNotes('');
       setPendingTransaction(null);
       setShowVenmoModal(false);
+      setPhotoMode(false);
+      setSelectedPhoto(null);
+      setPhotoSearchQuery('');
+      setPhotoSuggestions([]);
 
       // Reload transactions
       await loadData();
