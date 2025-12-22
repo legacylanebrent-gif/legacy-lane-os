@@ -92,13 +92,16 @@ export default function Revenue() {
   const adProjections = calculateProjections(avgAdRevenue, adGrowth, 120);
 
   const totalProjections = subProjections.map((_, i) => 
-    subProjections[i] + marketplaceProjections[i] + courseProjections[i] + 
+    subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
+    marketplaceProjections[i] + courseProjections[i] + 
     referralProjections[i] + featureProjections[i] + adProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
     month: `M${i + 1}`,
-    Subscriptions: Math.round(subProjections[i]),
+    'Operator Subs': Math.round(subProjections[i]),
+    'Vendor Subs': Math.round(vendorSubProjections[i]),
+    'Agent Subs': Math.round(agentSubProjections[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
     Courses: Math.round(courseProjections[i]),
     Referrals: Math.round(referralProjections[i]),
@@ -112,7 +115,9 @@ export default function Revenue() {
   const year10Total = getYearProjection(totalProjections, 10);
 
   const pieData = [
-    { name: 'Subscriptions', value: getYearProjection(subProjections, 3) },
+    { name: 'Operator Subs', value: getYearProjection(subProjections, 3) },
+    { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, 3) },
+    { name: 'Agent Subs', value: getYearProjection(agentSubProjections, 3) },
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
     { name: 'Courses', value: getYearProjection(courseProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
@@ -123,7 +128,9 @@ export default function Revenue() {
   const yearlyComparisonData = [
     {
       year: 'Year 3',
-      Subscriptions: getYearProjection(subProjections, 3),
+      'Operator Subs': getYearProjection(subProjections, 3),
+      'Vendor Subs': getYearProjection(vendorSubProjections, 3),
+      'Agent Subs': getYearProjection(agentSubProjections, 3),
       Marketplace: getYearProjection(marketplaceProjections, 3),
       Courses: getYearProjection(courseProjections, 3),
       Referrals: getYearProjection(referralProjections, 3),
@@ -132,7 +139,9 @@ export default function Revenue() {
     },
     {
       year: 'Year 5',
-      Subscriptions: getYearProjection(subProjections, 5),
+      'Operator Subs': getYearProjection(subProjections, 5),
+      'Vendor Subs': getYearProjection(vendorSubProjections, 5),
+      'Agent Subs': getYearProjection(agentSubProjections, 5),
       Marketplace: getYearProjection(marketplaceProjections, 5),
       Courses: getYearProjection(courseProjections, 5),
       Referrals: getYearProjection(referralProjections, 5),
@@ -141,7 +150,9 @@ export default function Revenue() {
     },
     {
       year: 'Year 10',
-      Subscriptions: getYearProjection(subProjections, 10),
+      'Operator Subs': getYearProjection(subProjections, 10),
+      'Vendor Subs': getYearProjection(vendorSubProjections, 10),
+      'Agent Subs': getYearProjection(agentSubProjections, 10),
       Marketplace: getYearProjection(marketplaceProjections, 10),
       Courses: getYearProjection(courseProjections, 10),
       Referrals: getYearProjection(referralProjections, 10),
@@ -270,10 +281,18 @@ export default function Revenue() {
 
         {/* Revenue Stream Calculators */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-2">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-8 gap-2">
             <TabsTrigger value="subscriptions">
               <Users className="w-4 h-4 mr-1" />
-              Subscriptions
+              Operator Subs
+            </TabsTrigger>
+            <TabsTrigger value="vendorSubs">
+              <Users className="w-4 h-4 mr-1" />
+              Vendor Subs
+            </TabsTrigger>
+            <TabsTrigger value="agentSubs">
+              <Users className="w-4 h-4 mr-1" />
+              Agent Subs
             </TabsTrigger>
             <TabsTrigger value="marketplace">
               <ShoppingBag className="w-4 h-4 mr-1" />
