@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
-  Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter
+  Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download
 } from 'lucide-react';
 import {
   Select,
@@ -22,6 +22,7 @@ export default function AdminFutureOperators() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stateFilter, setStateFilter] = useState('AR');
   const [packageFilter, setPackageFilter] = useState('all');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     loadOperators();
@@ -63,6 +64,31 @@ export default function AdminFutureOperators() {
       'Platinum': 'bg-purple-100 text-purple-800'
     };
     return colors[packageType] || 'bg-slate-100 text-slate-700';
+  };
+
+  const handleImportCompanies = async () => {
+    if (!stateFilter || stateFilter === 'all') {
+      alert('Please select a specific state to import companies');
+      return;
+    }
+
+    const functionName = `scrape${stateFilter}Operators`;
+    
+    setImporting(true);
+    try {
+      const response = await base44.functions.invoke(functionName, {});
+      console.log('Import result:', response.data);
+      
+      // Reload operators after import
+      await loadOperators();
+      
+      alert(`Successfully imported and updated companies for ${stateFilter}!\n\nScraped: ${response.data.scraped}\nDuplicates removed: ${response.data.duplicates_deleted}\nFinal count: ${response.data.final_count}`);
+    } catch (error) {
+      console.error('Error importing companies:', error);
+      alert(`Error importing companies: ${error.message}`);
+    } finally {
+      setImporting(false);
+    }
   };
 
   if (loading) {
@@ -136,6 +162,17 @@ export default function AdminFutureOperators() {
                   ))}
                 </SelectContent>
               </Select>
+              
+              {stateFilter !== 'all' && (
+                <Button 
+                  onClick={handleImportCompanies}
+                  disabled={importing}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {importing ? 'Importing...' : 'Import and Update Companies'}
+                </Button>
+              )}
               
               {(stateFilter !== 'all' || packageFilter !== 'all') && (
                 <Button 
