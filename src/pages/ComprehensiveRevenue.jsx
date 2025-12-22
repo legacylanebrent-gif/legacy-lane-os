@@ -218,6 +218,10 @@ export default function ComprehensiveRevenue() {
       value,
       revenue: monthlyRevenue + perSaleRevenue
     };
+  }).sort((a, b) => {
+    if (a.name === 'Basic') return 1;
+    if (b.name === 'Basic') return -1;
+    return 0;
   });
 
   const stateCounts = operators.reduce((acc, op) => {
