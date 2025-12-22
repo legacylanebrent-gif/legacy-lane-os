@@ -31,6 +31,7 @@ export default function AdminEstateSales() {
   const [editingSale, setEditingSale] = useState(null);
   const [viewingSale, setViewingSale] = useState(null);
   const [saleTechCosts, setSaleTechCosts] = useState({});
+  const [operatorSubscriptions, setOperatorSubscriptions] = useState({});
 
   useEffect(() => {
     loadSales();
@@ -45,6 +46,26 @@ export default function AdminEstateSales() {
       const data = await base44.entities.EstateSale.list();
       setSales(data);
       setFilteredSales(data);
+      
+      // Fetch subscriptions for all unique operators
+      const uniqueOperatorIds = [...new Set(data.map(s => s.operator_id).filter(Boolean))];
+      const subscriptionsMap = {};
+      
+      for (const operatorId of uniqueOperatorIds) {
+        try {
+          const subs = await base44.asServiceRole.entities.Subscription.filter({
+            user_id: operatorId,
+            status: 'active'
+          });
+          if (subs.length > 0) {
+            subscriptionsMap[operatorId] = subs[0];
+          }
+        } catch (error) {
+          console.error(`Error loading subscription for operator ${operatorId}:`, error);
+        }
+      }
+      
+      setOperatorSubscriptions(subscriptionsMap);
     } catch (error) {
       console.error('Error loading estate sales:', error);
     } finally {
@@ -524,8 +545,18 @@ export default function AdminEstateSales() {
                   </div>
                   
                   {sale.operator_name && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Operator:</span> {sale.operator_name}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Operator:</span> {sale.operator_name}
+                      </div>
+                      {operatorSubscriptions[sale.operator_id] && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-medium">Package:</span>
+                          <Badge variant="outline" className="bg-blue-50">
+                            {operatorSubscriptions[sale.operator_id].plan_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${operatorSubscriptions[sale.operator_id].price}/month
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   )}
 
