@@ -20,7 +20,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
   { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
-  { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
+  { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Packages', path: 'AdminPackages', icon: Package },
