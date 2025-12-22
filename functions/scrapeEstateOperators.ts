@@ -19,13 +19,16 @@ Deno.serve(async (req) => {
     const stateResponse = await fetch(stateUrl);
     const stateHtml = await stateResponse.text();
     
-    // Extract city/region links from the state page (matches both city names and multi-word regions)
-    const cityLinkRegex = new RegExp(`https://www\\.estatesales\\.net/companies/${state}/[^"\\s?]+`, 'g');
-    const cityLinks = [...stateHtml.matchAll(cityLinkRegex)].map(m => m[0]);
-    // Filter out company profile links (which have /ZIP/ID pattern)
-    const uniqueCityLinks = [...new Set(cityLinks)].filter(link => !link.match(/\/\d{5}\/\d+$/));
+    // Extract city/region links from the state page
+    // Look for href links in the Larger Cities section
+    const cityLinkRegex = /href="(https:\/\/www\.estatesales\.net\/companies\/[A-Z]{2}\/[^"]+)"/gi;
+    const cityLinks = [...stateHtml.matchAll(cityLinkRegex)].map(m => m[1]);
+    // Filter out company profile links (which have /ZIP/ID pattern) and out-of-state links
+    const uniqueCityLinks = [...new Set(cityLinks)].filter(link => 
+      link.includes(`/companies/${state}/`) && !link.match(/\/\d{5}\/\d+$/)
+    );
     
-    console.log(`Found ${uniqueCityLinks.length} cities/regions in ${state}`);
+    console.log(`Found ${uniqueCityLinks.length} cities/regions in ${state}:`, uniqueCityLinks);
     
     const allCompanies = [];
     const BATCH_SIZE = 10;
