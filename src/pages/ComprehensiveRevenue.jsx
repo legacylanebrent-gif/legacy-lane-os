@@ -433,7 +433,7 @@ export default function ComprehensiveRevenue() {
           <TabsList className="grid grid-cols-3 lg:grid-cols-8 gap-2">
             <TabsTrigger value="overview">
               <Package className="w-4 h-4 mr-1" />
-              Overview
+              Operators
             </TabsTrigger>
             <TabsTrigger value="vendorSubs">
               <Users className="w-4 h-4 mr-1" />
