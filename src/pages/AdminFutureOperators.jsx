@@ -33,10 +33,21 @@ export default function AdminFutureOperators() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
   const [importResults, setImportResults] = useState(null);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     loadOperators();
+    loadTotalCount();
   }, [stateFilter]);
+
+  const loadTotalCount = async () => {
+    try {
+      const allData = await base44.entities.FutureEstateOperator.list('-created_date', 10000);
+      setTotalCount(allData.length);
+    } catch (error) {
+      console.error('Error loading total count:', error);
+    }
+  };
 
   const loadOperators = async () => {
     setLoading(true);
@@ -108,8 +119,9 @@ export default function AdminFutureOperators() {
       setImportResults(response.data);
       setImportStatus('success');
       
-      // Reload operators after import
+      // Reload operators and total count after import
       await loadOperators();
+      await loadTotalCount();
     } catch (error) {
       console.error('Error importing companies:', error);
       setImportStatus('error');
@@ -148,10 +160,8 @@ export default function AdminFutureOperators() {
           </p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-slate-900">{filteredOperators.length}</div>
-          <div className="text-sm text-slate-600">
-            {stateFilter === 'all' ? 'Showing Latest 100' : `Companies in ${stateFilter}`}
-          </div>
+          <div className="text-3xl font-bold text-slate-900">{totalCount.toLocaleString()}</div>
+          <div className="text-sm text-slate-600">Total Records in Database</div>
         </div>
       </div>
 
