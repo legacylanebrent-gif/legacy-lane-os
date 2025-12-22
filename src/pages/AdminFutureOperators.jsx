@@ -165,7 +165,7 @@ export default function AdminFutureOperators() {
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All States" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
                   <SelectItem value="all">All States</SelectItem>
                   {uniqueStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
