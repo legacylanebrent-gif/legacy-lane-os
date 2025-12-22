@@ -9,15 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { createPageUrl } from '@/utils';
+import { Link } from 'react-router-dom';
 import { 
   User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
-  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar
 } from 'lucide-react';
 
 export default function MyProfile() {
   const [user, setUser] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [packages, setPackages] = useState([]);
+  const [estateSales, setEstateSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -86,6 +89,10 @@ export default function MyProfile() {
           return order[a.tier_level] - order[b.tier_level];
         }));
       }
+
+      // Load estate sales for this operator
+      const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id });
+      setEstateSales(sales);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -187,10 +194,11 @@ export default function MyProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="sales">My Sales</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -477,6 +485,107 @@ export default function MyProfile() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* My Sales Tab */}
+        <TabsContent value="sales" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="w-5 h-5" />
+                My Estate Sales
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {estateSales.length > 0 ? (
+                <div className="space-y-4">
+                  {estateSales.map(sale => (
+                    <Link 
+                      key={sale.id} 
+                      to={createPageUrl('MySales')}
+                      className="block p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-slate-900 mb-2">{sale.title}</h3>
+                          <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                            {sale.property_address?.city && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {sale.property_address.city}, {sale.property_address.state}
+                              </div>
+                            )}
+                            {sale.sale_dates?.[0]?.date && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(sale.sale_dates[0].date).toLocaleDateString()}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              {sale.views || 0} views
+                            </div>
+                          </div>
+                        </div>
+                        <Badge className={
+                          sale.status === 'active' ? 'bg-green-100 text-green-700' :
+                          sale.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
+                          sale.status === 'completed' ? 'bg-purple-100 text-purple-700' :
+                          'bg-slate-100 text-slate-700'
+                        }>
+                          {sale.status}
+                        </Badge>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Home className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 mb-4">You haven't created any estate sales yet</p>
+                  <Button asChild className="bg-orange-600 hover:bg-orange-700">
+                    <Link to={createPageUrl('MySales')}>
+                      Create Your First Sale
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {estateSales.length > 0 && subscription && (
+            <Card className="bg-gradient-to-br from-orange-50 to-cyan-50">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                      Sale Performance Summary
+                    </h3>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">
+                          {estateSales.length}
+                        </div>
+                        <div className="text-sm text-slate-600">Total Sales</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-cyan-700">
+                          {estateSales.reduce((sum, s) => sum + (s.views || 0), 0)}
+                        </div>
+                        <div className="text-sm text-slate-600">Total Views</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-green-700">
+                          ${estateSales.reduce((sum, s) => sum + (s.actual_revenue || 0), 0).toLocaleString()}
+                        </div>
+                        <div className="text-sm text-slate-600">Total Revenue</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Subscription Tab */}
