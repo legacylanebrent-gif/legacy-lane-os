@@ -55,7 +55,8 @@ export default function AdminEstateSales() {
 
         const subscriptionsMap = {};
         allSubs.forEach(sub => {
-          const userId = sub.data?.user_id || sub.user_id;
+          // Try all possible user_id locations
+          const userId = sub.user_id || sub.data?.user_id || sub.id;
           if (userId) {
             subscriptionsMap[userId] = sub;
           }

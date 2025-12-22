@@ -73,18 +73,16 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
             </div>
 
             <div className="p-3 text-xs bg-blue-50 border-b">
-              <div className="font-mono">
+              <div className="font-mono text-[10px]">
                 <div>Operator ID: {sale.operator_id || 'NONE'}</div>
                 <div>Operator Name: {sale.operator_name || 'NONE'}</div>
                 <div>Subscription Object: {operatorSubscription ? 'EXISTS' : 'NULL'}</div>
                 {operatorSubscription && (
                   <>
-                    <div>Sub.data exists: {operatorSubscription.data ? 'YES' : 'NO'}</div>
-                    <div>Sub.data.price: {operatorSubscription.data?.price || 'NONE'}</div>
-                    <div>Sub.data.user_id: {operatorSubscription.data?.user_id || 'NONE'}</div>
-                    <div>Sub.price: {operatorSubscription.price || 'NONE'}</div>
-                    <div>Sub.user_id: {operatorSubscription.user_id || 'NONE'}</div>
-                    <div>Calculated monthlySubscription: ${monthlySubscription}</div>
+                    <div>Full Sub Object:</div>
+                    <pre className="text-[9px] overflow-auto max-h-32 bg-white p-1 rounded mt-1">
+                      {JSON.stringify(operatorSubscription, null, 2)}
+                    </pre>
                   </>
                 )}
               </div>
