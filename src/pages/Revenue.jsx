@@ -135,6 +135,7 @@ export default function Revenue() {
     Total: Math.round(totalProjections[i])
   }));
 
+  const year1Total = getYearProjection(totalProjections, 1);
   const year3Total = getYearProjection(totalProjections, 3);
   const year5Total = getYearProjection(totalProjections, 5);
   const year10Total = getYearProjection(totalProjections, 10);
@@ -195,7 +196,18 @@ export default function Revenue() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">1-Year Projection</span>
+                <DollarSign className="w-5 h-5 opacity-75" />
+              </div>
+              <div className="text-3xl font-bold mb-1">${(year1Total / 1000000).toFixed(2)}M</div>
+              <div className="text-xs opacity-75">Cumulative Revenue</div>
+            </CardContent>
+          </Card>
+
           <Card className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
