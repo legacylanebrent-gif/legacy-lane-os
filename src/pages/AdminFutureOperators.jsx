@@ -6,13 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
-  Facebook, Twitter, Instagram, Youtube, ExternalLink
+  Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function AdminFutureOperators() {
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [stateFilter, setStateFilter] = useState('all');
+  const [packageFilter, setPackageFilter] = useState('all');
 
   useEffect(() => {
     loadOperators();
@@ -20,7 +29,7 @@ export default function AdminFutureOperators() {
 
   const loadOperators = async () => {
     try {
-      const data = await base44.entities.FutureEstateOperator.list('-created_date', 1000);
+      const data = await base44.entities.FutureEstateOperator.list('-created_date', 100);
       setOperators(data);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -30,15 +39,21 @@ export default function AdminFutureOperators() {
   };
 
   const filteredOperators = operators.filter(op => {
-    if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = !searchQuery || (
       op.company_name?.toLowerCase().includes(query) ||
       op.city?.toLowerCase().includes(query) ||
       op.state?.toLowerCase().includes(query) ||
       op.phone?.toLowerCase().includes(query)
     );
+    const matchesState = stateFilter === 'all' || op.state === stateFilter;
+    const matchesPackage = packageFilter === 'all' || op.package_type === packageFilter;
+    
+    return matchesSearch && matchesState && matchesPackage;
   });
+
+  const uniqueStates = [...new Set(operators.map(op => op.state).filter(Boolean))].sort();
+  const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
 
   const getPackageColor = (packageType) => {
     const colors = {
@@ -80,19 +95,61 @@ export default function AdminFutureOperators() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <Input
-                placeholder="Search by company, city, state, or phone..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Input
+                  placeholder="Search by company, city, state, or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Badge variant="outline" className="text-sm">
+                {filteredOperators.length} results
+              </Badge>
             </div>
-            <Badge variant="outline" className="text-sm">
-              {filteredOperators.length} results
-            </Badge>
+            
+            <div className="flex items-center gap-3">
+              <Filter className="w-4 h-4 text-slate-600" />
+              <Select value={stateFilter} onValueChange={setStateFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All States" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All States</SelectItem>
+                  {uniqueStates.map(state => (
+                    <SelectItem key={state} value={state}>{state}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={packageFilter} onValueChange={setPackageFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All Packages" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Packages</SelectItem>
+                  {uniquePackages.map(pkg => (
+                    <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {(stateFilter !== 'all' || packageFilter !== 'all') && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setStateFilter('all');
+                    setPackageFilter('all');
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>

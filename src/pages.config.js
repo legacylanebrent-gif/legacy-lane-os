@@ -1,121 +1,121 @@
-import Dashboard from './pages/Dashboard';
-import EstateSaleFinder from './pages/EstateSaleFinder';
-import Courses from './pages/Courses';
-import MyCourses from './pages/MyCourses';
+import AdminCampaigns from './pages/AdminCampaigns';
+import AdminCourses from './pages/AdminCourses';
+import AdminEstateSales from './pages/AdminEstateSales';
+import AdminFutureOperators from './pages/AdminFutureOperators';
+import AdminLeads from './pages/AdminLeads';
+import AdminMarketplace from './pages/AdminMarketplace';
+import AdminPackages from './pages/AdminPackages';
+import AdminRewards from './pages/AdminRewards';
+import AdminTransactions from './pages/AdminTransactions';
+import AdminUsers from './pages/AdminUsers';
+import AdminVendors from './pages/AdminVendors';
+import AgentSignup from './pages/AgentSignup';
+import Analytics from './pages/Analytics';
+import Attendance from './pages/Attendance';
+import BrowseItems from './pages/BrowseItems';
+import BusinessProfile from './pages/BusinessProfile';
+import CRM from './pages/CRM';
+import CampaignBuilder from './pages/CampaignBuilder';
+import Campaigns from './pages/Campaigns';
+import ContactDetail from './pages/ContactDetail';
 import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
-import BrowseItems from './pages/BrowseItems';
-import MyListings from './pages/MyListings';
-import Campaigns from './pages/Campaigns';
-import CampaignBuilder from './pages/CampaignBuilder';
-import Analytics from './pages/Analytics';
-import CRM from './pages/CRM';
-import Pipeline from './pages/Pipeline';
-import ContactDetail from './pages/ContactDetail';
-import Leads from './pages/Leads';
-import LeadCapture from './pages/LeadCapture';
-import Revenue from './pages/Revenue';
-import PlatformAnalytics from './pages/PlatformAnalytics';
-import Vendors from './pages/Vendors';
-import VendorDetail from './pages/VendorDetail';
-import Settings from './pages/Settings';
-import AdminUsers from './pages/AdminUsers';
-import AdminEstateSales from './pages/AdminEstateSales';
-import AdminMarketplace from './pages/AdminMarketplace';
-import AdminCourses from './pages/AdminCourses';
-import AdminVendors from './pages/AdminVendors';
-import AdminCampaigns from './pages/AdminCampaigns';
-import AdminLeads from './pages/AdminLeads';
-import AdminTransactions from './pages/AdminTransactions';
-import AdminPackages from './pages/AdminPackages';
-import Home from './pages/Home';
-import EstateSaleDetail from './pages/EstateSaleDetail';
-import Messages from './pages/Messages';
-import BusinessProfile from './pages/BusinessProfile';
-import SearchByState from './pages/SearchByState';
-import StateCities from './pages/StateCities';
-import Operators from './pages/Operators';
-import OperatorPackages from './pages/OperatorPackages';
+import Courses from './pages/Courses';
 import DIYSaleSignup from './pages/DIYSaleSignup';
-import AgentSignup from './pages/AgentSignup';
-import VendorSignup from './pages/VendorSignup';
-import MySales from './pages/MySales';
+import Dashboard from './pages/Dashboard';
+import EstateSaleDetail from './pages/EstateSaleDetail';
+import EstateSaleFinder from './pages/EstateSaleFinder';
+import Home from './pages/Home';
 import Inventory from './pages/Inventory';
-import Worksheet from './pages/Worksheet';
-import SaleInventory from './pages/SaleInventory';
-import Attendance from './pages/Attendance';
-import SaleTasks from './pages/SaleTasks';
-import SaleStatistics from './pages/SaleStatistics';
-import PrintSigns from './pages/PrintSigns';
-import SaleExport from './pages/SaleExport';
+import LeadCapture from './pages/LeadCapture';
+import Leads from './pages/Leads';
+import Messages from './pages/Messages';
+import MyCourses from './pages/MyCourses';
+import MyListings from './pages/MyListings';
 import MyProfile from './pages/MyProfile';
 import MyReferrals from './pages/MyReferrals';
-import ReferralLanding from './pages/ReferralLanding';
 import MyRewards from './pages/MyRewards';
-import AdminRewards from './pages/AdminRewards';
+import MySales from './pages/MySales';
+import OperatorPackages from './pages/OperatorPackages';
+import Operators from './pages/Operators';
+import Pipeline from './pages/Pipeline';
+import PlatformAnalytics from './pages/PlatformAnalytics';
+import PrintSigns from './pages/PrintSigns';
+import ReferralLanding from './pages/ReferralLanding';
+import Revenue from './pages/Revenue';
+import SaleExport from './pages/SaleExport';
+import SaleInventory from './pages/SaleInventory';
+import SaleStatistics from './pages/SaleStatistics';
+import SaleTasks from './pages/SaleTasks';
+import SearchByState from './pages/SearchByState';
+import Settings from './pages/Settings';
+import StateCities from './pages/StateCities';
 import VIPEvent from './pages/VIPEvent';
-import AdminFutureOperators from './pages/AdminFutureOperators';
+import VendorDetail from './pages/VendorDetail';
+import VendorSignup from './pages/VendorSignup';
+import Vendors from './pages/Vendors';
+import Worksheet from './pages/Worksheet';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "EstateSaleFinder": EstateSaleFinder,
-    "Courses": Courses,
-    "MyCourses": MyCourses,
+    "AdminCampaigns": AdminCampaigns,
+    "AdminCourses": AdminCourses,
+    "AdminEstateSales": AdminEstateSales,
+    "AdminFutureOperators": AdminFutureOperators,
+    "AdminLeads": AdminLeads,
+    "AdminMarketplace": AdminMarketplace,
+    "AdminPackages": AdminPackages,
+    "AdminRewards": AdminRewards,
+    "AdminTransactions": AdminTransactions,
+    "AdminUsers": AdminUsers,
+    "AdminVendors": AdminVendors,
+    "AgentSignup": AgentSignup,
+    "Analytics": Analytics,
+    "Attendance": Attendance,
+    "BrowseItems": BrowseItems,
+    "BusinessProfile": BusinessProfile,
+    "CRM": CRM,
+    "CampaignBuilder": CampaignBuilder,
+    "Campaigns": Campaigns,
+    "ContactDetail": ContactDetail,
     "CourseDetail": CourseDetail,
     "CourseLearning": CourseLearning,
-    "BrowseItems": BrowseItems,
-    "MyListings": MyListings,
-    "Campaigns": Campaigns,
-    "CampaignBuilder": CampaignBuilder,
-    "Analytics": Analytics,
-    "CRM": CRM,
-    "Pipeline": Pipeline,
-    "ContactDetail": ContactDetail,
-    "Leads": Leads,
-    "LeadCapture": LeadCapture,
-    "Revenue": Revenue,
-    "PlatformAnalytics": PlatformAnalytics,
-    "Vendors": Vendors,
-    "VendorDetail": VendorDetail,
-    "Settings": Settings,
-    "AdminUsers": AdminUsers,
-    "AdminEstateSales": AdminEstateSales,
-    "AdminMarketplace": AdminMarketplace,
-    "AdminCourses": AdminCourses,
-    "AdminVendors": AdminVendors,
-    "AdminCampaigns": AdminCampaigns,
-    "AdminLeads": AdminLeads,
-    "AdminTransactions": AdminTransactions,
-    "AdminPackages": AdminPackages,
-    "Home": Home,
-    "EstateSaleDetail": EstateSaleDetail,
-    "Messages": Messages,
-    "BusinessProfile": BusinessProfile,
-    "SearchByState": SearchByState,
-    "StateCities": StateCities,
-    "Operators": Operators,
-    "OperatorPackages": OperatorPackages,
+    "Courses": Courses,
     "DIYSaleSignup": DIYSaleSignup,
-    "AgentSignup": AgentSignup,
-    "VendorSignup": VendorSignup,
-    "MySales": MySales,
+    "Dashboard": Dashboard,
+    "EstateSaleDetail": EstateSaleDetail,
+    "EstateSaleFinder": EstateSaleFinder,
+    "Home": Home,
     "Inventory": Inventory,
-    "Worksheet": Worksheet,
-    "SaleInventory": SaleInventory,
-    "Attendance": Attendance,
-    "SaleTasks": SaleTasks,
-    "SaleStatistics": SaleStatistics,
-    "PrintSigns": PrintSigns,
-    "SaleExport": SaleExport,
+    "LeadCapture": LeadCapture,
+    "Leads": Leads,
+    "Messages": Messages,
+    "MyCourses": MyCourses,
+    "MyListings": MyListings,
     "MyProfile": MyProfile,
     "MyReferrals": MyReferrals,
-    "ReferralLanding": ReferralLanding,
     "MyRewards": MyRewards,
-    "AdminRewards": AdminRewards,
+    "MySales": MySales,
+    "OperatorPackages": OperatorPackages,
+    "Operators": Operators,
+    "Pipeline": Pipeline,
+    "PlatformAnalytics": PlatformAnalytics,
+    "PrintSigns": PrintSigns,
+    "ReferralLanding": ReferralLanding,
+    "Revenue": Revenue,
+    "SaleExport": SaleExport,
+    "SaleInventory": SaleInventory,
+    "SaleStatistics": SaleStatistics,
+    "SaleTasks": SaleTasks,
+    "SearchByState": SearchByState,
+    "Settings": Settings,
+    "StateCities": StateCities,
     "VIPEvent": VIPEvent,
-    "AdminFutureOperators": AdminFutureOperators,
+    "VendorDetail": VendorDetail,
+    "VendorSignup": VendorSignup,
+    "Vendors": Vendors,
+    "Worksheet": Worksheet,
 }
 
 export const pagesConfig = {
