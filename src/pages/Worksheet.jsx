@@ -477,23 +477,27 @@ export default function Worksheet() {
     }
   };
 
+  const searchRequestId = React.useRef(0);
+
   const handlePhotoSearch = async (query) => {
     setPhotoSearchQuery(query);
-    
-    // Clear immediately
     setPhotoSuggestions([]);
     
     if (!query || query.length < 2) {
+      setSearchingPhotos(false);
       return;
     }
 
+    const requestId = ++searchRequestId.current;
     setSearchingPhotos(true);
     
     try {
       const images = sale.images || [];
       
       if (images.length === 0) {
-        setSearchingPhotos(false);
+        if (searchRequestId.current === requestId) {
+          setSearchingPhotos(false);
+        }
         return;
       }
 
@@ -535,6 +539,11 @@ Only include items with confidence > 0.3. If no items match well, return an empt
         }
       });
 
+      // Only update if this is still the latest search
+      if (searchRequestId.current !== requestId) {
+        return;
+      }
+
       const matches = result?.matches || [];
       
       const suggestions = matches.map(match => {
@@ -551,9 +560,13 @@ Only include items with confidence > 0.3. If no items match well, return an empt
       setPhotoSuggestions(suggestions);
     } catch (error) {
       console.error('Error searching photos:', error);
-      setPhotoSuggestions([]);
+      if (searchRequestId.current === requestId) {
+        setPhotoSuggestions([]);
+      }
     } finally {
-      setSearchingPhotos(false);
+      if (searchRequestId.current === requestId) {
+        setSearchingPhotos(false);
+      }
     }
   };
 
