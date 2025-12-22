@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -266,6 +266,19 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <MessageSquare className="w-5 h-5 mr-3" />
                     Support
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('MyBusinessExpenses')}>
+                  <Button 
+                    variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'MyBusinessExpenses' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <FileText className="w-5 h-5 mr-3" />
+                    Business Expenses
                   </Button>
                 </Link>
                 </div>

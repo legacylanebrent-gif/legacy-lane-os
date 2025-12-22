@@ -60,6 +60,7 @@ import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import MyTickets from './pages/MyTickets';
 import AdminTickets from './pages/AdminTickets';
+import MyBusinessExpenses from './pages/MyBusinessExpenses';
 import __Layout from './Layout.jsx';
 
 
@@ -126,6 +127,7 @@ export const PAGES = {
     "Worksheet": Worksheet,
     "MyTickets": MyTickets,
     "AdminTickets": AdminTickets,
+    "MyBusinessExpenses": MyBusinessExpenses,
 }
 
 export const pagesConfig = {
