@@ -31,6 +31,7 @@ export default function ComprehensiveRevenue() {
   const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
   const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
+  const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 4));
 
   // Agent Subscription Inputs
   const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
@@ -73,7 +74,7 @@ export default function ComprehensiveRevenue() {
   // Auto-save to localStorage whenever values change
   useEffect(() => {
     const values = {
-      vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+      vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
       agentSubPrice, agentNewPerMonth, agentChurnRate,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
@@ -86,7 +87,7 @@ export default function ComprehensiveRevenue() {
       localStorage.setItem(`comprehensive_revenue_${key}`, JSON.stringify(value));
     });
   }, [
-    vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+    vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     agentSubPrice, agentNewPerMonth, agentChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
@@ -205,6 +206,10 @@ export default function ComprehensiveRevenue() {
     return acc;
   }, {});
 
+  // Calculate unique cities from operators
+  const uniqueCities = new Set(operators.map(op => `${op.city}, ${op.state}`).filter(Boolean));
+  const totalCities = uniqueCities.size;
+
   const currentOperatorMonthlyRevenue = operators.reduce((sum, op) => {
     const price = PACKAGE_PRICES[op.package_type] || 0;
     return sum + price;
@@ -213,7 +218,9 @@ export default function ComprehensiveRevenue() {
   const currentOperatorYearlyRevenue = currentOperatorMonthlyRevenue * 12;
 
   // Calculate all additional revenue streams
-  const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
+  // Use city-based calculation for vendors: total cities * new vendors per city per month
+  const calculatedVendorNewPerMonth = totalCities * vendorNewPerCityPerMonth;
+  const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
   const agentSubData = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
@@ -481,14 +488,27 @@ export default function ComprehensiveRevenue() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Calculated New Vendors/Month:</strong> {totalCities.toLocaleString()} cities × {vendorNewPerCityPerMonth} vendors/city = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
                     <Label>Monthly Price ($)</Label>
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>New Subscribers/Month</Label>
-                    <Input type="number" value={vendorNewPerMonth} onChange={(e) => setVendorNewPerMonth(Number(e.target.value))} />
+                    <Label>New Vendors Per City Per Month</Label>
+                    <Input type="number" value={vendorNewPerCityPerMonth} onChange={(e) => setVendorNewPerCityPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Total New Vendors/Month</Label>
+                    <Input type="number" value={calculatedVendorNewPerMonth} disabled className="bg-slate-100" />
                   </div>
                   <div>
                     <Label>Monthly Churn Rate (%)</Label>
