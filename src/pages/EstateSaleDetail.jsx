@@ -32,7 +32,12 @@ export default function EstateSaleDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
-  const [savedImages, setSavedImages] = useState([]);
+  const [savedImages, setSavedImages] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const saleId = urlParams.get('id');
+    const stored = localStorage.getItem(`savedImages_${saleId}`);
+    return stored ? JSON.parse(stored) : [];
+  });
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
@@ -194,11 +199,13 @@ END:VCALENDAR`;
   };
 
   const toggleImageSave = (index) => {
-    setSavedImages(prev => 
-      prev.includes(index) 
+    setSavedImages(prev => {
+      const updated = prev.includes(index) 
         ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
+        : [...prev, index];
+      localStorage.setItem(`savedImages_${sale.id}`, JSON.stringify(updated));
+      return updated;
+    });
   };
 
   if (loading) {
