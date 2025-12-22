@@ -229,6 +229,19 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
+                <Link to={createPageUrl('MyBusinessExpenses')}>
+                  <Button 
+                    variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'MyBusinessExpenses' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <FileText className="w-5 h-5 mr-3" />
+                    Business Expenses
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('MyReferrals')}>
                   <Button 
                     variant={currentPageName === 'MyReferrals' ? 'default' : 'ghost'}
@@ -266,19 +279,6 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <MessageSquare className="w-5 h-5 mr-3" />
                     Support
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyBusinessExpenses')}>
-                  <Button 
-                    variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyBusinessExpenses' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <FileText className="w-5 h-5 mr-3" />
-                    Business Expenses
                   </Button>
                 </Link>
                 </div>
