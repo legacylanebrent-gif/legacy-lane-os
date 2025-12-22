@@ -37,6 +37,7 @@ export default function ComprehensiveRevenue() {
   const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
   const [agentNewPerMonth, setAgentNewPerMonth] = useState(() => loadValue('agentNewPerMonth', 10));
   const [agentChurnRate, setAgentChurnRate] = useState(() => loadValue('agentChurnRate', 3));
+  const [agentNewPerCityPerMonth, setAgentNewPerCityPerMonth] = useState(() => loadValue('agentNewPerCityPerMonth', 4));
 
   // Marketplace Transaction Fee Inputs
   const [avgTransactionValue, setAvgTransactionValue] = useState(() => loadValue('avgTransactionValue', 250));
@@ -75,7 +76,7 @@ export default function ComprehensiveRevenue() {
   useEffect(() => {
     const values = {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-      agentSubPrice, agentNewPerMonth, agentChurnRate,
+      agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
@@ -88,7 +89,7 @@ export default function ComprehensiveRevenue() {
     });
   }, [
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-    agentSubPrice, agentNewPerMonth, agentChurnRate,
+    agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
@@ -223,7 +224,9 @@ export default function ComprehensiveRevenue() {
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
-  const agentSubData = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
+  // Use city-based calculation for agents: total cities * new agents per city per month
+  const calculatedAgentNewPerMonth = totalCities * agentNewPerCityPerMonth;
+  const agentSubData = calculateSimpleSubRevenue(agentSubPrice, calculatedAgentNewPerMonth, agentChurnRate, 120);
   const agentSubProjections = agentSubData.projections;
   
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
@@ -556,14 +559,27 @@ export default function ComprehensiveRevenue() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Calculated New Agents/Month:</strong> {totalCities.toLocaleString()} cities × {agentNewPerCityPerMonth} agents/city = {calculatedAgentNewPerMonth.toLocaleString()} agents/month
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
                     <Label>Monthly Price ($)</Label>
                     <Input type="number" value={agentSubPrice} onChange={(e) => setAgentSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>New Subscribers/Month</Label>
-                    <Input type="number" value={agentNewPerMonth} onChange={(e) => setAgentNewPerMonth(Number(e.target.value))} />
+                    <Label>New Agents Per City Per Month</Label>
+                    <Input type="number" value={agentNewPerCityPerMonth} onChange={(e) => setAgentNewPerCityPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Total New Agents/Month</Label>
+                    <Input type="number" value={calculatedAgentNewPerMonth} disabled className="bg-slate-100" />
                   </div>
                   <div>
                     <Label>Monthly Churn Rate (%)</Label>
