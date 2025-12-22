@@ -30,10 +30,10 @@ Deno.serve(async (req) => {
         const regionResponse = await fetch(regionUrl);
         const regionHtml = await regionResponse.text();
 
-        // Match company profile URLs with pattern /companies/NJ/City/ZIP/CompanyID
-        const companyLinkRegex = /https:\/\/www\.estatesales\.net\/companies\/[A-Z]{2}\/[^/]+\/\d{5}\/\d+/g;
-        const companyLinks = [...regionHtml.matchAll(companyLinkRegex)].map(m => m[0]);
-        const uniqueCompanyLinks = [...new Set(companyLinks)];
+        // Match company profile URLs (relative format)
+        const companyLinkRegex = /href="(\/companies\/NJ\/[^/]+\/\d{5}\/\d+)"/g;
+        const relativeLinks = [...regionHtml.matchAll(companyLinkRegex)].map(m => m[1]);
+        const uniqueCompanyLinks = [...new Set(relativeLinks)].map(link => `https://www.estatesales.net${link}`);
         console.log(`  Found ${uniqueCompanyLinks.length} companies in ${regionUrl}`);
 
         // Process companies in parallel batches
@@ -48,10 +48,16 @@ Deno.serve(async (req) => {
               const nameMatch = companyHtml.match(/<h1[^>]*>([^<]+)<\/h1>/);
               const name = nameMatch ? nameMatch[1].trim() : null;
 
+              // Extract city and zip from URL path: /companies/NJ/City/ZIP/ID
+              const urlParts = companyUrl.match(/\/companies\/NJ\/([^/]+)\/(\d{5})\/\d+/);
+              const cityFromUrl = urlParts ? urlParts[1].replace(/-/g, ' ') : null;
+              const zipFromUrl = urlParts ? urlParts[2] : null;
+
+              // Try to find location in page text as backup
               const locationMatch = companyHtml.match(/([^,\n]+),\s*([A-Z]{2})\s*(\d{5})/);
-              const city = locationMatch ? locationMatch[1].trim() : null;
+              const city = locationMatch ? locationMatch[1].trim() : cityFromUrl;
               const stateCode = locationMatch ? locationMatch[2] : 'NJ';
-              const zipCode = locationMatch ? locationMatch[3] : null;
+              const zipCode = locationMatch ? locationMatch[3] : zipFromUrl;
 
               const phoneMatch = companyHtml.match(/tel:\s*\+?1?(\d{10})/);
               const phone = phoneMatch ? phoneMatch[1].replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') : null;
