@@ -666,7 +666,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               </>
             )}
 
-            {formData.primary_account_type === 'estate_sale_operator' && (
+            {['estate_sale_operator', 'coach'].includes(formData.primary_account_type) && (
               <div>
                 <Label htmlFor="company_logo">Company Logo</Label>
                 <div className="flex items-center gap-3">
