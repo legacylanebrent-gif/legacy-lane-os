@@ -55,18 +55,35 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Parse request to get batch parameters
+    const url = new URL(req.url);
+    const batchSize = parseInt(url.searchParams.get('batch') || '10');
+    const startIndex = parseInt(url.searchParams.get('start') || '0');
+    
     const results = [];
     
     // Get all vendors
     const vendors = await base44.asServiceRole.entities.Vendor.list();
     
-    // Generate logos for each vendor
-    for (const vendorData of vendorLogoPrompts) {
+    // Process only a batch of vendors
+    const batch = vendorLogoPrompts.slice(startIndex, startIndex + batchSize);
+    
+    for (const vendorData of batch) {
       try {
         // Find matching vendor
         const vendor = vendors.find(v => v.company_name === vendorData.company);
         if (!vendor) {
           results.push({ company: vendorData.company, status: 'not_found' });
+          continue;
+        }
+
+        // Skip if already has a logo
+        if (vendor.company_logo_url) {
+          results.push({ 
+            company: vendorData.company, 
+            status: 'skipped',
+            reason: 'already_has_logo'
+          });
           continue;
         }
 
@@ -94,9 +111,20 @@ Deno.serve(async (req) => {
       }
     }
 
+    const totalVendors = vendorLogoPrompts.length;
+    const nextStart = startIndex + batchSize;
+    const hasMore = nextStart < totalVendors;
+
     return Response.json({ 
       success: true,
-      total: results.length,
+      batch: {
+        processed: results.length,
+        start: startIndex,
+        end: startIndex + batchSize,
+        total: totalVendors,
+        hasMore,
+        nextStart: hasMore ? nextStart : null
+      },
       successful: results.filter(r => r.status === 'success').length,
       results 
     });
