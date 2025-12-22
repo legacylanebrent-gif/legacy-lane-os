@@ -35,20 +35,21 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${duplicates.length} duplicates to remove`);
 
-    // Delete duplicates in batches
+    // Delete duplicates with delay to avoid rate limits
     let deleted = 0;
-    const BATCH_SIZE = 50;
     
-    for (let i = 0; i < duplicates.length; i += BATCH_SIZE) {
-      const batch = duplicates.slice(i, i + BATCH_SIZE);
+    for (const id of duplicates) {
+      await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
+      deleted++;
       
-      for (const id of batch) {
-        await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
-        deleted++;
+      if (deleted % 100 === 0) {
+        console.log(`Deleted ${deleted} of ${duplicates.length} duplicates`);
+        // Small delay every 100 deletions
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      
-      console.log(`Deleted ${deleted} of ${duplicates.length} duplicates`);
     }
+    
+    console.log(`Completed: Deleted ${deleted} duplicates`);
 
     return Response.json({
       success: true,
