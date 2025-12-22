@@ -20,11 +20,7 @@ export default function Revenue() {
   const [subNewPerMonth, setSubNewPerMonth] = useState(25);
   const [subChurnRate, setSubChurnRate] = useState(5);
   
-  // Estate Sale Commission Inputs
-  const [avgEstateSaleValue, setAvgEstateSaleValue] = useState(15000);
-  const [commissionRate, setCommissionRate] = useState(20);
-  const [salesPerMonth, setSalesPerMonth] = useState(10);
-  const [growthRate, setGrowthRate] = useState(15);
+
   
   // Marketplace Transaction Fee Inputs
   const [avgTransactionValue, setAvgTransactionValue] = useState(250);
@@ -93,7 +89,6 @@ export default function Revenue() {
 
   // Calculate all revenue streams
   const subProjections = calculateSubscriptionRevenue(120);
-  const estateProjections = calculateProjections(salesPerMonth * avgEstateSaleValue * (commissionRate / 100), growthRate, 120);
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
@@ -102,14 +97,13 @@ export default function Revenue() {
   const adProjections = calculateProjections(avgAdRevenue, adGrowth, 120);
 
   const totalProjections = subProjections.map((_, i) => 
-    subProjections[i] + estateProjections[i] + marketplaceProjections[i] + courseProjections[i] + 
+    subProjections[i] + marketplaceProjections[i] + courseProjections[i] + 
     referralProjections[i] + vendorProjections[i] + featureProjections[i] + adProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
     month: `M${i + 1}`,
     Subscriptions: Math.round(subProjections[i]),
-    'Estate Sales': Math.round(estateProjections[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
     Courses: Math.round(courseProjections[i]),
     Referrals: Math.round(referralProjections[i]),
@@ -125,7 +119,6 @@ export default function Revenue() {
 
   const pieData = [
     { name: 'Subscriptions', value: getYearProjection(subProjections, 3) },
-    { name: 'Estate Sales', value: getYearProjection(estateProjections, 3) },
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
     { name: 'Courses', value: getYearProjection(courseProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
@@ -138,7 +131,6 @@ export default function Revenue() {
     {
       year: 'Year 3',
       Subscriptions: getYearProjection(subProjections, 3),
-      'Estate Sales': getYearProjection(estateProjections, 3),
       Marketplace: getYearProjection(marketplaceProjections, 3),
       Courses: getYearProjection(courseProjections, 3),
       Referrals: getYearProjection(referralProjections, 3),
@@ -149,7 +141,6 @@ export default function Revenue() {
     {
       year: 'Year 5',
       Subscriptions: getYearProjection(subProjections, 5),
-      'Estate Sales': getYearProjection(estateProjections, 5),
       Marketplace: getYearProjection(marketplaceProjections, 5),
       Courses: getYearProjection(courseProjections, 5),
       Referrals: getYearProjection(referralProjections, 5),
@@ -160,7 +151,6 @@ export default function Revenue() {
     {
       year: 'Year 10',
       Subscriptions: getYearProjection(subProjections, 10),
-      'Estate Sales': getYearProjection(estateProjections, 10),
       Marketplace: getYearProjection(marketplaceProjections, 10),
       Courses: getYearProjection(courseProjections, 10),
       Referrals: getYearProjection(referralProjections, 10),
@@ -228,7 +218,6 @@ export default function Revenue() {
                 <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                 <Legend />
                 <Area type="monotone" dataKey="Subscriptions" stackId="1" stroke="#0891b2" fill="#0891b2" />
-                <Area type="monotone" dataKey="Estate Sales" stackId="1" stroke="#f97316" fill="#f97316" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Courses" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
@@ -282,7 +271,6 @@ export default function Revenue() {
                   <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
                   <Tooltip formatter={(value) => `$${(value / 1000000).toFixed(2)}M`} />
                   <Bar dataKey="Subscriptions" fill="#0891b2" />
-                  <Bar dataKey="Estate Sales" fill="#f97316" />
                   <Bar dataKey="Marketplace" fill="#8b5cf6" />
                   <Bar dataKey="Courses" fill="#10b981" />
                 </BarChart>
@@ -293,14 +281,10 @@ export default function Revenue() {
 
         {/* Revenue Stream Calculators */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-2">
             <TabsTrigger value="subscriptions">
               <Users className="w-4 h-4 mr-1" />
               Subscriptions
-            </TabsTrigger>
-            <TabsTrigger value="estate">
-              <Briefcase className="w-4 h-4 mr-1" />
-              Estate Sales
             </TabsTrigger>
             <TabsTrigger value="marketplace">
               <ShoppingBag className="w-4 h-4 mr-1" />
@@ -390,70 +374,6 @@ export default function Revenue() {
                     <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                     <Legend />
                     <Line type="monotone" dataKey="Subscriptions" stroke="#0891b2" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Estate Sales Tab */}
-          <TabsContent value="estate">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-orange-600" />
-                  Estate Sale Commission Calculator
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                  <div>
-                    <Label>Avg Estate Sale Value ($)</Label>
-                    <Input type="number" value={avgEstateSaleValue} onChange={(e) => setAvgEstateSaleValue(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Commission Rate (%)</Label>
-                    <Input type="number" value={commissionRate} onChange={(e) => setCommissionRate(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Sales Per Month</Label>
-                    <Input type="number" value={salesPerMonth} onChange={(e) => setSalesPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Monthly Growth Rate (%)</Label>
-                    <Input type="number" value={growthRate} onChange={(e) => setGrowthRate(Number(e.target.value))} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
-                    <div className="text-2xl font-bold text-cyan-600">
-                      ${(getYearProjection(estateProjections, 3) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      ${(getYearProjection(estateProjections, 5) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      ${(getYearProjection(estateProjections, 10) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                </div>
-
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={chartData.slice(0, 36)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                    <Legend />
-                    <Line type="monotone" dataKey="Estate Sales" stroke="#f97316" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
