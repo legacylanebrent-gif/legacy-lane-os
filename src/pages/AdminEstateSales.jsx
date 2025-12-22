@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, X, SlidersHorizontal, Plus, MoreVertical, Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
+import TechnologyCostAnalysis from '@/components/admin/TechnologyCostAnalysis';
 import { createPageUrl } from '@/utils';
 
 export default function AdminEstateSales() {
@@ -565,6 +566,8 @@ export default function AdminEstateSales() {
                     )}
                   </div>
                 )}
+
+                <TechnologyCostAnalysis sale={sale} />
               </div>
             </CardContent>
           </Card>
