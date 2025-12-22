@@ -64,6 +64,11 @@ export default function Worksheet() {
   const [offerPhone, setOfferPhone] = useState('');
   const [offerEmail, setOfferEmail] = useState('');
   const [offerNotes, setOfferNotes] = useState('');
+  const [offerPhotoMode, setOfferPhotoMode] = useState(false);
+  const [offerPhotoQuery, setOfferPhotoQuery] = useState('');
+  const [offerPhotoSuggestions, setOfferPhotoSuggestions] = useState([]);
+  const [searchingOfferPhotos, setSearchingOfferPhotos] = useState(false);
+  const [selectedOfferPhoto, setSelectedOfferPhoto] = useState(null);
 
   // Shipping form state
   const [showSmallShipForm, setShowSmallShipForm] = useState(false);
@@ -230,6 +235,9 @@ export default function Worksheet() {
       setOfferPhone('');
       setOfferEmail('');
       setOfferNotes('');
+      setOfferPhotoMode(false);
+      setSelectedOfferPhoto(null);
+      setOfferPhotoQuery('');
 
       // Reload offers
       await loadData();
@@ -557,6 +565,96 @@ Only include items with confidence > 0.3. If no items match well, return an empt
       setPrice(suggestion.suggested_price.toString());
     }
     setPhotoSuggestions([]);
+  };
+
+  const searchOfferPhotosByName = async (query) => {
+    if (!query || query.length < 2) {
+      setOfferPhotoSuggestions([]);
+      return;
+    }
+
+    setSearchingOfferPhotos(true);
+    try {
+      const images = sale.images || [];
+      
+      if (images.length === 0) {
+        setOfferPhotoSuggestions([]);
+        setSearchingOfferPhotos(false);
+        return;
+      }
+
+      const prompt = `You are helping an estate sale operator find items from their sale photos.
+
+The operator is searching for: "${query}"
+
+Available items from photos:
+${images.map((img, idx) => `${idx + 1}. ${img.name || 'Unnamed item'} - ${img.description || 'No description'} - Price: ${img.price ? '$' + img.price : 'Not priced'}`).join('\n')}
+
+Return a JSON array of the top matching items (max 5). For each match, include:
+- index: the item number from the list above
+- name: the item name
+- description: the item description
+- confidence: how confident you are this matches the search (0-1)
+- suggested_price: the price if available, otherwise null
+
+Only include items with confidence > 0.3. If no items match well, return an empty array.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            matches: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  index: { type: "number" },
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  confidence: { type: "number" },
+                  suggested_price: { type: "number" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const matches = result?.matches || [];
+      
+      const suggestions = matches.map(match => {
+        const imageData = images[match.index - 1];
+        return {
+          ...match,
+          imageUrl: imageData?.url || imageData,
+          name: match.name,
+          description: match.description,
+          suggested_price: match.suggested_price
+        };
+      });
+
+      setOfferPhotoSuggestions(suggestions);
+    } catch (error) {
+      console.error('Error searching photos:', error);
+      setOfferPhotoSuggestions([]);
+    } finally {
+      setSearchingOfferPhotos(false);
+    }
+  };
+
+  const handleOfferPhotoSearch = (query) => {
+    setOfferPhotoQuery(query);
+    searchOfferPhotosByName(query);
+  };
+
+  const selectOfferPhotoItem = (suggestion) => {
+    setSelectedOfferPhoto(suggestion);
+    setOfferItemName(suggestion.name);
+    if (suggestion.suggested_price) {
+      setOfferAmount(suggestion.suggested_price.toString());
+    }
+    setOfferPhotoSuggestions([]);
   };
 
   const handleAddSmallShipment = async () => {
@@ -1451,9 +1549,109 @@ Only include items with confidence > 0.3. If no items match well, return an empt
           {/* Add Offer Form */}
           <Card className="bg-white shadow-md">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-6">Add New Offer</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {offerPhotoMode ? 'Add Offer from Photos' : 'Add New Offer'}
+                </h3>
+                <Button 
+                  variant={offerPhotoMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setOfferPhotoMode(!offerPhotoMode);
+                    if (!offerPhotoMode) {
+                      setOfferItemName('');
+                      setOfferAmount('');
+                      setSelectedOfferPhoto(null);
+                      setOfferPhotoQuery('');
+                    }
+                  }}
+                  className={offerPhotoMode ? "bg-cyan-600 hover:bg-cyan-700" : ""}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  {offerPhotoMode ? 'Photo Mode' : 'Search Photos'}
+                </Button>
+              </div>
 
               <div className="space-y-4">
+                {offerPhotoMode && (
+                  <div className="border-2 border-cyan-200 rounded-lg p-4 bg-cyan-50 mb-4">
+                    <Label>
+                      Search Items from Photos <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative mt-2">
+                      <Input
+                        placeholder="Start typing item name... (e.g., 'dining table', 'vase')"
+                        value={offerPhotoQuery}
+                        onChange={(e) => handleOfferPhotoSearch(e.target.value)}
+                        className="pr-10"
+                      />
+                      {searchingOfferPhotos && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin h-4 w-4 border-2 border-cyan-600 border-t-transparent rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {offerPhotoSuggestions.length > 0 && (
+                      <div className="mt-2 border border-cyan-300 rounded-lg bg-white shadow-lg max-h-64 overflow-y-auto">
+                        {offerPhotoSuggestions.map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => selectOfferPhotoItem(suggestion)}
+                            className="w-full flex items-start gap-3 p-3 hover:bg-cyan-50 border-b last:border-b-0 text-left"
+                          >
+                            {suggestion.imageUrl && (
+                              <img 
+                                src={typeof suggestion.imageUrl === 'string' ? suggestion.imageUrl : suggestion.imageUrl.url}
+                                alt={suggestion.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <div className="font-medium text-slate-900">{suggestion.name}</div>
+                              {suggestion.description && (
+                                <div className="text-sm text-slate-600 line-clamp-2">{suggestion.description}</div>
+                              )}
+                              {suggestion.suggested_price && (
+                                <div className="text-sm font-semibold text-green-600 mt-1">
+                                  Price: ${suggestion.suggested_price.toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedOfferPhoto && (
+                      <div className="mt-3 p-3 bg-white border border-cyan-300 rounded-lg flex items-center gap-3">
+                        {selectedOfferPhoto.imageUrl && (
+                          <img 
+                            src={typeof selectedOfferPhoto.imageUrl === 'string' ? selectedOfferPhoto.imageUrl : selectedOfferPhoto.imageUrl.url}
+                            alt={selectedOfferPhoto.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-slate-900">Selected: {selectedOfferPhoto.name}</div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOfferPhoto(null);
+                            setOfferItemName('');
+                            setOfferAmount('');
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
