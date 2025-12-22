@@ -36,11 +36,23 @@ export default function AdminFutureOperators() {
 
   useEffect(() => {
     loadOperators();
-  }, []);
+  }, [stateFilter]);
 
   const loadOperators = async () => {
+    setLoading(true);
     try {
-      const data = await base44.entities.FutureEstateOperator.list('-created_date', 5000);
+      let data;
+      if (stateFilter === 'all') {
+        // Load only a small subset when viewing all
+        data = await base44.entities.FutureEstateOperator.list('-created_date', 100);
+      } else {
+        // Filter by state on the server
+        data = await base44.entities.FutureEstateOperator.filter(
+          { state: stateFilter },
+          '-created_date',
+          1000
+        );
+      }
       setOperators(data);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -59,10 +71,9 @@ export default function AdminFutureOperators() {
       op.state?.toLowerCase().includes(query) ||
       op.phone?.toLowerCase().includes(query)
     );
-    const matchesState = stateFilter === 'all' || op.state === stateFilter;
     const matchesPackage = packageFilter === 'all' || op.package_type === packageFilter;
     
-    return matchesSearch && matchesState && matchesPackage;
+    return matchesSearch && matchesPackage;
   });
 
   const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
@@ -137,8 +148,10 @@ export default function AdminFutureOperators() {
           </p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-slate-900">{operators.length}</div>
-          <div className="text-sm text-slate-600">Total Companies</div>
+          <div className="text-3xl font-bold text-slate-900">{filteredOperators.length}</div>
+          <div className="text-sm text-slate-600">
+            {stateFilter === 'all' ? 'Showing Latest 100' : `Companies in ${stateFilter}`}
+          </div>
         </div>
       </div>
 
