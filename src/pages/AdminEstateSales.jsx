@@ -47,18 +47,19 @@ export default function AdminEstateSales() {
       setSales(data);
       setFilteredSales(data);
       
-      // Fetch all active subscriptions at once
+      // Fetch all subscriptions and filter for active ones
       try {
-        const allSubs = await base44.asServiceRole.entities.Subscription.filter({
-          status: 'active'
-        });
+        const allSubs = await base44.asServiceRole.entities.Subscription.list();
 
         const subscriptionsMap = {};
         allSubs.forEach(sub => {
-          // Try all possible user_id locations
-          const userId = sub.user_id || sub.data?.user_id || sub.id;
-          if (userId) {
-            subscriptionsMap[userId] = sub;
+          // Only include active subscriptions
+          if (sub.status === 'active') {
+            // Try all possible user_id locations
+            const userId = sub.user_id || sub.data?.user_id;
+            if (userId) {
+              subscriptionsMap[userId] = sub;
+            }
           }
         });
 
