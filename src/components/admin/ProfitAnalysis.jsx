@@ -57,16 +57,17 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     
     if (operatorSubscription) {
       const planType = operatorSubscription.plan_type;
-      subscription = subscriptionRevenue[planType];
       
-      if (!subscription) {
-        // Fallback for unknown plan types
-        subscription = { 
-          price: operatorSubscription.price || 99, 
-          salesPerMonth: 2, 
-          name: planType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-        };
-      }
+      // Always use actual price and billing from subscription entity
+      const actualPrice = operatorSubscription.price;
+      const actualPlan = subscriptionRevenue[planType];
+      
+      subscription = {
+        price: actualPrice,
+        salesPerMonth: actualPlan?.salesPerMonth || 2,
+        name: actualPlan?.name || planType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      };
+      
       packageType = subscription.name;
     } else {
       // Default to Pro if no subscription found
@@ -79,7 +80,9 @@ export default function ProfitAnalysis({ sale, techCosts }) {
     const revenueSources = [
       {
         label: `${packageType} Package`,
-        detail: `Seller Subscription $${subscription.price}/month`,
+        detail: operatorSubscription 
+          ? `Seller Subscription $${subscription.price}/month` 
+          : `Seller Subscription $${subscription.price}/month (default - no subscription found)`,
         amount: perSaleRevenue,
         type: 'subscription'
       }
