@@ -9,7 +9,11 @@ export default function ProfitAnalysis({ sale, techCosts }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadOperatorSubscription();
+    if (sale.operator_id) {
+      loadOperatorSubscription();
+    } else {
+      setLoading(false);
+    }
   }, [sale.operator_id]);
 
   const loadOperatorSubscription = async () => {
