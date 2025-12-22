@@ -9,6 +9,11 @@ import {
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'My Sales', path: 'MySales', icon: Building2 },
+  { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
+  { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
+  { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
+  { label: 'Leads', path: 'AdminLeads', icon: Award },
   { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
@@ -18,11 +23,6 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
-  { label: 'My Sales', path: 'MySales', icon: Building2 },
-  { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
-  { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
-  { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
-  { label: 'Leads', path: 'AdminLeads', icon: Award },
   { label: 'Packages', path: 'AdminPackages', icon: Package },
   { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
