@@ -24,7 +24,7 @@ export default function FutureOperatorsAnalytics() {
   const loadOperators = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.FutureEstateOperator.list('-created_date', 50000);
+      const data = await base44.entities.FutureEstateOperator.filter({}, '-created_date', 100000);
       setOperators(data);
     } catch (error) {
       console.error('Error loading operators:', error);
