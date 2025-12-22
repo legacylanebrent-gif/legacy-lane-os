@@ -24,7 +24,7 @@ export default function AdminAdvertisingPackages() {
       setPackages([
         {
           id: '1',
-          name: 'Basic Ad',
+          name: 'Vendor Bronze',
           price: 29,
           billing_period: 'monthly',
           features: ['Homepage banner', 'Basic analytics', '1,000 impressions/month'],
@@ -32,7 +32,7 @@ export default function AdminAdvertisingPackages() {
         },
         {
           id: '2',
-          name: 'Pro Ad',
+          name: 'Vendor Silver',
           price: 49,
           billing_period: 'monthly',
           features: ['Homepage + category banners', 'Advanced analytics', '5,000 impressions/month', 'Featured placement'],
@@ -40,7 +40,7 @@ export default function AdminAdvertisingPackages() {
         },
         {
           id: '3',
-          name: 'Premium Ad',
+          name: 'Vendor Platinum',
           price: 179,
           billing_period: 'monthly',
           features: ['All placements', 'Full analytics suite', 'Unlimited impressions', 'Priority support', 'Custom targeting'],
