@@ -477,27 +477,26 @@ export default function Worksheet() {
     }
   };
 
-  const searchPhotosByName = async (query) => {
+  const handlePhotoSearch = async (query) => {
+    setPhotoSearchQuery(query);
+    
+    // Clear immediately
+    setPhotoSuggestions([]);
+    
     if (!query || query.length < 2) {
-      setPhotoSuggestions([]);
       return;
     }
 
-    const currentQuery = query;
-    setPhotoSuggestions([]);
     setSearchingPhotos(true);
+    
     try {
-      // Get images from the sale
       const images = sale.images || [];
       
-      // If no images or no metadata, return empty
       if (images.length === 0) {
-        setPhotoSuggestions([]);
         setSearchingPhotos(false);
         return;
       }
 
-      // Use AI to match the query with image names/descriptions
       const prompt = `You are helping an estate sale operator find items from their sale photos.
 
 The operator is searching for: "${query}"
@@ -538,7 +537,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
 
       const matches = result?.matches || [];
       
-      // Map back to actual images with their data
       const suggestions = matches.map(match => {
         const imageData = images[match.index - 1];
         return {
@@ -557,15 +555,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
     } finally {
       setSearchingPhotos(false);
     }
-  };
-
-  const handlePhotoSearch = (query) => {
-    setPhotoSearchQuery(query);
-    if (!query || query.length < 2) {
-      setPhotoSuggestions([]);
-      return;
-    }
-    searchPhotosByName(query);
   };
 
   const selectPhotoItem = (suggestion) => {
