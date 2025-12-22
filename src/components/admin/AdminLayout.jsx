@@ -9,12 +9,12 @@ import {
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
   { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
-  { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
