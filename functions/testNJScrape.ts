@@ -17,46 +17,81 @@ Deno.serve(async (req) => {
     
     console.log(`HTML length: ${html.length}`);
     
-    // Look for various patterns to find company links
-    const patterns = [
-      /href="(https:\/\/www\.estatesales\.net\/companies\/[^"]+)"/g,
-      /<a[^>]*href="([^"]*companies[^"]*)"[^>]*>/g,
-      /estatesales\.net\/companies\/[^\s"'<>]+/g
-    ];
+    // Find company profile links (relative URLs)
+    const companyLinkRegex = /href="(\/companies\/NJ\/[^/]+\/\d{5}\/\d+)"/g;
+    const relativeLinks = [...html.matchAll(companyLinkRegex)].map(m => m[1]);
+    const uniqueLinks = [...new Set(relativeLinks)];
     
-    const allMatches = {};
-    patterns.forEach((pattern, idx) => {
-      const matches = [...html.matchAll(pattern)].map(m => m[1] || m[0]);
-      allMatches[`pattern_${idx + 1}`] = [...new Set(matches)].slice(0, 10);
-      console.log(`Pattern ${idx + 1} found ${matches.length} matches`);
-    });
+    console.log(`Found ${uniqueLinks.length} unique company links`);
     
-    // Look for company cards or listings
-    const companyCardPatterns = [
-      /<div[^>]*class="[^"]*company[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
-      /<article[^>]*>[\s\S]*?<\/article>/gi,
-      /<li[^>]*class="[^"]*company[^"]*"[^>]*>[\s\S]*?<\/li>/gi
-    ];
+    // Take first 3 companies as sample
+    const sampleCompanies = [];
+    const sampleLinks = uniqueLinks.slice(0, 3);
     
-    const cardSamples = {};
-    companyCardPatterns.forEach((pattern, idx) => {
-      const matches = [...html.matchAll(pattern)];
-      if (matches.length > 0) {
-        cardSamples[`card_pattern_${idx + 1}`] = matches.slice(0, 2).map(m => m[0].substring(0, 500));
-        console.log(`Card pattern ${idx + 1} found ${matches.length} matches`);
+    for (const relativeUrl of sampleLinks) {
+      const companyUrl = `https://www.estatesales.net${relativeUrl}`;
+      console.log(`Fetching company: ${companyUrl}`);
+      
+      try {
+        const companyResponse = await fetch(companyUrl);
+        const companyHtml = await companyResponse.text();
+
+        // Extract company data
+        const nameMatch = companyHtml.match(/<h1[^>]*>([^<]+)<\/h1>/);
+        const name = nameMatch ? nameMatch[1].trim() : null;
+
+        const locationMatch = companyHtml.match(/([^,\n]+),\s*([A-Z]{2})\s*(\d{5})/);
+        const city = locationMatch ? locationMatch[1].trim() : null;
+        const stateCode = locationMatch ? locationMatch[2] : 'NJ';
+        const zipCode = locationMatch ? locationMatch[3] : null;
+
+        const phoneMatch = companyHtml.match(/tel:\s*\+?1?(\d{10})/);
+        const phone = phoneMatch ? phoneMatch[1].replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') : null;
+
+        const websiteMatch = companyHtml.match(/href="(http[^"]+)"[^>]*>[\s\n]*(?!Message|Facebook|Twitter|Instagram|YouTube|Pinterest)([a-zA-Z0-9\-\.]+\.[a-z]{2,})/i);
+        const website = websiteMatch ? websiteMatch[1] : null;
+
+        const memberMatch = companyHtml.match(/Member\s+Since\s+(\d{4})/);
+        const memberSince = memberMatch ? memberMatch[1] : null;
+
+        const packageMatch = companyHtml.match(/(Gold|Silver|Bronze|Platinum)\s+Package/i);
+        const packageType = packageMatch ? packageMatch[1] : null;
+
+        const facebookMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?facebook\.com\/[^"]+)"/);
+        const twitterMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?twitter\.com\/[^"]+)"/);
+        const instagramMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?instagram\.com\/[^"]+)"/);
+        const youtubeMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?youtube\.com\/[^"]+)"/);
+        const pinterestMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
+
+        sampleCompanies.push({
+          company_name: name,
+          city: city,
+          state: stateCode,
+          zip_code: zipCode,
+          phone: phone,
+          website: website,
+          member_since: memberSince,
+          package_type: packageType,
+          facebook: facebookMatch ? facebookMatch[1] : null,
+          twitter: twitterMatch ? twitterMatch[1] : null,
+          instagram: instagramMatch ? instagramMatch[1] : null,
+          youtube: youtubeMatch ? youtubeMatch[1] : null,
+          pinterest: pinterestMatch ? pinterestMatch[1] : null,
+          source_url: companyUrl,
+          source_state: 'NJ'
+        });
+        
+        console.log(`✓ Scraped: ${name}`);
+      } catch (error) {
+        console.error(`Error scraping ${companyUrl}:`, error.message);
       }
-    });
-    
-    // Sample the HTML structure
-    const htmlSample = html.substring(0, 5000);
+    }
     
     return Response.json({ 
       url: testUrl,
-      html_length: html.length,
-      link_patterns: allMatches,
-      card_samples: cardSamples,
-      html_sample: htmlSample,
-      note: "Check the patterns to see what company data we can extract"
+      total_companies_found: uniqueLinks.length,
+      sample_companies: sampleCompanies,
+      note: "This is a sample of 3 companies. Ready to scrape all?"
     });
     
   } catch (error) {
