@@ -401,8 +401,11 @@ END:VCALENDAR`;
                     {sale.images.map((image, index) => (
                       <div key={index} className="relative">
                         <button
-                          onClick={() => setSelectedImage(index)}
-                          className={`w-full aspect-square rounded-lg overflow-hidden border-2 ${
+                          onClick={() => {
+                            setSelectedImage(index);
+                            setModalOpen(true);
+                          }}
+                          className={`w-full aspect-square rounded-lg overflow-hidden border-2 hover:border-orange-400 transition-colors cursor-pointer ${
                             selectedImage === index ? 'border-orange-600' : 'border-slate-200'
                           }`}
                         >
