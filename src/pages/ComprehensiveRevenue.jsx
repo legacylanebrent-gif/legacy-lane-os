@@ -252,10 +252,9 @@ export default function ComprehensiveRevenue() {
   const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
   const featureProjections = calculateProjections(totalFeatureRevenuePerMonth, featureGrowth, 120);
   
-  // Calculate advertising based on cities: total cities * new advertisers per city per month
-  const calculatedAdNewPerMonth = totalCities * adNewPerCityPerMonth;
-  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, calculatedAdNewPerMonth, adChurnRate);
-  const adProjections = calculateProjections(adData.projections[0], adGrowth, 120);
+  // Calculate advertising: 1 advertiser per package per city per month
+  const adRevenuePerMonth = totalCities * (adBasicPrice + adProPrice + adPremiumPrice);
+  const adProjections = calculateProjections(adRevenuePerMonth, adGrowth, 120);
 
   // Create operator projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
@@ -918,12 +917,18 @@ export default function ComprehensiveRevenue() {
                   <div className="text-sm text-slate-700 mb-2">
                     <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
                   </div>
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Assumption:</strong> 1 advertiser per package type per city per month
+                  </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Calculated New Advertisers/Month:</strong> {totalCities.toLocaleString()} cities × {adNewPerCityPerMonth} advertiser/city = {calculatedAdNewPerMonth.toLocaleString()} advertisers/month
+                    <strong>Total Advertisers/Month:</strong> {totalCities.toLocaleString()} cities × 3 packages = {(totalCities * 3).toLocaleString()} advertisers/month
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Monthly Revenue:</strong> {totalCities.toLocaleString()} × (${adBasicPrice} + ${adProPrice} + ${adPremiumPrice}) = ${adRevenuePerMonth.toLocaleString()}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
                     <Label>Basic Ad Price ($)</Label>
                     <Input type="number" value={adBasicPrice} onChange={(e) => setAdBasicPrice(Number(e.target.value))} />
@@ -935,10 +940,6 @@ export default function ComprehensiveRevenue() {
                   <div>
                     <Label>Premium Ad Price ($)</Label>
                     <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>New Advertisers Per City/Month</Label>
-                    <Input type="number" value={adNewPerCityPerMonth} onChange={(e) => setAdNewPerCityPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
