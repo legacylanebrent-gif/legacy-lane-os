@@ -86,12 +86,22 @@ export default function AdminEstateSales() {
           activeCount,
           mappedCount,
           allStatuses,
-          sampleSubs
+          sampleSubs,
+          error: null,
+          fetchSuccess: true
         });
 
         setOperatorSubscriptions(subscriptionsMap);
       } catch (error) {
-        console.error('Error loading subscriptions:', error);
+        setDebugInfo({
+          total: 0,
+          activeCount: 0,
+          mappedCount: 0,
+          allStatuses: [],
+          sampleSubs: [],
+          error: error.message,
+          fetchSuccess: false
+        });
       }
     } catch (error) {
       console.error('Error loading estate sales:', error);
@@ -264,6 +274,8 @@ export default function AdminEstateSales() {
         <div className="font-bold text-sm mb-2">🐛 DEBUG: Subscriptions Analysis</div>
         <div className="text-xs space-y-2">
           <div className="bg-white p-2 rounded">
+            <div><strong>Fetch Success:</strong> {debugInfo.fetchSuccess ? '✅ YES' : '❌ NO'}</div>
+            {debugInfo.error && <div className="text-red-600"><strong>Error:</strong> {debugInfo.error}</div>}
             <div><strong>Total Fetched:</strong> {debugInfo.total || 0}</div>
             <div><strong>Active Status:</strong> {debugInfo.activeCount || 0}</div>
             <div><strong>Successfully Mapped:</strong> {debugInfo.mappedCount || 0}</div>
