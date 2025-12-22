@@ -145,7 +145,7 @@ export default function Revenue() {
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
-  const featureProjections = calculateProjections(featuresPerMonth * ((nationalFeaturePrice + localFeaturePrice) / 2), featureGrowth, 120);
+  const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
   const adProjections = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
 
   const totalProjections = subProjections.map((_, i) => 
@@ -779,7 +779,7 @@ export default function Revenue() {
                     <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Features Per Month (avg of national & local pricing)</Label>
+                    <Label>Features Per Month (3% national, 97% local)</Label>
                     <Input type="number" value={featuresPerMonth} onChange={(e) => setFeaturesPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
