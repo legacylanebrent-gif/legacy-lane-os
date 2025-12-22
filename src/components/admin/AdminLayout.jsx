@@ -11,7 +11,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
-  { label: 'Revenue', path: 'Revenue', icon: DollarSign },
+  { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'Vendors', path: 'AdminVendors', icon: Briefcase },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
