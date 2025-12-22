@@ -16,19 +16,25 @@ Deno.serve(async (req) => {
     }
 
     const stateUrl = `https://www.estatesales.net/companies/${state}`;
+    console.log(`Fetching state page: ${stateUrl}`);
     const stateResponse = await fetch(stateUrl);
     const stateHtml = await stateResponse.text();
     
-    // Extract city/region links from the state page
-    // Look for href links in the Larger Cities section
-    const cityLinkRegex = /href="(https:\/\/www\.estatesales\.net\/companies\/[A-Z]{2}\/[^"]+)"/gi;
-    const cityLinks = [...stateHtml.matchAll(cityLinkRegex)].map(m => m[1]);
-    // Filter out company profile links (which have /ZIP/ID pattern) and out-of-state links
-    const uniqueCityLinks = [...new Set(cityLinks)].filter(link => 
-      link.includes(`/companies/${state}/`) && !link.match(/\/\d{5}\/\d+$/)
-    );
+    console.log(`State page HTML length: ${stateHtml.length}`);
     
-    console.log(`Found ${uniqueCityLinks.length} cities/regions in ${state}:`, uniqueCityLinks);
+    // Extract all city/region links - look for estatesales.net/companies/{STATE}/... patterns
+    const allLinks = stateHtml.match(/https:\/\/www\.estatesales\.net\/companies\/[A-Z]{2}\/[^"\s<>]+/gi) || [];
+    console.log(`Found ${allLinks.length} total links`);
+    
+    // Filter to only this state and exclude company profiles (which have /ZIP/CompanyID)
+    const cityLinks = allLinks.filter(link => {
+      const isThisState = link.includes(`/companies/${state}/`);
+      const isNotCompanyProfile = !link.match(/\/\d{5}\/\d+/);
+      return isThisState && isNotCompanyProfile;
+    });
+    
+    const uniqueCityLinks = [...new Set(cityLinks)];
+    console.log(`Found ${uniqueCityLinks.length} unique city/region URLs for ${state}:`, uniqueCityLinks);
     
     const allCompanies = [];
     const BATCH_SIZE = 10;
@@ -40,11 +46,14 @@ Deno.serve(async (req) => {
 
       const cityPromises = cityBatch.map(async (cityUrl) => {
         try {
+          console.log(`  Fetching city: ${cityUrl}`);
           const cityResponse = await fetch(cityUrl);
           const cityHtml = await cityResponse.text();
 
-          const companyLinkRegex = new RegExp(`https://www\\.estatesales\\.net/companies/${state}/[^/]+/\\d+/\\d+`, 'g');
+          // Match company profile URLs with pattern /companies/STATE/City/ZIP/CompanyID
+          const companyLinkRegex = new RegExp(`https://www\\.estatesales\\.net/companies/${state}/[^/]+/\\d{5}/\\d+`, 'g');
           const companyLinks = [...cityHtml.matchAll(companyLinkRegex)].map(m => m[0]);
+          console.log(`    Found ${companyLinks.length} companies in ${cityUrl}`);
           return [...new Set(companyLinks)];
         } catch (error) {
           console.error(`Error processing city ${cityUrl}:`, error.message);
@@ -68,7 +77,7 @@ Deno.serve(async (req) => {
             const nameMatch = companyHtml.match(/<h1[^>]*>([^<]+)<\/h1>/);
             const name = nameMatch ? nameMatch[1].trim() : null;
 
-            const locationMatch = companyHtml.match(/([^,\n]+),\s*([A-Z]{2})(\d{5})/);
+            const locationMatch = companyHtml.match(/([^,\n]+),\s*([A-Z]{2})\s*(\d{5})/);
             const city = locationMatch ? locationMatch[1].trim() : null;
             const stateCode = locationMatch ? locationMatch[2] : state;
             const zipCode = locationMatch ? locationMatch[3] : null;
@@ -92,6 +101,7 @@ Deno.serve(async (req) => {
             const pinterestMatch = companyHtml.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
 
             if (name && city) {
+              console.log(`      ✓ Scraped: ${name} in ${city}, ${stateCode}`);
               return {
                 company_name: name,
                 city: city,
