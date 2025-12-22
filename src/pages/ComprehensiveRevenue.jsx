@@ -52,9 +52,10 @@ export default function ComprehensiveRevenue() {
   const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 5));
   
   // Referral Fee Inputs
-  const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 500));
+  const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 1000));
   const [referralsPerMonth, setReferralsPerMonth] = useState(() => loadValue('referralsPerMonth', 8));
-  const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 12));
+  const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 3));
+  const [referralsPerOperatorPerYear, setReferralsPerOperatorPerYear] = useState(() => loadValue('referralsPerOperatorPerYear', 1));
 
   // Premium Placement Inputs
   const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 299));
@@ -236,7 +237,10 @@ export default function ComprehensiveRevenue() {
   
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   
-  const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
+  // Calculate referrals based on total operators and referrals per operator per year
+  const totalOperators = operators.length;
+  const calculatedReferralsPerMonth = (totalOperators * referralsPerOperatorPerYear) / 12;
+  const referralProjections = calculateProjections(calculatedReferralsPerMonth * avgReferralFee, referralGrowth, 120);
   
   const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
   
@@ -753,18 +757,31 @@ export default function ComprehensiveRevenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-amber-600" />
-                  Leads & Referral Fee Calculator
+                  RE Referral Fee Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-slate-700 mb-2">
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Calculated Referrals/Month:</strong> {totalOperators.toLocaleString()} operators × {referralsPerOperatorPerYear} referral/yr ÷ 12 months = {calculatedReferralsPerMonth.toFixed(1)} referrals/month
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
                     <Label>Avg Referral Fee ($)</Label>
                     <Input type="number" value={avgReferralFee} onChange={(e) => setAvgReferralFee(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Referrals Per Month</Label>
-                    <Input type="number" value={referralsPerMonth} onChange={(e) => setReferralsPerMonth(Number(e.target.value))} />
+                    <Label>Referrals Per Operator/Year</Label>
+                    <Input type="number" value={referralsPerOperatorPerYear} onChange={(e) => setReferralsPerOperatorPerYear(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Total Referrals/Month</Label>
+                    <Input type="number" value={calculatedReferralsPerMonth.toFixed(1)} disabled className="bg-slate-100" />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
