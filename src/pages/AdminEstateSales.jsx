@@ -607,6 +607,7 @@ export default function AdminEstateSales() {
                 <ProfitAnalysis 
                   sale={sale} 
                   techCosts={saleTechCosts[sale.id] || { actual: 0, scenario: 0 }}
+                  operatorSubscription={operatorSubscriptions[sale.operator_id]}
                 />
               </div>
             </CardContent>

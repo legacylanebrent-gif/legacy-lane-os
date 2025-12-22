@@ -3,43 +3,11 @@ import { ChevronDown, ChevronUp, TrendingUp, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 
-export default function ProfitAnalysis({ sale, techCosts }) {
+export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }) {
   const [expanded, setExpanded] = useState(false);
-  const [operatorSubscription, setOperatorSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (sale.operator_id) {
-      loadOperatorSubscription();
-    } else {
-      setLoading(false);
-    }
-  }, [sale.operator_id]);
-
-  const loadOperatorSubscription = async () => {
-    if (!sale.operator_id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
-        user_id: sale.operator_id,
-        status: 'active'
-      });
-      
-      if (subscriptions.length > 0) {
-        setOperatorSubscription(subscriptions[0]);
-      }
-    } catch (error) {
-      console.error('Error loading operator subscription:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Revenue Calculations
-  const monthlySubscription = operatorSubscription?.price || 0;
+  const monthlySubscription = operatorSubscription?.price || operatorSubscription?.data?.price || 0;
   const nationalFeatureRevenue = sale.national_featured_price || 0;
   const localFeatureRevenue = sale.local_featured_price || 0;
   const emailCampaignRevenue = sale.email_campaign_price || 0;
@@ -108,7 +76,7 @@ export default function ProfitAnalysis({ sale, techCosts }) {
               </div>
             )}
 
-            {sale.operator_id && !operatorSubscription && !loading && (
+            {sale.operator_id && !operatorSubscription && (
               <div className="p-3 text-xs text-amber-600 bg-amber-50 border-b">
                 ⚠️ No active subscription found for operator {sale.operator_name || sale.operator_id}
               </div>
@@ -119,7 +87,7 @@ export default function ProfitAnalysis({ sale, techCosts }) {
                 <div className="text-slate-700">Monthly Subscription</div>
                 <div className="text-right">
                   <div className="text-green-600 font-semibold">${monthlySubscription.toFixed(2)}</div>
-                  <div className="text-xs text-slate-500">{operatorSubscription.plan_type}</div>
+                  <div className="text-xs text-slate-500">{operatorSubscription.plan_type || operatorSubscription.data?.plan_type}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-green-600">${monthlySubscription.toFixed(2)}</div>
