@@ -847,7 +847,7 @@ export default function Revenue() {
                     <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>New Advertisers/Month</Label>
+                    <Label>New Advertisers/Month (total, split 50/30/20)</Label>
                     <Input type="number" value={adNewPerMonth} onChange={(e) => setAdNewPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
