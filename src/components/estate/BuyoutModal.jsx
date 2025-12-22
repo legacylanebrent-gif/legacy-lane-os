@@ -149,78 +149,64 @@ export default function BuyoutModal({ open, onClose, sale }) {
     setLabelingStatus({ current: 0, total: images.length, completed: false });
 
     const labeled = [];
-    const BATCH_SIZE = 3; // Process 3 images at a time
 
     try {
-      const prompt = `You are analyzing a photo of an item from an estate sale for a buyout valuation.
+      for (let i = 0; i < images.length; i++) {
+        setLabelingStatus(prev => ({ ...prev, current: i + 1 }));
+
+        try {
+          const prompt = `You are analyzing a photo of an item from an estate sale.
 
 Look at this photo and provide:
 1. A specific name for this item (be descriptive but concise)
 2. A brief description highlighting key features, condition, and any notable details
-3. The estimated NEW retail price (research current prices on Amazon, eBay, retail websites)
+3. The estimated NEW retail price (what this would cost brand new)
 4. The suggested ESTATE SALE price (typically 30-50% of new retail value, accounting for condition)
-5. Brief notes on where you found pricing (e.g., "Amazon: $150, eBay: $140")
 
-Focus on being accurate and realistic with pricing based on current online market data.
+Focus on being accurate and realistic with pricing.
 
 Return ONLY valid JSON in this exact format:
 {
   "name": "Item name here",
   "description": "Description here",
   "suggested_new_price": 150.00,
-  "suggested_used_price": 75.00,
-  "pricing_sources": "Amazon: $150, eBay used: $80"
+  "suggested_used_price": 75.00
 }`;
 
-      // Process in batches
-      for (let i = 0; i < images.length; i += BATCH_SIZE) {
-        const batch = images.slice(i, i + BATCH_SIZE);
-        
-        const batchPromises = batch.map(async (img, batchIndex) => {
-          try {
-            const result = await base44.integrations.Core.InvokeLLM({
-              prompt,
-              file_urls: [img.url],
-              add_context_from_internet: true,
-              response_json_schema: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  suggested_new_price: { type: "number" },
-                  suggested_used_price: { type: "number" },
-                  pricing_sources: { type: "string" }
-                },
-                required: ["name", "description", "suggested_new_price", "suggested_used_price", "pricing_sources"]
-              }
-            });
+          const result = await base44.integrations.Core.InvokeLLM({
+            prompt,
+            file_urls: [images[i].url],
+            response_json_schema: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                description: { type: "string" },
+                suggested_new_price: { type: "number" },
+                suggested_used_price: { type: "number" }
+              },
+              required: ["name", "description", "suggested_new_price", "suggested_used_price"]
+            }
+          });
 
-            setLabelingStatus(prev => ({ ...prev, current: prev.current + 1 }));
+          labeled.push({
+            ...images[i],
+            name: result.name,
+            description: result.description,
+            suggested_new_price: result.suggested_new_price,
+            suggested_used_price: result.suggested_used_price
+          });
 
-            return {
-              ...img,
-              name: result.name,
-              description: result.description,
-              suggested_new_price: result.suggested_new_price,
-              suggested_used_price: result.suggested_used_price,
-              pricing_sources: result.pricing_sources
-            };
-          } catch (error) {
-            console.error('Error labeling image:', error);
-            setLabelingStatus(prev => ({ ...prev, current: prev.current + 1 }));
-            return {
-              ...img,
-              name: 'Unlabeled Item',
-              description: 'Failed to analyze',
-              suggested_new_price: 0,
-              suggested_used_price: 0,
-              pricing_sources: 'N/A'
-            };
-          }
-        });
-
-        const batchResults = await Promise.all(batchPromises);
-        labeled.push(...batchResults);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error('Error labeling image:', error);
+          labeled.push({
+            ...images[i],
+            name: 'Unlabeled Item',
+            description: 'Failed to analyze',
+            suggested_new_price: 0,
+            suggested_used_price: 0
+          });
+        }
       }
 
       setLabeledItems(labeled);
@@ -370,9 +356,6 @@ Return ONLY valid JSON in this exact format:
                       <div className="flex-1">
                         <h4 className="font-semibold text-slate-900">{item.name}</h4>
                         <p className="text-xs text-slate-600 line-clamp-1">{item.description}</p>
-                        {item.pricing_sources && (
-                          <p className="text-xs text-blue-600 mt-1">📊 {item.pricing_sources}</p>
-                        )}
                       </div>
                       <div className="text-right">
                         <div className="text-xs text-slate-500 line-through">${item.suggested_new_price?.toFixed(2) || '0.00'}</div>
@@ -454,15 +437,15 @@ ${labeledItems.map((item, i) => `${i + 1}. ${item.name} - $${item.suggested_used
                     onClick={async () => {
                       try {
                         const itemsList = labeledItems.map((item, i) => 
-                          `${i + 1}. ${item.name}\n   Retail: $${item.suggested_new_price?.toFixed(2)}, Estate: $${item.suggested_used_price?.toFixed(2)}\n   Sources: ${item.pricing_sources || 'N/A'}`
-                        ).join('\n\n');
+                          `${i + 1}. ${item.name} - Retail: $${item.suggested_new_price?.toFixed(2)}, Estate: $${item.suggested_used_price?.toFixed(2)}`
+                        ).join('\n');
 
                         await base44.entities.Offer.create({
                           sale_id: sale?.id,
                           item_name: `Buyout Offer - ${labeledItems.length} Items`,
                           offer_amount: getOfferAmount(),
                           full_name: 'Estate Buyout',
-                          notes: `Buyout Analysis:\n\nTotal Items: ${labeledItems.length}\nTotal Estate Value: $${getTotalValue().toFixed(2)}\nOffer Percentage: ${offerPercentage}%\nOffer Amount: $${getOfferAmount().toFixed(2)}\n\nDetailed Items:\n${itemsList}`,
+                          notes: `Buyout Analysis:\n\nTotal Items: ${labeledItems.length}\nTotal Estate Value: $${getTotalValue().toFixed(2)}\nOffer Percentage: ${offerPercentage}%\nOffer Amount: $${getOfferAmount().toFixed(2)}\n\nItems:\n${itemsList}`,
                           status: 'pending'
                         });
 
