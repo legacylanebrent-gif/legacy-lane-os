@@ -17,7 +17,6 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Leads', path: 'AdminLeads', icon: Award },
   { label: 'Users', path: 'AdminUsers', icon: Users },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
-  { label: 'Vendor Users', path: 'AdminVendorUsers', icon: Briefcase },
   { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
