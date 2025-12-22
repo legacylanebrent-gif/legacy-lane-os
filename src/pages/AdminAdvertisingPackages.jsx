@@ -45,6 +45,22 @@ export default function AdminAdvertisingPackages() {
           billing_period: 'monthly',
           features: ['All placements', 'Full analytics suite', 'Unlimited impressions', 'Priority support', 'Custom targeting'],
           is_active: true
+        },
+        {
+          id: '4',
+          name: 'National Featured',
+          price: 179,
+          billing_period: 'per listing',
+          features: ['Featured on national homepage', 'Priority search ranking', 'Enhanced visibility', '30-day feature period'],
+          is_active: true
+        },
+        {
+          id: '5',
+          name: 'Local Featured',
+          price: 97,
+          billing_period: 'per listing',
+          features: ['Featured in local city/region', 'Top of search results', 'Highlighted listing', '30-day feature period'],
+          is_active: true
         }
       ]);
     } catch (error) {
