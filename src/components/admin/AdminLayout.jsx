@@ -68,7 +68,7 @@ export default function AdminLayout({ children, currentPage }) {
 
             return (
               <React.Fragment key={item.path}>
-                {item.label === 'Users' && (
+                {(item.label === 'Users' || item.label === 'Revenue Projections') && (
                   <div className="w-[80%] mx-auto my-3 border-t border-slate-600" />
                 )}
                 <Link to={createPageUrl(item.path)}>
