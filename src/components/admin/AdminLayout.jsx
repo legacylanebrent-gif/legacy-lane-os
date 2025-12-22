@@ -4,12 +4,13 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
   { label: 'My Profile', path: 'MyProfile', icon: User },
+  { label: 'Income Tracker', path: 'IncomeTracker', icon: TrendingUp },
   { label: 'Business Expenses', path: 'MyBusinessExpenses', icon: FileText },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },

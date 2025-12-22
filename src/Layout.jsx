@@ -229,6 +229,19 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
+                <Link to={createPageUrl('IncomeTracker')}>
+                  <Button 
+                    variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'IncomeTracker' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <TrendingUp className="w-5 h-5 mr-3" />
+                    Income Tracker
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('MyBusinessExpenses')}>
                   <Button 
                     variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
