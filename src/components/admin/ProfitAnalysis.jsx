@@ -72,22 +72,6 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
               <div className="font-semibold text-sm text-slate-900">Revenue Sources</div>
             </div>
 
-            <div className="p-3 text-xs bg-blue-50 border-b">
-              <div className="font-mono text-[10px]">
-                <div>Operator ID: {sale.operator_id || 'NONE'}</div>
-                <div>Operator Name: {sale.operator_name || 'NONE'}</div>
-                <div>Subscription Object: {operatorSubscription ? 'EXISTS' : 'NULL'}</div>
-                {operatorSubscription && (
-                  <>
-                    <div>Full Sub Object:</div>
-                    <pre className="text-[9px] overflow-auto max-h-32 bg-white p-1 rounded mt-1">
-                      {JSON.stringify(operatorSubscription, null, 2)}
-                    </pre>
-                  </>
-                )}
-              </div>
-            </div>
-
             {!sale.operator_id && (
               <div className="p-3 text-xs text-amber-600 bg-amber-50 border-b">
                 ⚠️ No operator assigned to this sale. Please assign an operator to see subscription revenue.
