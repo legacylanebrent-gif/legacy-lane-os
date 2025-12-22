@@ -190,6 +190,11 @@ export default function AdminPackages() {
                               <>
                                 <div className="text-3xl font-bold text-slate-900">${pkgData.monthly_price}</div>
                                 <div className="text-sm text-slate-600">per month</div>
+                                {pkgData.per_item_price && (
+                                  <div className="text-sm text-slate-600 mt-1">
+                                    + ${pkgData.per_item_price} per sale listing
+                                  </div>
+                                )}
                                 {pkgData.annual_price && (
                                   <div className="mt-2 text-sm text-slate-600">
                                     ${pkgData.annual_price}/year (save ${(pkgData.monthly_price * 12 - pkgData.annual_price).toFixed(0)})
