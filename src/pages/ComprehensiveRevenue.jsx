@@ -205,11 +205,11 @@ export default function ComprehensiveRevenue() {
   const packageData = Object.entries(packageCounts).map(([name, value]) => {
     const displayName = name === 'Unknown' ? 'Basic' : name;
     const monthlyRevenue = value * (PACKAGE_PRICES[displayName] || 0);
-    // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
+    // Basic operators: $0/month + $99 per sale × 6 sales/year ÷ 12 months
     // Bronze operators: $35/month + $64 per sale × 1.25 sales/month
     let perSaleRevenue = 0;
     if (displayName === 'Basic') {
-      perSaleRevenue = value * 99 * 8 / 12;
+      perSaleRevenue = value * 99 * 6 / 12;
     } else if (displayName === 'Bronze') {
       perSaleRevenue = value * 64 * 1.25;
     }
@@ -237,11 +237,11 @@ export default function ComprehensiveRevenue() {
   const currentOperatorMonthlyRevenue = operators.reduce((sum, op) => {
     const packageType = op.package_type === 'Unknown' ? 'Basic' : op.package_type;
     const monthlyPrice = PACKAGE_PRICES[packageType] || 0;
-    // Basic operators: $0/month + $99 per sale × 8 sales/year ÷ 12 months
+    // Basic operators: $0/month + $99 per sale × 6 sales/year ÷ 12 months
     // Bronze operators: $35/month + $64 per sale × 1.25 sales/month
     let perSaleRevenue = 0;
     if (packageType === 'Basic') {
-      perSaleRevenue = 99 * 8 / 12;
+      perSaleRevenue = 99 * 6 / 12;
     } else if (packageType === 'Bronze') {
       perSaleRevenue = 64 * 1.25;
     }
@@ -509,7 +509,7 @@ export default function ComprehensiveRevenue() {
                         <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                         <div className="text-xs text-slate-500">
                           {pkg.value} operators
-                          {pkg.name === 'Basic' && ' ($99/sale × 8 sales/yr)'}
+                          {pkg.name === 'Basic' && ' ($99/sale × 6 sales/yr)'}
                           {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
                         </div>
                       </div>
