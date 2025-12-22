@@ -105,7 +105,6 @@ export default function AdminLeads() {
           <option value="all">All Sources</option>
           <option value="estate_finder">Estate Finder</option>
           <option value="home_value_tool">Home Value Tool</option>
-          <option value="course_signup">Course Signup</option>
           <option value="marketplace_inquiry">Marketplace Inquiry</option>
           <option value="referral">Referral</option>
           <option value="advertising">Advertising</option>
