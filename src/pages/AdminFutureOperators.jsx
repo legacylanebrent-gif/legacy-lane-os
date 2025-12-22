@@ -15,6 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function AdminFutureOperators() {
   const [operators, setOperators] = useState([]);
@@ -23,6 +30,9 @@ export default function AdminFutureOperators() {
   const [stateFilter, setStateFilter] = useState('AR');
   const [packageFilter, setPackageFilter] = useState('all');
   const [importing, setImporting] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
+  const [importResults, setImportResults] = useState(null);
 
   useEffect(() => {
     loadOperators();
@@ -75,20 +85,32 @@ export default function AdminFutureOperators() {
     const functionName = `scrape${stateFilter}Operators`;
     
     setImporting(true);
+    setShowImportModal(true);
+    setImportStatus('importing');
+    setImportResults(null);
+    
     try {
       const response = await base44.functions.invoke(functionName, {});
       console.log('Import result:', response.data);
       
+      setImportResults(response.data);
+      setImportStatus('success');
+      
       // Reload operators after import
       await loadOperators();
-      
-      alert(`Successfully imported and updated companies for ${stateFilter}!\n\nScraped: ${response.data.scraped}\nDuplicates removed: ${response.data.duplicates_deleted}\nFinal count: ${response.data.final_count}`);
     } catch (error) {
       console.error('Error importing companies:', error);
-      alert(`Error importing companies: ${error.message}`);
+      setImportStatus('error');
+      setImportResults({ error: error.message });
     } finally {
       setImporting(false);
     }
+  };
+
+  const closeImportModal = () => {
+    setShowImportModal(false);
+    setImportStatus('idle');
+    setImportResults(null);
   };
 
   if (loading) {
@@ -315,6 +337,92 @@ export default function AdminFutureOperators() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Import Status Modal */}
+      <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Importing Companies from {stateFilter}</DialogTitle>
+            <DialogDescription>
+              {importStatus === 'importing' && 'Please wait while we scrape and import companies...'}
+              {importStatus === 'success' && 'Import completed successfully!'}
+              {importStatus === 'error' && 'An error occurred during import'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-6">
+            {importStatus === 'importing' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-slate-600">
+                    Fetching city pages and extracting company data...
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    This may take a few minutes depending on the number of companies
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {importStatus === 'success' && importResults && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Import Complete!</h3>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Companies Scraped:</span>
+                    <span className="font-semibold text-slate-900">{importResults.scraped}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Total in Database:</span>
+                    <span className="font-semibold text-slate-900">{importResults.total_in_db}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Duplicates Removed:</span>
+                    <span className="font-semibold text-red-600">{importResults.duplicates_deleted}</span>
+                  </div>
+                  <div className="border-t pt-3 flex justify-between items-center">
+                    <span className="text-sm font-semibold text-slate-900">Final Count:</span>
+                    <span className="text-xl font-bold text-orange-600">{importResults.final_count}</span>
+                  </div>
+                </div>
+
+                <Button onClick={closeImportModal} className="w-full bg-orange-600 hover:bg-orange-700">
+                  Close
+                </Button>
+              </div>
+            )}
+
+            {importStatus === 'error' && importResults && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Import Failed</h3>
+                  <p className="text-sm text-red-600">{importResults.error}</p>
+                </div>
+
+                <Button onClick={closeImportModal} variant="outline" className="w-full">
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
