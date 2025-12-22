@@ -6,10 +6,16 @@ import { base44 } from '@/api/base44Client';
 export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }) {
   const [expanded, setExpanded] = useState(false);
 
+  console.log('ProfitAnalysis - sale.operator_id:', sale.operator_id);
+  console.log('ProfitAnalysis - operatorSubscription:', operatorSubscription);
+
   // Revenue Calculations - handle both direct and nested data structure
   const subData = operatorSubscription?.data || operatorSubscription;
   const monthlySubscription = subData?.price || 0;
   const planType = subData?.plan_type || 'Unknown';
+  
+  console.log('ProfitAnalysis - subData:', subData);
+  console.log('ProfitAnalysis - monthlySubscription:', monthlySubscription);
   const nationalFeatureRevenue = sale.national_featured_price || 0;
   const localFeatureRevenue = sale.local_featured_price || 0;
   const emailCampaignRevenue = sale.email_campaign_price || 0;
