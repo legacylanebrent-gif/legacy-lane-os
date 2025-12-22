@@ -20,7 +20,7 @@ export default function AdminFutureOperators() {
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [stateFilter, setStateFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('AR');
   const [packageFilter, setPackageFilter] = useState('all');
 
   useEffect(() => {
