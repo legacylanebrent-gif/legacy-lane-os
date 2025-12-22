@@ -48,6 +48,8 @@ export default function MyBusinessExpenses() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [showMileageModal, setShowMileageModal] = useState(false);
+  const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
   const [dateFilter, setDateFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
@@ -82,7 +84,17 @@ export default function MyBusinessExpenses() {
     miles_driven: '',
     rate_per_mile: '0.67',
     purpose: '',
-    round_trip: false
+    round_trip: false,
+    vehicle_id: ''
+  });
+
+  const [newVehicleData, setNewVehicleData] = useState({
+    vehicle_name: '',
+    make: '',
+    model: '',
+    year: '',
+    license_plate: '',
+    is_primary: false
   });
 
   const [newTag, setNewTag] = useState('');
@@ -102,6 +114,15 @@ export default function MyBusinessExpenses() {
 
       const expensesData = await base44.entities.BusinessExpense.filter({ created_by: user.email }, '-expense_date');
       setExpenses(expensesData);
+
+      const vehiclesData = await base44.entities.Vehicle.filter({ created_by: user.email });
+      setVehicles(vehiclesData);
+      
+      // Set primary vehicle as default if exists
+      const primaryVehicle = vehiclesData.find(v => v.is_primary);
+      if (primaryVehicle && !mileageData.vehicle_id) {
+        setMileageData(prev => ({ ...prev, vehicle_id: primaryVehicle.id }));
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -255,18 +276,22 @@ export default function MyBusinessExpenses() {
       const miles = parseFloat(mileageData.miles_driven) * (mileageData.round_trip ? 2 : 1);
       const totalAmount = miles * parseFloat(mileageData.rate_per_mile);
 
+      const vehicle = vehicles.find(v => v.id === mileageData.vehicle_id);
+      const vehicleInfo = vehicle ? `\nVehicle: ${vehicle.vehicle_name}` : '';
+
       await base44.entities.BusinessExpense.create({
         expense_date: mileageData.expense_date,
         vendor_name: 'Vehicle Mileage',
         amount: totalAmount,
         category: 'auto_expenses',
-        description: `${mileageData.starting_location} → ${mileageData.ending_location}\n${miles} miles @ $${mileageData.rate_per_mile}/mile\nPurpose: ${mileageData.purpose}`,
+        description: `${mileageData.starting_location} → ${mileageData.ending_location}\n${miles} miles @ $${mileageData.rate_per_mile}/mile${vehicleInfo}\nPurpose: ${mileageData.purpose}`,
         payment_method: 'cash',
         tax_deductible: true,
         tags: ['mileage', mileageData.round_trip ? 'round-trip' : 'one-way']
       });
 
       setShowMileageModal(false);
+      const primaryVehicle = vehicles.find(v => v.is_primary);
       setMileageData({
         expense_date: new Date().toISOString().split('T')[0],
         starting_location: '',
@@ -274,12 +299,44 @@ export default function MyBusinessExpenses() {
         miles_driven: '',
         rate_per_mile: '0.67',
         purpose: '',
-        round_trip: false
+        round_trip: false,
+        vehicle_id: primaryVehicle?.id || ''
       });
       loadData();
     } catch (error) {
       console.error('Error adding mileage:', error);
       alert('Failed to add mileage');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddVehicle = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const newVehicle = await base44.entities.Vehicle.create({
+        ...newVehicleData,
+        year: newVehicleData.year ? parseInt(newVehicleData.year) : undefined
+      });
+
+      setShowAddVehicleModal(false);
+      setNewVehicleData({
+        vehicle_name: '',
+        make: '',
+        model: '',
+        year: '',
+        license_plate: '',
+        is_primary: false
+      });
+      
+      const vehiclesData = await base44.entities.Vehicle.filter({ created_by: currentUser.email });
+      setVehicles(vehiclesData);
+      setMileageData({ ...mileageData, vehicle_id: newVehicle.id });
+    } catch (error) {
+      console.error('Error adding vehicle:', error);
+      alert('Failed to add vehicle');
     } finally {
       setLoading(false);
     }
@@ -822,6 +879,57 @@ export default function MyBusinessExpenses() {
               />
             </div>
 
+            {vehicles.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Vehicle {vehicles.length > 1 ? '*' : ''}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAddVehicleModal(true)}
+                    className="text-blue-600 hover:text-blue-700 h-auto p-0"
+                  >
+                    + Add Vehicle
+                  </Button>
+                </div>
+                {vehicles.length > 1 ? (
+                  <Select value={mileageData.vehicle_id} onValueChange={(value) => setMileageData({ ...mileageData, vehicle_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vehicle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicles.map(vehicle => (
+                        <SelectItem key={vehicle.id} value={vehicle.id}>
+                          {vehicle.vehicle_name} {vehicle.make && vehicle.model ? `(${vehicle.make} ${vehicle.model})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm">
+                    {vehicles[0].vehicle_name} {vehicles[0].make && vehicles[0].model ? `(${vehicles[0].make} ${vehicles[0].model})` : ''}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {vehicles.length === 0 && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-slate-700 mb-2">No vehicles added yet</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddVehicleModal(true)}
+                  className="border-blue-600 text-blue-700 hover:bg-blue-50"
+                >
+                  <Car className="w-4 h-4 mr-2" />
+                  Add Your First Vehicle
+                </Button>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Starting Location *</Label>
@@ -912,6 +1020,89 @@ export default function MyBusinessExpenses() {
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                 <Car className="w-4 h-4 mr-2" />
                 Add Mileage
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Vehicle Modal */}
+      <Dialog open={showAddVehicleModal} onOpenChange={setShowAddVehicleModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Car className="w-6 h-6 text-blue-600" />
+              Add New Vehicle
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleAddVehicle} className="space-y-4 mt-4">
+            <div>
+              <Label>Vehicle Name/Nickname *</Label>
+              <Input
+                value={newVehicleData.vehicle_name}
+                onChange={(e) => setNewVehicleData({ ...newVehicleData, vehicle_name: e.target.value })}
+                placeholder="e.g., My Car, Work Truck"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Make</Label>
+                <Input
+                  value={newVehicleData.make}
+                  onChange={(e) => setNewVehicleData({ ...newVehicleData, make: e.target.value })}
+                  placeholder="e.g., Toyota, Ford"
+                />
+              </div>
+              <div>
+                <Label>Model</Label>
+                <Input
+                  value={newVehicleData.model}
+                  onChange={(e) => setNewVehicleData({ ...newVehicleData, model: e.target.value })}
+                  placeholder="e.g., Camry, F-150"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Year</Label>
+                <Input
+                  type="number"
+                  value={newVehicleData.year}
+                  onChange={(e) => setNewVehicleData({ ...newVehicleData, year: e.target.value })}
+                  placeholder="2024"
+                />
+              </div>
+              <div>
+                <Label>License Plate</Label>
+                <Input
+                  value={newVehicleData.license_plate}
+                  onChange={(e) => setNewVehicleData({ ...newVehicleData, license_plate: e.target.value })}
+                  placeholder="ABC-1234"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_primary"
+                checked={newVehicleData.is_primary}
+                onChange={(e) => setNewVehicleData({ ...newVehicleData, is_primary: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="is_primary" className="cursor-pointer">
+                Set as primary vehicle (default selection)
+              </Label>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => setShowAddVehicleModal(false)}>Cancel</Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                Add Vehicle
               </Button>
             </div>
           </form>
