@@ -906,7 +906,7 @@ export default function Home() {
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Network</h2>
+            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Growing Network</h2>
             <p className="text-xl text-slate-600">Grow your business with Legacy Lane</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
