@@ -7,11 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, Heart, Share2, MapPin, Calendar, Tag, Package,
-  Image as ImageIcon, ShoppingBag, Phone, Mail, ExternalLink, Edit, Save, X
+  Image as ImageIcon, ShoppingBag, Phone, Mail, ExternalLink, Edit, Save, X, MessageSquare
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import MessageModal from '@/components/messaging/MessageModal';
 import { format } from 'date-fns';
 
 export default function ItemDetail() {
@@ -24,6 +25,7 @@ export default function ItemDetail() {
   const [relatedItems, setRelatedItems] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', description: '', price: 0 });
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
 
   useEffect(() => {
     loadData();
