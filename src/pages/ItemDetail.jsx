@@ -488,6 +488,16 @@ export default function ItemDetail() {
           </div>
         )}
       </div>
+
+      {/* Message Modal */}
+      {currentUser && operator && (
+        <MessageModal
+          open={messageModalOpen}
+          onClose={() => setMessageModalOpen(false)}
+          recipient={operator}
+          relatedEntity={{ type: 'Item', id: item.id, title: item.title }}
+        />
+      )}
     </div>
   );
 }
