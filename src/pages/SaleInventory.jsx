@@ -96,7 +96,8 @@ export default function SaleInventory() {
   const handlePrintQRTag = async (item) => {
     try {
       // Generate QR code with item detail page URL
-      const itemUrl = `${window.location.origin}${createPageUrl('ItemDetail')}?itemId=${item.id}`;
+      const itemPath = createPageUrl('ItemDetail');
+      const itemUrl = `${window.location.origin}${itemPath.startsWith('/') ? itemPath : '/' + itemPath}?itemId=${item.id}`;
       const qrCodeDataUrl = await QRCode.toDataURL(itemUrl, { width: 300, margin: 2 });
 
       // Create print window
