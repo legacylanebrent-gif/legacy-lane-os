@@ -16,6 +16,7 @@ export default function Revenue() {
   const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pieChartYear, setPieChartYear] = useState(3);
+  const [saveMessage, setSaveMessage] = useState('');
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -74,6 +75,11 @@ export default function Revenue() {
   const [bizChurnRate, setBizChurnRate] = useState(() => loadValue('bizChurnRate', 2));
   const [avgSaleProfit, setAvgSaleProfit] = useState(() => loadValue('avgSaleProfit', 1500));
   const [salesPerMonth, setSalesPerMonth] = useState(() => loadValue('salesPerMonth', 2));
+
+  const handleSave = () => {
+    setSaveMessage('Settings saved successfully!');
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
 
   // Fetch Biz in a Box pricing
   useEffect(() => {
@@ -602,6 +608,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Operator Subs Qty" name="Subscribers" stroke="#c4b5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -682,6 +695,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Vendor Subs Qty" name="Subscribers" stroke="#ddd6fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -762,6 +782,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Agent Subs Qty" name="Subscribers" stroke="#ede9fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -846,6 +873,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Marketplace Qty" name="Transactions" stroke="#6ee7b7" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -926,6 +960,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Courses Qty" name="Sales" stroke="#67e8f9" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-cyan-600 hover:bg-cyan-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1006,6 +1047,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Referrals Qty" name="Referrals" stroke="#fcd34d" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-amber-600 hover:bg-amber-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1090,6 +1138,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Features Qty" name="Features" stroke="#93c5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1237,6 +1292,13 @@ export default function Revenue() {
                         <Line yAxisId="right" type="monotone" dataKey="Biz in a Box Qty" name="Operators" stroke="#fdba74" strokeWidth={2} strokeDasharray="5 5" />
                       </LineChart>
                     </ResponsiveContainer>
+
+                    <div className="mt-6 flex items-center justify-end gap-3">
+                      {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                      <Button onClick={handleSave} className="bg-orange-600 hover:bg-orange-700">
+                        Save Settings
+                      </Button>
+                    </div>
                   </>
                 ) : (
                   <div className="text-center p-8 text-slate-500">
@@ -1331,6 +1393,13 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Advertising Qty" name="Advertisers" stroke="#5eead4" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
+                  <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700">
+                    Save Settings
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
