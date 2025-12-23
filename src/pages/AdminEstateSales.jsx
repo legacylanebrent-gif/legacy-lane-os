@@ -237,7 +237,7 @@ export default function AdminEstateSales() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Estate Sales Management</h1>
           <p className="text-slate-600">
@@ -247,7 +247,7 @@ export default function AdminEstateSales() {
         </div>
         <Button 
           onClick={() => setShowCreateModal(true)}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto whitespace-nowrap"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Estate Sale
