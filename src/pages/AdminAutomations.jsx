@@ -375,7 +375,7 @@ export default function AdminAutomations() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Automations & Notifications</h1>
           <p className="text-slate-600">Automate workflows and manage system notifications</p>
@@ -386,7 +386,7 @@ export default function AdminAutomations() {
             resetForm();
             setShowCreateModal(true);
           }}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto whitespace-nowrap"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Automation
@@ -467,67 +467,69 @@ export default function AdminAutomations() {
                 return (
                   <Card key={automation.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-slate-900">{automation.name}</h3>
-                            {automation.is_active ? (
-                              <Badge className="bg-green-100 text-green-700">Active</Badge>
-                            ) : (
-                              <Badge className="bg-slate-100 text-slate-600">Inactive</Badge>
-                            )}
-                          </div>
-                          {automation.description && (
-                            <p className="text-sm text-slate-600 mb-4">{automation.description}</p>
-                          )}
+                     <div className="flex flex-col gap-4">
+                       <div className="flex items-start justify-between gap-3">
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2 mb-2 flex-wrap">
+                             <h3 className="text-lg font-semibold text-slate-900 truncate">{automation.name}</h3>
+                             {automation.is_active ? (
+                               <Badge className="bg-green-100 text-green-700 flex-shrink-0">Active</Badge>
+                             ) : (
+                               <Badge className="bg-slate-100 text-slate-600 flex-shrink-0">Inactive</Badge>
+                             )}
+                           </div>
+                           {automation.description && (
+                             <p className="text-sm text-slate-600 mb-3">{automation.description}</p>
+                           )}
+                         </div>
 
-                          <div className="flex items-center gap-6 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
-                                <TriggerIcon className="w-4 h-4 text-cyan-600" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-500">When</p>
-                                <p className="font-medium text-slate-900">{triggerLabel}</p>
-                              </div>
-                            </div>
+                         <div className="flex items-center gap-2 flex-shrink-0">
+                           <Switch
+                             checked={automation.is_active}
+                             onCheckedChange={() => handleToggleActive(automation.id, automation.is_active)}
+                           />
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => handleEdit(automation)}
+                           >
+                             <Edit className="w-4 h-4" />
+                           </Button>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => handleDelete(automation.id)}
+                             className="text-red-600 hover:text-red-700"
+                           >
+                             <Trash2 className="w-4 h-4" />
+                           </Button>
+                         </div>
+                       </div>
 
-                            <div className="text-slate-400">→</div>
+                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 text-sm">
+                         <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                             <TriggerIcon className="w-4 h-4 text-cyan-600" />
+                           </div>
+                           <div className="min-w-0">
+                             <p className="text-xs text-slate-500">When</p>
+                             <p className="font-medium text-slate-900 truncate">{triggerLabel}</p>
+                           </div>
+                         </div>
 
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <ActionIcon className="w-4 h-4 text-orange-600" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-slate-500">Then</p>
-                                <p className="font-medium text-slate-900">{actionLabel}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                         <div className="text-slate-400 hidden sm:block">→</div>
 
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={automation.is_active}
-                            onCheckedChange={() => handleToggleActive(automation.id, automation.is_active)}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(automation)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(automation.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
+                         <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                             <ActionIcon className="w-4 h-4 text-orange-600" />
+                           </div>
+                           <div className="min-w-0">
+                             <p className="text-xs text-slate-500">Then</p>
+                             <p className="font-medium text-slate-900 truncate">{actionLabel}</p>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
                     </CardContent>
                   </Card>
                 );
