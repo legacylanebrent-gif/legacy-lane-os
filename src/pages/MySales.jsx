@@ -425,6 +425,26 @@ export default function MySales() {
                           <Briefcase className="w-3 h-3 mr-1" />
                           Buyout
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+                        >
+                          <Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}>
+                            Marketing
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}>
+                            Contracts
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
