@@ -856,51 +856,51 @@ export default function Home() {
           </div>
           </section>
 
-          {/* Browse by State CTA */}
-      <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <Link to={createPageUrl('SearchByState')}>
-            <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-12 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02]">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <MapPin className="w-10 h-10 text-white" />
+          {/* Browse by State & Estate Sale Request CTAs */}
+          <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Browse by State */}
+                <Link to={createPageUrl('SearchByState')}>
+                  <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
+                    <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                      <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <MapPin className="w-10 h-10 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                          Browse by State
+                        </h3>
+                        <p className="text-lg text-cyan-100">
+                          Discover estate sales in all 50 states
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <h3 className="text-4xl font-serif font-bold text-white mb-2">
-                      Browse by State
-                    </h3>
-                    <p className="text-xl text-cyan-100">
-                      Discover estate sales in all 50 states
-                    </p>
+                </Link>
+
+                {/* Estate Sale Request */}
+                <div 
+                  onClick={() => setShowSaleRequestModal(true)}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full"
+                >
+                  <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                    <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <HomeIcon className="w-10 h-10 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                        Need an Estate Sale {t('Company')}?
+                      </h3>
+                      <p className="text-lg text-orange-100">
+                        We'll connect you with trusted professionals in your area
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="text-white text-5xl group-hover:translate-x-2 transition-transform">→</div>
               </div>
             </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Estate Sale Request CTA Bar */}
-      <section className="py-16 px-4 bg-gradient-to-r from-orange-500 to-red-500">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
-              Need an Estate Sale {t('Company')}?
-            </h3>
-            <p className="text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto">
-              We'll connect you with trusted professionals in your area
-            </p>
-            <Button
-              onClick={() => setShowSaleRequestModal(true)}
-              className="bg-white hover:bg-slate-100 text-orange-600 px-12 py-8 text-2xl font-bold shadow-2xl hover:scale-105 transition-transform"
-            >
-              Submit Your Sale Request
-            </Button>
-          </div>
-        </div>
-      </section>
+          </section>
 
       {/* Sign Up CTAs */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
