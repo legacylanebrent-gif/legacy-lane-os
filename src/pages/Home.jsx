@@ -921,7 +921,7 @@ export default function Home() {
                       Estate Sale {t('Company')}
                     </h3>
                     <p className="text-orange-100">
-                      List your {t('company')}
+                      List, manage and market your sales
                     </p>
                   </div>
                 </div>
