@@ -587,21 +587,21 @@ export default function Revenue() {
                   <div className="text-sm font-semibold text-slate-700 mb-3">Package Pricing (from Subscription Packages)</div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
-                      <Label className="text-slate-500 text-xs mb-1">Basic Plan Price</Label>
+                      <Label className="text-slate-500 text-xs mb-1">{operatorPackages.basic?.package_name || 'Basic'} Price</Label>
                       <div className="text-2xl font-bold text-slate-400">
                         ${operatorPackages.basic?.monthly_price || subBasicPrice}
                       </div>
                       <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
                     <div>
-                      <Label className="text-slate-500 text-xs mb-1">Pro Plan Price</Label>
+                      <Label className="text-slate-500 text-xs mb-1">{operatorPackages.pro?.package_name || 'Pro'} Price</Label>
                       <div className="text-2xl font-bold text-slate-400">
                         ${operatorPackages.pro?.monthly_price || subProPrice}
                       </div>
                       <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
                     <div>
-                      <Label className="text-slate-500 text-xs mb-1">Premium Plan Price</Label>
+                      <Label className="text-slate-500 text-xs mb-1">{operatorPackages.premium?.package_name || 'Enterprise'} Price</Label>
                       <div className="text-2xl font-bold text-slate-400">
                         ${operatorPackages.premium?.monthly_price || subPremiumPrice}
                       </div>
