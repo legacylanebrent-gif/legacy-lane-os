@@ -306,27 +306,27 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+    <div className="min-h-screen bg-white">
       <SaleRequestModal 
         open={showSaleRequestModal} 
         onClose={() => setShowSaleRequestModal(false)} 
       />
-      
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xl">LL</span>
               </div>
               <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Estate Sale Finder</p>
+                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
               </div>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {isAuthenticated ? (
                 <>
                   <Button
@@ -334,6 +334,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => window.location.href = createPageUrl('Dashboard')}
                     title="Dashboard"
+                    className="text-white hover:bg-slate-800"
                   >
                     <LayoutDashboard className="w-5 h-5" />
                   </Button>
@@ -342,6 +343,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => window.location.href = createPageUrl('Messages')}
                     title="Messages"
+                    className="text-white hover:bg-slate-800"
                   >
                     <MessageSquare className="w-5 h-5" />
                   </Button>
@@ -349,6 +351,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => window.location.href = createPageUrl('Dashboard')}
+                    className="text-white hover:bg-slate-800"
                   >
                     <User className="w-4 h-4 mr-2" />
                     Dashboard
@@ -359,165 +362,187 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                    className="text-white hover:bg-slate-800"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
                     Sign In
                   </Button>
                   <Button
                     onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                    className="bg-orange-600 hover:bg-orange-700"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
                   >
-                    Get Started
+                    Get Started Free
                   </Button>
                 </>
               )}
             </div>
           </div>
         </div>
-      </header>
+        </header>
 
-      {/* Hero Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">
-            Discover Amazing Estate Sales
+      {/* Hero Section with Gradient Background */}
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0yMCA0NGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
+        
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <div className="inline-block mb-6">
+            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-sm px-4 py-1">
+              🎉 {totalItems > 0 ? `${totalItems.toLocaleString()}+ Items` : 'Thousands of Items'} Available Now
+            </Badge>
+          </div>
+          
+          <h2 className="text-6xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+            Discover Hidden<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Treasures</span> Near You
           </h2>
-          <p className="text-xl text-slate-600 mb-8">
-            Find treasures, furniture, antiques, and more near you
+          <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto">
+            Browse {sales.length}+ estate sales • Find unique furniture, antiques, collectibles & more
           </p>
 
-          {/* Map Section */}
-          {(localFeatured.length > 0 || regularSales.length > 0) && (
-            <div className="max-w-5xl mx-auto mb-8">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-slate-200">
-                <MapContainer
-                  center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
-                  zoom={userLocation ? 12 : 4}
-                  style={{ height: '400px', width: '100%' }}
-                  className="z-0"
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  {localFeatured.map(sale => 
-                    sale.location && sale.location.lat && sale.location.lng && (
-                      <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
-                        <Popup>
-                          <div className="text-sm">
-                            <strong className="text-cyan-600">{sale.title}</strong>
-                            <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
-                            {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
-                          </div>
-                        </Popup>
-                      </Marker>
-                    )
-                  )}
-                  {regularSales.map(sale => 
-                    sale.location && sale.location.lat && sale.location.lng && (
-                      <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
-                        <Popup>
-                          <div className="text-sm">
-                            <strong>{sale.title}</strong>
-                            <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
-                            {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
-                          </div>
-                        </Popup>
-                      </Marker>
-                    )
-                  )}
-                </MapContainer>
-              </div>
-            </div>
-          )}
-
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto space-y-4">
+          <div className="max-w-4xl mx-auto space-y-4">
             {/* Zip Code Search */}
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <MapPin className="absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 w-6 h-6" />
                 <Input
-                  placeholder="Enter ZIP code to find sales near you..."
+                  placeholder="Enter ZIP code to find estate sales near you..."
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleZipSearch()}
-                  className="pl-12 h-12 shadow-md w-full"
+                  className="pl-14 h-16 text-lg shadow-xl w-full bg-white/95 backdrop-blur-sm border-slate-200"
                 />
               </div>
               <Button 
                 onClick={handleZipSearch}
-                className="bg-cyan-600 hover:bg-cyan-700 h-12 px-6 w-full sm:w-auto whitespace-nowrap"
+                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 h-16 px-8 text-lg font-semibold shadow-xl w-full sm:w-auto whitespace-nowrap"
               >
                 Search ZIP
               </Button>
               <Button 
                 onClick={handleUseMyLocation}
-                variant="outline"
-                className="h-12 px-6 w-full sm:w-auto whitespace-nowrap"
+                className="bg-white hover:bg-slate-50 text-slate-900 h-16 px-8 text-lg font-semibold shadow-xl w-full sm:w-auto whitespace-nowrap border-2 border-slate-200"
               >
-                Use My Location
+                📍 Use My Location
               </Button>
             </div>
 
             {userLocation && (
-              <div className="text-sm text-slate-600 text-center">
-                📍 Showing local sales within 25 miles of your location
+              <div className="text-sm text-slate-300 text-center bg-slate-800/50 rounded-lg py-2 px-4 backdrop-blur-sm">
+                📍 Showing sales within 25 miles of your location
               </div>
             )}
           </div>
+        </div>
+      </section>
 
-          {/* Quick Stats */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <HomeIcon className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-              <div className="text-3xl font-bold text-slate-900">{sales.length}</div>
-              <div className="text-slate-600">Active Sales</div>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <TrendingUp className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
-              <div className="text-3xl font-bold text-slate-900">
-                {totalItems > 0 ? totalItems.toLocaleString() : '0'}
-              </div>
-              <div className="text-slate-600">Items Available</div>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <div className="text-3xl font-bold text-slate-900">
-                {totalEstimatedValue > 0 ? `$${(totalEstimatedValue / 1000000).toFixed(1)}M` : '$0'}
-              </div>
-              <div className="text-slate-600">Total Value</div>
+      {/* Map Section */}
+      {(localFeatured.length > 0 || regularSales.length > 0) && (
+        <section className="py-12 px-4 bg-slate-50">
+          <div className="max-w-7xl mx-auto">
+            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
+              🗺️ Sales Near You
+            </h3>
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+              <MapContainer
+                center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
+                zoom={userLocation ? 12 : 4}
+                style={{ height: '500px', width: '100%' }}
+                className="z-0"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {localFeatured.map(sale => 
+                  sale.location && sale.location.lat && sale.location.lng && (
+                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                      <Popup>
+                        <div className="text-sm">
+                          <strong className="text-cyan-600">{sale.title}</strong>
+                          <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                          {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )
+                )}
+                {regularSales.map(sale => 
+                  sale.location && sale.location.lat && sale.location.lng && (
+                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                      <Popup>
+                        <div className="text-sm">
+                          <strong>{sale.title}</strong>
+                          <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                          {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )
+                )}
+              </MapContainer>
             </div>
           </div>
+        </section>
+      )}
 
+      {/* Quick Stats */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-md">
+              <HomeIcon className="w-12 h-12 text-orange-600 mx-auto mb-4" />
+              <div className="text-5xl font-bold text-slate-900 mb-2">{sales.length}</div>
+              <div className="text-lg text-slate-600 font-medium">Active Estate Sales</div>
+            </div>
+            <div className="text-center p-8 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl shadow-md">
+              <TrendingUp className="w-12 h-12 text-cyan-600 mx-auto mb-4" />
+              <div className="text-5xl font-bold text-slate-900 mb-2">
+                {totalItems > 0 ? totalItems.toLocaleString() : '0'}
+              </div>
+              <div className="text-lg text-slate-600 font-medium">Items Available</div>
+            </div>
+            <div className="text-center p-8 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-md">
+              <DollarSign className="w-12 h-12 text-green-600 mx-auto mb-4" />
+              <div className="text-5xl font-bold text-slate-900 mb-2">
+                {totalEstimatedValue > 0 ? `$${(totalEstimatedValue / 1000000).toFixed(1)}M` : '$0'}
+              </div>
+              <div className="text-lg text-slate-600 font-medium">Total Value</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      {/* National Advertising Panel */}
+      <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">National Advertising Space</p>
+            <p className="text-white text-2xl font-semibold">Premium placement available for nationwide reach</p>
+          </div>
         </div>
       </section>
 
       {/* Nationally Featured Sales */}
       {nationalFeatured.length > 0 && (
-        <section className="py-12 px-4 bg-gradient-to-r from-orange-50 to-amber-50">
+        <section className="py-16 px-4 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-3xl font-serif font-bold text-slate-900">
-                  🌟 Nationally Featured Sales
-                </h3>
-                <p className="text-slate-600 mt-1">Premium estate sales from across the country</p>
-              </div>
-              <div className="text-slate-600">
-                {nationalFeatured.length} {nationalFeatured.length === 1 ? 'sale' : 'sales'}
-              </div>
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-orange-600 text-white text-sm px-4 py-1">Premium Featured</Badge>
+              <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+                ⭐ National Spotlight
+              </h3>
+              <p className="text-xl text-slate-600">Exceptional estate sales from across the country</p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {nationalFeatured.map(sale => (
                 <Link
                   key={sale.id}
                   to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
                   className="block group"
                 >
-                  <Card className="overflow-hidden hover:shadow-xl transition-shadow border-2 border-orange-200">
+                  <Card className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1 border-2 border-orange-300 bg-white">
                     {sale.images && sale.images.length > 0 && (
                       <div className="relative h-48 overflow-hidden">
                         <img
@@ -606,30 +631,36 @@ export default function Home() {
         </section>
       )}
 
+      {/* Local Advertising Panel */}
+      <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Local Advertising Space</p>
+            <p className="text-white text-2xl font-semibold">Target your local community with premium placement</p>
+          </div>
+        </div>
+      </section>
+
       {/* Locally Featured Sales */}
       {localFeatured.length > 0 && (
-        <section className="py-12 px-4 bg-gradient-to-r from-cyan-50 to-blue-50">
+        <section className="py-16 px-4 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-3xl font-serif font-bold text-slate-900">
-                  📍 Featured Sales Near You
-                </h3>
-                <p className="text-slate-600 mt-1">Premium local estate sales in your area</p>
-              </div>
-              <div className="text-slate-600">
-                {localFeatured.length} {localFeatured.length === 1 ? 'sale' : 'sales'}
-              </div>
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-cyan-600 text-white text-sm px-4 py-1">Local Featured</Badge>
+              <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+                📍 Nearby Treasures
+              </h3>
+              <p className="text-xl text-slate-600">Premium estate sales in your community</p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {localFeatured.map(sale => (
                 <Link
                   key={sale.id}
                   to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
                   className="block group"
                 >
-                  <Card className="overflow-hidden hover:shadow-xl transition-shadow border-2 border-cyan-200">
+                  <Card className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1 border-2 border-cyan-300 bg-white">
                     {sale.images && sale.images.length > 0 && (
                       <div className="relative h-48 overflow-hidden">
                         <img
@@ -724,33 +755,33 @@ export default function Home() {
       )}
 
       {/* Regular Local Sales */}
-      <section className="py-12 px-4">
+      <section className="py-16 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-3xl font-serif font-bold text-slate-900">
-                {userLocation ? 'Local Estate Sales Near You' : 'All Estate Sales'}
-              </h3>
-              {userLocation && (
-                <p className="text-slate-600 mt-1">Within 25 miles of your location</p>
-              )}
-            </div>
-            <div className="text-slate-600">
-              {regularSales.length} {regularSales.length === 1 ? 'sale' : 'sales'}
-            </div>
+          <div className="text-center mb-12">
+            <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+              {userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
+            </h3>
+            {userLocation ? (
+              <p className="text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
+            ) : (
+              <p className="text-xl text-slate-600">{regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'} nationwide</p>
+            )}
           </div>
 
           {regularSales.length === 0 ? (
-            <Card className="p-12 text-center">
-              <MapPin className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500 text-lg">
+            <Card className="p-16 text-center bg-slate-50">
+              <MapPin className="w-20 h-20 text-slate-300 mx-auto mb-6" />
+              <p className="text-slate-500 text-xl mb-4">
                 {userLocation 
-                  ? 'No estate sales found within 25 miles. Try searching a different location.'
-                  : 'No estate sales available. Check back soon!'}
+                  ? 'No estate sales found within 25 miles.'
+                  : 'No estate sales available.'}
               </p>
+              <Button onClick={handleUseMyLocation} className="bg-cyan-600 hover:bg-cyan-700">
+                Try Different Location
+              </Button>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {regularSales.map(sale => (
                 <Link
                   key={sale.id}
@@ -849,22 +880,25 @@ export default function Home() {
       </section>
 
       {/* Browse by State CTA */}
-      <section className="py-12 px-4">
+      <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-7xl mx-auto">
           <Link to={createPageUrl('SearchByState')}>
-            <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all cursor-pointer group">
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <MapPin className="w-8 h-8 text-white" />
+            <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-12 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02]">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <MapPin className="w-10 h-10 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-4xl font-serif font-bold text-white mb-2">
+                      Browse by State
+                    </h3>
+                    <p className="text-xl text-cyan-100">
+                      Discover estate sales in all 50 states
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                    Browse Sales by State
-                  </h3>
-                  <p className="text-cyan-100">
-                    Find estate sales in all 50 states
-                  </p>
-                </div>
+                <div className="text-white text-5xl group-hover:translate-x-2 transition-transform">→</div>
               </div>
             </div>
           </Link>
@@ -872,42 +906,44 @@ export default function Home() {
       </section>
 
       {/* Estate Sale Request CTA Bar */}
-      <section className="py-6 px-4">
+      <section className="py-16 px-4 bg-gradient-to-r from-orange-500 to-red-500">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl shadow-lg overflow-hidden">
-            <div className="flex flex-col md:flex-row items-center justify-between p-6 gap-4">
-              <div className="text-center md:text-left flex-1">
-                <p className="text-white text-lg font-medium">
-                  Need help finding a company? We've made it easy. We'll contact the companies for you!
-                </p>
-              </div>
-              <Button
-                onClick={() => setShowSaleRequestModal(true)}
-                className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-6 text-lg font-semibold shadow-lg whitespace-nowrap"
-              >
-                Submit A Sale Request
-              </Button>
-            </div>
+          <div className="text-center">
+            <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+              Need an Estate Sale {t('Company')}?
+            </h3>
+            <p className="text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto">
+              We'll connect you with trusted professionals in your area
+            </p>
+            <Button
+              onClick={() => setShowSaleRequestModal(true)}
+              className="bg-white hover:bg-slate-100 text-orange-600 px-12 py-8 text-2xl font-bold shadow-2xl hover:scale-105 transition-transform"
+            >
+              Get Free Quotes Now →
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Sign Up CTAs */}
-      <section className="py-12 px-4 bg-slate-50">
+      <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-serif font-bold text-slate-900 text-center mb-8">Join Legacy Lane</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="text-center mb-12">
+            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Network</h2>
+            <p className="text-xl text-slate-600">Grow your business with Legacy Lane</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Link to={createPageUrl('OperatorPackages')}>
-              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <HomeIcon className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <HomeIcon className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-serif font-bold text-white mb-1">
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
                       Estate Sale {t('Company')}
                     </h3>
-                    <p className="text-orange-100 text-sm">
+                    <p className="text-orange-100">
                       List your {t('company')}
                     </p>
                   </div>
@@ -916,16 +952,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('DIYSaleSignup')}>
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ShoppingBag className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <ShoppingBag className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-serif font-bold text-white mb-1">
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
                       DIY Sale
                     </h3>
-                    <p className="text-purple-100 text-sm">
+                    <p className="text-purple-100">
                       Run your own sale
                     </p>
                   </div>
@@ -934,16 +970,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('AgentSignup')}>
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Building2 className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Building2 className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-serif font-bold text-white mb-1">
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
                       Real Estate Agent
                     </h3>
-                    <p className="text-blue-100 text-sm">
+                    <p className="text-blue-100">
                       Become preferred agent
                     </p>
                   </div>
@@ -952,16 +988,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('VendorSignup')}>
-              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer group h-full">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <TrendingUp className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-serif font-bold text-white mb-1">
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
                       Vendor
                     </h3>
-                    <p className="text-green-100 text-sm">
+                    <p className="text-green-100">
                       Join our network
                     </p>
                   </div>
@@ -973,23 +1009,48 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 px-4 mt-20">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">LL</span>
+      <footer className="bg-slate-900 text-white py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-2xl">LL</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-serif font-bold">Legacy Lane</h3>
+                  <p className="text-sm text-orange-400">Estate Sale Finder</p>
+                </div>
+              </div>
+              <p className="text-slate-400 text-lg mb-6">
+                Discover amazing estate sales and find treasures near you. Connect with trusted estate sale companies nationwide.
+              </p>
             </div>
-            <div className="text-left">
-              <h3 className="text-xl font-serif font-bold">Legacy Lane</h3>
-              <p className="text-xs text-orange-400">Estate Sale Finder</p>
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><Link to={createPageUrl('SearchByState')} className="text-slate-400 hover:text-white transition-colors">Browse by State</Link></li>
+                <li><Link to={createPageUrl('Home')} className="text-slate-400 hover:text-white transition-colors">Find Sales</Link></li>
+                <li><a href="#" onClick={() => setShowSaleRequestModal(true)} className="text-slate-400 hover:text-white transition-colors">Request Service</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
+              <ul className="space-y-2">
+                <li><Link to={createPageUrl('OperatorPackages')} className="text-slate-400 hover:text-white transition-colors">List Your Company</Link></li>
+                <li><Link to={createPageUrl('AgentSignup')} className="text-slate-400 hover:text-white transition-colors">Real Estate Agents</Link></li>
+                <li><Link to={createPageUrl('VendorSignup')} className="text-slate-400 hover:text-white transition-colors">Vendors</Link></li>
+              </ul>
             </div>
           </div>
-          <p className="text-slate-400">
-            Discover amazing estate sales and find treasures near you
-          </p>
-          <p className="text-slate-500 text-sm mt-4">
-            © 2024 Legacy Lane. All rights reserved.
-          </p>
+          
+          <div className="border-t border-slate-800 pt-8 text-center">
+            <p className="text-slate-500">
+              © 2024 Legacy Lane. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
