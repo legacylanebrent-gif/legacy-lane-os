@@ -411,23 +411,30 @@ export default function ItemDetail() {
               <Card className="bg-gradient-to-br from-orange-50 to-cyan-50 border-2 border-orange-200">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-4">Interested in this item?</h3>
-                  <p className="text-slate-700 mb-4">
-                    Contact {operator.company_name || operator.full_name} for purchase details
-                  </p>
-                  <div className="flex flex-col gap-2">
+                  
+                  <div className="space-y-3">
+                    {currentUser ? (
+                      <Button
+                        onClick={() => setMessageModalOpen(true)}
+                        className="w-full bg-orange-600 hover:bg-orange-700 h-12 gap-2"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                        Message Seller
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                        className="w-full bg-orange-600 hover:bg-orange-700 h-12"
+                      >
+                        Sign In to Message
+                      </Button>
+                    )}
+
                     {operator.phone && (
-                      <Button variant="outline" className="justify-start" asChild>
+                      <Button variant="outline" className="w-full justify-start h-12" asChild>
                         <a href={`tel:${operator.phone}`}>
                           <Phone className="w-4 h-4 mr-2" />
                           {operator.phone}
-                        </a>
-                      </Button>
-                    )}
-                    {operator.email && (
-                      <Button variant="outline" className="justify-start" asChild>
-                        <a href={`mailto:${operator.email}?subject=Inquiry about ${item.title}`}>
-                          <Mail className="w-4 h-4 mr-2" />
-                          {operator.email}
                         </a>
                       </Button>
                     )}
