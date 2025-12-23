@@ -9,8 +9,9 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 const PACKAGE_PRICES = {
   'Gold': 299,
   'Silver': 149,
-  'Bronze': 79,
-  'Platinum': 499
+  'Bronze': 35,
+  'Platinum': 499,
+  'Basic': 0
 };
 
 export default function FutureOperatorsAnalytics() {
@@ -69,11 +70,27 @@ export default function FutureOperatorsAnalytics() {
     return acc;
   }, {});
 
-  const packageData = Object.entries(packageCounts).map(([name, value]) => ({
-    name,
-    value,
-    revenue: value * (PACKAGE_PRICES[name] || 0)
-  }));
+  const packageData = Object.entries(packageCounts).map(([name, value]) => {
+    const displayName = name === 'Unknown' ? 'Basic' : name;
+    const monthlyRevenue = value * (PACKAGE_PRICES[displayName] || 0);
+    // Basic operators: $0/month + $99 per sale × 6 sales/year ÷ 12 months
+    // Bronze operators: $35/month + $64 per sale × 1.25 sales/month
+    let perSaleRevenue = 0;
+    if (displayName === 'Basic') {
+      perSaleRevenue = value * 99 * 6 / 12;
+    } else if (displayName === 'Bronze') {
+      perSaleRevenue = value * 64 * 1.25;
+    }
+    return {
+      name: displayName,
+      value,
+      revenue: monthlyRevenue + perSaleRevenue
+    };
+  }).sort((a, b) => {
+    if (a.name === 'Basic') return 1;
+    if (b.name === 'Basic') return -1;
+    return 0;
+  });
 
   // Count by state
   const stateCounts = operators.reduce((acc, op) => {
@@ -233,7 +250,11 @@ export default function FutureOperatorsAnalytics() {
                     </div>
                     <div className="text-left sm:text-right pl-5 sm:pl-0">
                       <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
-                      <div className="text-xs text-slate-500">{pkg.value} operators</div>
+                      <div className="text-xs text-slate-500">
+                        {pkg.value} operators
+                        {pkg.name === 'Basic' && ' ($99/sale × 6 sales/yr)'}
+                        {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
+                      </div>
                     </div>
                   </div>
                 ))}
