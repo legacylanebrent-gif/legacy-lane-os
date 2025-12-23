@@ -528,10 +528,18 @@ export default function Revenue() {
           <TabsContent value="subscriptions">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-600" />
-                  Operator Subscription Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-600" />
+                    Operator Subscription Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -608,13 +616,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Operator Subs Qty" name="Subscribers" stroke="#c4b5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -623,10 +624,18 @@ export default function Revenue() {
           <TabsContent value="vendorSubs">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-400" />
-                  Vendor Subscription Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-400" />
+                    Vendor Subscription Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -695,13 +704,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Vendor Subs Qty" name="Subscribers" stroke="#ddd6fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -710,10 +712,18 @@ export default function Revenue() {
           <TabsContent value="agentSubs">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-300" />
-                  Agent Subscription Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-300" />
+                    Agent Subscription Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -782,13 +792,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Agent Subs Qty" name="Subscribers" stroke="#ede9fe" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -797,10 +800,18 @@ export default function Revenue() {
           <TabsContent value="marketplace">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-purple-600" />
-                  Marketplace Transaction Fee Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5 text-purple-600" />
+                    Marketplace Transaction Fee Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -873,13 +884,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Marketplace Qty" name="Transactions" stroke="#6ee7b7" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -888,10 +892,18 @@ export default function Revenue() {
           <TabsContent value="courses">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-green-600" />
-                  Course Sales Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-green-600" />
+                    Course Sales Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-cyan-600 hover:bg-cyan-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -960,13 +972,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Courses Qty" name="Sales" stroke="#67e8f9" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-cyan-600 hover:bg-cyan-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -975,10 +980,18 @@ export default function Revenue() {
           <TabsContent value="referrals">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-amber-600" />
-                  Leads & Referral Fee Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-amber-600" />
+                    Leads & Referral Fee Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-amber-600 hover:bg-amber-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -1047,13 +1060,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Referrals Qty" name="Referrals" stroke="#fcd34d" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-amber-600 hover:bg-amber-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1062,10 +1068,18 @@ export default function Revenue() {
           <TabsContent value="features">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-blue-600" />
-                  Premium Feature Placement Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                    Premium Feature Placement Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -1138,13 +1152,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Features Qty" name="Features" stroke="#93c5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1153,32 +1160,43 @@ export default function Revenue() {
           <TabsContent value="bizInBox">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-orange-600" />
-                  Biz in a Box Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-orange-600" />
+                    Biz in a Box Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-orange-600 hover:bg-orange-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {bizInBoxPricing ? (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-slate-50 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
                       <div>
-                        <Label className="text-slate-600">Setup Fee</Label>
-                        <div className="text-2xl font-bold text-slate-900">
+                        <Label className="text-slate-500 text-xs mb-1">Setup Fee (from package)</Label>
+                        <div className="text-2xl font-bold text-slate-400">
                           ${bizInBoxPricing.biz_in_a_box_setup_fee?.toLocaleString() || '2,997'}
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                       </div>
                       <div>
-                        <Label className="text-slate-600">Monthly Fee (Year 1)</Label>
-                        <div className="text-2xl font-bold text-slate-900">
+                        <Label className="text-slate-500 text-xs mb-1">Monthly Fee Year 1 (from package)</Label>
+                        <div className="text-2xl font-bold text-slate-400">
                           ${bizInBoxPricing.biz_in_a_box_monthly_year1 || '149'}
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                       </div>
                       <div>
-                        <Label className="text-slate-600">Revenue Share</Label>
-                        <div className="text-2xl font-bold text-slate-900">
+                        <Label className="text-slate-500 text-xs mb-1">Revenue Share (from package)</Label>
+                        <div className="text-2xl font-bold text-slate-400">
                           {bizInBoxPricing.biz_in_a_box_revenue_share || '3'}%
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                       </div>
                     </div>
 
@@ -1292,13 +1310,6 @@ export default function Revenue() {
                         <Line yAxisId="right" type="monotone" dataKey="Biz in a Box Qty" name="Operators" stroke="#fdba74" strokeWidth={2} strokeDasharray="5 5" />
                       </LineChart>
                     </ResponsiveContainer>
-
-                    <div className="mt-6 flex items-center justify-end gap-3">
-                      {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                      <Button onClick={handleSave} className="bg-orange-600 hover:bg-orange-700">
-                        Save Settings
-                      </Button>
-                    </div>
                   </>
                 ) : (
                   <div className="text-center p-8 text-slate-500">
@@ -1313,10 +1324,18 @@ export default function Revenue() {
           <TabsContent value="advertising">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Megaphone className="w-5 h-5 text-teal-600" />
-                  Advertising Space Calculator
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Megaphone className="w-5 h-5 text-teal-600" />
+                    Advertising Space Calculator
+                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                    <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700">
+                      Save Settings
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -1393,13 +1412,6 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Advertising Qty" name="Advertisers" stroke="#5eead4" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
-
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  {saveMessage && <span className="text-green-600 font-medium">{saveMessage}</span>}
-                  <Button onClick={handleSave} className="bg-teal-600 hover:bg-teal-700">
-                    Save Settings
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
