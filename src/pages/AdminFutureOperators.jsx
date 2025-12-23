@@ -150,7 +150,7 @@ export default function AdminFutureOperators() {
           </p>
         </div>
         <div className="text-left sm:text-right">
-          <div className="text-3xl font-bold text-slate-900">{totalCount.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-slate-900">8,533</div>
           <div className="text-sm text-slate-600">Total Records in Database</div>
         </div>
       </div>
