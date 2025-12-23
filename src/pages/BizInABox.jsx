@@ -267,7 +267,7 @@ export default function BizInABox() {
                   <CardContent className="p-6 text-center">
                     <Icon className="w-8 h-8 text-orange-400 mx-auto mb-3" />
                     <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-sm text-slate-300">{stat.label}</div>
+                    <div className="text-xs text-slate-300">{stat.label}</div>
                   </CardContent>
                 </Card>
               );
@@ -366,7 +366,7 @@ export default function BizInABox() {
               <h3 className="text-3xl font-bold mb-2">
                 Total First Year Cost: ${(pricing.setup_fee + (pricing.monthly_year1 * 12)).toLocaleString()}
               </h3>
-              <p className="text-xl text-white/90 mb-4">Approximate profit from two good sales. Basically ... it's paid off in two sales!</p>
+              <p className="text-sm text-white/90 mb-4">Approximate profit from two good sales. Basically ... it's paid off in two sales!</p>
               <p className="text-2xl font-bold">
                 That's a {Math.round((150000 / (pricing.setup_fee + (pricing.monthly_year1 * 12))) * 100)}% ROI in Year One
               </p>
