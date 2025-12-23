@@ -45,7 +45,11 @@ export default function SuperAdminDashboard({ user }) {
         vendors,
         referrals,
         transactions,
-        revenueEvents
+        revenueEvents,
+        leads,
+        campaigns,
+        income,
+        expenses
       ] = await Promise.all([
         base44.asServiceRole.entities.User.list(),
         base44.entities.EstateSale.list(),
@@ -56,24 +60,51 @@ export default function SuperAdminDashboard({ user }) {
         base44.entities.Ticket.list(),
         base44.entities.Vendor.list(),
         base44.entities.Referral.list(),
-        base44.entities.Transaction.list('-created_date', 50),
-        base44.entities.RevenueEvent.list()
+        base44.entities.Transaction.list(),
+        base44.entities.RevenueEvent.list(),
+        base44.entities.Lead.list(),
+        base44.entities.Campaign.list(),
+        base44.entities.Income.list(),
+        base44.entities.BusinessExpense.list()
       ]);
 
-      // Calculate total revenue from revenue events
-      const totalRevenue = revenueEvents.reduce((sum, event) => sum + (event.amount || 0), 0);
+      // Calculate comprehensive revenue from multiple sources
+      const revenueFromEvents = revenueEvents.reduce((sum, event) => sum + (event.amount || 0), 0);
+      const revenueFromTransactions = transactions.reduce((sum, t) => sum + (t.final_price || 0), 0);
+      const revenueFromIncome = income.reduce((sum, i) => sum + (i.amount || 0), 0);
+      const totalRevenue = revenueFromEvents + revenueFromTransactions + revenueFromIncome;
+
+      // Calculate comprehensive estate sales stats
+      const activeSales = estateSales.filter(e => e.status === 'active' || e.status === 'upcoming');
+      const totalSalesRevenue = estateSales.reduce((sum, s) => sum + (s.actual_revenue || 0), 0);
+      const totalCommission = estateSales.reduce((sum, s) => sum + (s.commission_earned || 0), 0);
+
+      // Calculate marketplace stats
+      const listedItems = items.filter(i => i.status === 'available' || i.status === 'pending');
+      const soldItems = items.filter(i => i.status === 'sold');
+
+      // Calculate vendor stats
+      const activeVendorList = vendors.filter(v => v.tier && v.tier !== 'standard');
+      
+      // Calculate referral stats
+      const activeReferrals = referrals.filter(r => r.status === 'subscribed' || r.status === 'paid');
+      const totalReferralRevenue = activeReferrals.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
+
+      // Calculate subscription MRR
+      const activeSubs = subscriptions.filter(s => s.status === 'active');
+      const mrr = activeSubs.reduce((sum, s) => sum + (s.mrr || 0), 0);
 
       setStats({
         totalUsers: users.length,
         totalRevenue,
-        activeEstateSales: estateSales.filter(e => e.status === 'active' || e.status === 'upcoming').length,
+        activeEstateSales: activeSales.length,
         totalCourses: courses.length,
-        totalItems: items.length,
+        totalItems: listedItems.length,
         totalProperties: properties.length,
-        totalSubscriptions: subscriptions.filter(s => s.status === 'active').length,
+        totalSubscriptions: activeSubs.length,
         totalTickets: tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length,
-        activeVendors: vendors.filter(v => v.tier).length,
-        totalReferrals: referrals.filter(r => r.status === 'subscribed' || r.status === 'paid').length
+        activeVendors: activeVendorList.length,
+        totalReferrals: activeReferrals.length
       });
 
       // Build recent activity from transactions and other events
