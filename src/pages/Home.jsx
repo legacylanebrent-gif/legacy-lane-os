@@ -959,10 +959,10 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                      DIY Sale
+                      Sell Your Items
                     </h3>
                     <p className="text-purple-100">
-                      Run your own sale
+                      Sell on the marketplace
                     </p>
                   </div>
                 </div>
