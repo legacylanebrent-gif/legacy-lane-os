@@ -513,7 +513,7 @@ export default function Home() {
                     {sale.images && sale.images.length > 0 && (
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={sale.images[0]}
+                          src={sale.images[0].url || sale.images[0]}
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -625,7 +625,7 @@ export default function Home() {
                     {sale.images && sale.images.length > 0 && (
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={sale.images[0]}
+                          src={sale.images[0].url || sale.images[0]}
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -753,7 +753,7 @@ export default function Home() {
                     {sale.images && sale.images.length > 0 && (
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={sale.images[0]}
+                          src={sale.images[0].url || sale.images[0]}
                           alt={sale.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
