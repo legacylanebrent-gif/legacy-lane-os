@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
   Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText
@@ -149,6 +150,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-4">
+              <MessagesDropdown />
               <NotificationsDropdown />
               <Button
                 variant="ghost"

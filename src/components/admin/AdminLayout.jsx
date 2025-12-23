@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
   Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp, Bell
@@ -66,7 +67,10 @@ export default function AdminLayout({ children, currentPage }) {
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
-            <NotificationsDropdown />
+            <div className="flex items-center gap-2">
+              <MessagesDropdown />
+              <NotificationsDropdown />
+            </div>
           </div>
           <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
