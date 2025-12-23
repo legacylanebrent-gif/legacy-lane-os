@@ -12,6 +12,8 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState('subscriptions');
+  const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -65,6 +67,30 @@ export default function Revenue() {
   const [adNewPerMonth, setAdNewPerMonth] = useState(() => loadValue('adNewPerMonth', 10));
   const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 8));
 
+  // Biz in a Box Inputs
+  const [bizNewPerMonth, setBizNewPerMonth] = useState(() => loadValue('bizNewPerMonth', 5));
+  const [bizChurnRate, setBizChurnRate] = useState(() => loadValue('bizChurnRate', 2));
+
+  // Fetch Biz in a Box pricing
+  useEffect(() => {
+    const loadBizInBoxPricing = async () => {
+      try {
+        const packages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'biz_in_a_box'
+        });
+        
+        if (packages.length > 0) {
+          setBizInBoxPricing(packages[0]);
+        }
+      } catch (error) {
+        console.error('Error loading Biz in a Box pricing:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBizInBoxPricing();
+  }, []);
+
   // Auto-save to localStorage whenever values change
   useEffect(() => {
     const values = {
@@ -75,7 +101,8 @@ export default function Revenue() {
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
-      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
+      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
+      bizNewPerMonth, bizChurnRate
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -89,7 +116,8 @@ export default function Revenue() {
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
-    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate
+    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
+    bizNewPerMonth, bizChurnRate
   ]);
 
   const calculateProjections = (monthlyBase, growthPercent, months) => {
@@ -172,10 +200,47 @@ export default function Revenue() {
   const adProjections = adData.projections;
   const adQuantities = adData.quantities;
 
+  // Calculate Biz in a Box revenue
+  const calculateBizInBoxRevenue = (months) => {
+    const projections = [];
+    const quantities = [];
+    let operators = bizNewPerMonth;
+    
+    const setupFee = bizInBoxPricing?.biz_in_a_box_setup_fee || 2997;
+    const monthlyFee = bizInBoxPricing?.biz_in_a_box_monthly_year1 || 149;
+    const revenueSharePercent = bizInBoxPricing?.biz_in_a_box_revenue_share || 3;
+    const avgMonthlySalesPerOperator = 150000 / 12; // $150k avg first year revenue
+    
+    for (let i = 0; i < months; i++) {
+      const churnFactor = (1 - bizChurnRate / 100);
+      
+      // One-time setup fees for new operators
+      const setupRevenue = bizNewPerMonth * setupFee;
+      
+      // Monthly platform fees
+      const monthlyRevenue = operators * monthlyFee * churnFactor;
+      
+      // Revenue share (3% of their sales)
+      const revenueShareRevenue = operators * avgMonthlySalesPerOperator * (revenueSharePercent / 100) * churnFactor;
+      
+      const totalRevenue = setupRevenue + monthlyRevenue + revenueShareRevenue;
+      
+      projections.push(totalRevenue);
+      quantities.push(operators);
+      
+      operators = Math.floor(operators * churnFactor + bizNewPerMonth);
+    }
+    return { projections, quantities };
+  };
+
+  const bizInBoxData = calculateBizInBoxRevenue(120);
+  const bizInBoxProjections = bizInBoxData.projections;
+  const bizInBoxQuantities = bizInBoxData.quantities;
+
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
     marketplaceProjections[i] + courseProjections[i] + 
-    referralProjections[i] + featureProjections[i] + adProjections[i]
+    referralProjections[i] + featureProjections[i] + adProjections[i] + bizInBoxProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -196,6 +261,8 @@ export default function Revenue() {
     'Features Qty': Math.round(featureQuantities[i]),
     Advertising: Math.round(adProjections[i]),
     'Advertising Qty': Math.round(adQuantities[i]),
+    'Biz in a Box': Math.round(bizInBoxProjections[i]),
+    'Biz in a Box Qty': Math.round(bizInBoxQuantities[i]),
     Total: Math.round(totalProjections[i])
   }));
 
@@ -213,6 +280,7 @@ export default function Revenue() {
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
+    { name: 'Biz in a Box', value: getYearProjection(bizInBoxProjections, 3) },
   ];
 
   const yearlyComparisonData = [
@@ -226,6 +294,7 @@ export default function Revenue() {
       Referrals: getYearProjection(referralProjections, 3),
       Features: getYearProjection(featureProjections, 3),
       Advertising: getYearProjection(adProjections, 3),
+      'Biz in a Box': getYearProjection(bizInBoxProjections, 3),
     },
     {
       year: 'Year 5',
@@ -237,6 +306,7 @@ export default function Revenue() {
       Referrals: getYearProjection(referralProjections, 5),
       Features: getYearProjection(featureProjections, 5),
       Advertising: getYearProjection(adProjections, 5),
+      'Biz in a Box': getYearProjection(bizInBoxProjections, 5),
     },
     {
       year: 'Year 10',
@@ -248,6 +318,7 @@ export default function Revenue() {
       Referrals: getYearProjection(referralProjections, 10),
       Features: getYearProjection(featureProjections, 10),
       Advertising: getYearProjection(adProjections, 10),
+      'Biz in a Box': getYearProjection(bizInBoxProjections, 10),
     }
   ];
 
@@ -327,6 +398,7 @@ export default function Revenue() {
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
+                <Area type="monotone" dataKey="Biz in a Box" stackId="1" stroke="#f97316" fill="#f97316" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -385,7 +457,7 @@ export default function Revenue() {
         {/* Revenue Stream Calculators */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-9 gap-1">
               <TabsTrigger value="subscriptions" className="whitespace-nowrap flex-shrink-0">
                 <Users className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Operator Subs</span>
@@ -400,6 +472,11 @@ export default function Revenue() {
                 <Users className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Agent Subs</span>
                 <span className="sm:hidden">Agent</span>
+              </TabsTrigger>
+              <TabsTrigger value="bizInBox" className="whitespace-nowrap flex-shrink-0">
+                <Briefcase className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Biz in a Box</span>
+                <span className="sm:hidden">Biz</span>
               </TabsTrigger>
               <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
                 <ShoppingBag className="w-4 h-4 mr-1" />
@@ -997,6 +1074,143 @@ export default function Revenue() {
                     <Line yAxisId="right" type="monotone" dataKey="Features Qty" name="Features" stroke="#93c5fd" strokeWidth={2} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Biz in a Box Tab */}
+          <TabsContent value="bizInBox">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-orange-600" />
+                  Biz in a Box Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {bizInBoxPricing ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-slate-50 rounded-lg">
+                      <div>
+                        <Label className="text-slate-600">Setup Fee</Label>
+                        <div className="text-2xl font-bold text-slate-900">
+                          ${bizInBoxPricing.biz_in_a_box_setup_fee?.toLocaleString() || '2,997'}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-slate-600">Monthly Fee (Year 1)</Label>
+                        <div className="text-2xl font-bold text-slate-900">
+                          ${bizInBoxPricing.biz_in_a_box_monthly_year1 || '149'}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-slate-600">Revenue Share</Label>
+                        <div className="text-2xl font-bold text-slate-900">
+                          {bizInBoxPricing.biz_in_a_box_revenue_share || '3'}%
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div>
+                        <Label>New Operators/Month</Label>
+                        <Input 
+                          type="number" 
+                          value={bizNewPerMonth} 
+                          onChange={(e) => setBizNewPerMonth(Number(e.target.value))} 
+                        />
+                      </div>
+                      <div>
+                        <Label>Monthly Churn Rate (%)</Label>
+                        <Input 
+                          type="number" 
+                          value={bizChurnRate} 
+                          onChange={(e) => setBizChurnRate(Number(e.target.value))} 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          ${(getYearProjection(bizInBoxProjections, 1) / 1000000).toFixed(2)}M
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          {Math.round(bizInBoxQuantities[11])} operators
+                        </div>
+                      </div>
+                      <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                        <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                        <div className="text-2xl font-bold text-cyan-600">
+                          ${(getYearProjection(bizInBoxProjections, 3) / 1000000).toFixed(2)}M
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          {Math.round(bizInBoxQuantities[35])} operators
+                        </div>
+                      </div>
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                        <div className="text-2xl font-bold text-purple-600">
+                          ${(getYearProjection(bizInBoxProjections, 5) / 1000000).toFixed(2)}M
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          {Math.round(bizInBoxQuantities[59])} operators
+                        </div>
+                      </div>
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                        <div className="text-2xl font-bold text-orange-600">
+                          ${(getYearProjection(bizInBoxProjections, 10) / 1000000).toFixed(2)}M
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          {Math.round(bizInBoxQuantities[119])} operators
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="text-sm font-semibold text-slate-700 mb-2">Revenue Breakdown per Operator:</div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-slate-600">Setup Fee:</span>
+                          <span className="font-bold text-slate-900 ml-2">
+                            ${bizInBoxPricing.biz_in_a_box_setup_fee?.toLocaleString() || '2,997'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Year 1 Monthly Fees:</span>
+                          <span className="font-bold text-slate-900 ml-2">
+                            ${((bizInBoxPricing.biz_in_a_box_monthly_year1 || 149) * 12).toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-600">Avg Revenue Share (Year 1):</span>
+                          <span className="font-bold text-slate-900 ml-2">
+                            ${(150000 * (bizInBoxPricing.biz_in_a_box_revenue_share || 3) / 100).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={chartData.slice(0, 36)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                        <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip />
+                        <Legend />
+                        <Line yAxisId="left" type="monotone" dataKey="Biz in a Box" name="Revenue" stroke="#f97316" strokeWidth={3} />
+                        <Line yAxisId="right" type="monotone" dataKey="Biz in a Box Qty" name="Operators" stroke="#fdba74" strokeWidth={2} strokeDasharray="5 5" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </>
+                ) : (
+                  <div className="text-center p-8 text-slate-500">
+                    Loading Biz in a Box pricing...
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
