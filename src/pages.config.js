@@ -68,6 +68,7 @@ import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import MarketingTasks from './pages/MarketingTasks';
 import Favorites from './pages/Favorites';
+import RewardsCheckins from './pages/RewardsCheckins';
 import __Layout from './Layout.jsx';
 
 
@@ -142,6 +143,7 @@ export const PAGES = {
     "Worksheet": Worksheet,
     "MarketingTasks": MarketingTasks,
     "Favorites": Favorites,
+    "RewardsCheckins": RewardsCheckins,
 }
 
 export const pagesConfig = {
