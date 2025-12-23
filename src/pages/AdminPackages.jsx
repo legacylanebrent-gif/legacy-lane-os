@@ -176,8 +176,25 @@ export default function AdminPackages() {
                       <div className="border-t pt-4">
                         <div className="flex items-baseline gap-2">
                           <CreditCard className="w-5 h-5 text-slate-500 mt-1" />
-                          <div>
-                            {pkgData.pricing_model === 'per_item' ? (
+                          <div className="w-full">
+                            {pkgData.account_type === 'biz_in_a_box' ? (
+                              <>
+                                <div className="space-y-3">
+                                  <div>
+                                    <div className="text-2xl font-bold text-slate-900">${pkgData.biz_in_a_box_setup_fee?.toLocaleString() || '0'}</div>
+                                    <div className="text-sm text-slate-600">One-Time Investment</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-2xl font-bold text-slate-900">${pkgData.biz_in_a_box_monthly_year1 || '0'}</div>
+                                    <div className="text-sm text-slate-600">Monthly Fee (Year 1)</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-2xl font-bold text-slate-900">{pkgData.biz_in_a_box_revenue_share || '0'}%</div>
+                                    <div className="text-sm text-slate-600">Royalty Fee</div>
+                                  </div>
+                                </div>
+                              </>
+                            ) : pkgData.pricing_model === 'per_item' ? (
                               <>
                                 <div className="text-3xl font-bold text-slate-900">${pkgData.per_item_price}</div>
                                 <div className="text-sm text-slate-600">per item</div>
