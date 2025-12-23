@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, MessageSquare, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
+import ComposeMessageModal from '@/components/messaging/ComposeMessageModal';
 
 export default function Messages() {
   const [conversations, setConversations] = useState([]);
@@ -17,6 +18,7 @@ export default function Messages() {
   const [currentUser, setCurrentUser] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState(null);
+  const [showComposeModal, setShowComposeModal] = useState(false);
 
   useEffect(() => {
     loadMessages();
@@ -95,6 +97,13 @@ export default function Messages() {
               {unreadTotal > 0 && `${unreadTotal} unread message${unreadTotal > 1 ? 's' : ''}`}
             </p>
           </div>
+          <Button
+            onClick={() => setShowComposeModal(true)}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            New Message
+          </Button>
         </div>
 
         <Card>
@@ -165,6 +174,15 @@ export default function Messages() {
           recipient={selectedRecipient}
         />
       )}
+
+      <ComposeMessageModal
+        open={showComposeModal}
+        onClose={() => {
+          setShowComposeModal(false);
+          loadMessages();
+        }}
+        currentUser={currentUser}
+      />
     </div>
   );
 }
