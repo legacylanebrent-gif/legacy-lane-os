@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
+import QRCode from 'qrcode';
 import { 
   ArrowLeft, Plus, Search, Package, DollarSign, Tag, 
-  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2
+  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2, Printer
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -90,6 +91,137 @@ export default function SaleInventory() {
   const handleEdit = (item) => {
     setEditingItem(item);
     setShowCreateModal(true);
+  };
+
+  const handlePrintQRTag = async (item) => {
+    try {
+      // Generate QR code with item URL or ID
+      const itemUrl = `${window.location.origin}${createPageUrl('BrowseItems')}?itemId=${item.id}`;
+      const qrCodeDataUrl = await QRCode.toDataURL(itemUrl, { width: 300, margin: 2 });
+
+      // Create print window
+      const printWindow = window.open('', '', 'width=600,height=600');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>QR Code Tag - ${item.title}</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+              }
+              .tag-container {
+                text-align: center;
+                border: 2px solid #000;
+                padding: 20px;
+                width: 400px;
+              }
+              .qr-code {
+                margin: 20px auto;
+              }
+              .item-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 10px;
+              }
+              .item-id {
+                font-size: 14px;
+                color: #666;
+                margin-top: 10px;
+              }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="tag-container">
+              <div class="item-title">${item.title}</div>
+              <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code" />
+              <div class="item-id">Item #${item.id.substring(0, 8)}</div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      alert('Failed to generate QR code');
+    }
+  };
+
+  const handlePrintLabel = (item) => {
+    const printWindow = window.open('', '', 'width=600,height=400');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Label - ${item.title}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+            }
+            .label-container {
+              border: 2px solid #000;
+              padding: 20px;
+              width: 400px;
+              margin: 20px auto;
+            }
+            .title {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 15px;
+              border-bottom: 2px solid #000;
+              padding-bottom: 10px;
+            }
+            .price {
+              font-size: 32px;
+              font-weight: bold;
+              color: #0891b2;
+              margin: 15px 0;
+            }
+            .description {
+              font-size: 14px;
+              line-height: 1.5;
+              margin-top: 15px;
+              padding-top: 15px;
+              border-top: 1px solid #ccc;
+            }
+            .category {
+              font-size: 12px;
+              color: #666;
+              margin-top: 10px;
+            }
+            @media print {
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="label-container">
+            <div class="title">${item.title}</div>
+            <div class="price">$${item.price?.toLocaleString() || '0'}</div>
+            ${item.category ? `<div class="category">${item.category}</div>` : ''}
+            ${item.description ? `<div class="description">${item.description}</div>` : ''}
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   };
 
   const getStatusColor = (status) => {
@@ -261,6 +393,14 @@ export default function SaleInventory() {
                     <DropdownMenuItem onClick={() => handleEdit(item)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Item
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handlePrintQRTag(item)}>
+                      <Printer className="w-4 h-4 mr-2" />
+                      Print QR Code Tag
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handlePrintLabel(item)}>
+                      <Printer className="w-4 h-4 mr-2" />
+                      Print Price Label
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>Change Status</DropdownMenuLabel>
