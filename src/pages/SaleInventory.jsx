@@ -390,6 +390,12 @@ export default function SaleInventory() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <a href={createPageUrl('ItemDetail') + '?itemId=' + item.id} target="_blank" rel="noopener noreferrer">
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        View Item Page
+                      </a>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleEdit(item)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Item
