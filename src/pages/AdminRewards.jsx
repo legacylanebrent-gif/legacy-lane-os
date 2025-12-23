@@ -140,17 +140,17 @@ export default function AdminRewards() {
       {/* Month Selector */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
               <Label>Select Month</Label>
               <Input 
                 type="month" 
                 value={currentMonth}
                 onChange={(e) => setCurrentMonth(e.target.value)}
-                className="mt-2 w-64"
+                className="mt-2 w-full sm:w-64"
               />
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right w-full sm:w-auto">
               <div className="text-sm text-slate-600">Current Month</div>
               <div className="text-2xl font-bold text-slate-900">
                 {new Date(currentMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -161,7 +161,7 @@ export default function AdminRewards() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -198,13 +198,13 @@ export default function AdminRewards() {
       {/* Conduct Draw */}
       <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
         <CardContent className="p-6">
-          <div className="flex items-start gap-4">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
             <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
               <Trophy className="w-6 h-6 text-white" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 w-full sm:w-auto">
               <h3 className="text-lg font-semibold text-slate-900 mb-3">Conduct Monthly Draw</h3>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <Label className="text-sm">Prize Description</Label>
                   <Input 
@@ -227,7 +227,7 @@ export default function AdminRewards() {
               <Button 
                 onClick={conductDraw}
                 disabled={conducting || totalParticipants === 0}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
               >
                 <Gift className="w-4 h-4 mr-2" />
                 {conducting ? 'Conducting Draw...' : 'Conduct Draw'}
@@ -249,15 +249,15 @@ export default function AdminRewards() {
               {leaderboard.map((user, index) => (
                 <div 
                   key={user.user_id}
-                  className={`flex items-center justify-between p-4 rounded-lg ${
+                  className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-lg ${
                     index === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300' :
                     index === 1 ? 'bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-300' :
                     index === 2 ? 'bg-gradient-to-r from-orange-100 to-orange-50 border border-orange-300' :
                     'bg-slate-50 border border-slate-200'
                   }`}
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  <div className="flex items-center gap-4 flex-1 w-full">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 ${
                       index === 0 ? 'bg-yellow-500 text-white' :
                       index === 1 ? 'bg-slate-400 text-white' :
                       index === 2 ? 'bg-orange-500 text-white' :
@@ -265,17 +265,17 @@ export default function AdminRewards() {
                     }`}>
                       {index + 1}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-900">{user.user_name}</p>
-                      <p className="text-sm text-slate-600">{user.user_email}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-900 truncate">{user.user_name}</p>
+                      <p className="text-sm text-slate-600 truncate">{user.user_email}</p>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 text-yellow-600 font-bold text-lg">
-                        <Star className="w-5 h-5 fill-yellow-600" />
-                        {user.points}
-                      </div>
-                      <div className="text-xs text-slate-500">{user.actions_completed} actions</div>
+                  </div>
+                  <div className="flex items-center gap-2 sm:gap-4 sm:text-right w-full sm:w-auto sm:flex-col sm:items-end pl-14 sm:pl-0">
+                    <div className="flex items-center gap-1 text-yellow-600 font-bold text-lg">
+                      <Star className="w-5 h-5 fill-yellow-600" />
+                      {user.points}
                     </div>
+                    <div className="text-xs text-slate-500">{user.actions_completed} actions</div>
                   </div>
                 </div>
               ))}
@@ -295,19 +295,19 @@ export default function AdminRewards() {
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Past Draws</h3>
             <div className="space-y-3">
               {draws.map((draw) => (
-                <div key={draw.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
-                  <div className="flex items-center gap-4">
-                    <Trophy className="w-6 h-6 text-purple-600" />
-                    <div>
+                <div key={draw.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 bg-slate-50 rounded-lg border">
+                  <div className="flex items-center gap-4 flex-1 w-full">
+                    <Trophy className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
                       <p className="font-semibold text-slate-900">
                         {new Date(draw.month + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-slate-600 truncate">
                         Winner: {draw.winner_name} ({draw.winner_points} points)
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-2 sm:flex-col sm:items-end w-full sm:w-auto pl-10 sm:pl-0">
                     <p className="font-bold text-green-600">{draw.prize}</p>
                     <Badge className={
                       draw.status === 'prize_sent' ? 'bg-green-100 text-green-700' :
