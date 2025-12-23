@@ -164,6 +164,8 @@ export default function BizInABox() {
     'Lead generation system and scripts'
   ];
 
+  const regularMonthlyPrice = pricing.monthly_year1 * 2;
+  
   const pricingCards = [
     {
       label: 'One-Time Setup Investment',
@@ -174,9 +176,9 @@ export default function BizInABox() {
     {
       label: 'Monthly Platform Fee (Year 1)',
       price: `$${pricing.monthly_year1}`,
-      description: '50% OFF - Regular price $299/mo',
+      description: `50% OFF - Regular price $${regularMonthlyPrice}/mo`,
       popular: true,
-      saved: `Save $${((299 - pricing.monthly_year1) * 12).toLocaleString()} first year`
+      saved: `Save $${((regularMonthlyPrice - pricing.monthly_year1) * 12).toLocaleString()} first year`
     },
     {
       label: 'Ongoing Revenue Share',
