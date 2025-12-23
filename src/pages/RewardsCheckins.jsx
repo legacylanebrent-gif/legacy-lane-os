@@ -336,9 +336,91 @@ function CheckInForm({ onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
     check_in_type: 'sale_visit',
     location_name: '',
+    location_id: '',
     notes: '',
     points_earned: 10
   });
+  const [nearbySales, setNearbySales] = useState([]);
+  const [loadingSales, setLoadingSales] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+
+  useEffect(() => {
+    loadNearbySales();
+  }, []);
+
+  const loadNearbySales = async () => {
+    setLoadingSales(true);
+    try {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const sales = await base44.entities.EstateSale.filter({
+              status: ['upcoming', 'active']
+            }, '-created_date', 50);
+
+            // Calculate distances and sort
+            const salesWithDistance = sales
+              .map(sale => {
+                if (sale.location && sale.location.lat && sale.location.lng) {
+                  const distance = calculateDistance(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                    sale.location.lat,
+                    sale.location.lng
+                  );
+                  return { ...sale, distance };
+                }
+                return null;
+              })
+              .filter(s => s && s.distance < 50) // Within 50 miles
+              .sort((a, b) => a.distance - b.distance);
+
+            setNearbySales(salesWithDistance);
+            setLoadingSales(false);
+          },
+          () => {
+            setLoadingSales(false);
+          }
+        );
+      } else {
+        setLoadingSales(false);
+      }
+    } catch (error) {
+      console.error('Error loading sales:', error);
+      setLoadingSales(false);
+    }
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3959; // Radius of Earth in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const handleSaleSelect = (saleId) => {
+    const sale = nearbySales.find(s => s.id === saleId);
+    if (sale) {
+      setFormData({
+        ...formData,
+        location_id: saleId,
+        location_name: sale.title
+      });
+    }
+  };
+
+  const handleScanQR = () => {
+    setShowScanner(true);
+    // In a real implementation, you would use a QR scanner library
+    // For now, we'll show a placeholder
+    alert('QR Scanner would launch here. You can integrate a library like react-qr-reader for full functionality.');
+    setShowScanner(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -420,6 +502,38 @@ function CheckInForm({ onSuccess, onCancel }) {
             <SelectItem value="custom">Custom</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label>Select Nearby Sale</Label>
+        <div className="flex gap-2">
+          <Select value={formData.location_id} onValueChange={handleSaleSelect} disabled={loadingSales}>
+            <SelectTrigger>
+              <SelectValue placeholder={loadingSales ? "Loading nearby sales..." : "Select a nearby sale"} />
+            </SelectTrigger>
+            <SelectContent>
+              {nearbySales.length === 0 ? (
+                <SelectItem value="none" disabled>No sales found nearby</SelectItem>
+              ) : (
+                nearbySales.map(sale => (
+                  <SelectItem key={sale.id} value={sale.id}>
+                    {sale.title} - {sale.distance.toFixed(1)} mi away
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handleScanQR}
+            title="Scan QR Code"
+          >
+            <Camera className="w-4 h-4" />
+          </Button>
+        </div>
+        <p className="text-xs text-slate-500 mt-1">Or enter location manually below</p>
       </div>
 
       <div>
