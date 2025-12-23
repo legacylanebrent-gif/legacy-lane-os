@@ -10,7 +10,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import { t } from '@/components/terminology';
 import { 
-  Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
+  Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2
 } from 'lucide-react';
 import { format } from 'date-fns';
