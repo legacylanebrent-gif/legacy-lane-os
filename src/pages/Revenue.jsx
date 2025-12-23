@@ -43,8 +43,8 @@ export default function Revenue() {
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
 
   // Agent Subscription Inputs
-  const [agentBasicPrice, setAgentBasicPrice] = useState(() => loadValue('agentBasicPrice', 99));
-  const [agentProPrice, setAgentProPrice] = useState(() => loadValue('agentProPrice', 199));
+  const [agentBasicPrice, setAgentBasicPrice] = useState(() => loadValue('agentBasicPrice', 0));
+  const [agentProPrice, setAgentProPrice] = useState(() => loadValue('agentProPrice', 29));
   const [agentNewPerMonth, setAgentNewPerMonth] = useState(() => loadValue('agentNewPerMonth', 10));
   const [agentChurnRate, setAgentChurnRate] = useState(() => loadValue('agentChurnRate', 3));
 
