@@ -488,123 +488,127 @@ export default function AdminAutomations() {
 
       {/* Create/Edit Automation Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
+        <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0">
+          <DialogHeader className="flex-shrink-0 px-6 pt-6">
             <DialogTitle className="text-2xl">
               {editingAutomation ? 'Edit Automation' : 'Create Automation'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreateAutomation} className="flex-1 overflow-y-auto space-y-6 px-1">
-            <div>
-              <Label>Automation Name *</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Welcome Email on Signup"
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Description</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="What does this automation do?"
-                rows={2}
-              />
-            </div>
-
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-cyan-600" />
-                Trigger: When should this run?
-              </h3>
-              
+          <form onSubmit={handleCreateAutomation} className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
               <div>
-                <Label>Trigger Event *</Label>
-                <Select
-                  value={formData.trigger_type}
-                  onValueChange={(value) => setFormData({ ...formData, trigger_type: value })}
+                <Label>Automation Name *</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., Welcome Email on Signup"
                   required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a trigger..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {['user', 'billing', 'sales', 'leads', 'marketplace', 'support', 'events'].map(category => (
-                      <React.Fragment key={category}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase">
-                          {category}
-                        </div>
-                        {TRIGGER_TYPES.filter(t => t.category === category).map(trigger => (
-                          <SelectItem key={trigger.value} value={trigger.value}>
-                            {trigger.label}
-                          </SelectItem>
-                        ))}
-                      </React.Fragment>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
-            </div>
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-orange-600" />
-                Action: What should happen?
-              </h3>
-              
-              <div className="space-y-4">
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="What does this automation do?"
+                  rows={2}
+                />
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-cyan-600" />
+                  Trigger: When should this run?
+                </h3>
+                
                 <div>
-                  <Label>Action Type *</Label>
+                  <Label>Trigger Event *</Label>
                   <Select
-                    value={formData.action_type}
-                    onValueChange={(value) => setFormData({ ...formData, action_type: value, action_config: {} })}
+                    value={formData.trigger_type}
+                    onValueChange={(value) => setFormData({ ...formData, trigger_type: value })}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select an action..." />
+                      <SelectValue placeholder="Select a trigger..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {ACTION_TYPES.map(action => (
-                        <SelectItem key={action.value} value={action.value}>
-                          {action.label}
-                        </SelectItem>
+                      {['user', 'billing', 'sales', 'leads', 'marketplace', 'support', 'events'].map(category => (
+                        <React.Fragment key={category}>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase">
+                            {category}
+                          </div>
+                          {TRIGGER_TYPES.filter(t => t.category === category).map(trigger => (
+                            <SelectItem key={trigger.value} value={trigger.value}>
+                              {trigger.label}
+                            </SelectItem>
+                          ))}
+                        </React.Fragment>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
-                {renderActionConfig()}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-orange-600" />
+                  Action: What should happen?
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Action Type *</Label>
+                    <Select
+                      value={formData.action_type}
+                      onValueChange={(value) => setFormData({ ...formData, action_type: value, action_config: {} })}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an action..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACTION_TYPES.map(action => (
+                          <SelectItem key={action.value} value={action.value}>
+                            {action.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {renderActionConfig()}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t pt-6 sticky bottom-0 bg-white pb-4 -mx-1 px-1">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                />
-                <Label>Active</Label>
-              </div>
+            <div className="flex-shrink-0 border-t bg-white px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label>Active</Label>
+                </div>
 
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingAutomation(null);
-                    resetForm();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
-                  {editingAutomation ? 'Update Automation' : 'Create Automation'}
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setEditingAutomation(null);
+                      resetForm();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+                    {editingAutomation ? 'Update Automation' : 'Create Automation'}
+                  </Button>
+                </div>
               </div>
             </div>
           </form>
