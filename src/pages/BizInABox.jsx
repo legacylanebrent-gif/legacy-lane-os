@@ -208,19 +208,20 @@ export default function BizInABox() {
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 shadow-lg sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-4">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-3 flex-shrink-0">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">LL</span>
               </div>
-              <div>
+              <div className="hidden sm:block">
                 <h1 className="text-xl font-serif font-bold text-white">Legacy Lane</h1>
                 <p className="text-xs text-orange-400">Business in a Box</p>
               </div>
             </Link>
-            <Button className="bg-orange-600 hover:bg-orange-700">
+            <Button className="bg-orange-600 hover:bg-orange-700 flex-shrink-0">
               <Phone className="w-4 h-4 mr-2" />
-              Schedule a Call
+              <span className="hidden sm:inline">Schedule a Call</span>
+              <span className="sm:hidden">Call</span>
             </Button>
           </div>
         </div>
