@@ -89,8 +89,8 @@ export default function RewardsCheckins() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-4 sm:p-6 space-y-6 mt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Rewards & Check-ins</h1>
           <p className="text-slate-600 mt-1">Track your activity and earn rewards</p>
