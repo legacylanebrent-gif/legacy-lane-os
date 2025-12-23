@@ -16,17 +16,86 @@ import {
 } from 'lucide-react';
 
 const TRIGGER_TYPES = [
+  // User Events
   { value: 'user_signup', label: 'User Signs Up', icon: Users, category: 'user' },
+  { value: 'user_login', label: 'User Logs In', icon: Users, category: 'user' },
+  { value: 'user_profile_updated', label: 'User Updates Profile', icon: Users, category: 'user' },
+  { value: 'user_inactive_30d', label: 'User Inactive (30+ days)', icon: Users, category: 'user' },
+  
+  // Billing Events
   { value: 'subscription_started', label: 'Subscription Started', icon: DollarSign, category: 'billing' },
   { value: 'subscription_cancelled', label: 'Subscription Cancelled', icon: DollarSign, category: 'billing' },
+  { value: 'subscription_expired', label: 'Subscription Expired', icon: DollarSign, category: 'billing' },
+  { value: 'subscription_trial_ending', label: 'Trial Ending Soon', icon: DollarSign, category: 'billing' },
+  { value: 'payment_succeeded', label: 'Payment Successful', icon: DollarSign, category: 'billing' },
+  { value: 'payment_failed', label: 'Payment Failed', icon: DollarSign, category: 'billing' },
+  
+  // Estate Sale Events
   { value: 'sale_created', label: 'Estate Sale Created', icon: Home, category: 'sales' },
+  { value: 'sale_published', label: 'Estate Sale Published', icon: Home, category: 'sales' },
+  { value: 'sale_going_live_24h', label: 'Estate Sale Going Live (24hrs)', icon: Home, category: 'sales' },
   { value: 'sale_completed', label: 'Estate Sale Completed', icon: Home, category: 'sales' },
-  { value: 'lead_created', label: 'New Lead Created', icon: Users, category: 'leads' },
+  { value: 'sale_cancelled', label: 'Estate Sale Cancelled', icon: Home, category: 'sales' },
+  { value: 'sale_revenue_milestone', label: 'Sale Revenue Milestone Reached', icon: Home, category: 'sales' },
+  
+  // Lead Events
+  { value: 'lead_created', label: 'New Lead Received', icon: Users, category: 'leads' },
   { value: 'lead_assigned', label: 'Lead Assigned to Operator', icon: Users, category: 'leads' },
-  { value: 'item_listed', label: 'Item Listed on Marketplace', icon: ShoppingBag, category: 'marketplace' },
+  { value: 'lead_converted', label: 'Lead Converted to Client', icon: Users, category: 'leads' },
+  { value: 'lead_high_score', label: 'High-Score Lead (75+)', icon: Users, category: 'leads' },
+  
+  // Marketplace Events
+  { value: 'item_listed', label: 'Item Listed for Sale', icon: ShoppingBag, category: 'marketplace' },
   { value: 'item_sold', label: 'Item Sold', icon: ShoppingBag, category: 'marketplace' },
+  { value: 'offer_made', label: 'Offer Made on Item', icon: ShoppingBag, category: 'marketplace' },
+  { value: 'offer_accepted', label: 'Offer Accepted', icon: ShoppingBag, category: 'marketplace' },
+  { value: 'offer_rejected', label: 'Offer Rejected', icon: ShoppingBag, category: 'marketplace' },
+  
+  // Support Events
   { value: 'ticket_created', label: 'Support Ticket Created', icon: MessageSquare, category: 'support' },
-  { value: 'vip_event_created', label: 'VIP Event Created', icon: Calendar, category: 'events' }
+  { value: 'ticket_resolved', label: 'Support Ticket Resolved', icon: MessageSquare, category: 'support' },
+  { value: 'ticket_escalated', label: 'Ticket Escalated (High Priority)', icon: MessageSquare, category: 'support' },
+  { value: 'ticket_response', label: 'New Ticket Message', icon: MessageSquare, category: 'support' },
+  
+  // VIP Event Management
+  { value: 'vip_event_created', label: 'VIP Event Created', icon: Calendar, category: 'events' },
+  { value: 'vip_invite_sent', label: 'VIP Invite Sent', icon: Calendar, category: 'events' },
+  { value: 'vip_invite_accepted', label: 'VIP Invite Accepted', icon: Calendar, category: 'events' },
+  { value: 'vip_event_tomorrow', label: 'VIP Event Tomorrow', icon: Calendar, category: 'events' },
+  
+  // Referral Events
+  { value: 'referral_created', label: 'New Referral Made', icon: Users, category: 'referrals' },
+  { value: 'referral_signed_up', label: 'Referral Signed Up', icon: Users, category: 'referrals' },
+  { value: 'referral_subscribed', label: 'Referral Started Subscription', icon: Users, category: 'referrals' },
+  { value: 'referral_first_payment', label: 'Referral Made First Payment', icon: DollarSign, category: 'referrals' },
+  
+  // Rewards Events
+  { value: 'reward_points_earned', label: 'User Earned Points', icon: Users, category: 'rewards' },
+  { value: 'reward_milestone_reached', label: 'Point Milestone Reached', icon: Users, category: 'rewards' },
+  { value: 'monthly_draw_winner', label: 'Monthly Draw Winner Selected', icon: Users, category: 'rewards' },
+  
+  // Course Events
+  { value: 'course_enrolled', label: 'User Enrolled in Course', icon: Users, category: 'courses' },
+  { value: 'lesson_completed', label: 'Lesson Completed', icon: Users, category: 'courses' },
+  { value: 'course_completed', label: 'Course Completed', icon: Users, category: 'courses' },
+  { value: 'quiz_passed', label: 'Quiz Passed', icon: Users, category: 'courses' },
+  { value: 'quiz_failed', label: 'Quiz Failed', icon: Users, category: 'courses' },
+  
+  // Vendor Events
+  { value: 'bid_request_created', label: 'Bid Request Created', icon: Users, category: 'vendors' },
+  { value: 'bid_submitted', label: 'Bid Submitted', icon: Users, category: 'vendors' },
+  { value: 'bid_accepted', label: 'Bid Accepted', icon: Users, category: 'vendors' },
+  
+  // Financial Tracking
+  { value: 'expense_added', label: 'Business Expense Added', icon: DollarSign, category: 'financial' },
+  { value: 'income_recorded', label: 'Income Recorded', icon: DollarSign, category: 'financial' },
+  { value: 'tax_threshold_reached', label: 'Tax Liability Threshold', icon: DollarSign, category: 'financial' },
+  
+  // CRM Events
+  { value: 'contact_added', label: 'New Contact Added', icon: Users, category: 'crm' },
+  { value: 'deal_created', label: 'New Deal Created', icon: DollarSign, category: 'crm' },
+  { value: 'deal_closed', label: 'Deal Closed', icon: DollarSign, category: 'crm' },
+  { value: 'property_listed', label: 'Property Listed', icon: Home, category: 'crm' }
 ];
 
 const ACTION_TYPES = [
