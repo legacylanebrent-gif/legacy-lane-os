@@ -48,28 +48,30 @@ export default function AdminLayout({ children, currentPage }) {
 
   return (
     <div className="flex h-screen bg-slate-50">
+      {/* Hamburger Button - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+        <MessagesDropdown />
+        <NotificationsDropdown />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="bg-slate-800 text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSidebarOpen(!sidebarOpen);
+          }}
+        >
+          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      </div>
+
       {/* Left Navigation */}
       <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 ${
         sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
       }`}>
         <div className="p-6 border-b border-slate-700">
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2">
             <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
-            <div className="flex items-center gap-3">
-              <MessagesDropdown />
-              <NotificationsDropdown />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSidebarOpen(!sidebarOpen);
-                }}
-              >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </div>
           </div>
           <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
