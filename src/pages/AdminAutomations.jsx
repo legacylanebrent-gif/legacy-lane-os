@@ -534,7 +534,7 @@ export default function AdminAutomations() {
                       <SelectValue placeholder="Select a trigger..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px] overflow-y-auto">
-                      {['user', 'billing', 'sales', 'leads', 'marketplace', 'support', 'events'].map(category => (
+                      {['user', 'billing', 'sales', 'leads', 'marketplace', 'support', 'events', 'referrals', 'rewards', 'courses', 'vendors', 'financial', 'crm'].map(category => (
                         <React.Fragment key={category}>
                           <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase">
                             {category}
