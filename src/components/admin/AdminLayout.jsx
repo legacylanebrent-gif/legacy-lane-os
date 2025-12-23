@@ -25,7 +25,6 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Business Expenses', path: 'MyBusinessExpenses', icon: FileText },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
   { label: 'Users', path: 'AdminUsers', icon: Users },
-  { label: 'Page Permissions', path: 'AdminPageAccess', icon: Shield },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Incoming Leads', path: 'IncomingLeads', icon: TrendingUp },
@@ -42,6 +41,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
   { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
+  { label: 'Page Permissions', path: 'AdminPageAccess', icon: Shield },
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
 
