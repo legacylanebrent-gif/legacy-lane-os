@@ -448,11 +448,11 @@ export default function MyBusinessExpenses() {
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Business Expenses</h1>
           <p className="text-slate-600">Track and manage your business expenses</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={() => setShowScanModal(true)}
             variant="outline"
-            className="border-cyan-600 text-cyan-700 hover:bg-cyan-50"
+            className="border-cyan-600 text-cyan-700 hover:bg-cyan-50 whitespace-nowrap"
           >
             <Receipt className="w-4 h-4 mr-2" />
             Scan Receipt
@@ -460,7 +460,7 @@ export default function MyBusinessExpenses() {
           <Button
             onClick={() => setShowMileageModal(true)}
             variant="outline"
-            className="border-blue-600 text-blue-700 hover:bg-blue-50"
+            className="border-blue-600 text-blue-700 hover:bg-blue-50 whitespace-nowrap"
           >
             <Car className="w-4 h-4 mr-2" />
             Add Mileage
@@ -468,14 +468,14 @@ export default function MyBusinessExpenses() {
           <Button
             onClick={() => setShowRecurringModal(true)}
             variant="outline"
-            className="border-purple-600 text-purple-700 hover:bg-purple-50"
+            className="border-purple-600 text-purple-700 hover:bg-purple-50 whitespace-nowrap"
           >
             <Repeat className="w-4 h-4 mr-2" />
             Add Recurring
           </Button>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Expense
@@ -555,12 +555,12 @@ export default function MyBusinessExpenses() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="ml-auto flex gap-2">
-              <Button onClick={handleExportCSV} variant="outline" size="sm">
+            <div className="ml-auto flex flex-col sm:flex-row gap-2">
+              <Button onClick={handleExportCSV} variant="outline" size="sm" className="whitespace-nowrap">
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
               </Button>
-              <Button onClick={handleExportQuickBooks} variant="outline" size="sm">
+              <Button onClick={handleExportQuickBooks} variant="outline" size="sm" className="whitespace-nowrap">
                 <Download className="w-4 h-4 mr-2" />
                 QuickBooks
               </Button>
