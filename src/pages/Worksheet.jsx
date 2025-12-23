@@ -1042,11 +1042,11 @@ Only include items with confidence > 0.3. If no items match well, return an empt
             {/* Add Transaction Form */}
           <Card className="bg-white shadow-md">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-slate-900">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-3">
                   {bundleMode ? 'Bundle Transaction' : photoMode ? 'Add from Photos' : 'Add New Transaction'}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button 
                     variant={photoMode ? "default" : "outline"}
                     size="sm"
@@ -1060,7 +1060,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                         setPhotoSearchQuery('');
                       }
                     }}
-                    className={photoMode ? "bg-cyan-600 hover:bg-cyan-700" : ""}
+                    className={`whitespace-nowrap ${photoMode ? "bg-cyan-600 hover:bg-cyan-700" : ""}`}
                   >
                     <Camera className="w-4 h-4 mr-2" />
                     {photoMode ? 'Photo Mode' : 'From Photos'}
@@ -1072,7 +1072,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                       setBundleMode(!bundleMode);
                       setPhotoMode(false);
                     }}
-                    className={bundleMode ? "bg-purple-600 hover:bg-purple-700" : ""}
+                    className={`whitespace-nowrap ${bundleMode ? "bg-purple-600 hover:bg-purple-700" : ""}`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     {bundleMode ? 'Bundle Mode' : 'Create Bundle'}
