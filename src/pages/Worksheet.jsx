@@ -1531,10 +1531,10 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
                             <p className="font-medium text-slate-900">{transaction.item_name}</p>
-                            <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
+                            <div className="flex items-center flex-wrap gap-2 text-sm text-slate-600 mt-1">
                               <span>Qty: {transaction.quantity}</span>
                               <span>•</span>
                               <span>${transaction.price.toFixed(2)} each</span>
@@ -1545,27 +1545,29 @@ Only include items with confidence > 0.3. If no items match well, return an empt
                               <p className="text-sm text-slate-500 mt-1">{transaction.notes}</p>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 ml-4">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <div className="text-right">
-                              <p className="text-xl font-bold text-green-600">
+                              <p className="text-xl font-bold text-green-600 whitespace-nowrap">
                                 ${transaction.total.toFixed(2)}
                               </p>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditTransaction(transaction)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTransaction(transaction.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
+                            <div className="flex flex-col sm:flex-row gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditTransaction(transaction)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTransaction(transaction.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
