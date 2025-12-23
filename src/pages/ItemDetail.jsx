@@ -177,6 +177,7 @@ export default function ItemDetail() {
                   <img
                     src={item.images[selectedImageIndex]}
                     alt={item.title}
+                    loading="lazy"
                     className="w-full h-full object-contain"
                   />
                 ) : (
@@ -206,6 +207,7 @@ export default function ItemDetail() {
                     <img
                       src={img}
                       alt={`${item.title} ${idx + 1}`}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -353,6 +355,7 @@ export default function ItemDetail() {
                         <img
                           src={relatedItem.images[0]}
                           alt={relatedItem.title}
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
