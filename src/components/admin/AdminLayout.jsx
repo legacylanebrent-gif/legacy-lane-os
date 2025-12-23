@@ -74,7 +74,6 @@ export default function AdminLayout({ children, currentPage }) {
           <div className="mb-2">
             <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
           </div>
-          <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
         
         <nav className="flex-1 overflow-y-auto p-4 pb-32 space-y-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-full">
