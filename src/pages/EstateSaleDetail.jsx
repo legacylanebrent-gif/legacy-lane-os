@@ -10,7 +10,7 @@ import MessageModal from '@/components/messaging/MessageModal';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -720,23 +720,33 @@ END:VCALENDAR`;
                   )}
                 </div>
 
-                {currentUser && (
+                <div className="space-y-2 mt-4">
                   <Button 
-                    onClick={handleMessageOperator}
-                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700 gap-2"
+                    onClick={() => window.location.href = createPageUrl('SaleLanding') + '?saleId=' + sale.id}
+                    className="w-full bg-cyan-600 hover:bg-cyan-700 gap-2"
                   >
-                    <MessageSquare className="w-4 h-4" />
-                    Message Operator
+                    <ShoppingBag className="w-4 h-4" />
+                    View Inventory Items
                   </Button>
-                )}
-                {!currentUser && (
-                  <Button 
-                    onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700"
-                  >
-                    Sign In to Contact
-                  </Button>
-                )}
+                  
+                  {currentUser && (
+                    <Button 
+                      onClick={handleMessageOperator}
+                      className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Message Operator
+                    </Button>
+                  )}
+                  {!currentUser && (
+                    <Button 
+                      onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                      className="w-full bg-orange-600 hover:bg-orange-700"
+                    >
+                      Sign In to Contact
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
