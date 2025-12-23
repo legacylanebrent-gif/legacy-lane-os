@@ -1025,7 +1025,7 @@ export default function Home() {
           
           <div className="border-t border-slate-800 pt-8 text-center">
             <p className="text-slate-500">
-              © 2024 Legacy Lane. All rights reserved.
+              © {new Date().getFullYear()} Legacy Lane. All rights reserved.
             </p>
           </div>
         </div>
