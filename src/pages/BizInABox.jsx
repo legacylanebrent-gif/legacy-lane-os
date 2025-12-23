@@ -183,7 +183,7 @@ export default function BizInABox() {
     {
       label: 'Ongoing Revenue Share',
       price: `${pricing.revenue_share}%`,
-      description: 'Of gross sales - only when you succeed',
+      description: 'Of profit per sale. Must use the onsite worksheets to document all transactions',
       popular: false
     }
   ];
