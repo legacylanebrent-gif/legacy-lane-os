@@ -24,6 +24,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Analytics', path: 'PlatformAnalytics', icon: BarChart3 },
   { label: 'Rewards & Draws', path: 'AdminRewards', icon: Gift },
   { label: 'Support Tickets', path: 'AdminTickets', icon: MessageSquare },
+  { label: 'Automations', path: 'AdminAutomations', icon: Zap },
   { label: 'Monthly Packages', path: 'AdminPackages', icon: Package },
   { label: 'Advertising Packages', path: 'AdminAdvertisingPackages', icon: Package },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
