@@ -896,7 +896,7 @@ export default function Home() {
               onClick={() => setShowSaleRequestModal(true)}
               className="bg-white hover:bg-slate-100 text-orange-600 px-12 py-8 text-2xl font-bold shadow-2xl hover:scale-105 transition-transform"
             >
-              Get Free Quotes Now →
+              Submit Your Sale Request
             </Button>
           </div>
         </div>
