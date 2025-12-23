@@ -143,7 +143,7 @@ export default function AdminFutureOperators() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">
-            Future Estate Operators
+            US Estate Sale Companies
           </h1>
           <p className="text-slate-600">
             US estate sale companies sourced from current competitors
