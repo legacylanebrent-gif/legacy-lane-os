@@ -48,18 +48,6 @@ export default function AdminLayout({ children, currentPage }) {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      {/* Hamburger Button */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="bg-slate-800 text-orange-400 hover:text-orange-300 hover:bg-slate-700"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
-      </div>
-
       {/* Left Navigation */}
       <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 ${
         sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
@@ -70,6 +58,14 @@ export default function AdminLayout({ children, currentPage }) {
             <div className="flex items-center gap-2">
               <MessagesDropdown />
               <NotificationsDropdown />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
             </div>
           </div>
           <p className="text-xs text-slate-400">Legacy Lane OS</p>
