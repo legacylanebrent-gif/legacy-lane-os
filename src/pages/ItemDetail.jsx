@@ -36,8 +36,11 @@ export default function ItemDetail() {
       const params = new URLSearchParams(window.location.search);
       const itemId = params.get('itemId');
       
+      console.log('ItemDetail - Loading item:', itemId);
+      
       if (!itemId) {
-        alert('Item ID not found');
+        console.error('ItemDetail - No item ID provided');
+        setLoading(false);
         return;
       }
 
@@ -45,13 +48,18 @@ export default function ItemDetail() {
       try {
         const user = await base44.auth.me();
         setCurrentUser(user);
+        console.log('ItemDetail - User loaded:', user?.id);
       } catch (error) {
-        // User not logged in
+        console.log('ItemDetail - User not logged in');
       }
 
+      console.log('ItemDetail - Fetching item data...');
       const itemData = await base44.entities.Item.filter({ id: itemId });
+      console.log('ItemDetail - Item data received:', itemData);
+      
       if (itemData.length === 0) {
-        alert('Item not found');
+        console.error('ItemDetail - Item not found');
+        setLoading(false);
         return;
       }
 
@@ -69,11 +77,12 @@ export default function ItemDetail() {
           views: (itemRecord.views || 0) + 1
         });
       } catch (error) {
-        console.log('Could not update view count');
+        console.log('ItemDetail - Could not update view count:', error);
       }
 
       // Load sale details
       if (itemRecord.estate_sale_id) {
+        console.log('ItemDetail - Loading sale:', itemRecord.estate_sale_id);
         const saleData = await base44.entities.EstateSale.filter({ 
           id: itemRecord.estate_sale_id 
         });
@@ -90,21 +99,28 @@ export default function ItemDetail() {
                 setOperator(operatorData[0]);
               }
             } catch (error) {
-              console.log('Could not load operator');
+              console.log('ItemDetail - Could not load operator:', error);
             }
           }
 
           // Load related items from same sale
-          const allItems = await base44.entities.Item.filter({
-            estate_sale_id: itemRecord.estate_sale_id,
-            status: ['available', 'pending', 'reserved']
-          }, '-created_date', 8);
-          
-          setRelatedItems(allItems.filter(i => i.id !== itemId).slice(0, 4));
+          try {
+            const allItems = await base44.entities.Item.filter({
+              estate_sale_id: itemRecord.estate_sale_id,
+              status: ['available', 'pending', 'reserved']
+            }, '-created_date', 8);
+            
+            setRelatedItems(allItems.filter(i => i.id !== itemId).slice(0, 4));
+          } catch (error) {
+            console.log('ItemDetail - Could not load related items:', error);
+          }
         }
       }
+      
+      console.log('ItemDetail - Data loading complete');
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('ItemDetail - Error loading data:', error);
+      alert('Error loading item: ' + error.message);
     } finally {
       setLoading(false);
     }
