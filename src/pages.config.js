@@ -67,6 +67,7 @@ import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import MarketingTasks from './pages/MarketingTasks';
+import Favorites from './pages/Favorites';
 import __Layout from './Layout.jsx';
 
 
@@ -140,6 +141,7 @@ export const PAGES = {
     "Vendors": Vendors,
     "Worksheet": Worksheet,
     "MarketingTasks": MarketingTasks,
+    "Favorites": Favorites,
 }
 
 export const pagesConfig = {

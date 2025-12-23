@@ -6,7 +6,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp, Bell, Megaphone
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp, Bell, Megaphone, Heart
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
@@ -14,6 +14,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Notifications', path: 'Notifications', icon: Bell },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
+  { label: 'Favorites', path: 'Favorites', icon: Heart },
   { label: 'CRM', path: 'CRM', icon: Users },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Leads', path: 'AdminLeads', icon: Award },
