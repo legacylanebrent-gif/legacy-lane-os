@@ -583,35 +583,41 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
-                  <div>
-                    <Label className="text-slate-500 text-xs mb-1">Basic Plan Price (from package)</Label>
-                    <div className="text-2xl font-bold text-slate-400">
-                      ${operatorPackages.basic?.monthly_price || subBasicPrice}
+                <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Package Pricing (from Subscription Packages)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Basic Plan Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${operatorPackages.basic?.monthly_price || subBasicPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-500 text-xs mb-1">Pro Plan Price (from package)</Label>
-                    <div className="text-2xl font-bold text-slate-400">
-                      ${operatorPackages.pro?.monthly_price || subProPrice}
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Pro Plan Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${operatorPackages.pro?.monthly_price || subProPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-500 text-xs mb-1">Premium Plan Price (from package)</Label>
-                    <div className="text-2xl font-bold text-slate-400">
-                      ${operatorPackages.premium?.monthly_price || subPremiumPrice}
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Premium Plan Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${operatorPackages.premium?.monthly_price || subPremiumPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Basic + Listing Fee</Label>
+                      <div className="text-2xl font-bold text-slate-900">
+                        ${subListingFee}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">$/month per operator</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Basic + Listing Fee ($/month per operator)</Label>
-                    <Input type="number" value={subListingFee} onChange={(e) => setSubListingFee(Number(e.target.value))} />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label>New Subscribers/Month</Label>
                     <Input type="number" value={subNewPerMonth} onChange={(e) => setSubNewPerMonth(Number(e.target.value))} />
