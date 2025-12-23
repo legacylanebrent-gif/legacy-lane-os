@@ -384,40 +384,46 @@ export default function Revenue() {
 
         {/* Revenue Stream Calculators */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 lg:grid-cols-8 gap-2">
-            <TabsTrigger value="subscriptions">
-              <Users className="w-4 h-4 mr-1" />
-              Operator Subs
-            </TabsTrigger>
-            <TabsTrigger value="vendorSubs">
-              <Users className="w-4 h-4 mr-1" />
-              Vendor Subs
-            </TabsTrigger>
-            <TabsTrigger value="agentSubs">
-              <Users className="w-4 h-4 mr-1" />
-              Agent Subs
-            </TabsTrigger>
-            <TabsTrigger value="marketplace">
-              <ShoppingBag className="w-4 h-4 mr-1" />
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="courses">
-              <BookOpen className="w-4 h-4 mr-1" />
-              Courses
-            </TabsTrigger>
-            <TabsTrigger value="referrals">
-              <Award className="w-4 h-4 mr-1" />
-              Leads & Referrals
-            </TabsTrigger>
-            <TabsTrigger value="features">
-              <Sparkles className="w-4 h-4 mr-1" />
-              Features
-            </TabsTrigger>
-            <TabsTrigger value="advertising">
-              <Megaphone className="w-4 h-4 mr-1" />
-              Ads
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+              <TabsTrigger value="subscriptions" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Operator Subs</span>
+                <span className="sm:hidden">Operator</span>
+              </TabsTrigger>
+              <TabsTrigger value="vendorSubs" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Vendor Subs</span>
+                <span className="sm:hidden">Vendor</span>
+              </TabsTrigger>
+              <TabsTrigger value="agentSubs" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Agent Subs</span>
+                <span className="sm:hidden">Agent</span>
+              </TabsTrigger>
+              <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
+                <ShoppingBag className="w-4 h-4 mr-1" />
+                Marketplace
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="whitespace-nowrap flex-shrink-0">
+                <BookOpen className="w-4 h-4 mr-1" />
+                Courses
+              </TabsTrigger>
+              <TabsTrigger value="referrals" className="whitespace-nowrap flex-shrink-0">
+                <Award className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Leads & Referrals</span>
+                <span className="sm:hidden">Leads</span>
+              </TabsTrigger>
+              <TabsTrigger value="features" className="whitespace-nowrap flex-shrink-0">
+                <Sparkles className="w-4 h-4 mr-1" />
+                Features
+              </TabsTrigger>
+              <TabsTrigger value="advertising" className="whitespace-nowrap flex-shrink-0">
+                <Megaphone className="w-4 h-4 mr-1" />
+                Ads
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Subscriptions Tab */}
           <TabsContent value="subscriptions">
