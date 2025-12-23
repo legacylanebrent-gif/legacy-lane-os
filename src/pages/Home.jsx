@@ -995,7 +995,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                      Vendor
+                      Vendor Network
                     </h3>
                     <p className="text-green-100">
                       Join our network and grow your business
