@@ -70,6 +70,8 @@ export default function Revenue() {
   // Biz in a Box Inputs
   const [bizNewPerMonth, setBizNewPerMonth] = useState(() => loadValue('bizNewPerMonth', 5));
   const [bizChurnRate, setBizChurnRate] = useState(() => loadValue('bizChurnRate', 2));
+  const [avgSaleProfit, setAvgSaleProfit] = useState(() => loadValue('avgSaleProfit', 1500));
+  const [salesPerMonth, setSalesPerMonth] = useState(() => loadValue('salesPerMonth', 2));
 
   // Fetch Biz in a Box pricing
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function Revenue() {
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
-      bizNewPerMonth, bizChurnRate
+      bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -117,7 +119,7 @@ export default function Revenue() {
     avgReferralFee, referralsPerMonth, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
-    bizNewPerMonth, bizChurnRate
+    bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth
   ]);
 
   const calculateProjections = (monthlyBase, growthPercent, months) => {
@@ -209,7 +211,6 @@ export default function Revenue() {
     const setupFee = bizInBoxPricing?.biz_in_a_box_setup_fee || 2997;
     const monthlyFee = bizInBoxPricing?.biz_in_a_box_monthly_year1 || 149;
     const revenueSharePercent = bizInBoxPricing?.biz_in_a_box_revenue_share || 3;
-    const avgMonthlySalesPerOperator = 150000 / 12; // $150k avg first year revenue
     
     for (let i = 0; i < months; i++) {
       const churnFactor = (1 - bizChurnRate / 100);
@@ -220,8 +221,8 @@ export default function Revenue() {
       // Monthly platform fees
       const monthlyRevenue = operators * monthlyFee * churnFactor;
       
-      // Revenue share (3% of their sales)
-      const revenueShareRevenue = operators * avgMonthlySalesPerOperator * (revenueSharePercent / 100) * churnFactor;
+      // Revenue share based on sales per month and avg sale profit
+      const revenueShareRevenue = operators * salesPerMonth * avgSaleProfit * (revenueSharePercent / 100) * churnFactor;
       
       const totalRevenue = setupRevenue + monthlyRevenue + revenueShareRevenue;
       
@@ -1111,7 +1112,7 @@ export default function Revenue() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                       <div>
                         <Label>New Operators/Month</Label>
                         <Input 
@@ -1126,6 +1127,22 @@ export default function Revenue() {
                           type="number" 
                           value={bizChurnRate} 
                           onChange={(e) => setBizChurnRate(Number(e.target.value))} 
+                        />
+                      </div>
+                      <div>
+                        <Label>Avg Sale Profit ($)</Label>
+                        <Input 
+                          type="number" 
+                          value={avgSaleProfit} 
+                          onChange={(e) => setAvgSaleProfit(Number(e.target.value))} 
+                        />
+                      </div>
+                      <div>
+                        <Label>Sales Per Month (per operator)</Label>
+                        <Input 
+                          type="number" 
+                          value={salesPerMonth} 
+                          onChange={(e) => setSalesPerMonth(Number(e.target.value))} 
                         />
                       </div>
                     </div>
@@ -1185,9 +1202,9 @@ export default function Revenue() {
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-600">Avg Revenue Share (Year 1):</span>
+                          <span className="text-slate-600">Avg Revenue Share (per month):</span>
                           <span className="font-bold text-slate-900 ml-2">
-                            ${(150000 * (bizInBoxPricing.biz_in_a_box_revenue_share || 3) / 100).toLocaleString()}
+                            ${(salesPerMonth * avgSaleProfit * (bizInBoxPricing.biz_in_a_box_revenue_share || 3) / 100).toLocaleString()}
                           </span>
                         </div>
                       </div>
