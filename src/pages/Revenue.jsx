@@ -16,7 +16,8 @@ export default function Revenue() {
   const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
   const [operatorPackages, setOperatorPackages] = useState({ basic: null, pro: null, premium: null });
   const [vendorPackages, setVendorPackages] = useState({ basic: null, pro: null });
-  const [agentPackage, setAgentPackage] = useState(null);
+  const [agentPackages, setAgentPackages] = useState({ basic: null, pro: null });
+  const [consignorPackages, setConsignorPackages] = useState({ basic: null, pro: null });
   const [loading, setLoading] = useState(true);
   const [pieChartYear, setPieChartYear] = useState(3);
   const [saveMessage, setSaveMessage] = useState('');
@@ -42,9 +43,16 @@ export default function Revenue() {
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
 
   // Agent Subscription Inputs
-  const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
+  const [agentBasicPrice, setAgentBasicPrice] = useState(() => loadValue('agentBasicPrice', 99));
+  const [agentProPrice, setAgentProPrice] = useState(() => loadValue('agentProPrice', 199));
   const [agentNewPerMonth, setAgentNewPerMonth] = useState(() => loadValue('agentNewPerMonth', 10));
   const [agentChurnRate, setAgentChurnRate] = useState(() => loadValue('agentChurnRate', 3));
+
+  // Consignor/Marketplace Subscription Inputs
+  const [consignorBasicPrice, setConsignorBasicPrice] = useState(() => loadValue('consignorBasicPrice', 29));
+  const [consignorProPrice, setConsignorProPrice] = useState(() => loadValue('consignorProPrice', 59));
+  const [consignorNewPerMonth, setConsignorNewPerMonth] = useState(() => loadValue('consignorNewPerMonth', 20));
+  const [consignorChurnRate, setConsignorChurnRate] = useState(() => loadValue('consignorChurnRate', 5));
 
   // Marketplace Transaction Fee Inputs
   const [avgTransactionValue, setAvgTransactionValue] = useState(() => loadValue('avgTransactionValue', 250));
@@ -125,9 +133,23 @@ export default function Revenue() {
         const agentPackages = await base44.entities.SubscriptionPackage.filter({
           account_type: 'real_estate_agent'
         });
-        if (agentPackages.length > 0) {
-          setAgentPackage(agentPackages[0]);
-        }
+        const agentPkgs = { basic: null, pro: null };
+        agentPackages.forEach(pkg => {
+          if (pkg.tier_level === 'basic') agentPkgs.basic = pkg;
+          if (pkg.tier_level === 'pro') agentPkgs.pro = pkg;
+        });
+        setAgentPackages(agentPkgs);
+
+        // Load Consignor packages
+        const consignorPackages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'consignor'
+        });
+        const consignorPkgs = { basic: null, pro: null };
+        consignorPackages.forEach(pkg => {
+          if (pkg.tier_level === 'basic') consignorPkgs.basic = pkg;
+          if (pkg.tier_level === 'pro') consignorPkgs.pro = pkg;
+        });
+        setConsignorPackages(consignorPkgs);
       } catch (error) {
         console.error('Error loading pricing:', error);
       } finally {
@@ -142,7 +164,8 @@ export default function Revenue() {
     const values = {
       subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate,
       vendorBasicPrice, vendorProPrice, vendorNewPerMonth, vendorChurnRate,
-      agentSubPrice, agentNewPerMonth, agentChurnRate,
+      agentBasicPrice, agentProPrice, agentNewPerMonth, agentChurnRate,
+      consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
@@ -157,7 +180,8 @@ export default function Revenue() {
   }, [
     subBasicPrice, subProPrice, subPremiumPrice, subListingFee, subNewPerMonth, subChurnRate,
     vendorBasicPrice, vendorProPrice, vendorNewPerMonth, vendorChurnRate,
-    agentSubPrice, agentNewPerMonth, agentChurnRate,
+    agentBasicPrice, agentProPrice, agentNewPerMonth, agentChurnRate,
+    consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
@@ -260,9 +284,25 @@ export default function Revenue() {
   const vendorSubProjections = vendorSubData.projections;
   const vendorSubQuantities = vendorSubData.quantities;
   
-  const agentSubData = calculateSimpleSubRevenue(agentPackage?.monthly_price || agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
+  const agentSubData = calculateTwoTierSubRevenue(
+    agentPackages.basic?.monthly_price || agentBasicPrice,
+    agentPackages.pro?.monthly_price || agentProPrice,
+    agentNewPerMonth,
+    agentChurnRate,
+    120
+  );
   const agentSubProjections = agentSubData.projections;
   const agentSubQuantities = agentSubData.quantities;
+
+  const consignorSubData = calculateTwoTierSubRevenue(
+    consignorPackages.basic?.monthly_price || consignorBasicPrice,
+    consignorPackages.pro?.monthly_price || consignorProPrice,
+    consignorNewPerMonth,
+    consignorChurnRate,
+    120
+  );
+  const consignorSubProjections = consignorSubData.projections;
+  const consignorSubQuantities = consignorSubData.quantities;
   
   const marketplaceProjections = calculateProjections(transactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
   const marketplaceQuantities = calculateProjections(transactionsPerMonth, marketplaceGrowth, 120);
@@ -835,11 +875,23 @@ export default function Revenue() {
               </CardHeader>
               <CardContent>
                 <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
-                  <Label className="text-slate-500 text-xs mb-1">Monthly Price (from package)</Label>
-                  <div className="text-2xl font-bold text-slate-400">
-                    ${agentPackage?.monthly_price || agentSubPrice}
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Package Pricing (from Subscription Packages)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">{agentPackages.basic?.package_name || 'Basic'} Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${agentPackages.basic?.monthly_price || agentBasicPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">{agentPackages.pro?.package_name || 'Pro'} Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${agentPackages.pro?.monthly_price || agentProPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
