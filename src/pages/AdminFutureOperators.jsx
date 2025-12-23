@@ -201,24 +201,6 @@ export default function AdminFutureOperators() {
               </div>
               
               <Button 
-                onClick={async () => {
-                  if (confirm('Clean all &amp; entities in the database?')) {
-                    try {
-                      const result = await base44.functions.invoke('cleanAmpersands', {});
-                      alert(`Success! ${result.data.message}`);
-                      loadOperators();
-                    } catch (error) {
-                      alert(`Error: ${error.message}`);
-                    }
-                  }
-                }}
-                variant="outline"
-                className="whitespace-nowrap"
-              >
-                Clean &amp;
-              </Button>
-
-              <Button 
                 onClick={handleImportCompanies}
                 disabled={importing}
                 className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
