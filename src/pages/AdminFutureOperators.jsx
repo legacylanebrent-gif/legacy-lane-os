@@ -140,16 +140,16 @@ export default function AdminFutureOperators() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">
             Future Estate Operators
           </h1>
           <p className="text-slate-600">
             Scraped estate sale companies for outreach and partnership
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <div className="text-3xl font-bold text-slate-900">{totalCount.toLocaleString()}</div>
           <div className="text-sm text-slate-600">Total Records in Database</div>
         </div>
@@ -158,7 +158,7 @@ export default function AdminFutureOperators() {
       <Card>
         <CardHeader>
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <Input
@@ -168,43 +168,46 @@ export default function AdminFutureOperators() {
                   className="pl-10"
                 />
               </div>
-              <Badge variant="outline" className="text-sm">
+              <Badge variant="outline" className="text-sm w-fit">
                 {filteredOperators.length} results
               </Badge>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Filter className="w-4 h-4 text-slate-600" />
-              <Select value={stateFilter} onValueChange={setStateFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All States" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px] overflow-y-auto">
-                  {allStates.map(state => (
-                    <SelectItem key={state} value={state}>{state}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select value={packageFilter} onValueChange={setPackageFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Packages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Packages</SelectItem>
-                  {uniquePackages.map(pkg => (
-                    <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <Filter className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                <Select value={stateFilter} onValueChange={setStateFilter}>
+                  <SelectTrigger className="w-full sm:w-32">
+                    <SelectValue placeholder="All States" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] overflow-y-auto">
+                    {allStates.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={packageFilter} onValueChange={setPackageFilter}>
+                  <SelectTrigger className="w-full sm:w-36">
+                    <SelectValue placeholder="All Packages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Packages</SelectItem>
+                    {uniquePackages.map(pkg => (
+                      <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               <Button 
                 onClick={handleImportCompanies}
                 disabled={importing}
-                className="bg-orange-600 hover:bg-orange-700"
+                className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
               >
                 <Download className="w-4 h-4 mr-2" />
-                {importing ? 'Importing...' : 'Import and Update Companies'}
+                <span className="hidden sm:inline">{importing ? 'Importing...' : 'Import and Update Companies'}</span>
+                <span className="sm:hidden">{importing ? 'Importing...' : 'Import'}</span>
               </Button>
               
               {packageFilter !== 'all' && (
@@ -214,6 +217,7 @@ export default function AdminFutureOperators() {
                   onClick={() => {
                     setPackageFilter('all');
                   }}
+                  className="w-full sm:w-auto"
                 >
                   Clear Filter
                 </Button>
@@ -225,120 +229,123 @@ export default function AdminFutureOperators() {
           <div className="space-y-4">
             {filteredOperators.map((operator) => (
               <Card key={operator.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-slate-900">
-                          {operator.company_name}
-                        </h3>
-                        {operator.package_type && (
-                          <Badge className={getPackageColor(operator.package_type)}>
-                            {operator.package_type}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-600">
-                        {operator.city && operator.state && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-cyan-600" />
-                            <span>{operator.city}, {operator.state} {operator.zip_code}</span>
-                          </div>
-                        )}
-                        
-                        {operator.phone && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-orange-600" />
-                            <a href={`tel:${operator.phone}`} className="hover:underline">
-                              {operator.phone}
-                            </a>
-                          </div>
-                        )}
-                        
-                        {operator.website && (
-                          <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4 text-green-600" />
-                            <a 
-                              href={operator.website} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:underline truncate"
-                            >
-                              {operator.website.replace(/https?:\/\/(www\.)?/, '')}
-                            </a>
-                          </div>
-                        )}
-                        
-                        {operator.member_since && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-purple-600" />
-                            <span>Member since {operator.member_since}</span>
-                          </div>
-                        )}
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">
+                            {operator.company_name}
+                          </h3>
+                          {operator.package_type && (
+                            <Badge className={getPackageColor(operator.package_type)}>
+                              {operator.package_type}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
-                      {(operator.facebook || operator.twitter || operator.instagram || operator.youtube || operator.pinterest) && (
-                        <div className="flex items-center gap-2 mt-3">
-                          {operator.facebook && (
-                            <a 
-                              href={operator.facebook} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Facebook className="w-4 h-4" />
-                            </a>
-                          )}
-                          {operator.twitter && (
-                            <a 
-                              href={operator.twitter} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-sky-500 hover:text-sky-600"
-                            >
-                              <Twitter className="w-4 h-4" />
-                            </a>
-                          )}
-                          {operator.instagram && (
-                            <a 
-                              href={operator.instagram} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-pink-600 hover:text-pink-700"
-                            >
-                              <Instagram className="w-4 h-4" />
-                            </a>
-                          )}
-                          {operator.youtube && (
-                            <a 
-                              href={operator.youtube} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Youtube className="w-4 h-4" />
-                            </a>
-                          )}
+                      {operator.source_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="flex-shrink-0"
+                        >
+                          <a 
+                            href={operator.source_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="w-3 h-3 sm:mr-1" />
+                            <span className="hidden sm:inline">View Profile</span>
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
+                      {operator.city && operator.state && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
+                          <span className="truncate">{operator.city}, {operator.state} {operator.zip_code}</span>
+                        </div>
+                      )}
+                      
+                      {operator.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                          <a href={`tel:${operator.phone}`} className="hover:underline truncate">
+                            {operator.phone}
+                          </a>
+                        </div>
+                      )}
+                      
+                      {operator.website && (
+                        <div className="flex items-center gap-2 col-span-full">
+                          <Globe className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          <a 
+                            href={operator.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:underline truncate"
+                          >
+                            {operator.website.replace(/https?:\/\/(www\.)?/, '')}
+                          </a>
+                        </div>
+                      )}
+                      
+                      {operator.member_since && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                          <span className="truncate">Member since {operator.member_since}</span>
                         </div>
                       )}
                     </div>
 
-                    {operator.source_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a 
-                          href={operator.source_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          View Profile
-                        </a>
-                      </Button>
+                    {(operator.facebook || operator.twitter || operator.instagram || operator.youtube || operator.pinterest) && (
+                      <div className="flex items-center gap-2 pt-2 border-t">
+                        {operator.facebook && (
+                          <a 
+                            href={operator.facebook} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Facebook className="w-4 h-4" />
+                          </a>
+                        )}
+                        {operator.twitter && (
+                          <a 
+                            href={operator.twitter} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sky-500 hover:text-sky-600"
+                          >
+                            <Twitter className="w-4 h-4" />
+                          </a>
+                        )}
+                        {operator.instagram && (
+                          <a 
+                            href={operator.instagram} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-pink-600 hover:text-pink-700"
+                          >
+                            <Instagram className="w-4 h-4" />
+                          </a>
+                        )}
+                        {operator.youtube && (
+                          <a 
+                            href={operator.youtube} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Youtube className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CardContent>
