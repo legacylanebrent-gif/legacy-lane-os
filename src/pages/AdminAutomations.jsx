@@ -488,14 +488,14 @@ export default function AdminAutomations() {
 
       {/* Create/Edit Automation Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl">
               {editingAutomation ? 'Edit Automation' : 'Create Automation'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreateAutomation} className="space-y-6 mt-4">
+          <form onSubmit={handleCreateAutomation} className="flex-1 overflow-y-auto space-y-6 px-1">
             <div>
               <Label>Automation Name *</Label>
               <Input
@@ -581,7 +581,7 @@ export default function AdminAutomations() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t pt-6">
+            <div className="flex items-center justify-between border-t pt-6 sticky bottom-0 bg-white pb-4 -mx-1 px-1">
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.is_active}
