@@ -569,11 +569,11 @@ export default function AdminCampaigns() {
 
       {/* Create Campaign Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Create New Campaign</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto pr-2">
             <div>
               <Label>Campaign Name</Label>
               <Input
@@ -639,11 +639,11 @@ export default function AdminCampaigns() {
 
       {/* Create Template Modal */}
       <Dialog open={showTemplateModal} onOpenChange={setShowTemplateModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Create Marketing Template</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          <div className="space-y-4 overflow-y-auto pr-2">
             <div>
               <Label>Template Name</Label>
               <Input
