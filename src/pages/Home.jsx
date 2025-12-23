@@ -957,7 +957,7 @@ export default function Home() {
                       Real Estate Agent
                     </h3>
                     <p className="text-blue-100">
-                      Become preferred agent
+                      Get seller leads instantly
                     </p>
                   </div>
                 </div>
