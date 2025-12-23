@@ -387,7 +387,7 @@ export default function Layout({ children, currentPageName }) {
         {!sidebarOpen && <div className="hidden lg:block w-0" />}
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-0">
+        <main className="flex-1 lg:ml-0 pb-32">
           {children}
         </main>
       </div>
