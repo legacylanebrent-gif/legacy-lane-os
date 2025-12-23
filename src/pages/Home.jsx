@@ -391,7 +391,7 @@ export default function Home() {
               <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-slate-200">
                 <MapContainer
                   center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
-                  zoom={userLocation ? 10 : 4}
+                  zoom={userLocation ? 12 : 4}
                   style={{ height: '400px', width: '100%' }}
                   className="z-0"
                 >
