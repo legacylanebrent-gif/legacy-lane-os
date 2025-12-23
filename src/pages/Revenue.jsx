@@ -71,15 +71,15 @@ export default function Revenue() {
   const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 12));
 
   // Premium Placement Inputs
-  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 299));
-  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 99));
+  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 179));
+  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 97));
   const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
   
-  // Advertising Revenue Inputs
-  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 500));
-  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 1500));
-  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 3000));
+  // Advertising Revenue Inputs (Vendor advertising packages)
+  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
+  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 49));
+  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 179));
   const [adNewPerMonth, setAdNewPerMonth] = useState(() => loadValue('adNewPerMonth', 10));
   const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 8));
 
