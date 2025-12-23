@@ -76,6 +76,7 @@ import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import AdminTemplates from './pages/AdminTemplates';
 import AdminPageAccess from './pages/AdminPageAccess';
+import NotificationSettings from './pages/NotificationSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -158,6 +159,7 @@ export const PAGES = {
     "Worksheet": Worksheet,
     "AdminTemplates": AdminTemplates,
     "AdminPageAccess": AdminPageAccess,
+    "NotificationSettings": NotificationSettings,
 }
 
 export const pagesConfig = {
