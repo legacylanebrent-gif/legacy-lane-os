@@ -114,28 +114,30 @@ export default function AdminPackages() {
       />
 
       <Tabs value={selectedAccountType} onValueChange={setSelectedAccountType}>
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
-          {accountTypes.map(type => (
-            <TabsTrigger key={type.value} value={type.value} className="text-xs lg:text-sm">
-              {type.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-auto pb-2">
+          <TabsList className="w-max grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {accountTypes.map(type => (
+              <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm whitespace-nowrap">
+                {type.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         {accountTypes.map(type => (
           <TabsContent key={type.value} value={type.value} className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <h2 className="text-2xl font-semibold">{type.label} Packages</h2>
               <Button
                 onClick={() => handleAdd(type.value)}
-                className="bg-orange-600 hover:bg-orange-700"
+                className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto whitespace-nowrap"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Package
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPackages.length === 0 ? (
                 <div className="col-span-3 text-center py-12 border-2 border-dashed border-slate-300 rounded-lg">
                   <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
