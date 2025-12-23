@@ -10,6 +10,7 @@ const TERMINOLOGY = {
   'estate sale operator': 'estate sale company',
   'Estate Sale Operator': 'Estate Sale Company',
   'estate_sale_operator': 'estate_sale_company',
+  'Estate Operators': 'Estate Sale Co\'s',
   
   // Add more term mappings here as needed
   // Example:
