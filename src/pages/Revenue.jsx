@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { DollarSign, TrendingUp, Users, ShoppingBag, Award, BookOpen, Briefcase, Megaphone, Sparkles, Package } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { jsPDF } from 'jspdf';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
 
@@ -21,6 +23,8 @@ export default function Revenue() {
   const [loading, setLoading] = useState(true);
   const [pieChartYear, setPieChartYear] = useState(3);
   const [saveMessage, setSaveMessage] = useState('');
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportYears, setExportYears] = useState(3);
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -92,6 +96,116 @@ export default function Revenue() {
   const handleSave = () => {
     setSaveMessage('Settings saved successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Revenue Projections Report', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+
+    // Summary Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Executive Summary', 14, yPos);
+    yPos += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const summaryData = [
+      { label: '1-Year Projection', value: `$${(year1Total / 1000000).toFixed(2)}M` },
+      { label: '3-Year Projection', value: `$${(year3Total / 1000000).toFixed(2)}M` },
+      { label: '5-Year Projection', value: `$${(year5Total / 1000000).toFixed(2)}M` },
+      { label: '10-Year Projection', value: `$${(year10Total / 1000000).toFixed(2)}M` }
+    ];
+
+    summaryData.slice(0, exportYears === 1 ? 1 : exportYears === 3 ? 2 : exportYears === 5 ? 3 : 4).forEach(item => {
+      doc.text(`${item.label}: ${item.value}`, 14, yPos);
+      yPos += 7;
+    });
+
+    yPos += 10;
+
+    // Revenue Streams Breakdown
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Revenue Streams Breakdown', 14, yPos);
+    yPos += 10;
+
+    const streams = [
+      { name: 'Operator Subscriptions', total: getYearProjection(subProjections, exportYears) },
+      { name: 'Vendor Subscriptions', total: getYearProjection(vendorSubProjections, exportYears) },
+      { name: 'Agent Subscriptions', total: getYearProjection(agentSubProjections, exportYears) },
+      { name: 'Marketplace Fees', total: getYearProjection(marketplaceProjections, exportYears) },
+      { name: 'Course Sales', total: getYearProjection(courseProjections, exportYears) },
+      { name: 'Referral Fees', total: getYearProjection(referralProjections, exportYears) },
+      { name: 'Premium Features', total: getYearProjection(featureProjections, exportYears) },
+      { name: 'Advertising', total: getYearProjection(adProjections, exportYears) },
+      { name: 'Biz in a Box', total: getYearProjection(bizInBoxProjections, exportYears) }
+    ];
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    streams.forEach(stream => {
+      if (yPos > pageHeight - 20) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const percentage = ((stream.total / getYearProjection(totalProjections, exportYears)) * 100).toFixed(1);
+      doc.text(`${stream.name}: $${(stream.total / 1000000).toFixed(2)}M (${percentage}%)`, 14, yPos);
+      yPos += 7;
+    });
+
+    yPos += 10;
+
+    // Monthly Projections Table
+    if (yPos > pageHeight - 60) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${exportYears}-Year Monthly Projections`, 14, yPos);
+    yPos += 10;
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    
+    const months = exportYears * 12;
+    const monthsPerPage = 24;
+    
+    for (let i = 0; i < Math.min(months, 36); i += monthsPerPage) {
+      if (i > 0) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      const endMonth = Math.min(i + monthsPerPage, months);
+      for (let m = i; m < endMonth; m++) {
+        if (yPos > pageHeight - 15) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(`Month ${m + 1}: $${(totalProjections[m] / 1000).toFixed(0)}k`, 14, yPos);
+        yPos += 6;
+      }
+    }
+
+    // Save PDF
+    doc.save(`revenue-projections-${exportYears}-year-${new Date().toISOString().split('T')[0]}.pdf`);
+    setExportModalOpen(false);
   };
 
   // Fetch all pricing from packages
@@ -444,9 +558,54 @@ export default function Revenue() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
-          <p className="text-slate-600">Model your revenue streams with 3, 5, and 10-year projections</p>
+        {/* Export Modal */}
+        <Dialog open={exportModalOpen} onOpenChange={setExportModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Generate Revenue Report</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div>
+                <Label className="text-base mb-4 block">Select Projection Period</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[1, 3, 5, 10].map(years => (
+                    <Button
+                      key={years}
+                      variant={exportYears === years ? 'default' : 'outline'}
+                      onClick={() => setExportYears(years)}
+                      className="h-20 flex flex-col items-center justify-center"
+                    >
+                      <span className="text-2xl font-bold">{years}</span>
+                      <span className="text-sm">Year{years > 1 ? 's' : ''}</span>
+                      <span className="text-xs mt-1">
+                        ${(getYearProjection(totalProjections, years) / 1000000).toFixed(2)}M
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setExportModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={generatePDF} className="bg-orange-600 hover:bg-orange-700">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate PDF
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
+            <p className="text-slate-600">Model your revenue streams with 3, 5, and 10-year projections</p>
+          </div>
+          <Button onClick={() => setExportModalOpen(true)} className="bg-slate-800 hover:bg-slate-700">
+            <FileText className="w-4 h-4 mr-2" />
+            Generate & Export Report
+          </Button>
         </div>
 
         {/* Summary Cards */}
