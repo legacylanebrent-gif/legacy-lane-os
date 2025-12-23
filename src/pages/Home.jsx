@@ -939,7 +939,7 @@ export default function Home() {
                       Sell Your Items
                     </h3>
                     <p className="text-purple-100">
-                      Sell on the marketplace
+                      Sell on marketplace or host your own sale
                     </p>
                   </div>
                 </div>
