@@ -487,7 +487,7 @@ export default function Home() {
       )}
 
       {/* Quick Stats */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-white hidden">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-md">
