@@ -455,40 +455,44 @@ export default function ComprehensiveRevenue() {
 
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 lg:grid-cols-8 gap-2">
-            <TabsTrigger value="overview">
-              <Package className="w-4 h-4 mr-1" />
-              Operators
-            </TabsTrigger>
-            <TabsTrigger value="vendorSubs">
-              <Users className="w-4 h-4 mr-1" />
-              Vendor Subs
-            </TabsTrigger>
-            <TabsTrigger value="agentSubs">
-              <Users className="w-4 h-4 mr-1" />
-              Agent Subs
-            </TabsTrigger>
-            <TabsTrigger value="marketplace">
-              <ShoppingBag className="w-4 h-4 mr-1" />
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="courses">
-              <BookOpen className="w-4 h-4 mr-1" />
-              Courses
-            </TabsTrigger>
-            <TabsTrigger value="referrals">
-              <Award className="w-4 h-4 mr-1" />
-              Referrals
-            </TabsTrigger>
-            <TabsTrigger value="features">
-              <Sparkles className="w-4 h-4 mr-1" />
-              Features
-            </TabsTrigger>
-            <TabsTrigger value="advertising">
-              <Megaphone className="w-4 h-4 mr-1" />
-              Ads
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+              <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
+                <Package className="w-4 h-4 mr-1" />
+                Operators
+              </TabsTrigger>
+              <TabsTrigger value="vendorSubs" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Vendor Subs</span>
+                <span className="sm:hidden">Vendor</span>
+              </TabsTrigger>
+              <TabsTrigger value="agentSubs" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Agent Subs</span>
+                <span className="sm:hidden">Agent</span>
+              </TabsTrigger>
+              <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
+                <ShoppingBag className="w-4 h-4 mr-1" />
+                Marketplace
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="whitespace-nowrap flex-shrink-0">
+                <BookOpen className="w-4 h-4 mr-1" />
+                Courses
+              </TabsTrigger>
+              <TabsTrigger value="referrals" className="whitespace-nowrap flex-shrink-0">
+                <Award className="w-4 h-4 mr-1" />
+                Referrals
+              </TabsTrigger>
+              <TabsTrigger value="features" className="whitespace-nowrap flex-shrink-0">
+                <Sparkles className="w-4 h-4 mr-1" />
+                Features
+              </TabsTrigger>
+              <TabsTrigger value="advertising" className="whitespace-nowrap flex-shrink-0">
+                <Megaphone className="w-4 h-4 mr-1" />
+                Ads
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
@@ -499,12 +503,12 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="space-y-2">
                   {packageData.map((pkg, idx) => (
-                    <div key={pkg.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div key={pkg.name} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-slate-50 rounded-lg gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                        <div className="w-4 h-4 rounded flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
                         <span className="text-sm font-medium">{pkg.name}</span>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right pl-7 sm:pl-0">
                         <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                         <div className="text-xs text-slate-500">
                           {pkg.value} operators
