@@ -1246,15 +1246,27 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                  <div>
-                    <Label>National Feature Price ($)</Label>
-                    <Input type="number" value={nationalFeaturePrice} onChange={(e) => setNationalFeaturePrice(Number(e.target.value))} />
+                <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Feature Placement Pricing (from Advertising Packages)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">National Feature Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${nationalFeaturePrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Per listing - Edit in Advertising Packages</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Local Feature Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${localFeaturePrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Per listing - Edit in Advertising Packages</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label>Local Feature Price ($)</Label>
-                    <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
-                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label>Features Per Month (3% national, 97% local)</Label>
                     <Input type="number" value={featuresPerMonth} onChange={(e) => setFeaturesPerMonth(Number(e.target.value))} />
