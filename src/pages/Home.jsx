@@ -395,8 +395,8 @@ export default function Home() {
             Discover Hidden<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Treasures</span> Near You
           </h2>
-          <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto">
-            Browse {sales.length}+ estate sales • Find unique furniture, antiques, collectibles & more
+          <p className="text-lg md:text-xl text-slate-300 mb-12 max-w-3xl mx-auto">
+            Search local sales as well as local and national online marketplace items
           </p>
 
           {/* Search Bar */}
