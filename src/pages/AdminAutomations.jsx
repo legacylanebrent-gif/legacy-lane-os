@@ -602,7 +602,13 @@ export default function AdminAutomations() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a trigger..." />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" sideOffset={5}>
+                    <SelectContent 
+                      className="max-h-[40vh] overflow-y-auto" 
+                      position="popper" 
+                      sideOffset={5}
+                      align="start"
+                      collisionPadding={20}
+                    >
                       {['user', 'billing', 'sales', 'leads', 'marketplace', 'support', 'events', 'referrals', 'rewards', 'courses', 'vendors', 'financial', 'crm'].map(category => (
                         <React.Fragment key={category}>
                           <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase">
@@ -637,7 +643,13 @@ export default function AdminAutomations() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select an action..." />
                       </SelectTrigger>
-                      <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" sideOffset={5}>
+                      <SelectContent 
+                        className="max-h-[40vh] overflow-y-auto" 
+                        position="popper" 
+                        sideOffset={5}
+                        align="start"
+                        collisionPadding={20}
+                      >
                         {ACTION_TYPES.map(action => (
                           <SelectItem key={action.value} value={action.value}>
                             {action.label}
