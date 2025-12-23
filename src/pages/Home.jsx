@@ -330,35 +330,51 @@ export default function Home() {
                   try {
                     const [saleId, saleTitle] = decodedText.split(':');
 
+                    const createCheckIn = async (latitude = null, longitude = null) => {
+                      try {
+                        const checkInData = {
+                          check_in_type: 'sale_visit',
+                          location_name: saleTitle || 'Estate Sale',
+                          location_id: saleId,
+                          verified: true,
+                          points_earned: 15
+                        };
+
+                        if (latitude && longitude) {
+                          checkInData.latitude = latitude;
+                          checkInData.longitude = longitude;
+                        }
+
+                        await base44.entities.CheckIn.create(checkInData);
+
+                        await base44.entities.UserReward.create({
+                          user_id: currentUser.id,
+                          action_id: 'qr_check_in',
+                          action_name: 'QR Code Check-in Bonus',
+                          points_earned: 15,
+                          description: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                        });
+
+                        setShowQRScanner(false);
+                        alert('Check-in successful! +15 points earned');
+                      } catch (err) {
+                        console.error('Error creating check-in:', err);
+                        setShowQRScanner(false);
+                        alert('Failed to create check-in');
+                      }
+                    };
+
                     if (navigator.geolocation) {
                       navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                          const checkInData = {
-                            check_in_type: 'sale_visit',
-                            location_name: saleTitle || 'Estate Sale',
-                            location_id: saleId,
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            verified: true,
-                            points_earned: 15
-                          };
-                          await base44.entities.CheckIn.create(checkInData);
-
-                          await base44.entities.UserReward.create({
-                            user_id: currentUser.id,
-                            action_id: 'qr_check_in',
-                            action_name: 'QR Code Check-in Bonus',
-                            points_earned: 15,
-                            description: `QR check-in at ${saleTitle || 'Estate Sale'}`
-                          });
-
-                          setShowQRScanner(false);
-                          alert('Check-in successful! +15 points earned');
-                        }
+                        (position) => createCheckIn(position.coords.latitude, position.coords.longitude),
+                        () => createCheckIn()
                       );
+                    } else {
+                      await createCheckIn();
                     }
                   } catch (error) {
                     console.error('Error processing QR code:', error);
+                    setShowQRScanner(false);
                     alert('Failed to process QR code');
                   }
                 }}
