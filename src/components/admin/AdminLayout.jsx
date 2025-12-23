@@ -106,7 +106,7 @@ export default function AdminLayout({ children, currentPage }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-16 md:pt-0">
+      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-32">
         {children}
       </main>
     </div>
