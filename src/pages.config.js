@@ -30,13 +30,16 @@ import DIYSaleSignup from './pages/DIYSaleSignup';
 import Dashboard from './pages/Dashboard';
 import EstateSaleDetail from './pages/EstateSaleDetail';
 import EstateSaleFinder from './pages/EstateSaleFinder';
+import Favorites from './pages/Favorites';
 import FutureOperatorsAnalytics from './pages/FutureOperatorsAnalytics';
 import Home from './pages/Home';
 import IncomeTracker from './pages/IncomeTracker';
 import IncomingLeads from './pages/IncomingLeads';
 import Inventory from './pages/Inventory';
+import ItemDetail from './pages/ItemDetail';
 import LeadCapture from './pages/LeadCapture';
 import Leads from './pages/Leads';
+import MarketingTasks from './pages/MarketingTasks';
 import Messages from './pages/Messages';
 import MyBusinessExpenses from './pages/MyBusinessExpenses';
 import MyCourses from './pages/MyCourses';
@@ -54,8 +57,10 @@ import PlatformAnalytics from './pages/PlatformAnalytics';
 import PrintSigns from './pages/PrintSigns';
 import ReferralLanding from './pages/ReferralLanding';
 import Revenue from './pages/Revenue';
+import RewardsCheckins from './pages/RewardsCheckins';
 import SaleExport from './pages/SaleExport';
 import SaleInventory from './pages/SaleInventory';
+import SaleLanding from './pages/SaleLanding';
 import SaleStatistics from './pages/SaleStatistics';
 import SaleTasks from './pages/SaleTasks';
 import SearchByState from './pages/SearchByState';
@@ -66,11 +71,7 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import MarketingTasks from './pages/MarketingTasks';
-import Favorites from './pages/Favorites';
-import RewardsCheckins from './pages/RewardsCheckins';
-import SaleLanding from './pages/SaleLanding';
-import ItemDetail from './pages/ItemDetail';
+import StartYourCompany from './pages/StartYourCompany';
 import __Layout from './Layout.jsx';
 
 
@@ -107,13 +108,16 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "EstateSaleDetail": EstateSaleDetail,
     "EstateSaleFinder": EstateSaleFinder,
+    "Favorites": Favorites,
     "FutureOperatorsAnalytics": FutureOperatorsAnalytics,
     "Home": Home,
     "IncomeTracker": IncomeTracker,
     "IncomingLeads": IncomingLeads,
     "Inventory": Inventory,
+    "ItemDetail": ItemDetail,
     "LeadCapture": LeadCapture,
     "Leads": Leads,
+    "MarketingTasks": MarketingTasks,
     "Messages": Messages,
     "MyBusinessExpenses": MyBusinessExpenses,
     "MyCourses": MyCourses,
@@ -131,8 +135,10 @@ export const PAGES = {
     "PrintSigns": PrintSigns,
     "ReferralLanding": ReferralLanding,
     "Revenue": Revenue,
+    "RewardsCheckins": RewardsCheckins,
     "SaleExport": SaleExport,
     "SaleInventory": SaleInventory,
+    "SaleLanding": SaleLanding,
     "SaleStatistics": SaleStatistics,
     "SaleTasks": SaleTasks,
     "SearchByState": SearchByState,
@@ -143,11 +149,7 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "MarketingTasks": MarketingTasks,
-    "Favorites": Favorites,
-    "RewardsCheckins": RewardsCheckins,
-    "SaleLanding": SaleLanding,
-    "ItemDetail": ItemDetail,
+    "StartYourCompany": StartYourCompany,
 }
 
 export const pagesConfig = {

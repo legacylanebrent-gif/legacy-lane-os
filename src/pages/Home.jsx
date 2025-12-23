@@ -1019,6 +1019,7 @@ export default function Home() {
                 <li><Link to={createPageUrl('OperatorPackages')} className="text-slate-400 hover:text-white transition-colors">List Your Company</Link></li>
                 <li><Link to={createPageUrl('AgentSignup')} className="text-slate-400 hover:text-white transition-colors">Real Estate Agents</Link></li>
                 <li><Link to={createPageUrl('VendorSignup')} className="text-slate-400 hover:text-white transition-colors">Vendors</Link></li>
+                <li><Link to={createPageUrl('StartYourCompany')} className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
               </ul>
             </div>
           </div>
