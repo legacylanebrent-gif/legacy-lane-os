@@ -487,39 +487,7 @@ export default function Home() {
 
       {/* Quick Stats */}
       <section className="py-16 px-4 bg-white hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-md">
-              <HomeIcon className="w-12 h-12 text-orange-600 mx-auto mb-4" />
-              <div className="text-5xl font-bold text-slate-900 mb-2">{sales.length}</div>
-              <div className="text-lg text-slate-600 font-medium">Active Estate Sales</div>
-            </div>
-            <div className="text-center p-8 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl shadow-md">
-              <TrendingUp className="w-12 h-12 text-cyan-600 mx-auto mb-4" />
-              <div className="text-5xl font-bold text-slate-900 mb-2">
-                {totalItems > 0 ? totalItems.toLocaleString() : '0'}
-              </div>
-              <div className="text-lg text-slate-600 font-medium">Items Available</div>
-            </div>
-            <div className="text-center p-8 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-md">
-              <DollarSign className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <div className="text-5xl font-bold text-slate-900 mb-2">
-                {totalEstimatedValue > 0 ? `$${(totalEstimatedValue / 1000000).toFixed(1)}M` : '$0'}
-              </div>
-              <div className="text-lg text-slate-600 font-medium">Total Value</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* National Advertising Panel */}
-      <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
-            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">National Advertising Space</p>
-            <p className="text-white text-2xl font-semibold">Premium placement available for nationwide reach</p>
-          </div>
-        </div>
+      ...
       </section>
 
       {/* Nationally Featured Sales */}
@@ -629,16 +597,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
-      {/* Local Advertising Panel */}
-      <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
-            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Local Advertising Space</p>
-            <p className="text-white text-2xl font-semibold">Target your local community with premium placement</p>
-          </div>
-        </div>
-      </section>
 
       {/* Locally Featured Sales */}
       {localFeatured.length > 0 && (
