@@ -8,7 +8,9 @@ import AdminFutureOperators from './pages/AdminFutureOperators';
 import AdminLeads from './pages/AdminLeads';
 import AdminMarketplace from './pages/AdminMarketplace';
 import AdminPackages from './pages/AdminPackages';
+import AdminPageAccess from './pages/AdminPageAccess';
 import AdminRewards from './pages/AdminRewards';
+import AdminTemplates from './pages/AdminTemplates';
 import AdminTickets from './pages/AdminTickets';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminUsers from './pages/AdminUsers';
@@ -49,6 +51,7 @@ import MyReferrals from './pages/MyReferrals';
 import MyRewards from './pages/MyRewards';
 import MySales from './pages/MySales';
 import MyTickets from './pages/MyTickets';
+import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
 import OperatorPackages from './pages/OperatorPackages';
 import Operators from './pages/Operators';
@@ -74,9 +77,7 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import AdminTemplates from './pages/AdminTemplates';
-import AdminPageAccess from './pages/AdminPageAccess';
-import NotificationSettings from './pages/NotificationSettings';
+import BizInABox from './pages/BizInABox';
 import __Layout from './Layout.jsx';
 
 
@@ -91,7 +92,9 @@ export const PAGES = {
     "AdminLeads": AdminLeads,
     "AdminMarketplace": AdminMarketplace,
     "AdminPackages": AdminPackages,
+    "AdminPageAccess": AdminPageAccess,
     "AdminRewards": AdminRewards,
+    "AdminTemplates": AdminTemplates,
     "AdminTickets": AdminTickets,
     "AdminTransactions": AdminTransactions,
     "AdminUsers": AdminUsers,
@@ -132,6 +135,7 @@ export const PAGES = {
     "MyRewards": MyRewards,
     "MySales": MySales,
     "MyTickets": MyTickets,
+    "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
     "OperatorPackages": OperatorPackages,
     "Operators": Operators,
@@ -157,9 +161,7 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "AdminTemplates": AdminTemplates,
-    "AdminPageAccess": AdminPageAccess,
-    "NotificationSettings": NotificationSettings,
+    "BizInABox": BizInABox,
 }
 
 export const pagesConfig = {

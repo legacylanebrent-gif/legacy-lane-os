@@ -41,6 +41,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
   { label: 'Future Operators Rev', path: 'FutureOperatorsAnalytics', icon: DollarSign },
   { label: 'Comprehensive Revenue', path: 'ComprehensiveRevenue', icon: DollarSign },
+  { label: 'Biz in a Box', path: 'BizInABox', icon: Briefcase },
   { label: 'Page Permissions', path: 'AdminPageAccess', icon: Shield },
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
