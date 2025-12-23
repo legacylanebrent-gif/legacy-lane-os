@@ -332,15 +332,6 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => window.location.href = createPageUrl('Dashboard')}
-                    title="Dashboard"
-                    className="text-white hover:bg-slate-800"
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
                     onClick={() => window.location.href = createPageUrl('Messages')}
                     title="Messages"
                     className="text-white hover:bg-slate-800"
@@ -353,8 +344,16 @@ export default function Home() {
                     onClick={() => window.location.href = createPageUrl('Dashboard')}
                     className="text-white hover:bg-slate-800"
                   >
-                    <User className="w-4 h-4 mr-2" />
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => base44.auth.logout()}
+                    className="text-white hover:bg-slate-800"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
                   </Button>
                 </>
               ) : (
