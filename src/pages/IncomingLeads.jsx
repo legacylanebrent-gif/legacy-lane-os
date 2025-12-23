@@ -631,7 +631,7 @@ export default function IncomingLeads() {
                 </Select>
               </div>
               <div>
-                <Label>Interested in full service?</Label>
+                <Label>Interested in a full service option? Estate Sale, Home Sale, Clean Out</Label>
                 <Select value={formData.interested_in_full_service} onValueChange={(value) => setFormData({ ...formData, interested_in_full_service: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select..." />
@@ -643,10 +643,6 @@ export default function IncomingLeads() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="text-xs text-slate-600 -mt-2">
-              <span className="font-medium">Full service:</span> Estate sale, home sale, and cleanout
             </div>
 
             <div>
