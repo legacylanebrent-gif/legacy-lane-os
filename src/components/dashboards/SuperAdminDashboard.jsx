@@ -239,7 +239,7 @@ export default function SuperAdminDashboard({ user }) {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4 shadow-xl border border-slate-700">
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4 shadow-xl border border-slate-700 w-[60%]">
         <h1 className="text-2xl font-serif font-bold text-white mb-1">
           Legacy Lane OS Dashboard
         </h1>
