@@ -94,36 +94,38 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="general">
-          <TabsList className="mb-6">
-            <TabsTrigger value="general">
-              <Globe className="w-4 h-4 mr-2" />
-              General
-            </TabsTrigger>
-            <TabsTrigger value="financial">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Financial
-            </TabsTrigger>
-            <TabsTrigger value="features">
-              <Zap className="w-4 h-4 mr-2" />
-              Features
-            </TabsTrigger>
-            <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-2" />
-              Users & Roles
-            </TabsTrigger>
-            <TabsTrigger value="notifications">
-              <Bell className="w-4 h-4 mr-2" />
-              Notifications
-            </TabsTrigger>
-            <TabsTrigger value="security">
-              <Shield className="w-4 h-4 mr-2" />
-              Security
-            </TabsTrigger>
-            <TabsTrigger value="branding">
-              <Palette className="w-4 h-4 mr-2" />
-              Branding
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2 -mx-8 px-8 lg:mx-0 lg:px-0 mb-6">
+            <TabsList className="inline-flex w-max min-w-full lg:w-full">
+              <TabsTrigger value="general" className="whitespace-nowrap">
+                <Globe className="w-4 h-4 mr-2" />
+                General
+              </TabsTrigger>
+              <TabsTrigger value="financial" className="whitespace-nowrap">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Financial
+              </TabsTrigger>
+              <TabsTrigger value="features" className="whitespace-nowrap">
+                <Zap className="w-4 h-4 mr-2" />
+                Features
+              </TabsTrigger>
+              <TabsTrigger value="users" className="whitespace-nowrap">
+                <Users className="w-4 h-4 mr-2" />
+                Users & Roles
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="whitespace-nowrap">
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
+              </TabsTrigger>
+              <TabsTrigger value="security" className="whitespace-nowrap">
+                <Shield className="w-4 h-4 mr-2" />
+                Security
+              </TabsTrigger>
+              <TabsTrigger value="branding" className="whitespace-nowrap">
+                <Palette className="w-4 h-4 mr-2" />
+                Branding
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="general">
             <Card>
