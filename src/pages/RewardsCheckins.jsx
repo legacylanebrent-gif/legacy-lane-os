@@ -24,9 +24,10 @@ import {
 } from '@/components/ui/select';
 import { 
   MapPin, Gift, Star, TrendingUp, Calendar, Camera, Plus,
-  CheckCircle2, Award, Target, Zap
+  CheckCircle2, Award, Target, Zap, QrCode
 } from 'lucide-react';
 import { format } from 'date-fns';
+import QRCodeScanner from '@/components/checkin/QRCodeScanner';
 
 export default function RewardsCheckins() {
   const [user, setUser] = useState(null);
@@ -35,6 +36,7 @@ export default function RewardsCheckins() {
   const [rewardActions, setRewardActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCheckInForm, setShowCheckInForm] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(() => {
@@ -93,26 +95,104 @@ export default function RewardsCheckins() {
           <h1 className="text-3xl font-serif font-bold text-slate-900">Rewards & Check-ins</h1>
           <p className="text-slate-600 mt-1">Track your activity and earn rewards</p>
         </div>
-        <Dialog open={showCheckInForm} onOpenChange={setShowCheckInForm}>
-          <DialogTrigger asChild>
-            <Button className="bg-orange-600 hover:bg-orange-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Check In
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create Check-in</DialogTitle>
-            </DialogHeader>
-            <CheckInForm
-              onSuccess={() => {
-                loadData();
-                setShowCheckInForm(false);
-              }}
-              onCancel={() => setShowCheckInForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Dialog open={showCheckInForm} onOpenChange={setShowCheckInForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-orange-600 hover:bg-orange-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Check In
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create Check-in</DialogTitle>
+              </DialogHeader>
+              <CheckInForm
+                onSuccess={() => {
+                  loadData();
+                  setShowCheckInForm(false);
+                }}
+                onCancel={() => setShowCheckInForm(false)}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={showQRScanner} onOpenChange={setShowQRScanner}>
+            <DialogTrigger asChild>
+              <Button className="bg-cyan-600 hover:bg-cyan-700">
+                <QrCode className="w-4 h-4 mr-2" />
+                Scan QR Code
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <QRCodeScanner
+                onScan={async (decodedText) => {
+                  try {
+                    // Parse the QR code data (expecting format: saleId:saleTitle)
+                    const [saleId, saleTitle] = decodedText.split(':');
+                    
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                          const checkInData = {
+                            check_in_type: 'sale_visit',
+                            location_name: saleTitle || 'Estate Sale',
+                            location_id: saleId,
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            verified: true,
+                            points_earned: 15
+                          };
+                          await base44.entities.CheckIn.create(checkInData);
+                          
+                          const user = await base44.auth.me();
+                          await base44.entities.UserReward.create({
+                            user_id: user.id,
+                            action_id: 'qr_check_in',
+                            action_name: 'QR Code Check-in Bonus',
+                            points_earned: 15,
+                            description: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                          });
+                          
+                          setShowQRScanner(false);
+                          loadData();
+                          alert('Check-in successful! +15 points earned');
+                        },
+                        async () => {
+                          const checkInData = {
+                            check_in_type: 'sale_visit',
+                            location_name: saleTitle || 'Estate Sale',
+                            location_id: saleId,
+                            verified: true,
+                            points_earned: 15
+                          };
+                          await base44.entities.CheckIn.create(checkInData);
+                          
+                          const user = await base44.auth.me();
+                          await base44.entities.UserReward.create({
+                            user_id: user.id,
+                            action_id: 'qr_check_in',
+                            action_name: 'QR Code Check-in Bonus',
+                            points_earned: 15,
+                            description: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                          });
+                          
+                          setShowQRScanner(false);
+                          loadData();
+                          alert('Check-in successful! +15 points earned');
+                        }
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error processing QR code:', error);
+                    alert('Failed to process QR code');
+                  }
+                }}
+                onClose={() => setShowQRScanner(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Stats Overview */}
