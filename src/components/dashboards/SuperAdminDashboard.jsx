@@ -239,11 +239,11 @@ export default function SuperAdminDashboard({ user }) {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-8 shadow-xl border border-slate-700">
-        <h1 className="text-5xl font-serif font-bold text-white mb-3">
-          Platform Overview
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4 shadow-xl border border-slate-700">
+        <h1 className="text-2xl font-serif font-bold text-white mb-1">
+          Legacy Lane OS Dashboard
         </h1>
-        <p className="text-lg text-slate-300">Welcome back, <span className="font-semibold text-white">{user.full_name}</span></p>
+        <p className="text-sm text-slate-300">Welcome back, <span className="font-semibold text-white">{user.full_name}</span></p>
       </div>
 
       {/* Stats Grid */}
