@@ -879,24 +879,24 @@ Only include items with confidence > 0.3. If no items match well, return an empt
           <p className="text-slate-600">{sale?.title}</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <Users className="w-4 h-4 mr-2" />
             Assign Client
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <Mail className="w-4 h-4 mr-2" />
             Email
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <FileDown className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <Package className="w-4 h-4 mr-2" />
             Inventory
           </Button>
@@ -905,32 +905,34 @@ Only include items with confidence > 0.3. If no items match well, return an empt
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="transactions">
-            <DollarSign className="w-4 h-4 mr-2" />
-            Transactions
-          </TabsTrigger>
-          <TabsTrigger value="offers">
-            <HandCoins className="w-4 h-4 mr-2" />
-            Offers
-          </TabsTrigger>
-          <TabsTrigger value="buyouts">
-            <DollarSign className="w-4 h-4 mr-2" />
-            Buyouts
-          </TabsTrigger>
-          <TabsTrigger value="expenses">
-            <Building2 className="w-4 h-4 mr-2" />
-            Expenses
-          </TabsTrigger>
-          <TabsTrigger value="shipping">
-            <Truck className="w-4 h-4 mr-2" />
-            Shipping
-          </TabsTrigger>
-          <TabsTrigger value="profit">
-            <Receipt className="w-4 h-4 mr-2" />
-            Profit Summary
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-2">
+          <TabsList className="w-max">
+            <TabsTrigger value="transactions" className="whitespace-nowrap">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="offers" className="whitespace-nowrap">
+              <HandCoins className="w-4 h-4 mr-2" />
+              Offers
+            </TabsTrigger>
+            <TabsTrigger value="buyouts" className="whitespace-nowrap">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Buyouts
+            </TabsTrigger>
+            <TabsTrigger value="expenses" className="whitespace-nowrap">
+              <Building2 className="w-4 h-4 mr-2" />
+              Expenses
+            </TabsTrigger>
+            <TabsTrigger value="shipping" className="whitespace-nowrap">
+              <Truck className="w-4 h-4 mr-2" />
+              Shipping
+            </TabsTrigger>
+            <TabsTrigger value="profit" className="whitespace-nowrap">
+              <Receipt className="w-4 h-4 mr-2" />
+              Profit Summary
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="transactions" className="space-y-6">
           {/* Stats Cards */}
