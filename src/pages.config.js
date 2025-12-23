@@ -72,6 +72,8 @@ import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import StartYourCompany from './pages/StartYourCompany';
+import SaleMarketingCampaigns from './pages/SaleMarketingCampaigns';
+import SaleContracts from './pages/SaleContracts';
 import __Layout from './Layout.jsx';
 
 
@@ -150,6 +152,8 @@ export const PAGES = {
     "Vendors": Vendors,
     "Worksheet": Worksheet,
     "StartYourCompany": StartYourCompany,
+    "SaleMarketingCampaigns": SaleMarketingCampaigns,
+    "SaleContracts": SaleContracts,
 }
 
 export const pagesConfig = {
