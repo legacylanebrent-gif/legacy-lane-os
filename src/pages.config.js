@@ -58,22 +58,22 @@ import PrintSigns from './pages/PrintSigns';
 import ReferralLanding from './pages/ReferralLanding';
 import Revenue from './pages/Revenue';
 import RewardsCheckins from './pages/RewardsCheckins';
+import SaleContracts from './pages/SaleContracts';
 import SaleExport from './pages/SaleExport';
 import SaleInventory from './pages/SaleInventory';
 import SaleLanding from './pages/SaleLanding';
+import SaleMarketingCampaigns from './pages/SaleMarketingCampaigns';
 import SaleStatistics from './pages/SaleStatistics';
 import SaleTasks from './pages/SaleTasks';
 import SearchByState from './pages/SearchByState';
 import Settings from './pages/Settings';
+import StartYourCompany from './pages/StartYourCompany';
 import StateCities from './pages/StateCities';
 import VIPEvent from './pages/VIPEvent';
 import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import StartYourCompany from './pages/StartYourCompany';
-import SaleMarketingCampaigns from './pages/SaleMarketingCampaigns';
-import SaleContracts from './pages/SaleContracts';
 import __Layout from './Layout.jsx';
 
 
@@ -138,22 +138,22 @@ export const PAGES = {
     "ReferralLanding": ReferralLanding,
     "Revenue": Revenue,
     "RewardsCheckins": RewardsCheckins,
+    "SaleContracts": SaleContracts,
     "SaleExport": SaleExport,
     "SaleInventory": SaleInventory,
     "SaleLanding": SaleLanding,
+    "SaleMarketingCampaigns": SaleMarketingCampaigns,
     "SaleStatistics": SaleStatistics,
     "SaleTasks": SaleTasks,
     "SearchByState": SearchByState,
     "Settings": Settings,
+    "StartYourCompany": StartYourCompany,
     "StateCities": StateCities,
     "VIPEvent": VIPEvent,
     "VendorDetail": VendorDetail,
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "StartYourCompany": StartYourCompany,
-    "SaleMarketingCampaigns": SaleMarketingCampaigns,
-    "SaleContracts": SaleContracts,
 }
 
 export const pagesConfig = {

@@ -89,16 +89,16 @@ export default function RewardsCheckins() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">Rewards & Check-ins</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Rewards & Check-ins</h1>
           <p className="text-slate-600 mt-1">Track your activity and earn rewards</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Dialog open={showCheckInForm} onOpenChange={setShowCheckInForm}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Check In
               </Button>
@@ -119,7 +119,7 @@ export default function RewardsCheckins() {
 
           <Dialog open={showQRScanner} onOpenChange={setShowQRScanner}>
             <DialogTrigger asChild>
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
+              <Button className="bg-cyan-600 hover:bg-cyan-700 w-full sm:w-auto">
                 <QrCode className="w-4 h-4 mr-2" />
                 Scan QR Code
               </Button>
@@ -244,18 +244,21 @@ export default function RewardsCheckins() {
       </div>
 
       <Tabs defaultValue="checkins" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="checkins">
-            <MapPin className="w-4 h-4 mr-2" />
-            My Check-ins
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="checkins" className="text-xs sm:text-sm">
+            <MapPin className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">My Check-ins</span>
+            <span className="sm:hidden">Check-ins</span>
           </TabsTrigger>
-          <TabsTrigger value="rewards">
-            <Gift className="w-4 h-4 mr-2" />
-            My Rewards
+          <TabsTrigger value="rewards" className="text-xs sm:text-sm">
+            <Gift className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">My Rewards</span>
+            <span className="sm:hidden">Rewards</span>
           </TabsTrigger>
-          <TabsTrigger value="actions">
-            <Target className="w-4 h-4 mr-2" />
-            Available Actions
+          <TabsTrigger value="actions" className="text-xs sm:text-sm">
+            <Target className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Available Actions</span>
+            <span className="sm:hidden">Actions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -281,32 +284,32 @@ export default function RewardsCheckins() {
                   {recentCheckIns.map((checkIn) => (
                     <div
                       key={checkIn.id}
-                      className="flex items-start gap-4 p-4 border rounded-lg hover:bg-slate-50"
+                      className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-4 border rounded-lg hover:bg-slate-50"
                     >
                       <div className="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0">
                         <MapPin className="w-6 h-6 text-cyan-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
+                      <div className="flex-1 w-full">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                          <div className="flex-1">
                             <h4 className="font-semibold text-slate-900">
                               {checkIn.location_name || 'Check-in'}
                             </h4>
-                            <Badge variant="outline" className="mt-1 capitalize">
+                            <Badge variant="outline" className="mt-1 capitalize text-xs">
                               {checkIn.check_in_type?.replace('_', ' ')}
                             </Badge>
                             {checkIn.notes && (
                               <p className="text-sm text-slate-600 mt-2">{checkIn.notes}</p>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="flex sm:flex-col gap-2 sm:text-right">
                             {checkIn.points_earned > 0 && (
-                              <Badge className="bg-orange-100 text-orange-700">
+                              <Badge className="bg-orange-100 text-orange-700 text-xs whitespace-nowrap">
                                 +{checkIn.points_earned} pts
                               </Badge>
                             )}
                             {checkIn.verified && (
-                              <Badge className="bg-green-100 text-green-700 mt-1">
+                              <Badge className="bg-green-100 text-green-700 text-xs whitespace-nowrap">
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
                                 Verified
                               </Badge>
@@ -342,23 +345,27 @@ export default function RewardsCheckins() {
                   {userRewards.map((reward) => (
                     <div
                       key={reward.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-4 border rounded-lg"
                     >
                       <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                         <Award className="w-6 h-6 text-purple-600" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-slate-900">{reward.action_name}</h4>
-                        <p className="text-sm text-slate-600 mt-1">
-                          {reward.description || 'Reward earned'}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-2">
-                          {format(new Date(reward.created_date), 'PPP')}
-                        </p>
+                      <div className="flex-1 w-full">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-slate-900">{reward.action_name}</h4>
+                            <p className="text-sm text-slate-600 mt-1">
+                              {reward.description || 'Reward earned'}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-2">
+                              {format(new Date(reward.created_date), 'PPP')}
+                            </p>
+                          </div>
+                          <Badge className="bg-orange-100 text-orange-700 text-sm sm:text-lg px-2 sm:px-3 py-1 whitespace-nowrap">
+                            +{reward.points_earned} pts
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge className="bg-orange-100 text-orange-700 text-lg px-3 py-1">
-                        +{reward.points_earned} pts
-                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -586,9 +593,9 @@ function CheckInForm({ onSuccess, onCancel }) {
 
       <div>
         <Label>Select Nearby Sale</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Select value={formData.location_id} onValueChange={handleSaleSelect} disabled={loadingSales}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={loadingSales ? "Loading nearby sales..." : "Select a nearby sale"} />
             </SelectTrigger>
             <SelectContent>
@@ -609,6 +616,7 @@ function CheckInForm({ onSuccess, onCancel }) {
             size="icon"
             onClick={handleScanQR}
             title="Scan QR Code"
+            className="w-full sm:w-auto"
           >
             <Camera className="w-4 h-4" />
           </Button>
@@ -646,9 +654,9 @@ function CheckInForm({ onSuccess, onCancel }) {
         />
       </div>
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">Cancel</Button>
+        <Button type="submit" className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
           Create Check-in
         </Button>
       </div>
