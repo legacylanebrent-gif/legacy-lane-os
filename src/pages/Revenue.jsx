@@ -25,6 +25,7 @@ export default function Revenue() {
   const [saveMessage, setSaveMessage] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportYears, setExportYears] = useState(3);
+  const [totalOperators, setTotalOperators] = useState(0);
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -212,6 +213,10 @@ export default function Revenue() {
   useEffect(() => {
     const loadAllPricing = async () => {
       try {
+        // Load total operators from FutureEstateOperator
+        const futureOps = await base44.entities.FutureEstateOperator.list('-created_date', 50000);
+        setTotalOperators(futureOps.length);
+
         // Load Biz in a Box
         const bizPackages = await base44.entities.SubscriptionPackage.filter({
           account_type: 'biz_in_a_box'
@@ -601,6 +606,12 @@ export default function Revenue() {
           <div>
             <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
             <p className="text-slate-600">Model your revenue streams with 3, 5, and 10-year projections</p>
+            <div className="mt-2 flex items-center gap-2">
+              <Badge variant="outline" className="text-lg px-3 py-1">
+                <Users className="w-4 h-4 mr-2" />
+                Total Operators: {totalOperators.toLocaleString()}
+              </Badge>
+            </div>
           </div>
           <Button onClick={() => setExportModalOpen(true)} className="bg-slate-800 hover:bg-slate-700">
             <FileText className="w-4 h-4 mr-2" />
