@@ -31,9 +31,7 @@ export default function Revenue() {
   const [subBasicPrice, setSubBasicPrice] = useState(() => loadValue('subBasicPrice', 49));
   const [subProPrice, setSubProPrice] = useState(() => loadValue('subProPrice', 99));
   const [subPremiumPrice, setSubPremiumPrice] = useState(() => loadValue('subPremiumPrice', 199));
-  const [subBasicListingFee, setSubBasicListingFee] = useState(() => loadValue('subBasicListingFee', 0));
-  const [subProListingFee, setSubProListingFee] = useState(() => loadValue('subProListingFee', 0));
-  const [subPremiumListingFee, setSubPremiumListingFee] = useState(() => loadValue('subPremiumListingFee', 0));
+  const [subListingFee, setSubListingFee] = useState(() => loadValue('subListingFee', 0));
   const [subNewPerMonth, setSubNewPerMonth] = useState(() => loadValue('subNewPerMonth', 25));
   const [subChurnRate, setSubChurnRate] = useState(() => loadValue('subChurnRate', 5));
 
@@ -146,14 +144,14 @@ export default function Revenue() {
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
-      bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth, subBasicListingFee, subProListingFee, subPremiumListingFee
+      bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth, subListingFee
     };
     
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`revenue_${key}`, JSON.stringify(value));
     });
   }, [
-    subBasicPrice, subProPrice, subPremiumPrice, subBasicListingFee, subProListingFee, subPremiumListingFee, subNewPerMonth, subChurnRate,
+    subBasicPrice, subProPrice, subPremiumPrice, subListingFee, subNewPerMonth, subChurnRate,
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
     agentSubPrice, agentNewPerMonth, agentChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
@@ -174,7 +172,7 @@ export default function Revenue() {
     return projections;
   };
 
-  const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate, basicListingFee = 0, proListingFee = 0, premiumListingFee = 0) => {
+  const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate, listingFee = 0) => {
     const projections = [];
     const quantities = [];
     let basicSubs = Math.floor(newPerMonth * 0.5);
@@ -184,7 +182,7 @@ export default function Revenue() {
     for (let i = 0; i < months; i++) {
       const churnFactor = (1 - churnRate / 100);
       const subscriptionRevenue = (basicSubs * basicPrice + proSubs * proPrice + premiumSubs * premiumPrice) * churnFactor;
-      const listingRevenue = (basicSubs * basicListingFee + proSubs * proListingFee + premiumSubs * premiumListingFee) * churnFactor;
+      const listingRevenue = (basicSubs + proSubs + premiumSubs) * listingFee * churnFactor;
       const revenue = subscriptionRevenue + listingRevenue;
       const totalSubs = basicSubs + proSubs + premiumSubs;
       projections.push(revenue);
@@ -224,9 +222,7 @@ export default function Revenue() {
     operatorPackages.premium?.monthly_price || subPremiumPrice, 
     subNewPerMonth, 
     subChurnRate,
-    subBasicListingFee,
-    subProListingFee,
-    subPremiumListingFee
+    subListingFee
   );
   const subProjections = subData.projections;
   const subQuantities = subData.quantities;
@@ -589,7 +585,7 @@ export default function Revenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
                   <div className="text-sm font-semibold text-slate-700 mb-3">Package Pricing (from Subscription Packages)</div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
                       <Label className="text-slate-500 text-xs mb-1">{operatorPackages.basic?.package_name || 'Basic'} Price</Label>
                       <div className="text-2xl font-bold text-slate-400">
@@ -598,7 +594,7 @@ export default function Revenue() {
                       <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
                     <div>
-                      <Label className="text-slate-500 text-xs mb-1">{operatorPackages.pro?.package_name || 'Growth'} Price</Label>
+                      <Label className="text-slate-500 text-xs mb-1">{operatorPackages.pro?.package_name || 'Pro'} Price</Label>
                       <div className="text-2xl font-bold text-slate-400">
                         ${operatorPackages.pro?.monthly_price || subProPrice}
                       </div>
@@ -611,26 +607,10 @@ export default function Revenue() {
                       </div>
                       <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <Label className="text-slate-700 text-xs mb-1">{operatorPackages.basic?.package_name || 'Basic'} Listing Fee</Label>
+                      <Label className="text-slate-500 text-xs mb-1">Basic + Listing Fee</Label>
                       <div className="text-2xl font-bold text-slate-900">
-                        ${subBasicListingFee}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">$/month per operator</p>
-                    </div>
-                    <div>
-                      <Label className="text-slate-700 text-xs mb-1">{operatorPackages.pro?.package_name || 'Growth'} Listing Fee</Label>
-                      <div className="text-2xl font-bold text-slate-900">
-                        ${subProListingFee}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">$/month per operator</p>
-                    </div>
-                    <div>
-                      <Label className="text-slate-700 text-xs mb-1">{operatorPackages.premium?.package_name || 'Enterprise'} Listing Fee</Label>
-                      <div className="text-2xl font-bold text-slate-900">
-                        ${subPremiumListingFee}
+                        ${subListingFee}
                       </div>
                       <p className="text-xs text-slate-500 mt-1">$/month per operator</p>
                     </div>
