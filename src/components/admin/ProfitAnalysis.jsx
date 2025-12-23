@@ -44,23 +44,23 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
         variant="ghost"
         size="sm"
         onClick={() => setExpanded(!expanded)}
-        className="w-full justify-between hover:bg-slate-50"
+        className="w-full justify-between hover:bg-slate-50 h-auto py-2"
       >
-        <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-green-600" />
-          <span className="font-medium text-slate-700">Profit Analysis</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <TrendingUp className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <span className="font-medium text-slate-700 truncate">Profit Analysis</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           <div className="text-xs text-slate-500">
-            Revenue: <span className="font-semibold">${totalRevenue.toFixed(2)}</span>
+            <span className="hidden sm:inline">Revenue: </span><span className="font-semibold">${totalRevenue.toFixed(2)}</span>
           </div>
           <div className="text-xs text-green-700">
-            Profit: <span className="font-semibold">${actualProfit.toFixed(2)}</span>
+            <span className="hidden sm:inline">Profit: </span><span className="font-semibold">${actualProfit.toFixed(2)}</span>
           </div>
-          <div className="text-xs text-cyan-600">
-            Hypo: <span className="font-semibold">${scenarioProfit.toFixed(2)}</span>
+          <div className="text-xs text-cyan-600 hidden md:block">
+            <span className="hidden sm:inline">Hypo: </span><span className="font-semibold">${scenarioProfit.toFixed(2)}</span>
           </div>
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expanded ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </Button>
 

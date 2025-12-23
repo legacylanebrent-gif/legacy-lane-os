@@ -118,23 +118,23 @@ export default function TechnologyCostAnalysis({ sale, onCostsCalculated }) {
         variant="ghost"
         size="sm"
         onClick={() => setExpanded(!expanded)}
-        className="w-full justify-between hover:bg-slate-50"
+        className="w-full justify-between hover:bg-slate-50 h-auto py-2"
       >
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-cyan-600" />
-          <span className="font-medium text-slate-700">Technology Cost Analysis</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <DollarSign className="w-4 h-4 text-cyan-600 flex-shrink-0" />
+          <span className="font-medium text-slate-700 truncate">Technology Cost Analysis</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           <div className="text-xs text-slate-500">
-            Est: <span className="font-semibold">${totalEstimate.toFixed(2)}</span>
+            <span className="hidden sm:inline">Est: </span><span className="font-semibold">${totalEstimate.toFixed(2)}</span>
           </div>
           <div className="text-xs text-slate-700">
-            Actual: <span className="font-semibold">${totalActual.toFixed(2)}</span>
+            <span className="hidden sm:inline">Actual: </span><span className="font-semibold">${totalActual.toFixed(2)}</span>
           </div>
-          <div className="text-xs text-cyan-600">
-            Hypo: <span className="font-semibold">${totalScenario.toFixed(2)}</span>
+          <div className="text-xs text-cyan-600 hidden md:block">
+            <span className="hidden sm:inline">Hypo: </span><span className="font-semibold">${totalScenario.toFixed(2)}</span>
           </div>
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expanded ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
         </div>
       </Button>
 
