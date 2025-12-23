@@ -851,7 +851,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div className="p-6 lg:p-8 pb-32 space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
       {/* Venmo Payment Modal */}
       <VenmoPaymentModal
         open={showVenmoModal}
