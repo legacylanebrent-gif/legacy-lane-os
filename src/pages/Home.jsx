@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2
@@ -41,6 +42,7 @@ export default function Home() {
   const [operators, setOperators] = useState({});
   const [totalItems, setTotalItems] = useState(0);
   const [totalEstimatedValue, setTotalEstimatedValue] = useState(0);
+  const [showSaleRequestModal, setShowSaleRequestModal] = useState(false);
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -304,6 +306,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+      <SaleRequestModal 
+        open={showSaleRequestModal} 
+        onClose={() => setShowSaleRequestModal(false)} 
+      />
+      
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -874,7 +881,7 @@ export default function Home() {
                 </p>
               </div>
               <Button
-                onClick={() => window.location.href = createPageUrl('LeadCapture')}
+                onClick={() => setShowSaleRequestModal(true)}
                 className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-6 text-lg font-semibold shadow-lg whitespace-nowrap"
               >
                 Submit A Sale Request
