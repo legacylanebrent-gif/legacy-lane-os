@@ -75,6 +75,7 @@ import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import AdminTemplates from './pages/AdminTemplates';
+import AdminPageAccess from './pages/AdminPageAccess';
 import __Layout from './Layout.jsx';
 
 
@@ -156,6 +157,7 @@ export const PAGES = {
     "Vendors": Vendors,
     "Worksheet": Worksheet,
     "AdminTemplates": AdminTemplates,
+    "AdminPageAccess": AdminPageAccess,
 }
 
 export const pagesConfig = {

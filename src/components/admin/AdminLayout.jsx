@@ -25,6 +25,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Business Expenses', path: 'MyBusinessExpenses', icon: FileText },
   { label: 'Courses', path: 'AdminCourses', icon: GraduationCap },
   { label: 'Users', path: 'AdminUsers', icon: Users },
+  { label: 'Page Access', path: 'AdminPageAccess', icon: Settings },
   { label: 'Estate Sales', path: 'AdminEstateSales', icon: Home },
   { label: 'Vendor Ads', path: 'AdminVendors', icon: Briefcase },
   { label: 'Incoming Leads', path: 'IncomingLeads', icon: TrendingUp },
