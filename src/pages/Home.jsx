@@ -441,7 +441,7 @@ export default function Home() {
         <section className="py-12 px-4 bg-slate-50">
           <div className="max-w-7xl mx-auto">
             <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
-              🗺️ Sales Near You
+              🗺️ Sales Near {zipCode ? zipCode : 'You'}
             </h3>
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
