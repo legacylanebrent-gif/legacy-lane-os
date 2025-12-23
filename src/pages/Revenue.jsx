@@ -14,6 +14,9 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState('subscriptions');
   const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
+  const [operatorPackages, setOperatorPackages] = useState({ basic: null, pro: null, premium: null });
+  const [vendorPackage, setVendorPackage] = useState(null);
+  const [agentPackage, setAgentPackage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pieChartYear, setPieChartYear] = useState(3);
   const [saveMessage, setSaveMessage] = useState('');
@@ -28,6 +31,7 @@ export default function Revenue() {
   const [subBasicPrice, setSubBasicPrice] = useState(() => loadValue('subBasicPrice', 49));
   const [subProPrice, setSubProPrice] = useState(() => loadValue('subProPrice', 99));
   const [subPremiumPrice, setSubPremiumPrice] = useState(() => loadValue('subPremiumPrice', 199));
+  const [subListingFee, setSubListingFee] = useState(() => loadValue('subListingFee', 0));
   const [subNewPerMonth, setSubNewPerMonth] = useState(() => loadValue('subNewPerMonth', 25));
   const [subChurnRate, setSubChurnRate] = useState(() => loadValue('subChurnRate', 5));
 
@@ -81,24 +85,52 @@ export default function Revenue() {
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
-  // Fetch Biz in a Box pricing
+  // Fetch all pricing from packages
   useEffect(() => {
-    const loadBizInBoxPricing = async () => {
+    const loadAllPricing = async () => {
       try {
-        const packages = await base44.entities.SubscriptionPackage.filter({
+        // Load Biz in a Box
+        const bizPackages = await base44.entities.SubscriptionPackage.filter({
           account_type: 'biz_in_a_box'
         });
-        
-        if (packages.length > 0) {
-          setBizInBoxPricing(packages[0]);
+        if (bizPackages.length > 0) {
+          setBizInBoxPricing(bizPackages[0]);
+        }
+
+        // Load Operator packages
+        const operatorPackages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'estate_sale_operator'
+        });
+        const opPkgs = { basic: null, pro: null, premium: null };
+        operatorPackages.forEach(pkg => {
+          if (pkg.tier_level === 'basic') opPkgs.basic = pkg;
+          if (pkg.tier_level === 'pro') opPkgs.pro = pkg;
+          if (pkg.tier_level === 'premium') opPkgs.premium = pkg;
+        });
+        setOperatorPackages(opPkgs);
+
+        // Load Vendor packages
+        const vendorPackages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'vendor'
+        });
+        if (vendorPackages.length > 0) {
+          setVendorPackage(vendorPackages[0]);
+        }
+
+        // Load Agent packages
+        const agentPackages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'real_estate_agent'
+        });
+        if (agentPackages.length > 0) {
+          setAgentPackage(agentPackages[0]);
         }
       } catch (error) {
-        console.error('Error loading Biz in a Box pricing:', error);
+        console.error('Error loading pricing:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadBizInBoxPricing();
+    loadAllPricing();
   }, []);
 
   // Auto-save to localStorage whenever values change
@@ -112,14 +144,14 @@ export default function Revenue() {
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
-      bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth
+      bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth, subListingFee
     };
     
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`revenue_${key}`, JSON.stringify(value));
     });
   }, [
-    subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate,
+    subBasicPrice, subProPrice, subPremiumPrice, subListingFee, subNewPerMonth, subChurnRate,
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
     agentSubPrice, agentNewPerMonth, agentChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
@@ -140,7 +172,7 @@ export default function Revenue() {
     return projections;
   };
 
-  const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate) => {
+  const calculateSubscriptionRevenue = (months, basicPrice = subBasicPrice, proPrice = subProPrice, premiumPrice = subPremiumPrice, newPerMonth = subNewPerMonth, churnRate = subChurnRate, listingFee = 0) => {
     const projections = [];
     const quantities = [];
     let basicSubs = Math.floor(newPerMonth * 0.5);
@@ -149,7 +181,9 @@ export default function Revenue() {
     
     for (let i = 0; i < months; i++) {
       const churnFactor = (1 - churnRate / 100);
-      const revenue = (basicSubs * basicPrice + proSubs * proPrice + premiumSubs * premiumPrice) * churnFactor;
+      const subscriptionRevenue = (basicSubs * basicPrice + proSubs * proPrice + premiumSubs * premiumPrice) * churnFactor;
+      const listingRevenue = (basicSubs + proSubs + premiumSubs) * listingFee * churnFactor;
+      const revenue = subscriptionRevenue + listingRevenue;
       const totalSubs = basicSubs + proSubs + premiumSubs;
       projections.push(revenue);
       quantities.push(totalSubs);
@@ -182,15 +216,22 @@ export default function Revenue() {
   };
 
   // Calculate all revenue streams
-  const subData = calculateSubscriptionRevenue(120, subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate);
+  const subData = calculateSubscriptionRevenue(120, 
+    operatorPackages.basic?.monthly_price || subBasicPrice, 
+    operatorPackages.pro?.monthly_price || subProPrice, 
+    operatorPackages.premium?.monthly_price || subPremiumPrice, 
+    subNewPerMonth, 
+    subChurnRate,
+    subListingFee
+  );
   const subProjections = subData.projections;
   const subQuantities = subData.quantities;
   
-  const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
+  const vendorSubData = calculateSimpleSubRevenue(vendorPackage?.monthly_price || vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   const vendorSubQuantities = vendorSubData.quantities;
   
-  const agentSubData = calculateSimpleSubRevenue(agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
+  const agentSubData = calculateSimpleSubRevenue(agentPackage?.monthly_price || agentSubPrice, agentNewPerMonth, agentChurnRate, 120);
   const agentSubProjections = agentSubData.projections;
   const agentSubQuantities = agentSubData.quantities;
   
@@ -542,18 +583,34 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <div>
+                    <Label className="text-slate-500 text-xs mb-1">Basic Plan Price (from package)</Label>
+                    <div className="text-2xl font-bold text-slate-400">
+                      ${operatorPackages.basic?.monthly_price || subBasicPrice}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-500 text-xs mb-1">Pro Plan Price (from package)</Label>
+                    <div className="text-2xl font-bold text-slate-400">
+                      ${operatorPackages.pro?.monthly_price || subProPrice}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-500 text-xs mb-1">Premium Plan Price (from package)</Label>
+                    <div className="text-2xl font-bold text-slate-400">
+                      ${operatorPackages.premium?.monthly_price || subPremiumPrice}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Basic Plan Price ($)</Label>
-                    <Input type="number" value={subBasicPrice} onChange={(e) => setSubBasicPrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Pro Plan Price ($)</Label>
-                    <Input type="number" value={subProPrice} onChange={(e) => setSubProPrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Premium Plan Price ($)</Label>
-                    <Input type="number" value={subPremiumPrice} onChange={(e) => setSubPremiumPrice(Number(e.target.value))} />
+                    <Label>Basic + Listing Fee ($/month per operator)</Label>
+                    <Input type="number" value={subListingFee} onChange={(e) => setSubListingFee(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>New Subscribers/Month</Label>
@@ -638,11 +695,15 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Monthly Price ($)</Label>
-                    <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
+                <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <Label className="text-slate-500 text-xs mb-1">Monthly Price (from package)</Label>
+                  <div className="text-2xl font-bold text-slate-400">
+                    ${vendorPackage?.monthly_price || vendorSubPrice}
                   </div>
+                  <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label>New Subscribers/Month</Label>
                     <Input type="number" value={vendorNewPerMonth} onChange={(e) => setVendorNewPerMonth(Number(e.target.value))} />
@@ -726,11 +787,15 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Monthly Price ($)</Label>
-                    <Input type="number" value={agentSubPrice} onChange={(e) => setAgentSubPrice(Number(e.target.value))} />
+                <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <Label className="text-slate-500 text-xs mb-1">Monthly Price (from package)</Label>
+                  <div className="text-2xl font-bold text-slate-400">
+                    ${agentPackage?.monthly_price || agentSubPrice}
                   </div>
+                  <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label>New Subscribers/Month</Label>
                     <Input type="number" value={agentNewPerMonth} onChange={(e) => setAgentNewPerMonth(Number(e.target.value))} />
