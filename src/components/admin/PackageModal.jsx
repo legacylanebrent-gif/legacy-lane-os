@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, GripVertical } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export default function PackageModal({ open, onClose, package: pkg, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -112,6 +113,19 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
     setFormData({
       ...formData,
       features: formData.features.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(formData.features);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setFormData({
+      ...formData,
+      features: items
     });
   };
 
@@ -334,21 +348,45 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
-            <div className="space-y-2">
-              {formData.features.map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-slate-50 p-2 rounded">
-                  <span className="flex-1 text-sm">{feature}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFeature(idx)}
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="features">
+                {(provided) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef}
+                    className="space-y-2"
                   >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
+                    {formData.features.map((feature, idx) => (
+                      <Draggable key={`feature-${idx}`} draggableId={`feature-${idx}`} index={idx}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`flex items-center gap-2 bg-slate-50 p-2 rounded ${
+                              snapshot.isDragging ? 'shadow-lg ring-2 ring-orange-500' : ''
+                            }`}
+                          >
+                            <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing">
+                              <GripVertical className="w-4 h-4 text-slate-400" />
+                            </div>
+                            <span className="flex-1 text-sm">{feature}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFeature(idx)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
 
           <div className="flex gap-6 border-t pt-4">
