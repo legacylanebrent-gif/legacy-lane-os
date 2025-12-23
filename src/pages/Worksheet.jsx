@@ -1929,7 +1929,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
 
         <TabsContent value="expenses" className="space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card className="bg-white shadow-sm">
               <CardContent className="p-4">
                 <div className="text-sm text-slate-600 mb-1">Total Expenses</div>
