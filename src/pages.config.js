@@ -1,4 +1,5 @@
 import AdminAdvertisingPackages from './pages/AdminAdvertisingPackages';
+import AdminAmazonProducts from './pages/AdminAmazonProducts';
 import AdminAutomations from './pages/AdminAutomations';
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCourses from './pages/AdminCourses';
@@ -65,12 +66,12 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import AdminAmazonProducts from './pages/AdminAmazonProducts';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminAdvertisingPackages": AdminAdvertisingPackages,
+    "AdminAmazonProducts": AdminAmazonProducts,
     "AdminAutomations": AdminAutomations,
     "AdminCampaigns": AdminCampaigns,
     "AdminCourses": AdminCourses,
@@ -137,7 +138,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "AdminAmazonProducts": AdminAmazonProducts,
 }
 
 export const pagesConfig = {
