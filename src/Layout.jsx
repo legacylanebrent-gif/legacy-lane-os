@@ -8,7 +8,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -181,10 +181,16 @@ export default function Layout({ children, currentPageName }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to={createPageUrl('Settings')} className="cursor-pointer">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
+                          <Settings className="w-4 h-4 mr-2" />
+                          Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                          <Bell className="w-4 h-4 mr-2" />
+                          Notification Settings
+                        </Link>
+                      </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
