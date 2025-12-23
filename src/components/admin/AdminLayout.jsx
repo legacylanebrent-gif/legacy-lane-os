@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, X, MessageSquare, TrendingUp, Bell
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [
   { label: 'Dashboard', path: 'Dashboard', icon: LayoutDashboard },
+  { label: 'Notifications', path: 'Notifications', icon: Bell },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
@@ -62,8 +64,11 @@ export default function AdminLayout({ children, currentPage }) {
         sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
       }`}>
         <div className="p-6 border-b border-slate-700">
-          <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
-          <p className="text-xs text-slate-400 mt-1">Legacy Lane OS</p>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
+            <NotificationsDropdown />
+          </div>
+          <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
         
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">

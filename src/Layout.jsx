@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
   Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText
@@ -148,6 +149,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-4">
+              <NotificationsDropdown />
               <Button
                 variant="ghost"
                 size="icon"
@@ -292,6 +294,19 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <MessageSquare className="w-5 h-5 mr-3" />
                     Support
+                  </Button>
+                </Link>
+                <Link to={createPageUrl('Notifications')}>
+                  <Button 
+                    variant={currentPageName === 'Notifications' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'Notifications' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <MessageSquare className="w-5 h-5 mr-3" />
+                    Notifications
                   </Button>
                 </Link>
                 </div>

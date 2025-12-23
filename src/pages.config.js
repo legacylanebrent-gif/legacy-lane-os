@@ -64,6 +64,7 @@ import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
 import AdminAutomations from './pages/AdminAutomations';
+import Notifications from './pages/Notifications';
 import __Layout from './Layout.jsx';
 
 
@@ -134,6 +135,7 @@ export const PAGES = {
     "Vendors": Vendors,
     "Worksheet": Worksheet,
     "AdminAutomations": AdminAutomations,
+    "Notifications": Notifications,
 }
 
 export const pagesConfig = {
