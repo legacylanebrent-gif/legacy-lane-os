@@ -246,6 +246,19 @@ export default function Layout({ children, currentPageName }) {
                     My Sales
                   </Button>
                 </Link>
+                <Link to={createPageUrl('RewardsCheckins')}>
+                  <Button 
+                    variant={currentPageName === 'RewardsCheckins' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'RewardsCheckins' 
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <MapPin className="w-5 h-5 mr-3" />
+                    Rewards & Check-ins
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('Favorites')}>
                   <Button 
                     variant={currentPageName === 'Favorites' ? 'default' : 'ghost'}
@@ -296,19 +309,6 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <Star className="w-5 h-5 mr-3" />
                     My Rewards
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('RewardsCheckins')}>
-                  <Button 
-                    variant={currentPageName === 'RewardsCheckins' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'RewardsCheckins' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <MapPin className="w-5 h-5 mr-3" />
-                    Rewards & Check-ins
                   </Button>
                 </Link>
                 <Link to={createPageUrl('MyTickets')}>
