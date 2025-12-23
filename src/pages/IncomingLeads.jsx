@@ -37,6 +37,7 @@ export default function IncomingLeads() {
     sales_allowed: '',
     amount_to_sell: '',
     interested_in_full_service: '',
+    items_to_sell: [],
     timeline: '',
     notes: '',
     score: 50
@@ -108,6 +109,7 @@ export default function IncomingLeads() {
         sales_allowed: formData.sales_allowed,
         amount_to_sell: formData.amount_to_sell,
         interested_in_full_service: formData.interested_in_full_service,
+        items_to_sell: formData.items_to_sell,
         timeline: formData.timeline,
         score: parseInt(formData.score),
         contact_name: formData.contact_name,
@@ -173,6 +175,7 @@ export default function IncomingLeads() {
       sales_allowed: '',
       amount_to_sell: '',
       interested_in_full_service: '',
+      items_to_sell: [],
       timeline: '',
       notes: '',
       score: 50
@@ -644,6 +647,30 @@ export default function IncomingLeads() {
 
             <div className="text-xs text-slate-600 -mt-2">
               <span className="font-medium">Full service:</span> Estate sale, home sale, and cleanout
+            </div>
+
+            <div>
+              <Label>What will you be selling?</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50">
+                {['Furniture', 'Clothing', 'Decor', 'Collectables', 'Antiques', 'Art', 'Vehicles', 'Tools', 'Appliances', 'Electronics', 'Other', "I don't know"].map(item => (
+                  <div key={item} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`item_${item}`}
+                      checked={formData.items_to_sell.includes(item)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData({ ...formData, items_to_sell: [...formData.items_to_sell, item] });
+                        } else {
+                          setFormData({ ...formData, items_to_sell: formData.items_to_sell.filter(i => i !== item) });
+                        }
+                      }}
+                      className="w-4 h-4 text-orange-600 border-slate-300 rounded focus:ring-orange-500"
+                    />
+                    <Label htmlFor={`item_${item}`} className="cursor-pointer text-sm">{item}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>
