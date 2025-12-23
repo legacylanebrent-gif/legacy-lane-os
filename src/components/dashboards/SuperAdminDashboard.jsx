@@ -130,79 +130,89 @@ export default function SuperAdminDashboard({ user }) {
       title: 'Total Users', 
       value: stats.totalUsers, 
       icon: Users, 
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-blue-100',
+      gradient: 'from-slate-700 to-slate-800',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-slate-700',
       link: createPageUrl('AdminUsers')
     },
     { 
       title: 'Platform Revenue', 
       value: `$${stats.totalRevenue.toLocaleString()}`, 
       icon: DollarSign, 
-      gradient: 'from-green-500 to-green-600',
-      bgGradient: 'from-green-50 to-green-100',
+      gradient: 'from-emerald-600 to-emerald-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-emerald-600',
       link: createPageUrl('ComprehensiveRevenue')
     },
     { 
       title: 'Active Estate Sales', 
       value: stats.activeEstateSales, 
       icon: Home, 
-      gradient: 'from-purple-500 to-purple-600',
-      bgGradient: 'from-purple-50 to-purple-100',
+      gradient: 'from-indigo-600 to-indigo-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-indigo-600',
       link: createPageUrl('AdminEstateSales')
     },
     { 
       title: 'Total Courses', 
       value: stats.totalCourses, 
       icon: BookOpen, 
-      gradient: 'from-orange-500 to-orange-600',
-      bgGradient: 'from-orange-50 to-orange-100',
+      gradient: 'from-orange-600 to-orange-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-orange-600',
       link: createPageUrl('AdminCourses')
     },
     { 
       title: 'Marketplace Items', 
       value: stats.totalItems, 
       icon: ShoppingBag, 
-      gradient: 'from-pink-500 to-pink-600',
-      bgGradient: 'from-pink-50 to-pink-100',
+      gradient: 'from-violet-600 to-violet-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-violet-600',
       link: createPageUrl('AdminMarketplace')
     },
     { 
       title: 'Properties', 
       value: stats.totalProperties, 
       icon: TrendingUp, 
-      gradient: 'from-cyan-500 to-cyan-600',
-      bgGradient: 'from-cyan-50 to-cyan-100'
+      gradient: 'from-cyan-600 to-cyan-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-cyan-600'
     },
     { 
       title: 'Active Subscriptions', 
       value: stats.totalSubscriptions, 
       icon: Package, 
-      gradient: 'from-indigo-500 to-indigo-600',
-      bgGradient: 'from-indigo-50 to-indigo-100',
+      gradient: 'from-blue-600 to-blue-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-blue-600',
       link: createPageUrl('AdminPackages')
     },
     { 
       title: 'Open Tickets', 
       value: stats.totalTickets, 
       icon: MessageSquare, 
-      gradient: 'from-amber-500 to-amber-600',
-      bgGradient: 'from-amber-50 to-amber-100',
+      gradient: 'from-amber-600 to-amber-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-amber-600',
       link: createPageUrl('AdminTickets')
     },
     { 
       title: 'Active Vendors', 
       value: stats.activeVendors, 
       icon: Briefcase, 
-      gradient: 'from-teal-500 to-teal-600',
-      bgGradient: 'from-teal-50 to-teal-100',
+      gradient: 'from-teal-600 to-teal-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-teal-600',
       link: createPageUrl('AdminVendors')
     },
     { 
       title: 'Active Referrals', 
       value: stats.totalReferrals, 
       icon: Gift, 
-      gradient: 'from-rose-500 to-rose-600',
-      bgGradient: 'from-rose-50 to-rose-100',
+      gradient: 'from-rose-600 to-rose-700',
+      bgGradient: 'from-white to-slate-50',
+      iconColor: 'text-rose-600',
       link: createPageUrl('AdminRewards')
     }
   ];
@@ -229,14 +239,11 @@ export default function SuperAdminDashboard({ user }) {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-cyan-500/10 rounded-3xl blur-3xl"></div>
-        <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-slate-200 shadow-lg">
-          <h1 className="text-5xl font-serif font-bold bg-gradient-to-r from-slate-900 via-orange-600 to-cyan-600 bg-clip-text text-transparent mb-3">
-            Platform Overview
-          </h1>
-          <p className="text-lg text-slate-600">Welcome back, <span className="font-semibold text-slate-900">{user.full_name}</span></p>
-        </div>
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-8 shadow-xl border border-slate-700">
+        <h1 className="text-5xl font-serif font-bold text-white mb-3">
+          Platform Overview
+        </h1>
+        <p className="text-lg text-slate-300">Welcome back, <span className="font-semibold text-white">{user.full_name}</span></p>
       </div>
 
       {/* Stats Grid */}
@@ -247,19 +254,18 @@ export default function SuperAdminDashboard({ user }) {
 
           return (
             <CardWrapper key={index} {...cardProps}>
-              <Card className={`relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 ${stat.link ? 'cursor-pointer hover:scale-105' : ''} bg-gradient-to-br ${stat.bgGradient}`}>
-                <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${stat.gradient} opacity-20 rounded-full blur-2xl`} />
+              <Card className={`relative overflow-hidden border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 ${stat.link ? 'cursor-pointer hover:border-slate-300' : ''} bg-white`}>
                 <CardContent className="p-6 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
-                      <stat.icon className="h-6 w-6 text-white" />
+                    <div className={`w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center`}>
+                      <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                     </div>
                     {stat.link && (
                       <ArrowUpRight className="h-5 w-5 text-slate-400" />
                     )}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">{stat.title}</p>
                     <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
                   </div>
                 </CardContent>
@@ -272,14 +278,14 @@ export default function SuperAdminDashboard({ user }) {
       {/* Activity & Quick Actions */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <Card className="border-none shadow-lg">
-          <CardHeader className="border-b bg-gradient-to-r from-slate-50 to-slate-100">
+        <Card className="border border-slate-200 shadow-md">
+          <CardHeader className="border-b bg-slate-50">
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl font-serif text-slate-900 flex items-center gap-2">
-                <Activity className="h-6 w-6 text-orange-600" />
+                <Activity className="h-6 w-6 text-slate-700" />
                 Recent Activity
               </CardTitle>
-              <Badge variant="outline" className="bg-white">
+              <Badge className="bg-slate-700 text-white">
                 Live
               </Badge>
             </div>
@@ -306,7 +312,7 @@ export default function SuperAdminDashboard({ user }) {
                               <p className="text-slate-600 text-sm truncate">{activity.description}</p>
                             </div>
                             {activity.amount && (
-                              <Badge className="bg-green-100 text-green-700 border-green-200">
+                              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
                                 ${activity.amount.toLocaleString()}
                               </Badge>
                             )}
@@ -325,47 +331,47 @@ export default function SuperAdminDashboard({ user }) {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="border-none shadow-lg">
-          <CardHeader className="border-b bg-gradient-to-r from-slate-50 to-slate-100">
+        <Card className="border border-slate-200 shadow-md">
+          <CardHeader className="border-b bg-slate-50">
             <CardTitle className="text-2xl font-serif text-slate-900 flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-cyan-600" />
+              <TrendingUp className="h-6 w-6 text-slate-700" />
               Quick Actions
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid gap-3">
               <Link to={createPageUrl('AdminUsers')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-slate-700 hover:bg-slate-800 text-white">
                   <Users className="h-5 w-5 mr-3" />
                   Manage Users
                 </Button>
               </Link>
               <Link to={createPageUrl('AdminEstateSales')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-indigo-600 hover:bg-indigo-700 text-white">
                   <Home className="h-5 w-5 mr-3" />
                   View Estate Sales
                 </Button>
               </Link>
               <Link to={createPageUrl('AdminTickets')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-orange-600 hover:bg-orange-700 text-white">
                   <MessageSquare className="h-5 w-5 mr-3" />
                   Support Tickets
                 </Button>
               </Link>
               <Link to={createPageUrl('PlatformAnalytics')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-cyan-600 hover:bg-cyan-700 text-white">
                   <TrendingUp className="h-5 w-5 mr-3" />
                   View Analytics
                 </Button>
               </Link>
               <Link to={createPageUrl('ComprehensiveRevenue')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 text-white">
                   <DollarSign className="h-5 w-5 mr-3" />
                   Revenue Reports
                 </Button>
               </Link>
               <Link to={createPageUrl('AdminRewards')}>
-                <Button className="w-full justify-start bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg">
+                <Button className="w-full justify-start bg-rose-600 hover:bg-rose-700 text-white">
                   <Gift className="h-5 w-5 mr-3" />
                   Rewards & Draws
                 </Button>
