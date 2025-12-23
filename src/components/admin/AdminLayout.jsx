@@ -77,7 +77,7 @@ export default function AdminLayout({ children, currentPage }) {
           <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
         
-        <nav className="flex-1 overflow-y-auto p-4 pb-32 space-y-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <nav className="flex-1 overflow-y-auto p-4 pb-32 space-y-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-thumb]:rounded-full">
           {ADMIN_NAV_ITEMS.map(item => {
             const Icon = item.icon;
             const active = isActive(item.path);
