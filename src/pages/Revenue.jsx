@@ -70,9 +70,9 @@ export default function Revenue() {
   const [referralsPerMonth, setReferralsPerMonth] = useState(() => loadValue('referralsPerMonth', 8));
   const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 12));
 
-  // Premium Placement Inputs
-  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 179));
-  const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 97));
+  // Premium Placement Inputs (from Advertising Packages - fixed values)
+  const [nationalFeaturePrice, setNationalFeaturePrice] = useState(179);
+  const [localFeaturePrice, setLocalFeaturePrice] = useState(97);
   const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
   
