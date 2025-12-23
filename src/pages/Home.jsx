@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
+import { t } from '@/components/terminology';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, MessageSquare, LayoutDashboard,
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2
@@ -904,10 +905,10 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-xl font-serif font-bold text-white mb-1">
-                      Estate Sale Operator
+                      Estate Sale {t('Company')}
                     </h3>
                     <p className="text-orange-100 text-sm">
-                      List your company
+                      List your {t('company')}
                     </p>
                   </div>
                 </div>
