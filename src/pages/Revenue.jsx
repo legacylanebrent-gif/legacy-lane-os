@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { DollarSign, TrendingUp, Users, ShoppingBag, Award, BookOpen, Briefcase, Megaphone, Sparkles, Package } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
@@ -14,6 +15,7 @@ export default function Revenue() {
   const [activeTab, setActiveTab] = useState('subscriptions');
   const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pieChartYear, setPieChartYear] = useState(3);
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -273,15 +275,15 @@ export default function Revenue() {
   const year10Total = getYearProjection(totalProjections, 10);
 
   const pieData = [
-    { name: 'Operator Subs', value: getYearProjection(subProjections, 3) },
-    { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, 3) },
-    { name: 'Agent Subs', value: getYearProjection(agentSubProjections, 3) },
-    { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
-    { name: 'Courses', value: getYearProjection(courseProjections, 3) },
-    { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
-    { name: 'Features', value: getYearProjection(featureProjections, 3) },
-    { name: 'Advertising', value: getYearProjection(adProjections, 3) },
-    { name: 'Biz in a Box', value: getYearProjection(bizInBoxProjections, 3) },
+    { name: 'Operator Subs', value: getYearProjection(subProjections, pieChartYear) },
+    { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, pieChartYear) },
+    { name: 'Agent Subs', value: getYearProjection(agentSubProjections, pieChartYear) },
+    { name: 'Marketplace', value: getYearProjection(marketplaceProjections, pieChartYear) },
+    { name: 'Courses', value: getYearProjection(courseProjections, pieChartYear) },
+    { name: 'Referrals', value: getYearProjection(referralProjections, pieChartYear) },
+    { name: 'Features', value: getYearProjection(featureProjections, pieChartYear) },
+    { name: 'Advertising', value: getYearProjection(adProjections, pieChartYear) },
+    { name: 'Biz in a Box', value: getYearProjection(bizInBoxProjections, pieChartYear) },
   ];
 
   const yearlyComparisonData = [
@@ -409,7 +411,20 @@ export default function Revenue() {
           {/* Pie Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>3-Year Revenue Mix</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>{pieChartYear}-Year Revenue Mix</CardTitle>
+                <Select value={pieChartYear.toString()} onValueChange={(value) => setPieChartYear(Number(value))}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 Year</SelectItem>
+                    <SelectItem value="3">3 Years</SelectItem>
+                    <SelectItem value="5">5 Years</SelectItem>
+                    <SelectItem value="10">10 Years</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
