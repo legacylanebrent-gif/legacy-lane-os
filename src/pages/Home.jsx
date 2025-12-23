@@ -426,7 +426,7 @@ export default function Home() {
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto space-y-4">
             {/* Zip Code Search */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <Input
@@ -434,19 +434,19 @@ export default function Home() {
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleZipSearch()}
-                  className="pl-12 h-12 shadow-md"
+                  className="pl-12 h-12 shadow-md w-full"
                 />
               </div>
               <Button 
                 onClick={handleZipSearch}
-                className="bg-cyan-600 hover:bg-cyan-700 h-12 px-6"
+                className="bg-cyan-600 hover:bg-cyan-700 h-12 px-6 w-full sm:w-auto whitespace-nowrap"
               >
                 Search ZIP
               </Button>
               <Button 
                 onClick={handleUseMyLocation}
                 variant="outline"
-                className="h-12 px-6"
+                className="h-12 px-6 w-full sm:w-auto whitespace-nowrap"
               >
                 Use My Location
               </Button>
