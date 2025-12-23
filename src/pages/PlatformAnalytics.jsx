@@ -116,13 +116,15 @@ export default function PlatformAnalytics() {
         </div>
 
         <Tabs defaultValue="monetization">
-          <TabsList>
-            <TabsTrigger value="monetization">Monetization Stack</TabsTrigger>
-            <TabsTrigger value="divisions">Division Performance</TabsTrigger>
-            <TabsTrigger value="partners">Partner Leaderboard</TabsTrigger>
-            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
-            <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2">
+            <TabsList className="w-max">
+              <TabsTrigger value="monetization" className="whitespace-nowrap">Monetization Stack</TabsTrigger>
+              <TabsTrigger value="divisions" className="whitespace-nowrap">Division Performance</TabsTrigger>
+              <TabsTrigger value="partners" className="whitespace-nowrap">Partner Leaderboard</TabsTrigger>
+              <TabsTrigger value="marketplace" className="whitespace-nowrap">Marketplace</TabsTrigger>
+              <TabsTrigger value="forecasting" className="whitespace-nowrap">Forecasting</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="monetization" className="mt-6">
             <MonetizationStack revenueEvents={revenueEvents} />
