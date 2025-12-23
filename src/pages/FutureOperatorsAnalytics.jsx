@@ -144,7 +144,7 @@ export default function FutureOperatorsAnalytics() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Future Operators Analytics</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Operators Analytics</h1>
           <p className="text-slate-600">Current database overview and revenue potential analysis</p>
         </div>
 
@@ -226,12 +226,12 @@ export default function FutureOperatorsAnalytics() {
               </ResponsiveContainer>
               <div className="mt-4 space-y-2">
                 {packageData.map((pkg, idx) => (
-                  <div key={pkg.name} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                  <div key={pkg.name} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-slate-50 rounded gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                      <div className="w-3 h-3 rounded flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
                       <span className="text-sm font-medium">{pkg.name}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right pl-5 sm:pl-0">
                       <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                       <div className="text-xs text-slate-500">{pkg.value} operators</div>
                     </div>
@@ -275,14 +275,14 @@ export default function FutureOperatorsAnalytics() {
                 <Bar dataKey="monthlyRevenue" name="Monthly Revenue" fill="#10b981" />
               </BarChart>
             </ResponsiveContainer>
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {stateRevenue.slice(0, 9).map((state) => (
                 <div key={state.state} className="p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-lg font-bold text-slate-900">{state.state}</span>
-                    <MapPin className="w-4 h-4 text-blue-600" />
+                    <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
                   </div>
-                  <div className="text-sm text-slate-600">
+                  <div className="text-sm text-slate-600 space-y-1">
                     <div className="flex justify-between">
                       <span>Operators:</span>
                       <span className="font-semibold">{state.count}</span>
