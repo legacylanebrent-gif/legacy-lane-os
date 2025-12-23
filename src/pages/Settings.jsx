@@ -8,10 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Save, Globe, DollarSign, Users, Bell, Shield, Mail, Palette, Zap } from 'lucide-react';
+import { Save, Globe, DollarSign, Users, Bell, Shield, Mail, Palette, Zap, Link2, Plus, Trash2, Edit } from 'lucide-react';
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [footerLinks, setFooterLinks] = useState([]);
+  const [editingLink, setEditingLink] = useState(null);
+  const [showLinkForm, setShowLinkForm] = useState(false);
   const [settings, setSettings] = useState({
     // General
     site_name: 'Legacy Lane OS',
@@ -45,6 +48,7 @@ export default function Settings() {
 
   useEffect(() => {
     loadUser();
+    loadFooterLinks();
   }, []);
 
   const loadUser = async () => {
@@ -53,6 +57,42 @@ export default function Settings() {
       setUser(userData);
     } catch (error) {
       console.error('Error loading user:', error);
+    }
+  };
+
+  const loadFooterLinks = async () => {
+    try {
+      const links = await base44.entities.FooterLink.filter({ is_active: true }, 'sort_order');
+      setFooterLinks(links);
+    } catch (error) {
+      console.error('Error loading footer links:', error);
+    }
+  };
+
+  const handleSaveLink = async (linkData) => {
+    try {
+      if (editingLink) {
+        await base44.entities.FooterLink.update(editingLink.id, linkData);
+      } else {
+        await base44.entities.FooterLink.create(linkData);
+      }
+      loadFooterLinks();
+      setShowLinkForm(false);
+      setEditingLink(null);
+    } catch (error) {
+      console.error('Error saving link:', error);
+      alert('Error saving link');
+    }
+  };
+
+  const handleDeleteLink = async (linkId) => {
+    if (confirm('Are you sure you want to delete this link?')) {
+      try {
+        await base44.entities.FooterLink.delete(linkId);
+        loadFooterLinks();
+      } catch (error) {
+        console.error('Error deleting link:', error);
+      }
     }
   };
 
@@ -123,6 +163,10 @@ export default function Settings() {
               <TabsTrigger value="branding" className="whitespace-nowrap">
                 <Palette className="w-4 h-4 mr-2" />
                 Branding
+              </TabsTrigger>
+              <TabsTrigger value="footer" className="whitespace-nowrap">
+                <Link2 className="w-4 h-4 mr-2" />
+                Footer Links
               </TabsTrigger>
             </TabsList>
           </div>
@@ -487,6 +531,91 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="footer">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Footer Links</CardTitle>
+                    <CardDescription>Manage footer navigation links</CardDescription>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      setEditingLink(null);
+                      setShowLinkForm(true);
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Link
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {showLinkForm ? (
+                  <FooterLinkForm
+                    link={editingLink}
+                    onSave={handleSaveLink}
+                    onCancel={() => {
+                      setShowLinkForm(false);
+                      setEditingLink(null);
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-6">
+                    {['quick_links', 'for_businesses', 'resources'].map(section => {
+                      const sectionLinks = footerLinks.filter(l => l.section === section);
+                      const sectionLabel = section === 'quick_links' ? 'Quick Links' : 
+                                          section === 'for_businesses' ? 'For Businesses' : 'Resources';
+                      
+                      return (
+                        <div key={section}>
+                          <h3 className="font-semibold text-slate-900 mb-3">{sectionLabel}</h3>
+                          {sectionLinks.length === 0 ? (
+                            <p className="text-sm text-slate-500 italic">No links in this section</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {sectionLinks.map(link => (
+                                <div key={link.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                  <div>
+                                    <p className="font-medium">{link.label}</p>
+                                    <p className="text-sm text-slate-600">
+                                      {link.page_name ? `→ ${link.page_name}` : link.external_url}
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingLink(link);
+                                        setShowLinkForm(true);
+                                      }}
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleDeleteLink(link.id)}
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         <div className="flex justify-end mt-8">
@@ -504,4 +633,96 @@ export default function Settings() {
   );
 
   return <SettingsContent />;
+}
+
+function FooterLinkForm({ link, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    section: link?.section || 'quick_links',
+    label: link?.label || '',
+    page_name: link?.page_name || '',
+    external_url: link?.external_url || '',
+    sort_order: link?.sort_order || 0,
+    is_active: link?.is_active ?? true
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 border-t pt-4">
+      <div>
+        <Label htmlFor="section">Section</Label>
+        <select
+          id="section"
+          value={formData.section}
+          onChange={(e) => setFormData({...formData, section: e.target.value})}
+          className="w-full px-3 py-2 border rounded-lg"
+        >
+          <option value="quick_links">Quick Links</option>
+          <option value="for_businesses">For Businesses</option>
+          <option value="resources">Resources</option>
+        </select>
+      </div>
+
+      <div>
+        <Label htmlFor="label">Link Label</Label>
+        <Input
+          id="label"
+          value={formData.label}
+          onChange={(e) => setFormData({...formData, label: e.target.value})}
+          placeholder="e.g., Browse by State"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="page_name">Internal Page Name (optional)</Label>
+        <Input
+          id="page_name"
+          value={formData.page_name}
+          onChange={(e) => setFormData({...formData, page_name: e.target.value})}
+          placeholder="e.g., SearchByState"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="external_url">External URL (optional)</Label>
+        <Input
+          id="external_url"
+          value={formData.external_url}
+          onChange={(e) => setFormData({...formData, external_url: e.target.value})}
+          placeholder="https://example.com"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="sort_order">Sort Order</Label>
+        <Input
+          id="sort_order"
+          type="number"
+          value={formData.sort_order}
+          onChange={(e) => setFormData({...formData, sort_order: parseInt(e.target.value)})}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={formData.is_active}
+          onCheckedChange={(val) => setFormData({...formData, is_active: val})}
+        />
+        <Label>Active</Label>
+      </div>
+
+      <div className="flex gap-2 pt-4">
+        <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+          {link ? 'Update Link' : 'Add Link'}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
 }
