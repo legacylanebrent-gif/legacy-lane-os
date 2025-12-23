@@ -287,12 +287,12 @@ export default function AdminCampaigns() {
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Campaign Management</h1>
           <p className="text-slate-600">{campaigns.length} total campaigns</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowTemplateModal(true)} variant="outline">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button onClick={() => setShowTemplateModal(true)} variant="outline" className="whitespace-nowrap">
             <FileText className="w-4 h-4 mr-2" />
             New Template
           </Button>
-          <Button onClick={() => setShowCreateModal(true)} className="bg-orange-600 hover:bg-orange-700">
+          <Button onClick={() => setShowCreateModal(true)} className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap">
             <Plus className="w-4 h-4 mr-2" />
             Create Campaign
           </Button>
@@ -300,12 +300,14 @@ export default function AdminCampaigns() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="campaigns">My Campaigns</TabsTrigger>
-          <TabsTrigger value="templates">Campaign Templates</TabsTrigger>
-          <TabsTrigger value="library">Template Library</TabsTrigger>
-          {isAdmin && <TabsTrigger value="all">All Campaigns</TabsTrigger>}
-        </TabsList>
+        <div className="overflow-x-auto pb-2">
+          <TabsList className="w-max">
+            <TabsTrigger value="campaigns" className="whitespace-nowrap">My Campaigns</TabsTrigger>
+            <TabsTrigger value="templates" className="whitespace-nowrap">Campaign Templates</TabsTrigger>
+            <TabsTrigger value="library" className="whitespace-nowrap">Template Library</TabsTrigger>
+            {isAdmin && <TabsTrigger value="all" className="whitespace-nowrap">All Campaigns</TabsTrigger>}
+          </TabsList>
+        </div>
 
         <TabsContent value="campaigns" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -398,12 +400,12 @@ export default function AdminCampaigns() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-2 pt-2 border-t">
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
                         {campaign.status === 'draft' && (
                           <Button
                             size="sm"
                             onClick={() => handleUpdateStatus(campaign.id, 'active')}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
                           >
                             <Play className="w-3 h-3 mr-1" />
                             Launch
@@ -414,6 +416,7 @@ export default function AdminCampaigns() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleUpdateStatus(campaign.id, 'paused')}
+                            className="whitespace-nowrap"
                           >
                             <Pause className="w-3 h-3 mr-1" />
                             Pause
@@ -423,17 +426,17 @@ export default function AdminCampaigns() {
                           <Button
                             size="sm"
                             onClick={() => handleUpdateStatus(campaign.id, 'active')}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
                           >
                             <Play className="w-3 h-3 mr-1" />
                             Resume
                           </Button>
                         )}
-                        <Button size="sm" variant="outline" onClick={() => handleDuplicateCampaign(campaign)}>
+                        <Button size="sm" variant="outline" onClick={() => handleDuplicateCampaign(campaign)} className="whitespace-nowrap">
                           <Copy className="w-3 h-3 mr-1" />
                           Duplicate
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDeleteCampaign(campaign.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleDeleteCampaign(campaign.id)} className="whitespace-nowrap">
                           <Trash2 className="w-3 h-3 mr-1" />
                           Delete
                         </Button>
