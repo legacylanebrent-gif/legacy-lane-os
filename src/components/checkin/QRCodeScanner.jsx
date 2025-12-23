@@ -21,13 +21,16 @@ export default function QRCodeScanner({ onScan, onClose }) {
         // Successfully scanned
         html5QrCode.stop().then(() => {
           onScan(decodedText);
+        }).catch(() => {
+          onScan(decodedText);
         });
       },
       (errorMessage) => {
         // Ignore scanning errors, they happen constantly
       }
     ).catch((err) => {
-      setError('Unable to start camera. Please check permissions.');
+      const errorMsg = err?.message || err?.toString() || 'Unable to start camera. Please check permissions.';
+      setError(errorMsg);
       console.error('QR Scanner Error:', err);
     });
 
