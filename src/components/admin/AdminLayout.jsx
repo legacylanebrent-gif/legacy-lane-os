@@ -15,6 +15,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
+  { label: 'Amazon Products', path: 'AdminAmazonProducts', icon: Package },
   { label: 'Leads', path: 'AdminLeads', icon: Award },
   { label: 'Campaigns', path: 'AdminCampaigns', icon: Zap },
   { label: 'Income Tracker', path: 'IncomeTracker', icon: TrendingUp },
