@@ -15,7 +15,7 @@ export default function Revenue() {
   const [activeTab, setActiveTab] = useState('subscriptions');
   const [bizInBoxPricing, setBizInBoxPricing] = useState(null);
   const [operatorPackages, setOperatorPackages] = useState({ basic: null, pro: null, premium: null });
-  const [vendorPackage, setVendorPackage] = useState(null);
+  const [vendorPackages, setVendorPackages] = useState({ basic: null, pro: null });
   const [agentPackage, setAgentPackage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pieChartYear, setPieChartYear] = useState(3);
@@ -36,7 +36,8 @@ export default function Revenue() {
   const [subChurnRate, setSubChurnRate] = useState(() => loadValue('subChurnRate', 5));
 
   // Vendor Subscription Inputs
-  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
+  const [vendorBasicPrice, setVendorBasicPrice] = useState(() => loadValue('vendorBasicPrice', 49));
+  const [vendorProPrice, setVendorProPrice] = useState(() => loadValue('vendorProPrice', 99));
   const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
 
@@ -113,9 +114,12 @@ export default function Revenue() {
         const vendorPackages = await base44.entities.SubscriptionPackage.filter({
           account_type: 'vendor'
         });
-        if (vendorPackages.length > 0) {
-          setVendorPackage(vendorPackages[0]);
-        }
+        const vendPkgs = { basic: null, pro: null };
+        vendorPackages.forEach(pkg => {
+          if (pkg.tier_level === 'basic') vendPkgs.basic = pkg;
+          if (pkg.tier_level === 'pro') vendPkgs.pro = pkg;
+        });
+        setVendorPackages(vendPkgs);
 
         // Load Agent packages
         const agentPackages = await base44.entities.SubscriptionPackage.filter({
@@ -137,7 +141,7 @@ export default function Revenue() {
   useEffect(() => {
     const values = {
       subBasicPrice, subProPrice, subPremiumPrice, subNewPerMonth, subChurnRate,
-      vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+      vendorBasicPrice, vendorProPrice, vendorNewPerMonth, vendorChurnRate,
       agentSubPrice, agentNewPerMonth, agentChurnRate,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
@@ -152,7 +156,7 @@ export default function Revenue() {
     });
   }, [
     subBasicPrice, subProPrice, subPremiumPrice, subListingFee, subNewPerMonth, subChurnRate,
-    vendorSubPrice, vendorNewPerMonth, vendorChurnRate,
+    vendorBasicPrice, vendorProPrice, vendorNewPerMonth, vendorChurnRate,
     agentSubPrice, agentNewPerMonth, agentChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
@@ -210,6 +214,25 @@ export default function Revenue() {
     return { projections, quantities };
   };
 
+  const calculateTwoTierSubRevenue = (basicPrice, proPrice, newPerMonth, churnRate, months) => {
+    const projections = [];
+    const quantities = [];
+    let basicSubs = Math.floor(newPerMonth * 0.6);
+    let proSubs = Math.floor(newPerMonth * 0.4);
+    
+    for (let i = 0; i < months; i++) {
+      const churnFactor = (1 - churnRate / 100);
+      const revenue = (basicSubs * basicPrice + proSubs * proPrice) * churnFactor;
+      const totalSubs = basicSubs + proSubs;
+      projections.push(revenue);
+      quantities.push(totalSubs);
+      
+      basicSubs = Math.floor(basicSubs * churnFactor + newPerMonth * 0.6);
+      proSubs = Math.floor(proSubs * churnFactor + newPerMonth * 0.4);
+    }
+    return { projections, quantities };
+  };
+
   const getYearProjection = (projections, year) => {
     const endMonth = year * 12;
     return projections.slice(0, endMonth).reduce((sum, val) => sum + val, 0);
@@ -227,7 +250,13 @@ export default function Revenue() {
   const subProjections = subData.projections;
   const subQuantities = subData.quantities;
   
-  const vendorSubData = calculateSimpleSubRevenue(vendorPackage?.monthly_price || vendorSubPrice, vendorNewPerMonth, vendorChurnRate, 120);
+  const vendorSubData = calculateTwoTierSubRevenue(
+    vendorPackages.basic?.monthly_price || vendorBasicPrice,
+    vendorPackages.pro?.monthly_price || vendorProPrice,
+    vendorNewPerMonth,
+    vendorChurnRate,
+    120
+  );
   const vendorSubProjections = vendorSubData.projections;
   const vendorSubQuantities = vendorSubData.quantities;
   
@@ -702,11 +731,23 @@ export default function Revenue() {
               </CardHeader>
               <CardContent>
                 <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
-                  <Label className="text-slate-500 text-xs mb-1">Monthly Price (from package)</Label>
-                  <div className="text-2xl font-bold text-slate-400">
-                    ${vendorPackage?.monthly_price || vendorSubPrice}
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Package Pricing (from Subscription Packages)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">{vendorPackages.basic?.package_name || 'Basic'} Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${vendorPackages.basic?.monthly_price || vendorBasicPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">{vendorPackages.pro?.package_name || 'Pro'} Price</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${vendorPackages.pro?.monthly_price || vendorProPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Edit in Subscription Packages</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
