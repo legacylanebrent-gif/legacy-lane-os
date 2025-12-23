@@ -146,7 +146,7 @@ export default function AdminFutureOperators() {
             Future Estate Operators
           </h1>
           <p className="text-slate-600">
-            Scraped estate sale companies for outreach and partnership
+            US estate sale companies sourced from current competitors
           </p>
         </div>
         <div className="text-left sm:text-right">
