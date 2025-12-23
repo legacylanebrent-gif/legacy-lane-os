@@ -833,10 +833,30 @@ export default function Home() {
               ))}
             </div>
           )}
-        </div>
-      </section>
+          </div>
+          </section>
 
-      {/* Browse by State CTA */}
+          {/* National Advertising Panel */}
+          <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
+          <div className="max-w-7xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">National Advertising Space</p>
+            <p className="text-white text-2xl font-semibold">Premium placement available for nationwide reach</p>
+          </div>
+          </div>
+          </section>
+
+          {/* Local Advertising Panel */}
+          <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
+          <div className="max-w-7xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Local Advertising Space</p>
+            <p className="text-white text-2xl font-semibold">Target your local community with premium placement</p>
+          </div>
+          </div>
+          </section>
+
+          {/* Browse by State CTA */}
       <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-7xl mx-auto">
           <Link to={createPageUrl('SearchByState')}>
