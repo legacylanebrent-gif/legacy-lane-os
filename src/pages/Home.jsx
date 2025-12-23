@@ -8,10 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
+import QRCodeScanner from '@/components/checkin/QRCodeScanner';
+import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
 import { t } from '@/components/terminology';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
-  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2
+  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -44,6 +46,8 @@ export default function Home() {
   const [totalItems, setTotalItems] = useState(0);
   const [totalEstimatedValue, setTotalEstimatedValue] = useState(0);
   const [showSaleRequestModal, setShowSaleRequestModal] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -312,6 +316,63 @@ export default function Home() {
         onClose={() => setShowSaleRequestModal(false)} 
       />
 
+      {/* QR Scanner Modal */}
+      {isAuthenticated && (
+        <>
+          <Dialog open={showQRScanner} onOpenChange={setShowQRScanner}>
+            <DialogContent className="max-w-lg">
+              <QRCodeScanner
+                onScan={async (decodedText) => {
+                  try {
+                    const [saleId, saleTitle] = decodedText.split(':');
+
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                          const checkInData = {
+                            check_in_type: 'sale_visit',
+                            location_name: saleTitle || 'Estate Sale',
+                            location_id: saleId,
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            verified: true,
+                            points_earned: 15
+                          };
+                          await base44.entities.CheckIn.create(checkInData);
+
+                          await base44.entities.UserReward.create({
+                            user_id: currentUser.id,
+                            action_id: 'qr_check_in',
+                            action_name: 'QR Code Check-in Bonus',
+                            points_earned: 15,
+                            description: `QR check-in at ${saleTitle || 'Estate Sale'}`
+                          });
+
+                          setShowQRScanner(false);
+                          alert('Check-in successful! +15 points earned');
+                        }
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error processing QR code:', error);
+                    alert('Failed to process QR code');
+                  }
+                }}
+                onClose={() => setShowQRScanner(false)}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <RecordPurchaseModal
+            open={showPurchaseModal}
+            onClose={() => setShowPurchaseModal(false)}
+            onSuccess={() => {
+              alert('Purchase recorded successfully!');
+            }}
+          />
+        </>
+      )}
+
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -326,9 +387,27 @@ export default function Home() {
               </div>
             </Link>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {isAuthenticated ? (
                 <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowQRScanner(true)}
+                    title="QR Check-in"
+                    className="text-white hover:bg-slate-800"
+                  >
+                    <QrCode className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPurchaseModal(true)}
+                    title="Record Purchase"
+                    className="text-white hover:bg-slate-800"
+                  >
+                    <Receipt className="w-5 h-5" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
