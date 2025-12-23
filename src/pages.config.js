@@ -1,4 +1,5 @@
 import AdminAdvertisingPackages from './pages/AdminAdvertisingPackages';
+import AdminAutomations from './pages/AdminAutomations';
 import AdminCampaigns from './pages/AdminCampaigns';
 import AdminCourses from './pages/AdminCourses';
 import AdminEstateSales from './pages/AdminEstateSales';
@@ -44,6 +45,7 @@ import MyReferrals from './pages/MyReferrals';
 import MyRewards from './pages/MyRewards';
 import MySales from './pages/MySales';
 import MyTickets from './pages/MyTickets';
+import Notifications from './pages/Notifications';
 import OperatorPackages from './pages/OperatorPackages';
 import Operators from './pages/Operators';
 import Pipeline from './pages/Pipeline';
@@ -63,13 +65,12 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import AdminAutomations from './pages/AdminAutomations';
-import Notifications from './pages/Notifications';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminAdvertisingPackages": AdminAdvertisingPackages,
+    "AdminAutomations": AdminAutomations,
     "AdminCampaigns": AdminCampaigns,
     "AdminCourses": AdminCourses,
     "AdminEstateSales": AdminEstateSales,
@@ -115,6 +116,7 @@ export const PAGES = {
     "MyRewards": MyRewards,
     "MySales": MySales,
     "MyTickets": MyTickets,
+    "Notifications": Notifications,
     "OperatorPackages": OperatorPackages,
     "Operators": Operators,
     "Pipeline": Pipeline,
@@ -134,8 +136,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "AdminAutomations": AdminAutomations,
-    "Notifications": Notifications,
 }
 
 export const pagesConfig = {

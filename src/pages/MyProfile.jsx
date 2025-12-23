@@ -187,7 +187,7 @@ export default function MyProfile() {
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-6 lg:p-8 pb-32 space-y-6">
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Profile</h1>
         <p className="text-slate-600">Manage your account settings and preferences</p>
