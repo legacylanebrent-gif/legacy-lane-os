@@ -47,7 +47,7 @@ export default function AdminLayout({ children, currentPage }) {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Hamburger Button - Fixed Position */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
         <MessagesDropdown />
@@ -66,17 +66,17 @@ export default function AdminLayout({ children, currentPage }) {
       </div>
 
       {/* Left Navigation */}
-      <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 ${
-        sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
+      <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 overflow-hidden ${
+        sidebarOpen ? 'w-64' : 'w-0'
       }`}>
-        <div className="p-6 border-b border-slate-700">
+        <div className="p-6 border-b border-slate-700 flex-shrink-0">
           <div className="mb-2">
             <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
           </div>
           <p className="text-xs text-slate-400">Legacy Lane OS</p>
         </div>
         
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4 pb-20 space-y-1">
           {ADMIN_NAV_ITEMS.map(item => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -106,7 +106,7 @@ export default function AdminLayout({ children, currentPage }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pt-16 md:pt-0">
         {children}
       </main>
     </div>
