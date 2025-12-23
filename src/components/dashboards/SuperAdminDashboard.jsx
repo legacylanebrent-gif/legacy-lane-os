@@ -251,7 +251,7 @@ export default function SuperAdminDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 pb-32 space-y-8">
+      <div className="p-6 lg:p-8 pb-48 space-y-8">
         <div className="animate-pulse space-y-6">
           <div className="h-12 bg-slate-200 rounded w-1/3"></div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
