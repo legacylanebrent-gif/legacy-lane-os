@@ -76,10 +76,10 @@ export default function Revenue() {
   const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 15));
   
-  // Advertising Revenue Inputs (Vendor advertising packages)
-  const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
-  const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 49));
-  const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 179));
+  // Advertising Revenue Inputs (from Advertising Packages - fixed values)
+  const [adBasicPrice, setAdBasicPrice] = useState(29);
+  const [adProPrice, setAdProPrice] = useState(49);
+  const [adPremiumPrice, setAdPremiumPrice] = useState(179);
   const [adNewPerMonth, setAdNewPerMonth] = useState(() => loadValue('adNewPerMonth', 10));
   const [adChurnRate, setAdChurnRate] = useState(() => loadValue('adChurnRate', 8));
 
@@ -1514,19 +1514,34 @@ export default function Revenue() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Basic Ad Space Price ($)</Label>
-                    <Input type="number" value={adBasicPrice} onChange={(e) => setAdBasicPrice(Number(e.target.value))} />
+                <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Advertising Package Pricing (from Advertising Packages)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Vendor Bronze</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${adBasicPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Per month - Edit in Advertising Packages</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Vendor Silver</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${adProPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Per month - Edit in Advertising Packages</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-500 text-xs mb-1">Vendor Platinum</Label>
+                      <div className="text-2xl font-bold text-slate-400">
+                        ${adPremiumPrice}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Per month - Edit in Advertising Packages</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label>Pro Ad Space Price ($)</Label>
-                    <Input type="number" value={adProPrice} onChange={(e) => setAdProPrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Premium Ad Space Price ($)</Label>
-                    <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
-                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label>New Advertisers/Month (total, split 50/30/20)</Label>
                     <Input type="number" value={adNewPerMonth} onChange={(e) => setAdNewPerMonth(Number(e.target.value))} />
