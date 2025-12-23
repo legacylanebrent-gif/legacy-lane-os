@@ -302,8 +302,8 @@ export default function SuperAdminDashboard({ user }) {
                   {recentActivity.map((activity, idx) => (
                     <div key={idx} className="p-4 hover:bg-slate-50 transition-colors">
                       <div className="flex items-start gap-4">
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${activity.color === 'text-green-600' ? 'from-green-500 to-green-600' : activity.color === 'text-purple-600' ? 'from-purple-500 to-purple-600' : 'from-orange-500 to-orange-600'} flex items-center justify-center flex-shrink-0`}>
-                          <activity.icon className="h-5 w-5 text-white" />
+                        <div className={`w-10 h-10 rounded-lg ${activity.color === 'text-green-600' ? 'bg-emerald-100' : activity.color === 'text-purple-600' ? 'bg-indigo-100' : 'bg-orange-100'} flex items-center justify-center flex-shrink-0`}>
+                          <activity.icon className={`h-5 w-5 ${activity.color === 'text-green-600' ? 'text-emerald-600' : activity.color === 'text-purple-600' ? 'text-indigo-600' : 'text-orange-600'}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
