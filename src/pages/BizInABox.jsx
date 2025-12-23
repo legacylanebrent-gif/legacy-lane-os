@@ -27,6 +27,37 @@ export default function BizInABox() {
     investment_ready: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [pricing, setPricing] = useState({
+    setup_fee: 2997,
+    monthly_year1: 149,
+    revenue_share: 3
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPricing();
+  }, []);
+
+  const loadPricing = async () => {
+    try {
+      const packages = await base44.entities.SubscriptionPackage.filter({
+        account_type: 'biz_in_a_box'
+      });
+      
+      if (packages.length > 0) {
+        const pkg = packages[0];
+        setPricing({
+          setup_fee: pkg.biz_in_a_box_setup_fee || 2997,
+          monthly_year1: pkg.biz_in_a_box_monthly_year1 || 149,
+          revenue_share: pkg.biz_in_a_box_revenue_share || 3
+        });
+      }
+    } catch (error) {
+      console.error('Error loading pricing:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,23 +164,23 @@ export default function BizInABox() {
     'Lead generation system and scripts'
   ];
 
-  const pricing = [
+  const pricingCards = [
     {
       label: 'One-Time Setup Investment',
-      price: '$12,500',
+      price: `$${pricing.setup_fee.toLocaleString()}`,
       description: 'Everything to launch your business',
       popular: false
     },
     {
       label: 'Monthly Platform Fee (Year 1)',
-      price: '$149',
+      price: `$${pricing.monthly_year1}`,
       description: '50% OFF - Regular price $299/mo',
       popular: true,
-      saved: 'Save $1,800 first year'
+      saved: `Save $${((299 - pricing.monthly_year1) * 12).toLocaleString()} first year`
     },
     {
       label: 'Ongoing Revenue Share',
-      price: '3%',
+      price: `${pricing.revenue_share}%`,
       description: 'Of gross sales - only when you succeed',
       popular: false
     }
@@ -161,6 +192,14 @@ export default function BizInABox() {
     { label: 'Break-Even Timeline', value: '3-6 months', icon: Calendar },
     { label: 'Client Satisfaction Rate', value: '98%', icon: Award }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 flex items-center justify-center">
+        <div className="animate-pulse text-slate-600 text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
@@ -300,7 +339,7 @@ export default function BizInABox() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-            {pricing.map((price, idx) => (
+            {pricingCards.map((price, idx) => (
               <Card key={idx} className={`${price.popular ? 'ring-4 ring-orange-500 shadow-2xl' : ''} relative`}>
                 {price.popular && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-600 text-white">
@@ -321,9 +360,13 @@ export default function BizInABox() {
 
           <Card className="bg-gradient-to-r from-orange-500 to-cyan-500 border-0">
             <CardContent className="p-8 text-center text-white">
-              <h3 className="text-3xl font-bold mb-2">Total First Year Cost: $14,288</h3>
+              <h3 className="text-3xl font-bold mb-2">
+                Total First Year Cost: ${(pricing.setup_fee + (pricing.monthly_year1 * 12)).toLocaleString()}
+              </h3>
               <p className="text-xl text-white/90 mb-4">Average First Year Revenue: $150,000+</p>
-              <p className="text-2xl font-bold">That's a 940% ROI in Year One</p>
+              <p className="text-2xl font-bold">
+                That's a {Math.round((150000 / (pricing.setup_fee + (pricing.monthly_year1 * 12))) * 100)}% ROI in Year One
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -529,7 +572,7 @@ export default function BizInABox() {
                 </div>
 
                 <div>
-                  <Label>Are you ready to invest $12,500 to launch? *</Label>
+                  <Label>Are you ready to invest ${pricing.setup_fee.toLocaleString()} to launch? *</Label>
                   <select
                     required
                     value={formData.investment_ready}

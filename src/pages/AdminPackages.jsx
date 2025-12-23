@@ -19,7 +19,8 @@ export default function AdminPackages() {
     { value: 'real_estate_agent', label: 'Real Estate Agent' },
     { value: 'investor', label: 'Investor' },
     { value: 'vendor', label: 'Vendor' },
-    { value: 'consignor', label: 'Consignor' }
+    { value: 'consignor', label: 'Consignor' },
+    { value: 'biz_in_a_box', label: 'Biz in a Box' }
   ];
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function AdminPackages() {
 
       <Tabs value={selectedAccountType} onValueChange={setSelectedAccountType}>
         <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-          <TabsList className="inline-flex w-max min-w-full lg:w-full lg:grid lg:grid-cols-5">
+          <TabsList className="inline-flex w-max min-w-full lg:w-full lg:grid lg:grid-cols-6">
             {accountTypes.map(type => (
               <TabsTrigger key={type.value} value={type.value} className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0">
                 {type.label}
