@@ -19,6 +19,9 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
     annual_price: '',
     per_item_price: '',
     platform_fee_percentage: '',
+    biz_in_a_box_setup_fee: '',
+    biz_in_a_box_monthly_year1: '',
+    biz_in_a_box_revenue_share: '',
     description: '',
     features: [],
     limits: {
@@ -45,6 +48,9 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
         annual_price: pkg.annual_price || '',
         per_item_price: pkg.per_item_price || '',
         platform_fee_percentage: pkg.platform_fee_percentage || '',
+        biz_in_a_box_setup_fee: pkg.biz_in_a_box_setup_fee || '',
+        biz_in_a_box_monthly_year1: pkg.biz_in_a_box_monthly_year1 || '',
+        biz_in_a_box_revenue_share: pkg.biz_in_a_box_revenue_share || '',
         description: pkg.description || '',
         features: pkg.features || [],
         limits: pkg.limits || {
@@ -70,7 +76,10 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
         monthly_price: formData.monthly_price ? parseFloat(formData.monthly_price) : null,
         annual_price: formData.annual_price ? parseFloat(formData.annual_price) : null,
         per_item_price: formData.per_item_price ? parseFloat(formData.per_item_price) : null,
-        platform_fee_percentage: formData.platform_fee_percentage ? parseFloat(formData.platform_fee_percentage) : null
+        platform_fee_percentage: formData.platform_fee_percentage ? parseFloat(formData.platform_fee_percentage) : null,
+        biz_in_a_box_setup_fee: formData.biz_in_a_box_setup_fee ? parseFloat(formData.biz_in_a_box_setup_fee) : null,
+        biz_in_a_box_monthly_year1: formData.biz_in_a_box_monthly_year1 ? parseFloat(formData.biz_in_a_box_monthly_year1) : null,
+        biz_in_a_box_revenue_share: formData.biz_in_a_box_revenue_share ? parseFloat(formData.biz_in_a_box_revenue_share) : null
       };
 
       if (pkg?.id) {
@@ -223,8 +232,51 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
             </div>
           )}
 
+          {formData.account_type === 'biz_in_a_box' && (
+           <div className="space-y-4 border-t pt-4">
+             <Label className="text-base font-semibold">Biz in a Box Pricing</Label>
+             <div className="grid grid-cols-2 gap-4">
+               <div>
+                 <Label htmlFor="setup_fee">One-Time Investment ($)</Label>
+                 <Input
+                   id="setup_fee"
+                   type="number"
+                   step="0.01"
+                   value={formData.biz_in_a_box_setup_fee}
+                   onChange={(e) => setFormData({...formData, biz_in_a_box_setup_fee: e.target.value})}
+                   placeholder="2997"
+                 />
+               </div>
+
+               <div>
+                 <Label htmlFor="revenue_share">Royalty Fee (%)</Label>
+                 <Input
+                   id="revenue_share"
+                   type="number"
+                   step="0.1"
+                   value={formData.biz_in_a_box_revenue_share}
+                   onChange={(e) => setFormData({...formData, biz_in_a_box_revenue_share: e.target.value})}
+                   placeholder="3"
+                 />
+               </div>
+             </div>
+
+             <div>
+               <Label htmlFor="monthly_year1">Monthly Fee - Year 1 ($)</Label>
+               <Input
+                 id="monthly_year1"
+                 type="number"
+                 step="0.01"
+                 value={formData.biz_in_a_box_monthly_year1}
+                 onChange={(e) => setFormData({...formData, biz_in_a_box_monthly_year1: e.target.value})}
+                 placeholder="149"
+               />
+             </div>
+           </div>
+          )}
+
           <div className="space-y-3 border-t pt-4">
-            <Label>Package Limits</Label>
+           <Label>Package Limits</Label>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 placeholder="Listings (e.g., 10/month)"
