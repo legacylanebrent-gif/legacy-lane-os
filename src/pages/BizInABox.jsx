@@ -189,7 +189,7 @@ export default function BizInABox() {
   ];
 
   const outcomes = [
-    { label: 'Average First-Year Revenue', value: '$150,000+', icon: DollarSign },
+    { label: 'Approximate profit from two good sales', value: "Basically ... it's paid off in two sales!", icon: DollarSign },
     { label: 'Typical Sale Commission', value: '35-45%', icon: TrendingUp },
     { label: 'Break-Even Timeline', value: '3-6 months', icon: Calendar },
     { label: 'Client Satisfaction Rate', value: '98%', icon: Award }
@@ -366,7 +366,7 @@ export default function BizInABox() {
               <h3 className="text-3xl font-bold mb-2">
                 Total First Year Cost: ${(pricing.setup_fee + (pricing.monthly_year1 * 12)).toLocaleString()}
               </h3>
-              <p className="text-xl text-white/90 mb-4">Average First Year Revenue: $150,000+</p>
+              <p className="text-xl text-white/90 mb-4">Approximate profit from two good sales. Basically ... it's paid off in two sales!</p>
               <p className="text-2xl font-bold">
                 That's a {Math.round((150000 / (pricing.setup_fee + (pricing.monthly_year1 * 12))) * 100)}% ROI in Year One
               </p>
