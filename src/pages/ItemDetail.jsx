@@ -7,17 +7,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, Heart, Share2, MapPin, Calendar, Tag, Package,
-  Image as ImageIcon, ShoppingBag, Phone, Mail, ExternalLink
+  Image as ImageIcon, ShoppingBag, Phone, Mail, ExternalLink, Edit, Save, X
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 
 export default function ItemDetail() {
   const [item, setItem] = useState(null);
   const [sale, setSale] = useState(null);
   const [operator, setOperator] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [relatedItems, setRelatedItems] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ title: '', description: '', price: 0 });
 
   useEffect(() => {
     loadData();
@@ -33,6 +39,14 @@ export default function ItemDetail() {
         return;
       }
 
+      // Load current user
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (error) {
+        // User not logged in
+      }
+
       const itemData = await base44.entities.Item.filter({ id: itemId });
       if (itemData.length === 0) {
         alert('Item not found');
@@ -41,6 +55,11 @@ export default function ItemDetail() {
 
       const itemRecord = itemData[0];
       setItem(itemRecord);
+      setEditForm({
+        title: itemRecord.title || '',
+        description: itemRecord.description || '',
+        price: itemRecord.price || 0
+      });
 
       // Increment view count
       try {
@@ -101,6 +120,24 @@ export default function ItemDetail() {
       alert('Link copied to clipboard!');
     }
   };
+
+  const handleSaveEdit = async () => {
+    try {
+      await base44.entities.Item.update(item.id, {
+        title: editForm.title,
+        description: editForm.description,
+        price: parseFloat(editForm.price)
+      });
+      setItem({ ...item, ...editForm, price: parseFloat(editForm.price) });
+      setIsEditing(false);
+      alert('Item updated successfully!');
+    } catch (error) {
+      console.error('Error updating item:', error);
+      alert('Failed to update item');
+    }
+  };
+
+  const isOperator = currentUser && sale && currentUser.id === sale.operator_id;
 
   const getStatusColor = (status) => {
     const colors = {
@@ -218,32 +255,95 @@ export default function ItemDetail() {
 
           {/* Product Details */}
           <div className="space-y-6">
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">
-                {item.title}
-              </h1>
-              
-              <div className="flex items-center gap-4 mb-6">
-                {item.category && (
-                  <Badge variant="outline" className="text-sm">
-                    <Tag className="w-3 h-3 mr-1" />
-                    {item.category}
-                  </Badge>
-                )}
-                {item.condition && (
-                  <Badge variant="outline" className="text-sm">
-                    <Package className="w-3 h-3 mr-1" />
-                    {item.condition}
-                  </Badge>
-                )}
-              </div>
+            {isOperator && (
+              <Card className="bg-orange-50 border-orange-200">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Edit className="w-4 h-4 text-orange-600" />
+                    <span className="text-sm font-medium text-slate-700">You're the operator</span>
+                  </div>
+                  {!isEditing ? (
+                    <Button onClick={() => setIsEditing(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Item
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button onClick={handleSaveEdit} size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Save className="w-4 h-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button onClick={() => setIsEditing(false)} size="sm" variant="outline">
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-              <div className="text-5xl font-bold text-cyan-600 mb-6">
-                ${item.price?.toLocaleString()}
-              </div>
+            <div>
+              {isEditing ? (
+                <Card>
+                  <CardContent className="p-6 space-y-4">
+                    <div>
+                      <Label>Item Title *</Label>
+                      <Input
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        placeholder="Item title"
+                      />
+                    </div>
+                    <div>
+                      <Label>Price *</Label>
+                      <Input
+                        type="number"
+                        value={editForm.price}
+                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        placeholder="Item description"
+                        rows={6}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">
+                    {item.title}
+                  </h1>
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    {item.category && (
+                      <Badge variant="outline" className="text-sm">
+                        <Tag className="w-3 h-3 mr-1" />
+                        {item.category}
+                      </Badge>
+                    )}
+                    {item.condition && (
+                      <Badge variant="outline" className="text-sm">
+                        <Package className="w-3 h-3 mr-1" />
+                        {item.condition}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="text-5xl font-bold text-cyan-600 mb-6">
+                    ${item.price?.toLocaleString()}
+                  </div>
+                </>
+              )}
             </div>
 
-            {item.description && (
+            {!isEditing && item.description && (
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-3">Description</h3>
