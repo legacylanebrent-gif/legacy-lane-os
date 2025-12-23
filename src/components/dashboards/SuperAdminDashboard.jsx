@@ -79,29 +79,30 @@ export default function SuperAdminDashboard({ user }) {
       const totalSalesRevenue = estateSales.reduce((sum, s) => sum + (s.actual_revenue || 0), 0);
       const totalCommission = estateSales.reduce((sum, s) => sum + (s.commission_earned || 0), 0);
 
-      // Calculate marketplace stats
-      const listedItems = items.filter(i => i.status === 'available' || i.status === 'pending');
+      // Calculate marketplace stats - show total items, not just active
+      const totalMarketplaceItems = items.length;
       const soldItems = items.filter(i => i.status === 'sold');
 
-      // Calculate vendor stats
-      const activeVendorList = vendors.filter(v => v.tier && v.tier !== 'standard');
+      // Calculate vendor stats - show all vendors with a tier
+      const activeVendorList = vendors.filter(v => v.tier);
       
       // Calculate referral stats
       const activeReferrals = referrals.filter(r => r.status === 'subscribed' || r.status === 'paid');
       const totalReferralRevenue = activeReferrals.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
 
-      // Calculate subscription MRR
+      // Calculate subscription MRR - show all subscriptions
+      const totalSubs = subscriptions.length;
       const activeSubs = subscriptions.filter(s => s.status === 'active');
       const mrr = activeSubs.reduce((sum, s) => sum + (s.mrr || 0), 0);
 
       setStats({
         totalUsers: users.length,
         totalRevenue,
-        activeEstateSales: activeSales.length,
+        activeEstateSales: estateSales.length, // Show all estate sales, not just active
         totalCourses: courses.length,
-        totalItems: listedItems.length,
+        totalItems: totalMarketplaceItems,
         totalProperties: properties.length,
-        totalSubscriptions: activeSubs.length,
+        totalSubscriptions: totalSubs,
         totalTickets: tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length,
         activeVendors: activeVendorList.length,
         totalReferrals: activeReferrals.length
@@ -176,7 +177,7 @@ export default function SuperAdminDashboard({ user }) {
       link: createPageUrl('ComprehensiveRevenue')
     },
     { 
-      title: 'Active Estate Sales', 
+      title: 'Total Estate Sales', 
       value: stats.activeEstateSales, 
       icon: Home, 
       gradient: 'from-indigo-600 to-indigo-700',
@@ -211,7 +212,7 @@ export default function SuperAdminDashboard({ user }) {
       iconColor: 'text-cyan-600'
     },
     { 
-      title: 'Active Subscriptions', 
+      title: 'Total Subscriptions', 
       value: stats.totalSubscriptions, 
       icon: Package, 
       gradient: 'from-blue-600 to-blue-700',
