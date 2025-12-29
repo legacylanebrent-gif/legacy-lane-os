@@ -20,7 +20,6 @@ export default function AdminUsers() {
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [subcategories, setSubcategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [debugInfo, setDebugInfo] = useState([]);
 
   useEffect(() => {
     loadUsers();
@@ -36,78 +35,32 @@ export default function AdminUsers() {
   }, [selectedRole]);
 
   const loadUsers = async () => {
-    const debug = [];
     try {
-      debug.push('🔵 Starting user load...');
-      
       const currentUser = await base44.auth.me();
-      debug.push(`✅ Current user: ${currentUser?.email} (${currentUser?.primary_account_type})`);
-      
       if (!currentUser) {
-        debug.push('❌ Not authenticated');
-        setDebugInfo(debug);
         setLoading(false);
         return;
       }
       
-      let data = null;
+      const data = await base44.entities.User.list('-created_date', 1000);
       
-      // Method 1: Try service role list
-      try {
-        debug.push('🔵 Trying asServiceRole.entities.User.list()...');
-        data = await base44.asServiceRole.entities.User.list('-created_date', 1000);
-        debug.push(`✅ Service role list returned: ${data?.length || 0} users`);
-      } catch (e) {
-        debug.push(`❌ Service role list failed: ${e.message}`);
-      }
-      
-      // Method 2: Try service role filter
       if (!data || data.length === 0) {
-        try {
-          debug.push('🔵 Trying asServiceRole.entities.User.filter({})...');
-          data = await base44.asServiceRole.entities.User.filter({}, '-created_date', 1000);
-          debug.push(`✅ Service role filter returned: ${data?.length || 0} users`);
-        } catch (e) {
-          debug.push(`❌ Service role filter failed: ${e.message}`);
-        }
-      }
-      
-      // Method 3: Try regular list
-      if (!data || data.length === 0) {
-        try {
-          debug.push('🔵 Trying entities.User.list()...');
-          data = await base44.entities.User.list('-created_date', 1000);
-          debug.push(`✅ Regular list returned: ${data?.length || 0} users`);
-        } catch (e) {
-          debug.push(`❌ Regular list failed: ${e.message}`);
-        }
-      }
-      
-      debug.push(`📊 Final result: ${data ? (Array.isArray(data) ? data.length : 1) : 0} users`);
-      
-      if (!data) {
-        debug.push('❌ All methods failed - no users found');
-        setDebugInfo(debug);
         setUsers([]);
         setFilteredUsers([]);
         setLoading(false);
         return;
       }
       
-      const userArray = Array.isArray(data) ? data : [data];
-      const usersWithDefaults = userArray.map(user => ({
+      const usersWithDefaults = data.map(user => ({
         ...user,
         primary_account_type: user.primary_account_type || 'consumer',
         full_name: user.full_name || user.email || 'Unknown User'
       }));
       
-      debug.push(`✅ Successfully loaded ${usersWithDefaults.length} users`);
-      setDebugInfo(debug);
       setUsers(usersWithDefaults);
       setFilteredUsers(usersWithDefaults);
     } catch (error) {
-      debug.push(`❌ CRITICAL ERROR: ${error.message}`);
-      setDebugInfo(debug);
+      console.error('Error loading users:', error);
       setUsers([]);
       setFilteredUsers([]);
     } finally {
@@ -239,20 +192,7 @@ export default function AdminUsers() {
         </Button>
       </div>
 
-      {debugInfo.length > 0 && (
-        <Card className="bg-slate-900 text-white">
-          <CardHeader>
-            <CardTitle className="text-sm font-mono">Debug Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1 text-xs font-mono">
-              {debugInfo.map((info, idx) => (
-                <div key={idx}>{info}</div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       <AddUserModal 
         open={showAddModal}
