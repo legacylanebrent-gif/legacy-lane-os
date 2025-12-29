@@ -138,7 +138,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl(accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' ? 'ConsumerHome' : 'Dashboard')} className="flex items-center gap-3">
+              <Link to={createPageUrl(accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach' ? 'ConsumerHome' : 'Dashboard')} className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">LL</span>
                 </div>
@@ -156,7 +156,8 @@ export default function Layout({ children, currentPageName }) {
                 user?.primary_account_type === 'buyer' || 
                 user?.primary_account_type === 'downsizer' || 
                 user?.primary_account_type === 'diy_seller' || 
-                user?.primary_account_type === 'consignor') && (
+                user?.primary_account_type === 'consignor' ||
+                user?.primary_account_type === 'coach') && (
                 <Link to={createPageUrl('ConsumerHome')}>
                   <Button
                     variant="ghost"
@@ -236,7 +237,8 @@ export default function Layout({ children, currentPageName }) {
                  accountType !== 'buyer' && 
                  accountType !== 'downsizer' && 
                  accountType !== 'diy_seller' && 
-                 accountType !== 'consignor' && (
+                 accountType !== 'consignor' &&
+                 accountType !== 'coach' && (
                   <Link to={createPageUrl('Dashboard')}>
                     <Button 
                       variant={currentPageName === 'Dashboard' ? 'default' : 'ghost'}
@@ -270,7 +272,8 @@ export default function Layout({ children, currentPageName }) {
                  accountType !== 'buyer' && 
                  accountType !== 'downsizer' && 
                  accountType !== 'diy_seller' && 
-                 accountType !== 'consignor' && (
+                 accountType !== 'consignor' &&
+                 accountType !== 'coach' && (
                   <Link to={createPageUrl('MySales')}>
                     <Button 
                       variant={currentPageName === 'MySales' ? 'default' : 'ghost'}
@@ -414,7 +417,8 @@ export default function Layout({ children, currentPageName }) {
                accountType !== 'buyer' && 
                accountType !== 'downsizer' && 
                accountType !== 'diy_seller' && 
-               accountType !== 'consignor' && (
+               accountType !== 'consignor' &&
+               accountType !== 'coach' && (
                 <div className="space-y-1 mt-6">
                   <Link to={createPageUrl('IncomeTracker')}>
                     <Button 
