@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   MapPin, Calendar, Search, Tag, DollarSign, Heart, ShoppingBag,
-  Image as ImageIcon, LogIn, LogOut, MessageSquare, LayoutDashboard
+  Image as ImageIcon, LogIn, LogOut, MessageSquare, LayoutDashboard, ArrowLeft
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -210,7 +210,7 @@ export default function SaleLanding() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
