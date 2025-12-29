@@ -90,6 +90,7 @@ export default function Layout({ children, currentPageName }) {
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
+      console.log('User account type:', userData?.primary_account_type);
       setUser(userData);
     } catch (error) {
       console.error('Error loading user:', error);
