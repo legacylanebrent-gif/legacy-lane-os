@@ -266,7 +266,7 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
-{accountType !== 'consumer' && 
+                {accountType !== 'consumer' && 
                  accountType !== 'executor' && 
                  accountType !== 'home_seller' && 
                  accountType !== 'buyer' && 
@@ -379,7 +379,44 @@ export default function Layout({ children, currentPageName }) {
                     Notifications
                   </Button>
                 </Link>
-                </div>
+                {accountType !== 'consumer' && 
+                 accountType !== 'executor' && 
+                 accountType !== 'home_seller' && 
+                 accountType !== 'buyer' && 
+                 accountType !== 'downsizer' && 
+                 accountType !== 'diy_seller' && 
+                 accountType !== 'consignor' &&
+                 accountType !== 'coach' && (
+                  <div className="space-y-1 mt-6">
+                    <Link to={createPageUrl('IncomeTracker')}>
+                      <Button 
+                        variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
+                        className={`w-full justify-start ${
+                          currentPageName === 'IncomeTracker' 
+                            ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                            : 'hover:bg-cyan-50'
+                        }`}
+                      >
+                        <TrendingUp className="w-5 h-5 mr-3" />
+                        Income Tracker
+                      </Button>
+                    </Link>
+                    <Link to={createPageUrl('MyBusinessExpenses')}>
+                      <Button 
+                        variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
+                        className={`w-full justify-start ${
+                          currentPageName === 'MyBusinessExpenses' 
+                            ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                            : 'hover:bg-cyan-50'
+                        }`}
+                      >
+                        <FileText className="w-5 h-5 mr-3" />
+                        Business Expenses
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               {user?.divisions_access?.map(divisionKey => {
                 const division = DIVISION_CONFIG[divisionKey];
@@ -410,44 +447,6 @@ export default function Layout({ children, currentPageName }) {
                   </div>
                 );
               })}
-
-{accountType !== 'consumer' && 
-               accountType !== 'executor' && 
-               accountType !== 'home_seller' && 
-               accountType !== 'buyer' && 
-               accountType !== 'downsizer' && 
-               accountType !== 'diy_seller' && 
-               accountType !== 'consignor' &&
-               accountType !== 'coach' && (
-                <div className="space-y-1 mt-6">
-                  <Link to={createPageUrl('IncomeTracker')}>
-                    <Button 
-                      variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'IncomeTracker' 
-                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <TrendingUp className="w-5 h-5 mr-3" />
-                      Income Tracker
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('MyBusinessExpenses')}>
-                    <Button 
-                      variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'MyBusinessExpenses' 
-                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <FileText className="w-5 h-5 mr-3" />
-                      Business Expenses
-                    </Button>
-                  </Link>
-                </div>
-              )}
             </div>
           </div>
         </aside>
