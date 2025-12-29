@@ -29,7 +29,7 @@ const ACCOUNT_TYPES = [
   { value: 'buyer', label: 'Buyer' }
 ];
 
-export default function AddUserModal({ open, onClose, onSuccess }) {
+export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -109,6 +109,75 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
   const [uploadingLightLogo, setUploadingLightLogo] = useState(false);
   const [uploadingDarkLogo, setUploadingDarkLogo] = useState(false);
   const [uploadingTeamLogo, setUploadingTeamLogo] = useState(false);
+
+  React.useEffect(() => {
+    if (editUser) {
+      setFormData({
+        full_name: editUser.full_name || '',
+        email: editUser.email || '',
+        primary_account_type: editUser.primary_account_type || '',
+        phone: editUser.phone || '',
+        bio: editUser.bio || '',
+        address: editUser.address || { street: '', city: '', state: '', zip: '' },
+        company_name: editUser.company_name || '',
+        company_logo_url: editUser.company_logo_url || '',
+        light_logo_url: editUser.light_logo_url || '',
+        dark_logo_url: editUser.dark_logo_url || '',
+        team_logo_url: editUser.team_logo_url || '',
+        brokerage_name: editUser.brokerage_name || '',
+        dre_license: editUser.dre_license || '',
+        mls_id: editUser.mls_id || '',
+        team_name: editUser.team_name || '',
+        investment_entity_name: editUser.investment_entity_name || '',
+        investment_strategies: editUser.investment_strategies || [],
+        years_investing: editUser.years_investing || '',
+        portfolio_size: editUser.portfolio_size || '',
+        average_deal_size: editUser.average_deal_size || '',
+        target_property_types: editUser.target_property_types || [],
+        funding_capacity: editUser.funding_capacity || '',
+        seeking_partnerships: editUser.seeking_partnerships || false,
+        vendor_type: editUser.vendor_type || '',
+        vendor_certifications: editUser.vendor_certifications || [],
+        vendor_licenses: editUser.vendor_licenses || [],
+        bonded: editUser.bonded || false,
+        insured: editUser.insured || false,
+        crew_size: editUser.crew_size || '',
+        equipment_owned: editUser.equipment_owned || [],
+        response_time_hours: editUser.response_time_hours || '',
+        emergency_services: editUser.emergency_services || false,
+        warranty_offered: editUser.warranty_offered || '',
+        minimum_project_size: editUser.minimum_project_size || '',
+        average_project_cost: editUser.average_project_cost || '',
+        payment_terms: editUser.payment_terms || '',
+        disposal_method: editUser.disposal_method || '',
+        truck_capacity: editUser.truck_capacity || '',
+        storage_available: editUser.storage_available || false,
+        packing_services: editUser.packing_services || false,
+        bar_number: editUser.bar_number || '',
+        practice_areas: editUser.practice_areas || [],
+        cpa_license: editUser.cpa_license || '',
+        tax_specialties: editUser.tax_specialties || [],
+        staging_inventory: editUser.staging_inventory || '',
+        design_styles: editUser.design_styles || [],
+        contractor_specialties: editUser.contractor_specialties || [],
+        photography_packages: editUser.photography_packages || [],
+        drone_certified: editUser.drone_certified || false,
+        inspection_types: editUser.inspection_types || [],
+        report_turnaround: editUser.report_turnaround || '',
+        company_phone: editUser.company_phone || '',
+        company_email: editUser.company_email || '',
+        company_website: editUser.company_website || '',
+        business_license: editUser.business_license || '',
+        insurance_provider: editUser.insurance_provider || '',
+        insurance_policy_number: editUser.insurance_policy_number || '',
+        years_in_business: editUser.years_in_business || '',
+        default_commission_rate: editUser.default_commission_rate || '',
+        service_areas: editUser.service_areas || [],
+        specializations: editUser.specializations || [],
+        company_address: editUser.company_address || { street: '', city: '', state: '', zip: '' }
+      });
+    }
+  }, [editUser]);
 
   const processImage = (file, maxSize = 500, quality = 0.85) => {
     return new Promise((resolve, reject) => {
@@ -250,12 +319,21 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         divisions.push('education');
       }
 
-      await base44.asServiceRole.entities.User.create({
-        ...formData,
-        account_types: [formData.primary_account_type],
-        divisions_access: [...new Set(divisions)],
-        onboarding_completed: true
-      });
+      if (editUser) {
+        await base44.entities.User.update(editUser.id, {
+          ...formData,
+          account_types: [formData.primary_account_type],
+          divisions_access: [...new Set(divisions)],
+          onboarding_completed: true
+        });
+      } else {
+        await base44.asServiceRole.entities.User.create({
+          ...formData,
+          account_types: [formData.primary_account_type],
+          divisions_access: [...new Set(divisions)],
+          onboarding_completed: true
+        });
+      }
 
       onSuccess();
       onClose();
@@ -334,8 +412,8 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
         }
       });
     } catch (error) {
-      console.error('Error creating user:', error);
-      alert('Failed to create user: ' + error.message);
+      console.error('Error saving user:', error);
+      alert(`Failed to ${editUser ? 'update' : 'create'} user: ` + error.message);
     } finally {
       setLoading(false);
     }
@@ -345,7 +423,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>{editUser ? 'Edit User' : 'Add New User'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -960,7 +1038,7 @@ export default function AddUserModal({ open, onClose, onSuccess }) {
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="bg-orange-600 hover:bg-orange-700">
-              {loading ? 'Creating...' : 'Create User'}
+              {loading ? (editUser ? 'Updating...' : 'Creating...') : (editUser ? 'Update User' : 'Create User')}
             </Button>
           </div>
         </form>
