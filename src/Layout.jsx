@@ -158,13 +158,13 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-4">
               {isConsumerType && (
-                <Link to={createPageUrl('ConsumerHome')}>
+                <Link to={createPageUrl('Home')}>
                   <Button
                     variant="ghost"
                     className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
                   >
                     <HomeIcon className="h-5 w-5 mr-2" />
-                    My Home
+                    Home
                   </Button>
                 </Link>
               )}
