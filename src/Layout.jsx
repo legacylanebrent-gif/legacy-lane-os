@@ -197,18 +197,20 @@ export default function Layout({ children, currentPageName }) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  {!isConsumerType && (
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('Settings')} className="cursor-pointer">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Settings')} className="cursor-pointer">
-                          <Settings className="w-4 h-4 mr-2" />
-                          Settings
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                          <Bell className="w-4 h-4 mr-2" />
-                          Notification Settings
-                        </Link>
-                      </DropdownMenuItem>
+                    <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Notification Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
