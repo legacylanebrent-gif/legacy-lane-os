@@ -10,7 +10,7 @@ import MessageModal from '@/components/messaging/MessageModal';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -41,6 +41,7 @@ export default function EstateSaleDetail() {
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     loadSaleData();
@@ -56,16 +57,21 @@ export default function EstateSaleDetail() {
         return;
       }
 
-      // Load current user
+      // Check authentication
       try {
-        const user = await base44.auth.me();
-        setCurrentUser(user);
+        const authenticated = await base44.auth.isAuthenticated();
+        setIsAuthenticated(authenticated);
         
-        // Check if sale is in route
-        const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
-        setIsInRoute(route.includes(saleId));
+        if (authenticated) {
+          const user = await base44.auth.me();
+          setCurrentUser(user);
+          
+          // Check if sale is in route
+          const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+          setIsInRoute(route.includes(saleId));
+        }
       } catch (error) {
-        // User not logged in
+        console.log('User not logged in');
       }
 
       const saleData = await base44.entities.EstateSale.list();
@@ -227,47 +233,46 @@ END:VCALENDAR`;
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xl">LL</span>
               </div>
               <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Estate Sale Finder</p>
+                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
               </div>
             </Link>
 
             <div className="flex items-center gap-2">
-              {currentUser && (
+              {isAuthenticated ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => window.location.href = createPageUrl('Dashboard')}
-                    title="Dashboard"
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => window.location.href = createPageUrl('Messages')}
-                    title="Messages"
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-white hover:bg-slate-800">
                     <MessageSquare className="w-5 h-5" />
                   </Button>
-                  <NotificationsDropdown user={currentUser} />
+                  {currentUser && <NotificationsDropdown user={currentUser} />}
+                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                  <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
+                    Get Started Free
+                  </Button>
                 </>
               )}
-              <Link to={createPageUrl('Home')}>
-                <Button variant="ghost" className="gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to All Sales
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
