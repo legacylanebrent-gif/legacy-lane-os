@@ -46,7 +46,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Settings', path: 'Settings', icon: Settings }
 ];
 
-export default function AdminLayout({ children, currentPage }) {
+export default function AdminLayout({ children, currentPage, user }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
@@ -114,6 +114,13 @@ export default function AdminLayout({ children, currentPage }) {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-32">
+        <div className="p-4 bg-yellow-100 border-2 border-yellow-600 m-4">
+          <div className="font-mono text-sm space-y-1">
+            <div>DEBUG INFO (AdminLayout):</div>
+            <div>primary_account_type: "{user?.primary_account_type}"</div>
+            <div>primary_role: "{user?.primary_role}"</div>
+          </div>
+        </div>
         {children}
       </main>
     </div>
