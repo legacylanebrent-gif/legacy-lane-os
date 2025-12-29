@@ -43,13 +43,28 @@ export default function AdminUsers() {
         setLoading(false);
         return;
       }
+      
       const data = await base44.asServiceRole.entities.User.list();
+      console.log('Loaded users:', data);
+      console.log('User count:', data?.length || 0);
+      
+      // If no data, set empty array and return
+      if (!data || data.length === 0) {
+        console.log('No users found in database');
+        setUsers([]);
+        setFilteredUsers([]);
+        setLoading(false);
+        return;
+      }
       
       // Ensure all users have at least primary_account_type set
-      const usersWithDefaults = (data || []).map(user => ({
+      const usersWithDefaults = data.map(user => ({
         ...user,
-        primary_account_type: user.primary_account_type || 'consumer'
+        primary_account_type: user.primary_account_type || 'consumer',
+        full_name: user.full_name || 'Unknown User'
       }));
+      
+      console.log('Users with defaults:', usersWithDefaults);
       
       setUsers(usersWithDefaults);
       setFilteredUsers(usersWithDefaults);
