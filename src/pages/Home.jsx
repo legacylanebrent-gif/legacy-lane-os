@@ -63,7 +63,6 @@ export default function Home() {
       setIsAuthenticated(authenticated);
       
       if (authenticated) {
-        // Load user data but don't redirect - allow viewing Home page
         try {
           const user = await base44.auth.me();
           setCurrentUser(user);
@@ -73,9 +72,15 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error checking authentication:', error);
+      setIsAuthenticated(false);
     } finally {
       setCheckingAuth(false);
-      loadData();
+      try {
+        await loadData();
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setLoading(false);
+      }
       getUserLocation();
       loadRoute();
     }
