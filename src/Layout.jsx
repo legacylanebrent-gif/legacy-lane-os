@@ -234,11 +234,11 @@ export default function Layout({ children, currentPageName }) {
             <div className="space-y-6">
               <div className="space-y-1">
                 {isConsumerType ? (
-                  <Link to={createPageUrl('ConsumerHome')}>
+                  <Link to={createPageUrl('Home')}>
                     <Button 
-                      variant={currentPageName === 'ConsumerHome' ? 'default' : 'ghost'}
+                      variant={currentPageName === 'Home' ? 'default' : 'ghost'}
                       className={`w-full justify-start ${
-                        currentPageName === 'ConsumerHome' 
+                        currentPageName === 'Home' 
                           ? 'bg-slate-800 text-white hover:bg-slate-700' 
                           : 'hover:bg-cyan-50'
                       }`}
