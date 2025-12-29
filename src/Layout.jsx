@@ -233,7 +233,21 @@ export default function Layout({ children, currentPageName }) {
           <div className="p-6 overflow-y-auto h-full">
             <div className="space-y-6">
               <div className="space-y-1">
-                {!isConsumerType && (
+                {isConsumerType ? (
+                  <Link to={createPageUrl('ConsumerHome')}>
+                    <Button 
+                      variant={currentPageName === 'ConsumerHome' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'ConsumerHome' 
+                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <HomeIcon className="w-5 h-5 mr-3" />
+                      Home
+                    </Button>
+                  </Link>
+                ) : (
                   <Link to={createPageUrl('Dashboard')}>
                     <Button 
                       variant={currentPageName === 'Dashboard' ? 'default' : 'ghost'}
