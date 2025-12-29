@@ -570,7 +570,7 @@ export default function Home() {
               <MapContainer
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
                 zoom={userLocation ? mapZoom : 4}
-                minZoom={mapMinZoom}
+                minZoom={mapMinZoom || undefined}
                 style={{ height: '500px', width: '100%' }}
                 className="z-0"
               >
