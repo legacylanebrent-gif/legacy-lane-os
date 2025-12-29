@@ -150,6 +150,23 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-4">
+              {(accountType === 'consumer' || 
+                accountType === 'executor' || 
+                accountType === 'home_seller' || 
+                accountType === 'buyer' || 
+                accountType === 'downsizer' || 
+                accountType === 'diy_seller' || 
+                accountType === 'consignor') && (
+                <Link to={createPageUrl('ConsumerHome')}>
+                  <Button
+                    variant="ghost"
+                    className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                  >
+                    <HomeIcon className="h-5 w-5 mr-2" />
+                    My Home
+                  </Button>
+                </Link>
+              )}
               <MessagesDropdown />
               <NotificationsDropdown />
               <Button
