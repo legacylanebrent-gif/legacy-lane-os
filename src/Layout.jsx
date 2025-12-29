@@ -150,13 +150,13 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-4">
-              {(accountType === 'consumer' || 
-                accountType === 'executor' || 
-                accountType === 'home_seller' || 
-                accountType === 'buyer' || 
-                accountType === 'downsizer' || 
-                accountType === 'diy_seller' || 
-                accountType === 'consignor') && (
+              {(user?.primary_account_type === 'consumer' || 
+                user?.primary_account_type === 'executor' || 
+                user?.primary_account_type === 'home_seller' || 
+                user?.primary_account_type === 'buyer' || 
+                user?.primary_account_type === 'downsizer' || 
+                user?.primary_account_type === 'diy_seller' || 
+                user?.primary_account_type === 'consignor') && (
                 <Link to={createPageUrl('ConsumerHome')}>
                   <Button
                     variant="ghost"
