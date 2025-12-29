@@ -52,6 +52,8 @@ export default function Home() {
   const [showSaleRequestModal, setShowSaleRequestModal] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [mapZoom, setMapZoom] = useState(12);
+  const [mapMinZoom, setMapMinZoom] = useState(null);
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -101,17 +103,26 @@ export default function Home() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const userLoc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
-          // Don't automatically filter, just get location for distance display
+          };
+          setUserLocation(userLoc);
+          // Calculate min zoom for 25 miles
+          calculateMinZoom(userLoc);
         },
         (error) => {
           console.log('Geolocation error:', error);
         }
       );
     }
+  };
+
+  const calculateMinZoom = (location) => {
+    // Zoom level 12 shows approximately 25 mile radius
+    // Set this as minimum zoom to prevent zooming out beyond 25 miles
+    setMapZoom(12);
+    setMapMinZoom(12);
   };
 
   const loadData = async () => {
@@ -168,7 +179,9 @@ export default function Home() {
       const data = await response.json();
       if (data.results && data.results[0]) {
         const location = data.results[0].geometry.location;
-        setUserLocation({ lat: location.lat, lng: location.lng });
+        const userLoc = { lat: location.lat, lng: location.lng };
+        setUserLocation(userLoc);
+        calculateMinZoom(userLoc);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
@@ -194,15 +207,18 @@ export default function Home() {
     if (userLocation) {
       // Already have location, re-organize
       organizeSales();
+      calculateMinZoom(userLocation);
     } else {
       // Get location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setUserLocation({
+            const userLoc = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
-            });
+            };
+            setUserLocation(userLoc);
+            calculateMinZoom(userLoc);
           },
           (error) => {
             console.log('Geolocation error:', error);
@@ -553,7 +569,8 @@ export default function Home() {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
-                zoom={userLocation ? 12 : 4}
+                zoom={userLocation ? mapZoom : 4}
+                minZoom={mapMinZoom}
                 style={{ height: '500px', width: '100%' }}
                 className="z-0"
               >
