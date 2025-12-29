@@ -139,7 +139,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl(accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach' ? 'ConsumerHome' : 'Dashboard')} className="flex items-center gap-3">
+              <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')} className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">LL</span>
                 </div>
