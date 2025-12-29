@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 
@@ -19,7 +19,6 @@ export default function AdminUsers() {
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [subcategories, setSubcategories] = useState([]);
-  const [onboardingFilter, setOnboardingFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     filterUsers();
-  }, [searchQuery, selectedRole, selectedSubcategory, onboardingFilter, users]);
+  }, [searchQuery, selectedRole, selectedSubcategory, users]);
 
   useEffect(() => {
     setSelectedSubcategory('all');
@@ -114,12 +113,6 @@ export default function AdminUsers() {
       );
     }
 
-    if (onboardingFilter === 'completed') {
-      filtered = filtered.filter(user => user.onboarding_completed === true);
-    } else if (onboardingFilter === 'pending') {
-      filtered = filtered.filter(user => !user.onboarding_completed);
-    }
-
     setFilteredUsers(filtered);
   };
 
@@ -127,10 +120,9 @@ export default function AdminUsers() {
     setSearchQuery('');
     setSelectedRole('all');
     setSelectedSubcategory('all');
-    setOnboardingFilter('all');
   };
 
-  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedSubcategory !== 'all' || onboardingFilter !== 'all';
+  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedSubcategory !== 'all';
 
   const getRoleBadgeColor = (role) => {
     const colors = {
@@ -245,7 +237,7 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -281,17 +273,6 @@ export default function AdminUsers() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <Label className="text-xs text-slate-600 mb-2 block">Onboarding Status</Label>
-              <Tabs value={onboardingFilter} onValueChange={setOnboardingFilter}>
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                  <TabsTrigger value="completed" className="text-xs">Complete</TabsTrigger>
-                  <TabsTrigger value="pending" className="text-xs">Pending</TabsTrigger>
-                </TabsList>
-              </Tabs>
             </div>
           </div>
         </CardContent>
@@ -337,11 +318,6 @@ export default function AdminUsers() {
                           {user.primary_account_type && (
                             <Badge className={getRoleBadgeColor(user.primary_account_type)}>
                               {user.primary_account_type.replace(/_/g, ' ')}
-                            </Badge>
-                          )}
-                          {!user.onboarding_completed && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-300">
-                              Pending Setup
                             </Badge>
                           )}
                         </div>
