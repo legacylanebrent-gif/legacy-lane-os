@@ -33,7 +33,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
-    primary_account_type: '',
+    primary_account_type: 'consumer',
     phone: '',
     bio: '',
     address: {
@@ -340,7 +340,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
       setFormData({
         full_name: '',
         email: '',
-        primary_account_type: '',
+        primary_account_type: 'consumer',
         phone: '',
         bio: '',
         address: {
