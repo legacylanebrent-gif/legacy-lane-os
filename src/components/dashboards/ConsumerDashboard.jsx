@@ -25,7 +25,7 @@ export default function ConsumerDashboard({ user }) {
       const response = await base44.functions.invoke('getRecommendations', {});
       setRecommendations(response.data || { sales: [], items: [] });
     } catch (error) {
-      console.error('Error loading recommendations:', error);
+      console.log('Recommendations not available:', error.message);
       setRecommendations({ sales: [], items: [] });
     } finally {
       setLoadingRecommendations(false);
@@ -33,9 +33,9 @@ export default function ConsumerDashboard({ user }) {
   };
 
   const loadRecentActivity = async () => {
+    const activities = [];
+    
     try {
-      const activities = [];
-
       // Load user's messages
       try {
         const messages = await base44.entities.Message.filter({ 
@@ -124,7 +124,8 @@ export default function ConsumerDashboard({ user }) {
       activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       setRecentActivity(activities.slice(0, 10));
     } catch (error) {
-      console.error('Error loading activity:', error);
+      console.log('Error loading activity:', error.message);
+      setRecentActivity([]);
     } finally {
       setLoading(false);
     }
