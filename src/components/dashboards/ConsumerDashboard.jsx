@@ -23,9 +23,10 @@ export default function ConsumerDashboard({ user }) {
   const loadRecommendations = async () => {
     try {
       const response = await base44.functions.invoke('getRecommendations', {});
-      setRecommendations(response.data);
+      setRecommendations(response.data || { sales: [], items: [] });
     } catch (error) {
       console.error('Error loading recommendations:', error);
+      setRecommendations({ sales: [], items: [] });
     } finally {
       setLoadingRecommendations(false);
     }
@@ -36,72 +37,88 @@ export default function ConsumerDashboard({ user }) {
       const activities = [];
 
       // Load user's messages
-      const messages = await base44.entities.Message.filter({ 
-        recipient_id: user.id 
-      }, '-created_date', 5);
-      messages.forEach(msg => {
-        activities.push({
-          type: 'message',
-          icon: MessageSquare,
-          title: 'New message from ' + msg.sender_name,
-          description: msg.message.substring(0, 60) + (msg.message.length > 60 ? '...' : ''),
-          timestamp: msg.created_date,
-          link: null,
-          color: 'blue'
-        });
-      });
-
-      // Load notifications
-      const notifications = await base44.entities.Notification.filter({
-        user_id: user.id
-      }, '-created_date', 5);
-      notifications.forEach(notif => {
-        activities.push({
-          type: 'notification',
-          icon: notif.type === 'sale_update' ? Home : MessageSquare,
-          title: notif.title || 'Notification',
-          description: notif.message,
-          timestamp: notif.created_date,
-          link: notif.link,
-          color: notif.read ? 'gray' : 'orange'
-        });
-      });
-
-      // Load saved estate sales
-      const savedSaleIds = JSON.parse(localStorage.getItem('savedSales') || '[]');
-      if (savedSaleIds.length > 0) {
-        const sales = await base44.entities.EstateSale.list('-created_date', 50);
-        const recentSaved = sales
-          .filter(s => savedSaleIds.includes(s.id))
-          .slice(0, 3);
-        recentSaved.forEach(sale => {
+      try {
+        const messages = await base44.entities.Message.filter({ 
+          recipient_id: user.id 
+        }, '-created_date', 5);
+        (messages || []).forEach(msg => {
           activities.push({
-            type: 'saved_sale',
-            icon: Heart,
-            title: 'Saved estate sale',
-            description: sale.title,
-            timestamp: sale.updated_date,
-            link: createPageUrl('EstateSaleDetail') + '?id=' + sale.id,
-            color: 'red'
+            type: 'message',
+            icon: MessageSquare,
+            title: 'New message from ' + msg.sender_name,
+            description: msg.message.substring(0, 60) + (msg.message.length > 60 ? '...' : ''),
+            timestamp: msg.created_date,
+            link: null,
+            color: 'blue'
           });
         });
+      } catch (e) {
+        console.log('Could not load messages');
+      }
+
+      // Load notifications
+      try {
+        const notifications = await base44.entities.Notification.filter({
+          user_id: user.id
+        }, '-created_date', 5);
+        (notifications || []).forEach(notif => {
+          activities.push({
+            type: 'notification',
+            icon: notif.type === 'sale_update' ? Home : MessageSquare,
+            title: notif.title || 'Notification',
+            description: notif.message,
+            timestamp: notif.created_date,
+            link: notif.link,
+            color: notif.read ? 'gray' : 'orange'
+          });
+        });
+      } catch (e) {
+        console.log('Could not load notifications');
+      }
+
+      // Load saved estate sales
+      try {
+        const savedSaleIds = JSON.parse(localStorage.getItem('savedSales') || '[]');
+        if (savedSaleIds.length > 0) {
+          const sales = await base44.entities.EstateSale.list('-created_date', 50);
+          const recentSaved = (sales || [])
+            .filter(s => savedSaleIds.includes(s.id))
+            .slice(0, 3);
+          recentSaved.forEach(sale => {
+            activities.push({
+              type: 'saved_sale',
+              icon: Heart,
+              title: 'Saved estate sale',
+              description: sale.title,
+              timestamp: sale.updated_date,
+              link: createPageUrl('EstateSaleDetail') + '?id=' + sale.id,
+              color: 'red'
+            });
+          });
+        }
+      } catch (e) {
+        console.log('Could not load saved sales');
       }
 
       // Load orders
-      const orders = await base44.entities.Order.filter({
-        buyer_id: user.id
-      }, '-created_date', 3);
-      orders.forEach(order => {
-        activities.push({
-          type: 'order',
-          icon: ShoppingBag,
-          title: 'Order ' + order.status,
-          description: 'Order #' + order.order_number + ' - $' + order.total.toFixed(2),
-          timestamp: order.created_date,
-          link: null,
-          color: 'green'
+      try {
+        const orders = await base44.entities.Order.filter({
+          buyer_id: user.id
+        }, '-created_date', 3);
+        (orders || []).forEach(order => {
+          activities.push({
+            type: 'order',
+            icon: ShoppingBag,
+            title: 'Order ' + order.status,
+            description: 'Order #' + order.order_number + ' - $' + order.total.toFixed(2),
+            timestamp: order.created_date,
+            link: null,
+            color: 'green'
+          });
         });
-      });
+      } catch (e) {
+        console.log('Could not load orders');
+      }
 
       // Sort all activities by timestamp
       activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
