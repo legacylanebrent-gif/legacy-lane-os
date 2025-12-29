@@ -123,14 +123,17 @@ export default function Home() {
       setTotalItems(itemsCount);
       setTotalEstimatedValue(estimatedValue);
       
-      // Load operator company names
+      // Load operator company names (skip if not authenticated)
       try {
-        const users = await base44.entities.User.list();
-        const operatorMap = {};
-        users.forEach(user => {
-          operatorMap[user.id] = user.company_name || user.full_name;
-        });
-        setOperators(operatorMap);
+        const authenticated = await base44.auth.isAuthenticated();
+        if (authenticated) {
+          const users = await base44.entities.User.list();
+          const operatorMap = {};
+          users.forEach(user => {
+            operatorMap[user.id] = user.company_name || user.full_name;
+          });
+          setOperators(operatorMap);
+        }
       } catch (error) {
         console.log('Could not load operators');
       }
