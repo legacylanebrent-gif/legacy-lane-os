@@ -111,7 +111,6 @@ export default function Home() {
 
   const loadData = async () => {
     try {
-
       // Load estate sales (public access)
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
       const activeSales = salesData.filter(s => s.status === 'upcoming' || s.status === 'active');
@@ -139,6 +138,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      // Set empty data to avoid blank page
+      setSales([]);
     } finally {
       setLoading(false);
     }
