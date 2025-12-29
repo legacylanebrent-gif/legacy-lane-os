@@ -45,41 +45,70 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6">
+            <h2 className="text-red-600 font-bold text-xl mb-2">Error: No User Data</h2>
+            <p className="text-red-700">User could not be loaded. Please try logging out and back in.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Route to appropriate dashboard based on primary account type
   const renderDashboard = () => {
     const accountType = user.primary_account_type || user.primary_role;
-    switch (accountType) {
-      case 'super_admin':
-      case 'platform_ops':
-      case 'growth_team':
-      case 'partnerships':
-      case 'education_admin':
-      case 'finance_admin':
-        return <SuperAdminDashboard user={user} />;
+    
+    try {
+      switch (accountType) {
+        case 'super_admin':
+        case 'platform_ops':
+        case 'growth_team':
+        case 'partnerships':
+        case 'education_admin':
+        case 'finance_admin':
+          return <SuperAdminDashboard user={user} />;
 
-      case 'estate_sale_operator':
-        return <EstateSaleOperatorDashboard user={user} />;
+        case 'estate_sale_operator':
+          return <EstateSaleOperatorDashboard user={user} />;
 
-      case 'real_estate_agent':
-        return <RealEstateAgentDashboard user={user} />;
+        case 'real_estate_agent':
+          return <RealEstateAgentDashboard user={user} />;
 
-      case 'investor':
-        return <InvestorDashboard user={user} />;
+        case 'investor':
+          return <InvestorDashboard user={user} />;
 
-      case 'coach':
-        return <CoachDashboard user={user} />;
+        case 'coach':
+          return <CoachDashboard user={user} />;
 
-      case 'consumer':
-      case 'executor':
-      case 'home_seller':
-      case 'buyer':
-      case 'downsizer':
-      case 'diy_seller':
-      case 'consignor':
-      default:
-        return <ConsumerDashboard user={user} />;
+        case 'consumer':
+        case 'executor':
+        case 'home_seller':
+        case 'buyer':
+        case 'downsizer':
+        case 'diy_seller':
+        case 'consignor':
+        default:
+          return <ConsumerDashboard user={user} />;
+      }
+    } catch (error) {
+      return (
+        <div className="p-6">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-6">
+              <h2 className="text-red-600 font-bold text-xl mb-2">Dashboard Error</h2>
+              <p className="text-red-700 mb-2">Failed to load dashboard for account type: {accountType}</p>
+              <p className="text-sm text-red-600">Error: {error.message}</p>
+              <pre className="mt-4 p-4 bg-white rounded text-xs overflow-auto">
+                {JSON.stringify(user, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        </div>
+      );
     }
   };
 
