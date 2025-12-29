@@ -44,8 +44,15 @@ export default function AdminUsers() {
         return;
       }
       const data = await base44.asServiceRole.entities.User.list();
-      setUsers(data || []);
-      setFilteredUsers(data || []);
+      
+      // Ensure all users have at least primary_account_type set
+      const usersWithDefaults = (data || []).map(user => ({
+        ...user,
+        primary_account_type: user.primary_account_type || 'consumer'
+      }));
+      
+      setUsers(usersWithDefaults);
+      setFilteredUsers(usersWithDefaults);
     } catch (error) {
       console.error('Error loading users:', error);
       setUsers([]);
