@@ -36,39 +36,82 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
+      console.log('=== LOADING USERS START ===');
+      
       const currentUser = await base44.auth.me();
+      console.log('Current user:', currentUser);
+      
       if (!currentUser) {
         console.error('Not authenticated');
         setLoading(false);
         return;
       }
       
-      const data = await base44.asServiceRole.entities.User.list();
-      console.log('Loaded users:', data);
-      console.log('User count:', data?.length || 0);
+      // Try multiple methods to fetch users
+      let data = null;
       
-      // If no data, set empty array and return
+      // Method 1: Try service role list
+      try {
+        console.log('Trying asServiceRole.entities.User.list()...');
+        data = await base44.asServiceRole.entities.User.list('-created_date', 1000);
+        console.log('Service role list returned:', data?.length || 0, 'users');
+      } catch (e) {
+        console.error('Service role list failed:', e);
+      }
+      
+      // Method 2: Try service role filter with empty query
       if (!data || data.length === 0) {
-        console.log('No users found in database');
+        try {
+          console.log('Trying asServiceRole.entities.User.filter({})...');
+          data = await base44.asServiceRole.entities.User.filter({}, '-created_date', 1000);
+          console.log('Service role filter returned:', data?.length || 0, 'users');
+        } catch (e) {
+          console.error('Service role filter failed:', e);
+        }
+      }
+      
+      // Method 3: Try regular entities.User.list (admin should have access)
+      if (!data || data.length === 0) {
+        try {
+          console.log('Trying entities.User.list()...');
+          data = await base44.entities.User.list('-created_date', 1000);
+          console.log('Regular list returned:', data?.length || 0, 'users');
+        } catch (e) {
+          console.error('Regular list failed:', e);
+        }
+      }
+      
+      console.log('Final data:', data);
+      console.log('Data type:', typeof data);
+      console.log('Is array:', Array.isArray(data));
+      
+      if (!data) {
+        console.error('All methods failed to fetch users');
         setUsers([]);
         setFilteredUsers([]);
         setLoading(false);
         return;
       }
       
+      // Ensure data is an array
+      const userArray = Array.isArray(data) ? data : [data];
+      console.log('User array length:', userArray.length);
+      
       // Ensure all users have at least primary_account_type set
-      const usersWithDefaults = data.map(user => ({
+      const usersWithDefaults = userArray.map(user => ({
         ...user,
         primary_account_type: user.primary_account_type || 'consumer',
-        full_name: user.full_name || 'Unknown User'
+        full_name: user.full_name || user.email || 'Unknown User'
       }));
       
       console.log('Users with defaults:', usersWithDefaults);
+      console.log('=== LOADING USERS END ===');
       
       setUsers(usersWithDefaults);
       setFilteredUsers(usersWithDefaults);
     } catch (error) {
-      console.error('Error loading users:', error);
+      console.error('CRITICAL Error loading users:', error);
+      console.error('Error details:', error.message, error.stack);
       setUsers([]);
       setFilteredUsers([]);
     } finally {
