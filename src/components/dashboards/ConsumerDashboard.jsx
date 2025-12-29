@@ -8,14 +8,35 @@ export default function ConsumerDashboard({ user }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('ConsumerDashboard mounted with user:', user);
     try {
       if (!user) {
+        console.error('No user data in ConsumerDashboard');
         setError('No user data available');
       }
     } catch (e) {
+      console.error('Error in ConsumerDashboard useEffect:', e);
       setError(e.message);
     }
   }, [user]);
+
+  console.log('ConsumerDashboard rendering, error state:', error);
+
+  if (!user) {
+    return (
+      <div className="p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-red-600 mb-4">
+              <AlertCircle className="w-8 h-8" />
+              <h2 className="font-bold text-2xl">No User Data</h2>
+            </div>
+            <p className="text-red-700 text-lg">Consumer dashboard cannot load without user data.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const quickActions = [
     {
       title: 'My Profile',
