@@ -90,6 +90,10 @@ export default function Layout({ children, currentPageName }) {
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
+      // Ensure primary_account_type defaults to 'consumer' if not set
+      if (userData && (!userData.primary_account_type || userData.primary_account_type === '')) {
+        userData.primary_account_type = 'consumer';
+      }
       console.log('User account type:', userData?.primary_account_type);
       setUser(userData);
     } catch (error) {

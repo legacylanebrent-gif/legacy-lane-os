@@ -23,6 +23,10 @@ export default function Dashboard() {
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
+      // Ensure primary_account_type defaults to 'consumer' if not set
+      if (userData && (!userData.primary_account_type || userData.primary_account_type === '')) {
+        userData.primary_account_type = 'consumer';
+      }
       setUser(userData);
     } catch (error) {
       console.error('Error loading user:', error);
