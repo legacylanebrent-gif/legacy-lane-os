@@ -262,19 +262,21 @@ export default function Layout({ children, currentPageName }) {
                     </Button>
                   </Link>
                 )}
-                <Link to={createPageUrl('MyProfile')}>
-                  <Button 
-                    variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyProfile' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <User className="w-5 h-5 mr-3" />
-                    My Profile
-                  </Button>
-                </Link>
+                {!isConsumerType && (
+                  <Link to={createPageUrl('MyProfile')}>
+                    <Button 
+                      variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'MyProfile' 
+                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <User className="w-5 h-5 mr-3" />
+                      My Profile
+                    </Button>
+                  </Link>
+                )}
                 {!isConsumerType && (
                   <Link to={createPageUrl('MySales')}>
                     <Button 
