@@ -127,9 +127,14 @@ export default function Home() {
 
   const loadData = async () => {
     try {
+      console.log('Loading estate sales data...');
       // Load estate sales (public access)
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
-      const activeSales = salesData.filter(s => s.status === 'upcoming' || s.status === 'active');
+      console.log('Raw sales data:', salesData);
+      
+      const activeSales = (salesData || []).filter(s => s.status === 'upcoming' || s.status === 'active');
+      console.log('Active sales after filter:', activeSales.length);
+      
       setSales(activeSales);
 
       // Calculate real-time stats
@@ -144,13 +149,13 @@ export default function Home() {
         if (authenticated) {
           const users = await base44.entities.User.list();
           const operatorMap = {};
-          users.forEach(user => {
+          (users || []).forEach(user => {
             operatorMap[user.id] = user.company_name || user.full_name;
           });
           setOperators(operatorMap);
         }
       } catch (error) {
-        console.log('Could not load operators');
+        console.log('Could not load operators:', error);
       }
     } catch (error) {
       console.error('Error loading data:', error);
