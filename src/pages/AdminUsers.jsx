@@ -20,6 +20,7 @@ export default function AdminUsers() {
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [subcategories, setSubcategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [debugInfo, setDebugInfo] = useState([]);
 
   useEffect(() => {
     loadUsers();
@@ -35,83 +36,78 @@ export default function AdminUsers() {
   }, [selectedRole]);
 
   const loadUsers = async () => {
+    const debug = [];
     try {
-      console.log('=== LOADING USERS START ===');
+      debug.push('🔵 Starting user load...');
       
       const currentUser = await base44.auth.me();
-      console.log('Current user:', currentUser);
+      debug.push(`✅ Current user: ${currentUser?.email} (${currentUser?.primary_account_type})`);
       
       if (!currentUser) {
-        console.error('Not authenticated');
+        debug.push('❌ Not authenticated');
+        setDebugInfo(debug);
         setLoading(false);
         return;
       }
       
-      // Try multiple methods to fetch users
       let data = null;
       
       // Method 1: Try service role list
       try {
-        console.log('Trying asServiceRole.entities.User.list()...');
+        debug.push('🔵 Trying asServiceRole.entities.User.list()...');
         data = await base44.asServiceRole.entities.User.list('-created_date', 1000);
-        console.log('Service role list returned:', data?.length || 0, 'users');
+        debug.push(`✅ Service role list returned: ${data?.length || 0} users`);
       } catch (e) {
-        console.error('Service role list failed:', e);
+        debug.push(`❌ Service role list failed: ${e.message}`);
       }
       
-      // Method 2: Try service role filter with empty query
+      // Method 2: Try service role filter
       if (!data || data.length === 0) {
         try {
-          console.log('Trying asServiceRole.entities.User.filter({})...');
+          debug.push('🔵 Trying asServiceRole.entities.User.filter({})...');
           data = await base44.asServiceRole.entities.User.filter({}, '-created_date', 1000);
-          console.log('Service role filter returned:', data?.length || 0, 'users');
+          debug.push(`✅ Service role filter returned: ${data?.length || 0} users`);
         } catch (e) {
-          console.error('Service role filter failed:', e);
+          debug.push(`❌ Service role filter failed: ${e.message}`);
         }
       }
       
-      // Method 3: Try regular entities.User.list (admin should have access)
+      // Method 3: Try regular list
       if (!data || data.length === 0) {
         try {
-          console.log('Trying entities.User.list()...');
+          debug.push('🔵 Trying entities.User.list()...');
           data = await base44.entities.User.list('-created_date', 1000);
-          console.log('Regular list returned:', data?.length || 0, 'users');
+          debug.push(`✅ Regular list returned: ${data?.length || 0} users`);
         } catch (e) {
-          console.error('Regular list failed:', e);
+          debug.push(`❌ Regular list failed: ${e.message}`);
         }
       }
       
-      console.log('Final data:', data);
-      console.log('Data type:', typeof data);
-      console.log('Is array:', Array.isArray(data));
+      debug.push(`📊 Final result: ${data ? (Array.isArray(data) ? data.length : 1) : 0} users`);
       
       if (!data) {
-        console.error('All methods failed to fetch users');
+        debug.push('❌ All methods failed - no users found');
+        setDebugInfo(debug);
         setUsers([]);
         setFilteredUsers([]);
         setLoading(false);
         return;
       }
       
-      // Ensure data is an array
       const userArray = Array.isArray(data) ? data : [data];
-      console.log('User array length:', userArray.length);
-      
-      // Ensure all users have at least primary_account_type set
       const usersWithDefaults = userArray.map(user => ({
         ...user,
         primary_account_type: user.primary_account_type || 'consumer',
         full_name: user.full_name || user.email || 'Unknown User'
       }));
       
-      console.log('Users with defaults:', usersWithDefaults);
-      console.log('=== LOADING USERS END ===');
-      
+      debug.push(`✅ Successfully loaded ${usersWithDefaults.length} users`);
+      setDebugInfo(debug);
       setUsers(usersWithDefaults);
       setFilteredUsers(usersWithDefaults);
     } catch (error) {
-      console.error('CRITICAL Error loading users:', error);
-      console.error('Error details:', error.message, error.stack);
+      debug.push(`❌ CRITICAL ERROR: ${error.message}`);
+      setDebugInfo(debug);
       setUsers([]);
       setFilteredUsers([]);
     } finally {
@@ -242,6 +238,21 @@ export default function AdminUsers() {
           Add User
         </Button>
       </div>
+
+      {debugInfo.length > 0 && (
+        <Card className="bg-slate-900 text-white">
+          <CardHeader>
+            <CardTitle className="text-sm font-mono">Debug Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1 text-xs font-mono">
+              {debugInfo.map((info, idx) => (
+                <div key={idx}>{info}</div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <AddUserModal 
         open={showAddModal}
