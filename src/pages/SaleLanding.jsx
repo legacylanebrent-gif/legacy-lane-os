@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   MapPin, Calendar, Search, Tag, DollarSign, Heart, ShoppingBag,
-  Image as ImageIcon, ArrowLeft
+  Image as ImageIcon, LogIn, LogOut, MessageSquare, LayoutDashboard
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -18,10 +19,26 @@ export default function SaleLanding() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    checkAuth();
     loadData();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const authenticated = await base44.auth.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      if (authenticated) {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      }
+    } catch (error) {
+      console.log('Auth check error:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -108,13 +125,54 @@ export default function SaleLanding() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
+      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xl">LL</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
+              </div>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              {isAuthenticated ? (
+                <>
+                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-white hover:bg-slate-800">
+                    <MessageSquare className="w-5 h-5" />
+                  </Button>
+                  {currentUser && <NotificationsDropdown user={currentUser} />}
+                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                  <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
+                    Get Started Free
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Sale Info */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link to={createPageUrl('Home')} className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-4">
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to All Sales
-          </Link>
-          
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div>
               <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
