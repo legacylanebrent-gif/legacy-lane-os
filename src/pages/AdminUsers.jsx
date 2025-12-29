@@ -8,8 +8,22 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -20,6 +34,7 @@ export default function AdminUsers() {
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [subcategories, setSubcategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -160,6 +175,58 @@ export default function AdminUsers() {
     ? [] 
     : subcategories.filter(sub => sub.account_type === selectedRole);
 
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (userId) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await base44.entities.User.delete(userId);
+      loadUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    }
+  };
+
+  const handleToggleStatus = async (user) => {
+    try {
+      await base44.entities.User.update(user.id, {
+        account_status: user.account_status === 'active' ? 'disabled' : 'active'
+      });
+      loadUsers();
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      alert('Failed to update user status');
+    }
+  };
+
+  const handleApprove = async (userId) => {
+    try {
+      await base44.entities.User.update(userId, {
+        account_status: 'active'
+      });
+      loadUsers();
+    } catch (error) {
+      console.error('Error approving user:', error);
+      alert('Failed to approve user');
+    }
+  };
+
+  const handleDeny = async (userId) => {
+    try {
+      await base44.entities.User.update(userId, {
+        account_status: 'denied'
+      });
+      loadUsers();
+    } catch (error) {
+      console.error('Error denying user:', error);
+      alert('Failed to deny user');
+    }
+  };
+
 
 
   if (loading) {
@@ -196,8 +263,12 @@ export default function AdminUsers() {
 
       <AddUserModal 
         open={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditingUser(null);
+        }}
         onSuccess={loadUsers}
+        editUser={editingUser}
       />
 
       <Card>
@@ -272,10 +343,10 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4">
-        {filteredUsers.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
+      <Card>
+        <CardContent className="p-0">
+          {filteredUsers.length === 0 ? (
+            <div className="p-12 text-center">
               <UserCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500 font-medium mb-2">No users found</p>
               <p className="text-sm text-slate-400 mb-4">Try adjusting your search or filters</p>
@@ -288,87 +359,115 @@ export default function AdminUsers() {
                   Clear Filters
                 </Button>
               )}
-            </CardContent>
-          </Card>
-        ) : (
-          filteredUsers.map(user => {
-            const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-            
-            return (
-              <Card key={user.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={user.profile_image_url} />
-                      <AvatarFallback className="bg-orange-600 text-white text-xl">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Account Type</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map(user => {
+                    const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+                    const status = user.account_status || 'active';
                     
-                    <div className="flex-1 space-y-3">
-                      <div>
-                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="text-xl font-semibold text-slate-900">{user.full_name}</h3>
-                          {user.primary_account_type && (
-                            <Badge className={getRoleBadgeColor(user.primary_account_type)}>
-                              {user.primary_account_type.replace(/_/g, ' ')}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-cyan-600" />
-                            {user.email}
+                    return (
+                      <TableRow key={user.id} className="hover:bg-slate-50">
+                        <TableCell>
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={user.profile_image_url} />
+                            <AvatarFallback className="bg-orange-600 text-white text-sm">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
+                        </TableCell>
+                        <TableCell className="font-medium">{user.full_name}</TableCell>
+                        <TableCell className="text-slate-600">{user.email}</TableCell>
+                        <TableCell>
+                          <Badge className={getRoleBadgeColor(user.primary_account_type)}>
+                            {user.primary_account_type?.replace(/_/g, ' ')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-slate-600">{user.phone || '-'}</TableCell>
+                        <TableCell className="text-slate-600">{user.company_name || user.brokerage_name || '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant={status === 'active' ? 'default' : status === 'disabled' ? 'secondary' : 'destructive'}>
+                            {status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(user)}
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            
+                            {status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleApprove(user.id)}
+                                  title="Approve"
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeny(user.id)}
+                                  title="Deny"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleStatus(user)}
+                              title={status === 'active' ? 'Disable' : 'Enable'}
+                              className={status === 'active' ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50' : 'text-green-600 hover:text-green-700 hover:bg-green-50'}
+                            >
+                              <Power className="w-4 h-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(user.id)}
+                              title="Delete"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          {user.phone && (
-                            <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4 text-cyan-600" />
-                              {user.phone}
-                            </div>
-                          )}
-                          {(user.company_name || user.brokerage_name) && (
-                            <div className="flex items-center gap-2">
-                              <Building2 className="w-4 h-4 text-cyan-600" />
-                              {user.company_name || user.brokerage_name}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-cyan-600" />
-                            Joined {new Date(user.created_date).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-
-                      {user.account_types && user.account_types.length > 1 && (
-                        <div className="flex flex-wrap gap-2">
-                          <span className="text-xs text-slate-500 font-medium">Additional Account Types:</span>
-                          {user.account_types.filter(r => r !== user.primary_account_type).map((type, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {type.replace(/_/g, ' ')}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        {user.divisions_access && user.divisions_access.length > 0 && (
-                          <div className="text-xs text-slate-500">
-                            <span className="font-medium">Divisions:</span> {user.divisions_access.map(d => d.replace(/_/g, ' ')).join(', ')}
-                          </div>
-                        )}
-                        <div className="text-xs text-slate-400 font-mono ml-auto">
-                          ID: {user.id.slice(0, 12)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
