@@ -91,11 +91,6 @@ export default function ConsumerHome() {
           Welcome, {user?.full_name || 'User'}
         </h1>
         <p className="text-slate-600">Manage your profile information</p>
-        <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded">
-          <p className="text-sm font-mono">
-            DEBUG: primary_account_type = "{user?.primary_account_type}"
-          </p>
-        </div>
       </div>
 
       <Card className="max-w-2xl">
