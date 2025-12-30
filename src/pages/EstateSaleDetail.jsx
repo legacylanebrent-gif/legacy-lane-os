@@ -304,22 +304,22 @@ END:VCALENDAR`;
             <div className="flex items-center gap-2">
               {isAuthenticated ? (
                 <>
-                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-white hover:bg-slate-800">
+                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
                     <MessageSquare className="w-5 h-5" />
                   </Button>
                   {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800">
+                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </Button>
-                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800">
+                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800">
+                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
                     <LogIn className="w-4 h-4 mr-2" />
                     Sign In
                   </Button>
