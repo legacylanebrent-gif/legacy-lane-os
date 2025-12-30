@@ -54,6 +54,7 @@ export default function Home() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [mapZoom, setMapZoom] = useState(12);
   const [mapMinZoom, setMapMinZoom] = useState(null);
+  const [debugMessage, setDebugMessage] = useState('');
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -274,6 +275,8 @@ export default function Home() {
       const updated = saved.filter(id => id !== saleId);
       localStorage.setItem('savedSales', JSON.stringify(updated));
       setSavedSales(updated);
+      setDebugMessage('❌ Removed from favorites');
+      setTimeout(() => setDebugMessage(''), 3000);
       
       // Remove connection
       if (currentUser && sale?.operator_id) {
@@ -285,15 +288,19 @@ export default function Home() {
           });
           if (connections.length > 0) {
             await base44.entities.Connection.delete(connections[0].id);
+            setDebugMessage('❌ Connection removed');
+            setTimeout(() => setDebugMessage(''), 3000);
           }
         } catch (error) {
-          console.log('Could not remove connection');
+          setDebugMessage('⚠️ Error removing connection');
+          setTimeout(() => setDebugMessage(''), 3000);
         }
       }
     } else {
       saved.push(saleId);
       localStorage.setItem('savedSales', JSON.stringify(saved));
       setSavedSales(saved);
+      setDebugMessage('✅ Added to favorites (localStorage)');
       
       // Update save count
       if (sale) {
@@ -301,8 +308,9 @@ export default function Home() {
           await base44.entities.EstateSale.update(saleId, {
             saves: (sale.saves || 0) + 1
           });
+          setDebugMessage('✅ Save count updated');
         } catch (error) {
-          console.log('Could not update save count');
+          setDebugMessage('⚠️ Could not update save count');
         }
       }
       
@@ -319,18 +327,17 @@ export default function Home() {
             connection_type: 'favorite',
             source: saleId
           };
-          console.log('Creating connection on Home page:', connectionData);
+          setDebugMessage(`🔄 Creating connection... User: ${currentUser.id}, Operator: ${sale.operator_id}`);
           await base44.entities.Connection.create(connectionData);
-          console.log('Connection created successfully');
+          setDebugMessage('✅ Connection created successfully!');
+          setTimeout(() => setDebugMessage(''), 5000);
         } catch (connError) {
-          console.error('Connection creation error:', connError);
+          setDebugMessage(`❌ Connection error: ${connError.message}`);
+          setTimeout(() => setDebugMessage(''), 5000);
         }
       } else {
-        console.log('Missing data for connection:', { 
-          hasUser: !!currentUser, 
-          operatorId: sale?.operator_id,
-          saleId 
-        });
+        setDebugMessage(`⚠️ Missing: User=${!!currentUser}, Operator=${sale?.operator_id}`);
+        setTimeout(() => setDebugMessage(''), 5000);
       }
     }
   };
@@ -396,6 +403,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Debug Message Banner */}
+      {debugMessage && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-2xl border-2 border-orange-500 max-w-xl">
+          <p className="text-sm font-mono">{debugMessage}</p>
+        </div>
+      )}
+      
       <SaleRequestModal 
         open={showSaleRequestModal} 
         onClose={() => setShowSaleRequestModal(false)} 
