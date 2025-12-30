@@ -161,7 +161,7 @@ export default function Layout({ children, currentPageName }) {
                 <Link to={createPageUrl('Home')}>
                   <Button
                     variant="ghost"
-                    className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <HomeIcon className="h-5 w-5 mr-2" />
                     Home
@@ -173,14 +173,14 @@ export default function Layout({ children, currentPageName }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700/50"
+                className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-slate-700/50 hover:text-orange-400">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.profile_image_url} />
                       <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
@@ -211,7 +211,7 @@ export default function Layout({ children, currentPageName }) {
                       Notification Settings
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
