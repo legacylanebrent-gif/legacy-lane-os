@@ -173,14 +173,14 @@ export default function Layout({ children, currentPageName }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                className="text-orange-400 hover:text-orange-300 hover:bg-slate-700/50"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-slate-700">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-slate-700/50 hover:text-orange-400">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.profile_image_url} />
                       <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
@@ -238,7 +238,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={(isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard') ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       ((isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard'))
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -251,7 +251,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'MyProfile' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -265,7 +265,7 @@ export default function Layout({ children, currentPageName }) {
                       variant={currentPageName === 'MySales' ? 'default' : 'ghost'}
                       className={`w-full justify-start ${
                         currentPageName === 'MySales' 
-                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
                           : 'hover:bg-cyan-50'
                       }`}
                     >
@@ -279,7 +279,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'RewardsCheckins' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'RewardsCheckins' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -292,7 +292,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'Favorites' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'Favorites' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -305,7 +305,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'BrowseItems' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'BrowseItems' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -318,7 +318,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'MyReferrals' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'MyReferrals' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -331,7 +331,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'MyRewards' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'MyRewards' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -344,7 +344,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'MyTickets' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'MyTickets' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -357,7 +357,7 @@ export default function Layout({ children, currentPageName }) {
                     variant={currentPageName === 'Notifications' ? 'default' : 'ghost'}
                     className={`w-full justify-start ${
                       currentPageName === 'Notifications' 
-                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
                         : 'hover:bg-cyan-50'
                     }`}
                   >
@@ -372,7 +372,7 @@ export default function Layout({ children, currentPageName }) {
                         variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
                         className={`w-full justify-start ${
                           currentPageName === 'IncomeTracker' 
-                            ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                            ? 'bg-orange-600 text-white hover:bg-orange-500' 
                             : 'hover:bg-cyan-50'
                         }`}
                       >
@@ -385,7 +385,7 @@ export default function Layout({ children, currentPageName }) {
                         variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
                         className={`w-full justify-start ${
                           currentPageName === 'MyBusinessExpenses' 
-                            ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                            ? 'bg-orange-600 text-white hover:bg-orange-500' 
                             : 'hover:bg-cyan-50'
                         }`}
                       >
