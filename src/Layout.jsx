@@ -284,7 +284,7 @@ export default function Layout({ children, currentPageName }) {
                     }`}
                   >
                     <MapPin className="w-5 h-5 mr-3" />
-                    Rewards & Check-ins
+                    Check-ins
                   </Button>
                 </Link>
                 <Link to={createPageUrl('Favorites')}>
