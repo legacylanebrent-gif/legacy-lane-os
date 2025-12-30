@@ -32,6 +32,7 @@ export default function Favorites() {
   const loadFavorites = async () => {
     try {
       const user = await base44.auth.me();
+      console.log('Loading favorites for user:', user.id);
       
       // Load connections where user is the connected user and type is favorite
       const connections = await base44.entities.Connection.filter({
@@ -39,6 +40,7 @@ export default function Favorites() {
         connection_type: 'favorite'
       });
       
+      console.log('Found connections:', connections.length, connections);
       setFavorites(connections);
       
       // Load estate sale details for each connection
@@ -143,6 +145,9 @@ export default function Favorites() {
           </h1>
           <p className="text-slate-600">{filteredFavorites.length} saved estate {filteredFavorites.length === 1 ? 'sale' : 'sales'}</p>
         </div>
+        <Button onClick={loadFavorites} variant="outline">
+          Refresh
+        </Button>
       </div>
 
       {/* Search */}
