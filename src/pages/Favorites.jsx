@@ -18,6 +18,7 @@ export default function Favorites() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [routeSales, setRouteSales] = useState([]);
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     loadFavorites();
@@ -32,7 +33,7 @@ export default function Favorites() {
   const loadFavorites = async () => {
     try {
       const user = await base44.auth.me();
-      console.log('Loading favorites for user:', user.id);
+      setDebugInfo(`Loading favorites for user: ${user.id}`);
       
       // Load connections where user is the connected user and type is favorite
       const connections = await base44.entities.Connection.filter({
@@ -40,7 +41,7 @@ export default function Favorites() {
         connection_type: 'favorite'
       });
       
-      console.log('Found connections:', connections.length, connections);
+      setDebugInfo(`Found ${connections.length} connections: ${JSON.stringify(connections.map(c => ({ id: c.id, source: c.source })))}`);
       setFavorites(connections);
       
       // Load estate sale details for each connection
@@ -138,6 +139,13 @@ export default function Favorites() {
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
+      {/* Debug Info */}
+      {debugInfo && (
+        <div className="bg-slate-900 text-white px-6 py-3 rounded-lg shadow-lg">
+          <p className="text-sm font-mono">{debugInfo}</p>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
