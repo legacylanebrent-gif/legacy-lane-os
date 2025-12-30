@@ -31,7 +31,12 @@ export default function EstateSaleDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const saleId = urlParams.get('id');
+    const savedSales = JSON.parse(localStorage.getItem('savedSales') || '[]');
+    return savedSales.includes(saleId);
+  });
   const [savedImages, setSavedImages] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const saleId = urlParams.get('id');
@@ -111,12 +116,42 @@ export default function EstateSaleDetail() {
   };
 
   const handleSave = async () => {
-    setSaved(!saved);
-    if (!saved && sale) {
+    const savedSales = JSON.parse(localStorage.getItem('savedSales') || '[]');
+    
+    if (saved) {
+      // Remove from saved
+      const updated = savedSales.filter(id => id !== sale.id);
+      localStorage.setItem('savedSales', JSON.stringify(updated));
+      setSaved(false);
+    } else {
+      // Add to saved
+      savedSales.push(sale.id);
+      localStorage.setItem('savedSales', JSON.stringify(savedSales));
+      setSaved(true);
+      
+      // Update save count
       try {
         await base44.entities.EstateSale.update(sale.id, {
           saves: (sale.saves || 0) + 1
         });
+        
+        // Create connection if user is authenticated and operator exists
+        if (currentUser && operator) {
+          try {
+            await base44.entities.Connection.create({
+              account_owner_id: operator.id,
+              account_owner_type: 'estate_sale_operator',
+              connected_user_id: currentUser.id,
+              connected_user_name: currentUser.full_name,
+              connected_user_email: currentUser.email,
+              connected_user_phone: currentUser.phone,
+              connection_type: 'favorite',
+              source: sale.id
+            });
+          } catch (connError) {
+            console.log('Connection already exists or could not create');
+          }
+        }
       } catch (error) {
         console.log('Could not update save count');
       }
