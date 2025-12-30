@@ -309,7 +309,7 @@ export default function Home() {
       // Create connection
       if (currentUser && sale?.operator_id) {
         try {
-          await base44.entities.Connection.create({
+          const connectionData = {
             account_owner_id: sale.operator_id,
             account_owner_type: 'estate_sale_operator',
             connected_user_id: currentUser.id,
@@ -318,10 +318,19 @@ export default function Home() {
             connected_user_phone: currentUser.phone || '',
             connection_type: 'favorite',
             source: saleId
-          });
+          };
+          console.log('Creating connection on Home page:', connectionData);
+          await base44.entities.Connection.create(connectionData);
+          console.log('Connection created successfully');
         } catch (connError) {
-          console.log('Connection already exists or could not create:', connError);
+          console.error('Connection creation error:', connError);
         }
+      } else {
+        console.log('Missing data for connection:', { 
+          hasUser: !!currentUser, 
+          operatorId: sale?.operator_id,
+          saleId 
+        });
       }
     }
   };
