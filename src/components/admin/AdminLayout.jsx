@@ -14,7 +14,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Notifications', path: 'Notifications', icon: Bell },
   { label: 'My Profile', path: 'MyProfile', icon: User },
   { label: 'My Sales', path: 'MySales', icon: Building2 },
-  { label: 'Rewards & Check-ins', path: 'RewardsCheckins', icon: MapPin },
+  { label: 'Check-ins', path: 'RewardsCheckins', icon: MapPin },
   { label: 'Favorites', path: 'Favorites', icon: Heart },
   { label: 'CRM', path: 'CRM', icon: Users },
   { label: 'Marketplace', path: 'AdminMarketplace', icon: ShoppingBag },
