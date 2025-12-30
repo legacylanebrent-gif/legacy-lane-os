@@ -2,45 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Search, Mail, Phone, Building2, MapPin, Star, Trash2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  Heart, Search, MapPin, Calendar, Trash2, Star, Building2, Mail, Phone, Navigation, Bookmark
+} from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Favorites() {
   const [favorites, setFavorites] = useState([]);
-  const [businesses, setBusinesses] = useState({});
+  const [saleDetails, setSaleDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [routeSales, setRouteSales] = useState([]);
 
   useEffect(() => {
     loadFavorites();
+    loadRoute();
   }, []);
+
+  const loadRoute = () => {
+    const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+    setRouteSales(route);
+  };
 
   const loadFavorites = async () => {
     try {
       const user = await base44.auth.me();
       
-      // Get all connections where this user favorited a business
+      // Load connections where user is the connected user and type is favorite
       const connections = await base44.entities.Connection.filter({
         connected_user_id: user.id,
         connection_type: 'favorite'
-      }, '-created_date');
-
+      });
+      
       setFavorites(connections);
-
-      // Load business details for all favorited accounts
-      const businessIds = connections.map(c => c.account_owner_id);
-      const users = await base44.entities.User.list();
-      const businessMap = {};
-      users.forEach(u => {
-        if (businessIds.includes(u.id)) {
-          businessMap[u.id] = u;
+      
+      // Load estate sale details for each connection
+      const saleIds = [...new Set(connections.map(c => c.source).filter(s => s))];
+      const sales = await Promise.all(
+        saleIds.map(id => 
+          base44.entities.EstateSale.filter({ id }).then(sales => sales[0])
+        )
+      );
+      
+      const saleMap = {};
+      sales.forEach(sale => {
+        if (sale) {
+          saleMap[sale.id] = sale;
         }
       });
-      setBusinesses(businessMap);
+      
+      setSaleDetails(saleMap);
     } catch (error) {
       console.error('Error loading favorites:', error);
     } finally {
@@ -49,164 +65,208 @@ export default function Favorites() {
   };
 
   const handleRemoveFavorite = async (favoriteId) => {
-    if (!confirm('Remove this business from your favorites?')) return;
+    if (!confirm('Remove this sale from your favorites?')) return;
     
     try {
       await base44.entities.Connection.delete(favoriteId);
+      
+      // Also remove from localStorage
+      const saved = JSON.parse(localStorage.getItem('savedSales') || '[]');
+      const favorite = favorites.find(f => f.id === favoriteId);
+      if (favorite?.source) {
+        const updated = saved.filter(id => id !== favorite.source);
+        localStorage.setItem('savedSales', JSON.stringify(updated));
+      }
+      
       loadFavorites();
     } catch (error) {
       console.error('Error removing favorite:', error);
-      alert('Error removing favorite');
+      alert('Failed to remove favorite');
     }
   };
 
-  const filteredFavorites = searchQuery.trim()
-    ? favorites.filter(f => {
-        const business = businesses[f.account_owner_id];
-        return business?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               business?.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               business?.email?.toLowerCase().includes(searchQuery.toLowerCase());
-      })
-    : favorites;
+  const handleAddToRoute = (e, saleId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
+    if (route.includes(saleId)) {
+      const updated = route.filter(id => id !== saleId);
+      localStorage.setItem('estateRoute', JSON.stringify(updated));
+      setRouteSales(updated);
+    } else {
+      route.push(saleId);
+      localStorage.setItem('estateRoute', JSON.stringify(route));
+      setRouteSales(route);
+    }
+  };
+
+  const handleGetDirections = (e, sale) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (sale.property_address) {
+      const address = `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`;
+      window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(address)}`, '_blank');
+    }
+  };
+
+  const filteredFavorites = favorites.filter(fav => {
+    const sale = saleDetails[fav.source];
+    if (!sale) return false;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      sale.title?.toLowerCase().includes(query) ||
+      sale.property_address?.city?.toLowerCase().includes(query) ||
+      sale.property_address?.state?.toLowerCase().includes(query)
+    );
+  });
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-slate-200 rounded w-1/3"></div>
-          <div className="h-96 bg-slate-200 rounded"></div>
+      <div className="p-6 lg:p-8 space-y-6">
+        <Skeleton className="h-12 w-64" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 lg:p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">My Favorites</h1>
-          <p className="text-slate-600 mt-1">Businesses you've saved for quick access</p>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
+            ❤️ My Favorites
+          </h1>
+          <p className="text-slate-600">{filteredFavorites.length} saved estate {filteredFavorites.length === 1 ? 'sale' : 'sales'}</p>
         </div>
-        <Badge className="bg-pink-100 text-pink-700 text-lg px-4 py-2">
-          <Heart className="w-5 h-5 mr-2 fill-current" />
-          {favorites.length} {favorites.length === 1 ? 'Favorite' : 'Favorites'}
-        </Badge>
       </div>
 
-      {favorites.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <Input
-                placeholder="Search favorites..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+        <Input
+          placeholder="Search favorites..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
 
       {filteredFavorites.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Favorites Yet</h3>
-            <p className="text-slate-600 mb-6">
-              {searchQuery.trim() ? 'No favorites match your search' : 'Start adding businesses to your favorites by clicking the heart icon'}
-            </p>
-            <Link to={createPageUrl('Home')}>
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
-                Browse Estate Sales
-              </Button>
-            </Link>
-          </CardContent>
+        <Card className="p-12 text-center">
+          <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">No Favorites Yet</h3>
+          <p className="text-slate-600 mb-6">
+            {searchQuery ? 'No favorites match your search.' : 'Start saving estate sales you\'re interested in!'}
+          </p>
+          <Link to={createPageUrl('Home')}>
+            <Button className="bg-orange-600 hover:bg-orange-700">
+              Browse Estate Sales
+            </Button>
+          </Link>
         </Card>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFavorites.map((favorite) => {
-            const business = businesses[favorite.account_owner_id];
-            if (!business) return null;
+          {filteredFavorites.map(favorite => {
+            const sale = saleDetails[favorite.source];
+            if (!sale) return null;
 
             return (
-              <Card key={favorite.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="bg-gradient-to-br from-pink-50 to-orange-50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
-                        {business.logo_url ? (
-                          <img src={business.logo_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <Building2 className="w-6 h-6 text-cyan-600" />
-                        )}
+              <Card key={favorite.id} className="overflow-hidden hover:shadow-xl transition-shadow group">
+                <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+                  {sale.images && sale.images.length > 0 && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={sale.images[0].url || sale.images[0]}
+                        alt={sale.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 left-3 bg-red-600 text-white rounded-full p-2 shadow-lg">
+                        <Heart className="w-4 h-4 fill-current" />
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{business.company_name || business.full_name}</CardTitle>
-                        <Badge variant="outline" className="mt-1 text-xs capitalize">
-                          {favorite.account_owner_type?.replace('_', ' ')}
+                      {sale.national_featured && (
+                        <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
+                          National Featured
                         </Badge>
-                      </div>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleRemoveFavorite(favorite.id)}
-                      className="text-pink-600 hover:text-pink-700 hover:bg-pink-100"
-                    >
-                      <Heart className="w-5 h-5 fill-current" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  {business.bio && (
-                    <p className="text-sm text-slate-600 line-clamp-2">{business.bio}</p>
-                  )}
-                  
-                  <div className="space-y-2 text-sm">
-                    {business.email && (
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Mail className="w-4 h-4" />
-                        <span className="truncate">{business.email}</span>
-                      </div>
-                    )}
-                    {business.phone && (
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Phone className="w-4 h-4" />
-                        <span>{business.phone}</span>
-                      </div>
-                    )}
-                    {business.city && business.state && (
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <MapPin className="w-4 h-4" />
-                        <span>{business.city}, {business.state}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {business.rating && (
-                    <div className="flex items-center gap-1 text-orange-600">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="font-semibold">{business.rating.toFixed(1)}</span>
-                      {business.total_reviews > 0 && (
-                        <span className="text-xs text-slate-500">({business.total_reviews} reviews)</span>
+                      )}
+                      {!sale.national_featured && sale.local_featured && (
+                        <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">
+                          Local Featured
+                        </Badge>
                       )}
                     </div>
                   )}
+                  <CardContent className="p-5">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 group-hover:text-orange-600 transition-colors">
+                      {sale.title}
+                    </h3>
 
-                  <div className="pt-3 border-t flex gap-2">
-                    <Link to={createPageUrl('BusinessProfile') + '?id=' + business.id} className="flex-1">
-                      <Button className="w-full bg-cyan-600 hover:bg-cyan-700">
-                        View Profile
+                    <div className="space-y-2 text-sm mb-4">
+                      <div className="flex items-start gap-2 text-slate-600">
+                        <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                        <span>
+                          {sale.property_address?.street && `${sale.property_address.street}, `}
+                          {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                        </span>
+                      </div>
+
+                      {sale.sale_dates && sale.sale_dates.length > 0 && (
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                          <div className="flex items-center justify-between flex-1">
+                            <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                            {sale.sale_dates[0].start_time && (
+                              <span className="text-xs text-slate-500">
+                                {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t space-y-2">
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={(e) => handleAddToRoute(e, sale.id)}
+                          variant="outline"
+                          size="sm"
+                          className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                        >
+                          <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                          {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                        </Button>
+                        <Button
+                          onClick={(e) => handleGetDirections(e, sale)}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                        >
+                          <Navigation className="w-4 h-4 mr-1" />
+                          Directions
+                        </Button>
+                      </div>
+                      
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleRemoveFavorite(favorite.id);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Remove from Favorites
                       </Button>
-                    </Link>
-                  </div>
-
-                  <div className="text-xs text-slate-500 text-center">
-                    Added {format(new Date(favorite.created_date), 'MMM d, yyyy')}
-                  </div>
-                </CardContent>
+                    </div>
+                  </CardContent>
+                </Link>
               </Card>
             );
           })}
