@@ -345,16 +345,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {currentUser && (
-        <div className="p-4 bg-yellow-100 border-2 border-yellow-600 m-4 sticky top-0 z-50">
-          <div className="font-mono text-sm space-y-1">
-            <div>DEBUG INFO (Home Page):</div>
-            <div>primary_account_type: "{currentUser?.primary_account_type}"</div>
-            <div>primary_role: "{currentUser?.primary_role}"</div>
-          </div>
-        </div>
-      )}
-      
       <SaleRequestModal 
         open={showSaleRequestModal} 
         onClose={() => setShowSaleRequestModal(false)} 
