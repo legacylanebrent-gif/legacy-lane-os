@@ -261,25 +261,67 @@ export default function Home() {
   const handleSaveSale = async (e, saleId) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+
     const saved = JSON.parse(localStorage.getItem('savedSales') || '[]');
+    const sale = sales.find(s => s.id === saleId);
+    
     if (saved.includes(saleId)) {
       const updated = saved.filter(id => id !== saleId);
       localStorage.setItem('savedSales', JSON.stringify(updated));
       setSavedSales(updated);
+      
+      // Remove connection
+      if (currentUser && sale?.operator_id) {
+        try {
+          const connections = await base44.entities.Connection.filter({
+            connected_user_id: currentUser.id,
+            account_owner_id: sale.operator_id,
+            source: saleId
+          });
+          if (connections.length > 0) {
+            await base44.entities.Connection.delete(connections[0].id);
+          }
+        } catch (error) {
+          console.log('Could not remove connection');
+        }
+      }
     } else {
       saved.push(saleId);
       localStorage.setItem('savedSales', JSON.stringify(saved));
       setSavedSales(saved);
+      
       // Update save count
-      try {
-        const sale = sales.find(s => s.id === saleId);
-        if (sale) {
+      if (sale) {
+        try {
           await base44.entities.EstateSale.update(saleId, {
             saves: (sale.saves || 0) + 1
           });
+        } catch (error) {
+          console.log('Could not update save count');
         }
-      } catch (error) {
-        console.log('Could not update save count');
+      }
+      
+      // Create connection
+      if (currentUser && sale?.operator_id) {
+        try {
+          await base44.entities.Connection.create({
+            account_owner_id: sale.operator_id,
+            account_owner_type: 'estate_sale_operator',
+            connected_user_id: currentUser.id,
+            connected_user_name: currentUser.full_name,
+            connected_user_email: currentUser.email,
+            connected_user_phone: currentUser.phone || '',
+            connection_type: 'favorite',
+            source: saleId
+          });
+        } catch (connError) {
+          console.log('Connection already exists or could not create:', connError);
+        }
       }
     }
   };
