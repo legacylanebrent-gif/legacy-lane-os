@@ -116,6 +116,12 @@ export default function EstateSaleDetail() {
   };
 
   const handleSave = async () => {
+    if (!currentUser) {
+      // Redirect to login if not authenticated
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+
     const savedSales = JSON.parse(localStorage.getItem('savedSales') || '[]');
     
     if (saved) {
@@ -123,6 +129,20 @@ export default function EstateSaleDetail() {
       const updated = savedSales.filter(id => id !== sale.id);
       localStorage.setItem('savedSales', JSON.stringify(updated));
       setSaved(false);
+      
+      // Remove connection
+      try {
+        const connections = await base44.entities.Connection.filter({
+          connected_user_id: currentUser.id,
+          account_owner_id: sale.operator_id,
+          source: sale.id
+        });
+        if (connections.length > 0) {
+          await base44.entities.Connection.delete(connections[0].id);
+        }
+      } catch (error) {
+        console.log('Could not remove connection');
+      }
     } else {
       // Add to saved
       savedSales.push(sale.id);
@@ -134,26 +154,26 @@ export default function EstateSaleDetail() {
         await base44.entities.EstateSale.update(sale.id, {
           saves: (sale.saves || 0) + 1
         });
-        
-        // Create connection if user is authenticated and operator exists
-        if (currentUser && operator) {
-          try {
-            await base44.entities.Connection.create({
-              account_owner_id: operator.id,
-              account_owner_type: 'estate_sale_operator',
-              connected_user_id: currentUser.id,
-              connected_user_name: currentUser.full_name,
-              connected_user_email: currentUser.email,
-              connected_user_phone: currentUser.phone,
-              connection_type: 'favorite',
-              source: sale.id
-            });
-          } catch (connError) {
-            console.log('Connection already exists or could not create');
-          }
-        }
       } catch (error) {
         console.log('Could not update save count');
+      }
+      
+      // Create connection
+      if (sale.operator_id) {
+        try {
+          await base44.entities.Connection.create({
+            account_owner_id: sale.operator_id,
+            account_owner_type: 'estate_sale_operator',
+            connected_user_id: currentUser.id,
+            connected_user_name: currentUser.full_name,
+            connected_user_email: currentUser.email,
+            connected_user_phone: currentUser.phone || '',
+            connection_type: 'favorite',
+            source: sale.id
+          });
+        } catch (connError) {
+          console.log('Connection already exists or could not create:', connError);
+        }
       }
     }
   };
