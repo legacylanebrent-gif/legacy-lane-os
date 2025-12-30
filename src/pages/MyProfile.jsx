@@ -185,6 +185,8 @@ export default function MyProfile() {
   }
 
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+  const accountType = user?.primary_account_type || user?.primary_role || 'consumer';
+  const isConsumerType = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor';
 
   return (
     <div className="p-6 lg:p-8 pb-32 space-y-6">
@@ -194,11 +196,11 @@ export default function MyProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className={`grid w-full ${isConsumerType ? 'grid-cols-2' : 'grid-cols-4'} max-w-2xl`}>
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="sales">My Sales</TabsTrigger>
+          {!isConsumerType && <TabsTrigger value="sales">My Sales</TabsTrigger>}
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          {!isConsumerType && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
         </TabsList>
 
         {/* Profile Tab */}
