@@ -235,16 +235,11 @@ export default function RewardsCheckins() {
       </div>
 
       <Tabs defaultValue="checkins" className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="checkins" className="text-xs sm:text-sm">
             <MapPin className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">My Check-ins</span>
             <span className="sm:hidden">Check-ins</span>
-          </TabsTrigger>
-          <TabsTrigger value="rewards" className="text-xs sm:text-sm">
-            <Gift className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">My Rewards</span>
-            <span className="sm:hidden">Rewards</span>
           </TabsTrigger>
           <TabsTrigger value="actions" className="text-xs sm:text-sm">
             <Target className="w-4 h-4 sm:mr-2" />
@@ -319,51 +314,7 @@ export default function RewardsCheckins() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="rewards" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Earned Rewards</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userRewards.length === 0 ? (
-                <div className="text-center py-12 text-slate-500">
-                  <Gift className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <p>No rewards earned yet</p>
-                  <p className="text-sm mt-2">Complete actions to earn points and rewards</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {userRewards.map((reward) => (
-                    <div
-                      key={reward.id}
-                      className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-4 border rounded-lg"
-                    >
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Award className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div className="flex-1 w-full">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-slate-900">{reward.action_name}</h4>
-                            <p className="text-sm text-slate-600 mt-1">
-                              {reward.description || 'Reward earned'}
-                            </p>
-                            <p className="text-xs text-slate-500 mt-2">
-                              {format(new Date(reward.created_date), 'PPP')}
-                            </p>
-                          </div>
-                          <Badge className="bg-orange-100 text-orange-700 text-sm sm:text-lg px-2 sm:px-3 py-1 whitespace-nowrap">
-                            +{reward.points_earned} pts
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
         <TabsContent value="actions" className="space-y-4">
           <Card>
