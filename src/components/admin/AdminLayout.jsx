@@ -114,13 +114,6 @@ export default function AdminLayout({ children, currentPage, user }) {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-32">
-        <div className="p-4 bg-yellow-100 border-2 border-yellow-600 m-4">
-          <div className="font-mono text-sm space-y-1">
-            <div>DEBUG INFO (AdminLayout):</div>
-            <div>primary_account_type: "{user?.primary_account_type}"</div>
-            <div>primary_role: "{user?.primary_role}"</div>
-          </div>
-        </div>
         {children}
       </main>
     </div>
