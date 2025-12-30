@@ -459,14 +459,6 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-0">
-          <div className="p-4 bg-yellow-100 border-2 border-yellow-600 m-4">
-            <div className="font-mono text-sm space-y-1">
-              <div>DEBUG INFO:</div>
-              <div>primary_account_type: "{user?.primary_account_type}"</div>
-              <div>primary_role: "{user?.primary_role}"</div>
-              <div>accountType variable: "{accountType}"</div>
-            </div>
-          </div>
           {children}
         </main>
       </div>
