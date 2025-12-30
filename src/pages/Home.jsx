@@ -510,7 +510,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => setShowQRScanner(true)}
                     title="QR Check-in"
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <QrCode className="w-5 h-5" />
                   </Button>
@@ -519,7 +519,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => setShowPurchaseModal(true)}
                     title="Record Purchase"
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <Receipt className="w-5 h-5" />
                   </Button>
@@ -528,7 +528,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => window.location.href = createPageUrl('Messages')}
                     title="Messages"
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <MessageSquare className="w-5 h-5" />
                   </Button>
@@ -536,7 +536,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => window.location.href = createPageUrl('Dashboard')}
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
@@ -544,7 +544,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => base44.auth.logout()}
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
@@ -555,7 +555,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                    className="text-white hover:bg-slate-800"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
                     Sign In
