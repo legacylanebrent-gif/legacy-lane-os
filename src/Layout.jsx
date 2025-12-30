@@ -233,35 +233,19 @@ export default function Layout({ children, currentPageName }) {
           <div className="p-6 overflow-y-auto h-full">
             <div className="space-y-6">
               <div className="space-y-1">
-                {isConsumerType ? (
-                  <Link to={createPageUrl('Home')}>
-                    <Button 
-                      variant={currentPageName === 'Home' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'Home' 
-                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <HomeIcon className="w-5 h-5 mr-3" />
-                      Home
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link to={createPageUrl('Dashboard')}>
-                    <Button 
-                      variant={currentPageName === 'Dashboard' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'Dashboard' 
-                          ? 'bg-slate-800 text-white hover:bg-slate-700' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <Home className="w-5 h-5 mr-3" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                )}
+                <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')}>
+                  <Button 
+                    variant={(isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard') ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      ((isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard'))
+                        ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <Home className="w-5 h-5 mr-3" />
+                    {isConsumerType ? 'Home' : 'Dashboard'}
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('MyProfile')}>
                   <Button 
                     variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
