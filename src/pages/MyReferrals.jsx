@@ -257,10 +257,10 @@ export default function MyReferrals() {
                 >
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">
-                      {referral.referred_company_name || 'Company Name Not Yet Provided'}
+                      {referral.referred_user_name || 'Company Name Not Yet Provided'}
                     </p>
                     <p className="text-sm text-slate-600">
-                      {referral.referred_email || 'Email not provided'}
+                      {referral.referred_user_email || 'Email not provided'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       Referred on {new Date(referral.created_date).toLocaleDateString()}
