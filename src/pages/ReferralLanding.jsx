@@ -19,6 +19,7 @@ export default function ReferralLanding() {
 
   useEffect(() => {
     loadData();
+    processPostSignup();
   }, []);
 
   const loadData = async () => {
@@ -53,12 +54,138 @@ export default function ReferralLanding() {
     }
   };
 
-  const handleSignUp = () => {
-    // Redirect to OperatorPackages with referral code
-    if (referralCode) {
-      navigate(createPageUrl('OperatorPackages') + `?ref=${referralCode}`);
-    } else {
-      navigate(createPageUrl('OperatorPackages'));
+  const processPostSignup = async () => {
+    try {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      const pkgId = params.get('pkg');
+
+      if (pkgId) {
+        const user = await base44.auth.me();
+        
+        // Update user to operator account type
+        await base44.auth.updateMe({
+          primary_account_type: 'estate_sale_operator',
+          selected_package: pkgId,
+          subscription_tier: 'basic'
+        });
+
+        // Create referral if ref code exists
+        if (ref) {
+          try {
+            const users = await base44.entities.User.list();
+            const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === ref);
+            
+            if (referrer) {
+              await base44.entities.Referral.create({
+                referrer_id: referrer.id,
+                referrer_name: referrer.full_name,
+                referrer_email: referrer.email,
+                referred_user_id: user.id,
+                referred_user_name: user.full_name,
+                referred_user_email: user.email,
+                account_type: 'estate_sale_operator',
+                status: 'converted',
+                referral_code: ref
+              });
+
+              await base44.entities.Connection.create({
+                account_owner_id: referrer.id,
+                account_owner_type: 'estate_sale_operator',
+                connected_user_id: user.id,
+                connected_user_name: user.full_name,
+                connected_user_email: user.email,
+                connection_type: 'referral',
+                source: 'operator_signup'
+              });
+            }
+          } catch (refError) {
+            console.error('Error creating referral:', refError);
+          }
+        }
+
+        // Clear params and redirect to dashboard
+        window.history.replaceState({}, '', window.location.pathname);
+        window.location.href = createPageUrl('Dashboard');
+      }
+    } catch (error) {
+      console.error('Error processing post-signup:', error);
+    }
+  };
+
+  const handleSignUp = async (selectedPkg = null) => {
+    try {
+      const isAuth = await base44.auth.isAuthenticated();
+      
+      if (!isAuth) {
+        // Build return URL with package and ref info
+        let returnUrl = window.location.pathname;
+        const params = new URLSearchParams();
+        
+        if (referralCode) {
+          params.append('ref', referralCode);
+        }
+        if (selectedPkg) {
+          params.append('pkg', selectedPkg.id);
+        }
+        
+        if (params.toString()) {
+          returnUrl += '?' + params.toString();
+        }
+        
+        base44.auth.redirectToLogin(returnUrl);
+      } else {
+        // Already authenticated, process immediately
+        const user = await base44.auth.me();
+        
+        await base44.auth.updateMe({
+          primary_account_type: 'estate_sale_operator',
+          selected_package: selectedPkg?.id,
+          subscription_tier: selectedPkg?.tier_level || 'basic'
+        });
+
+        // Create referral if ref exists
+        if (referralCode) {
+          try {
+            const users = await base44.entities.User.list();
+            const referrerUser = users.find(u => u.id.slice(0, 8).toUpperCase() === referralCode);
+            
+            if (referrerUser) {
+              await base44.entities.Referral.create({
+                referrer_id: referrerUser.id,
+                referrer_name: referrerUser.full_name,
+                referrer_email: referrerUser.email,
+                referred_user_id: user.id,
+                referred_user_name: user.full_name,
+                referred_user_email: user.email,
+                account_type: 'estate_sale_operator',
+                status: 'converted',
+                referral_code: referralCode
+              });
+
+              await base44.entities.Connection.create({
+                account_owner_id: referrerUser.id,
+                account_owner_type: 'estate_sale_operator',
+                connected_user_id: user.id,
+                connected_user_name: user.full_name,
+                connected_user_email: user.email,
+                connection_type: 'referral',
+                source: 'operator_signup'
+              });
+            }
+          } catch (refError) {
+            console.error('Error creating referral:', refError);
+          }
+        }
+        
+        window.location.href = createPageUrl('Dashboard');
+      }
+    } catch (error) {
+      console.error('Error during sign up:', error);
+      alert('There was an error. Please try again.');
     }
   };
 
@@ -294,7 +421,7 @@ export default function ReferralLanding() {
                     )}
 
                     <Button 
-                      onClick={handleSignUp}
+                      onClick={() => handleSignUp(pkg)}
                       className={`w-full ${
                         pkg.featured 
                           ? 'bg-orange-600 hover:bg-orange-700' 
