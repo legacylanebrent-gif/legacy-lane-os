@@ -51,10 +51,36 @@ export default function OperatorPackages() {
     return colors[tier] || 'bg-slate-100 text-slate-700';
   };
 
-  const handleSignUp = (pkg) => {
-    // TODO: Implement sign up flow
-    console.log('Sign up for package:', pkg);
-    alert('Sign up flow coming soon!');
+  const handleSignUp = async (pkg) => {
+    try {
+      // Check if user is authenticated
+      const isAuth = await base44.auth.isAuthenticated();
+      
+      if (!isAuth) {
+        // Redirect to login with return URL
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        const returnUrl = ref 
+          ? `${window.location.pathname}?ref=${ref}`
+          : window.location.pathname;
+        base44.auth.redirectToLogin(returnUrl);
+      } else {
+        // User is authenticated, proceed with package selection
+        const user = await base44.auth.me();
+        
+        // Create subscription (for now, just update user with selected package)
+        await base44.auth.updateMe({
+          selected_package: pkg.id,
+          subscription_tier: pkg.data?.tier_level || pkg.tier_level
+        });
+        
+        // Redirect to dashboard
+        window.location.href = createPageUrl('Dashboard');
+      }
+    } catch (error) {
+      console.error('Error during sign up:', error);
+      alert('There was an error. Please try again.');
+    }
   };
 
   if (loading) {
@@ -165,10 +191,16 @@ export default function OperatorPackages() {
                 <CardContent>
                   {/* Pricing */}
                   <div className="text-center mb-6 pb-6 border-b">
+                    <div className="mb-2">
+                      <Badge className="bg-green-600 text-white text-sm px-3 py-1">
+                        FREE 1 Month Trial
+                      </Badge>
+                    </div>
                     <div className="flex items-baseline justify-center gap-1">
                       <span className="text-5xl font-bold text-slate-900">${price}</span>
                       <span className="text-slate-600">/mo</span>
                     </div>
+                    <p className="text-sm text-slate-500 mt-1">after trial period</p>
                     {isAnnual && pkgData.annual_price && (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-slate-600">
