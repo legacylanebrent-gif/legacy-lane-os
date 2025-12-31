@@ -15,6 +15,7 @@ export default function OperatorPackages() {
 
   useEffect(() => {
     loadPackages();
+    processPostSignup();
   }, []);
 
   const loadPackages = async () => {
@@ -51,30 +52,131 @@ export default function OperatorPackages() {
     return colors[tier] || 'bg-slate-100 text-slate-700';
   };
 
+  const processPostSignup = async () => {
+    try {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      const pkgId = params.get('pkg');
+
+      if (pkgId) {
+        const user = await base44.auth.me();
+        
+        // Update user to operator account type
+        await base44.auth.updateMe({
+          primary_account_type: 'estate_sale_operator',
+          selected_package: pkgId,
+          subscription_tier: 'basic'
+        });
+
+        // Create referral if ref code exists
+        if (ref) {
+          try {
+            const users = await base44.entities.User.list();
+            const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === ref);
+            
+            if (referrer) {
+              await base44.entities.Referral.create({
+                referrer_id: referrer.id,
+                referrer_name: referrer.full_name,
+                referrer_email: referrer.email,
+                referred_user_id: user.id,
+                referred_user_name: user.full_name,
+                referred_user_email: user.email,
+                account_type: 'estate_sale_operator',
+                status: 'converted',
+                referral_code: ref
+              });
+
+              // Create connection for the referrer
+              await base44.entities.Connection.create({
+                account_owner_id: referrer.id,
+                account_owner_type: 'estate_sale_operator',
+                connected_user_id: user.id,
+                connected_user_name: user.full_name,
+                connected_user_email: user.email,
+                connection_type: 'referral',
+                source: 'operator_signup'
+              });
+            }
+          } catch (refError) {
+            console.error('Error creating referral:', refError);
+          }
+        }
+
+        // Clear params and redirect to dashboard
+        window.history.replaceState({}, '', window.location.pathname);
+        window.location.href = createPageUrl('Dashboard');
+      }
+    } catch (error) {
+      console.error('Error processing post-signup:', error);
+    }
+  };
+
   const handleSignUp = async (pkg) => {
     try {
-      // Check if user is authenticated
       const isAuth = await base44.auth.isAuthenticated();
       
       if (!isAuth) {
-        // Redirect to login with return URL
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');
-        const returnUrl = ref 
-          ? `${window.location.pathname}?ref=${ref}`
-          : window.location.pathname;
+        const pkgId = pkg.id;
+        
+        // Build return URL with package and ref info
+        let returnUrl = `${window.location.pathname}?pkg=${pkgId}`;
+        if (ref) {
+          returnUrl += `&ref=${ref}`;
+        }
+        
         base44.auth.redirectToLogin(returnUrl);
       } else {
-        // User is authenticated, proceed with package selection
+        // Already authenticated, process immediately
         const user = await base44.auth.me();
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
         
-        // Create subscription (for now, just update user with selected package)
         await base44.auth.updateMe({
+          primary_account_type: 'estate_sale_operator',
           selected_package: pkg.id,
           subscription_tier: pkg.data?.tier_level || pkg.tier_level
         });
+
+        // Create referral if ref exists
+        if (ref) {
+          try {
+            const users = await base44.entities.User.list();
+            const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === ref);
+            
+            if (referrer) {
+              await base44.entities.Referral.create({
+                referrer_id: referrer.id,
+                referrer_name: referrer.full_name,
+                referrer_email: referrer.email,
+                referred_user_id: user.id,
+                referred_user_name: user.full_name,
+                referred_user_email: user.email,
+                account_type: 'estate_sale_operator',
+                status: 'converted',
+                referral_code: ref
+              });
+
+              await base44.entities.Connection.create({
+                account_owner_id: referrer.id,
+                account_owner_type: 'estate_sale_operator',
+                connected_user_id: user.id,
+                connected_user_name: user.full_name,
+                connected_user_email: user.email,
+                connection_type: 'referral',
+                source: 'operator_signup'
+              });
+            }
+          } catch (refError) {
+            console.error('Error creating referral:', refError);
+          }
+        }
         
-        // Redirect to dashboard
         window.location.href = createPageUrl('Dashboard');
       }
     } catch (error) {
