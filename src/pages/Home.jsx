@@ -797,15 +797,15 @@ export default function Home() {
       {localFeatured.length > 0 && (
         <section className="py-8 sm:py-16 px-2 sm:px-4 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
           <div className="max-w-7xl mx-auto px-2 sm:px-0">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 sm:mb-12">
               <Badge className="mb-4 bg-cyan-600 text-white text-sm px-4 py-1">Local Featured</Badge>
-              <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
                 📍 Nearby Treasures
               </h3>
-              <p className="text-xl text-slate-600">Premium estate sales in your community</p>
+              <p className="text-lg sm:text-xl text-slate-600">Premium estate sales in your community</p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {localFeatured.map(sale => (
                 <Link
                   key={sale.id}
@@ -909,19 +909,19 @@ export default function Home() {
       {/* Regular Local Sales */}
       <section className="py-8 sm:py-16 px-2 sm:px-4 bg-white">
         <div className="max-w-7xl mx-auto px-2 sm:px-0">
-          <div className="text-center mb-12">
-            <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+          <div className="text-center mb-8 sm:mb-12">
+            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
               {userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
             </h3>
             {userLocation ? (
-              <p className="text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
+              <p className="text-lg sm:text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
             ) : (
-              <p className="text-xl text-slate-600">{regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'} nationwide</p>
+              <p className="text-lg sm:text-xl text-slate-600">{regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'} nationwide</p>
             )}
           </div>
 
           {regularSales.length === 0 ? (
-            <Card className="p-16 text-center bg-slate-50">
+            <Card className="p-8 sm:p-16 text-center bg-slate-50">
               <MapPin className="w-20 h-20 text-slate-300 mx-auto mb-6" />
               <p className="text-slate-500 text-xl mb-4">
                 {userLocation 
@@ -933,7 +933,7 @@ export default function Home() {
               </Button>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {regularSales.map(sale => (
                 <Link
                   key={sale.id}
