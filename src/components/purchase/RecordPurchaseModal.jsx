@@ -137,26 +137,6 @@ export default function RecordPurchaseModal({ open, onClose, onSuccess }) {
           </div>
 
           <div>
-            <Label>Category</Label>
-            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="furniture">Furniture</SelectItem>
-                <SelectItem value="art">Art & Decor</SelectItem>
-                <SelectItem value="jewelry">Jewelry</SelectItem>
-                <SelectItem value="collectibles">Collectibles</SelectItem>
-                <SelectItem value="antiques">Antiques</SelectItem>
-                <SelectItem value="clothing">Clothing & Accessories</SelectItem>
-                <SelectItem value="books">Books & Media</SelectItem>
-                <SelectItem value="tools">Tools & Equipment</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label>Notes</Label>
             <Textarea
               value={formData.notes}
