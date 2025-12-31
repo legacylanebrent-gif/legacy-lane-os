@@ -35,10 +35,12 @@ export default function AdminUsers() {
   const [subcategories, setSubcategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [referrals, setReferrals] = useState([]);
 
   useEffect(() => {
     loadUsers();
     loadSubcategories();
+    loadReferrals();
   }, []);
 
   useEffect(() => {
@@ -89,6 +91,15 @@ export default function AdminUsers() {
       setSubcategories(data || []);
     } catch (error) {
       console.error('Error loading subcategories:', error);
+    }
+  };
+
+  const loadReferrals = async () => {
+    try {
+      const data = await base44.entities.Referral.list();
+      setReferrals(data || []);
+    } catch (error) {
+      console.error('Error loading referrals:', error);
     }
   };
 
@@ -371,6 +382,7 @@ export default function AdminUsers() {
                     <TableHead>Account Type</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Company</TableHead>
+                    <TableHead>Referrer Email</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -379,6 +391,8 @@ export default function AdminUsers() {
                   {filteredUsers.map(user => {
                     const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
                     const status = user.account_status || 'active';
+                    const referral = referrals.find(r => r.referred_user_id === user.id);
+                    const referrerEmail = referral?.referrer_email || '-';
                     
                     return (
                       <TableRow key={user.id} className="hover:bg-slate-50">
@@ -399,6 +413,7 @@ export default function AdminUsers() {
                         </TableCell>
                         <TableCell className="text-slate-600">{user.phone || '-'}</TableCell>
                         <TableCell className="text-slate-600">{user.company_name || user.brokerage_name || '-'}</TableCell>
+                        <TableCell className="text-slate-600 text-sm">{referrerEmail}</TableCell>
                         <TableCell>
                           <Badge variant={status === 'active' ? 'default' : status === 'disabled' ? 'secondary' : 'destructive'}>
                             {status}
