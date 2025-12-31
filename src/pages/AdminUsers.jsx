@@ -97,9 +97,11 @@ export default function AdminUsers() {
   const loadReferrals = async () => {
     try {
       const data = await base44.entities.Referral.list();
+      console.log('Loaded referrals:', data);
       setReferrals(data || []);
     } catch (error) {
       console.error('Error loading referrals:', error);
+      setReferrals([]);
     }
   };
 
@@ -392,7 +394,11 @@ export default function AdminUsers() {
                     const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
                     const status = user.account_status || 'active';
                     const referral = referrals.find(r => r.referred_user_id === user.id);
-                    const referrerEmail = referral?.referrer_email || '-';
+                    const referrerEmail = referral?.referrer_email || '';
+                    
+                    if (user.primary_account_type === 'estate_sale_operator' && referral) {
+                      console.log(`User ${user.email} has referral:`, referral);
+                    }
                     
                     return (
                       <TableRow key={user.id} className="hover:bg-slate-50">
@@ -413,7 +419,9 @@ export default function AdminUsers() {
                         </TableCell>
                         <TableCell className="text-slate-600">{user.phone || '-'}</TableCell>
                         <TableCell className="text-slate-600">{user.company_name || user.brokerage_name || '-'}</TableCell>
-                        <TableCell className="text-slate-600 text-sm">{referrerEmail}</TableCell>
+                        <TableCell className="text-slate-600 text-sm">
+                          {referrerEmail || '-'}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={status === 'active' ? 'default' : status === 'disabled' ? 'secondary' : 'destructive'}>
                             {status}
