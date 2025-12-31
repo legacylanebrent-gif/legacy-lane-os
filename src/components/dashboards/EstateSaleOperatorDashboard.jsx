@@ -117,27 +117,28 @@ export default function EstateSaleOperatorDashboard({ user }) {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Estate Sale Dashboard</h1>
-          <p className="text-slate-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Estate Sale Dashboard</h1>
+          <p className="text-slate-600 mt-1 text-sm sm:text-base">
             Manage your estate sales and track performance
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => setRefreshKey((k) => k + 1)}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button
             onClick={() => setCreateModalOpen(true)}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Create Estate Sale
