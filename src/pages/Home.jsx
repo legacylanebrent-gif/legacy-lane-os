@@ -574,7 +574,7 @@ export default function Home() {
         </header>
 
       {/* Hero Section with Gradient Background */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 sm:py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0yMCA0NGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -584,7 +584,7 @@ export default function Home() {
             </Badge>
           </div>
           
-          <h2 className="text-6xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
             Discover Hidden<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Treasures</span> Near You
           </h2>
@@ -631,8 +631,8 @@ export default function Home() {
 
       {/* Map Section */}
       {(localFeatured.length > 0 || regularSales.length > 0) && (
-        <section className="py-12 px-4 bg-slate-50">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-8 sm:py-12 px-2 sm:px-4 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-2 sm:px-0">
             <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
               🗺️ Sales Near {zipCode ? zipCode : 'You'}
             </h3>
@@ -687,11 +687,11 @@ export default function Home() {
 
       {/* Nationally Featured Sales */}
       {nationalFeatured.length > 0 && (
-        <section className="py-16 px-4 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
+        <section className="py-8 sm:py-16 px-2 sm:px-4 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+          <div className="max-w-7xl mx-auto px-2 sm:px-0">
+            <div className="text-center mb-8 sm:mb-12">
               <Badge className="mb-4 bg-orange-600 text-white text-sm px-4 py-1">Premium Featured</Badge>
-              <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
                 ⭐ National Spotlight
               </h3>
               <p className="text-xl text-slate-600">Exceptional estate sales from across the country</p>
@@ -795,8 +795,8 @@ export default function Home() {
 
       {/* Locally Featured Sales */}
       {localFeatured.length > 0 && (
-        <section className="py-16 px-4 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-8 sm:py-16 px-2 sm:px-4 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
+          <div className="max-w-7xl mx-auto px-2 sm:px-0">
             <div className="text-center mb-12">
               <Badge className="mb-4 bg-cyan-600 text-white text-sm px-4 py-1">Local Featured</Badge>
               <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
@@ -907,8 +907,8 @@ export default function Home() {
       )}
 
       {/* Regular Local Sales */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-8 sm:py-16 px-2 sm:px-4 bg-white">
+        <div className="max-w-7xl mx-auto px-2 sm:px-0">
           <div className="text-center mb-12">
             <h3 className="text-5xl font-serif font-bold text-slate-900 mb-3">
               {userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
