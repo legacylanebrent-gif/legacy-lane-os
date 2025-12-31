@@ -54,11 +54,11 @@ export default function ReferralLanding() {
   };
 
   const handleSignUp = () => {
-    // Redirect to onboarding with referral code
+    // Redirect to OperatorPackages with referral code
     if (referralCode) {
-      navigate(createPageUrl('Onboarding') + `?ref=${referralCode}&type=estate_sale_operator`);
+      navigate(createPageUrl('OperatorPackages') + `?ref=${referralCode}`);
     } else {
-      navigate(createPageUrl('Onboarding') + '?type=estate_sale_operator');
+      navigate(createPageUrl('OperatorPackages'));
     }
   };
 
@@ -202,8 +202,11 @@ export default function ReferralLanding() {
           <h2 className="text-3xl font-serif font-bold text-slate-900 mb-2 text-center">
             Choose Your Plan
           </h2>
-          <p className="text-slate-600 text-center mb-8">
-            Start with a free trial, then select the plan that fits your business
+          <p className="text-slate-600 text-center mb-2">
+            All plans include a FREE 1 Month Trial
+          </p>
+          <p className="text-sm text-slate-500 text-center mb-8">
+            No credit card required • Cancel anytime
           </p>
           
           {packages.length > 0 ? (
@@ -233,12 +236,18 @@ export default function ReferralLanding() {
                     </h3>
                     
                     <div className="mb-6">
+                      <div className="mb-2">
+                        <Badge className="bg-green-600 text-white text-sm px-3 py-1">
+                          FREE 1 Month Trial
+                        </Badge>
+                      </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-slate-900">
                           ${pkg.monthly_price}
                         </span>
                         <span className="text-slate-600">/month</span>
                       </div>
+                      <p className="text-sm text-slate-500 mt-1">after trial period</p>
                       {pkg.annual_price && (
                         <p className="text-sm text-green-600 mt-1">
                           Save ${(pkg.monthly_price * 12 - pkg.annual_price).toFixed(0)}/year with annual billing
