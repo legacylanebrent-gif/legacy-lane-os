@@ -74,33 +74,9 @@ export default function OperatorPackages() {
         // Create referral if ref code exists
         if (ref) {
           try {
-            const users = await base44.asServiceRole.entities.User.list();
-            const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === ref);
-            
-            if (referrer) {
-              await base44.asServiceRole.entities.Referral.create({
-                referrer_id: referrer.id,
-                referrer_name: referrer.full_name,
-                referrer_email: referrer.email,
-                referred_user_id: user.id,
-                referred_user_name: user.full_name,
-                referred_user_email: user.email,
-                account_type: 'estate_sale_operator',
-                status: 'converted',
-                referral_code: ref
-              });
-
-              // Create connection for the referrer
-              await base44.asServiceRole.entities.Connection.create({
-                account_owner_id: referrer.id,
-                account_owner_type: 'estate_sale_operator',
-                connected_user_id: user.id,
-                connected_user_name: user.full_name,
-                connected_user_email: user.email,
-                connection_type: 'referral',
-                source: 'operator_signup'
-              });
-            }
+            await base44.functions.invoke('createReferral', { 
+              referralCode: ref 
+            });
           } catch (refError) {
             console.error('Error creating referral:', refError);
           }
@@ -146,32 +122,9 @@ export default function OperatorPackages() {
         // Create referral if ref exists
         if (ref) {
           try {
-            const users = await base44.asServiceRole.entities.User.list();
-            const referrer = users.find(u => u.id.slice(0, 8).toUpperCase() === ref);
-            
-            if (referrer) {
-              await base44.asServiceRole.entities.Referral.create({
-                referrer_id: referrer.id,
-                referrer_name: referrer.full_name,
-                referrer_email: referrer.email,
-                referred_user_id: user.id,
-                referred_user_name: user.full_name,
-                referred_user_email: user.email,
-                account_type: 'estate_sale_operator',
-                status: 'converted',
-                referral_code: ref
-              });
-
-              await base44.asServiceRole.entities.Connection.create({
-                account_owner_id: referrer.id,
-                account_owner_type: 'estate_sale_operator',
-                connected_user_id: user.id,
-                connected_user_name: user.full_name,
-                connected_user_email: user.email,
-                connection_type: 'referral',
-                source: 'operator_signup'
-              });
-            }
+            await base44.functions.invoke('createReferral', { 
+              referralCode: ref 
+            });
           } catch (refError) {
             console.error('Error creating referral:', refError);
           }
