@@ -91,27 +91,6 @@ export default function MyReferrals() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      {/* Debug Panel */}
-      <Card className="bg-yellow-50 border-yellow-300">
-        <CardContent className="p-4">
-          <h3 className="font-bold text-yellow-900 mb-2">Debug Info - My Referrals</h3>
-          <div className="text-xs space-y-1 text-yellow-900">
-            <p><strong>My User ID:</strong> {user?.id}</p>
-            <p><strong>My Referral Code:</strong> {referralCode}</p>
-            <p><strong>Total Referrals Found:</strong> {referrals.length}</p>
-            {referrals.map(ref => (
-              <div key={ref.id} className="border-t border-yellow-300 pt-1 mt-1">
-                <p><strong>Referral #{ref.id.slice(0, 8)}</strong></p>
-                <p>- Referred User: {ref.referred_user_name || 'MISSING'}</p>
-                <p>- Referred Email: {ref.referred_user_email || 'MISSING'}</p>
-                <p>- Referred User ID: {ref.referred_user_id?.slice(0, 8)}</p>
-                <p>- Status: {ref.status}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Header */}
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Referrals</h1>

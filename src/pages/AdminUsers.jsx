@@ -255,33 +255,6 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      {/* Debug Panel */}
-      <Card className="bg-yellow-50 border-yellow-300">
-        <CardContent className="p-4">
-          <h3 className="font-bold text-yellow-900 mb-2">Debug Info</h3>
-          <div className="text-xs space-y-1 text-yellow-900">
-            <p><strong>Total Referrals Loaded:</strong> {referrals.length}</p>
-            <p><strong>Estate Sale Operators:</strong> {filteredUsers.filter(u => u.primary_account_type === 'estate_sale_operator').length}</p>
-            {filteredUsers.filter(u => u.primary_account_type === 'estate_sale_operator').map(user => {
-              const ref = referrals.find(r => r.referred_user_id === user.id);
-              return (
-                <div key={user.id} className="border-t border-yellow-300 pt-1 mt-1">
-                  <p><strong>{user.email}</strong></p>
-                  <p>- User ID: {user.id.slice(0, 8)}</p>
-                  <p>- Has Referral: {ref ? 'YES' : 'NO'}</p>
-                  {ref && (
-                    <>
-                      <p>- Referrer ID: {ref.referrer_id?.slice(0, 8)}</p>
-                      <p>- Referrer Email: {ref.referrer_email || 'MISSING'}</p>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
