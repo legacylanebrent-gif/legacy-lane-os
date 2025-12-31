@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       referred_user_name: user.full_name,
       referred_user_email: user.email,
       account_type: 'estate_sale_operator',
-      status: 'converted',
+      status: 'signed_up',
       referral_code: referralCode
     });
 
