@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import AdminLayout from '@/components/admin/AdminLayout';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
+import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
   Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart, LayoutDashboard
@@ -138,6 +139,165 @@ export default function Layout({ children, currentPageName }) {
     .join('')
     .toUpperCase() || 'U';
 
+  // Consumer layout with unified header
+  if (isConsumerType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
+        <ConsumerHeader user={user} />
+        <div className="flex">
+          {/* Sidebar */}
+          <aside className={`
+            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] 
+            bg-white border-r border-slate-200 z-40
+            transition-all duration-300 ease-in-out
+            ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-0'}
+          `}>
+            <div className="p-6 overflow-y-auto h-full">
+              <div className="space-y-6">
+                <div className="space-y-1">
+                  <Link to={createPageUrl('ConsumerHome')}>
+                    <Button 
+                      variant={currentPageName === 'ConsumerHome' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'ConsumerHome'
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <Home className="w-5 h-5 mr-3" />
+                      Home
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('MyProfile')}>
+                    <Button 
+                      variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'MyProfile' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <User className="w-5 h-5 mr-3" />
+                      My Profile
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('RewardsCheckins')}>
+                    <Button 
+                      variant={currentPageName === 'RewardsCheckins' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'RewardsCheckins' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <MapPin className="w-5 h-5 mr-3" />
+                      Check-ins
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('Favorites')}>
+                    <Button 
+                      variant={currentPageName === 'Favorites' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'Favorites' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <Heart className="w-5 h-5 mr-3" />
+                      Favorites
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('BrowseItems')}>
+                    <Button 
+                      variant={currentPageName === 'BrowseItems' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'BrowseItems' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <ShoppingBag className="w-5 h-5 mr-3" />
+                      Marketplace
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('MyReferrals')}>
+                    <Button 
+                      variant={currentPageName === 'MyReferrals' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'MyReferrals' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <Users className="w-5 h-5 mr-3" />
+                      My Referrals
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('MyRewards')}>
+                    <Button 
+                      variant={currentPageName === 'MyRewards' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'MyRewards' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <Star className="w-5 h-5 mr-3" />
+                      My Rewards
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('MyTickets')}>
+                    <Button 
+                      variant={currentPageName === 'MyTickets' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'MyTickets' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <MessageSquare className="w-5 h-5 mr-3" />
+                      Support
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('Notifications')}>
+                    <Button 
+                      variant={currentPageName === 'Notifications' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'Notifications' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <MessageSquare className="w-5 h-5 mr-3" />
+                      Notifications
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Overlay for mobile */}
+          {sidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
+          {/* Sidebar spacer for desktop when closed */}
+          {!sidebarOpen && <div className="hidden lg:block w-0" />}
+
+          {/* Main Content */}
+          <main className="flex-1 lg:ml-0">
+            {children}
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Business user layout (operator, agent, etc.)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
       {/* Top Navigation */}
@@ -145,7 +305,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')} className="flex items-center gap-3">
+              <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">LL</span>
                 </div>
@@ -156,95 +316,17 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2">
-              {isConsumerType ? (
-                <>
-                  <Link to={createPageUrl('BrowseItems')}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                      title="Browse Items"
-                    >
-                      <ShoppingBag className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('Favorites')}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                      title="Favorites"
-                    >
-                      <Heart className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <MessagesDropdown />
-                  <NotificationsDropdown />
-                  <Link to={createPageUrl('ConsumerHome')}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                      title="Dashboard"
-                    >
-                      <LayoutDashboard className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link to={createPageUrl('ConsumerHome')} className="hidden sm:inline">
-                    <Button
-                      variant="ghost"
-                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                    >
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user?.profile_image_url} />
-                          <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
-                        </Avatar>
-                        <span className="hidden sm:inline">{user?.full_name}</span>
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel>
-                        <div>
-                          <p className="font-semibold">{user?.full_name}</p>
-                          <p className="text-xs text-slate-500">{user?.email}</p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                          <Bell className="w-4 h-4 mr-2" />
-                          Notification Settings
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              ) : (
-                <>
-                  <MessagesDropdown />
-                  <NotificationsDropdown />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20 lg:hidden"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                  >
-                    {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                  </Button>
-                </>
-              )}
+            <div className="flex items-center gap-4">
+              <MessagesDropdown />
+              <NotificationsDropdown />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
