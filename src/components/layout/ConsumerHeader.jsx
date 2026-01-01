@@ -44,14 +44,22 @@ export default function ConsumerHeader({ user }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link to={createPageUrl('BrowseItems')}>
+            <Link to={createPageUrl('Home')}>
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Browse Items"
+                title="Home"
               >
-                <ShoppingBag className="h-5 w-5" />
+                <Home className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to={createPageUrl('BrowseItems')}>
+              <Button
+                variant="ghost"
+                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+              >
+                Browse
               </Button>
             </Link>
             <Link to={createPageUrl('Favorites')}>
@@ -65,18 +73,30 @@ export default function ConsumerHeader({ user }) {
               </Button>
             </Link>
             <MessagesDropdown />
-            <NotificationsDropdown />
-            <Link to={createPageUrl('ConsumerHome')}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Dashboard"
-              >
-                <LayoutDashboard className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to={createPageUrl('ConsumerHome')} className="hidden sm:inline">
+            <NotificationsDropdown user={user} />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+              title="Record Purchase"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('openPurchaseModal'));
+              }}
+            >
+              <Receipt className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+              title="QR Check-in"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('openQRScanner'));
+              }}
+            >
+              <QrCode className="h-5 w-5" />
+            </Button>
+            <Link to={createPageUrl('Dashboard')}>
               <Button
                 variant="ghost"
                 className="text-white hover:text-orange-400 hover:bg-orange-500/20"
