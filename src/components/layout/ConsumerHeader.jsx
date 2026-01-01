@@ -14,7 +14,7 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut
+  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
