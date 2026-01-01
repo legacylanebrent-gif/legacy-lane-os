@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
@@ -498,116 +499,42 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">LL</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
-                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-              </div>
-            </Link>
+      {isAuthenticated && currentUser ? (
+        <ConsumerHeader user={currentUser} />
+      ) : (
+        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">LL</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
+                </div>
+              </Link>
 
-            <div className="flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowQRScanner(true)}
-                    title="QR Check-in"
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <QrCode className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowPurchaseModal(true)}
-                    title="Record Purchase"
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <Receipt className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => window.location.href = createPageUrl('Messages')}
-                    title="Messages"
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                  </Button>
-                  {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button
-                    variant="ghost"
-                    onClick={() => window.location.href = createPageUrl('Dashboard')}
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
-                  </Button>
-                  {currentUser && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={currentUser?.profile_image_url} />
-                            <AvatarFallback className="bg-orange-600 text-white">
-                              {currentUser?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="hidden sm:inline">{currentUser.full_name}</span>
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>
-                          <div>
-                            <p className="font-semibold">{currentUser.full_name}</p>
-                            <p className="text-xs text-slate-500">{currentUser.email}</p>
-                          </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <a href={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                            <Bell className="w-4 h-4 mr-2" />
-                            Notification Settings
-                          </a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
-                          <LogOut className="w-4 h-4 mr-2" />
-                          Logout
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
-                  >
-                    Get Started Free
-                  </Button>
-                </>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button
+                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                >
+                  Get Started Free
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
         </header>
+      )}
 
       {/* Hero Section with Gradient Background */}
       <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 sm:py-20 px-4 overflow-hidden">
