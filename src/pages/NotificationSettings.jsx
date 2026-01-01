@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Mail, MessageSquare, Save, AlertCircle } from 'lucide-react';
+import { Bell, Mail, MessageSquare, Save, AlertCircle, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 const NOTIFICATION_CATEGORIES = [
@@ -13,7 +13,8 @@ const NOTIFICATION_CATEGORIES = [
     label: 'New Leads',
     description: 'Get notified when you receive new leads',
     icon: AlertCircle,
-    color: 'text-orange-600'
+    color: 'text-orange-600',
+    hideForConsumer: true
   },
   {
     key: 'sale_update',
@@ -27,7 +28,8 @@ const NOTIFICATION_CATEGORIES = [
     label: 'Contract Expirations',
     description: 'Reminders about expiring contracts',
     icon: AlertCircle,
-    color: 'text-red-600'
+    color: 'text-red-600',
+    hideForConsumer: true
   },
   {
     key: 'message',
@@ -48,7 +50,8 @@ const NOTIFICATION_CATEGORIES = [
     label: 'Marketing Updates',
     description: 'New features and platform updates',
     icon: Mail,
-    color: 'text-green-600'
+    color: 'text-green-600',
+    hideForConsumer: true
   },
   {
     key: 'reward',
@@ -56,6 +59,13 @@ const NOTIFICATION_CATEGORIES = [
     description: 'Points, badges, and rewards earned',
     icon: Bell,
     color: 'text-yellow-600'
+  },
+  {
+    key: 'checkin',
+    label: 'Check-ins',
+    description: 'Notifications about your check-ins and location visits',
+    icon: MapPin,
+    color: 'text-green-600'
   }
 ];
 
@@ -104,7 +114,10 @@ export default function NotificationSettings() {
           marketing_sms: false,
           reward_in_app: true,
           reward_email: false,
-          reward_sms: false
+          reward_sms: false,
+          checkin_in_app: true,
+          checkin_email: false,
+          checkin_sms: false
         };
         const created = await base44.entities.NotificationPreference.create(defaultPrefs);
         setPreferences(created);
@@ -176,7 +189,18 @@ export default function NotificationSettings() {
 
       {/* Notification Categories */}
       <div className="space-y-4">
-        {NOTIFICATION_CATEGORIES.map(category => {
+        {NOTIFICATION_CATEGORIES.filter(category => {
+          const isConsumer = !user?.primary_account_type || 
+                           user?.primary_account_type === 'consumer' || 
+                           user?.primary_account_type === 'executor' || 
+                           user?.primary_account_type === 'home_seller' || 
+                           user?.primary_account_type === 'buyer' || 
+                           user?.primary_account_type === 'downsizer' || 
+                           user?.primary_account_type === 'diy_seller' || 
+                           user?.primary_account_type === 'consignor' || 
+                           user?.primary_account_type === 'coach';
+          return !(isConsumer && category.hideForConsumer);
+        }).map(category => {
           const Icon = category.icon;
           return (
             <Card key={category.key}>
