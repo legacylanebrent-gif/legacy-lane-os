@@ -146,11 +146,13 @@ export default function RecordPurchase() {
       });
 
       // Award points for purchase
+      const purchaseMonth = formData.purchase_date.substring(0, 7); // YYYY-MM format
       await base44.entities.UserReward.create({
         user_id: user.id,
         action_id: 'purchase',
         action_name: 'Purchase at Estate Sale',
         points_earned: 10,
+        month: purchaseMonth,
         reference_id: finalLocation,
         notes: `Purchase: ${formData.item_name}`
       });
