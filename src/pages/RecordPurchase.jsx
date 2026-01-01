@@ -7,23 +7,41 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Receipt, Calendar, DollarSign } from 'lucide-react';
 
 export default function RecordPurchase() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [nearbySales, setNearbySales] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
+  const [showCustomLocation, setShowCustomLocation] = useState(false);
   const [formData, setFormData] = useState({
     item_name: '',
     purchase_amount: '',
     purchase_date: new Date().toISOString().split('T')[0],
     sale_location: '',
+    custom_location: '',
     notes: ''
   });
 
   useEffect(() => {
     loadUser();
+    getUserLocation();
   }, []);
+
+  useEffect(() => {
+    if (userLocation) {
+      loadNearbySales();
+    }
+  }, [userLocation]);
 
   const loadUser = async () => {
     try {
@@ -34,6 +52,69 @@ export default function RecordPurchase() {
     }
   };
 
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+        }
+      );
+    }
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3959; // Radius of Earth in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const loadNearbySales = async () => {
+    try {
+      const allSales = await base44.entities.EstateSale.list('-created_date', 100);
+      const activeSales = allSales.filter(s => s.status === 'upcoming' || s.status === 'active');
+      
+      const salesWithDistance = activeSales
+        .filter(sale => sale.location && sale.location.lat && sale.location.lng)
+        .map(sale => ({
+          ...sale,
+          distance: calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            sale.location.lat,
+            sale.location.lng
+          )
+        }))
+        .filter(sale => sale.distance < 25)
+        .sort((a, b) => a.distance - b.distance);
+      
+      setNearbySales(salesWithDistance);
+    } catch (error) {
+      console.error('Error loading nearby sales:', error);
+    }
+  };
+
+  const handleLocationChange = (value) => {
+    if (value === 'other') {
+      setShowCustomLocation(true);
+      setFormData({ ...formData, sale_location: '', custom_location: '' });
+    } else {
+      setShowCustomLocation(false);
+      setFormData({ ...formData, sale_location: value, custom_location: '' });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.item_name || !formData.purchase_amount) {
@@ -41,8 +122,15 @@ export default function RecordPurchase() {
       return;
     }
 
+    if (!formData.sale_location && !formData.custom_location) {
+      alert('Please select or enter a sale location');
+      return;
+    }
+
     setLoading(true);
     try {
+      const finalLocation = formData.custom_location || formData.sale_location;
+      
       // Record the purchase
       await base44.entities.Transaction.create({
         user_id: user.id,
@@ -50,7 +138,7 @@ export default function RecordPurchase() {
         amount: parseFloat(formData.purchase_amount),
         item_name: formData.item_name,
         transaction_date: formData.purchase_date,
-        location: formData.sale_location,
+        location: finalLocation,
         notes: formData.notes
       });
 
@@ -60,7 +148,7 @@ export default function RecordPurchase() {
         action_id: 'purchase',
         action_name: 'Purchase at Estate Sale',
         points_earned: 10,
-        reference_id: formData.sale_location,
+        reference_id: finalLocation,
         notes: `Purchase: ${formData.item_name}`
       });
 
@@ -92,12 +180,12 @@ export default function RecordPurchase() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="item_name">Item Name *</Label>
+                <Label htmlFor="item_name">Item or Bundle Items *</Label>
                 <Input
                   id="item_name"
                   value={formData.item_name}
                   onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                  placeholder="e.g., Vintage Chair, Antique Lamp"
+                  placeholder="e.g., Vintage Chair, Antique Lamp, or Bundle of Books"
                   required
                 />
               </div>
@@ -134,14 +222,40 @@ export default function RecordPurchase() {
               </div>
 
               <div>
-                <Label htmlFor="sale_location">Sale Location</Label>
-                <Input
-                  id="sale_location"
-                  value={formData.sale_location}
-                  onChange={(e) => setFormData({ ...formData, sale_location: e.target.value })}
-                  placeholder="e.g., Estate Sale on Main St"
-                />
+                <Label htmlFor="sale_location">Sale Location *</Label>
+                <Select onValueChange={handleLocationChange} value={showCustomLocation ? 'other' : formData.sale_location}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a sale location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {nearbySales.length === 0 && !userLocation && (
+                      <SelectItem value="loading" disabled>Loading nearby sales...</SelectItem>
+                    )}
+                    {nearbySales.length === 0 && userLocation && (
+                      <SelectItem value="none" disabled>No nearby sales found</SelectItem>
+                    )}
+                    {nearbySales.map(sale => (
+                      <SelectItem key={sale.id} value={sale.title}>
+                        {sale.title} ({sale.distance.toFixed(1)} mi)
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="other">Other (Custom Location)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {showCustomLocation && (
+                <div>
+                  <Label htmlFor="custom_location">Custom Sale Location *</Label>
+                  <Input
+                    id="custom_location"
+                    value={formData.custom_location}
+                    onChange={(e) => setFormData({ ...formData, custom_location: e.target.value })}
+                    placeholder="Enter address or sale name"
+                    required
+                  />
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="notes">Notes (Optional)</Label>
