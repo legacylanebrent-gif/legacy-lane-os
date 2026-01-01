@@ -23,6 +23,7 @@ export default function RecordPurchase() {
   const [nearbySales, setNearbySales] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [showCustomLocation, setShowCustomLocation] = useState(false);
+  const [errorDetails, setErrorDetails] = useState(null);
   const [formData, setFormData] = useState({
     item_name: '',
     purchase_amount: '',
@@ -158,7 +159,12 @@ export default function RecordPurchase() {
       navigate(createPageUrl('Dashboard'));
     } catch (error) {
       console.error('Error recording purchase:', error);
-      alert('Failed to record purchase: ' + (error.message || 'Unknown error'));
+      setErrorDetails({
+        message: error.message || 'Unknown error',
+        stack: error.stack,
+        data: error.response?.data,
+        fullError: JSON.stringify(error, null, 2)
+      });
     } finally {
       setLoading(false);
     }
@@ -167,6 +173,44 @@ export default function RecordPurchase() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-6">
       <div className="max-w-2xl mx-auto">
+        {errorDetails && (
+          <Card className="mb-6 border-red-500 bg-red-50">
+            <CardHeader>
+              <CardTitle className="text-red-700 flex items-center justify-between">
+                Error Details
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setErrorDetails(null)}
+                  className="text-red-700 hover:text-red-900"
+                >
+                  Close
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <strong>Message:</strong> {errorDetails.message}
+                </div>
+                {errorDetails.data && (
+                  <div>
+                    <strong>Response Data:</strong>
+                    <pre className="mt-1 p-2 bg-white rounded text-xs overflow-auto">
+                      {JSON.stringify(errorDetails.data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                <div>
+                  <strong>Full Error:</strong>
+                  <pre className="mt-1 p-2 bg-white rounded text-xs overflow-auto max-h-64">
+                    {errorDetails.fullError}
+                  </pre>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
