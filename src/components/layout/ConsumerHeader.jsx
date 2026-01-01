@@ -78,28 +78,26 @@ export default function ConsumerHeader({ user }) {
               </Link>
               <MessagesDropdown />
               <NotificationsDropdown user={user} />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Record Purchase"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('openPurchaseModal'));
-                }}
-              >
-                <Receipt className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="QR Check-in"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('openQRScanner'));
-                }}
-              >
-                <QrCode className="h-5 w-5" />
-              </Button>
+              <Link to={createPageUrl('RecordPurchase')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  title="Record Purchase"
+                >
+                  <Receipt className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to={createPageUrl('RewardsCheckins')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  title="QR Check-in"
+                >
+                  <QrCode className="h-5 w-5" />
+                </Button>
+              </Link>
               <Link to={createPageUrl('Dashboard')}>
                 <Button
                   variant="ghost"
@@ -160,13 +158,17 @@ export default function ConsumerHeader({ user }) {
                       Notifications
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('openPurchaseModal'))} className="cursor-pointer">
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Record Purchase
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Record Purchase
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('openQRScanner'))} className="cursor-pointer">
-                    <QrCode className="w-4 h-4 mr-2" />
-                    QR Check-in
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
+                      <QrCode className="w-4 h-4 mr-2" />
+                      QR Check-in
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to={createPageUrl('Dashboard')} className="cursor-pointer">

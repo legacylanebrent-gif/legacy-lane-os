@@ -79,6 +79,7 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
+import RecordPurchase from './pages/RecordPurchase';
 import __Layout from './Layout.jsx';
 
 
@@ -164,6 +165,7 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
+    "RecordPurchase": RecordPurchase,
 }
 
 export const pagesConfig = {
