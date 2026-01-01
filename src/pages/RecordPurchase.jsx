@@ -130,16 +130,18 @@ export default function RecordPurchase() {
     setLoading(true);
     try {
       const finalLocation = formData.custom_location || formData.sale_location;
+      const amount = parseFloat(formData.purchase_amount);
       
       // Record the purchase
       await base44.entities.Transaction.create({
-        user_id: user.id,
-        transaction_type: 'purchase',
-        amount: parseFloat(formData.purchase_amount),
+        sale_id: 'user_purchase',
         item_name: formData.item_name,
-        transaction_date: formData.purchase_date,
-        location: finalLocation,
-        notes: formData.notes
+        quantity: 1,
+        price: amount,
+        total: amount,
+        payment_method: 'cash',
+        notes: `${formData.notes ? formData.notes + ' | ' : ''}Location: ${finalLocation}`,
+        transaction_date: new Date(formData.purchase_date).toISOString()
       });
 
       // Award points for purchase
@@ -156,7 +158,7 @@ export default function RecordPurchase() {
       navigate(createPageUrl('Dashboard'));
     } catch (error) {
       console.error('Error recording purchase:', error);
-      alert('Failed to record purchase');
+      alert('Failed to record purchase: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
