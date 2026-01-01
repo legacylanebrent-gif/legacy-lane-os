@@ -142,18 +142,18 @@ export default function Dashboard() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('SearchByState')} className="text-slate-400 hover:text-white transition-colors">Browse by State</Link></li>
-                <li><Link to={createPageUrl('Home')} className="text-slate-400 hover:text-white transition-colors">Find Sales</Link></li>
-                <li><Link to={createPageUrl('MyTickets')} className="text-slate-400 hover:text-white transition-colors">Support</Link></li>
+                <li><Link to={createPageUrl('SearchByState')} className="text-white hover:text-orange-400 transition-colors">Browse by State</Link></li>
+                <li><Link to={createPageUrl('Home')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
+                <li><Link to={createPageUrl('MyTickets')} className="text-white hover:text-orange-400 transition-colors">Support</Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('OperatorPackages')} className="text-slate-400 hover:text-white transition-colors">List Your Company</Link></li>
-                <li><Link to={createPageUrl('AgentSignup')} className="text-slate-400 hover:text-white transition-colors">Real Estate Agents</Link></li>
-                <li><Link to={createPageUrl('VendorSignup')} className="text-slate-400 hover:text-white transition-colors">Vendors</Link></li>
+                <li><Link to={createPageUrl('OperatorPackages')} className="text-white hover:text-orange-400 transition-colors">List Your Company</Link></li>
+                <li><Link to={createPageUrl('AgentSignup')} className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
+                <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
               </ul>
             </div>
           </div>
