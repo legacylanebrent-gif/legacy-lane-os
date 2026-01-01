@@ -163,7 +163,7 @@ export default function Layout({ children, currentPageName }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
                       title="Browse Items"
                     >
                       <ShoppingBag className="h-5 w-5" />
@@ -173,7 +173,7 @@ export default function Layout({ children, currentPageName }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
                       title="Favorites"
                     >
                       <Heart className="h-5 w-5" />
@@ -185,7 +185,7 @@ export default function Layout({ children, currentPageName }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
                       title="Dashboard"
                     >
                       <LayoutDashboard className="h-5 w-5" />
@@ -194,7 +194,7 @@ export default function Layout({ children, currentPageName }) {
                   <Link to={createPageUrl('ConsumerHome')} className="hidden sm:inline">
                     <Button
                       variant="ghost"
-                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      className="text-white hover:text-orange-400 hover:bg-orange-500/20"
                     >
                       Dashboard
                     </Button>
@@ -202,7 +202,7 @@ export default function Layout({ children, currentPageName }) {
                   <Button
                     variant="ghost"
                     onClick={handleLogout}
-                    className="text-orange-400 hover:text-orange-300 hover:bg-slate-700 hidden sm:inline-flex items-center"
+                    className="text-white hover:text-orange-400 hover:bg-orange-500/20 hidden sm:inline-flex items-center"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
