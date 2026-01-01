@@ -57,9 +57,11 @@ export default function ConsumerHeader({ user }) {
             <Link to={createPageUrl('BrowseItems')}>
               <Button
                 variant="ghost"
+                size="icon"
                 className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                title="Browse Items"
               >
-                Browse
+                <ShoppingBag className="h-5 w-5" />
               </Button>
             </Link>
             <Link to={createPageUrl('Favorites')}>
