@@ -541,14 +541,12 @@ export default function Home() {
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => base44.auth.logout()}
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
+                  {currentUser && (
+                    <div className="flex items-center gap-2 text-white px-3 py-1 rounded-lg bg-white/10">
+                      <User className="w-4 h-4" />
+                      <span className="text-sm font-medium">{currentUser.full_name}</span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>

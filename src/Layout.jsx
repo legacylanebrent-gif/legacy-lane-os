@@ -199,14 +199,10 @@ export default function Layout({ children, currentPageName }) {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    onClick={handleLogout}
-                    className="text-white hover:text-orange-400 hover:bg-orange-500/20 hidden sm:inline-flex items-center"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
+                  <div className="hidden sm:flex items-center gap-2 text-white">
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">{user?.full_name}</span>
+                  </div>
                 </>
               ) : (
                 <>
