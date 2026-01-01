@@ -158,7 +158,7 @@ export default function RecordPurchase() {
       });
 
       alert('Purchase recorded successfully! +10 points earned');
-      navigate(createPageUrl('Dashboard'));
+      navigate(createPageUrl('MyPurchases'));
     } catch (error) {
       console.error('Error recording purchase:', error);
       setErrorDetails({
