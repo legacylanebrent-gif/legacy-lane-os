@@ -117,7 +117,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
+    <>
       {renderDashboard()}
       
       {/* Footer */}
@@ -165,6 +165,6 @@ export default function Dashboard() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
