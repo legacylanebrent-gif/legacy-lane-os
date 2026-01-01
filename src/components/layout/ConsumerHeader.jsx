@@ -14,7 +14,7 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt
+  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt, MessageSquare
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -44,68 +44,71 @@ export default function ConsumerHeader({ user }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link to={createPageUrl('Home')}>
+            {/* Desktop navigation - hidden on mobile */}
+            <div className="hidden md:flex items-center gap-2">
+              <Link to={createPageUrl('Home')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  title="Home"
+                >
+                  <Home className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to={createPageUrl('BrowseItems')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  title="Browse Items"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to={createPageUrl('Favorites')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  title="Favorites"
+                >
+                  <Heart className="h-5 w-5" />
+                </Button>
+              </Link>
+              <MessagesDropdown />
+              <NotificationsDropdown user={user} />
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Home"
+                title="Record Purchase"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('openPurchaseModal'));
+                }}
               >
-                <Home className="h-5 w-5" />
+                <Receipt className="h-5 w-5" />
               </Button>
-            </Link>
-            <Link to={createPageUrl('BrowseItems')}>
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Browse Items"
+                title="QR Check-in"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('openQRScanner'));
+                }}
               >
-                <ShoppingBag className="h-5 w-5" />
+                <QrCode className="h-5 w-5" />
               </Button>
-            </Link>
-            <Link to={createPageUrl('Favorites')}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-                title="Favorites"
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-            </Link>
-            <MessagesDropdown />
-            <NotificationsDropdown user={user} />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-              title="Record Purchase"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('openPurchaseModal'));
-              }}
-            >
-              <Receipt className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-              title="QR Check-in"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('openQRScanner'));
-              }}
-            >
-              <QrCode className="h-5 w-5" />
-            </Button>
-            <Link to={createPageUrl('Dashboard')}>
-              <Button
-                variant="ghost"
-                className="text-white hover:text-orange-400 hover:bg-orange-500/20"
-              >
-                Dashboard
-              </Button>
-            </Link>
+              <Link to={createPageUrl('Dashboard')}>
+                <Button
+                  variant="ghost"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
@@ -125,6 +128,54 @@ export default function ConsumerHeader({ user }) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {/* Mobile-only menu items */}
+                <div className="md:hidden">
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Home')} className="cursor-pointer">
+                      <Home className="w-4 h-4 mr-2" />
+                      Home
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Browse Items
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Favorites')} className="cursor-pointer">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Favorites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Messages')} className="cursor-pointer">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Messages
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Notifications')} className="cursor-pointer">
+                      <Bell className="w-4 h-4 mr-2" />
+                      Notifications
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('openPurchaseModal'))} className="cursor-pointer">
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Record Purchase
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.dispatchEvent(new CustomEvent('openQRScanner'))} className="cursor-pointer">
+                    <QrCode className="w-4 h-4 mr-2" />
+                    QR Check-in
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </div>
                 <DropdownMenuItem asChild>
                   <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
                     <Bell className="w-4 h-4 mr-2" />
