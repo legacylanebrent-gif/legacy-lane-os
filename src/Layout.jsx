@@ -8,7 +8,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart, LayoutDashboard
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -156,28 +156,72 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             </div>
 
-            <div className="flex items-center gap-4">
-              {isConsumerType && (
-                <Link to={createPageUrl('Home')}>
+            <div className="flex items-center gap-2">
+              {isConsumerType ? (
+                <>
+                  <Link to={createPageUrl('BrowseItems')}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      title="Browse Items"
+                    >
+                      <ShoppingBag className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('Favorites')}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      title="Favorites"
+                    >
+                      <Heart className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <MessagesDropdown />
+                  <NotificationsDropdown />
+                  <Link to={createPageUrl('ConsumerHome')}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                      title="Dashboard"
+                    >
+                      <LayoutDashboard className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl('ConsumerHome')} className="hidden sm:inline">
+                    <Button
+                      variant="ghost"
+                      className="text-orange-400 hover:text-orange-300 hover:bg-slate-700"
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
-                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
+                    onClick={handleLogout}
+                    className="text-orange-400 hover:text-orange-300 hover:bg-slate-700 hidden sm:inline-flex items-center"
                   >
-                    <HomeIcon className="h-5 w-5 mr-2" />
-                    Home
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
                   </Button>
-                </Link>
+                </>
+              ) : (
+                <>
+                  <MessagesDropdown />
+                  <NotificationsDropdown />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20 lg:hidden"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                  >
+                    {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                  </Button>
+                </>
               )}
-              <MessagesDropdown />
-              <NotificationsDropdown />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
