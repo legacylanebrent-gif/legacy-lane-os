@@ -13,7 +13,7 @@ import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { 
   User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
-  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign
 } from 'lucide-react';
 
 export default function MyProfile() {
@@ -21,6 +21,7 @@ export default function MyProfile() {
   const [subscription, setSubscription] = useState(null);
   const [packages, setPackages] = useState([]);
   const [estateSales, setEstateSales] = useState([]);
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -93,6 +94,10 @@ export default function MyProfile() {
       // Load estate sales for this operator
       const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id });
       setEstateSales(sales);
+
+      // Load user purchases
+      const userPurchases = await base44.entities.Transaction.filter({ created_by: userData.email });
+      setPurchases(userPurchases);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -367,6 +372,92 @@ export default function MyProfile() {
                   </Button>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* My Purchases Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5" />
+                  My Purchases
+                </div>
+                <Link to={createPageUrl('MyPurchases')}>
+                  <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700">
+                    View All
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {purchases.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-4 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-700">
+                        {purchases.length}
+                      </div>
+                      <div className="text-sm text-slate-600">Total Purchases</div>
+                    </div>
+                    <div className="text-center p-4 bg-cyan-50 rounded-lg">
+                      <div className="text-2xl font-bold text-cyan-700">
+                        ${purchases.reduce((sum, p) => sum + (p.price * p.quantity || 0), 0).toFixed(0)}
+                      </div>
+                      <div className="text-sm text-slate-600">Total Spent</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-700">
+                        {purchases.reduce((sum, p) => sum + (p.quantity || 0), 0)}
+                      </div>
+                      <div className="text-sm text-slate-600">Items Bought</div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {purchases.slice(0, 3).map(purchase => (
+                      <div key={purchase.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <ShoppingBag className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-slate-900">{purchase.item_name}</div>
+                            <div className="text-xs text-slate-500">
+                              {new Date(purchase.created_date).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-green-600">
+                            ${(purchase.price * purchase.quantity).toFixed(2)}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {purchase.quantity}x @ ${purchase.price}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Link to={createPageUrl('MyPurchases')}>
+                    <Button variant="outline" className="w-full">
+                      View All Purchases
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 mb-4">No purchases recorded yet</p>
+                  <Link to={createPageUrl('RecordPurchase')}>
+                    <Button className="bg-orange-600 hover:bg-orange-700">
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Record Your First Purchase
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
