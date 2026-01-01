@@ -199,10 +199,37 @@ export default function Layout({ children, currentPageName }) {
                       Dashboard
                     </Button>
                   </Link>
-                  <div className="hidden sm:flex items-center gap-2 text-white">
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">{user?.full_name}</span>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user?.profile_image_url} />
+                          <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
+                        </Avatar>
+                        <span className="hidden sm:inline">{user?.full_name}</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>
+                        <div>
+                          <p className="font-semibold">{user?.full_name}</p>
+                          <p className="text-xs text-slate-500">{user?.email}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                          <Bell className="w-4 h-4 mr-2" />
+                          Notification Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
                 <>

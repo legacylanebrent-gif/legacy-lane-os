@@ -10,6 +10,15 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
@@ -17,7 +26,7 @@ import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
 import { t } from '@/components/terminology';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
-  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt
+  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -542,10 +551,39 @@ export default function Home() {
                     Dashboard
                   </Button>
                   {currentUser && (
-                    <div className="flex items-center gap-2 text-white px-3 py-1 rounded-lg bg-white/10">
-                      <User className="w-4 h-4" />
-                      <span className="text-sm font-medium">{currentUser.full_name}</span>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={currentUser?.profile_image_url} />
+                            <AvatarFallback className="bg-orange-600 text-white">
+                              {currentUser?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="hidden sm:inline">{currentUser.full_name}</span>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>
+                          <div>
+                            <p className="font-semibold">{currentUser.full_name}</p>
+                            <p className="text-xs text-slate-500">{currentUser.email}</p>
+                          </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <a href={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                            <Bell className="w-4 h-4 mr-2" />
+                            Notification Settings
+                          </a>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </>
               ) : (
