@@ -109,7 +109,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Message {recipient?.full_name || recipient?.company_name || 'User'}</span>
@@ -129,7 +129,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
           )}
 
           {messages.length > 0 && (
-            <ScrollArea className="h-96 border rounded-lg p-4">
+            <ScrollArea className="h-48 sm:h-64 md:h-96 border rounded-lg p-4">
               <div className="space-y-4">
                 {messages.map((msg) => (
                   <div
@@ -159,7 +159,8 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
               placeholder="Type your message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              rows={4}
+              rows={3}
+              className="resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && e.ctrlKey) {
                   handleSend();
