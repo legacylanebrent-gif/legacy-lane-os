@@ -30,7 +30,7 @@ import {
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -41,6 +41,17 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+// Component to update map view when userLocation changes
+function ChangeMapView({ center, zoom }) {
+  const map = useMap();
+  React.useEffect(() => {
+    if (center) {
+      map.setView(center, zoom);
+    }
+  }, [center, zoom, map]);
+  return null;
+}
 
 export default function Home() {
   const [sales, setSales] = useState([]);
@@ -601,13 +612,16 @@ export default function Home() {
             </h3>
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
-                key={userLocation ? `${userLocation.lat}-${userLocation.lng}` : 'default'}
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
                 zoom={userLocation ? 12 : 4}
                 minZoom={userLocation ? 11 : undefined}
                 style={{ height: '500px', width: '100%' }}
                 className="z-0"
               >
+                <ChangeMapView 
+                  center={userLocation ? [userLocation.lat, userLocation.lng] : null} 
+                  zoom={12} 
+                />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
