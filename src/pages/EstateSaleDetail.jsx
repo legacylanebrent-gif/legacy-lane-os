@@ -813,11 +813,11 @@ END:VCALENDAR`;
       </div>
 
       {/* Message Modal */}
-      {currentUser && operator && (
+      {currentUser && (
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={operator}
+          recipient={operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Operator' }}
           relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
           savedImages={savedImages}
           allImages={sale.images}
