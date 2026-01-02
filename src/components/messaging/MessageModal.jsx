@@ -176,37 +176,46 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
                   </span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  {savedImages.map((imageIndex) => (
-                    <div key={imageIndex} className="relative">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedPhotos(prev =>
-                            prev.includes(imageIndex)
-                              ? prev.filter(i => i !== imageIndex)
-                              : [...prev, imageIndex]
-                          );
-                        }}
-                        className={`w-full aspect-square rounded-lg overflow-hidden border-2 ${
-                          selectedPhotos.includes(imageIndex)
-                            ? 'border-orange-600 ring-2 ring-orange-200'
-                            : 'border-slate-200'
-                        }`}
-                      >
-                        <img
-                          src={allImages[imageIndex]}
-                          alt={`Photo ${imageIndex + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                      <div className="absolute top-1 right-1">
-                        <Checkbox
-                          checked={selectedPhotos.includes(imageIndex)}
-                          className="bg-white"
-                        />
+                  {savedImages.map((imageIndex) => {
+                    const imageUrl = typeof allImages[imageIndex] === 'string' 
+                      ? allImages[imageIndex] 
+                      : allImages[imageIndex]?.url;
+                    
+                    return (
+                      <div key={imageIndex} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedPhotos(prev =>
+                              prev.includes(imageIndex)
+                                ? prev.filter(i => i !== imageIndex)
+                                : [...prev, imageIndex]
+                            );
+                          }}
+                          className={`w-full aspect-square rounded-lg overflow-hidden border-2 ${
+                            selectedPhotos.includes(imageIndex)
+                              ? 'border-orange-600 ring-2 ring-orange-200'
+                              : 'border-slate-200'
+                          }`}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Photo ${imageIndex + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                        <div className="absolute top-1 right-1">
+                          <Checkbox
+                            checked={selectedPhotos.includes(imageIndex)}
+                            className="bg-white"
+                          />
+                        </div>
+                        <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded text-center">
+                          Photo {imageIndex + 1}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
