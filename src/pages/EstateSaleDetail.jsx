@@ -480,6 +480,7 @@ END:VCALENDAR`;
                             src={typeof image === 'string' ? image : image?.url}
                             alt={`View ${index + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            loading="lazy"
                           />
                         </button>
                         {currentUser && savedImages.includes(index) && (
