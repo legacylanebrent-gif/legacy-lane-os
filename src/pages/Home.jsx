@@ -562,7 +562,7 @@ export default function Home() {
               <div className="relative flex-1">
                 <MapPin className="absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 w-6 h-6" />
                 <Input
-                  placeholder="Enter ZIP code to find estate sales near you..."
+                  placeholder="Enter ZIP code..."
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleZipSearch()}

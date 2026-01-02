@@ -49,6 +49,7 @@ import MyBusinessExpenses from './pages/MyBusinessExpenses';
 import MyCourses from './pages/MyCourses';
 import MyListings from './pages/MyListings';
 import MyProfile from './pages/MyProfile';
+import MyPurchases from './pages/MyPurchases';
 import MyReferrals from './pages/MyReferrals';
 import MyRewards from './pages/MyRewards';
 import MySales from './pages/MySales';
@@ -60,6 +61,7 @@ import Operators from './pages/Operators';
 import Pipeline from './pages/Pipeline';
 import PlatformAnalytics from './pages/PlatformAnalytics';
 import PrintSigns from './pages/PrintSigns';
+import RecordPurchase from './pages/RecordPurchase';
 import ReferralLanding from './pages/ReferralLanding';
 import Revenue from './pages/Revenue';
 import RewardsCheckins from './pages/RewardsCheckins';
@@ -79,8 +81,6 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import RecordPurchase from './pages/RecordPurchase';
-import MyPurchases from './pages/MyPurchases';
 import __Layout from './Layout.jsx';
 
 
@@ -136,6 +136,7 @@ export const PAGES = {
     "MyCourses": MyCourses,
     "MyListings": MyListings,
     "MyProfile": MyProfile,
+    "MyPurchases": MyPurchases,
     "MyReferrals": MyReferrals,
     "MyRewards": MyRewards,
     "MySales": MySales,
@@ -147,6 +148,7 @@ export const PAGES = {
     "Pipeline": Pipeline,
     "PlatformAnalytics": PlatformAnalytics,
     "PrintSigns": PrintSigns,
+    "RecordPurchase": RecordPurchase,
     "ReferralLanding": ReferralLanding,
     "Revenue": Revenue,
     "RewardsCheckins": RewardsCheckins,
@@ -166,8 +168,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "RecordPurchase": RecordPurchase,
-    "MyPurchases": MyPurchases,
 }
 
 export const pagesConfig = {
