@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import { 
   MapPin, Calendar, Search, Tag, DollarSign, Heart, ShoppingBag,
   Image as ImageIcon, LogIn, LogOut, MessageSquare, LayoutDashboard, ArrowLeft
@@ -124,51 +125,35 @@ export default function SaleLanding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">LL</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
-                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-              </div>
-            </Link>
+      {isAuthenticated && currentUser ? (
+        <ConsumerHeader user={currentUser} />
+      ) : (
+        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">LL</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
+                </div>
+              </Link>
 
-            <div className="flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-white hover:bg-slate-800">
-                    <MessageSquare className="w-5 h-5" />
-                  </Button>
-                  {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
-                  </Button>
-                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
-                  <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
-                    Get Started Free
-                  </Button>
-                </>
-              )}
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:text-orange-400 hover:bg-orange-500/20">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
+                  Get Started Free
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Sale Info */}
       <div className="bg-white border-b border-slate-200 shadow-sm">
