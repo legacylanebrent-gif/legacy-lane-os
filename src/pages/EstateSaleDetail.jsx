@@ -482,8 +482,7 @@ END:VCALENDAR`;
                         <div className="mt-4 text-center">
                           <Button
                             onClick={() => setVisibleThumbnails(prev => prev + 20)}
-                            variant="outline"
-                            className="w-full"
+                            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold"
                           >
                             Load More ({sale.images.length - visibleThumbnails} remaining)
                           </Button>
