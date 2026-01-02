@@ -601,9 +601,10 @@ export default function Home() {
             </h3>
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
+                key={userLocation ? `${userLocation.lat}-${userLocation.lng}` : 'default'}
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
-                zoom={userLocation ? mapZoom : 4}
-                minZoom={mapMinZoom || undefined}
+                zoom={userLocation ? 12 : 4}
+                minZoom={userLocation ? 11 : undefined}
                 style={{ height: '500px', width: '100%' }}
                 className="z-0"
               >
