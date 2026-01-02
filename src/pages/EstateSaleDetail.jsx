@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import MessageModal from '@/components/messaging/MessageModal';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
   Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut
@@ -47,6 +48,7 @@ export default function EstateSaleDetail() {
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [visibleThumbnails, setVisibleThumbnails] = useState(20);
 
   useEffect(() => {
     loadSaleData();
@@ -287,51 +289,35 @@ END:VCALENDAR`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">LL</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
-                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-              </div>
-            </Link>
+      {isAuthenticated && currentUser ? (
+        <ConsumerHeader user={currentUser} />
+      ) : (
+        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
+              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">LL</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
+                </div>
+              </Link>
 
-            <div className="flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
-                    <MessageSquare className="w-5 h-5" />
-                  </Button>
-                  {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
-                  </Button>
-                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
-                  <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
-                    Get Started Free
-                  </Button>
-                </>
-              )}
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:text-orange-400 hover:bg-orange-500/20">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
+                  Get Started Free
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -464,33 +450,46 @@ END:VCALENDAR`;
                         </div>
                       )}
                     </div>
-                    <div className="p-4 grid grid-cols-6 gap-2">
-                    {sale.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <button
-                          onClick={() => {
-                            setSelectedImage(index);
-                            setModalOpen(true);
-                          }}
-                          className={`w-full aspect-square rounded-lg overflow-hidden border-2 hover:border-orange-400 transition-colors cursor-pointer ${
-                            selectedImage === index ? 'border-orange-600' : 'border-slate-200'
-                          }`}
-                        >
-                          <img
-                            src={typeof image === 'string' ? image : image?.url}
-                            alt={`View ${index + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform"
-                            loading="lazy"
-                          />
-                        </button>
-                        {currentUser && savedImages.includes(index) && (
-                          <div className="absolute top-1 right-1">
-                            <Heart className="w-4 h-4 fill-red-600 text-red-600" />
+                    <div className="p-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {sale.images.slice(0, visibleThumbnails).map((image, index) => (
+                          <div key={index} className="relative">
+                            <button
+                              onClick={() => {
+                                setSelectedImage(index);
+                                setModalOpen(true);
+                              }}
+                              className={`w-full aspect-square rounded-lg overflow-hidden border-2 hover:border-orange-400 transition-colors cursor-pointer ${
+                                selectedImage === index ? 'border-orange-600' : 'border-slate-200'
+                              }`}
+                            >
+                              <img
+                                src={typeof image === 'string' ? image : image?.url}
+                                alt={`View ${index + 1}`}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                loading="lazy"
+                              />
+                            </button>
+                            {currentUser && savedImages.includes(index) && (
+                              <div className="absolute top-1 right-1">
+                                <Heart className="w-4 h-4 fill-red-600 text-red-600" />
+                              </div>
+                            )}
                           </div>
-                        )}
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                      {sale.images.length > visibleThumbnails && (
+                        <div className="mt-4 text-center">
+                          <Button
+                            onClick={() => setVisibleThumbnails(prev => prev + 20)}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            Load More ({sale.images.length - visibleThumbnails} remaining)
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                 </CardContent>
               </Card>
 
