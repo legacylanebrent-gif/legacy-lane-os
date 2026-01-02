@@ -235,11 +235,27 @@ END:VCALENDAR`;
   };
 
   const convertTo24Hour = (time12h) => {
+    if (!time12h) return '00:00:00';
+    
+    // Handle if already in 24-hour format (e.g., "14:00")
+    if (!time12h.includes('AM') && !time12h.includes('PM') && !time12h.includes('am') && !time12h.includes('pm')) {
+      const [hours, minutes] = time12h.split(':');
+      return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0')}:00`;
+    }
+    
+    // Handle 12-hour format
     const [time, modifier] = time12h.split(' ');
     let [hours, minutes] = time.split(':');
-    if (hours === '12') hours = '00';
-    if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-    return `${hours.padStart(2, '0')}:${minutes || '00'}:00`;
+    hours = hours || '12';
+    minutes = minutes || '00';
+    
+    if (modifier && modifier.toUpperCase() === 'PM' && hours !== '12') {
+      hours = String(parseInt(hours, 10) + 12);
+    } else if (modifier && modifier.toUpperCase() === 'AM' && hours === '12') {
+      hours = '00';
+    }
+    
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
   };
 
   const handleMessageOperator = () => {
