@@ -98,7 +98,8 @@ export default function SaleRequestModal({ open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh]">
+        <div className="max-h-[calc(90vh-4rem)] overflow-y-auto pr-2">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif">Submit Estate Sale Request</DialogTitle>
         </DialogHeader>
@@ -330,6 +331,7 @@ export default function SaleRequestModal({ open, onClose }) {
             </div>
           </form>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );
