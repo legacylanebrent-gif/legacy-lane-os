@@ -42,6 +42,10 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
       state: '',
       zip: ''
     },
+    location: {
+      lat: null,
+      lng: null
+    },
     company_name: '',
     company_logo_url: '',
     light_logo_url: '',
@@ -119,6 +123,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         phone: editUser.phone || '',
         bio: editUser.bio || '',
         address: editUser.address || { street: '', city: '', state: '', zip: '' },
+        location: editUser.location || { lat: null, lng: null },
         company_name: editUser.company_name || '',
         company_logo_url: editUser.company_logo_url || '',
         light_logo_url: editUser.light_logo_url || '',
@@ -349,6 +354,10 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
           state: '',
           zip: ''
         },
+        location: {
+          lat: null,
+          lng: null
+        },
         company_name: '',
         company_logo_url: '',
         light_logo_url: '',
@@ -525,6 +534,31 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                   onChange={(e) => setFormData({...formData, address: {...formData.address, zip: e.target.value}})}
                 />
               </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Geolocation (Optional)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="Latitude"
+                    value={formData.location.lat || ''}
+                    onChange={(e) => setFormData({...formData, location: {...formData.location, lat: e.target.value ? parseFloat(e.target.value) : null}})}
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="Longitude"
+                    value={formData.location.lng || ''}
+                    onChange={(e) => setFormData({...formData, location: {...formData.location, lng: e.target.value ? parseFloat(e.target.value) : null}})}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-slate-500">User's stored geolocation for showing nearby estate sales</p>
             </div>
           </div>
 
