@@ -227,10 +227,10 @@ export default function Home() {
   };
 
   const calculateMinZoom = (location) => {
-    // Zoom level 13 shows approximately 20 mile radius
+    // Zoom level 12 shows approximately 30 mile radius
     // Force map to zoom to this level
-    setMapZoom(13);
-    setMapMinZoom(11);
+    setMapZoom(12);
+    setMapMinZoom(10);
   };
 
   const loadData = async () => {
