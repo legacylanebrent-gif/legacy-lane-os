@@ -17,7 +17,7 @@ export default function SaleRequestModal({ open, onClose }) {
     contact_phone: '',
     property_address: '',
     source: 'website',
-    situation: '',
+    situation: 'rather_not_say',
     home_size: '',
     gated_community: false,
     sales_allowed: '',
@@ -82,7 +82,7 @@ export default function SaleRequestModal({ open, onClose }) {
       contact_phone: '',
       property_address: '',
       source: 'website',
-      situation: '',
+      situation: 'rather_not_say',
       home_size: '',
       gated_community: false,
       sales_allowed: '',
@@ -174,6 +174,7 @@ export default function SaleRequestModal({ open, onClose }) {
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px] overflow-y-auto">
+                    <SelectItem value="rather_not_say">I'd Rather Not Say</SelectItem>
                     <SelectItem value="probate">Probate</SelectItem>
                     <SelectItem value="divorce">Divorce</SelectItem>
                     <SelectItem value="downsizing">Downsizing</SelectItem>
@@ -234,7 +235,7 @@ export default function SaleRequestModal({ open, onClose }) {
 
               {formData.gated_community && (
                 <div>
-                  <Label>Are sales allowed?</Label>
+                  <Label>Are in-person sales allowed?</Label>
                   <Select value={formData.sales_allowed} onValueChange={(value) => setFormData({...formData, sales_allowed: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select..." />
@@ -264,7 +265,7 @@ export default function SaleRequestModal({ open, onClose }) {
                 </Select>
               </div>
               <div>
-                <Label>Interested in full service?</Label>
+                <Label>Interested in full service? (sale, cleanout, home sale)</Label>
                 <Select value={formData.interested_in_full_service} onValueChange={(value) => setFormData({...formData, interested_in_full_service: value})}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select..." />
