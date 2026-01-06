@@ -675,7 +675,7 @@ export default function Home() {
           </div>
           
           <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
-            Discover Hidden<br/>
+            Discover Sales &<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Treasures</span> Near You
           </h2>
           <p className="text-sm md:text-base text-slate-300 mb-12 max-w-3xl mx-auto">
