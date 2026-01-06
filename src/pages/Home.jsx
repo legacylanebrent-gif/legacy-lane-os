@@ -78,6 +78,7 @@ export default function Home() {
   const [debugMessage, setDebugMessage] = useState('');
   const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
   const [newLocation, setNewLocation] = useState(null);
+  const [userZipCode, setUserZipCode] = useState('');
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -138,6 +139,25 @@ export default function Home() {
             lng: position.coords.longitude
           };
           
+          // Reverse geocode to get zip code
+          try {
+            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.lat},${userLoc.lng}&key=${await getGoogleMapsKey()}`);
+            const data = await response.json();
+            if (data.results && data.results[0]) {
+              const addressComponents = data.results[0].address_components;
+              const zipComponent = addressComponents.find(c => c.types.includes('postal_code'));
+              if (zipComponent) {
+                const zip = zipComponent.long_name.match(/^\d{5}/);
+                if (zip) {
+                  setUserZipCode(zip[0]);
+                  localStorage.setItem('userZipCode', zip[0]);
+                }
+              }
+            }
+          } catch (error) {
+            console.log('Could not get zip code from location');
+          }
+          
           // Check if location has changed significantly from stored location
           const prevLoc = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
           
@@ -191,9 +211,13 @@ export default function Home() {
           // Try to use stored location if available
           if (!userLocation) {
             const storedLocation = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
+            const storedZip = localStorage.getItem('userZipCode');
             if (storedLocation) {
               setUserLocation(storedLocation);
               calculateMinZoom(storedLocation);
+            }
+            if (storedZip) {
+              setUserZipCode(storedZip);
             }
           }
         }
@@ -295,6 +319,13 @@ export default function Home() {
         const userLoc = { lat: location.lat, lng: location.lng };
         setUserLocation(userLoc);
         calculateMinZoom(userLoc);
+        
+        // Extract 5-digit zip code
+        const zipMatch = zip.match(/^\d{5}/);
+        if (zipMatch) {
+          setUserZipCode(zipMatch[0]);
+          localStorage.setItem('userZipCode', zipMatch[0]);
+        }
         
         // Save to localStorage and profile
         localStorage.setItem('userLocation', JSON.stringify(userLoc));
@@ -1025,7 +1056,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-2 sm:px-0">
           <div className="text-center mb-8 sm:mb-12">
             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
-              {userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
+              {userLocation && userZipCode ? `🏘️ Local Sales Near ${userZipCode}` : userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
             </h3>
             {userLocation ? (
               <p className="text-lg sm:text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
