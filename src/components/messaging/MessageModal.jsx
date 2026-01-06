@@ -109,14 +109,14 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Message {recipient?.full_name || recipient?.company_name || 'User'}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[calc(90vh-8rem)] overflow-y-auto pr-2">
           {messages.length === 0 && (
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Subject</label>
@@ -129,7 +129,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
           )}
 
           {messages.length > 0 && (
-            <ScrollArea className="h-48 sm:h-64 md:h-96 border rounded-lg p-4">
+            <ScrollArea className="h-64 sm:h-80 border rounded-lg p-4">
               <div className="space-y-4">
                 {messages.map((msg) => (
                   <div
