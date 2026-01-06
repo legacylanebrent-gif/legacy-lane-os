@@ -281,8 +281,8 @@ export default function SaleRequestModal({ open, onClose }) {
 
             <div>
               <Label>What will you be selling?</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50">
-                {['Furniture', 'Clothing', 'Decor', 'Collectables', 'Antiques', 'Art', 'Vehicles', 'Tools', 'Appliances', 'Electronics', 'Other', "I don't know"].map(item => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50 max-h-[400px] overflow-y-auto">
+                {['Furniture', 'Antiques', 'Collectibles', 'Jewelry', 'Art & Paintings', 'China & Glassware', 'Crystal', 'Silver & Silverware', 'Books', 'Vintage Clothing', 'Tools', 'Garden & Outdoor', 'Kitchen & Dining', 'Appliances', 'Electronics', 'Linens & Bedding', 'Decorative Items', 'Rugs & Carpets', 'Lamps & Lighting', 'Musical Instruments', 'Sports Equipment', 'Toys & Games', 'Holiday Decorations', 'Records & Vinyl', 'Coins & Stamps', 'Watches & Clocks', 'Pottery & Ceramics', 'Vintage Electronics', 'Luggage & Trunks', 'Sewing & Crafts'].map(item => (
                   <div key={item} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
