@@ -47,7 +47,7 @@ function ChangeMapView({ center, zoom }) {
   const map = useMap();
   React.useEffect(() => {
     if (center) {
-      map.setView(center, zoom);
+      map.setView(center, zoom, { animate: true });
     }
   }, [center, zoom, map]);
   return null;
@@ -227,10 +227,10 @@ export default function Home() {
   };
 
   const calculateMinZoom = (location) => {
-    // Zoom level 12 shows approximately 25 mile radius
-    // Set this as minimum zoom to prevent zooming out beyond 25 miles
-    setMapZoom(12);
-    setMapMinZoom(12);
+    // Zoom level 13 shows approximately 20 mile radius
+    // Force map to zoom to this level
+    setMapZoom(13);
+    setMapMinZoom(11);
   };
 
   const loadData = async () => {
@@ -749,14 +749,14 @@ export default function Home() {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
-                zoom={userLocation ? 12 : 4}
-                minZoom={userLocation ? 11 : undefined}
+                zoom={userLocation ? mapZoom : 4}
+                minZoom={userLocation ? mapMinZoom : undefined}
                 style={{ height: '500px', width: '100%' }}
                 className="z-0"
               >
                 <ChangeMapView 
                   center={userLocation ? [userLocation.lat, userLocation.lng] : null} 
-                  zoom={12} 
+                  zoom={mapZoom} 
                 />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
