@@ -1088,7 +1088,7 @@ export default function Home() {
               <MapPin className="w-20 h-20 text-slate-300 mx-auto mb-6" />
               <p className="text-slate-500 text-xl mb-4">
                 {userLocation 
-                  ? 'No estate sales found within 25 miles.'
+                  ? 'No sales found within 25 miles.'
                   : 'No estate sales available.'}
               </p>
               <Button onClick={handleUseMyLocation} className="bg-cyan-600 hover:bg-cyan-700">
