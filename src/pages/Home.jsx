@@ -76,6 +76,8 @@ export default function Home() {
   const [mapZoom, setMapZoom] = useState(12);
   const [mapMinZoom, setMapMinZoom] = useState(null);
   const [debugMessage, setDebugMessage] = useState('');
+  const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
+  const [newLocation, setNewLocation] = useState(null);
 
   useEffect(() => {
     checkAuthAndRedirect();
@@ -129,15 +131,58 @@ export default function Home() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          setUserLocation(userLoc);
-          // Calculate min zoom for 25 miles
-          calculateMinZoom(userLoc);
+          
+          // Check if location has changed significantly from previous visit
+          const storedLocation = localStorage.getItem('userLocation');
+          if (storedLocation) {
+            const prevLoc = JSON.parse(storedLocation);
+            const distance = calculateDistance(prevLoc.lat, prevLoc.lng, userLoc.lat, userLoc.lng);
+            
+            // If moved more than 10 miles, ask to update
+            if (distance > 10) {
+              setNewLocation(userLoc);
+              setShowLocationChangeDialog(true);
+              // Use previous location temporarily
+              setUserLocation(prevLoc);
+              calculateMinZoom(prevLoc);
+            } else {
+              setUserLocation(userLoc);
+              calculateMinZoom(userLoc);
+            }
+          } else {
+            // First visit, store location
+            localStorage.setItem('userLocation', JSON.stringify(userLoc));
+            setUserLocation(userLoc);
+            calculateMinZoom(userLoc);
+          }
         },
         (error) => {
           console.log('Geolocation error:', error);
+          // Try to use stored location if available
+          const storedLocation = localStorage.getItem('userLocation');
+          if (storedLocation) {
+            const prevLoc = JSON.parse(storedLocation);
+            setUserLocation(prevLoc);
+            calculateMinZoom(prevLoc);
+          }
         }
       );
     }
+  };
+  
+  const handleUpdateLocation = () => {
+    if (newLocation) {
+      localStorage.setItem('userLocation', JSON.stringify(newLocation));
+      setUserLocation(newLocation);
+      calculateMinZoom(newLocation);
+      setShowLocationChangeDialog(false);
+      setNewLocation(null);
+    }
+  };
+  
+  const handleKeepOldLocation = () => {
+    setShowLocationChangeDialog(false);
+    setNewLocation(null);
   };
 
   const calculateMinZoom = (location) => {
@@ -435,6 +480,36 @@ export default function Home() {
         open={showSaleRequestModal} 
         onClose={() => setShowSaleRequestModal(false)} 
       />
+
+      {/* Location Change Dialog */}
+      <Dialog open={showLocationChangeDialog} onOpenChange={setShowLocationChangeDialog}>
+        <DialogContent className="max-w-md">
+          <div className="text-center py-4">
+            <MapPin className="w-16 h-16 mx-auto text-cyan-600 mb-4" />
+            <h3 className="text-2xl font-serif font-bold text-slate-900 mb-2">
+              Location Changed?
+            </h3>
+            <p className="text-slate-600 mb-6">
+              It looks like you're in a different area than your last visit. Would you like to update your location to see estate sales near you?
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleKeepOldLocation}
+                variant="outline"
+                className="flex-1"
+              >
+                Keep Old Location
+              </Button>
+              <Button
+                onClick={handleUpdateLocation}
+                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+              >
+                Update Location
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* QR Scanner Modal */}
       {isAuthenticated && (
