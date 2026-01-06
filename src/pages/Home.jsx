@@ -295,6 +295,16 @@ export default function Home() {
         const userLoc = { lat: location.lat, lng: location.lng };
         setUserLocation(userLoc);
         calculateMinZoom(userLoc);
+        
+        // Save to localStorage and profile
+        localStorage.setItem('userLocation', JSON.stringify(userLoc));
+        if (currentUser && isAuthenticated) {
+          try {
+            await base44.auth.updateMe({ location: userLoc });
+          } catch (error) {
+            console.log('Could not save location to profile');
+          }
+        }
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
@@ -325,13 +335,23 @@ export default function Home() {
       // Get location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          async (position) => {
             const userLoc = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
             setUserLocation(userLoc);
             calculateMinZoom(userLoc);
+            
+            // Save to localStorage and profile
+            localStorage.setItem('userLocation', JSON.stringify(userLoc));
+            if (currentUser && isAuthenticated) {
+              try {
+                await base44.auth.updateMe({ location: userLoc });
+              } catch (error) {
+                console.log('Could not save location to profile');
+              }
+            }
           },
           (error) => {
             console.log('Geolocation error:', error);
