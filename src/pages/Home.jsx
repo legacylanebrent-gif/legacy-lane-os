@@ -264,7 +264,25 @@ export default function Home() {
       const salesData = await base44.entities.EstateSale.list('-created_date', 50);
       console.log('Raw sales data:', salesData);
       
-      const activeSales = (salesData || []).filter(s => s.status === 'upcoming' || s.status === 'active');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const activeSales = (salesData || []).filter(s => {
+        // Filter by status
+        if (s.status !== 'upcoming' && s.status !== 'active') return false;
+        
+        // Filter by date - only show sales with future or today dates
+        if (s.sale_dates && s.sale_dates.length > 0) {
+          const hasFutureDate = s.sale_dates.some(dateObj => {
+            const saleDate = new Date(dateObj.date);
+            saleDate.setHours(0, 0, 0, 0);
+            return saleDate >= today;
+          });
+          return hasFutureDate;
+        }
+        
+        return true; // Include if no dates set
+      });
       console.log('Active sales after filter:', activeSales.length);
       
       setSales(activeSales);
