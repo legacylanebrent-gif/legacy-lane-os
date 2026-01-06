@@ -92,6 +92,12 @@ export default function Home() {
         try {
           const user = await base44.auth.me();
           setCurrentUser(user);
+          
+          // Load location from user profile first
+          if (user.location?.lat && user.location?.lng) {
+            setUserLocation(user.location);
+            calculateMinZoom(user.location);
+          }
         } catch (error) {
           console.error('Error loading user:', error);
         }
@@ -126,16 +132,16 @@ export default function Home() {
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const userLoc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
           
-          // Check if location has changed significantly from previous visit
-          const storedLocation = localStorage.getItem('userLocation');
-          if (storedLocation) {
-            const prevLoc = JSON.parse(storedLocation);
+          // Check if location has changed significantly from stored location
+          const prevLoc = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
+          
+          if (prevLoc?.lat && prevLoc?.lng) {
             const distance = calculateDistance(prevLoc.lat, prevLoc.lng, userLoc.lat, userLoc.lng);
             
             // If moved more than 10 miles, ask to update
@@ -143,38 +149,73 @@ export default function Home() {
               setNewLocation(userLoc);
               setShowLocationChangeDialog(true);
               // Use previous location temporarily
-              setUserLocation(prevLoc);
-              calculateMinZoom(prevLoc);
+              if (!userLocation) {
+                setUserLocation(prevLoc);
+                calculateMinZoom(prevLoc);
+              }
             } else {
-              setUserLocation(userLoc);
-              calculateMinZoom(userLoc);
+              // Update silently if within 10 miles
+              if (!userLocation) {
+                setUserLocation(userLoc);
+                calculateMinZoom(userLoc);
+              }
+              // Save to localStorage and profile if authenticated
+              localStorage.setItem('userLocation', JSON.stringify(userLoc));
+              if (currentUser && isAuthenticated) {
+                try {
+                  await base44.auth.updateMe({ location: userLoc });
+                } catch (error) {
+                  console.log('Could not update user location');
+                }
+              }
             }
           } else {
             // First visit, store location
             localStorage.setItem('userLocation', JSON.stringify(userLoc));
-            setUserLocation(userLoc);
-            calculateMinZoom(userLoc);
+            if (!userLocation) {
+              setUserLocation(userLoc);
+              calculateMinZoom(userLoc);
+            }
+            // Save to profile if authenticated
+            if (currentUser && isAuthenticated) {
+              try {
+                await base44.auth.updateMe({ location: userLoc });
+              } catch (error) {
+                console.log('Could not save user location');
+              }
+            }
           }
         },
         (error) => {
           console.log('Geolocation error:', error);
           // Try to use stored location if available
-          const storedLocation = localStorage.getItem('userLocation');
-          if (storedLocation) {
-            const prevLoc = JSON.parse(storedLocation);
-            setUserLocation(prevLoc);
-            calculateMinZoom(prevLoc);
+          if (!userLocation) {
+            const storedLocation = currentUser?.location || (localStorage.getItem('userLocation') ? JSON.parse(localStorage.getItem('userLocation')) : null);
+            if (storedLocation) {
+              setUserLocation(storedLocation);
+              calculateMinZoom(storedLocation);
+            }
           }
         }
       );
     }
   };
   
-  const handleUpdateLocation = () => {
+  const handleUpdateLocation = async () => {
     if (newLocation) {
       localStorage.setItem('userLocation', JSON.stringify(newLocation));
       setUserLocation(newLocation);
       calculateMinZoom(newLocation);
+      
+      // Save to user profile if authenticated
+      if (currentUser && isAuthenticated) {
+        try {
+          await base44.auth.updateMe({ location: newLocation });
+        } catch (error) {
+          console.log('Could not update user location');
+        }
+      }
+      
       setShowLocationChangeDialog(false);
       setNewLocation(null);
     }
