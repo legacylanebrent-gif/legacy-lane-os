@@ -14,7 +14,7 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt, MessageSquare
+  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt, MessageSquare, Star
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -171,6 +171,12 @@ export default function ConsumerHeader({ user }) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
+                      <Star className="w-4 h-4 mr-2" />
+                      My Rewards
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
                       <LayoutDashboard className="w-4 h-4 mr-2" />
                       Dashboard
@@ -178,6 +184,12 @@ export default function ConsumerHeader({ user }) {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </div>
+                <DropdownMenuItem asChild>
+                  <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
+                    <Star className="w-4 h-4 mr-2" />
+                    My Rewards
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
                     <Bell className="w-4 h-4 mr-2" />
