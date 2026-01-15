@@ -64,10 +64,11 @@ Format as JSON: {"title": "...", "description": "..."}`,
             }
           });
 
+          const responseData = response.data || response;
           const updatedPhoto = {
             ...image,
-            name: response.title,
-            description: response.description
+            name: responseData.title || '',
+            description: responseData.description || ''
           };
 
           generatedResults.push({
