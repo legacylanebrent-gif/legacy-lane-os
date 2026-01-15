@@ -117,9 +117,14 @@ Return ONLY valid JSON with no markdown or extra text:
   const handleNextBatch = async () => {
     const nextIndex = currentBatchIndex + BATCH_SIZE;
     if (nextIndex < images.length) {
+      setResults([]);
       setCurrentBatchIndex(nextIndex);
-      loadBatch();
-      setTimeout(() => generateBatch(), 100);
+      setTimeout(() => {
+        const start = nextIndex;
+        const end = Math.min(start + BATCH_SIZE, images.length);
+        setBatch(images.slice(start, end));
+        setTimeout(() => generateBatch(), 100);
+      }, 0);
     } else {
       onClose();
     }
