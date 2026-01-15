@@ -270,6 +270,13 @@ export default function SaleEditor() {
           updated[index] = photo;
           setFormData({...formData, images: updated});
         }}
+        onSaveToDb={async (index, photo) => {
+          if (saleId) {
+            const updated = [...formData.images];
+            updated[index] = photo;
+            await base44.entities.EstateSale.update(saleId, { images: updated });
+          }
+        }}
         startIndex={0}
       />
 
