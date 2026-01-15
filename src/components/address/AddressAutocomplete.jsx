@@ -81,12 +81,18 @@ export default function AddressAutocomplete({
         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         className={className}
       />
-      {showSuggestions && value.length > 0 && (
+      {showSuggestions && value.length > 0 && predictions.length > 0 && (
         <div className="absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-md shadow-lg mt-1 z-50 max-h-64 overflow-y-auto">
-          {/* Placeholder for actual predictions from API */}
-          <div className="p-2 text-xs text-slate-500">
-            Loading suggestions...
-          </div>
+          {predictions.map((prediction, index) => (
+            <div
+              key={index}
+              onClick={() => handleSuggestionClick(prediction.place_id, prediction.description)}
+              className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm border-b last:border-b-0"
+            >
+              <div className="font-medium text-slate-900">{prediction.description.split(',')[0]}</div>
+              <div className="text-xs text-slate-500">{prediction.description.split(',').slice(1).join(',').trim()}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>
