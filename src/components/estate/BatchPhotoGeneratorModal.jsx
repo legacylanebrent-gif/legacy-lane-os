@@ -103,7 +103,9 @@ Return ONLY valid JSON with no markdown or extra text:
             onDescriptionGenerated(actualIndex, description);
           }
         } catch (err) {
+          const errorMsg = `Image ${i}: ${err.message || 'Unknown error'}`;
           console.error('Error generating for image', i, err);
+          setError(errorMsg);
           generatedResults.push({
             index: actualIndex,
             photo: image,
