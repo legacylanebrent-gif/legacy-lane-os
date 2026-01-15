@@ -205,7 +205,7 @@ export default function SaleEditor() {
       sale_dates: [...prev.sale_dates, newDate]
     }));
 
-    setDateForm({ start_date: '', end_date: '', start_time: '', end_time: '' });
+    setDateForm({ start_date: '', start_time: '', end_time: '' });
   };
 
   const handleRemoveDate = (index) => {
