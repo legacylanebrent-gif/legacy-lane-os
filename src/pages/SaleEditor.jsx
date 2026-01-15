@@ -524,7 +524,20 @@ export default function SaleEditor() {
                 </TabsContent>
 
                 <TabsContent value="details" className="space-y-4">
-                  {formData.images.length === 0 ? (
+                   <div className="flex items-center justify-between mb-4">
+                     <h3 className="font-medium text-slate-900">Photo Titles & Descriptions</h3>
+                     <Button 
+                       size="sm" 
+                       variant="outline" 
+                       className="border-orange-500 text-orange-600"
+                       onClick={() => setShowGeneratorModal(true)}
+                       disabled={formData.images.length === 0}
+                     >
+                       <Sparkles className="w-3 h-3 mr-1" />
+                       Generate Titles
+                     </Button>
+                   </div>
+                   {formData.images.length === 0 ? (
                     <div className="text-center py-8 text-slate-500">
                       <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                       <p>No photos uploaded yet.</p>
