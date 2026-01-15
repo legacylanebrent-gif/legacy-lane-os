@@ -242,20 +242,36 @@ export default function SaleEditor() {
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                 />
               </div>
-              <div>
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SALE_STATUSES.map(status => (
-                      <SelectItem key={status} value={status} className="capitalize">
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Sale Type</Label>
+                  <Select value={formData.sale_type} onValueChange={(value) => setFormData({...formData, sale_type: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="estate_sale">Estate Sale</SelectItem>
+                      <SelectItem value="moving_sale">Moving Sale</SelectItem>
+                      <SelectItem value="downsizing_sale">Downsizing Sale</SelectItem>
+                      <SelectItem value="liquidation">Liquidation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SALE_STATUSES.map(status => (
+                        <SelectItem key={status} value={status} className="capitalize">
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <Label>Description</Label>
