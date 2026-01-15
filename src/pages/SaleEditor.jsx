@@ -547,8 +547,74 @@ export default function SaleEditor() {
                 </DragDropContext>
               </div>
             )}
-          </CardContent>
-        </Card>
+            </TabsContent>
+            <TabsContent value="descriptions" className="space-y-4">
+            {formData.images.length === 0 ? (
+              <p className="text-slate-500 text-center py-8">No photos added yet</p>
+            ) : (
+              <div className="space-y-4">
+                {formData.images.map((image, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="flex gap-4">
+                      <img
+                        src={image.url}
+                        alt={`Photo ${index + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                      />
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
+                          <Input
+                            id={`name-${index}`}
+                            placeholder="Item name"
+                            value={image.name || ''}
+                            onChange={(e) => {
+                              const updated = [...formData.images];
+                              updated[index].name = e.target.value;
+                              setFormData({...formData, images: updated});
+                            }}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`desc-${index}`} className="text-xs">Description</Label>
+                          <Input
+                            id={`desc-${index}`}
+                            placeholder="Item description"
+                            value={image.description || ''}
+                            onChange={(e) => {
+                              const updated = [...formData.images];
+                              updated[index].description = e.target.value;
+                              setFormData({...formData, images: updated});
+                            }}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`price-${index}`} className="text-xs">Price</Label>
+                          <Input
+                            id={`price-${index}`}
+                            type="number"
+                            placeholder="Price"
+                            value={image.price || ''}
+                            onChange={(e) => {
+                              const updated = [...formData.images];
+                              updated[index].price = e.target.value ? parseFloat(e.target.value) : '';
+                              setFormData({...formData, images: updated});
+                            }}
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+            </TabsContent>
+            </Tabs>
+            </CardContent>
+            </Card>
 
         {/* Featured Items */}
         <Card>
