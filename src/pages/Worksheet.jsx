@@ -881,10 +881,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
 
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="whitespace-nowrap">
-            <Users className="w-4 h-4 mr-2" />
-            Assign Client
-          </Button>
-          <Button variant="outline" size="sm" className="whitespace-nowrap">
             <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
