@@ -602,10 +602,86 @@ export default function SaleEditor() {
             <div className="text-center py-12">
               <p className="text-slate-500">No clients assigned to this sale</p>
             </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+            </Card>
 
-        {/* Footer */}
+            {/* Payment & Special Instructions */}
+            <Card>
+            <CardContent className="pt-6 space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Payment & Special Instructions</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium text-slate-900 mb-2">Accepted Payment Methods</h3>
+                  <div className="flex gap-2 mb-3">
+                    <Input
+                      placeholder="e.g., Cash, Credit Card, Venmo..."
+                      value={paymentMethodInput}
+                      onChange={(e) => setPaymentMethodInput(e.target.value)}
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => {
+                        if (paymentMethodInput.trim()) {
+                          setFormData(prev => ({
+                            ...prev,
+                            payment_methods: [...(prev.payment_methods || []), paymentMethodInput.trim()]
+                          }));
+                          setPaymentMethodInput('');
+                        }
+                      }}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {formData.payment_methods && formData.payment_methods.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.payment_methods.map((method, index) => (
+                        <Badge key={index} variant="outline" className="px-3 py-1">
+                          {method}
+                          <button
+                            onClick={() => setFormData({
+                              ...formData,
+                              payment_methods: formData.payment_methods.filter((_, i) => i !== index)
+                            })}
+                            className="ml-2 text-slate-500 hover:text-slate-700"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-slate-900 mb-2">Special Instructions</h3>
+                  <Textarea
+                    placeholder="Parking info, entry requirements, etc..."
+                    value={formData.special_notes}
+                    onChange={(e) => setFormData({...formData, special_notes: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                  <div>
+                    <h3 className="font-medium text-slate-900">Feature this sale</h3>
+                    <p className="text-sm text-slate-600">Display prominently on the homepage</p>
+                  </div>
+                  <Switch
+                    checked={featured}
+                    onCheckedChange={setFeatured}
+                  />
+                </div>
+              </div>
+            </div>
+            </CardContent>
+            </Card>
+
+            {/* Footer */}
         <div className="flex gap-3 justify-end pb-8">
           {saleId && (
             <Button variant="destructive" onClick={handleDelete} disabled={saving} className="mr-auto">
