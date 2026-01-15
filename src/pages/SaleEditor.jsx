@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, Plus, X, Upload, Camera, Sparkles, RotateCw, Trash2, Upload as UploadIcon, CalendarIcon, DollarSign, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, X, Upload, Camera, Sparkles, RotateCw, Trash2, Upload as UploadIcon, CalendarIcon, DollarSign, ImageIcon, Trash } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { format } from 'date-fns';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
