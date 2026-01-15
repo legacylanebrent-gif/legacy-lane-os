@@ -287,7 +287,7 @@ export default function MySales() {
                     </div>
 
                     <div className="space-y-2 text-sm">
-                      {(sale.property_address || (sale.sale_dates && sale.sale_dates.length > 0)) && (
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-slate-600">
                           {sale.property_address && (
                             <div className="flex items-center gap-2">
@@ -302,25 +302,24 @@ export default function MySales() {
                             </div>
                           )}
                         </div>
-                      )}
-
-                      <div className="flex items-center gap-4 pt-3 border-t mb-3">
-                        <div className="flex items-center gap-1 text-slate-600">
-                          <Eye className="w-4 h-4" />
-                          <span>{sale.views || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-slate-600">
-                          <Heart className="w-4 h-4" />
-                          <span>{sale.saves || 0}</span>
-                        </div>
-                        {sale.actual_revenue && (
-                          <div className="flex items-center gap-1 text-green-600 ml-auto">
-                            <DollarSign className="w-4 h-4" />
-                            <span className="font-semibold">
-                              {sale.actual_revenue.toLocaleString()}
-                            </span>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1 text-slate-600">
+                            <Eye className="w-4 h-4" />
+                            <span>{sale.views || 0}</span>
                           </div>
-                        )}
+                          <div className="flex items-center gap-1 text-slate-600">
+                            <Heart className="w-4 h-4" />
+                            <span>{sale.saves || 0}</span>
+                          </div>
+                          {sale.actual_revenue && (
+                            <div className="flex items-center gap-1 text-green-600">
+                              <DollarSign className="w-4 h-4" />
+                              <span className="font-semibold">
+                                {sale.actual_revenue.toLocaleString()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
