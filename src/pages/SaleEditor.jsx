@@ -454,8 +454,67 @@ export default function SaleEditor() {
                 <TabsTrigger value="descriptions">Descriptions & Pricing</TabsTrigger>
               </TabsList>
               <TabsContent value="thumbnails" className="space-y-4">
-            
-            <div className="grid grid-cols-2 gap-3">
+
+              {uploadingImages && uploadProgress.total > 0 && (
+              <div className="space-y-2 p-3 bg-slate-50 rounded-lg">
+                <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
+                <p className="text-xs text-slate-600 text-center">Uploading {uploadProgress.current} of {uploadProgress.total}...</p>
+              </div>
+              )}
+
+                {formData.images.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
+                    <DragDropContext onDragEnd={(result) => {
+                      if (!result.destination) return;
+                      const items = Array.from(formData.images);
+                      const [reordered] = items.splice(result.source.index, 1);
+                      items.splice(result.destination.index, 0, reordered);
+                      setFormData({...formData, images: items});
+                    }}>
+                      <Droppable droppableId="images" direction="horizontal">
+                        {(provided) => (
+                          <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            className="grid grid-cols-5 gap-3"
+                          >
+                            {formData.images.map((image, index) => (
+                              <Draggable key={index} draggableId={`image-${index}`} index={index}>
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square"
+                                  >
+                                    <img
+                                      src={image.url}
+                                      alt={`Photo ${index + 1}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                      onClick={() => setFormData({
+                                        ...formData,
+                                        images: formData.images.filter((_, i) => i !== index)
+                                      })}
+                                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+                  </div>
+                )}
+
+              <div className="grid grid-cols-2 gap-3">
               <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
                 <input
                   type="file"
@@ -487,66 +546,7 @@ export default function SaleEditor() {
                   <p className="text-sm font-medium text-green-900">Choose Files</p>
                 </label>
               </div>
-            </div>
-
-            {uploadingImages && uploadProgress.total > 0 && (
-              <div className="space-y-2 p-3 bg-slate-50 rounded-lg">
-                <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
-                <p className="text-xs text-slate-600 text-center">Uploading {uploadProgress.current} of {uploadProgress.total}...</p>
               </div>
-            )}
-
-            {formData.images.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
-                <DragDropContext onDragEnd={(result) => {
-                  if (!result.destination) return;
-                  const items = Array.from(formData.images);
-                  const [reordered] = items.splice(result.source.index, 1);
-                  items.splice(result.destination.index, 0, reordered);
-                  setFormData({...formData, images: items});
-                }}>
-                  <Droppable droppableId="images" direction="horizontal">
-                    {(provided) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        className="grid grid-cols-4 gap-3"
-                      >
-                        {formData.images.map((image, index) => (
-                          <Draggable key={index} draggableId={`image-${index}`} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="relative group rounded-lg overflow-hidden bg-slate-200 h-24"
-                              >
-                                <img
-                                  src={image.url}
-                                  alt={`Photo ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                                <button
-                                  onClick={() => setFormData({
-                                    ...formData,
-                                    images: formData.images.filter((_, i) => i !== index)
-                                  })}
-                                  className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </div>
-            )}
             </TabsContent>
             <TabsContent value="descriptions" className="space-y-4">
             {formData.images.length === 0 ? (
