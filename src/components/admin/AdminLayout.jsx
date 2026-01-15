@@ -36,6 +36,7 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Amazon Products', path: 'AdminAmazonProducts', icon: Package },
   { label: 'Subscription Packages', path: 'AdminPackages', icon: Package },
   { label: 'Advertising Packages', path: 'AdminAdvertisingPackages', icon: Package },
+  { label: 'Pricing Import', path: 'PricingImport', icon: BarChart3 },
   { label: 'Transactions', path: 'AdminTransactions', icon: FileText },
   { label: 'Revenue Projections', path: 'Revenue', icon: DollarSign },
   { label: 'Future Operators', path: 'AdminFutureOperators', icon: Briefcase },
