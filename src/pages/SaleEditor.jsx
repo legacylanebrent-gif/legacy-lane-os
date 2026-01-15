@@ -418,7 +418,13 @@ export default function SaleEditor() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Label className="text-sm font-medium">Gallery Photos</Label>
-                <Button size="sm" variant="outline" className="border-orange-500 text-orange-600">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-orange-500 text-orange-600"
+                  onClick={() => setShowGeneratorModal(true)}
+                  disabled={formData.images.length === 0}
+                >
                   <Sparkles className="w-3 h-3 mr-1" />
                   Generate Titles
                 </Button>
