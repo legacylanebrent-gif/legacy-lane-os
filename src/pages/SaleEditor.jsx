@@ -66,6 +66,7 @@ export default function SaleEditor() {
       setFormData({
         title: saleData.title || '',
         description: saleData.description || '',
+        sale_type: saleData.sale_type || '',
         status: saleData.status || 'draft',
         property_address: saleData.property_address || { street: '', city: '', state: '', zip: '' },
         sale_dates: saleData.sale_dates || [],
