@@ -72,7 +72,6 @@ export default function SaleEditor() {
           typeof img === 'string' ? { url: img, name: '', description: '' } : img
         ),
         categories: saleData.categories || [],
-        estimated_value: saleData.estimated_value || '',
         commission_rate: saleData.commission_rate || '',
         special_notes: saleData.special_notes || ''
       });
