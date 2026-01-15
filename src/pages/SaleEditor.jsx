@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Plus, X, Camera, Sparkles, RotateCw, ImageIcon, Trash } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 
