@@ -11,9 +11,9 @@ import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
 import { 
-  Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-  Package, Edit, TrendingUp, Star, Briefcase, Trash
-} from 'lucide-react';
+        Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download
+      } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
