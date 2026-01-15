@@ -283,13 +283,13 @@ export default function MySales() {
                         )}
                       </div>
                       {sale.sale_dates && sale.sale_dates.length > 0 && (
-                        <div className="mb-3 space-y-1">
+                        <div className="mb-3 flex flex-wrap gap-3">
                           {sale.sale_dates.map((saleDate, idx) => (
                             <div key={idx} className="flex items-center gap-2 text-slate-600">
                               <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                              <span>{format(new Date(saleDate.date), 'MMM d, yyyy')}</span>
+                              <span>{format(new Date(saleDate.date), 'MMM d')}</span>
                               {(saleDate.start_time || saleDate.end_time) && (
-                                <span className="text-slate-500">
+                                <span className="text-slate-500 text-xs">
                                   {saleDate.start_time} - {saleDate.end_time}
                                 </span>
                               )}
