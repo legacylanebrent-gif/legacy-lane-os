@@ -233,6 +233,25 @@ export default function SaleEditor() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!sale?.id) {
+      alert('Cannot delete unsaved sale');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to delete this sale? This action cannot be undone.')) {
+      setSaving(true);
+      try {
+        await base44.entities.EstateSale.delete(sale.id);
+        navigate(createPageUrl('MySales'));
+      } catch (error) {
+        console.error('Error deleting sale:', error);
+        alert('Failed to delete sale: ' + error.message);
+        setSaving(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8">
