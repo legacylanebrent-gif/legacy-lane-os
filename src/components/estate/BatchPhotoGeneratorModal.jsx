@@ -154,6 +154,33 @@ Return ONLY valid JSON with no markdown or extra text:
             </div>
           )}
 
+          {results.length > 0 && (
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {results.map((result) => (
+                <div key={result.index} className="p-3 bg-slate-50 rounded border border-slate-200">
+                  {result.status === 'success' && (
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">{result.photo.name}</p>
+                        <p className="text-xs text-slate-600 mt-1">{result.photo.description}</p>
+                      </div>
+                    </div>
+                  )}
+                  {result.status === 'error' && (
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-red-700">Failed to generate</p>
+                        <p className="text-xs text-red-600 mt-1">{result.error}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {!processing && results.length === 0 && (
             <div className="text-center py-8 text-slate-500">
               <p>Ready to generate titles and descriptions for {batch.length} photos</p>
