@@ -145,6 +145,7 @@ export default function SaleEditor() {
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
         },
+        sale_dates: formData.sale_dates,
         images: formData.images.map(img => ({ ...img })),
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
         categories: formData.categories,
