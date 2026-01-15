@@ -46,8 +46,13 @@ export default function BatchPhotoGeneratorModal({
         const image = batch[i];
         const actualIndex = currentBatchIndex + i;
 
-        // Skip if title and description already exist
+        // Skip API call if title and description already exist
         if (image.name && image.description) {
+          generatedResults.push({
+            index: actualIndex,
+            photo: image,
+            status: 'skipped'
+          });
           continue;
         }
 
