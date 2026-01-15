@@ -549,10 +549,16 @@ export default function SaleEditor() {
               </div>
             </TabsContent>
             <TabsContent value="descriptions" className="space-y-4">
-            {formData.images.length === 0 ? (
-              <p className="text-slate-500 text-center py-8">No photos added yet</p>
-            ) : (
-              <div className="space-y-4">
+              {formData.images.length === 0 ? (
+                <p className="text-slate-500 text-center py-8">No photos added yet</p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" onClick={() => setShowGeneratorModal(true)}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      AI Generate Titles
+                    </Button>
+                  </div>
                 {formData.images.map((image, index) => (
                   <Card key={index} className="p-4">
                     <div className="flex gap-4">
