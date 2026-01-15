@@ -54,6 +54,7 @@ export default function SaleEditor() {
   const loadSale = async (id) => {
     try {
       const saleData = await base44.entities.EstateSale.read(id);
+      
       setFormData({
         title: saleData.title || '',
         description: saleData.description || '',
@@ -70,7 +71,6 @@ export default function SaleEditor() {
       });
     } catch (error) {
       console.error('Error loading sale:', error);
-      alert('Failed to load sale');
     } finally {
       setLoading(false);
     }
