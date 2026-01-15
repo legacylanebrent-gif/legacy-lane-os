@@ -340,6 +340,19 @@ export default function Layout({ children, currentPageName }) {
                     My Rewards
                   </Button>
                 </Link>
+                <Link to={createPageUrl('Buyouts')}>
+                  <Button 
+                    variant={currentPageName === 'Buyouts' ? 'default' : 'ghost'}
+                    className={`w-full justify-start ${
+                      currentPageName === 'Buyouts' 
+                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                        : 'hover:bg-cyan-50'
+                    }`}
+                  >
+                    <HandCoins className="w-5 h-5 mr-3" />
+                    Buyouts
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('MyTickets')}>
                   <Button 
                     variant={currentPageName === 'MyTickets' ? 'default' : 'ghost'}
