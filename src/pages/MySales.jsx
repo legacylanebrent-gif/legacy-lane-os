@@ -297,27 +297,6 @@ export default function MySales() {
                           ))}
                         </div>
                       )}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1 text-slate-600">
-                            <Eye className="w-4 h-4" />
-                            <span>{sale.views || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-slate-600">
-                            <Heart className="w-4 h-4" />
-                            <span>{sale.saves || 0}</span>
-                          </div>
-                          {sale.actual_revenue && (
-                            <div className="flex items-center gap-1 text-green-600">
-                              <DollarSign className="w-4 h-4" />
-                              <span className="font-semibold">
-                                {sale.actual_revenue.toLocaleString()}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         <Button 
                           variant="outline" 
