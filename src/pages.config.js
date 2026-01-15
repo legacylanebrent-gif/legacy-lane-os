@@ -61,6 +61,7 @@ import OperatorPackages from './pages/OperatorPackages';
 import Operators from './pages/Operators';
 import Pipeline from './pages/Pipeline';
 import PlatformAnalytics from './pages/PlatformAnalytics';
+import PricingImport from './pages/PricingImport';
 import PrintSigns from './pages/PrintSigns';
 import RecordPurchase from './pages/RecordPurchase';
 import ReferralLanding from './pages/ReferralLanding';
@@ -82,7 +83,7 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import PricingImport from './pages/PricingImport';
+import SaleEditor from './pages/SaleEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -150,6 +151,7 @@ export const PAGES = {
     "Operators": Operators,
     "Pipeline": Pipeline,
     "PlatformAnalytics": PlatformAnalytics,
+    "PricingImport": PricingImport,
     "PrintSigns": PrintSigns,
     "RecordPurchase": RecordPurchase,
     "ReferralLanding": ReferralLanding,
@@ -171,7 +173,7 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "PricingImport": PricingImport,
+    "SaleEditor": SaleEditor,
 }
 
 export const pagesConfig = {
