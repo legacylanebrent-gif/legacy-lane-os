@@ -665,6 +665,13 @@ export default function SaleEditor() {
           </Button>
         </div>
       </div>
+
+      <BatchPhotoGeneratorModal
+        open={showGeneratorModal}
+        onClose={() => setShowGeneratorModal(false)}
+        images={formData.images}
+        onPhotosUpdated={handlePhotoUpdated}
+      />
     </div>
   );
 }
