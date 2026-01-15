@@ -593,8 +593,9 @@ export default function SaleEditor() {
                           <Input
                             id={`name-${index}`}
                             placeholder="Item name"
-                            value={image.name || ''}
+                            value={photoTitles[image.url] || image.name || ''}
                             onChange={(e) => {
+                              setPhotoTitles(prev => ({...prev, [image.url]: e.target.value}));
                               const updated = [...formData.images];
                               updated[index].name = e.target.value;
                               setFormData({...formData, images: updated});
@@ -607,8 +608,9 @@ export default function SaleEditor() {
                           <Input
                             id={`desc-${index}`}
                             placeholder="Item description"
-                            value={image.description || ''}
+                            value={photoDescriptions[image.url] || image.description || ''}
                             onChange={(e) => {
+                              setPhotoDescriptions(prev => ({...prev, [image.url]: e.target.value}));
                               const updated = [...formData.images];
                               updated[index].description = e.target.value;
                               setFormData({...formData, images: updated});
