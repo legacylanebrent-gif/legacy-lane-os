@@ -10,7 +10,9 @@ export default function BatchPhotoGeneratorModal({
   onClose, 
   images, 
   onPhotosUpdated, 
-  startIndex = 0 
+  startIndex = 0,
+  saleId = null,
+  onSaveToDb = null
 }) {
   const [batch, setBatch] = useState([]);
   const [processing, setProcessing] = useState(false);
@@ -79,8 +81,13 @@ Return ONLY valid JSON with no markdown or extra text:
             status: 'success'
           });
 
-          // Auto-save the photo
+          // Update form state
           await onPhotosUpdated(actualIndex, updatedPhoto);
+          
+          // Save to database if callback provided
+          if (onSaveToDb) {
+            await onSaveToDb(actualIndex, updatedPhoto);
+          }
         } catch (err) {
           console.error('Error generating for image', i, err);
           generatedResults.push({
