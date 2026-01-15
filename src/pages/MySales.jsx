@@ -274,21 +274,30 @@ export default function MySales() {
                     </div>
 
                     <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-slate-600">
-                          {sale.property_address && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-cyan-600" />
-                              <span>{sale.property_address.city}, {sale.property_address.state}</span>
+                      <div className="flex items-center gap-4 text-slate-600 mb-3">
+                        {sale.property_address && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-cyan-600" />
+                            <span>{sale.property_address.city}, {sale.property_address.state}</span>
+                          </div>
+                        )}
+                      </div>
+                      {sale.sale_dates && sale.sale_dates.length > 0 && (
+                        <div className="mb-3 space-y-1">
+                          {sale.sale_dates.map((saleDate, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-slate-600">
+                              <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                              <span>{format(new Date(saleDate.date), 'MMM d, yyyy')}</span>
+                              {(saleDate.start_time || saleDate.end_time) && (
+                                <span className="text-slate-500">
+                                  {saleDate.start_time} - {saleDate.end_time}
+                                </span>
+                              )}
                             </div>
-                          )}
-                          {sale.sale_dates && sale.sale_dates.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-orange-600" />
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
-                            </div>
-                          )}
+                          ))}
                         </div>
+                      )}
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1 text-slate-600">
                             <Eye className="w-4 h-4" />
