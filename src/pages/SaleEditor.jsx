@@ -154,6 +154,13 @@ export default function SaleEditor() {
 
   const handlePhotoUpdated = async (index, updatedPhoto) => {
     updateImageDetails(index, updatedPhoto);
+    // Auto-save to database when photos are updated
+    if (sale?.id) {
+      const updatedImages = formData.images.map((img, i) => 
+        i === index ? updatedPhoto : img
+      );
+      await base44.entities.EstateSale.update(sale.id, { images: updatedImages });
+    }
   };
 
   const rotateImage = (index) => {
