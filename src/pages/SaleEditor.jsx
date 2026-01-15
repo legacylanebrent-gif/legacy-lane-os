@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ArrowLeft, Plus, X, Upload, Camera, Sparkles, RotateCw, Trash2, Upload as UploadIcon, CalendarIcon, DollarSign, ImageIcon } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { format } from 'date-fns';
+import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
