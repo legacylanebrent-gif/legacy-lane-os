@@ -133,7 +133,7 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  const userInitials = user?.full_name
+  const userInitials = user?.display_name
     ?.split(' ')
     .map(n => n[0])
     .join('')
@@ -193,7 +193,7 @@ export default function Layout({ children, currentPageName }) {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
                     <div>
-                      <p className="font-semibold">{user?.full_name}</p>
+                      <p className="font-semibold">{user?.display_name}</p>
                       <p className="text-xs text-slate-500">{user?.email}</p>
                     </div>
                   </DropdownMenuLabel>

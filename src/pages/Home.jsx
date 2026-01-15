@@ -497,7 +497,7 @@ export default function Home() {
             account_owner_id: sale.operator_id,
             account_owner_type: 'estate_sale_operator',
             connected_user_id: currentUser.id,
-            connected_user_name: currentUser.full_name,
+            connected_user_name: currentUser.display_name,
             connected_user_email: currentUser.email,
             connected_user_phone: currentUser.phone || '',
             connection_type: 'favorite',

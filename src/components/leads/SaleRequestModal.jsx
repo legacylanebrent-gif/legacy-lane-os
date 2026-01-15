@@ -58,6 +58,7 @@ export default function SaleRequestModal({ open, onClose }) {
       await base44.entities.Contact.create({
         first_name: names[0],
         last_name: names.slice(1).join(' ') || names[0],
+        display_name: formData.contact_name,
         email: formData.contact_email,
         phone: formData.contact_phone,
         lead_source: 'website',

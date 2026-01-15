@@ -14,7 +14,21 @@ import {
 import { Bell, MessageSquare, Calendar, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function NotificationsDropdown({ user }) {
+export default function NotificationsDropdown() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const userData = await base44.auth.me();
+      setUser(userData);
+    } catch (error) {
+      console.error('Error loading user:', error);
+    }
+  };
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
