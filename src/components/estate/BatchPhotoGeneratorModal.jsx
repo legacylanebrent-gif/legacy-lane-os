@@ -31,7 +31,6 @@ export default function BatchPhotoGeneratorModal({
     const start = currentBatchIndex;
     const end = Math.min(start + BATCH_SIZE, images.length);
     setBatch(images.slice(start, end));
-    setResults([]);
   };
 
   const generateBatch = async () => {
