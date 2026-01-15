@@ -194,9 +194,9 @@ Return ONLY valid JSON with no markdown or extra text:
             </Button>
             {!processing && results.length === 0 ? (
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   try {
-                    generateBatch();
+                    await generateBatch();
                   } catch (err) {
                     setError(`Button click error: ${err.message}`);
                   }
