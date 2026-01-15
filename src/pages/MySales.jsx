@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
 import { 
