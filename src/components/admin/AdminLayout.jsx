@@ -79,8 +79,19 @@ export default function AdminLayout({ children, currentPage, user }) {
         sidebarOpen ? 'w-64' : 'w-0'
       }`}>
         <div className="p-6 border-b border-slate-700 flex-shrink-0">
-          <div className="mb-2">
-            <h2 className="text-xl font-serif font-bold text-orange-400">Admin Console</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-serif font-bold text-orange-400">Menu Options</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-400 hover:text-white h-6 w-6"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSidebarOpen(!sidebarOpen);
+              }}
+            >
+              <ChevronDown className="h-5 w-5 transition-transform" style={{ transform: sidebarOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+            </Button>
           </div>
         </div>
         
