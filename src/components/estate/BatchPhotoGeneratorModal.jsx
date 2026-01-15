@@ -25,10 +25,13 @@ export default function BatchPhotoGeneratorModal({
 
   useEffect(() => {
     if (open) {
-      loadBatch();
+      setResults([]);
       setError(null);
+      const start = currentBatchIndex;
+      const end = Math.min(start + BATCH_SIZE, images.length);
+      setBatch(images.slice(start, end));
     }
-  }, [open]);
+  }, [open, currentBatchIndex]);
 
   const loadBatch = () => {
     const start = currentBatchIndex;
