@@ -27,6 +27,8 @@ export default function SaleEditor() {
   const [showGeneratorModal, setShowGeneratorModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [dateForm, setDateForm] = useState({ start_date: '', start_time: '', end_time: '' });
+  const [paymentMethodInput, setPaymentMethodInput] = useState('');
+  const [featured, setFeatured] = useState(false);
 
   const [formData, setFormData] = useState({
       title: '',
