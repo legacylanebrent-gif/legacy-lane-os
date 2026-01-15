@@ -9,7 +9,7 @@ import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart, LayoutDashboard
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart, LayoutDashboard, HandCoins
 } from 'lucide-react';
 import {
   DropdownMenu,
