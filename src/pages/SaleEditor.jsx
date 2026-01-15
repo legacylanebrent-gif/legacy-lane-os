@@ -29,6 +29,7 @@ export default function SaleEditor() {
   const [dateForm, setDateForm] = useState({ start_date: '', start_time: '', end_time: '' });
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [photoTab, setPhotoTab] = useState('thumbnails');
 
   const [formData, setFormData] = useState({
       title: '',
