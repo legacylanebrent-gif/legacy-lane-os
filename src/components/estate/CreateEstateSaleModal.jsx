@@ -1116,8 +1116,14 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
 
           {step === 3 && (
             <>
-              <div>
-                <div className="flex items-center justify-between mb-3">
+              <Tabs defaultValue="thumbnails" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
+                  <TabsTrigger value="details">Details & Pricing</TabsTrigger>
+                </TabsList>
+
+                {/* Thumbnails Tab */}
+                <TabsContent value="thumbnails" className="space-y-4">
                   <div>
                     <Label className="flex items-center gap-2">
                       <ImageIcon className="w-4 h-4" />
@@ -1133,274 +1139,293 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                         </Badge>
                       )}
                     </Label>
-                    <p className="text-sm text-slate-600">Drag to reorder • Click to select/deselect • Photos are resized for best online viewing</p>
-                  </div>
-                  <div className="flex gap-2">
-                    {formData.images.length > 0 && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowBatchLabel(true)}
-                          className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100"
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          Batch AI Label
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedImages.length === formData.images.length) {
-                              setSelectedImages([]);
-                            } else {
-                              setSelectedImages(formData.images.map((_, idx) => idx));
-                            }
-                          }}
-                          className="gap-2"
-                        >
-                          {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
-                        </Button>
-                      </>
-                    )}
-                    {selectedImages.length > 0 && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowBulkEdit(true)}
-                          className="gap-2 text-orange-600 hover:text-orange-700"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                          Bulk Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={removeSelectedImages}
-                          className="gap-2 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete Selected
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={(e) => handleImageUpload(e, true)}
-                      className="hidden"
-                      id="camera-upload"
-                      disabled={uploadingImages}
-                    />
-                    <label htmlFor="camera-upload" className="cursor-pointer">
-                      <Camera className="w-10 h-10 text-blue-600 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-blue-900">
-                        Take Photo
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        Open camera directly
-                      </p>
-                    </label>
+                    <p className="text-sm text-slate-600 mt-1">Drag to reorder • Click to select/deselect • Photos are resized for best online viewing</p>
                   </div>
 
-                  <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/jpeg,image/jpg,image/png,image/gif"
-                      onChange={(e) => handleImageUpload(e, false)}
-                      className="hidden"
-                      id="image-upload"
-                      disabled={uploadingImages}
-                    />
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="w-10 h-10 text-green-600 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-green-900">
-                        Choose Files
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Select from gallery
-                      </p>
-                    </label>
-                  </div>
-                </div>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={(e) => handleImageUpload(e, true)}
+                        className="hidden"
+                        id="camera-upload"
+                        disabled={uploadingImages}
+                      />
+                      <label htmlFor="camera-upload" className="cursor-pointer">
+                        <Camera className="w-10 h-10 text-blue-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-blue-900">
+                          Take Photo
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                          Open camera directly
+                        </p>
+                      </label>
+                    </div>
 
-                {uploadingImages && uploadProgress.total > 0 && (
-                  <div className="mb-4 space-y-2 p-3 bg-slate-50 rounded-lg">
-                    <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
-                    <p className="text-xs text-slate-600 text-center">
-                      Processing {uploadProgress.current} of {uploadProgress.total} images... ({uploadProgress.successful} successful)
-                    </p>
+                    <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/jpg,image/png,image/gif"
+                        onChange={(e) => handleImageUpload(e, false)}
+                        className="hidden"
+                        id="image-upload"
+                        disabled={uploadingImages}
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-green-900">
+                          Choose Files
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          Select from gallery
+                        </p>
+                      </label>
+                    </div>
                   </div>
-                )}
 
-                {formData.images.length > 0 && (
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="images" direction="horizontal">
-                      {(provided) => (
-                        <div 
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"
-                        >
-                          {formData.images.map((image, index) => (
-                            <Draggable key={index} draggableId={`image-${index}`} index={index}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  className="space-y-2"
-                                >
-                                  <div 
-                                    className={`relative group cursor-pointer rounded-lg ${
-                                      selectedImages.includes(index) ? 'ring-4 ring-orange-500' : ''
-                                    }`}
-                                    onClick={(e) => {
-                                      if (!snapshot.isDragging) {
-                                        toggleImageSelection(index);
-                                      }
-                                    }}
-                                  >
-                                    <div {...provided.dragHandleProps} className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
-                                      <div className="bg-white/90 rounded p-1 shadow-sm">
-                                        <GripVertical className="w-4 h-4 text-slate-600" />
+                  {uploadingImages && uploadProgress.total > 0 && (
+                    <div className="mb-4 space-y-2 p-3 bg-slate-50 rounded-lg">
+                      <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
+                      <p className="text-xs text-slate-600 text-center">
+                        Processing {uploadProgress.current} of {uploadProgress.total} images... ({uploadProgress.successful} successful)
+                      </p>
+                    </div>
+                  )}
+
+                  {formData.images.length > 0 && (
+                    <div>
+                      <div className="flex gap-2 mb-3">
+                        {formData.images.length > 0 && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowBatchLabel(true)}
+                              className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              Batch AI Label
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (selectedImages.length === formData.images.length) {
+                                  setSelectedImages([]);
+                                } else {
+                                  setSelectedImages(formData.images.map((_, idx) => idx));
+                                }
+                              }}
+                              className="gap-2"
+                            >
+                              {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
+                            </Button>
+                          </>
+                        )}
+                        {selectedImages.length > 0 && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowBulkEdit(true)}
+                              className="gap-2 text-orange-600 hover:text-orange-700"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                              Bulk Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={removeSelectedImages}
+                              className="gap-2 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete Selected
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="images" direction="horizontal">
+                          {(provided) => (
+                            <div 
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                              className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"
+                            >
+                              {formData.images.map((image, index) => (
+                                <Draggable key={index} draggableId={`image-${index}`} index={index}>
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className="space-y-2"
+                                    >
+                                      <div 
+                                        className={`relative group cursor-pointer rounded-lg ${
+                                          selectedImages.includes(index) ? 'ring-4 ring-orange-500' : ''
+                                        }`}
+                                        onClick={(e) => {
+                                          if (!snapshot.isDragging) {
+                                            toggleImageSelection(index);
+                                          }
+                                        }}
+                                      >
+                                        <div {...provided.dragHandleProps} className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+                                          <div className="bg-white/90 rounded p-1 shadow-sm">
+                                            <GripVertical className="w-4 h-4 text-slate-600" />
+                                          </div>
+                                        </div>
+                                        <img 
+                                          src={image.url} 
+                                          alt={image.name || `Photo ${index + 1}`}
+                                          className="w-full h-32 object-cover rounded-lg"
+                                          style={{ transform: `rotate(${image.rotation}deg)` }}
+                                        />
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                         <Button
+                                           variant="secondary"
+                                           size="sm"
+                                           className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white"
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             setLabelingImage(index);
+                                           }}
+                                           title="AI Label & Price"
+                                         >
+                                           <Sparkles className="w-3 h-3" />
+                                         </Button>
+                                         <Button
+                                           variant="secondary"
+                                           size="sm"
+                                           className="h-7 w-7 p-0"
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             rotateImage(index);
+                                           }}
+                                         >
+                                           <RotateCw className="w-3 h-3" />
+                                         </Button>
+                                         <Button
+                                           variant="destructive"
+                                           size="sm"
+                                           className="h-7 w-7 p-0"
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             removeImage(index);
+                                           }}
+                                         >
+                                           <X className="w-3 h-3" />
+                                         </Button>
+                                        </div>
+                                        {selectedImages.includes(index) && (
+                                          <div className="absolute inset-0 bg-orange-500/20 rounded-lg pointer-events-none" />
+                                        )}
                                       </div>
                                     </div>
-                                    <img 
-                                      src={image.url} 
-                                      alt={image.name || `Photo ${index + 1}`}
-                                      className="w-full h-32 object-cover rounded-lg"
-                                      style={{ transform: `rotate(${image.rotation}deg)` }}
-                                    />
-                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                     <Button
-                                       variant="secondary"
-                                       size="sm"
-                                       className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         setLabelingImage(index);
-                                       }}
-                                       title="AI Label & Price"
-                                     >
-                                       <Sparkles className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       variant="secondary"
-                                       size="sm"
-                                       className="h-7 w-7 p-0"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         rotateImage(index);
-                                       }}
-                                     >
-                                       <RotateCw className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       variant="secondary"
-                                       size="sm"
-                                       className="h-7 w-7 p-0"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         setEditingImage(index);
-                                       }}
-                                     >
-                                       <Edit2 className="w-3 h-3" />
-                                     </Button>
-                                     <Button
-                                       variant="destructive"
-                                       size="sm"
-                                       className="h-7 w-7 p-0"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         removeImage(index);
-                                       }}
-                                     >
-                                       <X className="w-3 h-3" />
-                                     </Button>
-                                    </div>
-                                    {selectedImages.includes(index) && (
-                                      <div className="absolute inset-0 bg-orange-500/20 rounded-lg pointer-events-none" />
-                                    )}
-                                  </div>
-                                  <div className="space-y-1">
-                                   <Input
-                                     placeholder="Photo name"
-                                     value={image.name}
-                                     onChange={(e) => updateImageDetails(index, { name: e.target.value })}
-                                     onClick={(e) => e.stopPropagation()}
-                                     className="text-xs"
-                                   />
-                                   {image.price && (
-                                     <div className="text-xs font-semibold text-green-600">
-                                       ${parseFloat(image.price).toFixed(2)}
-                                     </div>
-                                   )}
-                                   {image.categories && image.categories.length > 0 && (
-                                     <div className="flex flex-wrap gap-1">
-                                       {image.categories.slice(0, 2).map((cat, i) => (
-                                         <Badge key={i} className="text-xs py-0 px-1 bg-purple-100 text-purple-700">
-                                           {cat}
-                                         </Badge>
-                                       ))}
-                                       {image.categories.length > 2 && (
-                                         <Badge className="text-xs py-0 px-1 bg-slate-100 text-slate-600">
-                                           +{image.categories.length - 2}
-                                         </Badge>
-                                       )}
-                                     </div>
-                                   )}
-                                  </div>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                )}
-              </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
+                    </div>
+                  )}
+                </TabsContent>
 
-              {editingImage !== null && (
-                <div className="border rounded-lg p-4 bg-slate-50 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="font-semibold">Edit Photo Details</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingImage(null)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Name</Label>
-                    <Input
-                      value={formData.images[editingImage]?.name || ''}
-                      onChange={(e) => updateImageDetails(editingImage, { name: e.target.value })}
-                      placeholder="e.g., Antique Dining Table"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Description</Label>
-                    <Textarea
-                      value={formData.images[editingImage]?.description || ''}
-                      onChange={(e) => updateImageDetails(editingImage, { description: e.target.value })}
-                      placeholder="Additional details about this item..."
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              )}
+                {/* Details Tab */}
+                <TabsContent value="details" className="space-y-4">
+                  {formData.images.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500">
+                      <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No photos uploaded yet. Upload photos in the Thumbnails tab.</p>
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-slate-100 border-b">
+                            <tr>
+                              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700 w-16">Photo</th>
+                              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">Photo Title</th>
+                              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">Description</th>
+                              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700 w-24">Price</th>
+                              <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700 w-20">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {formData.images.map((image, index) => (
+                              <tr key={index} className="border-b hover:bg-slate-50">
+                                <td className="px-4 py-2">
+                                  <img 
+                                    src={image.url} 
+                                    alt={image.name || `Photo ${index + 1}`}
+                                    className="w-12 h-12 object-cover rounded"
+                                    style={{ transform: `rotate(${image.rotation}deg)` }}
+                                  />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <Input
+                                    value={image.name}
+                                    onChange={(e) => updateImageDetails(index, { name: e.target.value })}
+                                    placeholder="Enter photo title"
+                                    className="text-sm"
+                                  />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <Textarea
+                                    value={image.description}
+                                    onChange={(e) => updateImageDetails(index, { description: e.target.value })}
+                                    placeholder="Enter description"
+                                    className="text-sm resize-none"
+                                    rows={1}
+                                  />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={image.price || ''}
+                                    onChange={(e) => updateImageDetails(index, { price: e.target.value })}
+                                    placeholder="0.00"
+                                    className="text-sm"
+                                  />
+                                </td>
+                                <td className="px-4 py-2 space-y-1">
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="h-6 w-full text-xs gap-1 bg-purple-600 hover:bg-purple-700 text-white"
+                                    onClick={() => setLabelingImage(index)}
+                                    title="AI Label & Price"
+                                  >
+                                    <Sparkles className="w-3 h-3" />
+                                    AI
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-6 w-full text-xs"
+                                    onClick={() => removeImage(index)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
 
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
