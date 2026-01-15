@@ -251,7 +251,7 @@ export default function MySales() {
               {filteredSales.map(sale => (
                 <Card key={sale.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col md:flex-row">
                   {sale.images && sale.images.length > 0 && (
-                    <div className="relative h-40 md:h-40 md:w-40 overflow-hidden flex-shrink-0">
+                    <div className="relative overflow-hidden flex-shrink-0" style={{ height: '235px', width: '235px' }}>
                       <img
                         src={typeof sale.images[0] === 'string' 
                           ? sale.images[0] 
