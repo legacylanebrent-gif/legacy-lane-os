@@ -267,23 +267,22 @@ export default function SaleEditor() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <button onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900 flex-shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-xl font-serif font-bold text-slate-900">Edit Sale</h1>
-              <p className="text-sm text-slate-500">Fill in the details for your estate sale</p>
+            <div className="min-w-0">
+              <h1 className="text-xl font-serif font-bold text-slate-900 truncate">Edit Sale</h1>
+              <p className="text-sm text-slate-500 truncate">Fill in the details for your estate sale</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-shrink-0">
             {sale?.id && (
               <Button 
                 variant="destructive" 
                 onClick={handleDelete} 
                 disabled={saving}
-                className="mr-auto"
               >
                 <Trash className="w-4 h-4 mr-2" />
                 Delete Sale
