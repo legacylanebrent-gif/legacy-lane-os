@@ -47,48 +47,42 @@ export default function BatchPhotoGeneratorModal({
 
     try {
       for (let i = 0; i < batch.length; i++) {
-        const image = batch[i];
-        const actualIndex = currentBatchIndex + i;
+            const image = batch[i];
+            const actualIndex = currentBatchIndex + i;
 
-        // Skip API call if title and description already exist
-        if (image.name && image.description) {
-          generatedResults.push({
-            index: actualIndex,
-            photo: image,
-            status: 'skipped'
-          });
-          continue;
-        }
+            try {
+              const response = await base44.integrations.Core.InvokeLLM({
+                prompt: `Analyze this image and provide a concise title (3-5 words) and brief description (1-2 sentences) for an estate sale listing.
 
-        try {
-          const response = await base44.integrations.Core.InvokeLLM({
-            prompt: `Analyze this image and provide a concise title (3-5 words) and brief description (1-2 sentences) for an estate sale listing.
+      Image URL: ${image.url}
 
-Image URL: ${image.url}
+      Return ONLY valid JSON with no markdown or extra text:
+      {"title": "...", "description": "..."}`,
+                add_context_from_internet: false,
+                file_urls: [image.url],
+                response_json_schema: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    description: { type: 'string' }
+                  }
+                }
+              });
 
-Return ONLY valid JSON with no markdown or extra text:
-{"title": "...", "description": "..."}`,
-            add_context_from_internet: false,
-            file_urls: [image.url],
-            response_json_schema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                description: { type: 'string' }
-              }
-            }
-          });
+              // Extract the actual response - it should be the JSON object directly
+              const responseData = response.data || response;
+              const aiTitle = responseData.title || '';
+              const aiDescription = responseData.description || '';
 
-          // Extract the actual response - it should be the JSON object directly
-          const responseData = response.data || response;
-          const title = responseData.title || '';
-          const description = responseData.description || '';
-          
-          const updatedPhoto = {
-            ...image,
-            name: title,
-            description: description
-          };
+              // Only update empty/whitespace fields
+              const title = (!image.name || !image.name.trim()) ? aiTitle : image.name;
+              const description = (!image.description || !image.description.trim()) ? aiDescription : image.description;
+
+              const updatedPhoto = {
+                ...image,
+                name: title,
+                description: description
+              };
 
           generatedResults.push({
             index: actualIndex,
