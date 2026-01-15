@@ -545,10 +545,10 @@ export default function SaleEditor() {
                   ) : (
                     <div className="space-y-4">
                       {formData.images.map((image, index) => (
-                        <div key={index} className="border rounded-lg p-4 space-y-3">
-                          <div className="flex gap-4">
-                            <img src={image.url} alt={`Photo ${index + 1}`} className="w-24 h-24 object-cover rounded flex-shrink-0" />
-                            <div className="flex-1 grid grid-cols-3 gap-4">
+                        <div key={index} className="border rounded-lg p-4 flex gap-4">
+                          <img src={image.url} alt={`Photo ${index + 1}`} className="w-24 h-32 object-cover rounded flex-shrink-0" />
+                          <div className="flex-1 space-y-3">
+                            <div className="grid grid-cols-3 gap-4">
                               <div className="col-span-2">
                                 <Label className="text-xs text-slate-600">Title</Label>
                                 <Input
@@ -570,16 +570,16 @@ export default function SaleEditor() {
                                 />
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-slate-600">Description</Label>
-                            <Textarea
-                              value={image.description}
-                              onChange={(e) => updateImageDetails(index, { description: e.target.value })}
-                              placeholder="Description"
-                              className="text-sm resize-none"
-                              rows={2}
-                            />
+                            <div>
+                              <Label className="text-xs text-slate-600">Description</Label>
+                              <Textarea
+                                value={image.description}
+                                onChange={(e) => updateImageDetails(index, { description: e.target.value })}
+                                placeholder="Description"
+                                className="text-sm resize-none"
+                                rows={2}
+                              />
+                            </div>
                           </div>
                         </div>
                       ))}
