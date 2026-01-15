@@ -373,7 +373,7 @@ export default function SaleEditor() {
         <Card>
           <CardContent className="pt-6 space-y-4">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Date & Time</h2>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
                 <Label htmlFor="start-date">Start Date *</Label>
                 <Input
@@ -381,15 +381,6 @@ export default function SaleEditor() {
                   type="date"
                   value={dateForm.start_date}
                   onChange={(e) => setDateForm({...dateForm, start_date: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="end-date">End Date</Label>
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={dateForm.end_date}
-                  onChange={(e) => setDateForm({...dateForm, end_date: e.target.value})}
                 />
               </div>
               <div>
