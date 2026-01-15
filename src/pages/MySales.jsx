@@ -454,15 +454,6 @@ export default function MySales() {
                             Contracts
                           </Link>
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleDelete(sale.id)}
-                          className="w-full border-red-600 text-red-600 hover:bg-red-50"
-                        >
-                          <Trash className="w-3 h-3 mr-1" />
-                          Delete
-                        </Button>
                         </div>
                     </div>
                   </CardContent>
