@@ -138,6 +138,7 @@ export default function SaleEditor() {
       const saveData = {
         title: formData.title,
         description: formData.description,
+        sale_type: formData.sale_type,
         status: publish ? 'upcoming' : formData.status,
         property_address: {
           ...formData.property_address,
