@@ -915,13 +915,13 @@ Only include items with confidence > 0.3. If no items match well, return an empt
               <Building2 className="w-4 h-4 mr-2" />
               Expenses
             </TabsTrigger>
+            <TabsTrigger value="profit" className="whitespace-nowrap">
+              <Receipt className="w-4 h-4 mr-2" />
+              Sale Summary
+            </TabsTrigger>
             <TabsTrigger value="shipping" className="whitespace-nowrap">
               <Truck className="w-4 h-4 mr-2" />
               Shipping
-            </TabsTrigger>
-            <TabsTrigger value="profit" className="whitespace-nowrap">
-              <Receipt className="w-4 h-4 mr-2" />
-              Profit Summary
             </TabsTrigger>
           </TabsList>
         </div>
