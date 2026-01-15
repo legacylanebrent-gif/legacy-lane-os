@@ -43,6 +43,7 @@ export default function SaleEditor() {
     const init = async () => {
       const params = new URLSearchParams(window.location.search);
       const id = params.get('saleId');
+      console.log('SaleEditor mounted with saleId:', id);
       
       if (id) {
         setSaleId(id);
