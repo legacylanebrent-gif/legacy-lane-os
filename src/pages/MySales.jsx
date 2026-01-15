@@ -131,15 +131,7 @@ export default function MySales() {
         </Button>
       </div>
 
-      <CreateEstateSaleModal
-        open={showCreateModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setEditingSale(null);
-        }}
-        sale={editingSale}
-        onSuccess={loadData}
-      />
+
 
       <CreateVIPEventModal
         open={showVIPModal}
