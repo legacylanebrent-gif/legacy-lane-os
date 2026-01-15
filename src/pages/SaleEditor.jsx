@@ -536,6 +536,67 @@ export default function SaleEditor() {
           </CardContent>
         </Card>
 
+        {/* Featured Items */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">Featured Items</h2>
+              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600">
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Suggest
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., Antique furniture, Vintage jewelry..."
+                className="flex-1"
+              />
+              <Button variant="outline" size="icon">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {formData.categories && formData.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.categories.map((category, index) => (
+                  <Badge key={index} variant="outline" className="px-3 py-1">
+                    {category}
+                    <button
+                      onClick={() => setFormData({
+                        ...formData,
+                        categories: formData.categories.filter((_, i) => i !== index)
+                      })}
+                      className="ml-2 text-slate-500 hover:text-slate-700"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Sale Clients - Permissions */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-1">Sale Clients - Permissions</h2>
+              <p className="text-sm text-slate-600">Manage page access permissions for assigned clients</p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <div className="text-blue-600 mt-0.5">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm text-blue-800">Clients are assigned to sales through the CRM. Use this panel to manage their page access permissions.</p>
+            </div>
+            <div className="text-center py-12">
+              <p className="text-slate-500">No clients assigned to this sale</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <div className="flex gap-3 justify-end pb-8">
           {saleId && (
