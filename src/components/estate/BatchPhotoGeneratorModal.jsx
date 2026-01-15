@@ -194,7 +194,13 @@ Return ONLY valid JSON with no markdown or extra text:
             </Button>
             {!processing && results.length === 0 ? (
               <Button 
-                onClick={generateBatch} 
+                onClick={() => {
+                  try {
+                    generateBatch();
+                  } catch (err) {
+                    setError(`Button click error: ${err.message}`);
+                  }
+                }}
                 disabled={processing}
                 className="bg-orange-600 hover:bg-orange-700"
               >
