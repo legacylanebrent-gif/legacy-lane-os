@@ -322,12 +322,12 @@ export default function MySales() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => handleEdit(sale)}
-                          className="w-full"
+                          className="w-full border-blue-500 text-blue-600 hover:bg-blue-50"
                         >
                           <Edit className="w-3 h-3 mr-1" />
                           Edit
@@ -336,7 +336,7 @@ export default function MySales() {
                            variant="outline" 
                            size="sm" 
                            asChild
-                           className="w-full"
+                           className="w-full border-green-500 text-green-600 hover:bg-green-50"
                          >
                            <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
                              <DollarSign className="w-3 h-3 mr-1" />
@@ -347,7 +347,7 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-purple-500 text-purple-600 hover:bg-purple-50"
                         >
                           <Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}>
                             <Package className="w-3 h-3 mr-1" />
@@ -358,7 +358,7 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-cyan-500 text-cyan-600 hover:bg-cyan-50"
                         >
                           <Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}>
                             <TrendingUp className="w-3 h-3 mr-1" />
@@ -369,9 +369,10 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-amber-500 text-amber-600 hover:bg-amber-50"
                         >
                           <Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}>
+                            <FileText className="w-3 h-3 mr-1" />
                             Tasks
                           </Link>
                         </Button>
@@ -379,9 +380,10 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-indigo-500 text-indigo-600 hover:bg-indigo-50"
                         >
                           <Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}>
+                            <BarChart3 className="w-3 h-3 mr-1" />
                             Statistics
                           </Link>
                         </Button>
@@ -389,19 +391,21 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-red-500 text-red-600 hover:bg-red-50"
                         >
                           <Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}>
-                            Print Signs
+                            <Megaphone className="w-3 h-3 mr-1" />
+                            Signs
                           </Link>
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full"
+                          className="w-full border-slate-500 text-slate-600 hover:bg-slate-50"
                         >
                           <Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}>
+                            <Download className="w-3 h-3 mr-1" />
                             Export
                           </Link>
                         </Button>
@@ -417,7 +421,7 @@ export default function MySales() {
                               setShowVIPModal(true);
                             }
                           }}
-                          className="w-full"
+                          className="w-full border-yellow-500 text-yellow-600 hover:bg-yellow-50"
                         >
                           <Star className="w-3 h-3 mr-1" />
                           VIP Event
@@ -438,9 +442,10 @@ export default function MySales() {
                           variant="outline" 
                           size="sm" 
                           asChild
-                          className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+                          className="w-full border-pink-500 text-pink-600 hover:bg-pink-50"
                         >
                           <Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}>
+                            <Megaphone className="w-3 h-3 mr-1" />
                             Marketing
                           </Link>
                         </Button>
@@ -451,6 +456,7 @@ export default function MySales() {
                           className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
                         >
                           <Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}>
+                            <FileText className="w-3 h-3 mr-1" />
                             Contracts
                           </Link>
                         </Button>
