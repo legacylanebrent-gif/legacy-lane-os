@@ -911,10 +911,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
               <HandCoins className="w-4 h-4 mr-2" />
               Offers
             </TabsTrigger>
-            <TabsTrigger value="buyouts" className="whitespace-nowrap">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Buyouts
-            </TabsTrigger>
             <TabsTrigger value="expenses" className="whitespace-nowrap">
               <Building2 className="w-4 h-4 mr-2" />
               Expenses
@@ -1834,94 +1830,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
           )}
         </TabsContent>
 
-        <TabsContent value="buyouts" className="space-y-6">
-          {/* Buyouts Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Total Buyout Value</span>
-                  <DollarSign className="w-4 h-4 text-purple-600" />
-                </div>
-                <div className="text-2xl font-bold text-purple-600">
-                  ${totalBuyouts.toFixed(2)}
-                </div>
-                <div className="text-xs text-slate-500 mt-1">{pendingBuyouts} pending</div>
-              </CardContent>
-            </Card>
 
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Total Buyouts</span>
-                  <HandCoins className="w-4 h-4 text-purple-600" />
-                </div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {buyoutOffers.length}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Buyouts List */}
-          {buyoutOffers.length > 0 ? (
-            <Card className="bg-white shadow-md">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Buyout Offers</h3>
-                <div className="space-y-3">
-                  {buyoutOffers.map((offer) => (
-                    <div 
-                      key={offer.id}
-                      className="flex items-start justify-between p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-purple-50/50"
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-900">{offer.item_name}</p>
-                        <div className="flex items-center gap-3 text-sm text-slate-600 mt-1">
-                          <span>{offer.full_name}</span>
-                          {offer.phone && (
-                            <>
-                              <span>•</span>
-                              <span>{offer.phone}</span>
-                            </>
-                          )}
-                          {offer.email && (
-                            <>
-                              <span>•</span>
-                              <span>{offer.email}</span>
-                            </>
-                          )}
-                        </div>
-                        {offer.notes && (
-                          <div className="mt-2 p-2 bg-white rounded border border-slate-200">
-                            <p className="text-sm text-slate-700 whitespace-pre-line">{offer.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="text-xl font-bold text-purple-600">
-                          ${offer.offer_amount.toFixed(2)}
-                        </p>
-                        <Badge className={`mt-1 ${
-                          offer.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          offer.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {offer.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="p-12 text-center">
-              <DollarSign className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500 text-lg">No buyout offers yet</p>
-              <p className="text-slate-400 text-sm mt-2">Buyout offers will appear here when created</p>
-            </Card>
-          )}
-        </TabsContent>
 
         <TabsContent value="expenses" className="space-y-6">
           {/* Stats Cards */}

@@ -21,6 +21,7 @@ import Attendance from './pages/Attendance';
 import BizInABox from './pages/BizInABox';
 import BrowseItems from './pages/BrowseItems';
 import BusinessProfile from './pages/BusinessProfile';
+import Buyouts from './pages/Buyouts';
 import CRM from './pages/CRM';
 import CampaignBuilder from './pages/CampaignBuilder';
 import Campaigns from './pages/Campaigns';
@@ -81,7 +82,6 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import Buyouts from './pages/Buyouts';
 import __Layout from './Layout.jsx';
 
 
@@ -109,6 +109,7 @@ export const PAGES = {
     "BizInABox": BizInABox,
     "BrowseItems": BrowseItems,
     "BusinessProfile": BusinessProfile,
+    "Buyouts": Buyouts,
     "CRM": CRM,
     "CampaignBuilder": CampaignBuilder,
     "Campaigns": Campaigns,
@@ -169,7 +170,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "Buyouts": Buyouts,
 }
 
 export const pagesConfig = {
