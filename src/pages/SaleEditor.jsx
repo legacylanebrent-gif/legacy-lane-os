@@ -29,6 +29,7 @@ export default function SaleEditor() {
   const [formData, setFormData] = useState({
       title: '',
       description: '',
+      sale_type: '',
       status: 'draft',
       property_address: { street: '', city: '', state: '', zip: '' },
       sale_dates: [],
