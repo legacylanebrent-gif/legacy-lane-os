@@ -31,6 +31,7 @@ export default function SaleEditor() {
   const [sale, setSale] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, successful: 0 });
+  const [showGeneratorModal, setShowGeneratorModal] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
