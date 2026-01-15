@@ -46,6 +46,11 @@ export default function BatchPhotoGeneratorModal({
         const image = batch[i];
         const actualIndex = currentBatchIndex + i;
 
+        // Skip if title and description already exist
+        if (image.name && image.description) {
+          continue;
+        }
+
         try {
           const response = await base44.integrations.Core.InvokeLLM({
             prompt: `Analyze this image and provide a concise title (3-5 words) and brief description (1-2 sentences) for an estate sale listing.
