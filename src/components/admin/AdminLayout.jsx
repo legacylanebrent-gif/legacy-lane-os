@@ -78,13 +78,13 @@ export default function AdminLayout({ children, currentPage, user }) {
       <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 overflow-hidden ${
         sidebarOpen ? 'w-64' : 'w-0'
       }`}>
-        <div className="sticky top-0 z-40 p-6 border-b border-slate-700 bg-slate-800">
+        <div className="sticky top-0 z-40 p-6 border-b border-slate-200 bg-white">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-serif font-bold text-orange-400">Menu Options</h2>
+            <h2 className="text-xl font-serif font-bold text-orange-600">Menu Options</h2>
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white h-6 w-6"
+              className="text-slate-600 hover:text-slate-900 h-6 w-6"
               onClick={(e) => {
                 e.stopPropagation();
                 setSidebarOpen(!sidebarOpen);
