@@ -27,8 +27,6 @@ export default function MySales() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingSale, setEditingSale] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [showVIPModal, setShowVIPModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
