@@ -250,12 +250,6 @@ export default function SaleEditor() {
             </div>
           </div>
           <div className="flex gap-3">
-            {saleId && (
-              <Button variant="destructive" onClick={handleDelete} disabled={saving}>
-                <Trash className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            )}
             <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
             <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
               {saving ? 'Saving...' : 'Save'}
@@ -778,12 +772,6 @@ export default function SaleEditor() {
 
             {/* Footer */}
         <div className="flex gap-3 justify-end pb-8">
-          {saleId && (
-            <Button variant="destructive" onClick={handleDelete} disabled={saving} className="mr-auto">
-              <Trash className="w-4 h-4 mr-2" />
-              Delete Sale
-            </Button>
-          )}
           <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
           <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
             {saving ? 'Saving...' : 'Save'}
