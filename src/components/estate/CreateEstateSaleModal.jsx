@@ -1199,31 +1199,20 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                     <div>
                       <div className="flex gap-2 mb-3">
                         {formData.images.length > 0 && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setShowBatchLabel(true)}
-                              className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100"
-                            >
-                              <Sparkles className="w-4 h-4" />
-                              Batch AI Label
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                if (selectedImages.length === formData.images.length) {
-                                  setSelectedImages([]);
-                                } else {
-                                  setSelectedImages(formData.images.map((_, idx) => idx));
-                                }
-                              }}
-                              className="gap-2"
-                            >
-                              {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
-                            </Button>
-                          </>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (selectedImages.length === formData.images.length) {
+                                setSelectedImages([]);
+                              } else {
+                                setSelectedImages(formData.images.map((_, idx) => idx));
+                              }
+                            }}
+                            className="gap-2"
+                          >
+                            {selectedImages.length === formData.images.length ? 'Deselect All' : 'Select All'}
+                          </Button>
                         )}
                         {selectedImages.length > 0 && (
                           <>
