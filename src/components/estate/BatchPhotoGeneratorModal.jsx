@@ -45,13 +45,12 @@ export default function BatchPhotoGeneratorModal({
 
         try {
           const response = await base44.integrations.Core.InvokeLLM({
-            prompt: `Analyze this image and provide:
-1. A concise title (3-5 words) for an estate sale listing
-2. A brief description (1-2 sentences) suitable for buyers
+            prompt: `Analyze this image and provide a concise title (3-5 words) and brief description (1-2 sentences) for an estate sale listing.
 
 Image URL: ${image.url}
 
-Format as JSON: {"title": "...", "description": "..."}`,
+Return ONLY valid JSON with no markdown or extra text:
+{"title": "...", "description": "..."}`,
             add_context_from_internet: false,
             file_urls: [image.url],
             response_json_schema: {
@@ -63,11 +62,15 @@ Format as JSON: {"title": "...", "description": "..."}`,
             }
           });
 
+          // Extract the actual response - it should be the JSON object directly
           const responseData = response.data || response;
+          const title = responseData.title || '';
+          const description = responseData.description || '';
+          
           const updatedPhoto = {
             ...image,
-            name: responseData.title || '',
-            description: responseData.description || ''
+            name: title,
+            description: description
           };
 
           generatedResults.push({
