@@ -16,10 +16,15 @@ export default function AddressAutocomplete({
   const placesService = useRef(null);
 
   useEffect(() => {
-    if (window.google && window.google.maps) {
-      autocompleteService.current = new window.google.maps.places.AutocompleteService();
-      placesService.current = new window.google.maps.places.PlacesService(document.createElement('div'));
-    }
+    const loadAPI = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        placesService.current = new window.google.maps.places.PlacesService(document.createElement('div'));
+      } else {
+        setTimeout(loadAPI, 500);
+      }
+    };
+    loadAPI();
   }, []);
 
   const handleInputChange = async (e) => {
