@@ -267,6 +267,23 @@ export default function SaleEditor() {
         </div>
       </div>
 
+      <BatchPhotoGeneratorModal
+        open={showGeneratorModal}
+        onClose={async () => {
+          setShowGeneratorModal(false);
+          if (saleId) {
+            await handleSave(false);
+          }
+        }}
+        images={formData.images}
+        onPhotosUpdated={async (index, photo) => {
+          const updated = [...formData.images];
+          updated[index] = photo;
+          setFormData({...formData, images: updated});
+        }}
+        startIndex={0}
+      />
+
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
         {/* Basic Information */}
         <Card>
