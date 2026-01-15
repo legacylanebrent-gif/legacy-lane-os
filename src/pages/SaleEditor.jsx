@@ -187,6 +187,8 @@ export default function SaleEditor() {
         status: publish ? 'upcoming' : (sale?.status || 'draft'),
         estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        national_featured_price: formData.national_featured_price ? parseFloat(formData.national_featured_price) : null,
+        local_featured_price: formData.local_featured_price ? parseFloat(formData.local_featured_price) : null,
         images: formData.images.map(img => ({
           ...img,
           price: img.price ? parseFloat(img.price) : null
