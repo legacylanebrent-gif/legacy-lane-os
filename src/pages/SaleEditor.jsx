@@ -40,15 +40,19 @@ export default function SaleEditor() {
   });
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('saleId');
+    const init = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('saleId');
+      
+      if (id) {
+        setSaleId(id);
+        await loadSale(id);
+      } else {
+        setLoading(false);
+      }
+    };
     
-    if (id) {
-      setSaleId(id);
-      loadSale(id);
-    } else {
-      setLoading(false);
-    }
+    init();
   }, []);
 
   const loadSale = async (id) => {
