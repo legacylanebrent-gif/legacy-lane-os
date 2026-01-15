@@ -225,7 +225,7 @@ export default function MySales() {
               </p>
               {!searchQuery && (
                 <Button 
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => navigate(createPageUrl('SaleEditor'))}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
