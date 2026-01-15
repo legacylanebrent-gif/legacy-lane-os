@@ -287,19 +287,20 @@ export default function MySales() {
                     </div>
 
                     <div className="space-y-2 text-sm">
-                      {sale.property_address && (
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600" />
-                          <span>
-                            {sale.property_address.city}, {sale.property_address.state}
-                          </span>
-                        </div>
-                      )}
-
-                      {sale.sale_dates && sale.sale_dates.length > 0 && (
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <Calendar className="w-4 h-4 text-orange-600" />
-                          <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                      {(sale.property_address || (sale.sale_dates && sale.sale_dates.length > 0)) && (
+                        <div className="flex items-center gap-4 text-slate-600">
+                          {sale.property_address && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-cyan-600" />
+                              <span>{sale.property_address.city}, {sale.property_address.state}</span>
+                            </div>
+                          )}
+                          {sale.sale_dates && sale.sale_dates.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-orange-600" />
+                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                            </div>
+                          )}
                         </div>
                       )}
 
