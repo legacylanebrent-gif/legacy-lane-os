@@ -11,6 +11,7 @@ export default function AddressAutocomplete({
 }) {
   const inputRef = useRef(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [predictions, setPredictions] = useState([]);
   const autocompleteService = useRef(null);
   const placesService = useRef(null);
 
