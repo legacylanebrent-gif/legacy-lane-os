@@ -195,14 +195,17 @@ Return ONLY valid JSON with no markdown or extra text:
             {!processing && results.length === 0 ? (
               <Button 
                 onClick={async () => {
+                  console.log('Generate button clicked');
                   setError("Starting generation...");
+                  setProcessing(true);
                   try {
                     await generateBatch();
                   } catch (err) {
+                    console.error('Error in generateBatch:', err);
                     setError(`Error: ${err.message}`);
                   }
                 }}
-                disabled={processing}
+                disabled={processing || batch.length === 0}
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 Generate Batch
