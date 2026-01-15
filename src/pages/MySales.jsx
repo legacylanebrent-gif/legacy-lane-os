@@ -269,11 +269,21 @@ export default function MySales() {
                       <h3 className="text-lg font-semibold text-slate-900 flex-1">
                         {sale.title}
                       </h3>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                        <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
-                          <Eye className="w-4 h-4" />
-                        </Link>
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(sale.id)}
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 text-sm">
