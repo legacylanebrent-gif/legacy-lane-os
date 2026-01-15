@@ -263,14 +263,9 @@ export default function SaleEditor() {
 
       <BatchPhotoGeneratorModal
         open={showGeneratorModal}
-        onClose={async () => {
-          setShowGeneratorModal(false);
-          if (saleId) {
-            await handleSave(false);
-          }
-        }}
+        onClose={() => setShowGeneratorModal(false)}
         images={formData.images}
-        onPhotosUpdated={async (index, photo) => {
+        onPhotosUpdated={(index, photo) => {
           const updated = [...formData.images];
           updated[index] = photo;
           setFormData({...formData, images: updated});
