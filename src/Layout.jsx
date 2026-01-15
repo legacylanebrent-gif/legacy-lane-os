@@ -169,8 +169,10 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             <div className="flex items-center gap-4">
-              <MessagesDropdown />
-              <NotificationsDropdown />
+              <div className="bg-white rounded-lg p-2 flex items-center gap-2">
+                <MessagesDropdown />
+                <NotificationsDropdown />
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
