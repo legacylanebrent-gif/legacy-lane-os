@@ -30,6 +30,8 @@ export default function SaleEditor() {
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
   const [featured, setFeatured] = useState(false);
   const [photoTab, setPhotoTab] = useState('thumbnails');
+  const [photoTitles, setPhotoTitles] = useState({});
+  const [photoDescriptions, setPhotoDescriptions] = useState({});
 
   const [formData, setFormData] = useState({
       title: '',
@@ -269,14 +271,19 @@ export default function SaleEditor() {
           const updated = [...formData.images];
           updated[index] = photo;
           setFormData({...formData, images: updated});
-        }}
-        onSaveToDb={async (index, photo) => {
-          if (saleId) {
-            const updated = [...formData.images];
-            updated[index] = photo;
-            await base44.entities.EstateSale.update(saleId, { images: updated });
+          }}
+          onTitleGenerated={(index, title) => {
+          const key = formData.images[index]?.url;
+          if (key) {
+            setPhotoTitles(prev => ({...prev, [key]: title}));
           }
-        }}
+          }}
+          onDescriptionGenerated={(index, description) => {
+          const key = formData.images[index]?.url;
+          if (key) {
+            setPhotoDescriptions(prev => ({...prev, [key]: description}));
+          }
+          }}
         startIndex={0}
       />
 
