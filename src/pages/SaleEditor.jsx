@@ -243,31 +243,20 @@ export default function SaleEditor() {
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SALE_STATUSES.map(status => (
-                        <SelectItem key={status} value={status} className="capitalize">
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Estimated Value</Label>
-                  <Input
-                    type="number"
-                    placeholder="$0.00"
-                    value={formData.estimated_value}
-                    onChange={(e) => setFormData({...formData, estimated_value: e.target.value})}
-                  />
-                </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SALE_STATUSES.map(status => (
+                      <SelectItem key={status} value={status} className="capitalize">
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Description</Label>
