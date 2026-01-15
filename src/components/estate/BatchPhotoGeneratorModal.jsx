@@ -183,6 +183,14 @@ Return ONLY valid JSON with no markdown or extra text:
             </div>
           )}
 
+          {debugLog.length > 0 && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 max-h-20 overflow-y-auto">
+              {debugLog.map((log, i) => (
+                <div key={i}>{log}</div>
+              ))}
+            </div>
+          )}
+
           {!processing && results.length === 0 && (
             <div className="text-center py-8 text-slate-500">
               <p>Ready to generate titles and descriptions for {batch.length} photos</p>
