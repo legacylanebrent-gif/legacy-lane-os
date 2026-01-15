@@ -79,8 +79,11 @@ export default function SaleEditor() {
         ),
         categories: saleData.categories || [],
         commission_rate: saleData.commission_rate || '',
-        special_notes: saleData.special_notes || ''
+        special_notes: saleData.special_notes || '',
+        payment_methods: saleData.payment_methods || [],
+        national_featured: saleData.national_featured || false
       });
+      setFeatured(saleData.national_featured || false);
     } catch (error) {
       console.error('Error loading sale:', error);
       alert('Error loading sale: ' + error.message);
