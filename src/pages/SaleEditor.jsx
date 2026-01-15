@@ -289,6 +289,13 @@ export default function SaleEditor() {
           <CardContent className="pt-6 space-y-4">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Location</h2>
             <AddressAutocomplete
+              value={`${formData.property_address.street} ${formData.property_address.city} ${formData.property_address.state}`.trim()}
+              onChange={(val) => {
+                setFormData({
+                  ...formData,
+                  property_address: {...formData.property_address, street: val}
+                });
+              }}
               onAddressSelect={(address) => setFormData({
                 ...formData,
                 property_address: {
@@ -298,7 +305,7 @@ export default function SaleEditor() {
                   zip: address.zip || ''
                 }
               })}
-              initialAddress={formData.property_address}
+              placeholder="123 Main Street, City, State"
             />
           </CardContent>
         </Card>
