@@ -27,17 +27,16 @@ export default function SaleEditor() {
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    status: 'draft',
-    property_address: { street: '', city: '', state: '', zip: '' },
-    sale_dates: [],
-    images: [],
-    categories: [],
-    estimated_value: '',
-    commission_rate: '',
-    special_notes: ''
-  });
+      title: '',
+      description: '',
+      status: 'draft',
+      property_address: { street: '', city: '', state: '', zip: '' },
+      sale_dates: [],
+      images: [],
+      categories: [],
+      commission_rate: '',
+      special_notes: ''
+    });
 
   useEffect(() => {
     const init = async () => {
