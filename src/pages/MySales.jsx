@@ -21,6 +21,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 
+const formatTo12Hour = (time) => {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'pm' : 'am';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes}${ampm}`;
+};
+
 export default function MySales() {
     const navigate = useNavigate();
     const [sales, setSales] = useState([]);
