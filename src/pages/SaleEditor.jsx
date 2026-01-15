@@ -58,7 +58,9 @@ export default function SaleEditor() {
 
   const loadSale = async (id) => {
     try {
-      const saleData = await base44.entities.EstateSale.read(id);
+      const sales = await base44.entities.EstateSale.filter({ id });
+      const saleData = sales[0];
+      if (!saleData) throw new Error('Sale not found');
       console.log('Loaded sale data:', saleData);
       
       setFormData({
