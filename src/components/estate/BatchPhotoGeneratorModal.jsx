@@ -20,6 +20,7 @@ export default function BatchPhotoGeneratorModal({
   const [results, setResults] = useState([]);
   const [currentBatchIndex, setCurrentBatchIndex] = useState(startIndex);
   const [error, setError] = useState(null);
+  const [debugLog, setDebugLog] = useState([]);
 
   const BATCH_SIZE = 10;
 
