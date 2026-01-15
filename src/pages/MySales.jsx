@@ -67,8 +67,7 @@ export default function MySales() {
   };
 
   const handleEdit = (sale) => {
-    setEditingSale(sale);
-    setShowCreateModal(true);
+    window.location.href = createPageUrl('SaleEditor') + '?saleId=' + sale.id;
   };
 
   const handleDelete = async (saleId) => {
