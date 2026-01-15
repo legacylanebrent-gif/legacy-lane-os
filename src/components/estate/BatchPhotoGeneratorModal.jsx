@@ -137,29 +137,7 @@ Format as JSON: {"title": "...", "description": "..."}`,
             </div>
           )}
 
-          {results.length > 0 && (
-            <div className="space-y-3 max-h-96 overflow-y-auto bg-slate-50 rounded-lg p-4">
-              {results.map((result) => (
-                <div key={result.index} className="flex gap-3 items-start text-sm">
-                  {result.status === 'success' ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    {result.status === 'success' ? (
-                      <div>
-                        <div className="font-medium text-slate-900 truncate">{result.photo.name}</div>
-                        <div className="text-slate-600 text-xs mt-1">{result.photo.description}</div>
-                      </div>
-                    ) : (
-                      <div className="text-red-600">Photo {result.index + 1}: {result.error}</div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
