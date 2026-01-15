@@ -17,6 +17,8 @@ import { ArrowLeft, Plus, X, Upload, Camera, Sparkles, RotateCw, Trash2, Upload 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { format } from 'date-fns';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
+import AddressAutocomplete from '@/components/address/AddressAutocomplete';
+import { Helmet } from 'react-helmet';
 
 const CATEGORIES = [
   'Furniture', 'Art & Collectibles', 'Jewelry', 'Antiques', 
