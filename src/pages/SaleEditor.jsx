@@ -152,6 +152,10 @@ export default function SaleEditor() {
     }));
   };
 
+  const handlePhotoUpdated = async (index, updatedPhoto) => {
+    updateImageDetails(index, updatedPhoto);
+  };
+
   const rotateImage = (index) => {
     setFormData(prev => ({
       ...prev,
