@@ -324,16 +324,16 @@ export default function MySales() {
                           Edit
                         </Button>
                         <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full"
-                        >
-                          <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
-                            <DollarSign className="w-3 h-3 mr-1" />
-                            Worksheet
-                          </Link>
-                        </Button>
+                           variant="outline" 
+                           size="sm" 
+                           asChild
+                           className="w-full"
+                         >
+                           <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
+                             <DollarSign className="w-3 h-3 mr-1" />
+                             POS
+                           </Link>
+                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
