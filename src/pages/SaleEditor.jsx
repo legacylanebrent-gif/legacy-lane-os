@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Plus, X, Camera, Sparkles, RotateCw, ImageIcon, Trash } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
+import AddressAutocomplete from '@/components/address/AddressAutocomplete';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
 
