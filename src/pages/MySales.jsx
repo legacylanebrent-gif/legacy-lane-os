@@ -290,7 +290,7 @@ export default function MySales() {
                               <span>{format(new Date(saleDate.date), 'MMM d')}</span>
                               {(saleDate.start_time || saleDate.end_time) && (
                                 <span className="text-slate-500 text-xs">
-                                  {saleDate.start_time} - {saleDate.end_time}
+                                  {formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}
                                 </span>
                               )}
                             </div>
