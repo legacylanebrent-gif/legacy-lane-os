@@ -138,7 +138,32 @@ Format as JSON: {"title": "...", "description": "..."}`,
             </div>
           )}
 
-
+          {results.length > 0 && (
+            <div className="space-y-2 max-h-[40vh] overflow-y-auto">
+              {results.map((result, idx) => (
+                <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <img
+                    src={result.photo.url}
+                    alt={`Photo ${result.index + 1}`}
+                    className="w-12 h-12 object-cover rounded flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    {result.status === 'success' ? (
+                      <div className="space-y-1">
+                        <p className="font-medium text-slate-900 text-sm">{result.photo.name}</p>
+                        <p className="text-xs text-slate-600">{result.photo.description}</p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-red-600">Error: {result.error}</p>
+                    )}
+                  </div>
+                  {result.status === 'success' && (
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-1" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
