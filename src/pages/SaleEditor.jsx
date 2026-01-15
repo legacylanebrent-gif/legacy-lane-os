@@ -449,9 +449,9 @@ export default function SaleEditor() {
         <Card>
           <CardContent className="pt-6 space-y-4">
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
-              <TabsList>
-                <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
-                <TabsTrigger value="descriptions">Descriptions & Pricing</TabsTrigger>
+              <TabsList className="w-full">
+                <TabsTrigger value="thumbnails" className="flex-1">Thumbnails</TabsTrigger>
+                <TabsTrigger value="descriptions" className="flex-1">Descriptions & Pricing</TabsTrigger>
               </TabsList>
               <TabsContent value="thumbnails" className="space-y-4">
 
