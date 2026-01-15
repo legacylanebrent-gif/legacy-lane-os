@@ -448,7 +448,12 @@ export default function SaleEditor() {
         {/* Photos */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Photos</h2>
+            <Tabs value={photoTab} onValueChange={setPhotoTab}>
+              <TabsList>
+                <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
+                <TabsTrigger value="descriptions">Descriptions & Pricing</TabsTrigger>
+              </TabsList>
+              <TabsContent value="thumbnails" className="space-y-4">
             
             <div className="grid grid-cols-2 gap-3">
               <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
