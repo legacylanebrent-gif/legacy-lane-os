@@ -23,9 +23,10 @@ import {
 import { format } from 'date-fns';
 
 export default function MySales() {
-  const [sales, setSales] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+    const [sales, setSales] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingSale, setEditingSale] = useState(null);
