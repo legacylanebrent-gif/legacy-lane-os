@@ -68,6 +68,7 @@ import ReferralLanding from './pages/ReferralLanding';
 import Revenue from './pages/Revenue';
 import RewardsCheckins from './pages/RewardsCheckins';
 import SaleContracts from './pages/SaleContracts';
+import SaleEditor from './pages/SaleEditor';
 import SaleExport from './pages/SaleExport';
 import SaleInventory from './pages/SaleInventory';
 import SaleLanding from './pages/SaleLanding';
@@ -83,7 +84,6 @@ import VendorDetail from './pages/VendorDetail';
 import VendorSignup from './pages/VendorSignup';
 import Vendors from './pages/Vendors';
 import Worksheet from './pages/Worksheet';
-import SaleEditor from './pages/SaleEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -158,6 +158,7 @@ export const PAGES = {
     "Revenue": Revenue,
     "RewardsCheckins": RewardsCheckins,
     "SaleContracts": SaleContracts,
+    "SaleEditor": SaleEditor,
     "SaleExport": SaleExport,
     "SaleInventory": SaleInventory,
     "SaleLanding": SaleLanding,
@@ -173,7 +174,6 @@ export const PAGES = {
     "VendorSignup": VendorSignup,
     "Vendors": Vendors,
     "Worksheet": Worksheet,
-    "SaleEditor": SaleEditor,
 }
 
 export const pagesConfig = {

@@ -153,14 +153,16 @@ export default function SaleEditor() {
   };
 
   const handlePhotoUpdated = async (index, updatedPhoto) => {
-    updateImageDetails(index, updatedPhoto);
-    // Auto-save to database when photos are updated
-    if (sale?.id) {
-      const updatedImages = formData.images.map((img, i) => 
+    setFormData(prev => {
+      const newImages = prev.images.map((img, i) => 
         i === index ? updatedPhoto : img
       );
-      await base44.entities.EstateSale.update(sale.id, { images: updatedImages });
-    }
+      // Auto-save to database when photos are updated
+      if (sale?.id) {
+        base44.entities.EstateSale.update(sale.id, { images: newImages });
+      }
+      return { ...prev, images: newImages };
+    });
   };
 
   const rotateImage = (index) => {
