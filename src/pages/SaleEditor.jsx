@@ -187,6 +187,10 @@ export default function SaleEditor() {
         status: publish ? 'upcoming' : (sale?.status || 'draft'),
         estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        images: formData.images.map(img => ({
+          ...img,
+          price: img.price ? parseFloat(img.price) : null
+        })),
         property_address: {
           ...formData.property_address,
           formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
