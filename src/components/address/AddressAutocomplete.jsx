@@ -34,13 +34,14 @@ export default function AddressAutocomplete({
     if (!autocompleteService.current) return;
 
     try {
-      const predictions = await autocompleteService.current.getPlacePredictions({
+      const result = await autocompleteService.current.getPlacePredictions({
         input: val,
         componentRestrictions: { country: 'us' },
         types: ['address']
       });
 
-      if (predictions && predictions.predictions) {
+      if (result && result.predictions && result.predictions.length > 0) {
+        setPredictions(result.predictions);
         setShowSuggestions(true);
       }
     } catch (error) {
