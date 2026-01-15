@@ -70,7 +70,7 @@ export default function AdminLayout({ children, currentPage, user }) {
             setSidebarOpen(!sidebarOpen);
           }}
         >
-          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {sidebarOpen ? <Menu className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
