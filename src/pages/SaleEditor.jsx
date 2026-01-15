@@ -338,13 +338,17 @@ export default function SaleEditor() {
             <h2 className="text-lg font-semibold text-slate-900">Location</h2>
             <div>
               <Label>Street Address *</Label>
-              <Input
-                placeholder="123 Main Street"
+              <AddressAutocomplete
                 value={formData.property_address.street}
-                onChange={(e) => setFormData({
+                onChange={(val) => setFormData({
                   ...formData,
-                  property_address: {...formData.property_address, street: e.target.value}
+                  property_address: {...formData.property_address, street: val}
                 })}
+                onAddressSelect={(addressData) => setFormData({
+                  ...formData,
+                  property_address: {...formData.property_address, ...addressData}
+                })}
+                placeholder="123 Main Street"
               />
             </div>
             <div className="grid grid-cols-3 gap-4">
