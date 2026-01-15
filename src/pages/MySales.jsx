@@ -123,10 +123,7 @@ export default function MySales() {
           <p className="text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
         <Button 
-          onClick={() => {
-            setEditingSale(null);
-            setShowCreateModal(true);
-          }}
+          onClick={() => navigate(createPageUrl('SaleEditor'))}
           className="bg-orange-600 hover:bg-orange-700"
         >
           <Plus className="w-4 h-4 mr-2" />
