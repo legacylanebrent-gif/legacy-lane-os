@@ -195,10 +195,11 @@ Return ONLY valid JSON with no markdown or extra text:
             {!processing && results.length === 0 ? (
               <Button 
                 onClick={async () => {
+                  setError("Starting generation...");
                   try {
                     await generateBatch();
                   } catch (err) {
-                    setError(`Button click error: ${err.message}`);
+                    setError(`Error: ${err.message}`);
                   }
                 }}
                 disabled={processing}
