@@ -103,11 +103,12 @@ Format as JSON: {"title": "...", "description": "..."}`,
     }
   };
 
-  const handleNextBatch = () => {
+  const handleNextBatch = async () => {
     const nextIndex = currentBatchIndex + BATCH_SIZE;
     if (nextIndex < images.length) {
       setCurrentBatchIndex(nextIndex);
       loadBatch();
+      setTimeout(() => generateBatch(), 100);
     } else {
       onClose();
     }
