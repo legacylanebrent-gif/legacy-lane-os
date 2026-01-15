@@ -543,40 +543,23 @@ export default function SaleEditor() {
                       <p>No photos uploaded yet.</p>
                     </div>
                   ) : (
-                    <div className="border rounded-lg overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-slate-100 border-b">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700 w-16">Photo</th>
-                            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">Title</th>
-                            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">Description</th>
-                            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700 w-20">Price</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.images.map((image, index) => (
-                            <tr key={index} className="border-b hover:bg-slate-50">
-                              <td className="px-4 py-2">
-                                <img src={image.url} alt={`Photo ${index + 1}`} className="w-12 h-12 object-cover rounded" />
-                              </td>
-                              <td className="px-4 py-2">
+                    <div className="space-y-4">
+                      {formData.images.map((image, index) => (
+                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                          <div className="flex gap-4">
+                            <img src={image.url} alt={`Photo ${index + 1}`} className="w-24 h-24 object-cover rounded flex-shrink-0" />
+                            <div className="flex-1 grid grid-cols-3 gap-4">
+                              <div className="col-span-2">
+                                <Label className="text-xs text-slate-600">Title</Label>
                                 <Input
                                   value={image.name}
                                   onChange={(e) => updateImageDetails(index, { name: e.target.value })}
                                   placeholder="Title"
                                   className="text-sm"
                                 />
-                              </td>
-                              <td className="px-4 py-2">
-                                <Textarea
-                                  value={image.description}
-                                  onChange={(e) => updateImageDetails(index, { description: e.target.value })}
-                                  placeholder="Description"
-                                  className="text-sm resize-none"
-                                  rows={1}
-                                />
-                              </td>
-                              <td className="px-4 py-2">
+                              </div>
+                              <div>
+                                <Label className="text-xs text-slate-600">Price</Label>
                                 <Input
                                   type="number"
                                   step="0.01"
@@ -585,11 +568,21 @@ export default function SaleEditor() {
                                   placeholder="$0.00"
                                   className="text-sm"
                                 />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-slate-600">Description</Label>
+                            <Textarea
+                              value={image.description}
+                              onChange={(e) => updateImageDetails(index, { description: e.target.value })}
+                              placeholder="Description"
+                              className="text-sm resize-none"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </TabsContent>
