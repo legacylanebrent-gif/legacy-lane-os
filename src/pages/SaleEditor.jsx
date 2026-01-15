@@ -188,6 +188,33 @@ export default function SaleEditor() {
     }
   };
 
+  const handleAddDate = () => {
+    if (!dateForm.start_date) {
+      alert('Please enter a start date');
+      return;
+    }
+
+    const newDate = {
+      date: dateForm.start_date,
+      start_time: dateForm.start_time || '',
+      end_time: dateForm.end_time || ''
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      sale_dates: [...prev.sale_dates, newDate]
+    }));
+
+    setDateForm({ start_date: '', end_date: '', start_time: '', end_time: '' });
+  };
+
+  const handleRemoveDate = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      sale_dates: prev.sale_dates.filter((_, i) => i !== index)
+    }));
+  };
+
   if (loading) {
     return (
       <div className="p-8">
