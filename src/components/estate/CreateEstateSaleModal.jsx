@@ -58,7 +58,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     national_featured: false,
     local_featured: false,
     national_featured_price: '',
-    local_featured_price: ''
+    local_featured_price: '',
+    assigned_client_id: '',
+    assigned_client_name: '',
+    assigned_client_email: '',
+    assigned_client_phone: ''
   });
 
   const [editingImage, setEditingImage] = useState(null);
@@ -110,7 +114,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         national_featured: sale.national_featured || false,
         local_featured: sale.local_featured || false,
         national_featured_price: sale.national_featured_price || '',
-        local_featured_price: sale.local_featured_price || ''
+        local_featured_price: sale.local_featured_price || '',
+        assigned_client_id: sale.assigned_client_id || '',
+        assigned_client_name: sale.assigned_client_name || '',
+        assigned_client_email: sale.assigned_client_email || '',
+        assigned_client_phone: sale.assigned_client_phone || ''
       });
       setAddressInput(sale.property_address?.street || '');
     }
@@ -768,7 +776,11 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       national_featured: false,
       local_featured: false,
       national_featured_price: '',
-      local_featured_price: ''
+      local_featured_price: '',
+      assigned_client_id: '',
+      assigned_client_name: '',
+      assigned_client_email: '',
+      assigned_client_phone: ''
     });
     setStep(1);
   };
@@ -1522,6 +1534,49 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   onChange={(e) => setFormData({...formData, special_notes: e.target.value})}
                   rows={3}
                 />
+              </div>
+
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-base font-semibold">Assign Client</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="client_name" className="text-xs">Client Name</Label>
+                    <Input
+                      id="client_name"
+                      placeholder="John Doe"
+                      value={formData.assigned_client_name}
+                      onChange={(e) => setFormData({...formData, assigned_client_name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="client_email" className="text-xs">Email</Label>
+                    <Input
+                      id="client_email"
+                      type="email"
+                      placeholder="john@example.com"
+                      value={formData.assigned_client_email}
+                      onChange={(e) => setFormData({...formData, assigned_client_email: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="client_phone" className="text-xs">Phone</Label>
+                    <Input
+                      id="client_phone"
+                      placeholder="(555) 123-4567"
+                      value={formData.assigned_client_phone}
+                      onChange={(e) => setFormData({...formData, assigned_client_phone: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Client ID (optional)</Label>
+                    <Input
+                      placeholder="Auto-generated if left blank"
+                      value={formData.assigned_client_id}
+                      onChange={(e) => setFormData({...formData, assigned_client_id: e.target.value})}
+                      disabled
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-4 border-t pt-4">
