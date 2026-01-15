@@ -287,25 +287,52 @@ export default function SaleEditor() {
         <Card>
           <CardContent className="pt-6 space-y-4">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Location</h2>
-            <AddressAutocomplete
-              value={`${formData.property_address.street} ${formData.property_address.city} ${formData.property_address.state}`.trim()}
-              onChange={(val) => {
-                setFormData({
-                  ...formData,
-                  property_address: {...formData.property_address, street: val}
-                });
-              }}
-              onAddressSelect={(address) => setFormData({
-                ...formData,
-                property_address: {
-                  street: address.street || '',
-                  city: address.city || '',
-                  state: address.state || '',
-                  zip: address.zip || ''
-                }
-              })}
-              placeholder="123 Main Street, City, State"
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Street Address</Label>
+                <Input
+                  placeholder="123 Main Street"
+                  value={formData.property_address.street}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    property_address: {...formData.property_address, street: e.target.value}
+                  })}
+                />
+              </div>
+              <div>
+                <Label>City *</Label>
+                <Input
+                  placeholder="Austin"
+                  value={formData.property_address.city}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    property_address: {...formData.property_address, city: e.target.value}
+                  })}
+                />
+              </div>
+              <div>
+                <Label>State</Label>
+                <Input
+                  placeholder="TX"
+                  value={formData.property_address.state}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    property_address: {...formData.property_address, state: e.target.value}
+                  })}
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>ZIP Code</Label>
+                <Input
+                  placeholder="78701"
+                  value={formData.property_address.zip}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    property_address: {...formData.property_address, zip: e.target.value}
+                  })}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
