@@ -159,6 +159,13 @@ Return ONLY valid JSON with no markdown or extra text:
             Processing {currentBatchIndex + 1} to {Math.min(currentBatchIndex + BATCH_SIZE, images.length)} of {images.length} photos
           </div>
 
+          <div className="p-3 bg-slate-100 border border-slate-300 rounded text-xs font-mono text-slate-700 space-y-1">
+            <div>batch.length: {batch.length}</div>
+            <div>processing: {processing.toString()}</div>
+            <div>results.length: {results.length}</div>
+            <div>currentBatchIndex: {currentBatchIndex}</div>
+          </div>
+
           {processing && (
             <div className="space-y-3">
               <Progress value={(results.length / batch.length) * 100} />
