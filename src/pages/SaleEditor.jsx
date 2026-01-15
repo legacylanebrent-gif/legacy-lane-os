@@ -276,12 +276,18 @@ export default function SaleEditor() {
           const key = formData.images[index]?.url;
           if (key) {
             setPhotoTitles(prev => ({...prev, [key]: title}));
+            const updated = [...formData.images];
+            updated[index].name = title;
+            setFormData({...formData, images: updated});
           }
           }}
           onDescriptionGenerated={(index, description) => {
           const key = formData.images[index]?.url;
           if (key) {
             setPhotoDescriptions(prev => ({...prev, [key]: description}));
+            const updated = [...formData.images];
+            updated[index].description = description;
+            setFormData({...formData, images: updated});
           }
           }}
         startIndex={0}
