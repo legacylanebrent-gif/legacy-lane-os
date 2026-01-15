@@ -143,22 +143,24 @@ export default function SaleEditor() {
     try {
       const user = await base44.auth.me();
       const saveData = {
-        title: formData.title,
-        description: formData.description,
-        sale_type: formData.sale_type,
-        status: publish ? 'upcoming' : formData.status,
-        property_address: {
-          ...formData.property_address,
-          formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
-        },
-        sale_dates: formData.sale_dates,
-        images: formData.images.map(img => ({ ...img })),
-        commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
-        categories: formData.categories,
-        special_notes: formData.special_notes,
-        operator_id: saleId ? undefined : user.id,
-        operator_name: saleId ? undefined : user.full_name
-      };
+            title: formData.title,
+            description: formData.description,
+            sale_type: formData.sale_type,
+            status: publish ? 'upcoming' : formData.status,
+            property_address: {
+              ...formData.property_address,
+              formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+            },
+            sale_dates: formData.sale_dates,
+            images: formData.images.map(img => ({ ...img })),
+            commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+            categories: formData.categories,
+            special_notes: formData.special_notes,
+            payment_methods: formData.payment_methods,
+            national_featured: featured,
+            operator_id: saleId ? undefined : user.id,
+            operator_name: saleId ? undefined : user.full_name
+          };
 
       if (saleId) {
         await base44.entities.EstateSale.update(saleId, saveData);
