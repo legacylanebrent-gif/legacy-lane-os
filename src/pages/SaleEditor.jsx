@@ -369,6 +369,81 @@ export default function SaleEditor() {
           </CardContent>
         </Card>
 
+        {/* Date & Time */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Date & Time</h2>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <Label htmlFor="start-date">Start Date *</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={dateForm.start_date}
+                  onChange={(e) => setDateForm({...dateForm, start_date: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="end-date">End Date</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={dateForm.end_date}
+                  onChange={(e) => setDateForm({...dateForm, end_date: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="start-time">Daily Start Time</Label>
+                <Input
+                  id="start-time"
+                  type="time"
+                  value={dateForm.start_time}
+                  onChange={(e) => setDateForm({...dateForm, start_time: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="end-time">Daily End Time</Label>
+                <Input
+                  id="end-time"
+                  type="time"
+                  value={dateForm.end_time}
+                  onChange={(e) => setDateForm({...dateForm, end_time: e.target.value})}
+                />
+              </div>
+            </div>
+            <Button onClick={handleAddDate} variant="outline" className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Sale Date
+            </Button>
+
+            {formData.sale_dates.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <h3 className="font-medium text-slate-900">Sale Dates ({formData.sale_dates.length})</h3>
+                <div className="space-y-2">
+                  {formData.sale_dates.map((saleDate, index) => (
+                    <div key={index} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                      <div className="text-sm">
+                        <p className="font-medium text-slate-900">{saleDate.date}</p>
+                        {(saleDate.start_time || saleDate.end_time) && (
+                          <p className="text-slate-600">
+                            {saleDate.start_time} - {saleDate.end_time}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleRemoveDate(index)}
+                        className="text-red-600 hover:text-red-700 p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Photos */}
         <Card>
           <CardContent className="pt-6 space-y-4">
