@@ -208,7 +208,7 @@ export default function SaleEditor() {
             title: formData.title,
             description: formData.description,
             sale_type: formData.sale_type,
-            status: publish ? 'upcoming' : formData.status,
+            status: formData.status,
             property_address: {
               ...formData.property_address,
               formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
