@@ -171,14 +171,13 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
                         </div>
                         <div className="whitespace-pre-wrap">
                           {msg.message.split('\n').map((line, idx) => {
-                            const match = line.match(/^\d+\.\s*(data:image.*)/);
-                            if (match && match[1]) {
+                            if (line.match(/^data:image/)) {
                               return (
                                 <img 
                                   key={idx} 
-                                  src={match[1]} 
+                                  src={line} 
                                   alt="Shared photo"
-                                  className="max-w-xs rounded-lg mt-2"
+                                  className="max-w-xs rounded mt-2"
                                 />
                               );
                             }
