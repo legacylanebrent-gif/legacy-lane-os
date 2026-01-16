@@ -35,6 +35,8 @@ export default function SaleEditor() {
   const [photoTitles, setPhotoTitles] = useState({});
   const [photoDescriptions, setPhotoDescriptions] = useState({});
   const [photoPricing, setPhotoPricing] = useState({});
+  const [regeneratingDesc, setRegeneratingDesc] = useState({});
+  const [regeneratingPrice, setRegeneratingPrice] = useState({});
 
   const [formData, setFormData] = useState({
       title: '',
@@ -242,6 +244,94 @@ export default function SaleEditor() {
       ...prev,
       sale_dates: prev.sale_dates.filter((_, i) => i !== index)
     }));
+  };
+
+  const handleRegenerateDescription = async (index) => {
+    const image = formData.images[index];
+    if (!image.name) return;
+
+    setRegeneratingDesc(prev => ({ ...prev, [index]: true }));
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Generate a detailed, accurate description for this estate sale item: "${image.name}". 
+        Focus on key features, condition indicators, and what makes it valuable or interesting.
+        Keep it concise but informative (2-3 sentences).`,
+        file_urls: [image.url]
+      });
+
+      const description = response.trim();
+      setPhotoDescriptions(prev => ({ ...prev, [image.url]: description }));
+      const updated = [...formData.images];
+      updated[index].description = description;
+      setFormData({ ...formData, images: updated });
+    } catch (error) {
+      console.error('Error generating description:', error);
+      alert('Failed to generate description');
+    } finally {
+      setRegeneratingDesc(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleRegeneratePrice = async (index) => {
+    const image = formData.images[index];
+    if (!image.name) return;
+
+    setRegeneratingPrice(prev => ({ ...prev, [index]: true }));
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Research current market prices for: "${image.name}"
+        
+        Search multiple sources (eBay sold listings, online marketplaces, antique dealers).
+        Return a JSON with pricing data.`,
+        add_context_from_internet: true,
+        file_urls: [image.url],
+        response_json_schema: {
+          type: "object",
+          properties: {
+            sources: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  site: { type: "string" },
+                  price: { type: "number" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const sources = response.sources || [];
+      if (sources.length > 0) {
+        const avgPrice = Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length);
+        
+        setPhotoPricing(prev => ({
+          ...prev,
+          [image.url]: {
+            sources,
+            average_price: avgPrice
+          }
+        }));
+
+        const updated = [...formData.images];
+        updated[index].price = avgPrice;
+        setFormData({ ...formData, images: updated });
+
+        if (saleId) {
+          await base44.entities.ItemPricing.create({
+            sale_id: saleId,
+            photo_url: image.url,
+            sources
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error generating price:', error);
+      alert('Failed to generate price');
+    } finally {
+      setRegeneratingPrice(prev => ({ ...prev, [index]: false }));
+    }
   };
 
   if (loading) {
@@ -730,16 +820,20 @@ export default function SaleEditor() {
                                 variant="outline"
                                 size="sm"
                                 className="w-full text-xs"
+                                onClick={() => handleRegenerateDescription(index)}
+                                disabled={regeneratingDesc[index]}
                               >
-                                Regenerate Description
+                                {regeneratingDesc[index] ? 'Generating...' : 'Regenerate Description'}
                               </Button>
                               <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
                                 className="w-full text-xs"
+                                onClick={() => handleRegeneratePrice(index)}
+                                disabled={regeneratingPrice[index]}
                               >
-                                Regenerate Price
+                                {regeneratingPrice[index] ? 'Generating...' : 'Regenerate Price'}
                               </Button>
                             </div>
                           )}
