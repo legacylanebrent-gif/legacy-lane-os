@@ -30,6 +30,23 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
     setCurrentUser(user);
   };
 
+  const resizeImage = async (imageUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 200, 200);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => resolve(imageUrl);
+      img.src = imageUrl;
+    });
+  };
+
   const loadConversation = async () => {
     if (!recipient?.id) return;
 
