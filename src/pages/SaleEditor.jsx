@@ -714,6 +714,35 @@ export default function SaleEditor() {
                               </div>
                             </div>
                           )}
+                          {image.name && image.description && (
+                            <div className="mt-3 flex flex-col gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs"
+                                onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}
+                              >
+                                Use Google Lens
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs"
+                              >
+                                Regenerate Description
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs"
+                              >
+                                Regenerate Price
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
