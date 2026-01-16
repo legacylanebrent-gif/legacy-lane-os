@@ -106,14 +106,15 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
         messageData.related_entity_id = relatedEntity.id;
       }
 
-      // Add selected photos to message
+      // Add selected photos to message (resized to 200px)
        if (selectedPhotos.length > 0) {
          const photoUrls = selectedPhotos.map(idx => {
            const img = allImages[idx];
            return typeof img === 'string' ? img : img?.url;
          }).filter(Boolean);
          if (photoUrls.length > 0) {
-           messageData.message += '\n\n📷 Attached Photos:\n' + photoUrls.map((url, i) => `${i + 1}. ${url}`).join('\n');
+           const resizedPhotos = await Promise.all(photoUrls.map(url => resizeImage(url)));
+           messageData.message += '\n\n📷 Attached Photos:\n' + resizedPhotos.map((url, i) => `${i + 1}. ${url}`).join('\n');
          }
        }
 
