@@ -91,8 +91,13 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
 
       // Add selected photos to message
       if (selectedPhotos.length > 0) {
-        const photoUrls = selectedPhotos.map(idx => allImages[idx]);
-        messageData.message += '\n\n📷 Attached Photos:\n' + photoUrls.join('\n');
+        const photoUrls = selectedPhotos.map(idx => {
+          const img = allImages[idx];
+          return typeof img === 'string' ? img : img?.url;
+        }).filter(Boolean);
+        if (photoUrls.length > 0) {
+          messageData.file_urls = photoUrls;
+        }
       }
 
       const created = await base44.entities.Message.create(messageData);
