@@ -96,7 +96,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
           return typeof img === 'string' ? img : img?.url;
         }).filter(Boolean);
         if (photoUrls.length > 0) {
-          messageData.file_urls = photoUrls;
+          messageData.message += '\n\n📷 Attached Photos:\n' + photoUrls.map((url, i) => `${i + 1}. ${url}`).join('\n');
         }
       }
 
