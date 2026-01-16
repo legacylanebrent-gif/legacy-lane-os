@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
+import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
 
@@ -27,6 +28,7 @@ export default function SaleEditor() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [showGeneratorModal, setShowGeneratorModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [dateForm, setDateForm] = useState({ start_date: '', start_time: '', end_time: '' });
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
@@ -493,6 +495,12 @@ export default function SaleEditor() {
           }
         }}
         startIndex={0}
+      />
+
+      <SaleClientPermissionsModal
+        open={showPermissionsModal}
+        onClose={() => setShowPermissionsModal(false)}
+        saleId={saleId}
       />
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
@@ -974,21 +982,43 @@ export default function SaleEditor() {
         {/* Sale Clients - Permissions */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-1">Sale Clients - Permissions</h2>
-              <p className="text-sm text-slate-600">Manage page access permissions for assigned clients</p>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-              <div className="text-blue-600 mt-0.5">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-1">Sale Clients - Permissions</h2>
+                <p className="text-sm text-slate-600">Manage page access permissions for assigned clients</p>
               </div>
-              <p className="text-sm text-blue-800">Clients are assigned to sales through the CRM. Use this panel to manage their page access permissions.</p>
+              {saleId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPermissionsModal(true)}
+                  className="flex-shrink-0"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Manage
+                </Button>
+              )}
             </div>
-            <div className="text-center py-12">
-              <p className="text-slate-500">No clients assigned to this sale</p>
-            </div>
+            
+            {!saleId ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="text-amber-600 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-sm text-amber-800">Save the sale first to assign clients and manage permissions.</p>
+              </div>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="text-blue-600 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-sm text-blue-800">Assign clients from your CRM connections and give them access to specific pages like inventory, statistics, and contracts.</p>
+              </div>
+            )}
             </CardContent>
             </Card>
 
