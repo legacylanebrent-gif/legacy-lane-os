@@ -681,7 +681,7 @@ END:VCALENDAR`;
                         </div>
                         <div className="text-sm text-slate-600 flex items-center gap-1 mt-1">
                           <Clock className="w-4 h-4" />
-                          {dateInfo.start_time} - {dateInfo.end_time}
+                          {convertTo12Hour(dateInfo.start_time)} - {convertTo12Hour(dateInfo.end_time)}
                         </div>
                       </div>
                     ))}
