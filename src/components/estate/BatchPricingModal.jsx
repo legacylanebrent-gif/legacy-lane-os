@@ -11,6 +11,7 @@ export default function BatchPricingModal({
   images, 
   onPriceUpdated,
   onPricingGenerated,
+  saleId,
   startIndex = 0
 }) {
   const [batch, setBatch] = useState([]);
@@ -136,6 +137,32 @@ Return ONLY valid JSON:
           // Store pricing data for display
           if (onPricingGenerated) {
             onPricingGenerated(actualIndex, pricingResult);
+          }
+
+          // Save to database if saleId exists
+          if (saleId) {
+            try {
+              const existingPricing = await base44.entities.ItemPricing.filter({ 
+                sale_id: saleId, 
+                photo_url: image.url 
+              });
+              
+              const pricingData = {
+                sale_id: saleId,
+                photo_url: image.url,
+                low_price: pricingResult.low_price,
+                high_price: pricingResult.high_price,
+                sources: pricingResult.sources
+              };
+
+              if (existingPricing.length > 0) {
+                await base44.entities.ItemPricing.update(existingPricing[0].id, pricingData);
+              } else {
+                await base44.entities.ItemPricing.create(pricingData);
+              }
+            } catch (dbError) {
+              console.error('Error saving pricing to database:', dbError);
+            }
           }
 
           generatedResults.push({

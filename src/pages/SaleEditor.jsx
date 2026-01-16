@@ -90,6 +90,20 @@ export default function SaleEditor() {
         national_featured: saleData.national_featured || false
       });
       setFeatured(saleData.national_featured || false);
+
+      // Load pricing data
+      const pricingData = await base44.entities.ItemPricing.filter({ sale_id: id });
+      const pricingMap = {};
+      pricingData.forEach(pricing => {
+        pricingMap[pricing.photo_url] = {
+          sources: pricing.sources || [],
+          low_price: pricing.low_price,
+          high_price: pricing.high_price,
+          average_price: pricing.sources ? 
+            Math.round(pricing.sources.reduce((sum, s) => sum + s.price, 0) / pricing.sources.length) : 0
+        };
+      });
+      setPhotoPricing(pricingMap);
     } catch (error) {
       console.error('Error loading sale:', error);
       alert('Error loading sale: ' + error.message);
@@ -300,6 +314,7 @@ export default function SaleEditor() {
         open={showPricingModal}
         onClose={() => setShowPricingModal(false)}
         images={formData.images}
+        saleId={saleId}
         onPriceUpdated={(index, price) => {
           const updated = [...formData.images];
           updated[index].price = price;
