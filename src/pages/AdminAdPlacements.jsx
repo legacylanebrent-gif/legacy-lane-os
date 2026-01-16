@@ -180,9 +180,15 @@ export default function AdminAdPlacements() {
                       Zip: {placement.zip_code} • {placement.radius_miles} miles
                     </p>
                   </div>
-                  <Badge className={placement.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}>
-                    {placement.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge className="bg-blue-100 text-blue-700 flex items-center">
+                      {getSizeIcon(placement.size)}
+                      {getSizeLabel(placement.size)}
+                    </Badge>
+                    <Badge className={placement.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}>
+                      {placement.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
