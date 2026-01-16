@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, Plus, Search, Mail, Phone, Tag, MessageSquare, 
-  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle
+  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle, Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -37,6 +37,7 @@ export default function CRM() {
   const [selectedConnection, setSelectedConnection] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [removingDuplicates, setRemovingDuplicates] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -85,6 +86,26 @@ export default function CRM() {
     setFilteredConnections(filtered);
   };
 
+  const handleRemoveDuplicates = async () => {
+    if (!window.confirm('Remove duplicate connections? This will keep the most complete record and remove others with the same email.')) {
+      return;
+    }
+
+    setRemovingDuplicates(true);
+    try {
+      const response = await base44.functions.invoke('removeDuplicateConnections');
+      if (response.data.success) {
+        alert(`Removed ${response.data.duplicatesRemoved} duplicate connection(s)`);
+        await loadData();
+      }
+    } catch (error) {
+      console.error('Error removing duplicates:', error);
+      alert('Failed to remove duplicates');
+    } finally {
+      setRemovingDuplicates(false);
+    }
+  };
+
   const getConnectionTypeColor = (type) => {
     switch (type) {
       case 'favorite': return 'bg-pink-100 text-pink-700';
@@ -130,13 +151,23 @@ export default function CRM() {
           <h1 className="text-3xl font-serif font-bold text-slate-900">CRM</h1>
           <p className="text-slate-600 mt-1">Manage your connections and relationships</p>
         </div>
-        <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-          <DialogTrigger asChild>
-            <Button className="bg-cyan-600 hover:bg-cyan-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Connection
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRemoveDuplicates}
+            disabled={removingDuplicates}
+            className="text-orange-600 border-orange-600"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
+          </Button>
+          <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-cyan-600 hover:bg-cyan-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Connection
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add New Connection</DialogTitle>
@@ -151,6 +182,7 @@ export default function CRM() {
             />
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
