@@ -319,9 +319,11 @@ export default function SaleEditor() {
           }
         }));
 
-        const updated = [...formData.images];
-        updated[index].price = avgPrice;
-        setFormData({ ...formData, images: updated });
+        setFormData(prev => {
+          const updated = [...prev.images];
+          updated[index] = { ...updated[index], price: avgPrice };
+          return { ...prev, images: updated };
+        });
 
         if (saleId) {
           await base44.entities.ItemPricing.create({
