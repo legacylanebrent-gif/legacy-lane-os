@@ -326,13 +326,24 @@ export default function SaleEditor() {
         });
 
         if (saleId) {
-          await base44.entities.ItemPricing.create({
+          const existingPricing = await base44.entities.ItemPricing.filter({ 
+            sale_id: saleId, 
+            photo_url: image.url 
+          });
+
+          const pricingData = {
             sale_id: saleId,
             photo_url: image.url,
             sources,
             low_price: lowPrice,
             high_price: highPrice
-          });
+          };
+
+          if (existingPricing.length > 0) {
+            await base44.entities.ItemPricing.update(existingPricing[0].id, pricingData);
+          } else {
+            await base44.entities.ItemPricing.create(pricingData);
+          }
         }
       }
     } catch (error) {
