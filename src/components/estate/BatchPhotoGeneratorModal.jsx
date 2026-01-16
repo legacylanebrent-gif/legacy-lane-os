@@ -43,12 +43,15 @@ export default function BatchPhotoGeneratorModal({
   };
 
   const generateBatch = async () => {
-    setProcessing(true);
-    setError(null);
-    const generatedResults = [];
+        setProcessing(true);
+        setError(null);
+        setResults([]); // Clear previous results
+        setDebugLog(prev => [...prev, `Starting batch of ${batch.length} items`]);
+        const generatedResults = [];
 
-    try {
-      for (let i = 0; i < batch.length; i++) {
+        try {
+        for (let i = 0; i < batch.length; i++) {
+          setDebugLog(prev => [...prev, `Processing item ${i+1}/${batch.length}`]);
             const image = batch[i];
             const actualIndex = currentBatchIndex + i;
 
