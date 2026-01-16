@@ -92,12 +92,17 @@ export default function BatchPhotoGeneratorModal({
             status: 'success'
           });
 
-          // Call callbacks for title and description
-          if (onTitleGenerated) {
+          // Call callbacks for title and description to update parent
+          if (onTitleGenerated && title) {
             onTitleGenerated(actualIndex, title);
           }
-          if (onDescriptionGenerated) {
+          if (onDescriptionGenerated && description) {
             onDescriptionGenerated(actualIndex, description);
+          }
+
+          // Also call onPhotosUpdated with the full updated photo
+          if (onPhotosUpdated) {
+            onPhotosUpdated(actualIndex, updatedPhoto);
           }
         } catch (err) {
           const errorMsg = `Image ${i}: ${err.message || 'Unknown error'}`;
