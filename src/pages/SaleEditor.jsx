@@ -445,7 +445,7 @@ export default function SaleEditor() {
         <Card>
           <CardContent className="pt-6 space-y-4">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Date & Time</h2>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="space-y-4 mb-4">
               <div>
                 <Label htmlFor="start-date">Start Date *</Label>
                 <Input
@@ -455,23 +455,25 @@ export default function SaleEditor() {
                   onChange={(e) => setDateForm({...dateForm, start_date: e.target.value})}
                 />
               </div>
-              <div>
-                <Label htmlFor="start-time">Daily Start Time</Label>
-                <Input
-                  id="start-time"
-                  type="time"
-                  value={dateForm.start_time}
-                  onChange={(e) => setDateForm({...dateForm, start_time: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="end-time">Daily End Time</Label>
-                <Input
-                  id="end-time"
-                  type="time"
-                  value={dateForm.end_time}
-                  onChange={(e) => setDateForm({...dateForm, end_time: e.target.value})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start-time">Daily Start Time</Label>
+                  <Input
+                    id="start-time"
+                    type="time"
+                    value={dateForm.start_time}
+                    onChange={(e) => setDateForm({...dateForm, start_time: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="end-time">Daily End Time</Label>
+                  <Input
+                    id="end-time"
+                    type="time"
+                    value={dateForm.end_time}
+                    onChange={(e) => setDateForm({...dateForm, end_time: e.target.value})}
+                  />
+                </div>
               </div>
             </div>
             <Button onClick={handleAddDate} variant="outline" className="w-full">
