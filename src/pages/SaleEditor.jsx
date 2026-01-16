@@ -539,7 +539,7 @@ export default function SaleEditor() {
                           <div
                             {...provided.droppableProps}
                             ref={provided.innerRef}
-                            className="grid grid-cols-5 gap-3"
+                            className="grid grid-cols-3 lg:grid-cols-5 gap-3"
                           >
                             {formData.images.map((image, index) => (
                               <Draggable key={index} draggableId={`image-${index}`} index={index}>
