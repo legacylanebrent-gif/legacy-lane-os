@@ -653,7 +653,7 @@ export default function SaleEditor() {
                         </div>
                         <div>
                           <Label htmlFor={`desc-${index}`} className="text-xs">Description</Label>
-                          <Input
+                          <Textarea
                             id={`desc-${index}`}
                             placeholder="Item description"
                             value={photoDescriptions[image.url] || image.description || ''}
@@ -663,7 +663,7 @@ export default function SaleEditor() {
                               updated[index].description = e.target.value;
                               setFormData({...formData, images: updated});
                             }}
-                            className="text-sm"
+                            className="text-sm min-h-[120px] lg:min-h-[72px]"
                           />
                         </div>
                         <div>
