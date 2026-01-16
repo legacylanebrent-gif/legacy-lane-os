@@ -212,7 +212,8 @@ Return ONLY valid JSON:
     }
   };
 
-  const isAllDone = currentBatchIndex + BATCH_SIZE >= totalNeedingPricing;
+  const remainingItems = totalNeedingPricing - (currentBatchIndex + batch.length);
+  const isAllDone = remainingItems <= 0;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -276,7 +277,7 @@ Return ONLY valid JSON:
                   disabled={processing}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
-                  {isAllDone ? 'All Done' : `Do the Next ${Math.min(BATCH_SIZE, totalNeedingPricing - currentBatchIndex - BATCH_SIZE)}`}
+                  {isAllDone ? 'All Done' : `Do the Next ${Math.min(BATCH_SIZE, remainingItems)}`}
                 </Button>
               )
             )}
