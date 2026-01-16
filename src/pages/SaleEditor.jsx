@@ -617,19 +617,19 @@ export default function SaleEditor() {
                 <p className="text-slate-500 text-center py-8">No photos added yet</p>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" onClick={() => setShowGeneratorModal(true)}>
+                  <div className="flex flex-col lg:flex-row justify-end gap-2">
+                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full lg:w-auto" onClick={() => setShowGeneratorModal(true)}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI Generate Titles
                     </Button>
-                    <Button variant="outline" size="sm" className="text-green-600 border-green-600" onClick={() => setShowPricingModal(true)}>
+                    <Button variant="outline" size="sm" className="text-green-600 border-green-600 w-full lg:w-auto" onClick={() => setShowPricingModal(true)}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI Generate Pricing
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="text-red-600 border-red-600"
+                      className="text-red-600 border-red-600 w-full lg:w-auto"
                       onClick={() => {
                         if (window.confirm('Remove all pricing from photos?')) {
                           const updated = formData.images.map(img => ({...img, price: null}));
