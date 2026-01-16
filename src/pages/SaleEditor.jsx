@@ -258,23 +258,23 @@ export default function SaleEditor() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-white border-b border-slate-200 lg:sticky lg:top-0 z-10">
-        <div className="px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900">
+        <div className="px-4 lg:px-6 py-4 flex items-center justify-between gap-2 lg:gap-4">
+          <div className="flex items-center gap-2 lg:gap-4 min-w-0">
+            <button onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900 flex-shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-xl font-serif font-bold text-slate-900">{saleId ? 'Edit Sale' : 'Create New Sale'}</h1>
-              <p className="text-sm text-slate-500">Fill in the details for your estate sale</p>
+            <div className="min-w-0">
+              <h1 className="text-lg lg:text-xl font-serif font-bold text-slate-900 truncate">{saleId ? 'Edit Sale' : 'Create New Sale'}</h1>
+              <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">Fill in the details for your estate sale</p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))} className="hidden sm:flex">Cancel</Button>
+            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} size="sm" className="text-xs lg:text-sm">
               {saving ? 'Saving...' : 'Save'}
             </Button>
-            <Button onClick={() => handleSave(true)} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
-              {saving ? 'Saving...' : 'Save & Close'}
+            <Button onClick={() => handleSave(true)} disabled={saving} size="sm" className="bg-orange-600 hover:bg-orange-700 text-xs lg:text-sm">
+              {saving ? 'Saving...' : 'Done'}
             </Button>
           </div>
         </div>
