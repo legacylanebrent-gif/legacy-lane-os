@@ -632,7 +632,7 @@ export default function SaleEditor() {
                       className="text-red-600 border-red-600"
                       onClick={() => {
                         if (window.confirm('Remove all pricing from photos?')) {
-                          const updated = formData.images.map(img => ({...img, price: ''}));
+                          const updated = formData.images.map(img => ({...img, price: null}));
                           setFormData({...formData, images: updated});
                           setPhotoPricing({});
                         }
@@ -691,7 +691,7 @@ export default function SaleEditor() {
                             value={image.price || ''}
                             onChange={(e) => {
                               const updated = [...formData.images];
-                              updated[index].price = e.target.value ? parseFloat(e.target.value) : '';
+                              updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
                               setFormData({...formData, images: updated});
                             }}
                             className="text-sm"
