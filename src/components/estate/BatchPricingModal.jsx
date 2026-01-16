@@ -55,34 +55,45 @@ export default function BatchPricingModal({
 
         try {
           const response = await base44.integrations.Core.InvokeLLM({
-            prompt: `CRITICAL: You MUST ONLY use these specific websites for pricing research.
+            prompt: `You are a professional estate sale pricing expert. Analyze the provided image and item title to determine accurate current market pricing for estate sale context.
 
-Item: ${title}
+ITEM: ${title}
 
-First, determine if this item is furniture.
+INSTRUCTIONS:
+1. First, look at the image and title to understand what this item actually is - its style, condition, age, brand, materials, etc.
 
-If it IS furniture, you MUST ONLY research prices on EXACTLY these 3 sites:
-1. Facebook Marketplace (facebook.com/marketplace)
-2. 1stDibs.com
-3. Chairish.com
+2. Determine the category:
+   - If it's FURNITURE (chairs, tables, sofas, beds, dressers, cabinets, etc.) → Use: Facebook Marketplace, 1stDibs, Chairish
+   - If it's NOT furniture (jewelry, art, collectibles, kitchenware, decor, etc.) → Use: eBay, Facebook Marketplace, Etsy
 
-If it is NOT furniture, you MUST ONLY research prices on EXACTLY these 3 sites:
-1. eBay (ebay.com)
-2. Facebook Marketplace (facebook.com/marketplace)
-3. Etsy (etsy.com)
+3. Search ONLY the 3 specified sites for this exact or very similar items:
+   - Look for SOLD/COMPLETED listings when possible (actual selling prices, not asking prices)
+   - Find items in similar condition
+   - Consider brand, age, style, and materials
+   - For common items, use typical market value
+   - For unique/antique items, research comparable sales
 
-Return ONLY valid JSON with no markdown:
+4. Be realistic for estate sale pricing:
+   - Estate sale items typically sell for 30-50% less than retail
+   - Used condition, not new
+   - Quick sale context
+   - Price to sell, not to sit
+
+5. Return 3 real prices from your research on the specified sites, plus a realistic price range.
+
+Return ONLY valid JSON:
 {
-  "site1_name": "name of first site",
-  "site1_price": numeric price,
-  "site2_name": "name of second site",
-  "site2_price": numeric price,
-  "site3_name": "name of third site",
-  "site3_price": numeric price,
-  "low_price": lowest price found,
-  "high_price": highest price found
+  "site1_name": "exact site name",
+  "site1_price": actual_number,
+  "site2_name": "exact site name", 
+  "site2_price": actual_number,
+  "site3_name": "exact site name",
+  "site3_price": actual_number,
+  "low_price": realistic_low_end,
+  "high_price": realistic_high_end
 }`,
             add_context_from_internet: true,
+            file_urls: [image.url],
             response_json_schema: {
               type: 'object',
               properties: {
