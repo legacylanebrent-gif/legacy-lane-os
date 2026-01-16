@@ -629,11 +629,11 @@ export default function SaleEditor() {
                   </div>
                 {formData.images.map((image, index) => (
                   <Card key={index} className="p-4">
-                    <div className="flex gap-4">
+                    <div className="flex flex-col lg:flex-row gap-4">
                       <img
                         src={image.url}
                         alt={`Photo ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                        className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg flex-shrink-0"
                       />
                       <div className="flex-1 space-y-3 w-full">
                         <div>
