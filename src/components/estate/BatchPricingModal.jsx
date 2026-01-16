@@ -10,6 +10,7 @@ export default function BatchPricingModal({
   onClose, 
   images, 
   onPriceUpdated,
+  onPricingGenerated,
   startIndex = 0
 }) {
   const [batch, setBatch] = useState([]);
@@ -132,10 +133,14 @@ Return ONLY valid JSON:
             onPriceUpdated(actualIndex, avgPrice);
           }
 
+          // Store pricing data for display
+          if (onPricingGenerated) {
+            onPricingGenerated(actualIndex, pricingResult);
+          }
+
           generatedResults.push({
             index: actualIndex,
-            status: 'success',
-            pricing: pricingResult
+            status: 'success'
           });
         } catch (err) {
           console.error('Error generating pricing for image', i, err);
@@ -207,55 +212,21 @@ Return ONLY valid JSON:
           )}
 
           {results.length > 0 && (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-2">
               {results.map((result, idx) => {
                 const image = batch[idx];
                 return (
-                  <div key={idx} className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={image?.url}
-                        alt=""
-                        className="w-16 h-16 object-cover rounded flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-slate-900 text-sm truncate mb-2">
-                          {image?.name || 'Untitled'}
-                        </h4>
-                        
-                        {result.status === 'success' && result.pricing && (
-                          <div className="space-y-2">
-                            <div className="space-y-1">
-                              {result.pricing.sources.map((source, i) => (
-                                <div key={i} className="flex justify-between text-sm">
-                                  <span className="text-slate-600">{source.site}</span>
-                                  <span className="font-medium">${source.price}</span>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="pt-2 border-t border-slate-200">
-                              <div className="flex justify-between text-sm font-medium text-orange-700">
-                                <span>Price Range</span>
-                                <span>${result.pricing.low_price} - ${result.pricing.high_price}</span>
-                              </div>
-                              <p className="text-xs text-slate-500 mt-1">
-                                Average price (${result.pricing.average_price}) has been filled in the Price field above
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {result.status === 'error' && (
-                          <div className="flex items-center gap-2 text-red-600 text-sm">
-                            <AlertCircle className="w-4 h-4" />
-                            <span>{result.error}</span>
-                          </div>
-                        )}
-                        
-                        {result.status === 'skipped' && (
-                          <div className="text-slate-500 text-sm">{result.error}</div>
-                        )}
-                      </div>
+                  <div key={idx} className="flex items-center gap-3 p-2 bg-slate-50 rounded">
+                    <img
+                      src={image?.url}
+                      alt=""
+                      className="w-12 h-12 object-cover rounded flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0 text-sm">
+                      <p className="font-medium text-slate-900 truncate">{image?.name || 'Untitled'}</p>
+                      {result.status === 'success' && <p className="text-green-600 text-xs">✓ Pricing generated</p>}
+                      {result.status === 'error' && <p className="text-red-600 text-xs">✗ {result.error}</p>}
+                      {result.status === 'skipped' && <p className="text-slate-500 text-xs">⊘ {result.error}</p>}
                     </div>
                   </div>
                 );

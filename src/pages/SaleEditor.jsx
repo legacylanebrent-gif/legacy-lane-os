@@ -34,6 +34,7 @@ export default function SaleEditor() {
   const [photoTab, setPhotoTab] = useState('thumbnails');
   const [photoTitles, setPhotoTitles] = useState({});
   const [photoDescriptions, setPhotoDescriptions] = useState({});
+  const [photoPricing, setPhotoPricing] = useState({});
 
   const [formData, setFormData] = useState({
       title: '',
@@ -303,6 +304,12 @@ export default function SaleEditor() {
           const updated = [...formData.images];
           updated[index].price = price;
           setFormData({...formData, images: updated});
+        }}
+        onPricingGenerated={(index, pricingData) => {
+          const key = formData.images[index]?.url;
+          if (key) {
+            setPhotoPricing(prev => ({...prev, [key]: pricingData}));
+          }
         }}
         startIndex={0}
       />
@@ -656,6 +663,27 @@ export default function SaleEditor() {
                             }}
                             className="text-sm"
                           />
+                          {photoPricing[image.url] && (
+                            <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
+                              <div className="space-y-1">
+                                {photoPricing[image.url].sources.map((source, i) => (
+                                  <div key={i} className="flex justify-between text-xs">
+                                    <span className="text-slate-600">{source.site}</span>
+                                    <span className="font-medium">${source.price}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="pt-2 border-t border-orange-300">
+                                <div className="flex justify-between text-xs font-semibold text-orange-700">
+                                  <span>Price Range</span>
+                                  <span>${photoPricing[image.url].low_price} - ${photoPricing[image.url].high_price}</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">
+                                  Average price (${photoPricing[image.url].average_price}) has been filled in the Price field above
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
