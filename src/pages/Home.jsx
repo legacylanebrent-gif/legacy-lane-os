@@ -565,10 +565,13 @@ export default function Home() {
       return salesList;
     };
 
+    // Only show active/upcoming sales on frontend (hide draft and completed)
+    const visibleSales = allSales.filter(s => s.status === 'active' || s.status === 'upcoming');
+    
     // Separate into categories and filter by distance
-    const national = filterByDistance(allSales.filter(s => s.national_featured));
-    const local = filterByDistance(allSales.filter(s => !s.national_featured && s.local_featured));
-    const regular = filterByDistance(allSales.filter(s => !s.national_featured && !s.local_featured));
+    const national = filterByDistance(visibleSales.filter(s => s.national_featured));
+    const local = filterByDistance(visibleSales.filter(s => !s.national_featured && s.local_featured));
+    const regular = filterByDistance(visibleSales.filter(s => !s.national_featured && !s.local_featured));
 
     setNationalFeatured(national);
     setLocalFeatured(local);
