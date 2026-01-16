@@ -304,12 +304,17 @@ export default function SaleEditor() {
 
       const sources = response.sources || [];
       if (sources.length > 0) {
+        const prices = sources.map(s => s.price);
+        const lowPrice = Math.min(...prices);
+        const highPrice = Math.max(...prices);
         const avgPrice = Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length);
         
         setPhotoPricing(prev => ({
           ...prev,
           [image.url]: {
             sources,
+            low_price: lowPrice,
+            high_price: highPrice,
             average_price: avgPrice
           }
         }));
@@ -322,7 +327,9 @@ export default function SaleEditor() {
           await base44.entities.ItemPricing.create({
             sale_id: saleId,
             photo_url: image.url,
-            sources
+            sources,
+            low_price: lowPrice,
+            high_price: highPrice
           });
         }
       }
