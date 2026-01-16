@@ -22,12 +22,16 @@ export default function BatchPricingModal({
 
   const BATCH_SIZE = 10;
 
+  // Calculate items needing pricing
+  const itemsNeedingPricing = images.filter(img => !img.price || img.price === 0);
+  const totalNeedingPricing = itemsNeedingPricing.length;
+
   useEffect(() => {
     if (open) {
       setError(null);
       const start = currentBatchIndex;
-      const end = Math.min(start + BATCH_SIZE, images.length);
-      const newBatch = images.slice(start, end);
+      const end = Math.min(start + BATCH_SIZE, itemsNeedingPricing.length);
+      const newBatch = itemsNeedingPricing.slice(start, end);
       setBatch(newBatch);
       setResults([]);
     }
@@ -42,7 +46,7 @@ export default function BatchPricingModal({
     try {
       for (let i = 0; i < batch.length; i++) {
         const image = batch[i];
-        const actualIndex = currentBatchIndex + i;
+        const actualIndex = images.findIndex(img => img.url === image.url);
         const title = image.name || '';
 
         if (!title || !title.trim()) {
@@ -194,13 +198,13 @@ Return ONLY valid JSON:
 
   const handleNextBatch = () => {
     const nextIndex = currentBatchIndex + BATCH_SIZE;
-    if (nextIndex < images.length) {
+    if (nextIndex < totalNeedingPricing) {
       setResults([]);
       setCurrentBatchIndex(nextIndex);
       setTimeout(() => {
         const start = nextIndex;
-        const end = Math.min(start + BATCH_SIZE, images.length);
-        setBatch(images.slice(start, end));
+        const end = Math.min(start + BATCH_SIZE, totalNeedingPricing);
+        setBatch(itemsNeedingPricing.slice(start, end));
         setTimeout(() => generatePricing(), 100);
       }, 0);
     } else {
@@ -208,7 +212,7 @@ Return ONLY valid JSON:
     }
   };
 
-  const isAllDone = currentBatchIndex + BATCH_SIZE >= images.length;
+  const isAllDone = currentBatchIndex + BATCH_SIZE >= totalNeedingPricing;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -218,10 +222,15 @@ Return ONLY valid JSON:
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="text-sm text-slate-600">
-            Processing {currentBatchIndex + 1} to {Math.min(currentBatchIndex + BATCH_SIZE, images.length)} of {images.length} photos
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-slate-900">
+              {totalNeedingPricing} {totalNeedingPricing === 1 ? 'item needs' : 'items need'} pricing
+            </div>
+            <div className="text-sm text-slate-600">
+              Processing {currentBatchIndex + 1} to {Math.min(currentBatchIndex + BATCH_SIZE, totalNeedingPricing)} of {totalNeedingPricing} photos
+            </div>
+            <p className="text-xs text-slate-500">Pricing takes between 15-30 sec per item</p>
           </div>
-          <p className="text-xs text-slate-500">Pricing takes between 15-30 sec per item</p>
 
           {processing && (
             <div className="space-y-3">
@@ -267,7 +276,7 @@ Return ONLY valid JSON:
                   disabled={processing}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
-                  {isAllDone ? 'All Done' : `Do the Next ${Math.min(BATCH_SIZE, images.length - currentBatchIndex - BATCH_SIZE)}`}
+                  {isAllDone ? 'All Done' : `Do the Next ${Math.min(BATCH_SIZE, totalNeedingPricing - currentBatchIndex - BATCH_SIZE)}`}
                 </Button>
               )
             )}
