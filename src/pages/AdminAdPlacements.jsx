@@ -52,6 +52,17 @@ export default function AdminAdPlacements() {
   const nationalCount = placements.filter(p => p.placement_type === 'national' && p.is_active).length;
   const localCount = placements.filter(p => p.placement_type === 'local' && p.is_active).length;
 
+  const getSizeLabel = (size) => {
+    const labels = { full: 'Full Width', half: 'Half Width', third: '1/3 Width' };
+    return labels[size] || 'Full Width';
+  };
+
+  const getSizeIcon = (size) => {
+    const icons = { full: Maximize, half: Columns2, third: Columns3 };
+    const Icon = icons[size] || Maximize;
+    return <Icon className="w-3 h-3 mr-1" />;
+  };
+
   if (loading) {
     return (
       <div className="p-8">
