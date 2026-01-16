@@ -208,9 +208,8 @@ export default function BatchPhotoGeneratorModal({
             {!processing && results.length === 0 ? (
               <Button 
                 onClick={async () => {
-                  setDebugLog(prev => [...prev, 'Click detected']);
+                  setDebugLog(prev => [...prev, `Click detected at ${new Date().toISOString()}`]);
                   setError("Starting generation...");
-                  setProcessing(true);
                   try {
                     await generateBatch();
                   } catch (err) {
@@ -218,7 +217,7 @@ export default function BatchPhotoGeneratorModal({
                     setError(`Error: ${err.message}`);
                   }
                 }}
-                disabled={processing}
+                disabled={processing || batch.length === 0}
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 Generate Batch
