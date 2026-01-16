@@ -635,10 +635,10 @@ export default function SaleEditor() {
                         alt={`Photo ${index + 1}`}
                         className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                       />
-                      <div className="flex-1 space-y-3">
+                      <div className="flex-1 space-y-3 w-full">
                         <div>
                           <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
-                          <Input
+                          <Textarea
                             id={`name-${index}`}
                             placeholder="Item name"
                             value={photoTitles[image.url] || image.name || ''}
@@ -648,7 +648,8 @@ export default function SaleEditor() {
                               updated[index].name = e.target.value;
                               setFormData({...formData, images: updated});
                             }}
-                            className="text-sm"
+                            className="text-sm min-h-[48px]"
+                            rows={2}
                           />
                         </div>
                         <div>
