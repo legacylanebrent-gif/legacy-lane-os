@@ -18,7 +18,7 @@ import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorMod
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 
-const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
+const SALE_STATUSES = ['draft', 'active', 'completed'];
 
 export default function SaleEditor() {
   const navigate = useNavigate();
