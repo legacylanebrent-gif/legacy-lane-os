@@ -257,7 +257,7 @@ export default function SaleEditor() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200 lg:sticky lg:top-0 z-10">
+      <div className="bg-white border-b border-slate-200">
         <div className="px-4 lg:px-6 py-4 flex items-center justify-between gap-2 lg:gap-4">
           <div className="flex items-center gap-2 lg:gap-4 min-w-0">
             <button onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900 flex-shrink-0">
