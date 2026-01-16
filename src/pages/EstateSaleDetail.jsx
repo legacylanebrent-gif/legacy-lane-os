@@ -520,7 +520,7 @@ END:VCALENDAR`;
                     {currentUser && (
                       <button
                         onClick={() => toggleImageSave(selectedImage)}
-                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
+                        className="absolute top-4 left-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
                       >
                         <Heart 
                           className={`w-6 h-6 ${savedImages.includes(selectedImage) ? 'fill-red-600 text-red-600' : 'text-slate-600'}`} 
