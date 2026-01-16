@@ -152,15 +152,17 @@ export default function CRM() {
           <p className="text-slate-600 mt-1">Manage your connections and relationships</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRemoveDuplicates}
-            disabled={removingDuplicates}
-            className="text-orange-600 border-orange-600"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
-          </Button>
+          {['super_admin', 'platform_ops', 'growth_team', 'partnerships', 'education_admin', 'finance_admin'].includes(user?.primary_account_type) && (
+            <Button
+              variant="outline"
+              onClick={handleRemoveDuplicates}
+              disabled={removingDuplicates}
+              className="text-orange-600 border-orange-600"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
+            </Button>
+          )}
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
               <Button className="bg-cyan-600 hover:bg-cyan-700">
