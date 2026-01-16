@@ -15,6 +15,7 @@ import { ArrowLeft, Plus, X, Camera, Sparkles, RotateCw, ImageIcon, Trash } from
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
+import BatchPricingModal from '@/components/estate/BatchPricingModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
 
@@ -25,6 +26,7 @@ export default function SaleEditor() {
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [showGeneratorModal, setShowGeneratorModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [dateForm, setDateForm] = useState({ start_date: '', start_time: '', end_time: '' });
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
@@ -290,6 +292,18 @@ export default function SaleEditor() {
             setFormData({...formData, images: updated});
           }
           }}
+        startIndex={0}
+      />
+
+      <BatchPricingModal
+        open={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        images={formData.images}
+        onPriceUpdated={(index, price) => {
+          const updated = [...formData.images];
+          updated[index].price = price;
+          setFormData({...formData, images: updated});
+        }}
         startIndex={0}
       />
 
@@ -579,10 +593,14 @@ export default function SaleEditor() {
                 <p className="text-slate-500 text-center py-8">No photos added yet</p>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" onClick={() => setShowGeneratorModal(true)}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI Generate Titles
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-green-600 border-green-600" onClick={() => setShowPricingModal(true)}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      AI Generate Pricing
                     </Button>
                   </div>
                 {formData.images.map((image, index) => (
