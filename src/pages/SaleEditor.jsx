@@ -708,12 +708,9 @@ export default function SaleEditor() {
                               </div>
                               <div className="pt-2 border-t border-orange-300">
                                 <div className="flex justify-between text-xs font-semibold text-orange-700">
-                                  <span>Price Range</span>
-                                  <span>${photoPricing[image.url].low_price} - ${photoPricing[image.url].high_price}</span>
+                                  <span>Avg Price</span>
+                                  <span>${photoPricing[image.url].average_price}</span>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">
-                                  Average price (${photoPricing[image.url].average_price}) has been filled in the Price field above
-                                </p>
                               </div>
                             </div>
                           )}
