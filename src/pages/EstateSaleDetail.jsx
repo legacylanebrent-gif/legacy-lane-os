@@ -258,6 +258,16 @@ END:VCALENDAR`;
     return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
   };
 
+  const convertTo12Hour = (time24h) => {
+    if (!time24h) return '';
+    const [hours, minutes] = time24h.split(':');
+    let hour = parseInt(hours, 10);
+    const modifier = hour >= 12 ? 'PM' : 'AM';
+    if (hour > 12) hour -= 12;
+    if (hour === 0) hour = 12;
+    return `${hour}:${minutes} ${modifier}`;
+  };
+
   const handleMessageOperator = () => {
     setMessageModalOpen(true);
   };
