@@ -820,7 +820,7 @@ END:VCALENDAR`;
                       className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
                     >
                       <MessageSquare className="w-4 h-4" />
-                      Message Operator
+                      Message Seller
                     </Button>
                   )}
                   {!currentUser && (
