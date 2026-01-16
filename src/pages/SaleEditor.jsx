@@ -381,7 +381,7 @@ export default function SaleEditor() {
                   placeholder="Describe the estate sale..."
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows={4}
+                  className="min-h-[120px] lg:min-h-[72px]"
                 />
               </div>
             </div>
