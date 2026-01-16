@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit2, Trash2, MapPin } from 'lucide-react';
+import { Plus, Edit2, Trash2, MapPin, Maximize, Columns2, Columns3 } from 'lucide-react';
 import AdPlacementModal from '@/components/admin/AdPlacementModal';
 
 export default function AdminAdPlacements() {
