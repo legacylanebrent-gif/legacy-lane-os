@@ -251,7 +251,6 @@ Return ONLY valid JSON:
                     />
                     <div className="flex-1 min-w-0 text-sm">
                       <p className="font-medium text-slate-900 truncate">{image?.name || 'Untitled'}</p>
-                      {result.status === 'success' && <p className="text-green-600 text-xs">✓ Pricing generated</p>}
                       {result.status === 'error' && <p className="text-red-600 text-xs">✗ {result.error}</p>}
                       {result.status === 'skipped' && <p className="text-slate-500 text-xs">⊘ {result.error}</p>}
                     </div>
