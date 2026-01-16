@@ -549,12 +549,7 @@ export default function Home() {
       );
     }
 
-    // Separate into categories
-    const national = allSales.filter(s => s.national_featured);
-    const local = allSales.filter(s => !s.national_featured && s.local_featured);
-    const regular = allSales.filter(s => !s.national_featured && !s.local_featured);
-
-    // For local featured and regular: filter by distance if location available
+    // Filter by distance if location available
     const filterByDistance = (salesList) => {
       if (userLocation) {
         const withDistance = salesList
@@ -570,9 +565,14 @@ export default function Home() {
       return salesList;
     };
 
+    // Separate into categories and filter by distance
+    const national = filterByDistance(allSales.filter(s => s.national_featured));
+    const local = filterByDistance(allSales.filter(s => !s.national_featured && s.local_featured));
+    const regular = filterByDistance(allSales.filter(s => !s.national_featured && !s.local_featured));
+
     setNationalFeatured(national);
-    setLocalFeatured(filterByDistance(local));
-    setRegularSales(filterByDistance(regular));
+    setLocalFeatured(local);
+    setRegularSales(regular);
   };
 
   if (checkingAuth || loading) {
