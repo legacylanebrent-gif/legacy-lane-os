@@ -221,6 +221,7 @@ Return ONLY valid JSON:
           <div className="text-sm text-slate-600">
             Processing {currentBatchIndex + 1} to {Math.min(currentBatchIndex + BATCH_SIZE, images.length)} of {images.length} photos
           </div>
+          <p className="text-xs text-slate-500">Pricing takes between 15-30 sec per item</p>
 
           {processing && (
             <div className="space-y-3">
