@@ -160,31 +160,17 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
                     className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
-                          msg.sender_id === currentUser?.id
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-slate-100 text-slate-900'
-                        }`}
-                      >
-                        <div className="text-xs opacity-75 mb-1">
-                          {msg.sender_name} • {format(new Date(msg.created_date), 'MMM d, h:mm a')}
-                        </div>
-                        <div className="whitespace-pre-wrap">
-                          {msg.message.split('\n').map((line, idx) => {
-                            if (line.match(/^data:image/)) {
-                              return (
-                                <img 
-                                  key={idx} 
-                                  src={line} 
-                                  alt="Shared photo"
-                                  className="max-w-xs rounded mt-2"
-                                />
-                              );
-                            }
-                            return <div key={idx}>{line}</div>;
-                          })}
-                        </div>
+                      className={`max-w-[70%] rounded-lg p-3 ${
+                        msg.sender_id === currentUser?.id
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-slate-100 text-slate-900'
+                      }`}
+                    >
+                      <div className="text-xs opacity-75 mb-1">
+                        {msg.sender_name} • {format(new Date(msg.created_date), 'MMM d, h:mm a')}
                       </div>
+                      <div className="whitespace-pre-wrap">{msg.message}</div>
+                    </div>
                   </div>
                 ))}
               </div>
