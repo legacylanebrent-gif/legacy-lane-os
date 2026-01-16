@@ -557,9 +557,15 @@ export default function Home() {
     // For local featured and regular: filter by distance if location available
     const filterByDistance = (salesList) => {
       if (userLocation) {
-        return salesList
+        const withDistance = salesList
           .filter(s => s.distance !== null && s.distance < 25)
           .sort((a, b) => a.distance - b.distance);
+        
+        // Also include sales without location data if they match the zip code
+        const withoutLocation = salesList
+          .filter(s => s.distance === null && userZipCode && s.property_address?.zip?.includes(userZipCode));
+        
+        return [...withDistance, ...withoutLocation];
       }
       return salesList;
     };
