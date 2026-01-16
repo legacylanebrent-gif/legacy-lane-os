@@ -626,6 +626,21 @@ export default function SaleEditor() {
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI Generate Pricing
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 border-red-600"
+                      onClick={() => {
+                        if (window.confirm('Remove all pricing from photos?')) {
+                          const updated = formData.images.map(img => ({...img, price: ''}));
+                          setFormData({...formData, images: updated});
+                          setPhotoPricing({});
+                        }
+                      }}
+                    >
+                      <Trash className="w-4 h-4 mr-2" />
+                      Remove All Pricing
+                    </Button>
                   </div>
                 {formData.images.map((image, index) => (
                   <Card key={index} className="p-4">
