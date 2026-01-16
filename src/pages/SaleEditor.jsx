@@ -40,6 +40,8 @@ export default function SaleEditor() {
   const [regeneratingDesc, setRegeneratingDesc] = useState({});
   const [regeneratingPrice, setRegeneratingPrice] = useState({});
   const [generatingTags, setGeneratingTags] = useState(false);
+  const [featuredNationally, setFeaturedNationally] = useState(false);
+  const [featuredLocally, setFeaturedLocally] = useState(false);
 
   const [formData, setFormData] = useState({
       title: '',
@@ -94,7 +96,8 @@ export default function SaleEditor() {
         payment_methods: saleData.payment_methods || [],
         national_featured: saleData.national_featured || false
       });
-      setFeatured(saleData.national_featured || false);
+      setFeaturedNationally(saleData.national_featured || false);
+      setFeaturedLocally(saleData.local_featured || false);
 
       // Load pricing data
       const pricingData = await base44.entities.ItemPricing.filter({ sale_id: id });
@@ -182,7 +185,8 @@ export default function SaleEditor() {
             categories: formData.categories,
             special_notes: formData.special_notes,
             payment_methods: formData.payment_methods,
-            national_featured: featured,
+            national_featured: featuredNationally,
+            local_featured: featuredLocally,
             operator_id: saleId ? undefined : user.id,
             operator_name: saleId ? undefined : user.full_name
           };
@@ -1083,15 +1087,27 @@ export default function SaleEditor() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                  <div>
-                    <h3 className="font-medium text-slate-900">Feature this sale</h3>
-                    <p className="text-sm text-slate-600">Display prominently on the homepage</p>
+                <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Feature Nationally</h3>
+                      <p className="text-sm text-slate-600">Display prominently on the national homepage</p>
+                    </div>
+                    <Switch
+                      checked={featuredNationally}
+                      onCheckedChange={setFeaturedNationally}
+                    />
                   </div>
-                  <Switch
-                    checked={featured}
-                    onCheckedChange={setFeatured}
-                  />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Feature Locally</h3>
+                      <p className="text-sm text-slate-600">Display prominently on local/regional pages</p>
+                    </div>
+                    <Switch
+                      checked={featuredLocally}
+                      onCheckedChange={setFeaturedLocally}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
