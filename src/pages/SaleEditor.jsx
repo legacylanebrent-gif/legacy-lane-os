@@ -44,17 +44,18 @@ export default function SaleEditor() {
   const [featuredLocally, setFeaturedLocally] = useState(false);
 
   const [formData, setFormData] = useState({
-      title: '',
-      description: '',
-      sale_type: '',
-      status: 'draft',
-      property_address: { street: '', city: '', state: '', zip: '' },
-      sale_dates: [],
-      images: [],
-      categories: [],
-      commission_rate: '',
-      special_notes: ''
-    });
+    title: '',
+    description: '',
+    sale_type: '',
+    status: 'draft',
+    property_address: { street: '', city: '', state: '', zip: '' },
+    location: null,
+    sale_dates: [],
+    images: [],
+    categories: [],
+    commission_rate: '',
+    special_notes: ''
+  });
 
   useEffect(() => {
     const init = async () => {
@@ -86,6 +87,7 @@ export default function SaleEditor() {
         sale_type: saleData.sale_type || '',
         status: saleData.status || 'draft',
         property_address: saleData.property_address || { street: '', city: '', state: '', zip: '' },
+        location: saleData.location || null,
         sale_dates: saleData.sale_dates || [],
         images: (saleData.images || []).map(img => 
           typeof img === 'string' ? { url: img, name: '', description: '' } : img
@@ -117,6 +119,38 @@ export default function SaleEditor() {
       alert('Error loading sale: ' + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getGoogleMapsKey = async () => {
+    try {
+      const response = await base44.functions.invoke('getConfig', {});
+      return response.data.GOOGLE_MAPS_API_KEY;
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const geocodeAddress = async (address) => {
+    if (!address.city || !address.state) return;
+    
+    try {
+      const fullAddress = `${address.street ? address.street + ', ' : ''}${address.city}, ${address.state} ${address.zip}`;
+      const key = await getGoogleMapsKey();
+      if (!key) return;
+      
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${key}`);
+      const data = await response.json();
+      
+      if (data.results && data.results[0]) {
+        const location = data.results[0].geometry.location;
+        setFormData(prev => ({
+          ...prev,
+          location: { lat: location.lat, lng: location.lng }
+        }));
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error);
     }
   };
 
@@ -179,6 +213,7 @@ export default function SaleEditor() {
               ...formData.property_address,
               formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
             },
+            location: formData.location,
             sale_dates: formData.sale_dates,
             images: formData.images.map(img => ({ ...img })),
             commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
@@ -576,10 +611,11 @@ export default function SaleEditor() {
                 <Input
                   placeholder="123 Main Street"
                   value={formData.property_address.street}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    property_address: {...formData.property_address, street: e.target.value}
-                  })}
+                  onChange={(e) => {
+                    const newAddress = {...formData.property_address, street: e.target.value};
+                    setFormData({...formData, property_address: newAddress});
+                    geocodeAddress(newAddress);
+                  }}
                 />
               </div>
               <div>
@@ -587,10 +623,11 @@ export default function SaleEditor() {
                 <Input
                   placeholder="Austin"
                   value={formData.property_address.city}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    property_address: {...formData.property_address, city: e.target.value}
-                  })}
+                  onChange={(e) => {
+                    const newAddress = {...formData.property_address, city: e.target.value};
+                    setFormData({...formData, property_address: newAddress});
+                    geocodeAddress(newAddress);
+                  }}
                 />
               </div>
               <div>
@@ -598,10 +635,11 @@ export default function SaleEditor() {
                 <Input
                   placeholder="TX"
                   value={formData.property_address.state}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    property_address: {...formData.property_address, state: e.target.value}
-                  })}
+                  onChange={(e) => {
+                    const newAddress = {...formData.property_address, state: e.target.value};
+                    setFormData({...formData, property_address: newAddress});
+                    geocodeAddress(newAddress);
+                  }}
                 />
               </div>
               <div className="col-span-2">
@@ -609,10 +647,11 @@ export default function SaleEditor() {
                 <Input
                   placeholder="78701"
                   value={formData.property_address.zip}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    property_address: {...formData.property_address, zip: e.target.value}
-                  })}
+                  onChange={(e) => {
+                    const newAddress = {...formData.property_address, zip: e.target.value};
+                    setFormData({...formData, property_address: newAddress});
+                    geocodeAddress(newAddress);
+                  }}
                 />
               </div>
             </div>
