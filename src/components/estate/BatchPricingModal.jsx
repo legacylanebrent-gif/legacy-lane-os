@@ -238,28 +238,6 @@ Return ONLY valid JSON:
             </div>
           )}
 
-          {results.length > 0 && (
-            <div className="space-y-2">
-              {results.map((result, idx) => {
-                const image = batch[idx];
-                return (
-                  <div key={idx} className="flex items-center gap-3 p-2 bg-slate-50 rounded">
-                    <img
-                      src={image?.url}
-                      alt=""
-                      className="w-12 h-12 object-cover rounded flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0 text-sm">
-                      <p className="font-medium text-slate-900 truncate">{image?.name || 'Untitled'}</p>
-                      {result.status === 'error' && <p className="text-red-600 text-xs">✗ {result.error}</p>}
-                      {result.status === 'skipped' && <p className="text-slate-500 text-xs">⊘ {result.error}</p>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
           {!processing && results.length === 0 && (
             <div className="text-center py-8 text-slate-500">
               <DollarSign className="w-12 h-12 mx-auto mb-2 text-slate-400" />
