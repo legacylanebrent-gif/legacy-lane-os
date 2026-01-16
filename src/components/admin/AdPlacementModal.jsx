@@ -168,6 +168,20 @@ export default function AdPlacementModal({ isOpen, onClose, onSave, placement = 
             </Select>
           </div>
 
+          <div className="space-y-2">
+            <Label>Ad Size *</Label>
+            <Select value={formData.size} onValueChange={(value) => setFormData(prev => ({ ...prev, size: value }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">Full Width</SelectItem>
+                <SelectItem value="half">Half Width (50%)</SelectItem>
+                <SelectItem value="third">1/3 Width (33%)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {formData.placement_type === 'local' && (
             <>
               <div className="space-y-2">
