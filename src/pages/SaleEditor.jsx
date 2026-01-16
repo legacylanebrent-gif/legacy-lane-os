@@ -37,6 +37,7 @@ export default function SaleEditor() {
   const [photoPricing, setPhotoPricing] = useState({});
   const [regeneratingDesc, setRegeneratingDesc] = useState({});
   const [regeneratingPrice, setRegeneratingPrice] = useState({});
+  const [generatingTags, setGeneratingTags] = useState(false);
 
   const [formData, setFormData] = useState({
       title: '',
@@ -269,6 +270,61 @@ export default function SaleEditor() {
       alert('Failed to generate description');
     } finally {
       setRegeneratingDesc(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleGenerateFeaturedTags = async () => {
+    const itemsWithInfo = formData.images.filter(img => img.name && img.description);
+    if (itemsWithInfo.length === 0) {
+      alert('Please add titles and descriptions to your items first');
+      return;
+    }
+
+    setGeneratingTags(true);
+    try {
+      const itemsData = itemsWithInfo.map(img => ({
+        name: img.name,
+        description: img.description,
+        price: img.price || 0
+      }));
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze these estate sale items and identify the most vintage, unique, and expensive items. 
+        Generate 5-8 featured item category tags that would attract buyers.
+        
+        Items:
+        ${JSON.stringify(itemsData, null, 2)}
+        
+        Focus on:
+        - Vintage/antique items
+        - Unique or rare pieces
+        - High-value items
+        - Items with collector appeal
+        
+        Return concise, appealing category tags (e.g., "Mid-Century Furniture", "Vintage Jewelry", "Rare Collectibles").`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            tags: {
+              type: "array",
+              items: { type: "string" }
+            }
+          }
+        }
+      });
+
+      const tags = response.tags || [];
+      if (tags.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          categories: [...new Set([...(prev.categories || []), ...tags])]
+        }));
+      }
+    } catch (error) {
+      console.error('Error generating tags:', error);
+      alert('Failed to generate tags');
+    } finally {
+      setGeneratingTags(false);
     }
   };
 
@@ -874,9 +930,15 @@ export default function SaleEditor() {
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-900">Featured Items</h2>
-              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-orange-600 border-orange-600"
+                onClick={handleGenerateFeaturedTags}
+                disabled={generatingTags}
+              >
                 <Sparkles className="w-4 h-4 mr-2" />
-                AI Suggest
+                {generatingTags ? 'Generating...' : 'AI Suggest'}
               </Button>
             </div>
             <div className="flex gap-2">
