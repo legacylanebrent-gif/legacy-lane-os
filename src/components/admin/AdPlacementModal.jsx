@@ -17,6 +17,7 @@ export default function AdPlacementModal({ isOpen, onClose, onSave, placement = 
     company_id: '',
     company_name: '',
     placement_type: 'national',
+    size: 'full',
     zip_code: '',
     radius_miles: 25,
     location_coordinates: { lat: null, lng: null },
