@@ -171,14 +171,6 @@ export default function Layout({ children, currentPageName }) {
                 <MessagesDropdown />
                 <NotificationsDropdown />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-orange-400 hover:text-orange-200 hover:bg-orange-500/20"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
