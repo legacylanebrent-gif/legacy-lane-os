@@ -217,6 +217,18 @@ export default function Layout({ children, currentPageName }) {
 
       <div className="flex">
         {/* Sidebar */}
+        {/* Toggle button when sidebar is closed */}
+        {!sidebarOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-[4.5rem] left-2 z-50 bg-white border border-slate-200 shadow-md text-slate-600 hover:bg-slate-100"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+
         <aside className={`
           fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] 
           bg-white border-r border-slate-200 z-40
@@ -224,6 +236,17 @@ export default function Layout({ children, currentPageName }) {
           ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-0'}
         `}>
           <div className="p-6 overflow-y-auto h-full">
+            {/* Sidebar close button */}
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-500 hover:bg-slate-100"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
             <div className="space-y-6">
               <div className="space-y-1">
                 <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')}>
