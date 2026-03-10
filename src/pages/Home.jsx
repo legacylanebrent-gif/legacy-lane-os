@@ -1080,9 +1080,12 @@ export default function Home() {
       <section className="py-8 sm:py-16 px-2 sm:px-4 bg-white">
         <div className="max-w-7xl mx-auto px-2 sm:px-0">
           <div className="text-center mb-8 sm:mb-12">
-            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
-              {userLocation && userZipCode ? `🏘️ Local Sales Near ${userZipCode}` : userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
-            </h3>
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900">
+                {userLocation && userZipCode ? `🏘️ Local Sales Near ${userZipCode}` : userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
+              </h3>
+            </div>
             {userLocation ? (
               <p className="text-lg sm:text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
             ) : (
