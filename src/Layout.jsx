@@ -158,7 +158,13 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/eda152f0a_logo_wide.png" alt="EstateSalen.com" className="h-10 w-auto" />
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">ES</span>
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
+                  <p className="text-xs text-orange-400">Operating System</p>
+                </div>
               </Link>
             </div>
 
