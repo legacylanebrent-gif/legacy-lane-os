@@ -158,7 +158,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/7c6939a06_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/549217f38_9D1F7B05-45B1-4E84-9498-15218717ADC5.jpeg" alt="logo" className="h-12 w-12 object-contain" />
                 <div className="hidden sm:block">
                   <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
                   <p className="text-xs text-orange-400">Operating System</p>

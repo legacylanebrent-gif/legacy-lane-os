@@ -711,7 +711,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-20">
               <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/7c6939a06_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/549217f38_9D1F7B05-45B1-4E84-9498-15218717ADC5.jpeg" alt="logo" className="h-12 w-12 object-contain" />
                 <div>
                   <h1 className="text-2xl font-serif font-bold text-white">EstateSalen.com</h1>
                   <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
@@ -1356,7 +1356,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/7c6939a06_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/549217f38_9D1F7B05-45B1-4E84-9498-15218717ADC5.jpeg" alt="logo" className="h-14 w-14 object-contain" />
                 <div>
                   <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
                   <p className="text-sm text-orange-400">Estate Sale Finder</p>
