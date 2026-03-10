@@ -712,10 +712,10 @@ export default function Home() {
             <div className="flex items-center justify-between h-20">
               <Link to={createPageUrl('Home')} className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xl">LL</span>
+                  <span className="text-white font-bold text-xl">ES</span>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
+                  <h1 className="text-2xl font-serif font-bold text-white">EstateSalen.com</h1>
                   <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
                 </div>
               </Link>
@@ -1274,7 +1274,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Growing Network</h2>
-            <p className="text-xl text-slate-600">Grow your business with Legacy Lane</p>
+            <p className="text-xl text-slate-600">Grow your business with EstateSalen.com</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Link to={createPageUrl('OperatorPackages')}>
@@ -1359,10 +1359,10 @@ export default function Home() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">LL</span>
+                  <span className="text-white font-bold text-2xl">ES</span>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif font-bold">Legacy Lane</h3>
+                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
                   <p className="text-sm text-orange-400">Estate Sale Finder</p>
                 </div>
               </div>
@@ -1393,7 +1393,7 @@ export default function Home() {
           
           <div className="border-t border-slate-800 pt-8 text-center">
             <p className="text-slate-500">
-              © {new Date().getFullYear()} Legacy Lane. All rights reserved.
+              © {new Date().getFullYear()} EstateSalen.com. All rights reserved.
             </p>
           </div>
         </div>
