@@ -58,40 +58,40 @@ export default function AdminLayout({ children, currentPage, user }) {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Hamburger Button - Fixed Position */}
+      {/* Notifications - fixed top right */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
         <MessagesDropdown />
         <NotificationsDropdown />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="bg-slate-800 text-orange-400 hover:text-orange-300 hover:bg-slate-700"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSidebarOpen(!sidebarOpen);
-          }}
-        >
-          {sidebarOpen ? <Menu className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
       </div>
+
+      {/* Collapsed sidebar toggle - shows only when sidebar is closed */}
+      {!sidebarOpen && (
+        <div className="fixed top-0 left-0 z-50 h-full w-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 left-2 bg-slate-800 text-orange-400 hover:text-orange-300 hover:bg-slate-700 shadow-lg"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
 
       {/* Left Navigation */}
       <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 overflow-hidden ${
         sidebarOpen ? 'w-64' : 'w-0'
       }`}>
-        <div className="sticky top-0 z-40 p-6 border-b border-slate-700 bg-slate-800">
+        <div className="sticky top-0 z-40 p-4 border-b border-slate-700 bg-slate-800">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-serif font-bold text-orange-400">Menu Options</h2>
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-white h-6 w-6"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSidebarOpen(!sidebarOpen);
-              }}
+              className="text-slate-400 hover:text-white h-8 w-8"
+              onClick={() => setSidebarOpen(false)}
             >
-              <ChevronDown className="h-5 w-5 transition-transform" style={{ transform: sidebarOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+              <Menu className="h-5 w-5" />
             </Button>
           </div>
         </div>
