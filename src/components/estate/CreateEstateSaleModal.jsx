@@ -653,11 +653,10 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       if (sale?.id) {
         await base44.entities.EstateSale.update(sale.id, data);
       } else {
-        await base44.entities.EstateSale.create(data);
+        const created = await base44.entities.EstateSale.create(data);
+        // Store the created sale id so subsequent saves use update
+        sale = created;
       }
-
-      // Refresh parent data to reflect changes
-      onSuccess();
 
       return true;
     } catch (error) {
