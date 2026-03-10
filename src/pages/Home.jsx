@@ -1083,7 +1083,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-4 mb-3">
               <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900">
-                {userLocation && userZipCode ? `🏘️ Local Sales Near ${userZipCode}` : userLocation ? '🏘️ Estate Sales Near You' : '🏘️ All Estate Sales'}
+                {userLocation && userZipCode ? `Local Sales Near ${userZipCode}` : userLocation ? 'Estate Sales Near You' : 'All Estate Sales'}
               </h3>
             </div>
             {userLocation ? (
