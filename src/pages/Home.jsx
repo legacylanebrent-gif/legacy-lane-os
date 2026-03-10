@@ -711,9 +711,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-20">
               <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xl">ES</span>
-                </div>
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/7c6939a06_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
                 <div>
                   <h1 className="text-2xl font-serif font-bold text-white">EstateSalen.com</h1>
                   <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
@@ -1358,9 +1356,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">ES</span>
-                </div>
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/7c6939a06_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
                 <div>
                   <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
                   <p className="text-sm text-orange-400">Estate Sale Finder</p>
