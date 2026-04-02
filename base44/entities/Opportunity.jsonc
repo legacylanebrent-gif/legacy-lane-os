@@ -1,0 +1,65 @@
+{
+  "name": "Opportunity",
+  "type": "object",
+  "properties": {
+    "source_record_id": {
+      "type": "string",
+      "description": "Unique source record ID for BC Rise sync"
+    },
+    "app_name": {
+      "type": "string",
+      "default": "legacy_lane_os"
+    },
+    "object_type": {
+      "type": "string",
+      "default": "opportunity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "opportunity_name": {
+      "type": "string"
+    },
+    "opportunity_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale",
+        "property_management",
+        "buyer_agent"
+      ]
+    },
+    "pipeline_stage": {
+      "type": "string"
+    },
+    "estimated_revenue": {
+      "type": "number"
+    },
+    "probability_to_close": {
+      "type": "number"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assigned_owner": {
+      "type": "string"
+    },
+    "territory": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "opportunity_name"
+  ]
+}
