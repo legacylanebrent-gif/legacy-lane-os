@@ -79,15 +79,6 @@ export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  // Pages that don't need layout or authentication
-  if (['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'].includes(currentPageName)) {
-    return children;
-  }
-
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
@@ -107,6 +98,15 @@ export default function Layout({ children, currentPageName }) {
   const handleLogout = async () => {
     await base44.auth.logout(createPageUrl('Home'));
   };
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  // Pages that don't need layout or authentication
+  if (['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'].includes(currentPageName)) {
+    return children;
+  }
 
   if (loading) {
     return (
