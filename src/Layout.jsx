@@ -75,11 +75,6 @@ const DIVISION_CONFIG = {
 };
 
 export default function Layout({ children, currentPageName }) {
-  // Pages that don't need layout or authentication
-  if (['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'].includes(currentPageName)) {
-    return children;
-  }
-
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -87,6 +82,11 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     loadUser();
   }, []);
+
+  // Pages that don't need layout or authentication
+  if (['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'].includes(currentPageName)) {
+    return children;
+  }
 
   const loadUser = async () => {
     try {

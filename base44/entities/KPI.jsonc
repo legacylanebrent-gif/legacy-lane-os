@@ -1,0 +1,61 @@
+{
+  "name": "KPI",
+  "type": "object",
+  "properties": {
+    "reporting_period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of reporting period"
+    },
+    "reporting_period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of reporting period"
+    },
+    "leads_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total leads generated"
+    },
+    "opportunities_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total opportunities"
+    },
+    "estate_sales_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total estate sales"
+    },
+    "inventory_items_sold": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total inventory items sold"
+    },
+    "revenue_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total revenue"
+    },
+    "average_sale_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Average sale value"
+    },
+    "conversion_rate": {
+      "type": "number",
+      "description": "Conversion rate percentage"
+    },
+    "territory": {
+      "type": "string",
+      "description": "Geographic territory"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reporting_period_start",
+    "reporting_period_end"
+  ]
+}
