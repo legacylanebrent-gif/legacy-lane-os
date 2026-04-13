@@ -783,10 +783,10 @@ export default function SaleEditor() {
                   <p className="text-slate-500 text-center py-8">No photos added yet</p>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex flex-col lg:flex-row justify-end gap-2">
-                      <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full lg:w-auto" onClick={async () => {
+                    <div className="flex flex-col gap-2">
+                      <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
-                        if (!window.confirm(`Run SerpAI Search on all ${formData.images.length} photos?`)) return;
+                        if (!window.confirm(`Run AI Pricing & Description Generation on all ${formData.images.length} photos?`)) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
                           if (img.name && img.description) continue;
@@ -826,25 +826,32 @@ export default function SaleEditor() {
                         }
                       }}>
                         <Scan className="w-4 h-4 mr-2" />
-                        SerpAI Search All
+                        AI Pricing & Description Generation
                       </Button>
-                      <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full lg:w-auto" onClick={() => setShowGeneratorModal(true)}>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        AI Generate Titles
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-green-600 border-green-600 w-full lg:w-auto" onClick={() => setShowPricingModal(true)}>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        AI Generate Pricing
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 border-red-600 w-full lg:w-auto" onClick={() => {
-                        if (window.confirm('Remove all pricing from photos?')) {
-                          const updated = formData.images.map(img => ({ ...img, price: null }));
-                          setFormData({ ...formData, images: updated });
-                          setPhotoPricing({});
+                      <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
+                        if (!window.confirm('Regenerate descriptions for all items that have a title?')) return;
+                        for (let i = 0; i < formData.images.length; i++) {
+                          const img = formData.images[i];
+                          if (!img.name) continue;
+                          setRegeneratingDesc(prev => ({ ...prev, [i]: true }));
+                          try {
+                            const response = await base44.integrations.Core.InvokeLLM({
+                              prompt: `Generate a detailed, accurate description for this estate sale item titled: "${img.name}". Focus on key features, condition indicators, what makes it valuable or interesting, and any relevant historical or collector context. Keep it concise but informative (2-3 sentences).`,
+                            });
+                            const description = response.trim();
+                            setPhotoDescriptions(prev => ({ ...prev, [img.url]: description }));
+                            setFormData(prev => {
+                              const updated = [...prev.images];
+                              updated[i] = { ...updated[i], description };
+                              return { ...prev, images: updated };
+                            });
+                          } catch (e) { console.error(e); }
+                          setRegeneratingDesc(prev => ({ ...prev, [i]: false }));
+                          await new Promise(r => setTimeout(r, 500));
                         }
                       }}>
-                        <Trash className="w-4 h-4 mr-2" />
-                        Remove All Pricing
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Regenerate Item Descriptions
                       </Button>
                     </div>
                     {formData.images.map((image, index) => (
