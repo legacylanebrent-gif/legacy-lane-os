@@ -68,6 +68,17 @@ export default function SaleEditor() {
     saleIdRef.current = saleId;
   }, [saleId]);
 
+  // Reset stuck saving state when user returns from another tab (e.g. Google Lens)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setSaving(false);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   // Auto-save: debounce 3s after any formData change (skip initial load)
   useEffect(() => {
     if (isInitialLoad.current) return;
