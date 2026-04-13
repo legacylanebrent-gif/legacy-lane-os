@@ -717,8 +717,8 @@ export default function SaleEditor() {
           <CardContent className="pt-6 space-y-4">
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
               <TabsList className="w-full">
-                <TabsTrigger value="thumbnails" className="flex-1">Thumbnails</TabsTrigger>
-                <TabsTrigger value="descriptions" className="flex-1">Descriptions & Pricing</TabsTrigger>
+                <TabsTrigger value="thumbnails" className="flex-1 text-xs sm:text-sm">Thumbnails</TabsTrigger>
+                <TabsTrigger value="descriptions" className="flex-1 text-xs sm:text-sm">Descriptions & Pricing</TabsTrigger>
               </TabsList>
               <TabsContent value="thumbnails" className="space-y-4">
                 {uploadingImages && uploadProgress.total > 0 && (
