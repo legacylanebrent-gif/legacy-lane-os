@@ -427,6 +427,7 @@ export default function SaleEditor() {
   const handleRegeneratePrice = async (index) => {
     const image = formData.images[index];
     if (!image.name) return;
+    if (!window.confirm('Deep dive pricing search can take up to 3 minutes per image. Continue?')) return;
     setRegeneratingPrice(prev => ({ ...prev, [index]: true }));
     try {
       const response = await base44.integrations.Core.InvokeLLM({
