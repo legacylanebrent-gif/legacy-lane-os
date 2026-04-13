@@ -30,22 +30,40 @@ Deno.serve(async (req) => {
     const visualMatches = serpData.visual_matches || [];
     const knowledgeGraph = serpData.knowledge_graph || {};
 
-    const results = visualMatches.slice(0, 10).map(match => ({
+    const results = visualMatches.slice(0, 10).map(match => {
+      // SerpAPI price can be a string, number, or object like {value: 25, extracted_value: 25, currency: '$'}
+      let priceStr = null;
+      if (match.price != null) {
+        if (typeof match.price === 'object') {
+          priceStr = match.price.extracted_value != null
+            ? `$${match.price.extracted_value}`
+            : match.price.value != null
+            ? String(match.price.value)
+            : null;
+        } else {
+          priceStr = String(match.price);
+        }
+      }
+      return {
       title: match.title || 'Unknown Item',
-      price: match.price || null,
+      price: priceStr,
       source: match.source || null,
       link: match.link || null,
       thumbnail: match.thumbnail || null,
       rating: match.rating || null,
       reviews: match.reviews || null,
       position: match.position || null,
-    }));
+    };
+    });
 
     // Calculate price range from matches that have prices
-    const pricesRaw = results
-      .filter(r => r.price)
-      .map(r => {
-        const match = r.price.match(/[\d,]+\.?\d*/);
+    // Also extract raw numeric prices directly from SerpAPI before string conversion
+    const pricesRaw = visualMatches.slice(0, 10)
+      .map(m => {
+        if (!m.price) return null;
+        if (typeof m.price === 'number') return m.price;
+        if (typeof m.price === 'object') return m.price.extracted_value || null;
+        const match = String(m.price).match(/[\d,]+\.?\d*/);
         return match ? parseFloat(match[0].replace(',', '')) : null;
       })
       .filter(p => p !== null && p > 0);
