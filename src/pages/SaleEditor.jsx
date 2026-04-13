@@ -821,13 +821,28 @@ export default function SaleEditor() {
                           const sources = response.sources || [];
                           if (sources.length > 0) {
                             const prices = sources.map(s => s.price);
+                            const lowPrice = Math.min(...prices);
+                            const highPrice = Math.max(...prices);
                             const avgPrice = Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length);
-                            setPhotoPricing(prev => ({ ...prev, [img.url]: { sources, average_price: avgPrice } }));
+                            setPhotoPricing(prev => ({ ...prev, [img.url]: { sources, low_price: lowPrice, high_price: highPrice, average_price: avgPrice } }));
                             setFormData(prev => {
                               const updated = [...prev.images];
                               updated[i] = { ...updated[i], ai_deep_search_price: avgPrice };
                               return { ...prev, images: updated };
                             });
+                            if (saleId) {
+                              try {
+                                const existingPricing = await base44.entities.ItemPricing.filter({ sale_id: saleId, photo_url: img.url });
+                                const pricingData = { sale_id: saleId, photo_url: img.url, sources, low_price: lowPrice, high_price: highPrice };
+                                if (existingPricing.length > 0) {
+                                  await base44.entities.ItemPricing.update(existingPricing[0].id, pricingData);
+                                } else {
+                                  await base44.entities.ItemPricing.create(pricingData);
+                                }
+                              } catch (saveError) {
+                                console.error('Error saving pricing to database:', saveError);
+                              }
+                            }
                           }
                         } catch (error) { console.error(error); }
                         setRegeneratingPrice(prev => ({ ...prev, [i]: false }));
