@@ -17,6 +17,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
+import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 
 const SALE_STATUSES = ['draft', 'active', 'completed'];
 
@@ -44,6 +45,7 @@ export default function SaleEditor() {
   const [featuredNationally, setFeaturedNationally] = useState(false);
   const [featuredLocally, setFeaturedLocally] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
+  const [selectedPricingImage, setSelectedPricingImage] = useState(null);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -565,7 +567,14 @@ export default function SaleEditor() {
           onClose={() => setShowPermissionsModal(false)}
           saleId={saleId}
         />
-      </>
+
+        <DeepSearchPricingModal
+          isOpen={!!selectedPricingImage}
+          onClose={() => setSelectedPricingImage(null)}
+          photoPricing={photoPricing}
+          imageUrl={selectedPricingImage}
+        />
+        </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
         {/* Basic Information */}
@@ -997,22 +1006,19 @@ export default function SaleEditor() {
                                 </div>
                               )}
                               {photoPricing[image.url] && (
-                                 <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2 overflow-hidden w-full">
-                                  <div className="space-y-1">
-                                    {photoPricing[image.url].sources.map((source, i) => (
-                                      <div key={i} className="flex justify-between text-xs gap-2">
-                                        <span className="text-slate-600 truncate">{source.site}</span>
-                                        <span className="font-medium flex-shrink-0">${source.price}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <div className="pt-2 border-t border-orange-300">
-                                    <div className="flex justify-between text-xs font-semibold text-orange-700">
-                                      <span>Avg Price</span>
-                                      <span>${photoPricing[image.url].average_price}</span>
-                                    </div>
-                                  </div>
-                                </div>
+                                 <button
+                                   type="button"
+                                   onClick={() => setSelectedPricingImage(image.url)}
+                                   className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg w-full text-left hover:bg-orange-100 transition-colors"
+                                 >
+                                   <div className="flex justify-between items-center">
+                                     <div>
+                                       <p className="text-xs text-orange-600 font-medium">Deep Search Results</p>
+                                       <p className="text-sm font-semibold text-orange-700">Avg: ${photoPricing[image.url].average_price}</p>
+                                     </div>
+                                     <span className="text-xs text-orange-600 hover:text-orange-700">View Details →</span>
+                                   </div>
+                                 </button>
                               )}
                               <div className="mt-3 flex flex-col gap-2 w-full max-w-full overflow-hidden">
                                 {!(image.name && image.description) && (
