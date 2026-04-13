@@ -1,0 +1,75 @@
+{
+  "name": "SaleItemPricing",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the photo analyzed"
+    },
+    "item_title": {
+      "type": "string",
+      "description": "Identified item name"
+    },
+    "price_min": {
+      "type": "number",
+      "description": "Lowest price found"
+    },
+    "price_max": {
+      "type": "number",
+      "description": "Highest price found"
+    },
+    "price_avg": {
+      "type": "number",
+      "description": "Average price found"
+    },
+    "top_matches": {
+      "type": "array",
+      "description": "Top Google Lens product matches",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "knowledge_graph_title": {
+      "type": "string"
+    },
+    "knowledge_graph_type": {
+      "type": "string"
+    },
+    "processed_by": {
+      "type": "string"
+    },
+    "user_price": {
+      "type": "number",
+      "description": "Final price set by user"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_id",
+    "image_url"
+  ]
+}
