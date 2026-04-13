@@ -509,7 +509,8 @@ export default function SaleEditor() {
         </div>
       </div>
 
-      <BatchPhotoGeneratorModal
+      <>
+        <BatchPhotoGeneratorModal
         open={showGeneratorModal}
         onClose={() => setShowGeneratorModal(false)}
         images={formData.images}
@@ -558,11 +559,12 @@ export default function SaleEditor() {
         startIndex={0}
       />
 
-      <SaleClientPermissionsModal
-        open={showPermissionsModal}
-        onClose={() => setShowPermissionsModal(false)}
-        saleId={saleId}
-      />
+        <SaleClientPermissionsModal
+          open={showPermissionsModal}
+          onClose={() => setShowPermissionsModal(false)}
+          saleId={saleId}
+        />
+      </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
         {/* Basic Information */}
