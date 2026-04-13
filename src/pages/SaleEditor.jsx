@@ -786,10 +786,12 @@ export default function SaleEditor() {
                     <div className="flex flex-col gap-2">
                       <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
-                        if (!window.confirm(`Run AI Pricing & Description Generation on all ${formData.images.length} photos?`)) return;
+                        const toProcess = formData.images.filter(img => !img.name || !img.description || !serpResults[img.url]);
+                        if (toProcess.length === 0) { alert('All images already have titles and descriptions.'); return; }
+                        if (!window.confirm(`Run AI Pricing & Description Generation on ${toProcess.length} unprocessed photo(s)?`)) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
-                          if (img.name && img.description) continue;
+                          if (img.name && img.description && serpResults[img.url]) continue;
                           setSerpSearching(prev => ({ ...prev, [i]: true }));
                           try {
                             const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
