@@ -171,6 +171,22 @@ export default function SaleEditor() {
         };
       });
       setPhotoPricing(pricingMap);
+
+      // Restore serpResults from saved SaleItemPricing records
+      const serpData = await base44.entities.SaleItemPricing.filter({ sale_id: id });
+      const serpMap = {};
+      serpData.forEach(record => {
+        serpMap[record.image_url] = {
+          item_title: record.item_title,
+          price_range: {
+            min: record.price_min,
+            max: record.price_max,
+            avg: record.price_avg,
+          },
+          matches: record.top_matches || [],
+        };
+      });
+      setSerpResults(serpMap);
     } catch (error) {
       console.error('Error loading sale:', error);
       alert('Error loading sale: ' + error.message);
