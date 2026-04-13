@@ -158,9 +158,10 @@ export default function SaleEditor() {
         property_address: saleData.property_address || { street: '', city: '', state: '', zip: '' },
         location: saleData.location || null,
         sale_dates: saleData.sale_dates || [],
-        images: (saleData.images || []).map(img =>
-          typeof img === 'string' ? { url: img, name: '', description: '' } : img
-        ),
+        images: (saleData.images || []).map(img => {
+          const imageObj = typeof img === 'string' ? { url: img, name: '', description: '' } : img;
+          return imageObj;
+        }),
         categories: saleData.categories || [],
         commission_rate: saleData.commission_rate || '',
         special_notes: saleData.special_notes || '',
@@ -886,7 +887,7 @@ export default function SaleEditor() {
                                   setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
                                 }
                               }
-                              if (data.price_range?.avg && !item.price) item.price = data.price_range.avg;
+                              if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
                               updated[i] = item;
                               return { ...prev, images: updated };
                             });
