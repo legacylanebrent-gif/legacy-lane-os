@@ -848,10 +848,10 @@ export default function SaleEditor() {
                       </Button>
                     </div>
                     {formData.images.map((image, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex flex-col lg:flex-row gap-4">
+                       <Card key={index} className="p-4 overflow-hidden">
+                         <div className="flex flex-col lg:flex-row gap-4 w-full min-w-0">
                           <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg flex-shrink-0" />
-                          <div className="flex-1 space-y-3 w-full min-w-0">
+                          <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
                               <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
                               <Textarea
@@ -864,7 +864,7 @@ export default function SaleEditor() {
                                   updated[index].name = e.target.value;
                                   setFormData({ ...formData, images: updated });
                                 }}
-                                className="text-sm min-h-[48px]"
+                                className="text-sm min-h-[48px] w-full max-w-full"
                                 rows={2}
                               />
                             </div>
@@ -880,7 +880,7 @@ export default function SaleEditor() {
                                   updated[index].description = e.target.value;
                                   setFormData({ ...formData, images: updated });
                                 }}
-                                className="text-sm min-h-[120px] lg:min-h-[72px]"
+                                className="text-sm min-h-[120px] lg:min-h-[72px] w-full max-w-full"
                               />
                             </div>
                             <div>
@@ -915,7 +915,7 @@ export default function SaleEditor() {
                                   </div>
                                 </div>
                               )}
-                              <div className="mt-3 flex flex-col gap-2">
+                              <div className="mt-3 flex flex-col gap-2 w-full max-w-full overflow-hidden">
                                 {!(image.name && image.description) && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
@@ -923,7 +923,7 @@ export default function SaleEditor() {
                                 </Button>
                               )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
-                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 overflow-hidden w-full max-w-full">
+                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 w-full max-w-full overflow-hidden">
                                      <p className="font-semibold text-purple-800 break-words">{serpResults[image.url].item_title}</p>
                                      {serpResults[image.url].price_range?.avg && (
                                        <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
