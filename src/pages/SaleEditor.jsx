@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -44,6 +44,9 @@ export default function SaleEditor() {
   const [generatingTags, setGeneratingTags] = useState(false);
   const [featuredNationally, setFeaturedNationally] = useState(false);
   const [featuredLocally, setFeaturedLocally] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const autoSaveTimer = useRef(null);
+  const isInitialLoad = useRef(true);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -59,6 +62,55 @@ export default function SaleEditor() {
     special_notes: ''
   });
 
+  // Auto-save: debounce 3s after any formData change (skip initial load)
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+    if (!formData.title.trim() || !formData.property_address.city.trim()) return;
+
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(async () => {
+      setAutoSaving(true);
+      try {
+        const user = await base44.auth.me();
+        const saveData = {
+          title: formData.title,
+          description: formData.description,
+          sale_type: formData.sale_type,
+          status: formData.status,
+          property_address: {
+            ...formData.property_address,
+            formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+          },
+          location: formData.location,
+          sale_dates: formData.sale_dates,
+          images: formData.images.map(img => ({ ...img })),
+          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+          categories: formData.categories,
+          special_notes: formData.special_notes,
+          payment_methods: formData.payment_methods,
+          national_featured: featuredNationally,
+          local_featured: featuredLocally,
+        };
+        if (saleId) {
+          await base44.entities.EstateSale.update(saleId, saveData);
+        } else {
+          const newSale = await base44.entities.EstateSale.create({
+            ...saveData,
+            operator_id: user.id,
+            operator_name: user.full_name
+          });
+          setSaleId(newSale.id);
+        }
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+      } finally {
+        setAutoSaving(false);
+      }
+    }, 3000);
+
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [formData, featuredNationally, featuredLocally]);
+
   useEffect(() => {
     const init = async () => {
       const params = new URLSearchParams(window.location.search);
@@ -71,6 +123,8 @@ export default function SaleEditor() {
       } else {
         setLoading(false);
       }
+      // Mark initial load complete after data is set
+      setTimeout(() => { isInitialLoad.current = false; }, 500);
     };
     
     init();
@@ -532,7 +586,9 @@ export default function SaleEditor() {
             </button>
             <div className="min-w-0">
               <h1 className="text-lg lg:text-xl font-serif font-bold text-slate-900 truncate">{saleId ? 'Edit Sale' : 'Create New Sale'}</h1>
-              <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">Fill in the details for your estate sale</p>
+              <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">
+                {autoSaving ? '⏳ Auto-saving...' : 'Fill in the details for your estate sale'}
+              </p>
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
