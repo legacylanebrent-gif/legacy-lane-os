@@ -472,7 +472,7 @@ export default function SaleEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden w-full max-w-full">
       <div className="bg-white border-b border-slate-200">
         <div className="px-4 lg:px-6 py-4 flex items-center justify-between gap-2 lg:gap-4">
           <div className="flex items-center gap-2 lg:gap-4 min-w-0">
@@ -553,7 +553,7 @@ export default function SaleEditor() {
         saleId={saleId}
       />
 
-      <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
         {/* Basic Information */}
         <Card>
           <CardContent className="pt-6 space-y-4">
