@@ -918,7 +918,7 @@ export default function SaleEditor() {
                                 className="text-sm"
                               />
                               {photoPricing[image.url] && (
-                                <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
+                                 <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2 overflow-hidden w-full">
                                   <div className="space-y-1">
                                     {photoPricing[image.url].sources.map((source, i) => (
                                       <div key={i} className="flex justify-between text-xs gap-2">
@@ -943,7 +943,7 @@ export default function SaleEditor() {
                                 </Button>
                               )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
-                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 w-full max-w-full overflow-hidden">
+                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 w-full overflow-hidden break-words">
                                      <p className="font-semibold text-purple-800 break-words">{serpResults[image.url].item_title}</p>
                                      {serpResults[image.url].price_range?.avg && (
                                        <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
