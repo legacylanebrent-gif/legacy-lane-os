@@ -382,12 +382,26 @@ export default function SaleEditor() {
       });
       const data = res.data;
       setSerpResults(prev => ({ ...prev, [image.url]: data }));
-      // Auto-fill price with average if not already set
-      if (data.price_range?.avg && !image.price) {
-        const updated = [...formData.images];
-        updated[index].price = data.price_range.avg;
-        setFormData({ ...formData, images: updated });
-      }
+      // Auto-fill title, description, and price if not already set
+      setFormData(prev => {
+        const updated = [...prev.images];
+        if (data.item_title && !updated[index].name) {
+          updated[index].name = data.item_title;
+          setPhotoTitles(pt => ({ ...pt, [image.url]: data.item_title }));
+        }
+        if (!updated[index].description && data.matches?.length > 0) {
+          const topMatch = data.matches.find(m => m.title);
+          if (topMatch) {
+            const desc = topMatch.title + (topMatch.source ? ` — found on ${topMatch.source}` : '');
+            updated[index].description = desc;
+            setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc }));
+          }
+        }
+        if (data.price_range?.avg && !updated[index].price) {
+          updated[index].price = data.price_range.avg;
+        }
+        return { ...prev, images: updated };
+      });
     } catch (e) {
       alert('SerpAI Search failed: ' + e.message);
     } finally {
@@ -996,13 +1010,24 @@ export default function SaleEditor() {
                                 {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
                               </Button>
                               {serpResults[image.url] && !serpResults[image.url].error && (
-                                <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs">
+                                <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1">
                                   <p className="font-semibold text-purple-800 truncate">{serpResults[image.url].item_title}</p>
                                   {serpResults[image.url].price_range?.avg && (
-                                    <div className="flex gap-2 mt-1 text-purple-700">
+                                    <div className="flex gap-3 text-purple-700 font-medium">
                                       <span>Low: ${serpResults[image.url].price_range.min}</span>
-                                      <span className="font-bold">Avg: ${serpResults[image.url].price_range.avg}</span>
+                                      <span className="font-bold text-purple-900">Avg: ${serpResults[image.url].price_range.avg}</span>
                                       <span>High: ${serpResults[image.url].price_range.max}</span>
+                                    </div>
+                                  )}
+                                  {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
+                                    <div className="border-t border-purple-200 pt-1 space-y-1">
+                                      <p className="text-purple-500 font-medium">Source Prices:</p>
+                                      {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => (
+                                        <div key={mi} className="flex justify-between items-center">
+                                          <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate max-w-[60%]">{match.source || match.title}</a>
+                                          <span className="font-bold text-green-700 ml-2">{match.price}</span>
+                                        </div>
+                                      ))}
                                     </div>
                                   )}
                                 </div>
