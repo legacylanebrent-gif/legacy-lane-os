@@ -323,8 +323,7 @@ export default function SaleEditor() {
     setRegeneratingDesc(prev => ({ ...prev, [index]: true }));
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate a detailed, accurate description for this estate sale item: "${image.name}". Focus on key features, condition indicators, and what makes it valuable or interesting. Keep it concise but informative (2-3 sentences).`,
-        file_urls: [image.url]
+        prompt: `Generate a detailed, accurate description for this estate sale item titled: "${image.name}". Focus on key features, condition indicators, what makes it valuable or interesting, and any relevant historical or collector context. Keep it concise but informative (2-3 sentences).`,
       });
       const description = response.trim();
       setPhotoDescriptions(prev => ({ ...prev, [image.url]: description }));
@@ -790,6 +789,7 @@ export default function SaleEditor() {
                         if (!window.confirm(`Run SerpAI Search on all ${formData.images.length} photos?`)) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
+                          if (img.name && img.description) continue;
                           setSerpSearching(prev => ({ ...prev, [i]: true }));
                           try {
                             const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
@@ -916,10 +916,12 @@ export default function SaleEditor() {
                                 </div>
                               )}
                               <div className="mt-3 flex flex-col gap-2">
+                                {!serpResults[image.url] && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
                                   {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
                                 </Button>
+                              )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 overflow-hidden w-full">
                                     <p className="font-semibold text-purple-800 truncate">{serpResults[image.url].item_title}</p>
