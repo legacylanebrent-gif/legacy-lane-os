@@ -972,6 +972,12 @@ export default function SaleEditor() {
                                 }}
                                 className="text-sm"
                               />
+                              {regeneratingPrice[index] && (
+                                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+                                  <span className="text-xs text-blue-700">Searching market prices (up to 3 min)...</span>
+                                </div>
+                              )}
                               {photoPricing[image.url] && (
                                  <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2 overflow-hidden w-full">
                                   <div className="space-y-1">
@@ -1027,7 +1033,7 @@ export default function SaleEditor() {
                                   {regeneratingDesc[index] ? 'Generating...' : 'Regenerate Description'}
                                 </Button>
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleRegeneratePrice(index)} disabled={regeneratingPrice[index]}>
-                                  {regeneratingPrice[index] ? 'Generating...' : 'Regenerate Price'}
+                                  {regeneratingPrice[index] ? 'Searching...' : 'Regenerate Deep Search Price'}
                                 </Button>
                               </div>
                             </div>
