@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Trash, Scan } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
