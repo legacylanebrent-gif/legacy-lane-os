@@ -382,26 +382,31 @@ export default function SaleEditor() {
       });
       const data = res.data;
       setSerpResults(prev => ({ ...prev, [image.url]: data }));
+
       // Auto-fill title, description, and price if not already set
-      setFormData(prev => {
-        const updated = [...prev.images];
-        if (data.item_title && !updated[index].name) {
-          updated[index].name = data.item_title;
-          setPhotoTitles(pt => ({ ...pt, [image.url]: data.item_title }));
+      const updatedImages = [...formData.images];
+      const img = { ...updatedImages[index] };
+
+      if (data.item_title && !img.name) {
+        img.name = data.item_title;
+        setPhotoTitles(pt => ({ ...pt, [image.url]: data.item_title }));
+      }
+
+      if (!img.description && data.matches?.length > 0) {
+        const topMatch = data.matches.find(m => m.title);
+        if (topMatch) {
+          const desc = topMatch.title + (topMatch.source ? ` — found on ${topMatch.source}` : '');
+          img.description = desc;
+          setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc }));
         }
-        if (!updated[index].description && data.matches?.length > 0) {
-          const topMatch = data.matches.find(m => m.title);
-          if (topMatch) {
-            const desc = topMatch.title + (topMatch.source ? ` — found on ${topMatch.source}` : '');
-            updated[index].description = desc;
-            setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc }));
-          }
-        }
-        if (data.price_range?.avg && !updated[index].price) {
-          updated[index].price = data.price_range.avg;
-        }
-        return { ...prev, images: updated };
-      });
+      }
+
+      if (data.price_range?.avg && !img.price) {
+        img.price = data.price_range.avg;
+      }
+
+      updatedImages[index] = img;
+      setFormData(prev => ({ ...prev, images: updatedImages }));
     } catch (e) {
       alert('SerpAI Search failed: ' + e.message);
     } finally {
@@ -885,13 +890,26 @@ export default function SaleEditor() {
                           const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
                           const data = res.data;
                           setSerpResults(prev => ({ ...prev, [img.url]: data }));
-                          if (data.price_range?.avg && !img.price) {
-                            setFormData(prev => {
-                              const updated = [...prev.images];
-                              updated[i].price = data.price_range.avg;
-                              return { ...prev, images: updated };
-                            });
-                          }
+
+                          setFormData(prev => {
+                            const updated = [...prev.images];
+                            const item = { ...updated[i] };
+                            if (data.item_title && !item.name) {
+                              item.name = data.item_title;
+                              setPhotoTitles(pt => ({ ...pt, [img.url]: data.item_title }));
+                            }
+                            if (!item.description && data.matches?.length > 0) {
+                              const topMatch = data.matches.find(m => m.title);
+                              if (topMatch) {
+                                const desc = topMatch.title + (topMatch.source ? ` — found on ${topMatch.source}` : '');
+                                item.description = desc;
+                                setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc }));
+                              }
+                            }
+                            if (data.price_range?.avg && !item.price) item.price = data.price_range.avg;
+                            updated[i] = item;
+                            return { ...prev, images: updated };
+                          });
                         } catch(e) { console.error(e); }
                         setSerpSearching(prev => ({ ...prev, [i]: false }));
                         await new Promise(r => setTimeout(r, 1000));
