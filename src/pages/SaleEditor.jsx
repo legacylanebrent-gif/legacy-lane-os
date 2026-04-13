@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, RotateCw, ImageIcon, Trash } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, RotateCw, ImageIcon, Trash, Scan } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
@@ -38,6 +38,8 @@ export default function SaleEditor() {
   const [photoDescriptions, setPhotoDescriptions] = useState({});
   const [photoPricing, setPhotoPricing] = useState({});
   const [regeneratingDesc, setRegeneratingDesc] = useState({});
+  const [serpSearching, setSerpSearching] = useState({});
+  const [serpResults, setSerpResults] = useState({});
   const [regeneratingPrice, setRegeneratingPrice] = useState({});
   const [generatingTags, setGeneratingTags] = useState(false);
   const [featuredNationally, setFeaturedNationally] = useState(false);
@@ -366,6 +368,30 @@ export default function SaleEditor() {
       alert('Failed to generate tags');
     } finally {
       setGeneratingTags(false);
+    }
+  };
+
+  const handleSerpSearch = async (index) => {
+    const image = formData.images[index];
+    if (!image.url) return;
+    setSerpSearching(prev => ({ ...prev, [index]: true }));
+    try {
+      const res = await base44.functions.invoke('googleLensPricing', {
+        image_url: image.url,
+        sale_id: saleId,
+      });
+      const data = res.data;
+      setSerpResults(prev => ({ ...prev, [image.url]: data }));
+      // Auto-fill price with average if not already set
+      if (data.price_range?.avg && !image.price) {
+        const updated = [...formData.images];
+        updated[index].price = data.price_range.avg;
+        setFormData({ ...formData, images: updated });
+      }
+    } catch (e) {
+      alert('SerpAI Search failed: ' + e.message);
+    } finally {
+      setSerpSearching(prev => ({ ...prev, [index]: false }));
     }
   };
 
@@ -933,6 +959,29 @@ export default function SaleEditor() {
                           )}
                           {image.name && image.description && (
                             <div className="mt-3 flex flex-col gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50"
+                                onClick={() => handleSerpSearch(index)}
+                                disabled={serpSearching[index]}
+                              >
+                                <Scan className="w-3 h-3 mr-1" />
+                                {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
+                              </Button>
+                              {serpResults[image.url] && !serpResults[image.url].error && (
+                                <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs">
+                                  <p className="font-semibold text-purple-800 truncate">{serpResults[image.url].item_title}</p>
+                                  {serpResults[image.url].price_range?.avg && (
+                                    <div className="flex gap-2 mt-1 text-purple-700">
+                                      <span>Low: ${serpResults[image.url].price_range.min}</span>
+                                      <span className="font-bold">Avg: ${serpResults[image.url].price_range.avg}</span>
+                                      <span>High: ${serpResults[image.url].price_range.max}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                               <Button
                                 type="button"
                                 variant="outline"
