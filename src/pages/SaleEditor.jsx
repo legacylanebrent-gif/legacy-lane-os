@@ -383,21 +383,36 @@ export default function SaleEditor() {
       const data = res.data;
       setSerpResults(prev => ({ ...prev, [image.url]: data }));
 
+      // Helper to clean title - strip trailing site names like " - Etsy", " | eBay", " — Amazon"
+      const cleanTitle = (raw) => raw ? raw.replace(/\s*[-|\u2014]\s*(etsy|ebay|amazon|walmart|1stdibs|ruby lane|chairish|bonanza|mercari|poshmark|facebook|google|bing)[^\S\n]*/gi, '').trim() : raw;
+
       // Auto-fill title, description, and price if not already set
       const updatedImages = [...formData.images];
       const img = { ...updatedImages[index] };
 
       if (data.item_title && !img.name) {
-        img.name = data.item_title;
-        setPhotoTitles(pt => ({ ...pt, [image.url]: data.item_title }));
+        const cleanedTitle = cleanTitle(data.item_title);
+        img.name = cleanedTitle;
+        setPhotoTitles(pt => ({ ...pt, [image.url]: cleanedTitle }));
       }
 
-      if (!img.description && data.matches?.length > 0) {
-        const topMatch = data.matches.find(m => m.title);
-        if (topMatch) {
-          const desc = topMatch.title + (topMatch.source ? ` — found on ${topMatch.source}` : '');
-          img.description = desc;
-          setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc }));
+      if (!img.description) {
+        const withPrices = (data.matches || []).filter(m => m.price && m.title);
+        const withTitles = (data.matches || []).filter(m => m.title);
+        const sources = withPrices.slice(0, 3);
+        const knownTitle = cleanTitle(data.item_title) || (withTitles[0] && cleanTitle(withTitles[0].title));
+        let desc = '';
+        if (knownTitle) desc += `${knownTitle}.`;
+        if (sources.length > 0) {
+          const priceList = sources.map(m => `${m.price} on ${m.source}`).join(', ');
+          desc += ` Currently listed for ${priceList}.`;
+        }
+        if (data.price_range?.min && data.price_range?.max) {
+          desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
+        }
+        if (desc.trim()) {
+          img.description = desc.trim();
+          setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc.trim() }));
         }
       }
 
@@ -508,7 +523,7 @@ export default function SaleEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       <div className="bg-white border-b border-slate-200">
         <div className="px-4 lg:px-6 py-4 flex items-center justify-between gap-2 lg:gap-4">
           <div className="flex items-center gap-2 lg:gap-4 min-w-0">
@@ -1028,7 +1043,7 @@ export default function SaleEditor() {
                                 {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
                               </Button>
                               {serpResults[image.url] && !serpResults[image.url].error && (
-                                <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1">
+                                <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 overflow-hidden w-full">
                                   <p className="font-semibold text-purple-800 truncate">{serpResults[image.url].item_title}</p>
                                   {serpResults[image.url].price_range?.avg && (
                                     <div className="flex gap-3 text-purple-700 font-medium">
@@ -1041,9 +1056,9 @@ export default function SaleEditor() {
                                     <div className="border-t border-purple-200 pt-1 space-y-1">
                                       <p className="text-purple-500 font-medium">Source Prices:</p>
                                       {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => (
-                                        <div key={mi} className="flex justify-between items-center">
-                                          <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate max-w-[60%]">{match.source || match.title}</a>
-                                          <span className="font-bold text-green-700 ml-2">{match.price}</span>
+                                        <div key={mi} className="flex justify-between items-center gap-2 min-w-0">
+                                          <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate flex-1 min-w-0">{match.source || match.title}</a>
+                                          <span className="font-bold text-green-700 flex-shrink-0">{match.price}</span>
                                         </div>
                                       ))}
                                     </div>
