@@ -861,6 +861,31 @@ export default function SaleEditor() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex flex-col lg:flex-row justify-end gap-2">
+                    <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full lg:w-auto" onClick={async () => {
+                      if (!saleId) { alert('Save the sale first'); return; }
+                      if (!window.confirm(`Run SerpAI Search on all ${formData.images.length} photos?`)) return;
+                      for (let i = 0; i < formData.images.length; i++) {
+                        const img = formData.images[i];
+                        setSerpSearching(prev => ({ ...prev, [i]: true }));
+                        try {
+                          const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
+                          const data = res.data;
+                          setSerpResults(prev => ({ ...prev, [img.url]: data }));
+                          if (data.price_range?.avg && !img.price) {
+                            setFormData(prev => {
+                              const updated = [...prev.images];
+                              updated[i].price = data.price_range.avg;
+                              return { ...prev, images: updated };
+                            });
+                          }
+                        } catch(e) { console.error(e); }
+                        setSerpSearching(prev => ({ ...prev, [i]: false }));
+                        await new Promise(r => setTimeout(r, 1000));
+                      }
+                    }}>
+                      <Scan className="w-4 h-4 mr-2" />
+                      SerpAI Search All
+                    </Button>
                     <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full lg:w-auto" onClick={() => setShowGeneratorModal(true)}>
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI Generate Titles
