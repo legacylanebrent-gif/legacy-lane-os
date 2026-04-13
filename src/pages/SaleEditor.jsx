@@ -916,33 +916,33 @@ export default function SaleEditor() {
                                 </div>
                               )}
                               <div className="mt-3 flex flex-col gap-2">
-                                {!serpResults[image.url] && (
+                                {!(image.name && image.description) && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
                                   {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
                                 </Button>
                               )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
-                                  <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 overflow-hidden w-full">
-                                    <p className="font-semibold text-purple-800 truncate">{serpResults[image.url].item_title}</p>
-                                    {serpResults[image.url].price_range?.avg && (
-                                      <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
-                                        <span>Low: ${serpResults[image.url].price_range.min}</span>
-                                        <span className="font-bold text-purple-900">Avg: ${serpResults[image.url].price_range.avg}</span>
-                                        <span>High: ${serpResults[image.url].price_range.max}</span>
-                                      </div>
-                                    )}
-                                    {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
-                                      <div className="border-t border-purple-200 pt-1 space-y-1">
-                                        <p className="text-purple-500 font-medium">Source Prices:</p>
-                                        {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => (
-                                          <div key={mi} className="flex justify-between items-center gap-2 min-w-0">
-                                            <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate flex-1 min-w-0">{match.source || match.title}</a>
-                                            <span className="font-bold text-green-700 flex-shrink-0">{match.price}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
+                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 overflow-hidden w-full max-w-full">
+                                     <p className="font-semibold text-purple-800 break-words">{serpResults[image.url].item_title}</p>
+                                     {serpResults[image.url].price_range?.avg && (
+                                       <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
+                                         <span>Low: ${serpResults[image.url].price_range.min}</span>
+                                         <span className="font-bold text-purple-900">Avg: ${serpResults[image.url].price_range.avg}</span>
+                                         <span>High: ${serpResults[image.url].price_range.max}</span>
+                                       </div>
+                                     )}
+                                     {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
+                                       <div className="border-t border-purple-200 pt-1 space-y-1">
+                                         <p className="text-purple-500 font-medium">Source Prices:</p>
+                                         {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => (
+                                           <div key={mi} className="flex justify-between items-center gap-1 min-w-0">
+                                             <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate flex-1 min-w-0 max-w-[60%]">{match.source || match.title}</a>
+                                             <span className="font-bold text-green-700 flex-shrink-0 text-right">{typeof match.price === 'object' ? (match.price?.extracted_value ? `$${match.price.extracted_value}` : JSON.stringify(match.price)) : match.price}</span>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     )}
                                   </div>
                                 )}
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
