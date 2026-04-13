@@ -449,7 +449,7 @@ export default function SaleEditor() {
         setPhotoPricing(prev => ({ ...prev, [image.url]: { sources, low_price: lowPrice, high_price: highPrice, average_price: avgPrice } }));
         setFormData(prev => {
           const updated = [...prev.images];
-          updated[index] = { ...updated[index], price: avgPrice };
+          updated[index] = { ...updated[index], ai_deep_search_price: avgPrice };
           return { ...prev, images: updated };
         });
         if (saleId) {
@@ -794,8 +794,47 @@ export default function SaleEditor() {
                   <p className="text-slate-500 text-center py-8">No photos added yet</p>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex flex-col gap-2">
-                      <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" onClick={async () => {
+                  <div className="flex flex-col gap-2">
+                    <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
+                      const toProcess = formData.images.filter(img => img.name && img.description);
+                      if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
+                      if (!window.confirm(`Batch deep search pricing for ${toProcess.length} items. This may take a few minutes. Continue?`)) return;
+                      for (let i = 0; i < formData.images.length; i++) {
+                        const img = formData.images[i];
+                        if (!img.name || !img.description) continue;
+                        setRegeneratingPrice(prev => ({ ...prev, [i]: true }));
+                        try {
+                          const response = await base44.integrations.Core.InvokeLLM({
+                            prompt: `Research current market prices for: "${img.name}"\n\nSearch multiple sources (eBay sold listings, online marketplaces, antique dealers).\nReturn a JSON with pricing data.`,
+                            add_context_from_internet: true,
+                            file_urls: [img.url],
+                            response_json_schema: {
+                              type: "object",
+                              properties: {
+                                sources: { type: "array", items: { type: "object", properties: { site: { type: "string" }, price: { type: "number" } } } }
+                              }
+                            }
+                          });
+                          const sources = response.sources || [];
+                          if (sources.length > 0) {
+                            const prices = sources.map(s => s.price);
+                            const avgPrice = Math.round(sources.reduce((sum, s) => sum + s.price, 0) / sources.length);
+                            setPhotoPricing(prev => ({ ...prev, [img.url]: { sources, average_price: avgPrice } }));
+                            setFormData(prev => {
+                              const updated = [...prev.images];
+                              updated[i] = { ...updated[i], ai_deep_search_price: avgPrice };
+                              return { ...prev, images: updated };
+                            });
+                          }
+                        } catch (error) { console.error(error); }
+                        setRegeneratingPrice(prev => ({ ...prev, [i]: false }));
+                        await new Promise(r => setTimeout(r, 1000));
+                      }
+                    }}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Batch Deep Search Price
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
                         const toProcess = formData.images.filter(img => !img.name || !img.description);
                         if (toProcess.length === 0) { alert('All images have already been batch searched.'); return; }
@@ -904,15 +943,30 @@ export default function SaleEditor() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor={`price-${index}`} className="text-xs">Price</Label>
+                              <Label htmlFor={`ai-first-${index}`} className="text-xs">AI First Search Price</Label>
                               <Input
-                                id={`price-${index}`}
+                                id={`ai-first-${index}`}
                                 type="number"
-                                placeholder="Price"
-                                value={image.price || ''}
+                                placeholder="First search price"
+                                value={image.ai_first_search_price || ''}
                                 onChange={(e) => {
                                   const updated = [...formData.images];
-                                  updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
+                                  updated[index].ai_first_search_price = e.target.value ? parseFloat(e.target.value) : null;
+                                  setFormData({ ...formData, images: updated });
+                                }}
+                                className="text-sm"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`ai-deep-${index}`} className="text-xs">AI Deep Search Price</Label>
+                              <Input
+                                id={`ai-deep-${index}`}
+                                type="number"
+                                placeholder="Deep search price"
+                                value={image.ai_deep_search_price || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.images];
+                                  updated[index].ai_deep_search_price = e.target.value ? parseFloat(e.target.value) : null;
                                   setFormData({ ...formData, images: updated });
                                 }}
                                 className="text-sm"
