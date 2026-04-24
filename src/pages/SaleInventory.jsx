@@ -324,43 +324,46 @@ export default function SaleInventory() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(createPageUrl('MySales'))}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Sales
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate(createPageUrl('MySales'))}>
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back
           </Button>
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-slate-900">{sale?.title}</h1>
-            <p className="text-slate-600">Marketplace Inventory</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-serif font-bold text-slate-900 truncate">{sale?.title}</h1>
+            <p className="text-xs text-slate-500">Marketplace Inventory</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => { setSelectedImages({}); setShowSelectModal(true); }}
-            className="border-green-600 text-green-700 hover:bg-green-50"
+            className="border-green-600 text-green-700 hover:bg-green-50 text-xs"
           >
-            <CheckSquare className="w-4 h-4 mr-2" />
+            <CheckSquare className="w-3 h-3 mr-1" />
             Select Items to Add
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleAddAllToInventory}
             disabled={addingToInventory}
-            className="border-blue-600 text-blue-700 hover:bg-blue-50"
+            className="border-blue-600 text-blue-700 hover:bg-blue-50 text-xs"
           >
-            <PackagePlus className="w-4 h-4 mr-2" />
+            <PackagePlus className="w-3 h-3 mr-1" />
             {addingToInventory ? 'Adding...' : 'Add All to Inventory'}
           </Button>
           <Button 
+            size="sm"
             onClick={() => {
               setEditingItem(null);
               setShowCreateModal(true);
             }}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-orange-600 hover:bg-orange-700 text-xs"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-3 h-3 mr-1" />
             Add to Marketplace
           </Button>
         </div>
