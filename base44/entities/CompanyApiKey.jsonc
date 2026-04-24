@@ -1,0 +1,48 @@
+{
+  "name": "CompanyApiKey",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Unique API key for this company"
+    },
+    "webhook_url": {
+      "type": "string",
+      "description": "URL to push data to when items/sales change"
+    },
+    "webhook_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_push_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_push_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "pending"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "operator_id",
+    "api_key"
+  ]
+}

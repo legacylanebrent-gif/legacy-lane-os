@@ -11,7 +11,7 @@ import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe
       } from 'lucide-react';
 import {
   DropdownMenu,
@@ -131,13 +131,23 @@ export default function MySales() {
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Estate Sales</h1>
           <p className="text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
-        <Button 
-          onClick={() => navigate(createPageUrl('SaleEditor'))}
-          className="bg-orange-600 hover:bg-orange-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Sale
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(createPageUrl('ApiKeyManager'))}
+            className="border-cyan-600 text-cyan-700 hover:bg-cyan-50"
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Website API
+          </Button>
+          <Button 
+            onClick={() => navigate(createPageUrl('SaleEditor'))}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Sale
+          </Button>
+        </div>
       </div>
 
 
