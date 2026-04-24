@@ -43,7 +43,11 @@ export default function PrintSigns() {
         return;
       }
 
-      const saleData = await base44.entities.EstateSale.filter({ id: saleId });
+      const [saleData, itemsData] = await Promise.all([
+        base44.entities.EstateSale.filter({ id: saleId }),
+        base44.entities.Item.filter({ estate_sale_id: saleId })
+      ]);
+
       if (saleData.length === 0) {
         alert('Sale not found');
         navigate(createPageUrl('MySales'));
@@ -52,7 +56,7 @@ export default function PrintSigns() {
 
       const s = saleData[0];
       setSale(s);
-      await generateQRCodes(s);
+      await generateQRCodes(s, itemsData);
     } catch (error) {
       console.error('Error loading sale:', error);
     } finally {
@@ -60,20 +64,31 @@ export default function PrintSigns() {
     }
   };
 
-  const generateQRCodes = async (s) => {
+  const generateQRCodes = async (s, marketplaceItems = []) => {
     const images = (s.images || []).filter(img => img && (img.url || typeof img === 'string'));
     if (images.length === 0) return;
+
+    // Build a map from image URL -> marketplace item id
+    const imageToItemId = {};
+    for (const item of marketplaceItems) {
+      for (const imgUrl of (item.images || [])) {
+        if (imgUrl) imageToItemId[imgUrl] = item.id;
+      }
+    }
 
     setGeneratingQR(true);
     const results = [];
     for (const img of images) {
       const imageObj = typeof img === 'string' ? { url: img, name: '' } : img;
-      const itemUrl = `${window.location.origin}/EstateSaleDetail?id=${s.id}`;
+      const matchedItemId = imageToItemId[imageObj.url];
+      const targetUrl = matchedItemId
+        ? `${window.location.origin}/ItemDetail?itemId=${matchedItemId}`
+        : `${window.location.origin}/EstateSaleDetail?id=${s.id}`;
       try {
-        const qrDataUrl = await QRCode.toDataURL(itemUrl, { width: 200, margin: 1 });
-        results.push({ image: imageObj, qrDataUrl, selected: true });
+        const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 200, margin: 1 });
+        results.push({ image: imageObj, qrDataUrl, selected: true, linkedToItem: !!matchedItemId });
       } catch (e) {
-        results.push({ image: imageObj, qrDataUrl: null, selected: true });
+        results.push({ image: imageObj, qrDataUrl: null, selected: true, linkedToItem: false });
       }
     }
     setQrImages(results);
@@ -276,6 +291,9 @@ export default function PrintSigns() {
                     <p className="text-xs font-medium text-slate-700 line-clamp-2 leading-tight">
                       {q.image.name || `Item ${index + 1}`}
                     </p>
+                    <span className={`text-[9px] mt-1 inline-block px-1 rounded ${q.linkedToItem ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {q.linkedToItem ? '→ Item Page' : '→ Sale Page'}
+                    </span>
                   </div>
                 ))}
               </div>
