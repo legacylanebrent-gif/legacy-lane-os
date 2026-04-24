@@ -8,9 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 import QRCode from 'qrcode';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   ArrowLeft, Plus, Search, Package, DollarSign, Tag, 
-  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2, Printer
+  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2, Printer, PackagePlus, CheckSquare
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -29,6 +31,9 @@ export default function SaleInventory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [showSelectModal, setShowSelectModal] = useState(false);
+  const [selectedImages, setSelectedImages] = useState({});
+  const [addingToInventory, setAddingToInventory] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -225,6 +230,63 @@ export default function SaleInventory() {
     }, 250);
   };
 
+  const buildItemFromImage = (img, saleId, user) => {
+    const imageObj = typeof img === 'string' ? { url: img, name: '', description: '', price: null } : img;
+    return {
+      title: imageObj.name || 'Untitled Item',
+      description: imageObj.description || '',
+      price: imageObj.price || imageObj.user_price || imageObj.ai_first_search_price || 0,
+      images: [imageObj.url],
+      estate_sale_id: saleId,
+      seller_id: user.id,
+      seller_name: user.full_name,
+      status: 'available',
+      category: (imageObj.categories && imageObj.categories[0]) || 'estate_items',
+    };
+  };
+
+  const handleAddAllToInventory = async () => {
+    const saleImages = sale?.images || [];
+    if (saleImages.length === 0) { alert('No photos found on this sale.'); return; }
+    if (!confirm(`Add all ${saleImages.length} photos to inventory?`)) return;
+    setAddingToInventory(true);
+    try {
+      const user = await base44.auth.me();
+      // Get existing item image URLs to avoid duplicates
+      const existingUrls = new Set(items.flatMap(i => i.images || []));
+      const toAdd = saleImages.filter(img => {
+        const url = typeof img === 'string' ? img : img?.url;
+        return url && !existingUrls.has(url);
+      });
+      if (toAdd.length === 0) { alert('All photos are already in inventory.'); return; }
+      await base44.entities.Item.bulkCreate(toAdd.map(img => buildItemFromImage(img, sale.id, user)));
+      await loadData();
+      alert(`Added ${toAdd.length} item(s) to inventory.`);
+    } catch (e) {
+      alert('Failed: ' + e.message);
+    } finally {
+      setAddingToInventory(false);
+    }
+  };
+
+  const handleAddSelectedToInventory = async () => {
+    const chosen = (sale?.images || []).filter((img, i) => selectedImages[i]);
+    if (chosen.length === 0) { alert('Please select at least one photo.'); return; }
+    setAddingToInventory(true);
+    try {
+      const user = await base44.auth.me();
+      await base44.entities.Item.bulkCreate(chosen.map(img => buildItemFromImage(img, sale.id, user)));
+      await loadData();
+      setShowSelectModal(false);
+      setSelectedImages({});
+      alert(`Added ${chosen.length} item(s) to inventory.`);
+    } catch (e) {
+      alert('Failed: ' + e.message);
+    } finally {
+      setAddingToInventory(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       available: 'bg-green-100 text-green-700',
@@ -273,16 +335,35 @@ export default function SaleInventory() {
             <p className="text-slate-600">Marketplace Inventory</p>
           </div>
         </div>
-        <Button 
-          onClick={() => {
-            setEditingItem(null);
-            setShowCreateModal(true);
-          }}
-          className="bg-orange-600 hover:bg-orange-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add to Marketplace
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => { setSelectedImages({}); setShowSelectModal(true); }}
+            className="border-green-600 text-green-700 hover:bg-green-50"
+          >
+            <CheckSquare className="w-4 h-4 mr-2" />
+            Select Items to Add
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleAddAllToInventory}
+            disabled={addingToInventory}
+            className="border-blue-600 text-blue-700 hover:bg-blue-50"
+          >
+            <PackagePlus className="w-4 h-4 mr-2" />
+            {addingToInventory ? 'Adding...' : 'Add All to Inventory'}
+          </Button>
+          <Button 
+            onClick={() => {
+              setEditingItem(null);
+              setShowCreateModal(true);
+            }}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add to Marketplace
+          </Button>
+        </div>
       </div>
 
       <CreateItemModal
@@ -295,6 +376,74 @@ export default function SaleInventory() {
         saleId={sale?.id}
         onSuccess={loadData}
       />
+
+      {/* Select Images Modal */}
+      <Dialog open={showSelectModal} onOpenChange={setShowSelectModal}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Select Photos to Add to Inventory</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-500">
+                {Object.values(selectedImages).filter(Boolean).length} selected
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const all = {};
+                  (sale?.images || []).forEach((_, i) => { all[i] = true; });
+                  setSelectedImages(all);
+                }}>Select All</Button>
+                <Button variant="outline" size="sm" onClick={() => setSelectedImages({})}>Clear</Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {(sale?.images || []).map((img, i) => {
+                const imageObj = typeof img === 'string' ? { url: img, name: '' } : img;
+                const existingUrls = new Set(items.flatMap(it => it.images || []));
+                const alreadyAdded = existingUrls.has(imageObj.url);
+                return (
+                  <div
+                    key={i}
+                    className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                      alreadyAdded ? 'opacity-40 cursor-not-allowed border-slate-200' :
+                      selectedImages[i] ? 'border-green-500 ring-2 ring-green-300' : 'border-slate-200 hover:border-slate-400'
+                    }`}
+                    onClick={() => {
+                      if (alreadyAdded) return;
+                      setSelectedImages(prev => ({ ...prev, [i]: !prev[i] }));
+                    }}
+                  >
+                    <img src={imageObj.url} alt={imageObj.name || `Photo ${i+1}`} className="w-full aspect-square object-cover" />
+                    <div className="absolute top-1 left-1">
+                      <Checkbox checked={!!selectedImages[i]} readOnly className="bg-white" />
+                    </div>
+                    {alreadyAdded && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-1">Already added</div>
+                    )}
+                    {imageObj.name && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] px-1 py-0.5 truncate">
+                        {imageObj.name}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowSelectModal(false)}>Cancel</Button>
+              <Button
+                onClick={handleAddSelectedToInventory}
+                disabled={addingToInventory || Object.values(selectedImages).filter(Boolean).length === 0}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <PackagePlus className="w-4 h-4 mr-2" />
+                {addingToInventory ? 'Adding...' : `Add ${Object.values(selectedImages).filter(Boolean).length} to Inventory`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
