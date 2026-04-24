@@ -214,42 +214,38 @@ export default function ItemDetail() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">LL</span>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow">
+                <span className="text-white font-bold text-sm">LL</span>
               </div>
-              <div>
-                <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
-                <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-              </div>
+              <span className="text-lg font-serif font-bold text-white hidden sm:block">Legacy Lane</span>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {isAuthenticated ? (
                 <>
-                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} title="Messages" className="text-white hover:bg-slate-800">
-                    <MessageSquare className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} className="text-white hover:bg-slate-800 h-8 w-8">
+                    <MessageSquare className="w-4 h-4" />
                   </Button>
                   {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button variant="ghost" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
+                  <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800 text-xs">
+                    <LayoutDashboard className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Dashboard</span>
                   </Button>
-                  <Button variant="ghost" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                  <Button variant="ghost" size="sm" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800 text-xs">
+                    <LogOut className="w-4 h-4" />
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800">
-                    <LogIn className="w-4 h-4 mr-2" />
+                  <Button variant="ghost" size="sm" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800 text-xs">
+                    <LogIn className="w-4 h-4 mr-1" />
                     Sign In
                   </Button>
-                  <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
-                    Get Started Free
+                  <Button size="sm" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3">
+                    Get Started
                   </Button>
                 </>
               )}
@@ -259,12 +255,12 @@ export default function ItemDetail() {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-12 mb-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 mb-8">
           {/* Image Gallery */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Card className="overflow-hidden">
-              <div className="relative h-96 md:h-[500px] bg-slate-100">
+              <div className="relative h-72 sm:h-96 md:h-[500px] bg-slate-100">
                 {item.images && item.images.length > 0 ? (
                   <img
                     src={item.images[selectedImageIndex]}
@@ -372,26 +368,26 @@ export default function ItemDetail() {
                 </Card>
               ) : (
                 <>
-                  <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">
+                  <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-3 leading-tight">
                     {item.title}
                   </h1>
                   
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
                     {item.category && (
-                      <Badge variant="outline" className="text-sm">
+                      <Badge variant="outline" className="text-xs">
                         <Tag className="w-3 h-3 mr-1" />
                         {item.category}
                       </Badge>
                     )}
                     {item.condition && (
-                      <Badge variant="outline" className="text-sm">
+                      <Badge variant="outline" className="text-xs">
                         <Package className="w-3 h-3 mr-1" />
                         {item.condition}
                       </Badge>
                     )}
                   </div>
 
-                  <div className="text-5xl font-bold text-cyan-600 mb-6">
+                  <div className="text-3xl sm:text-4xl font-bold text-cyan-600 mb-4">
                     ${item.price?.toLocaleString()}
                   </div>
                 </>
@@ -501,7 +497,7 @@ export default function ItemDetail() {
         {/* Related Items */}
         {relatedItems.length > 0 && (
           <div>
-            <h2 className="text-3xl font-serif font-bold text-slate-900 mb-6">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-slate-900 mb-4">
               More from this Sale
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
