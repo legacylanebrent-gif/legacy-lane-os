@@ -708,30 +708,32 @@ export default function Home() {
         <ConsumerHeader user={currentUser} />
       ) : (
         <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-14">
+              <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
                 <div>
-                  <h1 className="text-2xl font-serif font-bold text-white">EstateSalen.com</h1>
-                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
+                  <h1 className="text-base font-serif font-bold text-white leading-tight">EstateSalen.com</h1>
+                  <p className="text-[10px] text-orange-400 hidden sm:block">Discover Amazing Estate Sales</p>
                 </div>
               </Link>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="text-white hover:text-orange-400 hover:bg-orange-500/20"
+                  className="text-white hover:text-orange-400 hover:bg-orange-500/20 text-sm"
                 >
-                  <LogIn className="w-4 h-4 mr-2" />
+                  <LogIn className="w-4 h-4 mr-1" />
                   Sign In
                 </Button>
                 <Button
+                  size="sm"
                   onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-3"
                 >
-                  Get Started Free
+                  Get Started
                 </Button>
               </div>
             </div>
@@ -740,7 +742,7 @@ export default function Home() {
       )}
 
       {/* Hero Section with Gradient Background */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 sm:py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-16 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0yMCA0NGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -750,41 +752,41 @@ export default function Home() {
             </Badge>
           </div>
           
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-white mb-4 leading-tight">
             Discover Sales &<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Treasures</span> Near You
           </h2>
-          <p className="text-sm md:text-base text-slate-300 mb-12 max-w-3xl mx-auto">
+          <p className="text-sm text-slate-300 mb-8 max-w-2xl mx-auto">
             Search local estate and moving sales as well as local and national online marketplace items
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-4xl mx-auto space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
             {/* Zip Code Search */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex gap-2">
               <div className="relative flex-1">
-                <MapPin className="absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 w-6 h-6" />
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input
                   placeholder="Enter ZIP code..."
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleZipSearch()}
-                  className="pl-14 h-16 text-lg shadow-xl w-full bg-white/95 backdrop-blur-sm border-slate-200"
+                  className="pl-9 h-11 shadow-xl w-full bg-white/95 backdrop-blur-sm border-slate-200"
                 />
               </div>
               <Button 
                 onClick={handleZipSearch}
-                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 h-16 px-8 text-lg font-semibold shadow-xl w-full sm:w-auto whitespace-nowrap"
+                className="bg-cyan-500 hover:bg-cyan-600 h-11 px-5 font-semibold shadow-xl whitespace-nowrap"
               >
                 Search ZIP
               </Button>
-              <Button 
-                onClick={handleUseMyLocation}
-                className="bg-white hover:bg-slate-50 text-slate-900 h-16 px-8 text-lg font-semibold shadow-xl w-full sm:w-auto whitespace-nowrap border-2 border-slate-200"
-              >
-                📍 Use My Location
-              </Button>
             </div>
+            <Button 
+              onClick={handleUseMyLocation}
+              className="bg-white hover:bg-slate-50 text-slate-900 h-11 w-full font-semibold shadow-xl border-2 border-slate-200"
+            >
+              📍 Use My Location
+            </Button>
 
             {userLocation && (
               <div className="text-sm text-slate-300 text-center bg-slate-800/50 rounded-lg py-2 px-4 backdrop-blur-sm">
