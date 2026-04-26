@@ -6,7 +6,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import { 
   LayoutDashboard, Users, DollarSign, Package, Home, GraduationCap,
-  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, ChevronDown, MessageSquare, TrendingUp, Bell, Megaphone, Heart, MapPin, Shield
+  Settings, BarChart3, ShoppingBag, Briefcase, Award, FileText, Zap, Building2, User, Gift, Menu, ChevronDown, MessageSquare, TrendingUp, Bell, Megaphone, Heart, MapPin, Shield, ArrowLeft
 } from 'lucide-react';
 
 const ADMIN_NAV_ITEMS = [

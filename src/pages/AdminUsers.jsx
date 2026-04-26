@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 import {
   Table,
@@ -36,6 +38,7 @@ export default function AdminUsers() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [referrals, setReferrals] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -53,7 +56,9 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
-      const currentUser = await base44.auth.me();
+      const me = await base44.auth.me();
+      setCurrentUser(me);
+      const currentUser = me;
       if (!currentUser) {
         setLoading(false);
         return;
@@ -255,6 +260,14 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
+      {currentUser?.is_admin && currentUser?.primary_account_type !== 'super_admin' && (
+        <Link to={createPageUrl('MySales')}>
+          <Button variant="outline" size="sm" className="mb-2 border-orange-400 text-orange-700 hover:bg-orange-50">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to My Sales
+          </Button>
+        </Link>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>

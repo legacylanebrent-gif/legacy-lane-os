@@ -1,0 +1,84 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Full Name"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name for business users"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "profile_image_url": {
+      "type": "string",
+      "description": "Profile picture URL"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "User location coordinates"
+    },
+    "primary_account_type": {
+      "type": "string",
+      "enum": [
+        "super_admin",
+        "platform_ops",
+        "growth_team",
+        "partnerships",
+        "education_admin",
+        "finance_admin",
+        "estate_sale_operator",
+        "real_estate_agent",
+        "investor",
+        "vendor",
+        "consignor",
+        "consumer",
+        "executor",
+        "home_seller",
+        "buyer",
+        "downsizer",
+        "diy_seller",
+        "coach"
+      ],
+      "description": "Primary account type"
+    },
+    "is_admin": {
+      "type": "boolean",
+      "default": false,
+      "description": "Grants access to the admin panel regardless of primary account type"
+    },
+    "divisions_access": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Division access keys"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is user account active"
+    }
+  },
+  "required": [
+    "display_name",
+    "company_name",
+    "phone",
+    "profile_image_url",
+    "location",
+    "primary_account_type"
+  ]
+}

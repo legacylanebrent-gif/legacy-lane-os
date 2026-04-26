@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
+    is_admin: false,
     primary_account_type: 'consumer',
     phone: '',
     bio: '',
@@ -120,6 +121,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         full_name: editUser.full_name || '',
         email: editUser.email || '',
         primary_account_type: editUser.primary_account_type || '',
+        is_admin: editUser.is_admin || false,
         phone: editUser.phone || '',
         bio: editUser.bio || '',
         address: editUser.address || { street: '', city: '', state: '', zip: '' },
@@ -458,6 +460,20 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
           {formData.primary_account_type === 'vendor' && (
             <VendorSubcategoryDropdown formData={formData} setFormData={setFormData} />
           )}
+
+          <div className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <input
+              type="checkbox"
+              id="is_admin"
+              checked={formData.is_admin || false}
+              onChange={(e) => setFormData({...formData, is_admin: e.target.checked})}
+              className="rounded h-4 w-4"
+            />
+            <div>
+              <Label htmlFor="is_admin" className="cursor-pointer font-semibold text-orange-800">Grant Admin Panel Access</Label>
+              <p className="text-xs text-orange-600">User keeps their primary account type but gains access to the Admin Panel link in their sidebar.</p>
+            </div>
+          </div>
 
           {formData.primary_account_type && (
             <>

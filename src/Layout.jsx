@@ -9,7 +9,7 @@ import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import { 
   Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Home as HomeIcon, Heart, LayoutDashboard, HandCoins
+  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Heart, LayoutDashboard, HandCoins, Shield
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -120,12 +120,14 @@ export default function Layout({ children, currentPageName }) {
   const accountType = user?.primary_account_type || user?.primary_role || 'consumer';
   const isConsumerType = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach';
   
-  if (accountType === 'super_admin' || 
+  const isPureAdmin = accountType === 'super_admin' || 
       accountType === 'platform_ops' || 
       accountType === 'growth_team' ||
       accountType === 'partnerships' ||
       accountType === 'education_admin' ||
-      accountType === 'finance_admin') {
+      accountType === 'finance_admin';
+
+  if (isPureAdmin) {
     return (
       <AdminLayout currentPage={currentPageName} user={user}>
         {children}
@@ -248,6 +250,16 @@ export default function Layout({ children, currentPageName }) {
               </Button>
             </div>
             <div className="space-y-6">
+              {user?.is_admin && (
+                <div className="mb-4 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                  <Link to={createPageUrl('AdminUsers')}>
+                    <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white text-sm">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin Panel
+                    </Button>
+                  </Link>
+                </div>
+              )}
               <div className="space-y-1">
                 <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')}>
                   <Button 
