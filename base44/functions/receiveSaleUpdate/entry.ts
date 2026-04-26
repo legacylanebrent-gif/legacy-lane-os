@@ -7,13 +7,27 @@
  * Expected POST body:
  * {
  *   api_key: string,          // the operator's API key from CompanyApiKey
- *   event: "item_status_update" | "item_sold" | "sale_view",
- *   item_id?: string,         // for item events
- *   sale_id?: string,         // for sale events
+ *   event: "item_status_update" | "item_sold" | "sale_update" | "sale_view",
+ *
+ *   // For item events:
+ *   item_id?: string,
  *   status?: string,          // "sold" | "reserved" | "available" | "pending"
- *   buyer_name?: string,      // optional buyer info for sold items
+ *   buyer_name?: string,
  *   buyer_email?: string,
- *   sale_price?: number,      // actual sold price if different from listing
+ *   sale_price?: number,
+ *
+ *   // For sale_update event:
+ *   sale_id: string,
+ *   sale_fields?: {           // any subset of EstateSale fields to patch
+ *     title?: string,
+ *     description?: string,
+ *     sale_type?: "estate_sale" | "moving_sale" | "downsizing_sale" | "liquidation",
+ *     status?: "draft" | "upcoming" | "active" | "completed" | "cancelled",
+ *     special_notes?: string,
+ *     payment_methods?: string[],
+ *     categories?: string[],
+ *     sale_dates?: { date: string, start_time?: string, end_time?: string }[],
+ *   }
  * }
  */
 
@@ -38,7 +52,7 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const body = await req.json().catch(() => ({}));
 
-  const { api_key, event, item_id, sale_id, status, buyer_name, buyer_email, sale_price } = body;
+  const { api_key, event, item_id, sale_id, status, buyer_name, buyer_email, sale_price, sale_fields } = body;
 
   // Validate API key
   if (!api_key) {
@@ -101,6 +115,51 @@ Deno.serve(async (req) => {
     }
 
     return Response.json({ success: true, event, item_id, updated: updateData }, { headers });
+  }
+
+  // Handle sale field updates (title, sale_type, status, dates, etc.)
+  if (event === 'sale_update') {
+    if (!sale_id) {
+      return Response.json({ error: 'Missing sale_id' }, { status: 400, headers });
+    }
+    if (!sale_fields || typeof sale_fields !== 'object') {
+      return Response.json({ error: 'Missing sale_fields object' }, { status: 400, headers });
+    }
+
+    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id, operator_id: operatorId });
+    if (sales.length === 0) {
+      return Response.json({ error: 'Sale not found or unauthorized' }, { status: 404, headers });
+    }
+
+    // Whitelist allowed fields to prevent unwanted patches
+    const ALLOWED_SALE_FIELDS = [
+      'title', 'description', 'sale_type', 'status', 'special_notes',
+      'payment_methods', 'categories', 'sale_dates', 'parking_info'
+    ];
+
+    // Validate sale_type if provided
+    const VALID_SALE_TYPES = ['estate_sale', 'moving_sale', 'downsizing_sale', 'liquidation'];
+    if (sale_fields.sale_type && !VALID_SALE_TYPES.includes(sale_fields.sale_type)) {
+      return Response.json({
+        error: `Invalid sale_type. Must be one of: ${VALID_SALE_TYPES.join(', ')}`
+      }, { status: 400, headers });
+    }
+
+    // Validate status if provided
+    const VALID_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
+    if (sale_fields.status && !VALID_STATUSES.includes(sale_fields.status)) {
+      return Response.json({
+        error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`
+      }, { status: 400, headers });
+    }
+
+    const sanitized = {};
+    for (const key of ALLOWED_SALE_FIELDS) {
+      if (sale_fields[key] !== undefined) sanitized[key] = sale_fields[key];
+    }
+
+    await base44.asServiceRole.entities.EstateSale.update(sale_id, sanitized);
+    return Response.json({ success: true, event, sale_id, updated: sanitized }, { headers });
   }
 
   if (event === 'sale_view') {

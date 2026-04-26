@@ -220,7 +220,7 @@ export default function ApiKeyManager() {
       {apiKeyRecord && (
         <Card>
           <CardContent className="p-6 space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">Payload Structure</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Outbound Payload (OS → Your Site)</h2>
             <p className="text-sm text-slate-600">Your website will receive this JSON structure on every push or pull:</p>
             <pre className="bg-slate-900 text-green-400 rounded-lg p-4 text-xs overflow-auto">
 {`{
@@ -230,26 +230,103 @@ export default function ApiKeyManager() {
   "operator_name": "Your Company Name",
   "sales": [
     {
-      "id": "...",
+      "id": "sale_abc123",
       "title": "Spring Estate Sale",
+      "sale_type": "estate_sale",
+      // sale_type options: "estate_sale" | "moving_sale" | "downsizing_sale" | "liquidation"
       "status": "active",
-      "sale_dates": [{ "date": "2026-05-01", "start_time": "08:00" }],
-      "address": { "street": "...", "city": "...", "state": "TX", "zip": "..." },
-      "images": ["https://..."],
+      // status options: "draft" | "upcoming" | "active" | "completed" | "cancelled"
+      "sale_dates": [{ "date": "2026-05-01", "start_time": "08:00", "end_time": "17:00" }],
+      "address": { "street": "123 Main St", "city": "Austin", "state": "TX", "zip": "78701" },
+      "location": { "lat": 30.267, "lng": -97.743 },
+      "categories": ["Furniture", "Jewelry"],
+      "payment_methods": ["cash", "credit_card", "venmo"],
+      "special_notes": "...",
+      "images": [{ "url": "https://...", "name": "Antique Chair", "description": "...", "price": 120 }],
       "items": [
         {
-          "id": "...",
+          "id": "item_xyz789",
           "title": "Antique Vase",
           "price": 45.00,
           "status": "available",
-          "images": ["https://..."],
-          "category": "antiques"
+          // item status options: "available" | "pending" | "sold" | "reserved"
+          "category": "antiques",
+          "condition": "good",
+          "images": ["https://..."]
         }
       ]
     }
   ]
 }`}
             </pre>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Reverse Webhook Docs */}
+      {apiKeyRecord && (
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            <h2 className="text-lg font-semibold text-slate-900">Inbound Webhook (Your Site → OS)</h2>
+            <p className="text-sm text-slate-600">Your website can push updates back to the OS — item sold, sale edits, view counts. Find the endpoint at: <span className="font-mono bg-slate-100 px-1 rounded text-xs">Dashboard → Code → Functions → receiveSaleUpdate</span></p>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <p className="text-slate-500 font-semibold mb-1">Update a sale (title, type, dates, etc.)</p>
+                <pre className="bg-slate-900 text-green-400 rounded-lg p-3 overflow-auto">
+{`POST <function_url>/receiveSaleUpdate
+{
+  "api_key": "${apiKeyRecord.api_key}",
+  "event": "sale_update",
+  "sale_id": "sale_abc123",
+  "sale_fields": {
+    "title": "Updated Sale Title",
+    "sale_type": "estate_sale",
+    // "estate_sale" | "moving_sale" | "downsizing_sale" | "liquidation"
+    "status": "upcoming",
+    // "draft" | "upcoming" | "active" | "completed" | "cancelled"
+    "special_notes": "No early birds",
+    "payment_methods": ["cash", "venmo"]
+  }
+}`}
+                </pre>
+              </div>
+              <div>
+                <p className="text-slate-500 font-semibold mb-1">Mark item as sold</p>
+                <pre className="bg-slate-900 text-green-400 rounded-lg p-3 overflow-auto">
+{`{
+  "api_key": "${apiKeyRecord.api_key}",
+  "event": "item_sold",
+  "item_id": "item_xyz789",
+  "sale_price": 45.00,
+  "buyer_name": "Jane Doe",
+  "buyer_email": "jane@example.com"
+}`}
+                </pre>
+              </div>
+              <div>
+                <p className="text-slate-500 font-semibold mb-1">Update item status</p>
+                <pre className="bg-slate-900 text-green-400 rounded-lg p-3 overflow-auto">
+{`{
+  "api_key": "${apiKeyRecord.api_key}",
+  "event": "item_status_update",
+  "item_id": "item_xyz789",
+  "status": "reserved"
+  // "available" | "pending" | "sold" | "reserved"
+}`}
+                </pre>
+              </div>
+              <div>
+                <p className="text-slate-500 font-semibold mb-1">Track a sale page view</p>
+                <pre className="bg-slate-900 text-green-400 rounded-lg p-3 overflow-auto">
+{`{
+  "api_key": "${apiKeyRecord.api_key}",
+  "event": "sale_view",
+  "sale_id": "sale_abc123"
+}`}
+                </pre>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
