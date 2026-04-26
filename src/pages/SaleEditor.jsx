@@ -595,12 +595,22 @@ export default function SaleEditor() {
                 <div>
                   <Label>Sale Type</Label>
                   <Select value={formData.sale_type} onValueChange={(value) => setFormData({ ...formData, sale_type: value })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="estate_sale">Estate Sale</SelectItem>
-                      <SelectItem value="moving_sale">Moving Sale</SelectItem>
-                      <SelectItem value="downsizing_sale">Downsizing Sale</SelectItem>
-                      <SelectItem value="liquidation">Liquidation</SelectItem>
+                      <SelectItem value="estate_tag_sale_private_home">Estate/Tag Sale Inside Private Home</SelectItem>
+                      <SelectItem value="online_only_auction">Online Only Auction</SelectItem>
+                      <SelectItem value="auction">Auction</SelectItem>
+                      <SelectItem value="moving_sale_private_home">Moving Sale Inside Private Home</SelectItem>
+                      <SelectItem value="estate_tag_sale_offsite_warehouse">Estate/Tag Sale Moved Offsite to Warehouse</SelectItem>
+                      <SelectItem value="auction_house">Auction House</SelectItem>
+                      <SelectItem value="appointment_required_sale">Sale That Requires an Appointment</SelectItem>
+                      <SelectItem value="estate_sale_offsite_store">Estate Sale Moved Offsite to Store</SelectItem>
+                      <SelectItem value="business_closing">Business Closing</SelectItem>
+                      <SelectItem value="online_estate_sale">Online Estate Sale</SelectItem>
+                      <SelectItem value="outside_sale">Outside Sale</SelectItem>
+                      <SelectItem value="buyout_or_cleanout">Buyout Or Cleanout</SelectItem>
+                      <SelectItem value="demolition_sale">Demolition Sale</SelectItem>
+                      <SelectItem value="single_item_type_collection">Single Item Type Collection</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -1,0 +1,241 @@
+{
+  "name": "EstateSale",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sale_type": {
+      "type": "string",
+      "enum": [
+        "estate_tag_sale_private_home",
+        "online_only_auction",
+        "auction",
+        "moving_sale_private_home",
+        "estate_tag_sale_offsite_warehouse",
+        "auction_house",
+        "appointment_required_sale",
+        "estate_sale_offsite_store",
+        "business_closing",
+        "online_estate_sale",
+        "outside_sale",
+        "buyout_or_cleanout",
+        "demolition_sale",
+        "single_item_type_collection"
+      ],
+      "description": "Type of sale"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Estate sale operator user ID"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "formatted_address": {
+          "type": "string"
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "Geographic coordinates"
+    },
+    "sale_dates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "upcoming",
+        "active",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "rotation": {
+            "type": "number",
+            "default": 0
+          },
+          "price": {
+            "type": "number"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          }
+        }
+      },
+      "description": "Array of image objects with metadata",
+      "default": []
+    },
+    "featured_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "estimated_value": {
+            "type": "number"
+          }
+        }
+      },
+      "default": []
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Furniture, Art, Jewelry, etc.",
+      "default": []
+    },
+    "total_items": {
+      "type": "integer",
+      "default": 0
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "actual_revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "commission_rate": {
+      "type": "number",
+      "description": "Percentage"
+    },
+    "commission_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "saves": {
+      "type": "integer",
+      "default": 0
+    },
+    "premium_listing": {
+      "type": "boolean",
+      "default": false
+    },
+    "payment_methods": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "cash",
+        "credit_card",
+        "venmo"
+      ]
+    },
+    "special_notes": {
+      "type": "string"
+    },
+    "parking_info": {
+      "type": "string"
+    },
+    "national_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "local_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "national_featured_price": {
+      "type": "number"
+    },
+    "local_featured_price": {
+      "type": "number"
+    },
+    "email_campaign_price": {
+      "type": "number",
+      "description": "Price paid for email campaign"
+    },
+    "sms_campaign_price": {
+      "type": "number",
+      "description": "Price paid for SMS campaign"
+    }
+  },
+  "required": [
+    "title",
+    "operator_id",
+    "property_address"
+  ]
+}

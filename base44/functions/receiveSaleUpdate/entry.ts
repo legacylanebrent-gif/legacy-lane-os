@@ -138,7 +138,13 @@ Deno.serve(async (req) => {
     ];
 
     // Validate sale_type if provided
-    const VALID_SALE_TYPES = ['estate_sale', 'moving_sale', 'downsizing_sale', 'liquidation'];
+    const VALID_SALE_TYPES = [
+      'estate_tag_sale_private_home', 'online_only_auction', 'auction',
+      'moving_sale_private_home', 'estate_tag_sale_offsite_warehouse', 'auction_house',
+      'appointment_required_sale', 'estate_sale_offsite_store', 'business_closing',
+      'online_estate_sale', 'outside_sale', 'buyout_or_cleanout',
+      'demolition_sale', 'single_item_type_collection'
+    ];
     if (sale_fields.sale_type && !VALID_SALE_TYPES.includes(sale_fields.sale_type)) {
       return Response.json({
         error: `Invalid sale_type. Must be one of: ${VALID_SALE_TYPES.join(', ')}`

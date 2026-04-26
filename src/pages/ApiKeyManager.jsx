@@ -232,8 +232,12 @@ export default function ApiKeyManager() {
     {
       "id": "sale_abc123",
       "title": "Spring Estate Sale",
-      "sale_type": "estate_sale",
-      // sale_type options: "estate_sale" | "moving_sale" | "downsizing_sale" | "liquidation"
+      "sale_type": "estate_tag_sale_private_home",
+      // sale_type options: "estate_tag_sale_private_home" | "online_only_auction" | "auction" |
+      // "moving_sale_private_home" | "estate_tag_sale_offsite_warehouse" | "auction_house" |
+      // "appointment_required_sale" | "estate_sale_offsite_store" | "business_closing" |
+      // "online_estate_sale" | "outside_sale" | "buyout_or_cleanout" |
+      // "demolition_sale" | "single_item_type_collection"
       "status": "active",
       // status options: "draft" | "upcoming" | "active" | "completed" | "cancelled"
       "sale_dates": [{ "date": "2026-05-01", "start_time": "08:00", "end_time": "17:00" }],
@@ -281,8 +285,11 @@ export default function ApiKeyManager() {
   "sale_id": "sale_abc123",
   "sale_fields": {
     "title": "Updated Sale Title",
-    "sale_type": "estate_sale",
-    // "estate_sale" | "moving_sale" | "downsizing_sale" | "liquidation"
+    "sale_type": "estate_tag_sale_private_home",
+    // "estate_tag_sale_private_home" | "online_only_auction" | "auction" | "moving_sale_private_home"
+    // "estate_tag_sale_offsite_warehouse" | "auction_house" | "appointment_required_sale"
+    // "estate_sale_offsite_store" | "business_closing" | "online_estate_sale"
+    // "outside_sale" | "buyout_or_cleanout" | "demolition_sale" | "single_item_type_collection"
     "status": "upcoming",
     // "draft" | "upcoming" | "active" | "completed" | "cancelled"
     "special_notes": "No early birds",
