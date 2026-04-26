@@ -19,7 +19,7 @@ import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 
-const SALE_STATUSES = ['draft', 'active', 'completed'];
+const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
 export default function SaleEditor() {
   const navigate = useNavigate();

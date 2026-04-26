@@ -96,7 +96,7 @@
         "upcoming",
         "active",
         "completed",
-        "cancelled"
+        "archived"
       ],
       "default": "draft"
     },

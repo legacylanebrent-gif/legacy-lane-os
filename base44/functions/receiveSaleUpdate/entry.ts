@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
     }
 
     // Validate status if provided
-    const VALID_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'cancelled'];
+    const VALID_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
     if (sale_fields.status && !VALID_STATUSES.includes(sale_fields.status)) {
       return Response.json({
         error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`
