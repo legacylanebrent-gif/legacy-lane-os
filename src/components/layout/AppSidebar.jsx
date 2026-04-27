@@ -23,7 +23,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyProfile',              label: 'My Profile',          icon: User,            group: 'Main' },
   { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
-  { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Main' },
+  { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
   { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Main' },
 
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
@@ -208,11 +208,6 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
               <DropdownMenuItem asChild>
                 <Link to={createPageUrl('MyProfile')}>
                   <User className="w-4 h-4 mr-2" /> My Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={createPageUrl('Settings')}>
-                  <Settings className="w-4 h-4 mr-2" /> Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
