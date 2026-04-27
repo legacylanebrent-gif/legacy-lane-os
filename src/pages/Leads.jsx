@@ -179,18 +179,15 @@ export default function Leads() {
                       {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600 line-clamp-1">{lead.property_address}</span></div>}
                     </div>
 
-                    {(lead.estimated_referral_fee || lead.timeline) && (
-                      <div className="grid grid-cols-2 gap-2 text-sm border-t pt-2">
-                        {lead.estimated_referral_fee && (
-                          <div className="flex items-center gap-1">
-                            <Gift className="w-3.5 h-3.5 text-amber-500" />
-                            <div>
-                              <p className="text-xs text-slate-500">Finder Fee</p>
-                              <p className="font-semibold text-amber-600">${lead.estimated_referral_fee.toLocaleString()}</p>
-                            </div>
-                          </div>
+                    {(lead.estimated_value || lead.timeline) && (
+                      <div className="space-y-2 text-xs border-t pt-2">
+                        {lead.estimated_value && (
+                          <>
+                            <div className="flex justify-between"><span className="text-slate-500">Finder Fee:</span><span className="text-amber-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Timeline:</span><span className="capitalize">{lead.timeline?.replace(/_/g, ' ') || 'N/A'}</span></div>
+                          </>
                         )}
-                        {lead.timeline && <div><p className="text-xs text-slate-500">Timeline</p><p className="capitalize">{lead.timeline.replace(/_/g, ' ')}</p></div>}
+                        {!lead.estimated_value && lead.timeline && <div className="flex justify-between"><span className="text-slate-500">Timeline:</span><span className="capitalize">{lead.timeline.replace(/_/g, ' ')}</span></div>}
                       </div>
                     )}
 
@@ -275,7 +272,7 @@ export default function Leads() {
               </div>
               <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <p className="text-sm font-semibold text-amber-900 mb-2">Your Finder Fee</p>
-                <p className="text-2xl font-bold text-amber-700 mb-3">${referralLead.estimated_referral_fee?.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-amber-700 mb-3">${(referralLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</p>
                 <p className="text-xs text-amber-800">This fee is paid upon closing when the client purchases a home through our realtor network. EstateSalen.com acts as the licensed referral agent.</p>
               </div>
               <div className="space-y-2 p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
@@ -337,10 +334,10 @@ export default function Leads() {
                </div>
               )}
 
-              {selectedLead.referral_eligible && selectedLead.referral_status === 'no_referral' && selectedLead.estimated_referral_fee && (
+              {selectedLead.referral_eligible && selectedLead.referral_status === 'no_referral' && selectedLead.estimated_value && (
                <div className="p-3 bg-amber-50 border-l-4 border-l-amber-500 rounded-lg">
                  <p className="font-semibold text-amber-900 text-sm mb-2">Potential Finder Fee</p>
-                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor for buyer representation, you could earn a <span className="font-bold">${selectedLead.estimated_referral_fee.toLocaleString()}</span> finder fee when the sale closes.</p>
+                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor for buyer representation, you could earn a <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span> finder fee when the sale closes.</p>
                  <Button 
                    onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
