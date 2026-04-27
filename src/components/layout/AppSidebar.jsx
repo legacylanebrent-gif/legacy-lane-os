@@ -35,9 +35,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyListings',             label: 'Marketplace Listings', icon: ShoppingBag,     group: 'Estate Sales' },
 
   { page: 'CRM',                    label: 'CRM',                 icon: Users,           group: 'CRM & Leads' },
-  { page: 'Leads',                  label: 'Leads',               icon: Award,           group: 'CRM & Leads' },
-  { page: 'Pipeline',               label: 'Pipeline',            icon: TrendingUp,      group: 'CRM & Leads' },
-  { page: 'IncomingLeads',          label: 'Incoming Leads',      icon: Award,           group: 'CRM & Leads' },
+  { page: 'Leads',                  label: 'Lead Center',         icon: Award,           group: 'CRM & Leads' },
 
   { page: 'Campaigns',              label: 'Campaigns',           icon: Megaphone,       group: 'Marketing' },
   { page: 'MarketingTasks',         label: 'Marketing Tasks',     icon: Megaphone,       group: 'Marketing' },
