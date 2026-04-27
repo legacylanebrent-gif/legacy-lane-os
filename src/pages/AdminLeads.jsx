@@ -1,191 +1,369 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Target, TrendingUp, MapPin, Clock } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Plus, Mail, Phone, MapPin, Clock, TrendingUp, User,
+  CheckCircle, Search, Users, AlertCircle, UserCheck
+} from 'lucide-react';
+
+const getScoreColor = (score) => {
+  if (score >= 75) return 'text-green-600 bg-green-100';
+  if (score >= 50) return 'text-yellow-600 bg-yellow-100';
+  return 'text-red-600 bg-red-100';
+};
+
+const SITUATION_COLORS = {
+  probate: 'bg-purple-100 text-purple-700',
+  divorce: 'bg-red-100 text-red-700',
+  downsizing: 'bg-blue-100 text-blue-700',
+  relocation: 'bg-cyan-100 text-cyan-700',
+  foreclosure: 'bg-orange-100 text-orange-700',
+  investment: 'bg-green-100 text-green-700',
+  estate: 'bg-amber-100 text-amber-700',
+  standard: 'bg-slate-100 text-slate-700'
+};
 
 export default function AdminLeads() {
   const [leads, setLeads] = useState([]);
-  const [filteredLeads, setFilteredLeads] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sourceFilter, setSourceFilter] = useState('all');
+  const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('unassigned');
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  useEffect(() => {
-    loadLeads();
-  }, []);
+  const [formData, setFormData] = useState({
+    source: 'advertising', intent: 'estate_sale', situation: '',
+    property_address: '', contact_name: '', contact_email: '',
+    contact_phone: '', home_size: '', gated_community: false,
+    sales_allowed: '', timeline: '', notes: '', score: 50
+  });
 
-  useEffect(() => {
-    filterLeads();
-  }, [searchQuery, sourceFilter, leads]);
+  useEffect(() => { loadData(); }, []);
 
-  const loadLeads = async () => {
-    try {
-      const data = await base44.entities.Lead.list();
-      setLeads(data);
-      setFilteredLeads(data);
-    } catch (error) {
-      console.error('Error loading leads:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadData = async () => {
+    setLoading(true);
+    const [leadsData, users] = await Promise.all([
+      base44.entities.Lead.list('-created_date'),
+      base44.entities.User.list()
+    ]);
+    setLeads(leadsData);
+    setOperators(users.filter(u =>
+      u.primary_account_type === 'estate_sale_operator' ||
+      u.account_types?.includes('estate_sale_operator')
+    ));
+    setLoading(false);
   };
 
-  const filterLeads = () => {
-    let filtered = leads;
+  const unassignedCount = leads.filter(l => !l.routed_to && !l.converted).length;
+  const assignedCount = leads.filter(l => l.routed_to && !l.converted).length;
+  const convertedCount = leads.filter(l => l.converted).length;
 
-    if (searchQuery) {
-      filtered = filtered.filter(lead =>
-        lead.property_address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.contact_id?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  const filteredLeads = leads.filter(lead => {
+    const q = search.toLowerCase();
+    const matchesSearch = !search ||
+      lead.property_address?.toLowerCase().includes(q) ||
+      lead.contact_name?.toLowerCase().includes(q) ||
+      lead.contact_email?.toLowerCase().includes(q) ||
+      lead.source?.toLowerCase().includes(q);
+    if (filter === 'unassigned') return matchesSearch && !lead.routed_to && !lead.converted;
+    if (filter === 'assigned') return matchesSearch && lead.routed_to && !lead.converted;
+    if (filter === 'converted') return matchesSearch && lead.converted;
+    return matchesSearch;
+  });
 
-    if (sourceFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.source === sourceFilter);
-    }
-
-    setFilteredLeads(filtered);
+  const handleAssign = async (leadId, operatorId) => {
+    await base44.entities.Lead.update(leadId, {
+      routed_to: operatorId,
+      routing_criteria: { geography: true, manual_assignment: true }
+    });
+    setShowDetail(false);
+    loadData();
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 75) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+  const handleMarkConverted = async (leadId) => {
+    await base44.entities.Lead.update(leadId, {
+      converted: true,
+      conversion_date: new Date().toISOString()
+    });
+    setShowDetail(false);
+    loadData();
   };
 
-  const getIntentBadge = (intent) => {
-    const configs = {
-      sell_home: { label: 'Sell Home', className: 'bg-blue-100 text-blue-700' },
-      buy_home: { label: 'Buy Home', className: 'bg-green-100 text-green-700' },
-      estate_sale: { label: 'Estate Sale', className: 'bg-purple-100 text-purple-700' },
-      find_items: { label: 'Find Items', className: 'bg-pink-100 text-pink-700' },
-      invest: { label: 'Invest', className: 'bg-orange-100 text-orange-700' },
-      learn: { label: 'Learn', className: 'bg-cyan-100 text-cyan-700' },
-      hire_vendor: { label: 'Hire Vendor', className: 'bg-indigo-100 text-indigo-700' }
-    };
-    const config = configs[intent] || { label: intent, className: 'bg-slate-100 text-slate-700' };
-    return <Badge className={config.className}>{config.label}</Badge>;
+  const handleAddLead = async (e) => {
+    e.preventDefault();
+    await base44.entities.Lead.create({
+      ...formData,
+      source_details: 'Manual entry by admin',
+      situation: formData.situation || 'standard',
+      score: parseInt(formData.score)
+    });
+    setShowAddModal(false);
+    setFormData({
+      source: 'advertising', intent: 'estate_sale', situation: '',
+      property_address: '', contact_name: '', contact_email: '',
+      contact_phone: '', home_size: '', gated_community: false,
+      sales_allowed: '', timeline: '', notes: '', score: 50
+    });
+    loadData();
   };
-
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-          <div className="h-64 bg-slate-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Leads Management</h1>
-        <p className="text-slate-600">{leads.length} total leads</p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <Input
-            placeholder="Search by address or contact..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">Incoming Leads</h1>
+          <p className="text-slate-600">Paid leads from EstateSalen.com advertising — assign to local operators</p>
         </div>
-        <select
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          className="px-4 py-2 border border-slate-300 rounded-lg bg-white"
-        >
-          <option value="all">All Sources</option>
-          <option value="estate_finder">Estate Finder</option>
-          <option value="home_value_tool">Home Value Tool</option>
-          <option value="marketplace_inquiry">Marketplace Inquiry</option>
-          <option value="referral">Referral</option>
-          <option value="advertising">Advertising</option>
-          <option value="organic">Organic</option>
-        </select>
+        <Button onClick={() => setShowAddModal(true)} className="bg-orange-600 hover:bg-orange-700">
+          <Plus className="w-4 h-4 mr-2" />Add Lead
+        </Button>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {filteredLeads.map(lead => (
-          <Card key={lead.id} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    {getIntentBadge(lead.intent)}
-                    {lead.score !== undefined && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Target className={`w-4 h-4 ${getScoreColor(lead.score)}`} />
-                        <span className={`font-semibold ${getScoreColor(lead.score)}`}>
-                          Score: {lead.score}
-                        </span>
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total</p><p className="text-3xl font-bold">{leads.length}</p></div><div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
+        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Unassigned</p><p className="text-3xl font-bold text-orange-600">{unassignedCount}</p></div><div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><AlertCircle className="w-5 h-5 text-orange-600" /></div></CardContent></Card>
+        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Assigned</p><p className="text-3xl font-bold text-cyan-600">{assignedCount}</p></div><div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
+        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
+      </div>
+
+      {/* Filters + Search */}
+      <div className="flex flex-col md:flex-row gap-3 items-center">
+        <Tabs value={filter} onValueChange={setFilter}>
+          <TabsList>
+            <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
+            <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
+            <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
+            <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input placeholder="Search by name, email, address..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+        </div>
+      </div>
+
+      {/* Lead Cards */}
+      {loading ? (
+        <div className="animate-pulse h-48 bg-slate-100 rounded-lg" />
+      ) : filteredLeads.length === 0 ? (
+        <Card><CardContent className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No leads found</p></CardContent></Card>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-6">
+          {filteredLeads.map(lead => {
+            const assignedOp = operators.find(o => o.id === lead.routed_to);
+            return (
+              <Card key={lead.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-lg ${getScoreColor(lead.score || 0)}`}>
+                        {lead.score || 0}
                       </div>
-                    )}
+                      <div>
+                        <p className="font-semibold text-slate-900 capitalize">{lead.intent?.replace(/_/g, ' ')}</p>
+                        {lead.situation && (
+                          <Badge className={`text-xs capitalize mt-1 ${SITUATION_COLORS[lead.situation] || SITUATION_COLORS.standard}`}>
+                            {lead.situation}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
+                        : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
+                        : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
+                    </div>
                   </div>
-                  {lead.converted && (
-                    <Badge className="bg-green-600 text-white">Converted</Badge>
+
+                  <div className="space-y-1.5 text-sm">
+                    {lead.contact_name && <div className="flex items-center gap-2"><User className="w-3.5 h-3.5 text-slate-400" /><span className="font-medium">{lead.contact_name}</span></div>}
+                    {lead.contact_email && <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /><a href={`mailto:${lead.contact_email}`} onClick={e => e.stopPropagation()} className="text-cyan-600 hover:underline">{lead.contact_email}</a></div>}
+                    {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><a href={`tel:${lead.contact_phone}`} onClick={e => e.stopPropagation()} className="text-cyan-600 hover:underline">{lead.contact_phone}</a></div>}
+                    {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600">{lead.property_address}</span></div>}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-slate-500">
+                    <span>Source: {lead.source?.replace(/_/g, ' ')}</span>
+                    {assignedOp && <span className="text-cyan-700 font-medium">→ {assignedOp.company_name || assignedOp.full_name}</span>}
+                    <span>{new Date(lead.created_date).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Quick assign if unassigned */}
+                  {!lead.routed_to && !lead.converted && (
+                    <div className="mt-3" onClick={e => e.stopPropagation()}>
+                      <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to operator..." /></SelectTrigger>
+                        <SelectContent>
+                          {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Lead Detail Modal */}
+      <Dialog open={showDetail} onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Lead Details</DialogTitle></DialogHeader>
+          {selectedLead && (
+            <div className="space-y-4 mt-2">
+              <div className="flex items-center gap-3">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold ${getScoreColor(selectedLead.score || 0)}`}>
+                  {selectedLead.score || 0}
                 </div>
-
-                <div className="space-y-2 text-sm text-slate-600">
-                  {lead.property_address && (
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 mt-0.5 text-cyan-600" />
-                      <span>{lead.property_address}</span>
-                    </div>
-                  )}
-
-                  {lead.estimated_value && (
-                    <div>
-                      <span className="font-medium">Est. Value:</span> ${lead.estimated_value.toLocaleString()}
-                    </div>
-                  )}
-
-                  {lead.timeline && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-slate-500" />
-                      <span className="capitalize">{lead.timeline.replace('_', '-')}</span>
-                    </div>
-                  )}
-
-                  {lead.situation && (
-                    <div>
-                      <span className="font-medium">Situation:</span> <span className="capitalize">{lead.situation}</span>
-                    </div>
-                  )}
-
-                  <div className="text-xs text-slate-500 pt-2 border-t">
-                    <span className="font-medium">Source:</span> {lead.source.replace('_', ' ')}
-                    {lead.source_details && <span> - {lead.source_details}</span>}
-                  </div>
-
-                  {lead.routed_to && (
-                    <div className="text-xs">
-                      <Badge variant="outline" className="text-green-700 border-green-300">Assigned</Badge>
-                    </div>
-                  )}
+                <div>
+                  <p className="font-semibold text-slate-900 capitalize">{selectedLead.intent?.replace(/_/g, ' ')}</p>
+                  <p className="text-sm text-slate-500 capitalize">{selectedLead.source?.replace(/_/g, ' ')}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
-      {filteredLeads.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">No leads found</p>
-          </CardContent>
-        </Card>
-      )}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {selectedLead.contact_name && <div><p className="text-xs text-slate-500 mb-0.5">Name</p><p className="font-medium">{selectedLead.contact_name}</p></div>}
+                {selectedLead.contact_email && <div><p className="text-xs text-slate-500 mb-0.5">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="text-cyan-600 hover:underline break-all">{selectedLead.contact_email}</a></div>}
+                {selectedLead.contact_phone && <div><p className="text-xs text-slate-500 mb-0.5">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
+                {selectedLead.timeline && <div><p className="text-xs text-slate-500 mb-0.5">Timeline</p><p className="capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
+                {selectedLead.estimated_value && <div><p className="text-xs text-slate-500 mb-0.5">Est. Value</p><p className="text-green-600 font-semibold">${selectedLead.estimated_value.toLocaleString()}</p></div>}
+                {selectedLead.situation && <div><p className="text-xs text-slate-500 mb-0.5">Situation</p><p className="capitalize">{selectedLead.situation}</p></div>}
+                {selectedLead.home_size && <div><p className="text-xs text-slate-500 mb-0.5">Home Size</p><p className="capitalize">{selectedLead.home_size.replace(/_/g, ' ')}</p></div>}
+              </div>
+
+              {selectedLead.property_address && (
+                <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg">
+                  <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                  <span>{selectedLead.property_address}</span>
+                </div>
+              )}
+
+              {selectedLead.notes && (
+                <div className="p-3 bg-slate-50 rounded-lg text-sm">
+                  <p className="font-medium mb-1">Notes</p>
+                  <p className="text-slate-600">{selectedLead.notes}</p>
+                </div>
+              )}
+
+              {!selectedLead.routed_to && !selectedLead.converted && (
+                <div>
+                  <p className="text-sm font-medium mb-1">Assign to Operator</p>
+                  <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
+                    <SelectTrigger><SelectValue placeholder="Select operator..." /></SelectTrigger>
+                    <SelectContent>
+                      {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {selectedLead.routed_to && !selectedLead.converted && (
+                <div className="space-y-2">
+                  <div className="p-3 bg-cyan-50 rounded-lg text-sm">
+                    <p className="text-xs text-slate-500 mb-0.5">Assigned to</p>
+                    <p className="font-medium text-cyan-800">
+                      {operators.find(o => o.id === selectedLead.routed_to)?.company_name ||
+                       operators.find(o => o.id === selectedLead.routed_to)?.full_name || 'Operator'}
+                    </p>
+                  </div>
+                  <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700">
+                    <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
+                <Clock className="w-3 h-3" />
+                Added {new Date(selectedLead.created_date).toLocaleDateString()}
+                {selectedLead.converted && <Badge className="ml-auto bg-green-100 text-green-800">Converted</Badge>}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lead Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-2xl">Add Lead Manually</DialogTitle></DialogHeader>
+          <form onSubmit={handleAddLead} className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Contact Name *</Label><Input value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })} placeholder="John Doe" required /></div>
+              <div><Label>Source</Label>
+                <Select value={formData.source} onValueChange={(v) => setFormData({ ...formData, source: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="advertising">Advertising</SelectItem>
+                    <SelectItem value="estate_finder">Estate Finder</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                    <SelectItem value="organic">Organic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Email</Label><Input type="email" value={formData.contact_email} onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })} placeholder="john@example.com" /></div>
+              <div><Label>Phone</Label><Input type="tel" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} placeholder="(555) 123-4567" /></div>
+            </div>
+            <div><Label>Property Address *</Label><Input value={formData.property_address} onChange={(e) => setFormData({ ...formData, property_address: e.target.value })} placeholder="123 Main St, City, State ZIP" required /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Situation</Label>
+                <Select value={formData.situation} onValueChange={(v) => setFormData({ ...formData, situation: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    {['probate','divorce','downsizing','relocation','foreclosure','investment','estate','standard'].map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Timeline</Label>
+                <Select value={formData.timeline} onValueChange={(v) => setFormData({ ...formData, timeline: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immediate">Immediate</SelectItem>
+                    <SelectItem value="1_3_months">1-3 Months</SelectItem>
+                    <SelectItem value="3_6_months">3-6 Months</SelectItem>
+                    <SelectItem value="6_12_months">6-12 Months</SelectItem>
+                    <SelectItem value="exploring">Just Exploring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Home Size</Label>
+                <Select value={formData.home_size} onValueChange={(v) => setFormData({ ...formData, home_size: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-2_bedroom">1-2 Bedroom</SelectItem>
+                    <SelectItem value="3-4_bedroom">3-4 Bedroom</SelectItem>
+                    <SelectItem value="5+_bedroom">5+ Bedroom</SelectItem>
+                    <SelectItem value="apartment_condo">Apartment/Condo</SelectItem>
+                    <SelectItem value="storefront_business">Storefront/Business</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Lead Score (0-100)</Label><Input type="number" min="0" max="100" value={formData.score} onChange={(e) => setFormData({ ...formData, score: e.target.value })} /></div>
+            </div>
+            <div><Label>Notes</Label><Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Additional details..." rows={3} /></div>
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button type="submit" className="bg-orange-600 hover:bg-orange-700">Add Lead</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
