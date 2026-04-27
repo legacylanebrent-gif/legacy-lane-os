@@ -155,10 +155,10 @@ export default function AdminLeadsPropstream() {
                 </div>
                 <div className="space-y-2 mt-3 pt-2 border-t text-xs">
                   {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
-                  {lead.estimated_referral_fee && (
+                  {lead.estimated_value && (
                     <>
-                      <div className="flex justify-between"><span className="text-slate-500">Platform Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_referral_fee * 2.333).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-500">Operator Income:</span><span className="text-purple-600 font-semibold">${lead.estimated_referral_fee.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Platform Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.70).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Operator Income:</span><span className="text-purple-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
                     </>
                   )}
                   {lead.propstream_equity && <div className="flex justify-between"><span className="text-slate-500">Equity:</span><span className="text-slate-600">${lead.propstream_equity.toLocaleString()}</span></div>}
