@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Heart, AlertCircle } from 'lucide-react';
+import { User, Heart, AlertCircle, MapPin, ShoppingBag, Star, Users, MessageSquare, Bell, Ticket, HandCoins } from 'lucide-react';
 
 export default function ConsumerDashboard({ user }) {
   const [error, setError] = useState(null);
@@ -39,11 +39,11 @@ export default function ConsumerDashboard({ user }) {
   }
   const quickActions = [
     {
-      title: 'My Profile',
-      description: 'Edit your profile and settings',
-      icon: User,
-      link: 'MyProfile',
-      color: 'blue'
+      title: 'Find Estate Sales',
+      description: 'Browse upcoming estate sales near you',
+      icon: MapPin,
+      link: 'EstateSaleFinder',
+      color: 'orange'
     },
     {
       title: 'My Favorites',
@@ -51,12 +51,76 @@ export default function ConsumerDashboard({ user }) {
       icon: Heart,
       link: 'Favorites',
       color: 'red'
-    }
+    },
+    {
+      title: 'Marketplace',
+      description: 'Shop items from estate sales',
+      icon: ShoppingBag,
+      link: 'BrowseItems',
+      color: 'cyan'
+    },
+    {
+      title: 'Check-ins & Rewards',
+      description: 'Check in at sales and earn rewards',
+      icon: MapPin,
+      link: 'RewardsCheckins',
+      color: 'green'
+    },
+    {
+      title: 'My Rewards',
+      description: 'View your points and reward history',
+      icon: Star,
+      link: 'MyRewards',
+      color: 'yellow'
+    },
+    {
+      title: 'My Referrals',
+      description: 'Invite friends and earn bonuses',
+      icon: Users,
+      link: 'MyReferrals',
+      color: 'purple'
+    },
+    {
+      title: 'Buyouts',
+      description: 'Request a full estate buyout',
+      icon: HandCoins,
+      link: 'Buyouts',
+      color: 'amber'
+    },
+    {
+      title: 'Support',
+      description: 'Get help with your account',
+      icon: MessageSquare,
+      link: 'MyTickets',
+      color: 'slate'
+    },
+    {
+      title: 'Notifications',
+      description: 'View your recent notifications',
+      icon: Bell,
+      link: 'Notifications',
+      color: 'indigo'
+    },
+    {
+      title: 'My Profile',
+      description: 'Edit your profile and settings',
+      icon: User,
+      link: 'MyProfile',
+      color: 'blue'
+    },
   ];
 
   const colorMap = {
-    blue: { bg: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-200' },
-    red: { bg: 'bg-red-500', text: 'text-red-600', border: 'border-red-200' }
+    orange: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-200' },
+    red:    { bg: 'bg-red-100',    text: 'text-red-600',    border: 'border-red-200' },
+    cyan:   { bg: 'bg-cyan-100',   text: 'text-cyan-600',   border: 'border-cyan-200' },
+    green:  { bg: 'bg-green-100',  text: 'text-green-600',  border: 'border-green-200' },
+    yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
+    purple: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
+    amber:  { bg: 'bg-amber-100',  text: 'text-amber-600',  border: 'border-amber-200' },
+    slate:  { bg: 'bg-slate-100',  text: 'text-slate-600',  border: 'border-slate-200' },
+    indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600', border: 'border-indigo-200' },
+    blue:   { bg: 'bg-blue-100',   text: 'text-blue-600',   border: 'border-blue-200' },
   };
 
   try {
@@ -75,28 +139,23 @@ export default function ConsumerDashboard({ user }) {
         
         <div>
           <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
-            Welcome, {user?.full_name || 'User'}
+            Welcome, {user?.full_name || 'User'}!
           </h1>
-          <p className="text-slate-600">Manage your profile and favorites</p>
-          <p className="text-xs text-slate-400 mt-2">Account Type: {user?.primary_account_type || 'Not Set'}</p>
+          <p className="text-slate-600">Everything you need, all in one place.</p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-6 max-w-2xl">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {quickActions.map((action, index) => {
             const colors = colorMap[action.color];
             return (
               <Link key={index} to={createPageUrl(action.link)}>
-                <Card className={`cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 border-2 ${colors.border}`}>
-                  <CardHeader>
-                    <div className={`w-12 h-12 rounded-lg ${colors.bg} bg-opacity-20 flex items-center justify-center mb-3`}>
-                      <action.icon className={`h-6 w-6 ${colors.text}`} />
+                <Card className={`cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border ${colors.border} h-full`}>
+                  <CardContent className="p-5">
+                    <div className={`w-11 h-11 rounded-xl ${colors.bg} flex items-center justify-center mb-3`}>
+                      <action.icon className={`h-5 w-5 ${colors.text}`} />
                     </div>
-                    <CardTitle className="text-lg font-serif text-navy-900">
-                      {action.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-slate-600">{action.description}</p>
+                    <h3 className="font-semibold text-slate-900 mb-1">{action.title}</h3>
+                    <p className="text-sm text-slate-500">{action.description}</p>
                   </CardContent>
                 </Card>
               </Link>
