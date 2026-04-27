@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, MapPin, Home, UserCheck, Clock, Mail, Phone, User } from 'lucide-react';
+import { TrendingUp, MapPin, Home, UserCheck, Clock, Mail, Phone, User, DollarSign } from 'lucide-react';
 
 const getScoreColor = (score) => {
   if (score >= 80) return 'text-green-600 bg-green-100';
@@ -82,8 +82,8 @@ export default function LeadCard({ lead, onRoute, onClick, assignedOperator }) {
           )}
         </div>
 
-        {/* Value + Timeline */}
-        {(lead.estimated_value || lead.timeline) && (
+        {/* Value + Timeline + Referral Fee */}
+        {(lead.estimated_value || lead.timeline || lead.estimated_referral_fee) && (
           <div className="grid grid-cols-2 gap-3 mb-3 pb-3 border-b">
             {lead.estimated_value && (
               <div>
@@ -95,6 +95,14 @@ export default function LeadCard({ lead, onRoute, onClick, assignedOperator }) {
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Timeline</p>
                 <p className="font-semibold text-slate-900 text-sm capitalize">{lead.timeline?.replace(/_/g, ' ')}</p>
+              </div>
+            )}
+            {lead.estimated_referral_fee && (
+              <div>
+                <p className="text-xs text-slate-500 mb-0.5 flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" />Referral Fee
+                </p>
+                <p className="font-semibold text-green-700 text-sm">${lead.estimated_referral_fee.toLocaleString()}</p>
               </div>
             )}
           </div>
