@@ -435,19 +435,21 @@ export default function Revenue() {
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const courseQuantities = calculateProjections(courseSalesPerMonth, courseGrowth, 120);
   
-  // Calculate referral fee revenue from estate sale operators
-  const leadsAcceptedPerMonth = operatorLeadsPerMonth * (leadAcceptanceRate / 100);
-  const referralsConvertedPerMonth = leadsAcceptedPerMonth * (referralConversionRate / 100);
-  const avgReferralFeeCalculated = avgPropertyValue * referralFeePercent;
-  const estateReferralMonthlyRevenue = referralsConvertedPerMonth * avgReferralFeeCalculated;
-  const estateReferralProjections = calculateProjections(estateReferralMonthlyRevenue, operatorLeadGrowth, 120);
-  const estateReferralQuantities = calculateProjections(referralsConvertedPerMonth, operatorLeadGrowth, 120);
-  
-  // Legacy referral projections (for backward compatibility)
-  const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
-  const referralQuantities = calculateProjections(referralsPerMonth, referralGrowth, 120);
-  
-  // Combined referral projections (estate + legacy)
+  // CARD 1: Lead fee — Leads per month × 75% conversion × $75
+  const leadConversionRate = 0.75;
+  const leadFee = 75;
+  const leadFeeMonthlyRevenue = operatorLeadsPerMonth * leadConversionRate * leadFee;
+  const leadsAcceptedPerMonth = operatorLeadsPerMonth * leadConversionRate;
+  const estateReferralProjections = calculateProjections(leadFeeMonthlyRevenue, operatorLeadGrowth, 120);
+  const estateReferralQuantities = calculateProjections(leadsAcceptedPerMonth, operatorLeadGrowth, 120);
+
+  // CARD 2: RE Referral income — 5% of accepted leads × avg referral fee
+  const reReferralRate = 0.05;
+  const reReferralMonthlyRevenue = leadsAcceptedPerMonth * reReferralRate * avgReferralFee;
+  const referralProjections = calculateProjections(reReferralMonthlyRevenue, referralGrowth, 120);
+  const referralQuantities = calculateProjections(leadsAcceptedPerMonth * reReferralRate, referralGrowth, 120);
+
+  // Combined for total projections
   const combinedReferralProjections = estateReferralProjections.map((val, i) => val + referralProjections[i]);
   const combinedReferralQuantities = estateReferralQuantities.map((val, i) => val + referralQuantities[i]);
   
