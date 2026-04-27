@@ -29,6 +29,7 @@ const getScoreColor = (score) => {
 export default function Leads() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('leads');
+  const [hasEnterprisePackage, setHasEnterprisePackage] = useState(false);
 
   // Leads (assigned to this operator)
   const [leads, setLeads] = useState([]);
@@ -51,6 +52,12 @@ export default function Leads() {
   const loadUser = async () => {
     const me = await base44.auth.me();
     setUser(me);
+    
+    // Check if user has Enterprise Package subscription
+    const subscriptions = await base44.entities.Subscription.filter({ user_id: me.id, status: 'active' });
+    const hasEnterprise = subscriptions.some(sub => sub.package_type === 'Enterprise' || sub.package_name?.includes('Enterprise'));
+    setHasEnterprisePackage(hasEnterprise);
+    
     loadLeads(me.id);
     loadDeals(me.id);
   };
@@ -183,7 +190,7 @@ export default function Leads() {
                       <div className="space-y-2 text-xs border-t pt-2">
                         {lead.estimated_value && (
                           <>
-                            <div className="flex justify-between"><span className="text-slate-500">Lead Fee:</span><span className="text-red-600 font-semibold">$75</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Lead Fee:</span><span className={hasEnterprisePackage ? 'text-green-600 font-semibold line-through' : 'text-red-600 font-semibold'}>$75</span>{hasEnterprisePackage && <span className="text-green-600 font-semibold text-xs">WAIVED</span>}</div>
                             <div className="flex justify-between"><span className="text-slate-500">Refer Lead and Earn Approx:</span><span className="text-amber-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
                             <div className="flex justify-between"><span className="text-slate-500">Timeline:</span><span className="capitalize">{lead.timeline?.replace(/_/g, ' ') || 'N/A'}</span></div>
                           </>
@@ -343,7 +350,8 @@ export default function Leads() {
                    <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor and they successfully list and close the property, you could earn a finder fee of approximately <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span>. We handle the entire referral process with the realtor and you get paid 7 days after the property closes.</p>
                  </div>
                  <div className="space-y-2 p-3 bg-white rounded-lg text-xs text-slate-600 border border-amber-200">
-                   <p>✓ $75 lead fee required to accept and book this lead</p>
+                   {!hasEnterprisePackage && <p>✓ $75 lead fee required to accept and book this lead</p>}
+                   {hasEnterprisePackage && <p className="text-green-600 font-semibold">✓ Lead fee waived (Enterprise Package)</p>}
                    <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
                    <p>✓ Finder fee applies if referral converts to actual closing: approximately $513 is based on property value. Could be more or less depending on final sale value</p>
                    <p>✓ You receive payment approximately 7 days after property closes</p>
