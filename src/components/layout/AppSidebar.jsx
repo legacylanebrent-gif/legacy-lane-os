@@ -23,6 +23,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyProfile',              label: 'My Profile',          icon: User,            group: 'Main' },
   { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
+  { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Main' },
   { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
 
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
@@ -31,7 +32,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
   { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
 
-  { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Marketplace' },
   { page: 'MyListings',             label: 'My Listings',         icon: ShoppingBag,     group: 'Marketplace' },
 
   { page: 'CRM',                    label: 'CRM',                 icon: Users,           group: 'CRM & Leads' },
