@@ -1373,13 +1373,21 @@ export default function Revenue() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                     <div className="text-sm text-slate-700">
-                       <strong>Calculation:</strong> Leads per Month × Conversion Rate × $75 lead fee
-                     </div>
-                   </div>
+                   <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-sm text-slate-700">
+                        <strong>Calculation:</strong> Leads per Month × Conversion Rate × $75 lead fee
+                      </div>
+                    </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="text-xs text-slate-500 mb-1 font-medium">Total Operators in System</div>
+                      <div className="text-3xl font-bold text-slate-800">
+                        {Math.round(bizInBoxQuantities[0] || 0)}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-2">Each operator receives 10 leads/month</div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                      <div>
                        <Label>Leads Per Month</Label>
                        <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
