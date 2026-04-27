@@ -1,0 +1,155 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "social_ads",
+        "propstream",
+        "website",
+        "estate_finder",
+        "home_value_tool",
+        "course_signup",
+        "marketplace_inquiry",
+        "referral",
+        "advertising",
+        "organic"
+      ]
+    },
+    "source_details": {
+      "type": "string",
+      "description": "Campaign name, referrer, etc."
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "home_size": {
+      "type": "string"
+    },
+    "gated_community": {
+      "type": "boolean",
+      "default": false
+    },
+    "sales_allowed": {
+      "type": "string"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "sell_home",
+        "buy_home",
+        "estate_sale",
+        "find_items",
+        "invest",
+        "learn",
+        "hire_vendor"
+      ]
+    },
+    "situation": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "investment",
+        "standard"
+      ]
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "timeline": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "1_3_months",
+        "3_6_months",
+        "6_12_months",
+        "exploring"
+      ]
+    },
+    "routed_to": {
+      "type": "string",
+      "description": "User ID of assigned professional"
+    },
+    "routing_criteria": {
+      "type": "object",
+      "properties": {
+        "geography": {
+          "type": "boolean"
+        },
+        "certification": {
+          "type": "boolean"
+        },
+        "performance": {
+          "type": "boolean"
+        },
+        "availability": {
+          "type": "boolean"
+        }
+      }
+    },
+    "score": {
+      "type": "integer",
+      "description": "Lead quality score 0-100"
+    },
+    "converted": {
+      "type": "boolean",
+      "default": false
+    },
+    "conversion_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revenue_generated": {
+      "type": "number",
+      "default": 0
+    },
+    "ad_platform": {
+      "type": "string",
+      "description": "e.g. Facebook, Instagram, TikTok (social_ads source)"
+    },
+    "ad_campaign": {
+      "type": "string",
+      "description": "Campaign name for social ads"
+    },
+    "propstream_id": {
+      "type": "string",
+      "description": "Propstream property ID"
+    },
+    "propstream_equity": {
+      "type": "number",
+      "description": "Estimated equity from Propstream"
+    },
+    "propstream_owner_type": {
+      "type": "string",
+      "description": "e.g. absentee, inherited, distressed"
+    },
+    "website_page": {
+      "type": "string",
+      "description": "Which page/form the lead came from on EstateSalen.com"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "intent"
+  ]
+}

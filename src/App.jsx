@@ -9,6 +9,9 @@ import PageNotFound from './lib/PageNotFound';
 import SalePricingTool from './pages/SalePricingTool';
 import ApiKeyManager from './pages/ApiKeyManager';
 import ManageTeam from './pages/ManageTeam';
+import AdminLeadsSocialAds from './pages/AdminLeadsSocialAds';
+import AdminLeadsPropstream from './pages/AdminLeadsPropstream';
+import AdminLeadsWebsite from './pages/AdminLeadsWebsite';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -65,6 +68,9 @@ const AuthenticatedApp = () => {
       <Route path="/SalePricingTool" element={<LayoutWrapper currentPageName="SalePricingTool"><SalePricingTool /></LayoutWrapper>} />
       <Route path="/ApiKeyManager" element={<LayoutWrapper currentPageName="ApiKeyManager"><ApiKeyManager /></LayoutWrapper>} />
       <Route path="/ManageTeam" element={<LayoutWrapper currentPageName="ManageTeam"><ManageTeam /></LayoutWrapper>} />
+      <Route path="/AdminLeadsSocialAds" element={<LayoutWrapper currentPageName="AdminLeadsSocialAds"><AdminLeadsSocialAds /></LayoutWrapper>} />
+      <Route path="/AdminLeadsPropstream" element={<LayoutWrapper currentPageName="AdminLeadsPropstream"><AdminLeadsPropstream /></LayoutWrapper>} />
+      <Route path="/AdminLeadsWebsite" element={<LayoutWrapper currentPageName="AdminLeadsWebsite"><AdminLeadsWebsite /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

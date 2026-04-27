@@ -1,369 +1,229 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  Plus, Mail, Phone, MapPin, Clock, TrendingUp, User,
-  CheckCircle, Search, Users, AlertCircle, UserCheck
-} from 'lucide-react';
+import { Search, TrendingUp, AlertCircle, CheckCircle, User, Facebook, Database, Globe, ExternalLink } from 'lucide-react';
 
-const getScoreColor = (score) => {
-  if (score >= 75) return 'text-green-600 bg-green-100';
-  if (score >= 50) return 'text-yellow-600 bg-yellow-100';
-  return 'text-red-600 bg-red-100';
+const SOURCE_CONFIG = {
+  social_ads:  { label: 'Social Ads',  color: 'bg-blue-100 text-blue-700',   icon: Facebook, accent: 'text-blue-600',  page: 'AdminLeadsSocialAds' },
+  propstream:  { label: 'Propstream',  color: 'bg-purple-100 text-purple-700', icon: Database, accent: 'text-purple-600', page: 'AdminLeadsPropstream' },
+  website:     { label: 'Website',     color: 'bg-cyan-100 text-cyan-700',    icon: Globe,    accent: 'text-cyan-600',  page: 'AdminLeadsWebsite' },
+  advertising: { label: 'Advertising', color: 'bg-orange-100 text-orange-700', icon: TrendingUp, accent: 'text-orange-600', page: null },
+  referral:    { label: 'Referral',    color: 'bg-green-100 text-green-700',  icon: User,     accent: 'text-green-600', page: null },
+  organic:     { label: 'Organic',     color: 'bg-slate-100 text-slate-700',  icon: Globe,    accent: 'text-slate-600', page: null },
 };
 
-const SITUATION_COLORS = {
-  probate: 'bg-purple-100 text-purple-700',
-  divorce: 'bg-red-100 text-red-700',
-  downsizing: 'bg-blue-100 text-blue-700',
-  relocation: 'bg-cyan-100 text-cyan-700',
-  foreclosure: 'bg-orange-100 text-orange-700',
-  investment: 'bg-green-100 text-green-700',
-  estate: 'bg-amber-100 text-amber-700',
-  standard: 'bg-slate-100 text-slate-700'
+const getScoreColor = (score) => {
+  if (score >= 75) return 'bg-green-100 text-green-700';
+  if (score >= 50) return 'bg-yellow-100 text-yellow-700';
+  return 'bg-red-100 text-red-700';
 };
 
 export default function AdminLeads() {
   const [leads, setLeads] = useState([]);
-  const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('unassigned');
-  const [selectedLead, setSelectedLead] = useState(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const [formData, setFormData] = useState({
-    source: 'advertising', intent: 'estate_sale', situation: '',
-    property_address: '', contact_name: '', contact_email: '',
-    contact_phone: '', home_size: '', gated_community: false,
-    sales_allowed: '', timeline: '', notes: '', score: 50
-  });
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
-    const [leadsData, users] = await Promise.all([
-      base44.entities.Lead.list('-created_date'),
-      base44.entities.User.list()
-    ]);
-    setLeads(leadsData);
-    setOperators(users.filter(u =>
-      u.primary_account_type === 'estate_sale_operator' ||
-      u.account_types?.includes('estate_sale_operator')
-    ));
+    const data = await base44.entities.Lead.list('-created_date');
+    setLeads(data);
     setLoading(false);
   };
 
-  const unassignedCount = leads.filter(l => !l.routed_to && !l.converted).length;
-  const assignedCount = leads.filter(l => l.routed_to && !l.converted).length;
-  const convertedCount = leads.filter(l => l.converted).length;
-
-  const filteredLeads = leads.filter(lead => {
+  const filtered = leads.filter(lead => {
     const q = search.toLowerCase();
-    const matchesSearch = !search ||
-      lead.property_address?.toLowerCase().includes(q) ||
+    const matchSearch = !search ||
       lead.contact_name?.toLowerCase().includes(q) ||
       lead.contact_email?.toLowerCase().includes(q) ||
+      lead.property_address?.toLowerCase().includes(q) ||
       lead.source?.toLowerCase().includes(q);
-    if (filter === 'unassigned') return matchesSearch && !lead.routed_to && !lead.converted;
-    if (filter === 'assigned') return matchesSearch && lead.routed_to && !lead.converted;
-    if (filter === 'converted') return matchesSearch && lead.converted;
-    return matchesSearch;
+    const matchSource = sourceFilter === 'all' || lead.source === sourceFilter;
+    const matchStatus = statusFilter === 'all' ||
+      (statusFilter === 'unassigned' && !lead.routed_to && !lead.converted) ||
+      (statusFilter === 'assigned' && lead.routed_to && !lead.converted) ||
+      (statusFilter === 'converted' && lead.converted);
+    return matchSearch && matchSource && matchStatus;
   });
 
-  const handleAssign = async (leadId, operatorId) => {
-    await base44.entities.Lead.update(leadId, {
-      routed_to: operatorId,
-      routing_criteria: { geography: true, manual_assignment: true }
-    });
-    setShowDetail(false);
-    loadData();
-  };
-
-  const handleMarkConverted = async (leadId) => {
-    await base44.entities.Lead.update(leadId, {
-      converted: true,
-      conversion_date: new Date().toISOString()
-    });
-    setShowDetail(false);
-    loadData();
-  };
-
-  const handleAddLead = async (e) => {
-    e.preventDefault();
-    await base44.entities.Lead.create({
-      ...formData,
-      source_details: 'Manual entry by admin',
-      situation: formData.situation || 'standard',
-      score: parseInt(formData.score)
-    });
-    setShowAddModal(false);
-    setFormData({
-      source: 'advertising', intent: 'estate_sale', situation: '',
-      property_address: '', contact_name: '', contact_email: '',
-      contact_phone: '', home_size: '', gated_community: false,
-      sales_allowed: '', timeline: '', notes: '', score: 50
-    });
-    loadData();
+  const stats = {
+    total: leads.length,
+    unassigned: leads.filter(l => !l.routed_to && !l.converted).length,
+    assigned: leads.filter(l => l.routed_to && !l.converted).length,
+    converted: leads.filter(l => l.converted).length,
+    social: leads.filter(l => l.source === 'social_ads').length,
+    propstream: leads.filter(l => l.source === 'propstream').length,
+    website: leads.filter(l => l.source === 'website').length,
   };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">Incoming Leads</h1>
-          <p className="text-slate-600">Paid leads from EstateSalen.com advertising — assign to local operators</p>
-        </div>
-        <Button onClick={() => setShowAddModal(true)} className="bg-orange-600 hover:bg-orange-700">
-          <Plus className="w-4 h-4 mr-2" />Add Lead
-        </Button>
+      <div>
+        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">All Leads — Consolidated</h1>
+        <p className="text-slate-600">Every lead from all sources. Use the source pages to add and manage leads by channel.</p>
       </div>
 
-      {/* Stats */}
+      {/* Source Quick Links */}
+      <div className="grid grid-cols-3 gap-4">
+        <Link to={createPageUrl('AdminLeadsSocialAds')}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 mb-0.5">Social Ads</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.social}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Facebook className="w-6 h-6 text-blue-500" />
+                <ExternalLink className="w-4 h-4 text-slate-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to={createPageUrl('AdminLeadsPropstream')}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-purple-500">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 mb-0.5">Propstream</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.propstream}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Database className="w-6 h-6 text-purple-500" />
+                <ExternalLink className="w-4 h-4 text-slate-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to={createPageUrl('AdminLeadsWebsite')}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-cyan-500">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 mb-0.5">Website</p>
+                <p className="text-2xl font-bold text-cyan-600">{stats.website}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe className="w-6 h-6 text-cyan-500" />
+                <ExternalLink className="w-4 h-4 text-slate-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Overall Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total</p><p className="text-3xl font-bold">{leads.length}</p></div><div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
-        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Unassigned</p><p className="text-3xl font-bold text-orange-600">{unassignedCount}</p></div><div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><AlertCircle className="w-5 h-5 text-orange-600" /></div></CardContent></Card>
-        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Assigned</p><p className="text-3xl font-bold text-cyan-600">{assignedCount}</p></div><div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
-        <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Total Leads</p><p className="text-3xl font-bold mt-1">{stats.total}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Unassigned</p><p className="text-3xl font-bold mt-1 text-orange-600">{stats.unassigned}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Assigned</p><p className="text-3xl font-bold mt-1 text-cyan-600">{stats.assigned}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Converted</p><p className="text-3xl font-bold mt-1 text-green-600">{stats.converted}</p></CardContent></Card>
       </div>
 
-      {/* Filters + Search */}
-      <div className="flex flex-col md:flex-row gap-3 items-center">
-        <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList>
-            <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
-            <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
-            <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
-            <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <div className="relative flex-1 w-full">
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input placeholder="Search by name, email, address..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+          <Input placeholder="Search by name, email, address..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>
+        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="All Sources" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sources</SelectItem>
+            <SelectItem value="social_ads">Social Ads</SelectItem>
+            <SelectItem value="propstream">Propstream</SelectItem>
+            <SelectItem value="website">Website</SelectItem>
+            <SelectItem value="advertising">Advertising</SelectItem>
+            <SelectItem value="referral">Referral</SelectItem>
+            <SelectItem value="organic">Organic</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+            <SelectItem value="assigned">Assigned</SelectItem>
+            <SelectItem value="converted">Converted</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Lead Cards */}
+      {/* Table */}
       {loading ? (
-        <div className="animate-pulse h-48 bg-slate-100 rounded-lg" />
-      ) : filteredLeads.length === 0 ? (
-        <Card><CardContent className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No leads found</p></CardContent></Card>
+        <div className="animate-pulse h-64 bg-slate-100 rounded-lg" />
       ) : (
-        <div className="grid lg:grid-cols-2 gap-6">
-          {filteredLeads.map(lead => {
-            const assignedOp = operators.find(o => o.id === lead.routed_to);
-            return (
-              <Card key={lead.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-lg ${getScoreColor(lead.score || 0)}`}>
-                        {lead.score || 0}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 capitalize">{lead.intent?.replace(/_/g, ' ')}</p>
-                        {lead.situation && (
-                          <Badge className={`text-xs capitalize mt-1 ${SITUATION_COLORS[lead.situation] || SITUATION_COLORS.standard}`}>
-                            {lead.situation}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
-                        : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
-                        : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 text-sm">
-                    {lead.contact_name && <div className="flex items-center gap-2"><User className="w-3.5 h-3.5 text-slate-400" /><span className="font-medium">{lead.contact_name}</span></div>}
-                    {lead.contact_email && <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /><a href={`mailto:${lead.contact_email}`} onClick={e => e.stopPropagation()} className="text-cyan-600 hover:underline">{lead.contact_email}</a></div>}
-                    {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><a href={`tel:${lead.contact_phone}`} onClick={e => e.stopPropagation()} className="text-cyan-600 hover:underline">{lead.contact_phone}</a></div>}
-                    {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600">{lead.property_address}</span></div>}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-slate-500">
-                    <span>Source: {lead.source?.replace(/_/g, ' ')}</span>
-                    {assignedOp && <span className="text-cyan-700 font-medium">→ {assignedOp.company_name || assignedOp.full_name}</span>}
-                    <span>{new Date(lead.created_date).toLocaleDateString()}</span>
-                  </div>
-
-                  {/* Quick assign if unassigned */}
-                  {!lead.routed_to && !lead.converted && (
-                    <div className="mt-3" onClick={e => e.stopPropagation()}>
-                      <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
-                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to operator..." /></SelectTrigger>
-                        <SelectContent>
-                          {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b">
+                <tr>
+                  <th className="text-left p-4 font-semibold text-slate-600">Score</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Name</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Contact</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Property</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Source</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Intent</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Value</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Status</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.length === 0 ? (
+                  <tr><td colSpan="9" className="p-12 text-center text-slate-400">No leads found</td></tr>
+                ) : filtered.map(lead => {
+                  const src = SOURCE_CONFIG[lead.source] || { label: lead.source, color: 'bg-slate-100 text-slate-700' };
+                  const SrcIcon = src.icon;
+                  return (
+                    <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-4">
+                        <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm ${getScoreColor(lead.score || 0)}`}>
+                          {lead.score || '—'}
+                        </span>
+                      </td>
+                      <td className="p-4 font-medium text-slate-900">{lead.contact_name || <span className="text-slate-400">—</span>}</td>
+                      <td className="p-4">
+                        <div className="space-y-0.5">
+                          {lead.contact_email && <a href={`mailto:${lead.contact_email}`} className="text-cyan-600 hover:underline block truncate max-w-[160px]">{lead.contact_email}</a>}
+                          {lead.contact_phone && <a href={`tel:${lead.contact_phone}`} className="text-slate-600 hover:underline block">{lead.contact_phone}</a>}
+                        </div>
+                      </td>
+                      <td className="p-4 text-slate-600 max-w-[180px]">
+                        <span className="line-clamp-2">{lead.property_address || '—'}</span>
+                      </td>
+                      <td className="p-4">
+                        <Badge className={`${src.color} flex items-center gap-1 w-fit`}>
+                          {SrcIcon && <SrcIcon className="w-3 h-3" />}
+                          {src.label}
+                        </Badge>
+                      </td>
+                      <td className="p-4 capitalize text-slate-600">{lead.intent?.replace(/_/g, ' ') || '—'}</td>
+                      <td className="p-4 font-semibold text-green-700">{lead.estimated_value ? `$${lead.estimated_value.toLocaleString()}` : '—'}</td>
+                      <td className="p-4">
+                        {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
+                          : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
+                          : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
+                      </td>
+                      <td className="p-4 text-slate-500 whitespace-nowrap">{new Date(lead.created_date).toLocaleDateString()}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="p-4 border-t text-sm text-slate-500">
+            Showing {filtered.length} of {leads.length} leads
+          </div>
+        </Card>
       )}
-
-      {/* Lead Detail Modal */}
-      <Dialog open={showDetail} onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Lead Details</DialogTitle></DialogHeader>
-          {selectedLead && (
-            <div className="space-y-4 mt-2">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold ${getScoreColor(selectedLead.score || 0)}`}>
-                  {selectedLead.score || 0}
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900 capitalize">{selectedLead.intent?.replace(/_/g, ' ')}</p>
-                  <p className="text-sm text-slate-500 capitalize">{selectedLead.source?.replace(/_/g, ' ')}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                {selectedLead.contact_name && <div><p className="text-xs text-slate-500 mb-0.5">Name</p><p className="font-medium">{selectedLead.contact_name}</p></div>}
-                {selectedLead.contact_email && <div><p className="text-xs text-slate-500 mb-0.5">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="text-cyan-600 hover:underline break-all">{selectedLead.contact_email}</a></div>}
-                {selectedLead.contact_phone && <div><p className="text-xs text-slate-500 mb-0.5">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
-                {selectedLead.timeline && <div><p className="text-xs text-slate-500 mb-0.5">Timeline</p><p className="capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
-                {selectedLead.estimated_value && <div><p className="text-xs text-slate-500 mb-0.5">Est. Value</p><p className="text-green-600 font-semibold">${selectedLead.estimated_value.toLocaleString()}</p></div>}
-                {selectedLead.situation && <div><p className="text-xs text-slate-500 mb-0.5">Situation</p><p className="capitalize">{selectedLead.situation}</p></div>}
-                {selectedLead.home_size && <div><p className="text-xs text-slate-500 mb-0.5">Home Size</p><p className="capitalize">{selectedLead.home_size.replace(/_/g, ' ')}</p></div>}
-              </div>
-
-              {selectedLead.property_address && (
-                <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg">
-                  <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                  <span>{selectedLead.property_address}</span>
-                </div>
-              )}
-
-              {selectedLead.notes && (
-                <div className="p-3 bg-slate-50 rounded-lg text-sm">
-                  <p className="font-medium mb-1">Notes</p>
-                  <p className="text-slate-600">{selectedLead.notes}</p>
-                </div>
-              )}
-
-              {!selectedLead.routed_to && !selectedLead.converted && (
-                <div>
-                  <p className="text-sm font-medium mb-1">Assign to Operator</p>
-                  <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
-                    <SelectTrigger><SelectValue placeholder="Select operator..." /></SelectTrigger>
-                    <SelectContent>
-                      {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {selectedLead.routed_to && !selectedLead.converted && (
-                <div className="space-y-2">
-                  <div className="p-3 bg-cyan-50 rounded-lg text-sm">
-                    <p className="text-xs text-slate-500 mb-0.5">Assigned to</p>
-                    <p className="font-medium text-cyan-800">
-                      {operators.find(o => o.id === selectedLead.routed_to)?.company_name ||
-                       operators.find(o => o.id === selectedLead.routed_to)?.full_name || 'Operator'}
-                    </p>
-                  </div>
-                  <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
-                  </Button>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
-                <Clock className="w-3 h-3" />
-                Added {new Date(selectedLead.created_date).toLocaleDateString()}
-                {selectedLead.converted && <Badge className="ml-auto bg-green-100 text-green-800">Converted</Badge>}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Lead Modal */}
-      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="text-2xl">Add Lead Manually</DialogTitle></DialogHeader>
-          <form onSubmit={handleAddLead} className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Contact Name *</Label><Input value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })} placeholder="John Doe" required /></div>
-              <div><Label>Source</Label>
-                <Select value={formData.source} onValueChange={(v) => setFormData({ ...formData, source: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="advertising">Advertising</SelectItem>
-                    <SelectItem value="estate_finder">Estate Finder</SelectItem>
-                    <SelectItem value="referral">Referral</SelectItem>
-                    <SelectItem value="organic">Organic</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Email</Label><Input type="email" value={formData.contact_email} onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })} placeholder="john@example.com" /></div>
-              <div><Label>Phone</Label><Input type="tel" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} placeholder="(555) 123-4567" /></div>
-            </div>
-            <div><Label>Property Address *</Label><Input value={formData.property_address} onChange={(e) => setFormData({ ...formData, property_address: e.target.value })} placeholder="123 Main St, City, State ZIP" required /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Situation</Label>
-                <Select value={formData.situation} onValueChange={(v) => setFormData({ ...formData, situation: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>
-                    {['probate','divorce','downsizing','relocation','foreclosure','investment','estate','standard'].map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Timeline</Label>
-                <Select value={formData.timeline} onValueChange={(v) => setFormData({ ...formData, timeline: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="immediate">Immediate</SelectItem>
-                    <SelectItem value="1_3_months">1-3 Months</SelectItem>
-                    <SelectItem value="3_6_months">3-6 Months</SelectItem>
-                    <SelectItem value="6_12_months">6-12 Months</SelectItem>
-                    <SelectItem value="exploring">Just Exploring</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Home Size</Label>
-                <Select value={formData.home_size} onValueChange={(v) => setFormData({ ...formData, home_size: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1-2_bedroom">1-2 Bedroom</SelectItem>
-                    <SelectItem value="3-4_bedroom">3-4 Bedroom</SelectItem>
-                    <SelectItem value="5+_bedroom">5+ Bedroom</SelectItem>
-                    <SelectItem value="apartment_condo">Apartment/Condo</SelectItem>
-                    <SelectItem value="storefront_business">Storefront/Business</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Lead Score (0-100)</Label><Input type="number" min="0" max="100" value={formData.score} onChange={(e) => setFormData({ ...formData, score: e.target.value })} /></div>
-            </div>
-            <div><Label>Notes</Label><Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Additional details..." rows={3} /></div>
-            <div className="flex gap-3 justify-end pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
-              <Button type="submit" className="bg-orange-600 hover:bg-orange-700">Add Lead</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
