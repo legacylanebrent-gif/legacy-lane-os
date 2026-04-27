@@ -69,7 +69,16 @@ export default function Revenue() {
   const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(() => loadValue('courseSalesPerMonth', 15));
   const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 10));
   
-  // Referral Fee Inputs
+  // Referral Fee Inputs (Estate Sale Operator referrals to realtors)
+  const [estateLeadFee, setEstateLeadFee] = useState(() => loadValue('estateLeadFee', 75));
+  const [leadAcceptanceRate, setLeadAcceptanceRate] = useState(() => loadValue('leadAcceptanceRate', 30));
+  const [referralConversionRate, setReferralConversionRate] = useState(() => loadValue('referralConversionRate', 25));
+  const [avgPropertyValue, setAvgPropertyValue] = useState(() => loadValue('avgPropertyValue', 350000));
+  const [referralFeePercent, setReferralFeePercent] = useState(() => loadValue('referralFeePercent', 0.15)); // 0.02 * 0.25 * 0.30
+  const [operatorLeadsPerMonth, setOperatorLeadsPerMonth] = useState(() => loadValue('operatorLeadsPerMonth', 50));
+  const [operatorLeadGrowth, setOperatorLeadGrowth] = useState(() => loadValue('operatorLeadGrowth', 12));
+
+  // Legacy referral inputs (kept for compatibility)
   const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 500));
   const [referralsPerMonth, setReferralsPerMonth] = useState(() => loadValue('referralsPerMonth', 8));
   const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 12));
@@ -282,6 +291,7 @@ export default function Revenue() {
       consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
+      estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, operatorLeadGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
@@ -298,6 +308,7 @@ export default function Revenue() {
     consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
+    estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, operatorLeadGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
@@ -424,8 +435,21 @@ export default function Revenue() {
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const courseQuantities = calculateProjections(courseSalesPerMonth, courseGrowth, 120);
   
+  // Calculate referral fee revenue from estate sale operators
+  const leadsAcceptedPerMonth = operatorLeadsPerMonth * (leadAcceptanceRate / 100);
+  const referralsConvertedPerMonth = leadsAcceptedPerMonth * (referralConversionRate / 100);
+  const avgReferralFeeCalculated = avgPropertyValue * referralFeePercent;
+  const estateReferralMonthlyRevenue = referralsConvertedPerMonth * avgReferralFeeCalculated;
+  const estateReferralProjections = calculateProjections(estateReferralMonthlyRevenue, operatorLeadGrowth, 120);
+  const estateReferralQuantities = calculateProjections(referralsConvertedPerMonth, operatorLeadGrowth, 120);
+  
+  // Legacy referral projections (for backward compatibility)
   const referralProjections = calculateProjections(referralsPerMonth * avgReferralFee, referralGrowth, 120);
   const referralQuantities = calculateProjections(referralsPerMonth, referralGrowth, 120);
+  
+  // Combined referral projections (estate + legacy)
+  const combinedReferralProjections = estateReferralProjections.map((val, i) => val + referralProjections[i]);
+  const combinedReferralQuantities = estateReferralQuantities.map((val, i) => val + referralQuantities[i]);
   
   const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
   const featureQuantities = calculateProjections(featuresPerMonth, featureGrowth, 120);
@@ -473,7 +497,7 @@ export default function Revenue() {
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
     marketplaceProjections[i] + courseProjections[i] + 
-    referralProjections[i] + featureProjections[i] + adProjections[i] + bizInBoxProjections[i]
+    combinedReferralProjections[i] + featureProjections[i] + adProjections[i] + bizInBoxProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -1319,17 +1343,33 @@ export default function Revenue() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Avg Referral Fee ($)</Label>
-                    <Input type="number" value={avgReferralFee} onChange={(e) => setAvgReferralFee(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Referrals Per Month</Label>
-                    <Input type="number" value={referralsPerMonth} onChange={(e) => setReferralsPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Monthly Growth Rate (%)</Label>
-                    <Input type="number" value={referralGrowth} onChange={(e) => setReferralGrowth(Number(e.target.value))} />
-                  </div>
+                    <Label>Operator Leads Per Month</Label>
+                          <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
+                        </div>
+                        <div>
+                          <Label>Lead Acceptance Rate (%)</Label>
+                          <Input type="number" value={leadAcceptanceRate} onChange={(e) => setLeadAcceptanceRate(Number(e.target.value))} />
+                        </div>
+                        <div>
+                          <Label>Referral Conversion Rate (%)</Label>
+                          <Input type="number" value={referralConversionRate} onChange={(e) => setReferralConversionRate(Number(e.target.value))} />
+                        </div>
+                        <div>
+                          <Label>Avg Property Value ($)</Label>
+                          <Input type="number" value={avgPropertyValue} onChange={(e) => setAvgPropertyValue(Number(e.target.value))} />
+                        </div>
+                        <div>
+                          <Label>Referral Fee % (0.30 = 0.3%)</Label>
+                          <Input type="number" step="0.01" value={referralFeePercent} onChange={(e) => setReferralFeePercent(Number(e.target.value))} />
+                        </div>
+                        <div>
+                          <Label>Growth Rate (%)</Label>
+                          <Input type="number" value={operatorLeadGrowth} onChange={(e) => setOperatorLeadGrowth(Number(e.target.value))} />
+                        </div>
+                        <div className="md:col-span-2 p-4 bg-amber-50 rounded-lg border border-amber-200 text-xs text-slate-600">
+                          <p className="font-semibold mb-1">Calculation:</p>
+                          <p>{operatorLeadsPerMonth.toLocaleString()} leads/mo × {leadAcceptanceRate}% acceptance × {referralConversionRate}% conversion × ${avgPropertyValue.toLocaleString()} × {(referralFeePercent * 100).toFixed(2)}% = ${estateReferralMonthlyRevenue.toLocaleString('en-US', {maximumFractionDigits: 0})}/mo</p>
+                        </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
