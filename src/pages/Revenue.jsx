@@ -449,45 +449,7 @@ export default function Revenue() {
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const courseQuantities = calculateProjections(courseSalesPerMonth, courseGrowth, 120);
   
-  // CARD 1: Lead fee — Leads scale with operator count × conversion rate × $75
-  const leadFee = 75;
-  const leadConversionRate = leadConversionRatePercent / 100;
-  const leadsPerOperator = operatorLeadsPerMonth / Math.max(bizInBoxQuantities[0], 1); // Normalize to per-operator rate
-  
-  const estateReferralProjections = [];
-  const estateReferralQuantities = [];
-  
-  // CARD 2: RE Referral income — 5% of accepted leads × dynamic avg referral fee
-  const reReferralRate = 0.05;
-  const dynamicReferralFee = dynamicAvgPropertyValue ? Math.round(dynamicAvgPropertyValue * 0.02 * 0.25 * 0.70) : avgReferralFee;
-  const referralProjections = [];
-  const referralQuantities = [];
-  
-  for (let i = 0; i < 120; i++) {
-    // Leads compound with operator growth
-    const operatorCount = bizInBoxQuantities[i] || 1;
-    const monthlyLeads = operatorCount * leadsPerOperator;
-    const acceptedLeads = monthlyLeads * leadConversionRate;
-    
-    estateReferralProjections.push(acceptedLeads * leadFee);
-    estateReferralQuantities.push(acceptedLeads);
-    
-    referralProjections.push(acceptedLeads * reReferralRate * dynamicReferralFee);
-    referralQuantities.push(acceptedLeads * reReferralRate);
-  }
-
-  // Combined for total projections
-  const combinedReferralProjections = estateReferralProjections.map((val, i) => val + referralProjections[i]);
-  const combinedReferralQuantities = estateReferralQuantities.map((val, i) => val + referralQuantities[i]);
-  
-  const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
-  const featureQuantities = calculateProjections(featuresPerMonth, featureGrowth, 120);
-  
-  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
-  const adProjections = adData.projections;
-  const adQuantities = adData.quantities;
-
-  // Calculate Biz in a Box revenue
+  // Calculate Biz in a Box revenue FIRST (needed for lead scaling)
   const calculateBizInBoxRevenue = (months) => {
     const projections = [];
     const quantities = [];
@@ -522,6 +484,44 @@ export default function Revenue() {
   const bizInBoxData = calculateBizInBoxRevenue(120);
   const bizInBoxProjections = bizInBoxData.projections;
   const bizInBoxQuantities = bizInBoxData.quantities;
+  
+  // CARD 1: Lead fee — Leads scale with operator count × conversion rate × $75
+  const leadFee = 75;
+  const leadConversionRate = leadConversionRatePercent / 100;
+  const leadsPerOperator = operatorLeadsPerMonth / Math.max(bizInBoxQuantities[0], 1); // Normalize to per-operator rate
+  
+  const estateReferralProjections = [];
+  const estateReferralQuantities = [];
+  
+  // CARD 2: RE Referral income — 5% of accepted leads × dynamic avg referral fee
+  const reReferralRate = 0.05;
+  const dynamicReferralFee = dynamicAvgPropertyValue ? Math.round(dynamicAvgPropertyValue * 0.02 * 0.25 * 0.70) : avgReferralFee;
+  const referralProjections = [];
+  const referralQuantities = [];
+  
+  for (let i = 0; i < 120; i++) {
+    // Leads compound with operator growth
+    const operatorCount = bizInBoxQuantities[i] || 1;
+    const monthlyLeads = operatorCount * leadsPerOperator;
+    const acceptedLeads = monthlyLeads * leadConversionRate;
+    
+    estateReferralProjections.push(acceptedLeads * leadFee);
+    estateReferralQuantities.push(acceptedLeads);
+    
+    referralProjections.push(acceptedLeads * reReferralRate * dynamicReferralFee);
+    referralQuantities.push(acceptedLeads * reReferralRate);
+  }
+
+  // Combined for total projections
+  const combinedReferralProjections = estateReferralProjections.map((val, i) => val + referralProjections[i]);
+  const combinedReferralQuantities = estateReferralQuantities.map((val, i) => val + referralQuantities[i]);
+
+  const featureProjections = calculateProjections(featuresPerMonth * (nationalFeaturePrice * 0.03 + localFeaturePrice * 0.97), featureGrowth, 120);
+  const featureQuantities = calculateProjections(featuresPerMonth, featureGrowth, 120);
+  
+  const adData = calculateSubscriptionRevenue(120, adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate);
+  const adProjections = adData.projections;
+  const adQuantities = adData.quantities;
 
   const totalProjections = subProjections.map((_, i) => 
     subProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
