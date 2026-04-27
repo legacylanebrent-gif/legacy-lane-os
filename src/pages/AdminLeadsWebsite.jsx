@@ -153,7 +153,10 @@ export default function AdminLeadsWebsite() {
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-2 border-t text-xs text-slate-400">
                   <span className="capitalize">{lead.situation || 'standard'}</span>
-                  {lead.estimated_value && <span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span>}
+                  <div className="flex flex-col items-end gap-0.5">
+                    {lead.estimated_value && <span className="text-slate-600">Value: <span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></span>}
+                    {lead.estimated_referral_fee && <span className="text-slate-600">Referral: <span className="text-green-700 font-semibold">${lead.estimated_referral_fee.toLocaleString()}</span></span>}
+                  </div>
                   <span>{new Date(lead.created_date).toLocaleDateString()}</span>
                 </div>
                 {!lead.routed_to && !lead.converted && (
