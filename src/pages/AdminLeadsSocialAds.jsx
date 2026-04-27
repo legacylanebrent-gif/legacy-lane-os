@@ -153,13 +153,14 @@ export default function AdminLeadsSocialAds() {
                   {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600 line-clamp-1">{lead.property_address}</span></div>}
                   {lead.ad_campaign && <div className="text-xs text-slate-500 mt-1">Campaign: <span className="font-medium">{lead.ad_campaign}</span></div>}
                 </div>
-                <div className="flex items-center justify-between mt-3 pt-2 border-t text-xs text-slate-400">
-                  <span className="capitalize">{lead.situation || 'standard'}</span>
-                  <div className="flex flex-col items-end gap-0.5">
-                    {lead.estimated_value && <span className="text-slate-600">Value: <span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></span>}
-                    {lead.estimated_referral_fee && <span className="text-slate-600">Referral: <span className="text-green-700 font-semibold">${lead.estimated_referral_fee.toLocaleString()}</span></span>}
-                  </div>
-                  <span>{new Date(lead.created_date).toLocaleDateString()}</span>
+                <div className="space-y-2 mt-3 pt-2 border-t text-xs">
+                  {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
+                  {lead.estimated_referral_fee && (
+                    <>
+                      <div className="flex justify-between"><span className="text-slate-500">Platform Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_referral_fee * 2.333).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Operator Income:</span><span className="text-purple-600 font-semibold">${lead.estimated_referral_fee.toLocaleString()}</span></div>
+                    </>
+                  )}
                 </div>
                 {!lead.routed_to && !lead.converted && (
                   <div className="mt-3" onClick={e => e.stopPropagation()}>

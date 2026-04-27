@@ -153,10 +153,15 @@ export default function AdminLeadsPropstream() {
                   {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{lead.contact_phone}</span></div>}
                   {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600 line-clamp-1">{lead.property_address}</span></div>}
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t text-xs">
-                  {lead.estimated_value && <div><span className="text-slate-500">Value: </span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
-                  {lead.propstream_equity && <div><span className="text-slate-500">Equity: </span><span className="text-purple-600 font-semibold">${lead.propstream_equity.toLocaleString()}</span></div>}
-                  {lead.propstream_id && <div className="col-span-2"><span className="text-slate-500">PS ID: </span><span className="font-mono">{lead.propstream_id}</span></div>}
+                <div className="space-y-2 mt-3 pt-2 border-t text-xs">
+                  {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
+                  {lead.estimated_referral_fee && (
+                    <>
+                      <div className="flex justify-between"><span className="text-slate-500">Platform Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_referral_fee * 2.333).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Operator Income:</span><span className="text-purple-600 font-semibold">${lead.estimated_referral_fee.toLocaleString()}</span></div>
+                    </>
+                  )}
+                  {lead.propstream_equity && <div className="flex justify-between"><span className="text-slate-500">Equity:</span><span className="text-slate-600">${lead.propstream_equity.toLocaleString()}</span></div>}
                 </div>
                 {!lead.routed_to && !lead.converted && (
                   <div className="mt-3" onClick={e => e.stopPropagation()}>
