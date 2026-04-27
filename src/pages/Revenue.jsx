@@ -76,6 +76,7 @@ export default function Revenue() {
   const [avgPropertyValue, setAvgPropertyValue] = useState(() => loadValue('avgPropertyValue', 350000));
   const [referralFeePercent, setReferralFeePercent] = useState(() => loadValue('referralFeePercent', 0.15)); // 0.02 * 0.25 * 0.30
   const [operatorLeadsPerMonth, setOperatorLeadsPerMonth] = useState(() => loadValue('operatorLeadsPerMonth', 50));
+  const [leadConversionRatePercent, setLeadConversionRatePercent] = useState(() => loadValue('leadConversionRatePercent', 75));
   const [operatorLeadGrowth, setOperatorLeadGrowth] = useState(() => loadValue('operatorLeadGrowth', 12));
 
   // Legacy referral inputs (kept for compatibility)
@@ -291,7 +292,7 @@ export default function Revenue() {
       consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
-      estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, operatorLeadGrowth,
+      estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, leadConversionRatePercent, operatorLeadGrowth,
       avgReferralFee, referralsPerMonth, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
@@ -308,7 +309,7 @@ export default function Revenue() {
     consignorBasicPrice, consignorProPrice, consignorNewPerMonth, consignorChurnRate,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
-    estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, operatorLeadGrowth,
+    estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, operatorLeadsPerMonth, leadConversionRatePercent, operatorLeadGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate,
@@ -435,9 +436,9 @@ export default function Revenue() {
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   const courseQuantities = calculateProjections(courseSalesPerMonth, courseGrowth, 120);
   
-  // CARD 1: Lead fee — Leads per month × 75% conversion × $75
-  const leadConversionRate = 0.75;
+  // CARD 1: Lead fee — Leads per month × conversion rate × $75
   const leadFee = 75;
+  const leadConversionRate = leadConversionRatePercent / 100;
   const leadFeeMonthlyRevenue = operatorLeadsPerMonth * leadConversionRate * leadFee;
   const leadsAcceptedPerMonth = operatorLeadsPerMonth * leadConversionRate;
   const estateReferralProjections = calculateProjections(leadFeeMonthlyRevenue, operatorLeadGrowth, 120);
@@ -1346,21 +1347,25 @@ export default function Revenue() {
                 </CardHeader>
                 <CardContent>
                   <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-sm text-slate-700">
-                      <strong>Calculation:</strong> Leads per Month × 75% conversion rate × $75 lead fee
-                    </div>
-                  </div>
+                     <div className="text-sm text-slate-700">
+                       <strong>Calculation:</strong> Leads per Month × Conversion Rate × $75 lead fee
+                     </div>
+                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <Label>Leads Per Month</Label>
-                      <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
-                    </div>
-                    <div>
-                      <Label>Monthly Growth Rate (%)</Label>
-                      <Input type="number" value={operatorLeadGrowth} onChange={(e) => setOperatorLeadGrowth(Number(e.target.value))} />
-                    </div>
-                  </div>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                     <div>
+                       <Label>Leads Per Month</Label>
+                       <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
+                     </div>
+                     <div>
+                       <Label>Conversion Rate (%)</Label>
+                       <Input type="number" value={leadConversionRatePercent} onChange={(e) => setLeadConversionRatePercent(Number(e.target.value))} />
+                     </div>
+                     <div>
+                       <Label>Monthly Growth Rate (%)</Label>
+                       <Input type="number" value={operatorLeadGrowth} onChange={(e) => setOperatorLeadGrowth(Number(e.target.value))} />
+                     </div>
+                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
