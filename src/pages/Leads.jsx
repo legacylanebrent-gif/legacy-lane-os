@@ -44,7 +44,7 @@ export default function Leads() {
   const [operators, setOperators] = useState([]);
   const [incomingLoading, setIncomingLoading] = useState(true);
   const [incomingSearch, setIncomingSearch] = useState('');
-  const [incomingFilter, setIncomingFilter] = useState('unassigned');
+  const [incomingFilter, setIncomingFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [formData, setFormData] = useState({
