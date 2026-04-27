@@ -32,7 +32,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
   { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
 
-  { page: 'MyListings',             label: 'My Listings',         icon: ShoppingBag,     group: 'Marketplace' },
+  { page: 'MyListings',             label: 'Marketplace Listings', icon: ShoppingBag,     group: 'Estate Sales' },
 
   { page: 'CRM',                    label: 'CRM',                 icon: Users,           group: 'CRM & Leads' },
   { page: 'ContactDetail',          label: 'Contacts',            icon: User,            group: 'CRM & Leads' },
