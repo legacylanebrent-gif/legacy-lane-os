@@ -1505,6 +1505,27 @@ export default function Revenue() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
+                    <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                      <Label className="text-xs text-slate-600 mb-2 block">Test with Different Operator Count</Label>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter operator count to test"
+                        value={testOperatorCount || ''}
+                        onChange={(e) => setTestOperatorCount(e.target.value ? Number(e.target.value) : null)}
+                        className="mb-3"
+                      />
+                      {testOperatorCount && (
+                        <div className="text-sm space-y-1 pt-3 border-t border-purple-200">
+                          <p className="text-purple-900"><strong>If {testOperatorCount.toLocaleString()} operators:</strong></p>
+                          <p className="text-purple-800">Monthly Leads: {(testOperatorCount * 10).toLocaleString()}</p>
+                          <p className="text-purple-800">Accepted for Referral (20% × 5%): {Math.round(testOperatorCount * 10 * 0.20 * 0.05).toLocaleString()}</p>
+                          <p className="text-purple-900 font-semibold">Monthly Referral Income: ${(Math.round(testOperatorCount * 10 * 0.20 * 0.05) * (dynamicAvgPropertyValue ? Math.round(dynamicAvgPropertyValue * 0.02 * 0.25 * 0.70) : avgReferralFee)).toLocaleString()}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                       <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
