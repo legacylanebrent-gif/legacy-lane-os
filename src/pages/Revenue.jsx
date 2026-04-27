@@ -1431,11 +1431,18 @@ export default function Revenue() {
                   </div>
 
                   {/* Dynamic avg property value from leads and calculated referral fee */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                       <div className="text-xs text-slate-500 mb-1 font-medium">Avg Property Value from Leads</div>
                       <div className="text-2xl font-bold text-slate-800">{dynamicAvgPropertyValue ? `$${dynamicAvgPropertyValue.toLocaleString()}` : 'Loading...'}</div>
                       <div className="text-xs text-slate-400 mt-2">({leadsCount} leads with values)</div>
+                    </div>
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-xs text-slate-500 mb-1 font-medium">5% of Total Leads</div>
+                      <div className="text-2xl font-bold text-blue-700">
+                        {leadsCount ? Math.round(leadsCount * 0.05) : 'Loading...'}
+                      </div>
+                      <div className="text-xs text-blue-600 mt-2">{leadsCount} total × 5%</div>
                     </div>
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                       <div className="text-xs text-slate-500 mb-1 font-medium">Recommended Avg Referral Fee</div>
