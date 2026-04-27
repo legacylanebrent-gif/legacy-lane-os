@@ -481,18 +481,20 @@ export default function MyProfile() {
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Email Notifications</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base">New Leads</Label>
-                      <p className="text-sm text-slate-500">Get notified when new leads come in</p>
+                  {!isConsumerType && (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">New Leads</Label>
+                        <p className="text-sm text-slate-500">Get notified when new leads come in</p>
+                      </div>
+                      <Switch
+                        checked={notificationSettings.email_new_leads}
+                        onCheckedChange={(checked) => 
+                          setNotificationSettings({ ...notificationSettings, email_new_leads: checked })
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={notificationSettings.email_new_leads}
-                      onCheckedChange={(checked) => 
-                        setNotificationSettings({ ...notificationSettings, email_new_leads: checked })
-                      }
-                    />
-                  </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="text-base">New Messages</Label>
@@ -535,18 +537,20 @@ export default function MyProfile() {
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">SMS Notifications</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base">New Leads</Label>
-                      <p className="text-sm text-slate-500">Text alerts for new leads</p>
+                  {!isConsumerType && (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">New Leads</Label>
+                        <p className="text-sm text-slate-500">Text alerts for new leads</p>
+                      </div>
+                      <Switch
+                        checked={notificationSettings.sms_new_leads}
+                        onCheckedChange={(checked) => 
+                          setNotificationSettings({ ...notificationSettings, sms_new_leads: checked })
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={notificationSettings.sms_new_leads}
-                      onCheckedChange={(checked) => 
-                        setNotificationSettings({ ...notificationSettings, sms_new_leads: checked })
-                      }
-                    />
-                  </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="text-base">New Messages</Label>
