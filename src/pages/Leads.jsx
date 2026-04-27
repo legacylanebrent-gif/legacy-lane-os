@@ -183,6 +183,7 @@ export default function Leads() {
                       <div className="space-y-2 text-xs border-t pt-2">
                         {lead.estimated_value && (
                           <>
+                            <div className="flex justify-between"><span className="text-slate-500">Lead Fee:</span><span className="text-red-600 font-semibold">$75</span></div>
                             <div className="flex justify-between"><span className="text-slate-500">Refer Lead and Earn Approx:</span><span className="text-amber-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
                             <div className="flex justify-between"><span className="text-slate-500">Timeline:</span><span className="capitalize">{lead.timeline?.replace(/_/g, ' ') || 'N/A'}</span></div>
                           </>
