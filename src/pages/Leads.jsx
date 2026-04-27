@@ -44,7 +44,7 @@ export default function Leads() {
   const [operators, setOperators] = useState([]);
   const [incomingLoading, setIncomingLoading] = useState(true);
   const [incomingSearch, setIncomingSearch] = useState('');
-  const [incomingFilter, setIncomingFilter] = useState('all');
+  const [incomingFilter, setIncomingFilter] = useState('assigned');
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -298,8 +298,8 @@ export default function Leads() {
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <Tabs value={incomingFilter} onValueChange={setIncomingFilter}>
                   <TabsList>
-                    <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
                     <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
+                    <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
                     <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
                     <TabsTrigger value="all">All ({incomingLeads.length})</TabsTrigger>
                   </TabsList>
