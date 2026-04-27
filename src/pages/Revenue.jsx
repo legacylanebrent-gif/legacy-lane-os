@@ -485,10 +485,10 @@ export default function Revenue() {
   const bizInBoxProjections = bizInBoxData.projections;
   const bizInBoxQuantities = bizInBoxData.quantities;
   
-  // CARD 1: Lead fee — Leads scale with operator count × conversion rate × $75
+  // CARD 1: Lead fee — Each operator gets 10 leads/month × 20% conversion × $75
   const leadFee = 75;
-  const leadConversionRate = leadConversionRatePercent / 100;
-  const leadsPerOperator = operatorLeadsPerMonth / Math.max(bizInBoxQuantities[0], 1); // Normalize to per-operator rate
+  const leadsPerOperatorPerMonth = 10; // Every operator gets 10 leads per month
+  const defaultLeadConversionRate = 0.20; // 20% default conversion
   
   const estateReferralProjections = [];
   const estateReferralQuantities = [];
@@ -500,10 +500,10 @@ export default function Revenue() {
   const referralQuantities = [];
   
   for (let i = 0; i < 120; i++) {
-    // Leads compound with operator growth
+    // Leads compound with operator growth (each operator gets 10 leads/month)
     const operatorCount = bizInBoxQuantities[i] || 1;
-    const monthlyLeads = operatorCount * leadsPerOperator;
-    const acceptedLeads = monthlyLeads * leadConversionRate;
+    const monthlyLeads = operatorCount * leadsPerOperatorPerMonth;
+    const acceptedLeads = monthlyLeads * defaultLeadConversionRate;
     
     estateReferralProjections.push(acceptedLeads * leadFee);
     estateReferralQuantities.push(acceptedLeads);
