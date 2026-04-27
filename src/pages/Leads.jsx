@@ -337,7 +337,7 @@ export default function Leads() {
               {selectedLead.referral_eligible && selectedLead.referral_status === 'no_referral' && selectedLead.estimated_value && (
                <div className="p-3 bg-amber-50 border-l-4 border-l-amber-500 rounded-lg">
                  <p className="font-semibold text-amber-900 text-sm mb-2">Potential Finder Fee</p>
-                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor for buyer representation, you could earn a <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span> finder fee when the sale closes.</p>
+                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor listing and they successfully close the property, you could earn a finder fee of approximately <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span>. We handle the entire referral process with the realtor and you get paid 7 days after the property closes.</p>
                  <Button 
                    onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
