@@ -11,42 +11,53 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Plus, Mail, Phone, MapPin, Clock, TrendingUp, User,
-  CheckCircle, XCircle, Loader2, Filter, Search, Users, AlertCircle, DollarSign
+  CheckCircle, Loader2, Search, Users, AlertCircle, DollarSign
 } from 'lucide-react';
 import LeadCard from '@/components/leads/LeadCard';
 import LeadRoutingModal from '@/components/leads/LeadRoutingModal';
 
 const PIPELINE_STAGES = [
-  { value: 'prospecting', label: 'Prospecting', color: 'bg-slate-100 text-slate-800' },
-  { value: 'qualified', label: 'Qualified', color: 'bg-blue-100 text-blue-800' },
-  { value: 'proposal', label: 'Proposal', color: 'bg-purple-100 text-purple-800' },
-  { value: 'negotiation', label: 'Negotiation', color: 'bg-amber-100 text-amber-800' },
-  { value: 'closing', label: 'Closing', color: 'bg-green-100 text-green-800' }
+  { value: 'prospecting', label: 'Prospecting' },
+  { value: 'qualified', label: 'Qualified' },
+  { value: 'proposal', label: 'Proposal' },
+  { value: 'negotiation', label: 'Negotiation' },
+  { value: 'closing', label: 'Closing' }
 ];
+
+const SITUATION_CONFIG = {
+  probate: { label: 'Probate', className: 'bg-purple-100 text-purple-700' },
+  divorce: { label: 'Divorce', className: 'bg-red-100 text-red-700' },
+  downsizing: { label: 'Downsizing', className: 'bg-blue-100 text-blue-700' },
+  relocation: { label: 'Relocation', className: 'bg-cyan-100 text-cyan-700' },
+  foreclosure: { label: 'Foreclosure', className: 'bg-orange-100 text-orange-700' },
+  investment: { label: 'Investment', className: 'bg-green-100 text-green-700' },
+  estate: { label: 'Estate', className: 'bg-amber-100 text-amber-700' },
+  standard: { label: 'Standard', className: 'bg-slate-100 text-slate-700' }
+};
+
+const getScoreColor = (score) => {
+  if (score >= 75) return 'text-green-600 bg-green-100';
+  if (score >= 50) return 'text-yellow-600 bg-yellow-100';
+  return 'text-red-600 bg-red-100';
+};
 
 export default function Leads() {
   const [activeTab, setActiveTab] = useState('leads');
 
-  // --- Leads tab state ---
+  // Unified leads state
   const [leads, setLeads] = useState([]);
-  const [leadsLoading, setLeadsLoading] = useState(true);
-  const [leadsSearch, setLeadsSearch] = useState('');
-  const [leadsFilter, setLeadsFilter] = useState('all');
+  const [operators, setOperators] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('assigned');
   const [selectedLead, setSelectedLead] = useState(null);
   const [showRoutingModal, setShowRoutingModal] = useState(false);
   const [showLeadDetail, setShowLeadDetail] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  // --- Pipeline tab state ---
+  // Pipeline state
   const [deals, setDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
-
-  // --- Incoming Leads tab state ---
-  const [incomingLeads, setIncomingLeads] = useState([]);
-  const [operators, setOperators] = useState([]);
-  const [incomingLoading, setIncomingLoading] = useState(true);
-  const [incomingSearch, setIncomingSearch] = useState('');
-  const [incomingFilter, setIncomingFilter] = useState('assigned');
-  const [showAddModal, setShowAddModal] = useState(false);
 
   const [formData, setFormData] = useState({
     source: 'email', intent: 'estate_sale', situation: '',
@@ -56,33 +67,22 @@ export default function Leads() {
     items_to_sell: [], timeline: '', notes: '', score: 50
   });
 
-  useEffect(() => { loadLeads(); loadDeals(); loadIncomingData(); }, []);
+  useEffect(() => { loadData(); loadDeals(); }, []);
 
-  // ---- Leads ----
-  const loadLeads = async () => {
-    setLeadsLoading(true);
-    const data = await base44.entities.Lead.list('-created_date');
-    setLeads(data);
-    setLeadsLoading(false);
+  const loadData = async () => {
+    setLoading(true);
+    const [leadsData, users] = await Promise.all([
+      base44.entities.Lead.list('-created_date'),
+      base44.entities.User.list()
+    ]);
+    setLeads(leadsData);
+    setOperators(users.filter(u =>
+      u.primary_account_type === 'estate_sale_operator' ||
+      u.account_types?.includes('estate_sale_operator')
+    ));
+    setLoading(false);
   };
 
-  const filteredLeads = leads.filter(lead => {
-    const matchesSearch = leadsSearch.trim() === '' ||
-      lead.property_address?.toLowerCase().includes(leadsSearch.toLowerCase()) ||
-      lead.source?.toLowerCase().includes(leadsSearch.toLowerCase());
-    if (leadsFilter === 'unassigned') return matchesSearch && !lead.routed_to;
-    if (leadsFilter === 'converted') return matchesSearch && lead.converted;
-    return matchesSearch;
-  });
-
-  const leadsStats = {
-    total: leads.length,
-    unassigned: leads.filter(l => !l.routed_to).length,
-    converted: leads.filter(l => l.converted).length,
-    avgScore: Math.round(leads.reduce((sum, l) => sum + (l.score || 0), 0) / (leads.length || 1))
-  };
-
-  // ---- Pipeline ----
   const loadDeals = async () => {
     setDealsLoading(true);
     const data = await base44.entities.Deal.filter({ stage: { $ne: 'lost' } });
@@ -90,30 +90,21 @@ export default function Leads() {
     setDealsLoading(false);
   };
 
-  const getDealsByStage = (stage) => deals.filter(d => d.stage === stage);
-  const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
+  // Stats
+  const unassignedCount = leads.filter(l => !l.routed_to && !l.converted).length;
+  const assignedCount = leads.filter(l => l.routed_to && !l.converted).length;
+  const convertedCount = leads.filter(l => l.converted).length;
 
-  // ---- Incoming Leads ----
-  const loadIncomingData = async () => {
-    setIncomingLoading(true);
-    const leadsData = await base44.entities.Lead.filter({ intent: 'estate_sale' }, '-created_date');
-    setIncomingLeads(leadsData);
-    const users = await base44.entities.User.list();
-    setOperators(users.filter(u =>
-      u.primary_account_type === 'estate_sale_operator' ||
-      u.account_types?.includes('estate_sale_operator')
-    ));
-    setIncomingLoading(false);
-  };
-
-  const filteredIncoming = incomingLeads.filter(lead => {
-    const matchesSearch = !incomingSearch ||
-      lead.property_address?.toLowerCase().includes(incomingSearch.toLowerCase()) ||
-      lead.contact_name?.toLowerCase().includes(incomingSearch.toLowerCase()) ||
-      lead.contact_email?.toLowerCase().includes(incomingSearch.toLowerCase());
-    if (incomingFilter === 'unassigned') return matchesSearch && !lead.routed_to;
-    if (incomingFilter === 'assigned') return matchesSearch && lead.routed_to && !lead.converted;
-    if (incomingFilter === 'converted') return matchesSearch && lead.converted;
+  const filteredLeads = leads.filter(lead => {
+    const q = search.toLowerCase();
+    const matchesSearch = !search ||
+      lead.property_address?.toLowerCase().includes(q) ||
+      lead.contact_name?.toLowerCase().includes(q) ||
+      lead.contact_email?.toLowerCase().includes(q) ||
+      lead.source?.toLowerCase().includes(q);
+    if (filter === 'unassigned') return matchesSearch && !lead.routed_to && !lead.converted;
+    if (filter === 'assigned') return matchesSearch && lead.routed_to && !lead.converted;
+    if (filter === 'converted') return matchesSearch && lead.converted;
     return matchesSearch;
   });
 
@@ -127,8 +118,14 @@ export default function Leads() {
       score: parseInt(formData.score)
     });
     setShowAddModal(false);
-    resetForm();
-    loadIncomingData();
+    setFormData({
+      source: 'email', intent: 'estate_sale', situation: '',
+      property_address: '', contact_name: '', contact_email: '',
+      contact_phone: '', home_size: '', gated_community: false,
+      sales_allowed: '', amount_to_sell: '', interested_in_full_service: '',
+      items_to_sell: [], timeline: '', notes: '', score: 50
+    });
+    loadData();
   };
 
   const handleAssignLead = async (leadId, operatorId) => {
@@ -136,7 +133,7 @@ export default function Leads() {
       routed_to: operatorId,
       routing_criteria: { geography: true, manual_assignment: true }
     });
-    loadIncomingData();
+    loadData();
   };
 
   const handleMarkConverted = async (leadId) => {
@@ -144,95 +141,78 @@ export default function Leads() {
       converted: true,
       conversion_date: new Date().toISOString()
     });
-    loadIncomingData();
+    loadData();
   };
 
-  const resetForm = () => setFormData({
-    source: 'email', intent: 'estate_sale', situation: '',
-    property_address: '', contact_name: '', contact_email: '',
-    contact_phone: '', home_size: '', gated_community: false,
-    sales_allowed: '', amount_to_sell: '', interested_in_full_service: '',
-    items_to_sell: [], timeline: '', notes: '', score: 50
-  });
-
-  const getScoreColor = (score) => {
-    if (score >= 75) return 'text-green-600 bg-green-100';
-    if (score >= 50) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
-  };
-
-  const getSituationBadge = (situation) => {
-    const configs = {
-      probate: { label: 'Probate', className: 'bg-purple-100 text-purple-700' },
-      divorce: { label: 'Divorce', className: 'bg-red-100 text-red-700' },
-      downsizing: { label: 'Downsizing', className: 'bg-blue-100 text-blue-700' },
-      relocation: { label: 'Relocation', className: 'bg-cyan-100 text-cyan-700' },
-      foreclosure: { label: 'Foreclosure', className: 'bg-orange-100 text-orange-700' },
-      investment: { label: 'Investment', className: 'bg-green-100 text-green-700' },
-      estate: { label: 'Estate', className: 'bg-amber-100 text-amber-700' },
-      standard: { label: 'Standard', className: 'bg-slate-100 text-slate-700' }
-    };
-    const config = configs[situation] || configs.standard;
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
-
-  const unassignedCount = incomingLeads.filter(l => !l.routed_to).length;
-  const assignedCount = incomingLeads.filter(l => l.routed_to && !l.converted).length;
-  const convertedCount = incomingLeads.filter(l => l.converted).length;
+  const getDealsByStage = (stage) => deals.filter(d => d.stage === stage);
+  const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">Lead Center</h1>
-        <p className="text-slate-600">Manage leads, pipeline, and incoming estate sale requests</p>
+        <p className="text-slate-600">Manage leads, assignments, and deal pipeline</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full max-w-lg">
-          <TabsTrigger value="leads">Lead Intelligence</TabsTrigger>
+        <TabsList className="grid grid-cols-2 w-full max-w-sm">
+          <TabsTrigger value="leads">Leads</TabsTrigger>
           <TabsTrigger value="pipeline">Deal Pipeline</TabsTrigger>
-          <TabsTrigger value="incoming">Incoming Leads</TabsTrigger>
         </TabsList>
 
         {/* ===== LEADS TAB ===== */}
         <TabsContent value="leads" className="mt-6 space-y-6">
-          <div className="grid sm:grid-cols-4 gap-4">
-            <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-slate-600">Total Leads</CardTitle><Users className="h-5 w-5 text-blue-600" /></CardHeader><CardContent><div className="text-3xl font-bold">{leadsStats.total}</div></CardContent></Card>
-            <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-slate-600">Unassigned</CardTitle><AlertCircle className="h-5 w-5 text-amber-600" /></CardHeader><CardContent><div className="text-3xl font-bold">{leadsStats.unassigned}</div></CardContent></Card>
-            <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-slate-600">Converted</CardTitle><CheckCircle className="h-5 w-5 text-green-600" /></CardHeader><CardContent><div className="text-3xl font-bold">{leadsStats.converted}</div></CardContent></Card>
-            <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-slate-600">Avg Score</CardTitle><TrendingUp className="h-5 w-5 text-purple-600" /></CardHeader><CardContent><div className="text-3xl font-bold">{leadsStats.avgScore}</div></CardContent></Card>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total</p><p className="text-3xl font-bold">{leads.length}</p></div><div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
+            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Unassigned</p><p className="text-3xl font-bold text-orange-600">{unassignedCount}</p></div><div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><AlertCircle className="w-5 h-5 text-orange-600" /></div></CardContent></Card>
+            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Assigned</p><p className="text-3xl font-bold text-cyan-600">{assignedCount}</p></div><div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
+            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input placeholder="Search leads..." value={leadsSearch} onChange={(e) => setLeadsSearch(e.target.value)} className="pl-10" />
+          {/* Filters + Search + Add */}
+          <div className="flex flex-col md:flex-row gap-3 items-center">
+            <Tabs value={filter} onValueChange={setFilter}>
+              <TabsList>
+                <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
+                <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
+                <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
+                <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Input placeholder="Search leads..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+            </div>
+            <Button onClick={() => setShowAddModal(true)} className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap">
+              <Plus className="w-4 h-4 mr-2" />Add Lead
+            </Button>
           </div>
 
-          <Tabs value={leadsFilter} onValueChange={setLeadsFilter}>
-            <TabsList>
-              <TabsTrigger value="all">All ({leadsStats.total})</TabsTrigger>
-              <TabsTrigger value="unassigned">Unassigned ({leadsStats.unassigned})</TabsTrigger>
-              <TabsTrigger value="converted">Converted ({leadsStats.converted})</TabsTrigger>
-            </TabsList>
-            <TabsContent value={leadsFilter} className="mt-6">
-              {leadsLoading ? (
-                <div className="animate-pulse h-48 bg-slate-100 rounded-lg" />
-              ) : filteredLeads.length === 0 ? (
-                <Card className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No leads found</p></Card>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredLeads.map(lead => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      onRoute={(l) => { setSelectedLead(l); setShowRoutingModal(true); }}
-                      onClick={() => { setSelectedLead(lead); setShowLeadDetail(true); }}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          {/* Lead Cards */}
+          {loading ? (
+            <div className="animate-pulse h-48 bg-slate-100 rounded-lg" />
+          ) : filteredLeads.length === 0 ? (
+            <Card><CardContent className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No leads found</p></CardContent></Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredLeads.map(lead => {
+                const assignedOperator = operators.find(o => o.id === lead.routed_to);
+                return (
+                  <LeadCard
+                    key={lead.id}
+                    lead={lead}
+                    assignedOperator={assignedOperator}
+                    operators={operators}
+                    onRoute={(l) => { setSelectedLead(l); setShowRoutingModal(true); }}
+                    onAssign={handleAssignLead}
+                    onMarkConverted={handleMarkConverted}
+                    onClick={() => { setSelectedLead(lead); setShowLeadDetail(true); }}
+                  />
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         {/* ===== PIPELINE TAB ===== */}
@@ -241,7 +221,6 @@ export default function Leads() {
             <p className="text-slate-600">{deals.length} active deals • <span className="font-semibold">${totalDealValue.toLocaleString()}</span> total value</p>
             <Button className="bg-orange-600 hover:bg-orange-700"><Plus className="w-4 h-4 mr-2" />New Deal</Button>
           </div>
-
           {dealsLoading ? (
             <div className="animate-pulse h-64 bg-slate-100 rounded-lg" />
           ) : (
@@ -282,95 +261,6 @@ export default function Leads() {
             </div>
           )}
         </TabsContent>
-
-        {/* ===== INCOMING LEADS TAB ===== */}
-        <TabsContent value="incoming" className="mt-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-slate-600">Manage and distribute estate sale leads to operators</p>
-            <Button onClick={() => setShowAddModal(true)} className="bg-orange-600 hover:bg-orange-700">
-              <Plus className="w-4 h-4 mr-2" />Add Lead Manually
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total</p><p className="text-3xl font-bold">{incomingLeads.length}</p></div><div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Unassigned</p><p className="text-3xl font-bold text-orange-600">{unassignedCount}</p></div><div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"><Loader2 className="w-5 h-5 text-orange-600" /></div></CardContent></Card>
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Assigned</p><p className="text-3xl font-bold text-cyan-600">{assignedCount}</p></div><div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
-          </div>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <Tabs value={incomingFilter} onValueChange={setIncomingFilter}>
-                  <TabsList>
-                    <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
-                    <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
-                    <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
-                    <TabsTrigger value="all">All ({incomingLeads.length})</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                  <Input placeholder="Search leads..." value={incomingSearch} onChange={(e) => setIncomingSearch(e.target.value)} className="pl-10" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {incomingLoading ? (
-            <div className="animate-pulse h-64 bg-slate-100 rounded-lg" />
-          ) : filteredIncoming.length === 0 ? (
-            <Card><CardContent className="p-12 text-center"><TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-4" /><p className="text-slate-500">No leads found</p></CardContent></Card>
-          ) : (
-            <div className="grid lg:grid-cols-2 gap-6">
-              {filteredIncoming.map(lead => {
-                const assignedOperator = operators.find(o => o.id === lead.routed_to);
-                return (
-                  <Card key={lead.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {getSituationBadge(lead.situation)}
-                            <Badge className={getScoreColor(lead.score)}>Score: {lead.score}</Badge>
-                          </div>
-                          {lead.converted && <Badge className="bg-green-600 text-white"><CheckCircle className="w-3 h-3 mr-1" />Converted</Badge>}
-                        </div>
-                        {!lead.routed_to && !lead.converted && (
-                          <Select onValueChange={(operatorId) => handleAssignLead(lead.id, operatorId)}>
-                            <SelectTrigger className="w-48"><SelectValue placeholder="Assign to operator..." /></SelectTrigger>
-                            <SelectContent>
-                              {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {lead.property_address && <div className="flex items-start gap-2 text-sm"><MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" /><span>{lead.property_address}</span></div>}
-                      {lead.contact_name && <div className="flex items-center gap-2 text-sm"><User className="w-4 h-4 text-slate-500" /><span>{lead.contact_name}</span></div>}
-                      {lead.contact_email && <div className="flex items-center gap-2 text-sm"><Mail className="w-4 h-4 text-slate-500" /><a href={`mailto:${lead.contact_email}`} className="text-cyan-600 hover:text-cyan-700">{lead.contact_email}</a></div>}
-                      {lead.contact_phone && <div className="flex items-center gap-2 text-sm"><Phone className="w-4 h-4 text-slate-500" /><a href={`tel:${lead.contact_phone}`} className="text-cyan-600 hover:text-cyan-700">{lead.contact_phone}</a></div>}
-                      {lead.estimated_value && <div className="text-sm"><span className="font-medium">Est. Value:</span> <span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
-                      {lead.timeline && <div className="flex items-center gap-2 text-sm"><Clock className="w-4 h-4 text-slate-500" /><span className="capitalize">{lead.timeline.replace('_', '-')}</span></div>}
-                      {lead.notes && <div className="text-sm p-3 bg-slate-50 rounded-lg"><span className="font-medium">Notes:</span><p className="text-slate-600 mt-1">{lead.notes}</p></div>}
-                      {assignedOperator && <div className="pt-3 border-t"><div className="text-xs text-slate-500 mb-1">Assigned to:</div><div className="font-medium">{assignedOperator.company_name || assignedOperator.full_name}</div></div>}
-                      {lead.routed_to && !lead.converted && (
-                        <Button onClick={() => handleMarkConverted(lead.id)} size="sm" className="w-full bg-green-600 hover:bg-green-700">
-                          <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
-                        </Button>
-                      )}
-                      <div className="text-xs text-slate-500 pt-2 border-t">
-                        <span className="font-medium">Source:</span> {lead.source?.replace('_', ' ')}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
 
       {/* Lead Detail Modal */}
@@ -388,32 +278,55 @@ export default function Leads() {
                   <p className="text-sm text-slate-500 capitalize">{selectedLead.source?.replace(/_/g, ' ')}</p>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {selectedLead.contact_name && <div><p className="text-xs text-slate-500 mb-0.5">Name</p><p className="font-medium">{selectedLead.contact_name}</p></div>}
-                {selectedLead.contact_email && <div><p className="text-xs text-slate-500 mb-0.5">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="font-medium text-cyan-600 hover:underline">{selectedLead.contact_email}</a></div>}
+                {selectedLead.contact_email && <div><p className="text-xs text-slate-500 mb-0.5">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="font-medium text-cyan-600 hover:underline break-all">{selectedLead.contact_email}</a></div>}
                 {selectedLead.contact_phone && <div><p className="text-xs text-slate-500 mb-0.5">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="font-medium text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
                 {selectedLead.timeline && <div><p className="text-xs text-slate-500 mb-0.5">Timeline</p><p className="font-medium capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
                 {selectedLead.estimated_value && <div><p className="text-xs text-slate-500 mb-0.5">Est. Value</p><p className="font-medium text-green-600">${selectedLead.estimated_value.toLocaleString()}</p></div>}
                 {selectedLead.situation && <div><p className="text-xs text-slate-500 mb-0.5">Situation</p><p className="font-medium capitalize">{selectedLead.situation}</p></div>}
                 {selectedLead.home_size && <div><p className="text-xs text-slate-500 mb-0.5">Home Size</p><p className="font-medium capitalize">{selectedLead.home_size.replace(/_/g, ' ')}</p></div>}
               </div>
+
               {selectedLead.property_address && (
                 <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg">
                   <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
                   <span>{selectedLead.property_address}</span>
                 </div>
               )}
+
               {selectedLead.notes && (
                 <div className="p-3 bg-slate-50 rounded-lg text-sm">
                   <p className="font-medium mb-1">Notes</p>
                   <p className="text-slate-600">{selectedLead.notes}</p>
                 </div>
               )}
+
+              {/* Assign operator if unassigned */}
+              {!selectedLead.routed_to && !selectedLead.converted && (
+                <div>
+                  <p className="text-sm font-medium mb-1">Assign to Operator</p>
+                  <Select onValueChange={(operatorId) => { handleAssignLead(selectedLead.id, operatorId); setShowLeadDetail(false); }}>
+                    <SelectTrigger><SelectValue placeholder="Select operator..." /></SelectTrigger>
+                    <SelectContent>
+                      {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {selectedLead.routed_to && !selectedLead.converted && (
+                <Button onClick={() => { handleMarkConverted(selectedLead.id); setShowLeadDetail(false); }} className="w-full bg-green-600 hover:bg-green-700">
+                  <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
+                </Button>
+              )}
+
               <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
                 <Clock className="w-3 h-3" />
                 Added {new Date(selectedLead.created_date).toLocaleDateString()}
-                {selectedLead.routed_to && <Badge className="ml-auto bg-green-100 text-green-800">Assigned</Badge>}
-                {selectedLead.converted && <Badge className="ml-auto bg-blue-100 text-blue-800">Converted</Badge>}
+                {selectedLead.routed_to && !selectedLead.converted && <Badge className="ml-auto bg-cyan-100 text-cyan-800">Assigned</Badge>}
+                {selectedLead.converted && <Badge className="ml-auto bg-green-100 text-green-800">Converted</Badge>}
               </div>
             </div>
           )}
@@ -425,7 +338,7 @@ export default function Leads() {
         <LeadRoutingModal
           lead={selectedLead}
           onClose={() => { setShowRoutingModal(false); setSelectedLead(null); }}
-          onSuccess={() => { setShowRoutingModal(false); setSelectedLead(null); loadLeads(); }}
+          onSuccess={() => { setShowRoutingModal(false); setSelectedLead(null); loadData(); }}
         />
       )}
 
