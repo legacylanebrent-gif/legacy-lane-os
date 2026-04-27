@@ -455,9 +455,10 @@ export default function Revenue() {
   const estateReferralProjections = calculateProjections(leadFeeMonthlyRevenue, operatorLeadGrowth, 120);
   const estateReferralQuantities = calculateProjections(leadsAcceptedPerMonth, operatorLeadGrowth, 120);
 
-  // CARD 2: RE Referral income — 5% of accepted leads × avg referral fee
+  // CARD 2: RE Referral income — 5% of accepted leads × dynamic avg referral fee (property value × 2% × 25% × 70%)
   const reReferralRate = 0.05;
-  const reReferralMonthlyRevenue = leadsAcceptedPerMonth * reReferralRate * avgReferralFee;
+  const dynamicReferralFee = dynamicAvgPropertyValue ? Math.round(dynamicAvgPropertyValue * 0.02 * 0.25 * 0.70) : avgReferralFee;
+  const reReferralMonthlyRevenue = leadsAcceptedPerMonth * reReferralRate * dynamicReferralFee;
   const referralProjections = calculateProjections(reReferralMonthlyRevenue, referralGrowth, 120);
   const referralQuantities = calculateProjections(leadsAcceptedPerMonth * reReferralRate, referralGrowth, 120);
 
