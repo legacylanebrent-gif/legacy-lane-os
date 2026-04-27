@@ -269,42 +269,48 @@ export default function MyProfile() {
                     placeholder="(555) 123-4567"
                   />
                 </div>
-                <div>
-                  <Label>Website</Label>
-                  <Input
-                    value={profileData.website_url}
-                    onChange={(e) => setProfileData({ ...profileData, website_url: e.target.value })}
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div>
+                {!isConsumerType && (
+                  <div>
+                    <Label>Website</Label>
+                    <Input
+                      value={profileData.website_url}
+                      onChange={(e) => setProfileData({ ...profileData, website_url: e.target.value })}
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div>
-                <Label>Company/Business Name</Label>
-                <Input
-                  value={profileData.company_name}
-                  onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
-                />
-              </div>
+              {!isConsumerType && (
+                <>
+                  <div>
+                    <Label>Company/Business Name</Label>
+                    <Input
+                      value={profileData.company_name}
+                      onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
+                    />
+                  </div>
 
-              <div>
-                <Label>Business Description</Label>
-                <Textarea
-                  value={profileData.company_description}
-                  onChange={(e) => setProfileData({ ...profileData, company_description: e.target.value })}
-                  rows={4}
-                  placeholder="Tell customers about your business..."
-                />
-              </div>
+                  <div>
+                    <Label>Business Description</Label>
+                    <Textarea
+                      value={profileData.company_description}
+                      onChange={(e) => setProfileData({ ...profileData, company_description: e.target.value })}
+                      rows={4}
+                      placeholder="Tell customers about your business..."
+                    />
+                  </div>
 
-              <div>
-                <Label>Business Address</Label>
-                <Input
-                  value={profileData.business_address}
-                  onChange={(e) => setProfileData({ ...profileData, business_address: e.target.value })}
-                  placeholder="123 Main St, City, State ZIP"
-                />
-              </div>
+                  <div>
+                    <Label>Business Address</Label>
+                    <Input
+                      value={profileData.business_address}
+                      onChange={(e) => setProfileData({ ...profileData, business_address: e.target.value })}
+                      placeholder="123 Main St, City, State ZIP"
+                    />
+                  </div>
+                </>
+              )}
 
               <Button 
                 onClick={handleSaveProfile} 
@@ -317,8 +323,8 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* Venmo QR Code Section */}
-          <Card>
+          {/* Venmo QR Code Section - business users only */}
+          {!isConsumerType && <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5" />
@@ -373,7 +379,7 @@ export default function MyProfile() {
                 )}
               </div>
             </CardContent>
-          </Card>
+          </Card>}
 
           {/* My Purchases Card */}
           <Card>
