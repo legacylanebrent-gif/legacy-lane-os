@@ -337,9 +337,17 @@ export default function Leads() {
               )}
 
               {selectedLead.referral_eligible && selectedLead.referral_status === 'no_referral' && selectedLead.estimated_value && (
-               <div className="p-3 bg-amber-50 border-l-4 border-l-amber-500 rounded-lg">
-                 <p className="font-semibold text-amber-900 text-sm mb-2">Potential Finder Fee</p>
-                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor and they successfully list and close the property, you could earn a finder fee of approximately <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span>. We handle the entire referral process with the realtor and you get paid 7 days after the property closes.</p>
+               <div className="space-y-3 p-3 bg-amber-50 border-l-4 border-l-amber-500 rounded-lg">
+                 <div>
+                   <p className="font-semibold text-amber-900 text-sm mb-2">Potential Finder Fee</p>
+                   <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor and they successfully list and close the property, you could earn a finder fee of approximately <span className="font-bold">${(selectedLead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span>. We handle the entire referral process with the realtor and you get paid 7 days after the property closes.</p>
+                 </div>
+                 <div className="space-y-2 p-3 bg-white rounded-lg text-xs text-slate-600 border border-amber-200">
+                   <p>✓ $75 lead fee required to accept and book this lead</p>
+                   <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
+                   <p>✓ Finder fee applies if referral converts: approximately $513 upon closing</p>
+                   <p>✓ You receive payment 7 days after property closes</p>
+                 </div>
                  <Button 
                    onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
