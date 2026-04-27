@@ -37,7 +37,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'VIPEvent',               label: 'VIP Events',          icon: Star,            group: 'Estate Sales' },
   { page: 'SaleContracts',          label: 'Contracts',           icon: FileText,        group: 'Estate Sales' },
   { page: 'SaleMarketingCampaigns', label: 'Sale Marketing',      icon: Megaphone,       group: 'Estate Sales' },
-  { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Estate Sales' },
+  { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
 
   { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Inventory' },

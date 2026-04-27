@@ -135,14 +135,6 @@ export default function MySales() {
           <p className="text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate(createPageUrl('ApiKeyManager'))}
-            className="border-cyan-600 text-cyan-700 hover:bg-cyan-50"
-          >
-            <Globe className="w-4 h-4 mr-2" />
-            Website API
-          </Button>
           <Button 
             onClick={() => navigate(createPageUrl('SaleEditor'))}
             className="bg-orange-600 hover:bg-orange-700"
