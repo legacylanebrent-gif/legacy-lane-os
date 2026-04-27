@@ -27,6 +27,7 @@ export default function Revenue() {
   const [saveMessage, setSaveMessage] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportYears, setExportYears] = useState(3);
+  const [testOperatorCount, setTestOperatorCount] = useState(null);
   
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -1379,12 +1380,32 @@ export default function Revenue() {
                       </div>
                     </div>
 
-                    <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                      <div className="text-xs text-slate-500 mb-1 font-medium">Total Operators in System</div>
-                      <div className="text-3xl font-bold text-slate-800">
-                        {Math.round(bizInBoxQuantities[0] || 0)}
+                    <div className="mb-6 space-y-4">
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="text-xs text-slate-500 mb-1 font-medium">Total Operators in System</div>
+                        <div className="text-3xl font-bold text-slate-800">
+                          {Math.round(bizInBoxQuantities[0] || 0)}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-2">Each operator receives 10 leads/month</div>
                       </div>
-                      <div className="text-xs text-slate-400 mt-2">Each operator receives 10 leads/month</div>
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <Label className="text-xs text-slate-600 mb-2 block">Test with Different Operator Count</Label>
+                        <Input 
+                          type="number" 
+                          placeholder="Enter operator count to test"
+                          value={testOperatorCount || ''}
+                          onChange={(e) => setTestOperatorCount(e.target.value ? Number(e.target.value) : null)}
+                          className="mb-3"
+                        />
+                        {testOperatorCount && (
+                          <div className="text-sm space-y-1 pt-3 border-t border-amber-200">
+                            <p className="text-amber-900"><strong>If {testOperatorCount.toLocaleString()} operators:</strong></p>
+                            <p className="text-amber-800">Monthly Leads: {(testOperatorCount * 10).toLocaleString()}</p>
+                            <p className="text-amber-800">Monthly Conversions (20%): {Math.round(testOperatorCount * 10 * 0.20).toLocaleString()}</p>
+                            <p className="text-amber-900 font-semibold">Monthly Lead Fee Revenue: ${(Math.round(testOperatorCount * 10 * 0.20) * 75).toLocaleString()}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
