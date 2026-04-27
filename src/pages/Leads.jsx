@@ -279,7 +279,7 @@ export default function Leads() {
               <div className="space-y-2 p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
                 <p>✓ $75 lead fee required to accept and book this lead</p>
                 <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
-                <p>✓ Finder fee applies if referral converts: approximately $513 upon closing</p>
+                <p>✓ Finder fee applies if referral converts to actual closing: approximately $513 is based on property value. Could be more or less depending on final sale value</p>
                 <p>✓ You receive payment 7 days after property closes</p>
               </div>
               <div className="flex gap-3">
@@ -345,7 +345,7 @@ export default function Leads() {
                  <div className="space-y-2 p-3 bg-white rounded-lg text-xs text-slate-600 border border-amber-200">
                    <p>✓ $75 lead fee required to accept and book this lead</p>
                    <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
-                   <p>✓ Finder fee applies if referral converts: approximately $513 upon closing</p>
+                   <p>✓ Finder fee applies if referral converts to actual closing: approximately $513 is based on property value. Could be more or less depending on final sale value</p>
                    <p>✓ You receive payment 7 days after property closes</p>
                  </div>
                  <Button 
