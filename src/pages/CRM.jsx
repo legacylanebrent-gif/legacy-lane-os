@@ -653,6 +653,16 @@ function AddConnectionForm({ user, onSuccess, onCancel }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check for duplicate connection under this operator
+    const existing = await base44.entities.Connection.filter({
+      account_owner_id: user.id,
+      connected_user_email: formData.connected_user_email.trim()
+    });
+    if (existing.length > 0) {
+      alert('A connection with this email already exists in your CRM.');
+      return;
+    }
     
     if (existingUser) {
       // User exists - send invitation
