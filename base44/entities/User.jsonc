@@ -40,6 +40,9 @@
         "education_admin",
         "finance_admin",
         "estate_sale_operator",
+        "team_admin",
+        "team_member",
+        "team_marketer",
         "real_estate_agent",
         "investor",
         "vendor",
@@ -53,6 +56,10 @@
         "coach"
       ],
       "description": "Primary account type"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "For team roles: the ID of the estate_sale_operator this user belongs to"
     },
     "is_admin": {
       "type": "boolean",

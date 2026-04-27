@@ -119,6 +119,7 @@ export default function Layout({ children, currentPageName }) {
   // Admin users use AdminLayout
   const accountType = user?.primary_account_type || user?.primary_role || 'consumer';
   const isConsumerType = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach';
+  const isTeamRole = accountType === 'team_admin' || accountType === 'team_member' || accountType === 'team_marketer';
   
   const isPureAdmin = accountType === 'super_admin' || 
       accountType === 'platform_ops' || 

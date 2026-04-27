@@ -51,9 +51,12 @@ export default function MySales() {
       const userData = await base44.auth.me();
       setUser(userData);
 
-      const salesData = await base44.entities.EstateSale.filter({ 
-        operator_id: userData.id 
-      }, '-created_date');
+      const isTeamRole = ['team_admin', 'team_member', 'team_marketer'].includes(userData.primary_account_type);
+      // Team members see their operator's sales; operators see their own sales
+      const operatorId = isTeamRole ? userData.operator_id : userData.id;
+      const salesData = operatorId
+        ? await base44.entities.EstateSale.filter({ operator_id: operatorId }, '-created_date')
+        : [];
       setSales(salesData);
     } catch (error) {
       console.error('Error loading sales:', error);

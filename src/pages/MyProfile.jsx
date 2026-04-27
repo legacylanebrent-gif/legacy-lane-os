@@ -94,9 +94,13 @@ export default function MyProfile() {
       // Load estate sales only for operator-type users (consumers never own sales)
       const userAccountType = userData.primary_account_type || 'consumer';
       const isConsumer = !userAccountType || userAccountType === 'consumer' || userAccountType === 'executor' || userAccountType === 'home_seller' || userAccountType === 'buyer' || userAccountType === 'downsizer' || userAccountType === 'diy_seller' || userAccountType === 'consignor';
+      const isTeamRole = ['team_admin', 'team_member', 'team_marketer'].includes(userAccountType);
       if (!isConsumer) {
-        const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id });
-        setEstateSales(sales);
+        const operatorId = isTeamRole ? userData.operator_id : userData.id;
+        if (operatorId) {
+          const sales = await base44.entities.EstateSale.filter({ operator_id: operatorId });
+          setEstateSales(sales);
+        }
       }
 
       // Load user purchases
