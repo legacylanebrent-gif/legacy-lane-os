@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Users, Settings, Mail, Phone } from 'lucide-react';
+import { Shield, Users, Settings, Mail, Phone, UserPlus } from 'lucide-react';
 import TeamPermissionsModal from '@/components/team/TeamPermissionsModal';
+import InviteTeamMemberModal from '@/components/team/InviteTeamMemberModal';
 
 const ROLE_COLORS = {
   team_admin: 'bg-purple-100 text-purple-700',
@@ -19,6 +20,7 @@ export default function ManageTeam() {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -60,9 +62,15 @@ export default function ManageTeam() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Manage Team</h1>
-        <p className="text-slate-600">Control your team members' access and permissions</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Manage Team</h1>
+          <p className="text-slate-600">Control your team members' access and permissions</p>
+        </div>
+        <Button onClick={() => setShowInviteModal(true)} className="bg-orange-600 hover:bg-orange-700">
+          <UserPlus className="w-4 h-4 mr-2" />
+          Invite Member
+        </Button>
       </div>
 
       {teamMembers.length === 0 ? (
@@ -70,9 +78,13 @@ export default function ManageTeam() {
           <CardContent className="p-12 text-center">
             <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500 text-lg mb-2">No team members yet</p>
-            <p className="text-sm text-slate-400">
-              Ask your platform admin to create team member accounts linked to your operator ID.
+            <p className="text-sm text-slate-400 mb-4">
+              Invite your first team member using the button above.
             </p>
+            <Button onClick={() => setShowInviteModal(true)} className="bg-orange-600 hover:bg-orange-700">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Invite Member
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -134,6 +146,13 @@ export default function ManageTeam() {
           })}
         </div>
       )}
+
+      <InviteTeamMemberModal
+        open={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        operator={user}
+        onSuccess={loadData}
+      />
 
       <TeamPermissionsModal
         open={showPermissionsModal}
