@@ -61,6 +61,85 @@
       "type": "string",
       "description": "For team roles: the ID of the estate_sale_operator this user belongs to"
     },
+    "team_permissions": {
+      "type": "object",
+      "description": "For team roles: operator-controlled page/feature access toggles",
+      "properties": {
+        "MySales": {
+          "type": "boolean",
+          "default": true
+        },
+        "SaleEditor": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleInventory": {
+          "type": "boolean",
+          "default": false
+        },
+        "Worksheet": {
+          "type": "boolean",
+          "default": false
+        },
+        "Attendance": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleTasks": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleStatistics": {
+          "type": "boolean",
+          "default": false
+        },
+        "PrintSigns": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleExport": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleMarketingCampaigns": {
+          "type": "boolean",
+          "default": false
+        },
+        "SaleContracts": {
+          "type": "boolean",
+          "default": false
+        },
+        "VIPEvent": {
+          "type": "boolean",
+          "default": false
+        },
+        "Buyouts": {
+          "type": "boolean",
+          "default": false
+        },
+        "IncomeTracker": {
+          "type": "boolean",
+          "default": false
+        },
+        "MyBusinessExpenses": {
+          "type": "boolean",
+          "default": false
+        },
+        "ApiKeyManager": {
+          "type": "boolean",
+          "default": false
+        },
+        "CRM": {
+          "type": "boolean",
+          "default": false
+        },
+        "Campaigns": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {}
+    },
     "is_admin": {
       "type": "boolean",
       "default": false,
@@ -81,11 +160,6 @@
     }
   },
   "required": [
-    "display_name",
-    "company_name",
-    "phone",
-    "profile_image_url",
-    "location",
     "primary_account_type"
   ]
 }

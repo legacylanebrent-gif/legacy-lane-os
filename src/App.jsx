@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import SalePricingTool from './pages/SalePricingTool';
 import ApiKeyManager from './pages/ApiKeyManager';
+import ManageTeam from './pages/ManageTeam';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/SalePricingTool" element={<LayoutWrapper currentPageName="SalePricingTool"><SalePricingTool /></LayoutWrapper>} />
       <Route path="/ApiKeyManager" element={<LayoutWrapper currentPageName="ApiKeyManager"><ApiKeyManager /></LayoutWrapper>} />
+      <Route path="/ManageTeam" element={<LayoutWrapper currentPageName="ManageTeam"><ManageTeam /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

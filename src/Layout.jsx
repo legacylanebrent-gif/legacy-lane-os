@@ -120,6 +120,13 @@ export default function Layout({ children, currentPageName }) {
   const accountType = user?.primary_account_type || user?.primary_role || 'consumer';
   const isConsumerType = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach';
   const isTeamRole = accountType === 'team_admin' || accountType === 'team_member' || accountType === 'team_marketer';
+  const teamPerms = isTeamRole ? (user?.team_permissions || {}) : null;
+  // team_admin gets all perms; other team roles use assigned perms
+  const hasTeamPerm = (page) => {
+    if (!isTeamRole) return true;
+    if (accountType === 'team_admin') return true;
+    return teamPerms?.[page] === true;
+  };
   
   const isPureAdmin = accountType === 'super_admin' || 
       accountType === 'platform_ops' || 
@@ -288,7 +295,22 @@ export default function Layout({ children, currentPageName }) {
                     My Profile
                   </Button>
                 </Link>
-                {!isConsumerType && (
+                {(accountType === 'estate_sale_operator' || accountType === 'team_admin') && (
+                  <Link to={createPageUrl('ManageTeam')}>
+                    <Button 
+                      variant={currentPageName === 'ManageTeam' ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${
+                        currentPageName === 'ManageTeam' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
+                          : 'hover:bg-cyan-50'
+                      }`}
+                    >
+                      <Users className="w-5 h-5 mr-3" />
+                      Manage Team
+                    </Button>
+                  </Link>
+                )}
+                {!isConsumerType && hasTeamPerm('MySales') && (
                   <Link to={createPageUrl('MySales')}>
                     <Button 
                       variant={currentPageName === 'MySales' ? 'default' : 'ghost'}
