@@ -21,6 +21,8 @@ export default function Revenue() {
   const [agentPackages, setAgentPackages] = useState({ basic: null, pro: null });
   const [consignorPackages, setConsignorPackages] = useState({ basic: null, pro: null });
   const [loading, setLoading] = useState(true);
+  const [dynamicAvgPropertyValue, setDynamicAvgPropertyValue] = useState(null);
+  const [leadsCount, setLeadsCount] = useState(0);
   const [pieChartYear, setPieChartYear] = useState(3);
   const [saveMessage, setSaveMessage] = useState('');
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -274,6 +276,15 @@ export default function Revenue() {
           if (pkg.tier_level === 'pro') consignorPkgs.pro = pkg;
         });
         setConsignorPackages(consignorPkgs);
+
+        // Load leads to compute avg property value
+        const leads = await base44.entities.Lead.list('-created_date', 500);
+        const leadsWithValue = leads.filter(l => l.estimated_value && l.estimated_value > 0);
+        setLeadsCount(leadsWithValue.length);
+        if (leadsWithValue.length > 0) {
+          const avg = leadsWithValue.reduce((sum, l) => sum + l.estimated_value, 0) / leadsWithValue.length;
+          setDynamicAvgPropertyValue(Math.round(avg));
+        }
       } catch (error) {
         console.error('Error loading pricing:', error);
       } finally {
@@ -1416,6 +1427,26 @@ export default function Revenue() {
                   <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <div className="text-sm text-slate-700">
                       <strong>Calculation:</strong> Accepted Leads × 5% conversion to RE referral × Average fee per property
+                    </div>
+                  </div>
+
+                  {/* Dynamic avg property value from leads */}
+                  <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs text-slate-500 mb-1 font-medium">Avg Property Value from Leads ({leadsCount} leads with values)</div>
+                        {dynamicAvgPropertyValue ? (
+                          <div className="text-2xl font-bold text-slate-800">${dynamicAvgPropertyValue.toLocaleString()}</div>
+                        ) : (
+                          <div className="text-lg text-slate-400 italic">No lead property values found — using manual input</div>
+                        )}
+                      </div>
+                      {dynamicAvgPropertyValue && (
+                        <div className="text-xs text-slate-500 text-right">
+                          <div>Live from Lead entity</div>
+                          <div className="text-amber-600 font-medium mt-1">Use this to set your Avg Referral Fee below</div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
