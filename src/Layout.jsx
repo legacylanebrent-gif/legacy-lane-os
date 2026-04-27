@@ -2,155 +2,68 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from '@/components/ui/button';
-import AdminLayout from '@/components/admin/AdminLayout';
+import AppSidebar from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
-import { 
-  Home, Building2, TrendingUp, ShoppingBag, Megaphone, GraduationCap,
-  Users, User, Settings, LogOut, Menu, X, ChevronDown, BarChart3, MapPin, Star, MessageSquare, FileText, Bell, Heart, LayoutDashboard, HandCoins, Shield
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const DIVISION_CONFIG = {
-  estate_services: {
-    label: 'Estate Services',
-    icon: Home,
-    pages: [
-      { name: 'MySales', label: 'My Sales', icon: Building2 },
-      { name: 'Inventory', label: 'Inventory', icon: ShoppingBag },
-      { name: 'Messages', label: 'Messages', icon: Users }
-    ]
-  },
-  real_estate: {
-    label: 'Real Estate',
-    icon: Building2,
-    pages: [
-      { name: 'CRM', label: 'CRM', icon: Users },
-      { name: 'Properties', label: 'Properties', icon: Building2 },
-      { name: 'Leads', label: 'Leads', icon: TrendingUp }
-    ]
-  },
-  investment: {
-    label: 'Investment & Flips',
-    icon: TrendingUp,
-    pages: [
-      { name: 'Deals', label: 'Deals', icon: TrendingUp },
-      { name: 'Projects', label: 'Projects', icon: Building2 }
-    ]
-  },
-  marketplace: {
-    label: 'Marketplace',
-    icon: ShoppingBag,
-    pages: [
-      { name: 'BrowseItems', label: 'Browse', icon: ShoppingBag },
-      { name: 'MyListings', label: 'My Listings', icon: BarChart3 }
-    ]
-  },
-  marketing: {
-    label: 'Marketing Hub',
-    icon: Megaphone,
-    pages: [
-      { name: 'Campaigns', label: 'Campaigns', icon: Megaphone },
-      { name: 'Analytics', label: 'Analytics', icon: BarChart3 }
-    ]
-  },
-  education: {
-    label: 'Education',
-    icon: GraduationCap,
-    pages: [
-      { name: 'Courses', label: 'All Courses', icon: GraduationCap },
-      { name: 'MyCourses', label: 'My Courses', icon: Users }
-    ]
-  }
-};
+// Pages that render without any chrome (public-facing)
+const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'];
+
+// Consumer-type roles that get the consumer header instead of the sidebar
+const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach'];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadUser = async () => {
+  useEffect(() => {
+    loadUserAndAccess();
+  }, []);
+
+  const loadUserAndAccess = async () => {
     try {
       const userData = await base44.auth.me();
-      // Ensure primary_account_type defaults to 'consumer' if not set
-      if (userData && (!userData.primary_account_type || userData.primary_account_type === '')) {
-        userData.primary_account_type = 'consumer';
-      }
-      console.log('User account type:', userData?.primary_account_type);
+      if (!userData) { setLoading(false); return; }
+
+      // Default primary_account_type
+      if (!userData.primary_account_type) userData.primary_account_type = 'consumer';
       setUser(userData);
+
+      const role = userData.primary_account_type;
+
+      // Fetch the PageAccess config for this role
+      const configs = await base44.entities.PageAccess.filter({ account_type: role, is_active: true });
+      if (configs.length > 0) {
+        setAllowedPages(configs[0].allowed_pages || []);
+      } else {
+        // Fallback: consumers get a minimal set, everyone else gets a basic set
+        setAllowedPages(['Dashboard', 'MyProfile', 'Notifications', 'MyTickets', 'BrowseItems', 'EstateSaleFinder', 'RewardsCheckins', 'Favorites', 'MyRewards', 'MyReferrals']);
+      }
     } catch (error) {
-      console.error('Error loading user:', error);
+      console.error('Error loading user/access:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await base44.auth.logout(createPageUrl('Home'));
-  };
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  // Pages that don't need layout or authentication
-  if (['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'].includes(currentPageName)) {
-    return children;
-  }
+  // Public pages — no layout at all
+  if (PUBLIC_PAGES.includes(currentPageName)) return children;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-navy-900 text-xl font-serif">Loading...</div>
+        <div className="animate-pulse text-slate-600 text-lg font-serif">Loading...</div>
       </div>
     );
   }
 
-  // Admin users use AdminLayout
-  const accountType = user?.primary_account_type || user?.primary_role || 'consumer';
-  const isConsumerType = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor' || accountType === 'coach';
-  const isTeamRole = accountType === 'team_admin' || accountType === 'team_member' || accountType === 'team_marketer';
-  const teamPerms = isTeamRole ? (user?.team_permissions || {}) : null;
-  // team_admin gets all perms; other team roles use assigned perms
-  const hasTeamPerm = (page) => {
-    if (!isTeamRole) return true;
-    if (accountType === 'team_admin') return true;
-    return teamPerms?.[page] === true;
-  };
-  
-  const isPureAdmin = accountType === 'super_admin' || 
-      accountType === 'platform_ops' || 
-      accountType === 'growth_team' ||
-      accountType === 'partnerships' ||
-      accountType === 'education_admin' ||
-      accountType === 'finance_admin';
+  const role = user?.primary_account_type || 'consumer';
+  const isConsumer = CONSUMER_ROLES.includes(role);
 
-  if (isPureAdmin) {
-    return (
-      <AdminLayout currentPage={currentPageName} user={user}>
-        {children}
-      </AdminLayout>
-    );
-  }
-
-  const userInitials = user?.display_name
-    ?.split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase() || 'U';
-
-  // Consumer layout with unified header
-  if (isConsumerType) {
+  // Consumer layout — top header only, no sidebar
+  if (isConsumer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
         <ConsumerHeader user={user} />
@@ -159,354 +72,19 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // Business user layout (operator, agent, etc.)
+  // All other roles — unified sidebar layout
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
-      {/* Top Navigation */}
-      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
-                <div className="hidden sm:block">
-                  <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
-                  <p className="text-xs text-orange-400">Operating System</p>
-                </div>
-              </Link>
-            </div>
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
+      <AppSidebar user={user} currentPageName={currentPageName} allowedPages={allowedPages} />
 
-            <div className="flex items-center gap-4">
-              <div className="bg-white rounded-lg p-2 flex items-center gap-2">
-                <MessagesDropdown />
-                <NotificationsDropdown />
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-orange-500/20 hover:text-orange-300">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.profile_image_url} />
-                      <AvatarFallback className="bg-orange-600 text-white">{userInitials}</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">{user?.full_name}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div>
-                      <p className="font-semibold">{user?.display_name}</p>
-                      <p className="text-xs text-slate-500">{user?.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {!isConsumerType && (
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Settings')} className="cursor-pointer">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                      <Bell className="w-4 h-4 mr-2" />
-                      Notification Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar with notifications */}
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200 px-4 h-12 flex items-center justify-end gap-3">
+          <MessagesDropdown />
+          <NotificationsDropdown />
         </div>
-      </nav>
 
-      <div className="flex">
-        {/* Sidebar */}
-        {/* Toggle button when sidebar is closed */}
-        {!sidebarOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-[4.5rem] left-2 z-50 bg-white border border-slate-200 shadow-md text-slate-600 hover:bg-slate-100"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        )}
-
-        <aside className={`
-          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] 
-          bg-white border-r border-slate-200 z-40
-          transition-all duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-0'}
-        `}>
-          <div className="p-6 overflow-y-auto h-full">
-            {/* Sidebar close button */}
-            <div className="flex justify-end mb-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-slate-500 hover:bg-slate-100"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="space-y-6">
-              {user?.is_admin && (
-                <div className="mb-4 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-                  <Link to={createPageUrl('AdminUsers')}>
-                    <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white text-sm">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Admin Panel
-                    </Button>
-                  </Link>
-                </div>
-              )}
-              <div className="space-y-1">
-                <Link to={createPageUrl(isConsumerType ? 'ConsumerHome' : 'Dashboard')}>
-                  <Button 
-                    variant={(isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard') ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      ((isConsumerType && currentPageName === 'ConsumerHome') || (!isConsumerType && currentPageName === 'Dashboard'))
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <Home className="w-5 h-5 mr-3" />
-                    {isConsumerType ? 'Home' : 'Dashboard'}
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyProfile')}>
-                  <Button 
-                    variant={currentPageName === 'MyProfile' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyProfile' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <User className="w-5 h-5 mr-3" />
-                    My Profile
-                  </Button>
-                </Link>
-                {(accountType === 'estate_sale_operator' || accountType === 'team_admin') && (
-                  <Link to={createPageUrl('ManageTeam')}>
-                    <Button 
-                      variant={currentPageName === 'ManageTeam' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'ManageTeam' 
-                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <Users className="w-5 h-5 mr-3" />
-                      Manage Team
-                    </Button>
-                  </Link>
-                )}
-                {!isConsumerType && hasTeamPerm('MySales') && (
-                  <Link to={createPageUrl('MySales')}>
-                    <Button 
-                      variant={currentPageName === 'MySales' ? 'default' : 'ghost'}
-                      className={`w-full justify-start ${
-                        currentPageName === 'MySales' 
-                          ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                          : 'hover:bg-cyan-50'
-                      }`}
-                    >
-                      <Building2 className="w-5 h-5 mr-3" />
-                      My Sales
-                    </Button>
-                  </Link>
-                )}
-                <Link to={createPageUrl('RewardsCheckins')}>
-                  <Button 
-                    variant={currentPageName === 'RewardsCheckins' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'RewardsCheckins' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <MapPin className="w-5 h-5 mr-3" />
-                    Check-ins
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('Favorites')}>
-                  <Button 
-                    variant={currentPageName === 'Favorites' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'Favorites' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <Heart className="w-5 h-5 mr-3" />
-                    Favorites
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('BrowseItems')}>
-                  <Button 
-                    variant={currentPageName === 'BrowseItems' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'BrowseItems' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <ShoppingBag className="w-5 h-5 mr-3" />
-                    Marketplace
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyReferrals')}>
-                  <Button 
-                    variant={currentPageName === 'MyReferrals' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyReferrals' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <Users className="w-5 h-5 mr-3" />
-                    My Referrals
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyRewards')}>
-                  <Button 
-                    variant={currentPageName === 'MyRewards' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyRewards' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <Star className="w-5 h-5 mr-3" />
-                    My Rewards
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('Buyouts')}>
-                  <Button 
-                    variant={currentPageName === 'Buyouts' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'Buyouts' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <HandCoins className="w-5 h-5 mr-3" />
-                    Buyouts
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('MyTickets')}>
-                  <Button 
-                    variant={currentPageName === 'MyTickets' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'MyTickets' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <MessageSquare className="w-5 h-5 mr-3" />
-                    Support
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('Notifications')}>
-                  <Button 
-                    variant={currentPageName === 'Notifications' ? 'default' : 'ghost'}
-                    className={`w-full justify-start ${
-                      currentPageName === 'Notifications' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                        : 'hover:bg-cyan-50'
-                    }`}
-                  >
-                    <MessageSquare className="w-5 h-5 mr-3" />
-                    Notifications
-                  </Button>
-                </Link>
-                {!isConsumerType && (
-                  <div className="space-y-1 mt-6">
-                    <Link to={createPageUrl('IncomeTracker')}>
-                      <Button 
-                        variant={currentPageName === 'IncomeTracker' ? 'default' : 'ghost'}
-                        className={`w-full justify-start ${
-                          currentPageName === 'IncomeTracker' 
-                            ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                            : 'hover:bg-cyan-50'
-                        }`}
-                      >
-                        <TrendingUp className="w-5 h-5 mr-3" />
-                        Income Tracker
-                      </Button>
-                    </Link>
-                    <Link to={createPageUrl('MyBusinessExpenses')}>
-                      <Button 
-                        variant={currentPageName === 'MyBusinessExpenses' ? 'default' : 'ghost'}
-                        className={`w-full justify-start ${
-                          currentPageName === 'MyBusinessExpenses' 
-                            ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                            : 'hover:bg-cyan-50'
-                        }`}
-                      >
-                        <FileText className="w-5 h-5 mr-3" />
-                        Business Expenses
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {user?.divisions_access?.map(divisionKey => {
-                const division = DIVISION_CONFIG[divisionKey];
-                if (!division) return null;
-
-                return (
-                  <div key={divisionKey}>
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                      {division.label}
-                    </h3>
-                    <div className="space-y-1">
-                      {division.pages.map(page => (
-                        <Link key={page.name} to={createPageUrl(page.name)}>
-                          <Button
-                            variant="ghost"
-                            className={`w-full justify-start ${
-                              currentPageName === page.name
-                                ? 'bg-cyan-100 text-cyan-700'
-                                : 'hover:bg-cyan-50'
-                            }`}
-                          >
-                            <page.icon className="w-4 h-4 mr-3" />
-                            {page.label}
-                          </Button>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </aside>
-
-        {/* Overlay for mobile */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar spacer for desktop when closed */}
-        {!sidebarOpen && <div className="hidden lg:block w-0" />}
-
-        {/* Main Content */}
-        <main className="flex-1 lg:ml-0">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>
