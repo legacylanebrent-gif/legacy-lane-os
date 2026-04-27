@@ -36,16 +36,29 @@ export default function Buyouts() {
       const userData = await base44.auth.me();
       setUser(userData);
 
-      // Load all sales for this operator
-      const salesData = await base44.entities.EstateSale.filter({ 
-        operator_id: userData.id 
-      }, '-created_date');
-      setSales(salesData);
+      const accountType = userData.primary_account_type || 'consumer';
+      const isConsumer = !accountType || accountType === 'consumer' || accountType === 'executor' || accountType === 'home_seller' || accountType === 'buyer' || accountType === 'downsizer' || accountType === 'diy_seller' || accountType === 'consignor';
 
-      // Load all buyout offers
-      const offers = await base44.entities.Offer.filter({}, '-created_date');
-      const buyouts = offers.filter(o => o.full_name === 'Estate Buyout' || o.item_name?.startsWith('Buyout Offer'));
-      setBuyoutOffers(buyouts);
+      if (isConsumer) {
+        // Consumers only see their own buyout offers
+        setSales([]);
+        const offers = await base44.entities.Offer.filter({ created_by: userData.email }, '-created_date');
+        const buyouts = offers.filter(o => o.item_name?.startsWith('Buyout Offer') || o.full_name === 'Estate Buyout');
+        setBuyoutOffers(buyouts);
+      } else {
+        // Operators see buyout offers on their own sales
+        const salesData = await base44.entities.EstateSale.filter({ 
+          operator_id: userData.id 
+        }, '-created_date');
+        setSales(salesData);
+
+        const allOffers = await base44.entities.Offer.filter({}, '-created_date');
+        const saleIds = new Set(salesData.map(s => s.id));
+        const buyouts = allOffers.filter(o => 
+          saleIds.has(o.sale_id) && (o.item_name?.startsWith('Buyout Offer') || o.full_name === 'Estate Buyout')
+        );
+        setBuyoutOffers(buyouts);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
