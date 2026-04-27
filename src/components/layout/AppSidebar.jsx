@@ -27,7 +27,7 @@ export const ALL_NAV_ITEMS = [
 
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
-  { page: 'SaleInventory',          label: 'Sale Inventory',      icon: Package,         group: 'Estate Sales' },
+  { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Estate Sales' },
   { page: 'Worksheet',              label: 'POS / Worksheet',     icon: DollarSign,      group: 'Estate Sales' },
   { page: 'Attendance',             label: 'Attendance',          icon: Users,           group: 'Estate Sales' },
   { page: 'SaleTasks',              label: 'Sale Tasks',          icon: FileText,        group: 'Estate Sales' },
@@ -39,8 +39,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'SaleMarketingCampaigns', label: 'Sale Marketing',      icon: Megaphone,       group: 'Estate Sales' },
   { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
-
-  { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Inventory' },
 
   { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Marketplace' },
   { page: 'MyListings',             label: 'My Listings',         icon: ShoppingBag,     group: 'Marketplace' },
@@ -115,7 +113,7 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
     return acc;
   }, {});
 
-  const groupOrder = ['Main', 'Estate Sales', 'Inventory', 'Marketplace', 'CRM & Leads', 'Marketing', 'Education', 'Finance', 'Consumer', 'Directory', 'Admin'];
+  const groupOrder = ['Main', 'Estate Sales', 'Marketplace', 'CRM & Leads', 'Marketing', 'Education', 'Finance', 'Consumer', 'Directory', 'Admin'];
 
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
