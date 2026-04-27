@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import AppSidebar from '@/components/layout/AppSidebar';
+import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+
+const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page);
+const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 
 // Pages that render without any chrome (public-facing)
 const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'];
@@ -33,12 +36,18 @@ export default function Layout({ children, currentPageName }) {
 
       const role = userData.primary_account_type;
 
+      // Admins always get all pages — no DB lookup needed
+      if (ADMIN_ROLES.includes(role) || userData.role === 'admin') {
+        setAllowedPages(ALL_PAGE_NAMES);
+        return;
+      }
+
       // Fetch the PageAccess config for this role
       const configs = await base44.entities.PageAccess.filter({ account_type: role, is_active: true });
       if (configs.length > 0) {
         setAllowedPages(configs[0].allowed_pages || []);
       } else {
-        // Fallback: consumers get a minimal set, everyone else gets a basic set
+        // Fallback minimal set
         setAllowedPages(['Dashboard', 'MyProfile', 'Notifications', 'MyTickets', 'BrowseItems', 'EstateSaleFinder', 'RewardsCheckins', 'Favorites', 'MyRewards', 'MyReferrals']);
       }
     } catch (error) {
