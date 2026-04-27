@@ -276,9 +276,10 @@ export default function Leads() {
                 <p className="text-xs text-amber-800">This fee is paid upon closing when the client purchases a home through our realtor network. EstateSalen.com acts as the licensed referral agent.</p>
               </div>
               <div className="space-y-2 p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
-                <p>✓ You agree to refer this client to EstateSalen.com's realtor network</p>
-                <p>✓ Finder fee only applies if the referral converts to a closing</p>
-                <p>✓ Fee structure: $400K home = $2,000 referral pool → You receive 30% = $600</p>
+                <p>✓ $75 lead fee required to accept and book this lead</p>
+                <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
+                <p>✓ Finder fee applies if referral converts: approximately $513 upon closing</p>
+                <p>✓ You receive payment 7 days after property closes</p>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setShowReferralModal(false)} className="flex-1">Cancel</Button>
