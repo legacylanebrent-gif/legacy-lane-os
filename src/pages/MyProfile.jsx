@@ -91,9 +91,13 @@ export default function MyProfile() {
         }));
       }
 
-      // Load estate sales for this operator
-      const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id });
-      setEstateSales(sales);
+      // Load estate sales only for operator-type users (consumers never own sales)
+      const userAccountType = userData.primary_account_type || 'consumer';
+      const isConsumer = !userAccountType || userAccountType === 'consumer' || userAccountType === 'executor' || userAccountType === 'home_seller' || userAccountType === 'buyer' || userAccountType === 'downsizer' || userAccountType === 'diy_seller' || userAccountType === 'consignor';
+      if (!isConsumer) {
+        const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id });
+        setEstateSales(sales);
+      }
 
       // Load user purchases
       const userPurchases = await base44.entities.Transaction.filter({ created_by: userData.email });
