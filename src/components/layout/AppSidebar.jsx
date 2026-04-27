@@ -24,9 +24,9 @@ export const ALL_NAV_ITEMS = [
   { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
   { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
-  { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Main' },
 
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
+  { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
   { page: 'SaleInventory',          label: 'Sale Inventory',      icon: Package,         group: 'Estate Sales' },
   { page: 'Worksheet',              label: 'POS / Worksheet',     icon: DollarSign,      group: 'Estate Sales' },
   { page: 'Attendance',             label: 'Attendance',          icon: Users,           group: 'Estate Sales' },
