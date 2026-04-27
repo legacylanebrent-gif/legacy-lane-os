@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Mail, Phone, MapPin, Clock, TrendingUp, User,
-  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign
+  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign, Gift
 } from 'lucide-react';
 
 const PIPELINE_STAGES = [
@@ -37,6 +37,8 @@ export default function Leads() {
   const [filter, setFilter] = useState('active');
   const [selectedLead, setSelectedLead] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [referralLead, setReferralLead] = useState(null);
 
   // Pipeline (deals linked to this operator's leads)
   const [deals, setDeals] = useState([]);
@@ -90,6 +92,16 @@ export default function Leads() {
       converted: true,
       conversion_date: new Date().toISOString()
     });
+    setShowDetail(false);
+    loadLeads(user.id);
+  };
+
+  const handleAcceptReferral = async (leadId) => {
+    await base44.entities.Lead.update(leadId, {
+      referral_status: 'pending',
+      referral_accepted_at: new Date().toISOString()
+    });
+    setShowReferralModal(false);
     setShowDetail(false);
     loadLeads(user.id);
   };
@@ -167,9 +179,17 @@ export default function Leads() {
                       {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600 line-clamp-1">{lead.property_address}</span></div>}
                     </div>
 
-                    {(lead.estimated_value || lead.timeline) && (
+                    {(lead.estimated_referral_fee || lead.timeline) && (
                       <div className="grid grid-cols-2 gap-2 text-sm border-t pt-2">
-                        {lead.estimated_value && <div><p className="text-xs text-slate-500">Est. Value</p><p className="font-semibold text-green-700">${lead.estimated_value.toLocaleString()}</p></div>}
+                        {lead.estimated_referral_fee && (
+                          <div className="flex items-center gap-1">
+                            <Gift className="w-3.5 h-3.5 text-amber-500" />
+                            <div>
+                              <p className="text-xs text-slate-500">Finder Fee</p>
+                              <p className="font-semibold text-amber-600">${lead.estimated_referral_fee.toLocaleString()}</p>
+                            </div>
+                          </div>
+                        )}
                         {lead.timeline && <div><p className="text-xs text-slate-500">Timeline</p><p className="capitalize">{lead.timeline.replace(/_/g, ' ')}</p></div>}
                       </div>
                     )}
@@ -242,6 +262,41 @@ export default function Leads() {
         </TabsContent>
       </Tabs>
 
+      {/* Referral Acceptance Modal */}
+      <Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Referral Agreement</DialogTitle></DialogHeader>
+          {referralLead && (
+            <div className="space-y-4 mt-4">
+              <div className="p-4 bg-slate-50 rounded-lg space-y-2">
+                <p className="text-sm"><span className="font-semibold">Client:</span> {referralLead.contact_name}</p>
+                <p className="text-sm"><span className="font-semibold">Property:</span> {referralLead.property_address}</p>
+                <p className="text-sm"><span className="font-semibold">Est. Value:</span> ${referralLead.estimated_value?.toLocaleString()}</p>
+              </div>
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm font-semibold text-amber-900 mb-2">Your Finder Fee</p>
+                <p className="text-2xl font-bold text-amber-700 mb-3">${referralLead.estimated_referral_fee?.toLocaleString()}</p>
+                <p className="text-xs text-amber-800">This fee is paid upon closing when the client purchases a home through our realtor network. EstateSalen.com acts as the licensed referral agent.</p>
+              </div>
+              <div className="space-y-2 p-3 bg-slate-50 rounded-lg text-xs text-slate-600">
+                <p>✓ You agree to refer this client to EstateSalen.com's realtor network</p>
+                <p>✓ Finder fee only applies if the referral converts to a closing</p>
+                <p>✓ Fee structure: $400K home = $2,000 referral pool → You receive 30% = $600</p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowReferralModal(false)} className="flex-1">Cancel</Button>
+                <Button 
+                  onClick={() => handleAcceptReferral(referralLead.id)}
+                  className="flex-1 bg-amber-600 hover:bg-amber-700"
+                >
+                  <Gift className="w-4 h-4 mr-2" />Accept Terms
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Lead Detail Modal */}
       <Dialog open={showDetail} onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -276,16 +331,29 @@ export default function Leads() {
               )}
 
               {selectedLead.notes && (
-                <div className="p-3 bg-slate-50 rounded-lg text-sm">
-                  <p className="font-medium mb-1">Notes</p>
-                  <p className="text-slate-600">{selectedLead.notes}</p>
-                </div>
+               <div className="p-3 bg-slate-50 rounded-lg text-sm">
+                 <p className="font-medium mb-1">Notes</p>
+                 <p className="text-slate-600">{selectedLead.notes}</p>
+               </div>
+              )}
+
+              {selectedLead.referral_eligible && selectedLead.referral_status === 'no_referral' && selectedLead.estimated_referral_fee && (
+               <div className="p-3 bg-amber-50 border-l-4 border-l-amber-500 rounded-lg">
+                 <p className="font-semibold text-amber-900 text-sm mb-2">Potential Finder Fee</p>
+                 <p className="text-sm text-amber-800 mb-3">If you refer this client to a realtor for buyer representation, you could earn a <span className="font-bold">${selectedLead.estimated_referral_fee.toLocaleString()}</span> finder fee when the sale closes.</p>
+                 <Button 
+                   onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
+                   className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                 >
+                   <Gift className="w-4 h-4 mr-2" />Accept Referral Terms
+                 </Button>
+               </div>
               )}
 
               {!selectedLead.converted && (
-                <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700">
-                  <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
-                </Button>
+               <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700">
+                 <CheckCircle className="w-4 h-4 mr-2" />Mark as Converted
+               </Button>
               )}
 
               <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">

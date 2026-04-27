@@ -144,6 +144,39 @@
       "type": "string",
       "description": "Which page/form the lead came from on EstateSalen.com"
     },
+    "referral_eligible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Can this lead be referred to a realtor for buyer representation"
+    },
+    "estimated_referral_fee": {
+      "type": "number",
+      "description": "Operator's finder fee if referred to realtor (Home Value \u00d7 2% \u00d7 25% \u00d7 30%)"
+    },
+    "referral_status": {
+      "type": "string",
+      "enum": [
+        "no_referral",
+        "pending",
+        "paid"
+      ],
+      "default": "no_referral",
+      "description": "Status of realtor referral"
+    },
+    "referral_accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When operator accepted referral terms"
+    },
+    "referral_paid_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When referral fee was paid to operator"
+    },
+    "referral_paid_amount": {
+      "type": "number",
+      "description": "Actual amount paid to operator"
+    },
     "notes": {
       "type": "string"
     }
