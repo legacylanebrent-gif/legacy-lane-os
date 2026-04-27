@@ -34,6 +34,7 @@ export default function Leads() {
   const [leadsFilter, setLeadsFilter] = useState('all');
   const [selectedLead, setSelectedLead] = useState(null);
   const [showRoutingModal, setShowRoutingModal] = useState(false);
+  const [showLeadDetail, setShowLeadDetail] = useState(false);
 
   // --- Pipeline tab state ---
   const [deals, setDeals] = useState([]);
@@ -221,7 +222,12 @@ export default function Leads() {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredLeads.map(lead => (
-                    <LeadCard key={lead.id} lead={lead} onRoute={(l) => { setSelectedLead(l); setShowRoutingModal(true); }} />
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onRoute={(l) => { setSelectedLead(l); setShowRoutingModal(true); }}
+                      onClick={() => { setSelectedLead(lead); setShowLeadDetail(true); }}
+                    />
                   ))}
                 </div>
               )}
@@ -366,6 +372,53 @@ export default function Leads() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Lead Detail Modal */}
+      <Dialog open={showLeadDetail} onOpenChange={(open) => { setShowLeadDetail(open); if (!open) setSelectedLead(null); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-xl">Lead Details</DialogTitle></DialogHeader>
+          {selectedLead && (
+            <div className="space-y-4 mt-2">
+              <div className="flex items-center gap-3">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold ${getScoreColor(selectedLead.score || 0)}`}>
+                  {selectedLead.score || 0}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 capitalize">{selectedLead.intent?.replace(/_/g, ' ')}</p>
+                  <p className="text-sm text-slate-500 capitalize">{selectedLead.source?.replace(/_/g, ' ')}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {selectedLead.contact_name && <div><p className="text-xs text-slate-500 mb-0.5">Name</p><p className="font-medium">{selectedLead.contact_name}</p></div>}
+                {selectedLead.contact_email && <div><p className="text-xs text-slate-500 mb-0.5">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="font-medium text-cyan-600 hover:underline">{selectedLead.contact_email}</a></div>}
+                {selectedLead.contact_phone && <div><p className="text-xs text-slate-500 mb-0.5">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="font-medium text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
+                {selectedLead.timeline && <div><p className="text-xs text-slate-500 mb-0.5">Timeline</p><p className="font-medium capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
+                {selectedLead.estimated_value && <div><p className="text-xs text-slate-500 mb-0.5">Est. Value</p><p className="font-medium text-green-600">${selectedLead.estimated_value.toLocaleString()}</p></div>}
+                {selectedLead.situation && <div><p className="text-xs text-slate-500 mb-0.5">Situation</p><p className="font-medium capitalize">{selectedLead.situation}</p></div>}
+                {selectedLead.home_size && <div><p className="text-xs text-slate-500 mb-0.5">Home Size</p><p className="font-medium capitalize">{selectedLead.home_size.replace(/_/g, ' ')}</p></div>}
+              </div>
+              {selectedLead.property_address && (
+                <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg">
+                  <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                  <span>{selectedLead.property_address}</span>
+                </div>
+              )}
+              {selectedLead.notes && (
+                <div className="p-3 bg-slate-50 rounded-lg text-sm">
+                  <p className="font-medium mb-1">Notes</p>
+                  <p className="text-slate-600">{selectedLead.notes}</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
+                <Clock className="w-3 h-3" />
+                Added {new Date(selectedLead.created_date).toLocaleDateString()}
+                {selectedLead.routed_to && <Badge className="ml-auto bg-green-100 text-green-800">Assigned</Badge>}
+                {selectedLead.converted && <Badge className="ml-auto bg-blue-100 text-blue-800">Converted</Badge>}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Routing Modal */}
       {showRoutingModal && selectedLead && (

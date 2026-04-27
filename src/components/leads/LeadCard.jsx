@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, MapPin, Home, UserCheck, DollarSign, Clock } from 'lucide-react';
 
-export default function LeadCard({ lead, onRoute }) {
+export default function LeadCard({ lead, onRoute, onClick }) {
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-green-600 bg-green-100';
     if (score >= 60) return 'text-amber-600 bg-amber-100';
@@ -22,7 +22,7 @@ export default function LeadCard({ lead, onRoute }) {
   const IntentIcon = getIntentIcon(lead.intent);
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
