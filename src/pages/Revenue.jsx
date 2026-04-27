@@ -327,12 +327,14 @@ export default function Revenue() {
     bizNewPerMonth, bizChurnRate, avgSaleProfit, salesPerMonth
   ]);
 
-  const calculateProjections = (monthlyBase, growthPercent, months) => {
+  const calculateProjections = (monthlyBase, annualGrowthPercent, months) => {
     const projections = [];
     let current = monthlyBase;
+    // Convert annual growth to monthly growth (compound annually, apply monthly)
+    const monthlyGrowthRate = Math.pow(1 + annualGrowthPercent / 100, 1 / 12) - 1;
     for (let i = 0; i < months; i++) {
       projections.push(current);
-      current = current * (1 + growthPercent / 100);
+      current = current * (1 + monthlyGrowthRate);
     }
     return projections;
   };
