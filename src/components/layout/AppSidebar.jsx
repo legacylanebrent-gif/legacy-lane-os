@@ -35,7 +35,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyListings',             label: 'Marketplace Listings', icon: ShoppingBag,     group: 'Estate Sales' },
 
   { page: 'CRM',                    label: 'CRM',                 icon: Users,           group: 'CRM & Leads' },
-  { page: 'ContactDetail',          label: 'Contacts',            icon: User,            group: 'CRM & Leads' },
   { page: 'Leads',                  label: 'Leads',               icon: Award,           group: 'CRM & Leads' },
   { page: 'Pipeline',               label: 'Pipeline',            icon: TrendingUp,      group: 'CRM & Leads' },
   { page: 'IncomingLeads',          label: 'Incoming Leads',      icon: Award,           group: 'CRM & Leads' },
