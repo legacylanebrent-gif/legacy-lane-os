@@ -1446,11 +1446,7 @@ export default function Revenue() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <Label>Avg Referral Fee ($)</Label>
-                      <Input type="number" value={avgReferralFee} onChange={(e) => setAvgReferralFee(Number(e.target.value))} />
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
                     <div>
                       <Label>Monthly Growth Rate (%)</Label>
                       <Input type="number" value={referralGrowth} onChange={(e) => setReferralGrowth(Number(e.target.value))} />
