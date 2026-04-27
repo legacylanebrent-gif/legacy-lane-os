@@ -352,7 +352,7 @@ export default function Leads() {
                    onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
                  >
-                   <Gift className="w-4 h-4 mr-2" />Accept Referral Terms
+                   <Gift className="w-4 h-4 mr-2" />Accept Lead Fee and Referral Terms
                  </Button>
                </div>
               )}
