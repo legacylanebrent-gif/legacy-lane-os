@@ -1325,106 +1325,145 @@ export default function Revenue() {
 
           {/* Referrals Tab */}
           <TabsContent value="referrals">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-amber-600" />
-                    Leads & Referral Fee Calculator
-                  </CardTitle>
-                  <div className="flex items-center gap-3">
-                    {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
-                    <Button onClick={handleSave} className="bg-amber-600 hover:bg-amber-700">
-                      Save Settings
-                    </Button>
+            <div className="space-y-6">
+              {/* Leads Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="w-5 h-5 text-blue-600" />
+                      Leads Calculator ($75 Lead Fee)
+                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                      <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                        Save Settings
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Operator Leads Per Month</Label>
-                          <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <Label>Lead Acceptance Rate (%)</Label>
-                          <Input type="number" value={leadAcceptanceRate} onChange={(e) => setLeadAcceptanceRate(Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <Label>Referral Conversion Rate (%)</Label>
-                          <Input type="number" value={referralConversionRate} onChange={(e) => setReferralConversionRate(Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <Label>Avg Property Value ($)</Label>
-                          <Input type="number" value={avgPropertyValue} onChange={(e) => setAvgPropertyValue(Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <Label>Referral Fee % (0.30 = 0.3%)</Label>
-                          <Input type="number" step="0.01" value={referralFeePercent} onChange={(e) => setReferralFeePercent(Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <Label>Growth Rate (%)</Label>
-                          <Input type="number" value={operatorLeadGrowth} onChange={(e) => setOperatorLeadGrowth(Number(e.target.value))} />
-                        </div>
-                        <div className="md:col-span-2 p-4 bg-amber-50 rounded-lg border border-amber-200 text-xs text-slate-600">
-                          <p className="font-semibold mb-1">Calculation:</p>
-                          <p>{operatorLeadsPerMonth.toLocaleString()} leads/mo × {leadAcceptanceRate}% acceptance × {referralConversionRate}% conversion × ${avgPropertyValue.toLocaleString()} × {(referralFeePercent * 100).toFixed(2)}% = ${estateReferralMonthlyRevenue.toLocaleString('en-US', {maximumFractionDigits: 0})}/mo</p>
-                        </div>
-                </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="text-sm text-slate-700">
+                      <strong>Calculation:</strong> Leads per Month × 75% conversion rate × $75 lead fee
+                    </div>
+                  </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
-                    <div className="text-2xl font-bold text-green-600">
-                      ${(getYearProjection(referralProjections, 1) / 1000000).toFixed(2)}M
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <Label>Leads Per Month</Label>
+                      <Input type="number" value={operatorLeadsPerMonth} onChange={(e) => setOperatorLeadsPerMonth(Number(e.target.value))} />
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {Math.round(getYearProjection(referralQuantities, 1)).toLocaleString()} referrals
-                    </div>
-                  </div>
-                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
-                    <div className="text-2xl font-bold text-cyan-600">
-                      ${(getYearProjection(referralProjections, 3) / 1000000).toFixed(2)}M
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {Math.round(getYearProjection(referralQuantities, 3)).toLocaleString()} referrals
+                    <div>
+                      <Label>Monthly Growth Rate (%)</Label>
+                      <Input type="number" value={operatorLeadGrowth} onChange={(e) => setOperatorLeadGrowth(Number(e.target.value))} />
                     </div>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      ${(getYearProjection(referralProjections, 5) / 1000000).toFixed(2)}M
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {Math.round(getYearProjection(referralQuantities, 5)).toLocaleString()} referrals
-                    </div>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      ${(getYearProjection(referralProjections, 10) / 1000000).toFixed(2)}M
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {Math.round(getYearProjection(referralQuantities, 10)).toLocaleString()} referrals
-                    </div>
-                  </div>
-                </div>
 
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={chartData.slice(0, 36)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                    <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value.toLocaleString()} />
-                    <Tooltip />
-                    <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="Referrals" name="Revenue" stroke="#f59e0b" strokeWidth={3} />
-                    <Line yAxisId="right" type="monotone" dataKey="Referrals Qty" name="Referrals" stroke="#fcd34d" strokeWidth={2} strokeDasharray="5 5" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        ${(getYearProjection(estateReferralProjections, 1) / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                    <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                      <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                      <div className="text-2xl font-bold text-cyan-600">
+                        ${(getYearProjection(estateReferralProjections, 3) / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${(getYearProjection(estateReferralProjections, 5) / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        ${(getYearProjection(estateReferralProjections, 10) / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Real Estate Referral Income Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="w-5 h-5 text-amber-600" />
+                      Real Estate Referral Income (5% of Accepted Leads)
+                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      {saveMessage && <span className="text-green-600 font-medium text-sm">{saveMessage}</span>}
+                      <Button onClick={handleSave} className="bg-amber-600 hover:bg-amber-700">
+                        Save Settings
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="text-sm text-slate-700">
+                      <strong>Calculation:</strong> Accepted Leads × 5% conversion to RE referral × Average fee per property
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <Label>Avg Referral Fee ($)</Label>
+                      <Input type="number" value={avgReferralFee} onChange={(e) => setAvgReferralFee(Number(e.target.value))} />
+                    </div>
+                    <div>
+                      <Label>Monthly Growth Rate (%)</Label>
+                      <Input type="number" value={referralGrowth} onChange={(e) => setReferralGrowth(Number(e.target.value))} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        ${(getYearProjection(referralProjections, 1) / 1000000).toFixed(2)}M
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {Math.round(getYearProjection(referralQuantities, 1)).toLocaleString()} referrals
+                      </div>
+                    </div>
+                    <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                      <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                      <div className="text-2xl font-bold text-cyan-600">
+                        ${(getYearProjection(referralProjections, 3) / 1000000).toFixed(2)}M
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {Math.round(getYearProjection(referralQuantities, 3)).toLocaleString()} referrals
+                      </div>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${(getYearProjection(referralProjections, 5) / 1000000).toFixed(2)}M
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {Math.round(getYearProjection(referralQuantities, 5)).toLocaleString()} referrals
+                      </div>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        ${(getYearProjection(referralProjections, 10) / 1000000).toFixed(2)}M
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {Math.round(getYearProjection(referralQuantities, 10)).toLocaleString()} referrals
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Features Tab */}
