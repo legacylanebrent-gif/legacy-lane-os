@@ -280,7 +280,7 @@ export default function Leads() {
                 <p>✓ $75 lead fee required to accept and book this lead</p>
                 <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
                 <p>✓ Finder fee applies if referral converts to actual closing: approximately $513 is based on property value. Could be more or less depending on final sale value</p>
-                <p>✓ You receive payment 7 days after property closes</p>
+                <p>✓ You receive payment approximately 7 days after property closes</p>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setShowReferralModal(false)} className="flex-1">Cancel</Button>
@@ -346,7 +346,7 @@ export default function Leads() {
                    <p>✓ $75 lead fee required to accept and book this lead</p>
                    <p>✓ If you refer this client to a realtor and the property closes, the $75 lead fee is waived</p>
                    <p>✓ Finder fee applies if referral converts to actual closing: approximately $513 is based on property value. Could be more or less depending on final sale value</p>
-                   <p>✓ You receive payment 7 days after property closes</p>
+                   <p>✓ You receive payment approximately 7 days after property closes</p>
                  </div>
                  <Button 
                    onClick={() => { setReferralLead(selectedLead); setShowReferralModal(true); }}
