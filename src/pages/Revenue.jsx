@@ -1430,23 +1430,19 @@ export default function Revenue() {
                     </div>
                   </div>
 
-                  {/* Dynamic avg property value from leads */}
-                  <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-slate-500 mb-1 font-medium">Avg Property Value from Leads ({leadsCount} leads with values)</div>
-                        {dynamicAvgPropertyValue ? (
-                          <div className="text-2xl font-bold text-slate-800">${dynamicAvgPropertyValue.toLocaleString()}</div>
-                        ) : (
-                          <div className="text-lg text-slate-400 italic">No lead property values found — using manual input</div>
-                        )}
+                  {/* Dynamic avg property value from leads and calculated referral fee */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="text-xs text-slate-500 mb-1 font-medium">Avg Property Value from Leads</div>
+                      <div className="text-2xl font-bold text-slate-800">{dynamicAvgPropertyValue ? `$${dynamicAvgPropertyValue.toLocaleString()}` : 'Loading...'}</div>
+                      <div className="text-xs text-slate-400 mt-2">({leadsCount} leads with values)</div>
+                    </div>
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="text-xs text-slate-500 mb-1 font-medium">Recommended Avg Referral Fee</div>
+                      <div className="text-2xl font-bold text-amber-700">
+                        {dynamicAvgPropertyValue ? `$${Math.round(dynamicAvgPropertyValue * 0.02 * 0.25 * 0.70).toLocaleString()}` : 'Loading...'}
                       </div>
-                      {dynamicAvgPropertyValue && (
-                        <div className="text-xs text-slate-500 text-right">
-                          <div>Live from Lead entity</div>
-                          <div className="text-amber-600 font-medium mt-1">Use this to set your Avg Referral Fee below</div>
-                        </div>
-                      )}
+                      <div className="text-xs text-amber-600 mt-2">Property Value × 2% × 25% × 70%</div>
                     </div>
                   </div>
 
