@@ -14,6 +14,7 @@ const AVG_OPERATOR_MONTHLY_REVENUE = 0.60 * 49.5 + 0.25 * 115 + 0.10 * 149 + 0.0
 
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState('operators');
+  const [savedOperators, setSavedOperators] = useState(() => loadValue('launchOperators', 100));
 
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
@@ -77,6 +78,11 @@ export default function Revenue() {
   const [adPremiumPrice, setAdPremiumPrice] = useState(() => loadValue('adPremiumPrice', 179));
   const [adGrowth, setAdGrowth] = useState(() => loadValue('adGrowth', 3));
   const [citiesPerOperator, setCitiesPerOperator] = useState(() => loadValue('citiesPerOperator', 1));
+
+  const handleSaveOperators = () => {
+    localStorage.setItem('revenue_proj_launchOperators', JSON.stringify(launchOperators));
+    setSavedOperators(launchOperators);
+  };
 
   // Auto-save
   useEffect(() => {
@@ -411,7 +417,15 @@ export default function Revenue() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
                     <Label>Launch Operators (Month 1)</Label>
-                    <Input type="number" value={launchOperators} onChange={(e) => setLaunchOperators(Number(e.target.value))} />
+                    <div className="flex gap-2 items-center mt-1">
+                      <Input type="number" value={launchOperators} onChange={(e) => setLaunchOperators(Number(e.target.value))} />
+                      <button
+                        onClick={handleSaveOperators}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${launchOperators === savedOperators ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                      >
+                        {launchOperators === savedOperators ? '✓ Saved' : 'Save Default'}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
