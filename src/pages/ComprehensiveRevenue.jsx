@@ -260,7 +260,7 @@ export default function ComprehensiveRevenue() {
 
   const currentOperatorYearlyRevenue = currentOperatorMonthlyRevenue * 12;
 
-  // Calculate all additional revenue streams
+  // Derived calculations (all after loading is complete)
   const totalOperators = operators.length;
   // Use operator-based calculation for vendors: each operator refers up to N vendors
   const calculatedVendorNewPerMonth = totalOperators * vendorNewPerCityPerMonth;
