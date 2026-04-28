@@ -34,12 +34,6 @@ export default function ComprehensiveRevenue() {
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
   const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 2));
 
-  // Agent Subscription Inputs
-  const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
-  const [agentNewPerMonth, setAgentNewPerMonth] = useState(() => loadValue('agentNewPerMonth', 10));
-  const [agentChurnRate, setAgentChurnRate] = useState(() => loadValue('agentChurnRate', 3));
-  const [agentNewPerCityPerMonth, setAgentNewPerCityPerMonth] = useState(() => loadValue('agentNewPerCityPerMonth', 4));
-
   // Marketplace Transaction Fee Inputs
   const [avgTransactionValue, setAvgTransactionValue] = useState(() => loadValue('avgTransactionValue', 90));
   const [transactionFeePercent, setTransactionFeePercent] = useState(() => loadValue('transactionFeePercent', 10));
@@ -91,7 +85,6 @@ export default function ComprehensiveRevenue() {
   useEffect(() => {
     const values = {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-      agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
       avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
@@ -106,7 +99,6 @@ export default function ComprehensiveRevenue() {
     });
   }, [
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-    agentSubPrice, agentNewPerMonth, agentChurnRate, agentNewPerCityPerMonth,
     avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
@@ -267,11 +259,6 @@ export default function ComprehensiveRevenue() {
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
-  // Use city-based calculation for agents: total cities * new agents per city per month
-  const calculatedAgentNewPerMonth = totalCities * agentNewPerCityPerMonth;
-  const agentSubData = calculateSimpleSubRevenue(agentSubPrice, calculatedAgentNewPerMonth, agentChurnRate, 120);
-  const agentSubProjections = agentSubData.projections;
-  
   // Use city-based calculation for marketplace: total cities * transactions per city per month
   const calculatedTransactionsPerMonth = totalCities * transactionsPerCityPerMonth;
   const marketplaceProjections = calculateProjections(calculatedTransactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
@@ -306,7 +293,7 @@ export default function ComprehensiveRevenue() {
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
 
   const totalProjections = operatorProjections.map((_, i) => 
-    operatorProjections[i] + vendorSubProjections[i] + agentSubProjections[i] + 
+    operatorProjections[i] + vendorSubProjections[i] +
     marketplaceProjections[i] + courseProjections[i] + 
     referralProjections[i] + featureProjections[i] + adProjections[i]
   );
@@ -315,7 +302,6 @@ export default function ComprehensiveRevenue() {
     month: `M${i + 1}`,
     'Future Operators': Math.round(operatorProjections[i]),
     'Vendor Subs': Math.round(vendorSubProjections[i]),
-    'Agent Subs': Math.round(agentSubProjections[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
     Courses: Math.round(courseProjections[i]),
     Referrals: Math.round(referralProjections[i]),
@@ -332,7 +318,6 @@ export default function ComprehensiveRevenue() {
   const pieData = [
     { name: 'Future Operators', value: getYearProjection(operatorProjections, 3) },
     { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, 3) },
-    { name: 'Agent Subs', value: getYearProjection(agentSubProjections, 3) },
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
     { name: 'Courses', value: getYearProjection(courseProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
@@ -415,7 +400,6 @@ export default function ComprehensiveRevenue() {
                 <Legend />
                 <Area type="monotone" dataKey="Future Operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
-                <Area type="monotone" dataKey="Agent Subs" stackId="1" stroke="#c4b5fd" fill="#c4b5fd" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="Courses" stackId="1" stroke="#0891b2" fill="#0891b2" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
@@ -477,7 +461,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 Operators
@@ -486,11 +470,6 @@ export default function ComprehensiveRevenue() {
                 <Users className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Vendor Subs</span>
                 <span className="sm:hidden">Vendor</span>
-              </TabsTrigger>
-              <TabsTrigger value="agentSubs" className="whitespace-nowrap flex-shrink-0">
-                <Users className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">Agent Subs</span>
-                <span className="sm:hidden">Agent</span>
               </TabsTrigger>
               <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
                 <ShoppingBag className="w-4 h-4 mr-1" />
@@ -612,74 +591,6 @@ export default function ComprehensiveRevenue() {
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(vendorSubProjections, 10) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Agent Subs Tab */}
-          <TabsContent value="agentSubs">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-300" />
-                  Agent Subscription Calculator
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm text-slate-700 mb-2">
-                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
-                  </div>
-                  <div className="text-sm text-slate-700">
-                    <strong>Calculated New Agents/Month:</strong> {totalCities.toLocaleString()} cities × {agentNewPerCityPerMonth} agents/city = {calculatedAgentNewPerMonth.toLocaleString()} agents/month
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                  <div>
-                    <Label>Monthly Price ($)</Label>
-                    <Input type="number" value={agentSubPrice} onChange={(e) => setAgentSubPrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>New Agents Per City Per Month</Label>
-                    <Input type="number" value={agentNewPerCityPerMonth} onChange={(e) => setAgentNewPerCityPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Total New Agents/Month</Label>
-                    <Input type="number" value={calculatedAgentNewPerMonth} disabled className="bg-slate-100" />
-                  </div>
-                  <div>
-                    <Label>Monthly Churn Rate (%)</Label>
-                    <Input type="number" value={agentChurnRate} onChange={(e) => setAgentChurnRate(Number(e.target.value))} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
-                    <div className="text-2xl font-bold text-green-600">
-                      ${(getYearProjection(agentSubProjections, 1) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
-                    <div className="text-2xl font-bold text-cyan-600">
-                      ${(getYearProjection(agentSubProjections, 3) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      ${(getYearProjection(agentSubProjections, 5) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      ${(getYearProjection(agentSubProjections, 10) / 1000000).toFixed(2)}M
                     </div>
                   </div>
                 </div>
