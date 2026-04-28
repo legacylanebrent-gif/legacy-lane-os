@@ -34,12 +34,11 @@ export default function ComprehensiveRevenue() {
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
   const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 2));
 
-  // Marketplace Transaction Fee Inputs
-  const [avgTransactionValue, setAvgTransactionValue] = useState(() => loadValue('avgTransactionValue', 90));
-  const [transactionFeePercent, setTransactionFeePercent] = useState(() => loadValue('transactionFeePercent', 10));
-  const [transactionsPerMonth, setTransactionsPerMonth] = useState(() => loadValue('transactionsPerMonth', 100));
+  // Marketplace Item Post Fee Inputs
+  const [itemPostFee] = useState(3); // Fixed at $3 per item
+  const [avgAnnualSalesPerOperator, setAvgAnnualSalesPerOperator] = useState(() => loadValue('avgAnnualSalesPerOperator', 6));
+  const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 50));
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 5));
-  const [transactionsPerCityPerMonth, setTransactionsPerCityPerMonth] = useState(() => loadValue('transactionsPerCityPerMonth', 15));
   
   // Course Sales Inputs
   const [avgCoursePrice, setAvgCoursePrice] = useState(() => loadValue('avgCoursePrice', 49));
@@ -85,7 +84,7 @@ export default function ComprehensiveRevenue() {
   useEffect(() => {
     const values = {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-      avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
+      avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
       avgCoursePrice, courseSalesPerMonth, courseGrowth,
       estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
       estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
@@ -99,7 +98,7 @@ export default function ComprehensiveRevenue() {
     });
   }, [
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
-    avgTransactionValue, transactionFeePercent, transactionsPerMonth, marketplaceGrowth, transactionsPerCityPerMonth,
+    avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
     avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
@@ -259,9 +258,9 @@ export default function ComprehensiveRevenue() {
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
-  // Use city-based calculation for marketplace: total cities * transactions per city per month
-  const calculatedTransactionsPerMonth = totalCities * transactionsPerCityPerMonth;
-  const marketplaceProjections = calculateProjections(calculatedTransactionsPerMonth * avgTransactionValue * (transactionFeePercent / 100), marketplaceGrowth, 120);
+  // Marketplace: operators × avg annual sales ÷ 12 × avg items per sale × $3 fee
+  const marketplaceMonthlyItems = totalOperators * (avgAnnualSalesPerOperator / 12) * avgItemsPostedPerSale;
+  const marketplaceProjections = calculateProjections(marketplaceMonthlyItems * itemPostFee, marketplaceGrowth, 120);
   
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   
@@ -604,40 +603,43 @@ export default function ComprehensiveRevenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-purple-600" />
-                  Marketplace Transaction Fee Calculator
+                  Marketplace Item Post Fee Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm text-slate-700 mb-2">
-                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
+                  <div className="text-sm text-slate-700">
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Calculated Transactions/Month:</strong> {totalCities.toLocaleString()} cities × {transactionsPerCityPerMonth} transactions/city = {calculatedTransactionsPerMonth.toLocaleString()} transactions/month
+                    <strong>Items Posted/Month:</strong> {totalOperators.toLocaleString()} operators × {avgAnnualSalesPerOperator} sales/yr ÷ 12 × {avgItemsPostedPerSale} items/sale = {Math.round(marketplaceMonthlyItems).toLocaleString()} items/month
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Monthly Revenue:</strong> {Math.round(marketplaceMonthlyItems).toLocaleString()} items × $3/item = ${(marketplaceMonthlyItems * itemPostFee).toLocaleString('en-US', { maximumFractionDigits: 0 })}/month
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
-                    <Label>Avg Transaction Value ($)</Label>
-                    <Input type="number" value={avgTransactionValue} onChange={(e) => setAvgTransactionValue(Number(e.target.value))} />
+                    <Label>Total Operators</Label>
+                    <Input type="number" value={totalOperators} disabled className="bg-slate-100" />
                   </div>
                   <div>
-                    <Label>Transaction Fee (%)</Label>
-                    <Input type="number" value={transactionFeePercent} onChange={(e) => setTransactionFeePercent(Number(e.target.value))} />
+                    <Label>Avg Annual Estate Sales / Operator</Label>
+                    <Input type="number" value={avgAnnualSalesPerOperator} onChange={(e) => setAvgAnnualSalesPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Transactions Per City/Month</Label>
-                    <Input type="number" value={transactionsPerCityPerMonth} onChange={(e) => setTransactionsPerCityPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Total Transactions/Month</Label>
-                    <Input type="number" value={calculatedTransactionsPerMonth} disabled className="bg-slate-100" />
+                    <Label>Avg Items Posted / Sale</Label>
+                    <Input type="number" value={avgItemsPostedPerSale} onChange={(e) => setAvgItemsPostedPerSale(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
                     <Input type="number" value={marketplaceGrowth} onChange={(e) => setMarketplaceGrowth(Number(e.target.value))} />
                   </div>
+                </div>
+                <div className="mb-6 p-3 bg-slate-50 border border-slate-200 rounded-lg inline-block">
+                  <span className="text-sm text-slate-600">Item Post Fee: </span>
+                  <span className="text-sm font-bold text-slate-900">$3.00 per item (fixed)</span>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
