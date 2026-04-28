@@ -20,8 +20,16 @@ export default function Revenue() {
     const saved = localStorage.getItem(`revenue_proj_${key}`);
     if (saved !== null) {
       const parsed = JSON.parse(saved);
-      // Reset vendorSubPrice if it's the old default of 79
+      // Reset stale defaults
       if (key === 'vendorSubPrice' && parsed === 79) {
+        localStorage.removeItem(`revenue_proj_${key}`);
+        return defaultValue;
+      }
+      if (key === 'avgAnnualSalesPerOperator' && parsed === 6) {
+        localStorage.removeItem(`revenue_proj_${key}`);
+        return defaultValue;
+      }
+      if (key === 'avgItemsPostedPerSale' && parsed === 50) {
         localStorage.removeItem(`revenue_proj_${key}`);
         return defaultValue;
       }
@@ -41,8 +49,8 @@ export default function Revenue() {
   const [vendorPerOperator, setVendorPerOperator] = useState(() => loadValue('vendorPerOperator', 2));
 
   // Marketplace Inputs
-  const [avgAnnualSalesPerOperator, setAvgAnnualSalesPerOperator] = useState(() => loadValue('avgAnnualSalesPerOperator', 6));
-  const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 50));
+  const [avgAnnualSalesPerOperator, setAvgAnnualSalesPerOperator] = useState(() => loadValue('avgAnnualSalesPerOperator', 12));
+  const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 15));
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 5));
   const itemPostFee = 3;
 
