@@ -40,19 +40,11 @@ export default function ComprehensiveRevenue() {
   const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 50));
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 5));
   
-  // Referral Fee Inputs (Estate Sale Operator referrals to realtors)
-  const [estateLeadFee, setEstateLeadFee] = useState(() => loadValue('estateLeadFee', 75));
-  const [leadAcceptanceRate, setLeadAcceptanceRate] = useState(() => loadValue('leadAcceptanceRate', 30));
-  const [referralConversionRate, setReferralConversionRate] = useState(() => loadValue('referralConversionRate', 25));
-  const [avgPropertyValue, setAvgPropertyValue] = useState(() => loadValue('avgPropertyValue', 350000));
-  const [referralFeePercent, setReferralFeePercent] = useState(() => loadValue('referralFeePercent', 0.15));
-  const [leadsPerOperatorPerMonth, setLeadsPerOperatorPerMonth] = useState(() => loadValue('leadsPerOperatorPerMonth', 2));
-
-  // Legacy inputs
-  const [avgReferralFee, setAvgReferralFee] = useState(() => loadValue('avgReferralFee', 1000));
-  const [referralsPerMonth, setReferralsPerMonth] = useState(() => loadValue('referralsPerMonth', 8));
+  // Referral Inputs
+  const [annualReferralConv, setAnnualReferralConv] = useState(() => loadValue('annualReferralConv', 3));
+  const [refAvgPropertyValue, setRefAvgPropertyValue] = useState(() => loadValue('refAvgPropertyValue', 350000));
+  const [platformIncomePercent, setPlatformIncomePercent] = useState(() => loadValue('platformIncomePercent', 30));
   const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 3));
-  const [referralsPerOperatorPerYear, setReferralsPerOperatorPerYear] = useState(() => loadValue('referralsPerOperatorPerYear', 1));
 
   // Premium Placement Inputs
   const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 179));
@@ -80,9 +72,7 @@ export default function ComprehensiveRevenue() {
     const values = {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
       avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
-      estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
-      estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
-     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
+      annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
     };
@@ -93,7 +83,7 @@ export default function ComprehensiveRevenue() {
   }, [
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
-    avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
+    annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
     ]);
@@ -255,20 +245,10 @@ export default function ComprehensiveRevenue() {
   const marketplaceMonthlyItems = totalOperators * (avgAnnualSalesPerOperator / 12) * avgItemsPostedPerSale;
   const marketplaceProjections = calculateProjections(marketplaceMonthlyItems * itemPostFee, marketplaceGrowth, 120);
   
-  // Calculate referrals based on estate sale operators referring properties
-  const estateLeadsPerMonth = totalOperators * leadsPerOperatorPerMonth;
-  const leadsAcceptedPerMonth = estateLeadsPerMonth * (leadAcceptanceRate / 100);
-  const referralsConvertedPerMonth = leadsAcceptedPerMonth * (referralConversionRate / 100);
-  const avgReferralFeeCalculated = avgPropertyValue * referralFeePercent;
-  const estateReferralMonthlyRevenue = referralsConvertedPerMonth * avgReferralFeeCalculated;
-  const estateReferralProjections = calculateProjections(estateReferralMonthlyRevenue, referralGrowth, 120);
-  
-  // Legacy referral logic (10% of operators refer 1 per year)
-  const calculatedReferralsPerMonth = (totalOperators * 0.10 * referralsPerOperatorPerYear) / 12;
-  const legacyReferralProjections = calculateProjections(calculatedReferralsPerMonth * avgReferralFee, referralGrowth, 120);
-  
-  // Combined referrals
-  const referralProjections = estateReferralProjections.map((val, i) => val + legacyReferralProjections[i]);
+  // Referral calc: totalOperators × annualReferralConv ÷ 12 × avgPropValue × 2% × 25% × platformIncomePercent%
+  const referralIncomePerConversion = refAvgPropertyValue * 0.02 * 0.25 * (platformIncomePercent / 100);
+  const referralMonthlyRevenue = totalOperators * (annualReferralConv / 12) * referralIncomePerConversion;
+  const referralProjections = calculateProjections(referralMonthlyRevenue, referralGrowth, 120);
   
   // Calculate features based on fixed national (35/month) and percentage local (20% per year)
   const localFeaturesPerMonth = (totalOperators * (localFeaturePercentOperators / 100)) / 12;
@@ -657,48 +637,40 @@ export default function ComprehensiveRevenue() {
 
           {/* Referrals Tab */}
           <TabsContent value="referrals">
-          <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-600" />
-              RE Referral Fee Calculator
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-              <div className="text-sm text-slate-700">
-                <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
-              </div>
-              <div className="text-sm text-slate-700">
-                <strong>Estate Leads/Month:</strong> {totalOperators.toLocaleString()} operators × {leadsPerOperatorPerMonth} leads/operator/mo = {estateLeadsPerMonth.toLocaleString()} leads/month
-              </div>
-              <div className="text-sm text-slate-700">
-                <strong>Referral Fee Calculation:</strong> {estateLeadsPerMonth.toLocaleString()} leads × {leadAcceptanceRate}% acceptance × {referralConversionRate}% conversion × ${avgPropertyValue.toLocaleString()} × {(referralFeePercent * 100).toFixed(2)}% = ${estateReferralMonthlyRevenue.toLocaleString('en-US', {maximumFractionDigits: 0})}/mo
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-600" />
+                  RE Referral Fee Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+                  <div className="text-sm text-slate-700">
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Formula:</strong> {totalOperators.toLocaleString()} operators × {annualReferralConv} annual conv ÷ 12 × ${refAvgPropertyValue.toLocaleString()} × 2% × 25% × {platformIncomePercent}% = <strong>${referralMonthlyRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</strong>
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Income per Conversion:</strong> ${referralIncomePerConversion.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-              <div>
-                <Label>Leads Per Operator/Month</Label>
-                <Input type="number" value={leadsPerOperatorPerMonth} onChange={(e) => setLeadsPerOperatorPerMonth(Number(e.target.value))} />
-              </div>
-              <div>
-                <Label>Lead Acceptance Rate (%)</Label>
-                <Input type="number" value={leadAcceptanceRate} onChange={(e) => setLeadAcceptanceRate(Number(e.target.value))} />
-              </div>
-              <div>
-                <Label>Conversion Rate (%)</Label>
-                <Input type="number" value={referralConversionRate} onChange={(e) => setReferralConversionRate(Number(e.target.value))} />
-              </div>
-              <div>
-                <Label>Avg Property Value ($)</Label>
-                <Input type="number" value={avgPropertyValue} onChange={(e) => setAvgPropertyValue(Number(e.target.value))} />
-              </div>
-              <div>
-                <Label>Referral Fee % (0.30 = 0.3%)</Label>
-                <Input type="number" step="0.01" value={referralFeePercent} onChange={(e) => setReferralFeePercent(Number(e.target.value))} />
-              </div>
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Annual Referral Conv (per operator)</Label>
+                    <Input type="number" value={annualReferralConv} onChange={(e) => setAnnualReferralConv(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Avg Property Value ($)</Label>
+                    <Input type="number" value={refAvgPropertyValue} onChange={(e) => setRefAvgPropertyValue(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Platform % Income</Label>
+                    <Input type="number" value={platformIncomePercent} onChange={(e) => setPlatformIncomePercent(Number(e.target.value))} />
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
