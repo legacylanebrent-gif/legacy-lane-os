@@ -18,7 +18,16 @@ export default function Revenue() {
   // Load saved values from localStorage or use defaults
   const loadValue = (key, defaultValue) => {
     const saved = localStorage.getItem(`revenue_proj_${key}`);
-    return saved !== null ? JSON.parse(saved) : defaultValue;
+    if (saved !== null) {
+      const parsed = JSON.parse(saved);
+      // Reset vendorSubPrice if it's the old default of 79
+      if (key === 'vendorSubPrice' && parsed === 79) {
+        localStorage.removeItem(`revenue_proj_${key}`);
+        return defaultValue;
+      }
+      return parsed;
+    }
+    return defaultValue;
   };
 
   // Operator Growth Inputs
