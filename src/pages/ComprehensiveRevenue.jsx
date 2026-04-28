@@ -625,7 +625,7 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={totalOperators} disabled className="bg-slate-100" />
                   </div>
                   <div>
-                    <Label>Avg Anl Sales per Operator</Label>
+                    <Label>Avg Annual Sales per Operator</Label>
                     <Input type="number" value={avgAnnualSalesPerOperator} onChange={(e) => setAvgAnnualSalesPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
