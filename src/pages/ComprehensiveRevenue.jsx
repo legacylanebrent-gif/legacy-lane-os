@@ -261,6 +261,7 @@ export default function ComprehensiveRevenue() {
   const currentOperatorYearlyRevenue = currentOperatorMonthlyRevenue * 12;
 
   // Calculate all additional revenue streams
+  const totalOperators = operators.length;
   // Use operator-based calculation for vendors: each operator refers up to N vendors
   const calculatedVendorNewPerMonth = totalOperators * vendorNewPerCityPerMonth;
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
@@ -278,7 +279,6 @@ export default function ComprehensiveRevenue() {
   const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
   
   // Calculate referrals based on estate sale operators referring properties
-  const totalOperators = operators.length;
   const estateLeadsPerMonth = totalOperators * leadsPerOperatorPerMonth;
   const leadsAcceptedPerMonth = estateLeadsPerMonth * (leadAcceptanceRate / 100);
   const referralsConvertedPerMonth = leadsAcceptedPerMonth * (referralConversionRate / 100);
