@@ -90,9 +90,9 @@ export default function Revenue() {
   const getYearProjection = (projections, year) =>
     projections.slice(0, year * 12).reduce((s, v) => s + v, 0);
 
-  // Build operator count curve: starts at launchOperators, grows at operatorGrowthRate% per month
+  // Build operator count curve: starts at launchOperators, grows at operatorGrowthRate% per month, capped at 12,000
   const operatorCounts = Array.from({ length: 120 }, (_, i) =>
-    Math.round(launchOperators * Math.pow(1 + operatorGrowthRate / 100, i))
+    Math.min(12000, Math.round(launchOperators * Math.pow(1 + operatorGrowthRate / 100, i)))
   );
 
   // Operator revenue = operator count × avg monthly revenue per operator
