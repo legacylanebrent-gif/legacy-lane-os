@@ -443,7 +443,7 @@ export default function ComprehensiveRevenue() {
               </TabsTrigger>
               <TabsTrigger value="referrals" className="whitespace-nowrap flex-shrink-0">
                 <Award className="w-4 h-4 mr-1" />
-                Referrals
+                RE Referrals
               </TabsTrigger>
               <TabsTrigger value="features" className="whitespace-nowrap flex-shrink-0">
                 <Sparkles className="w-4 h-4 mr-1" />
