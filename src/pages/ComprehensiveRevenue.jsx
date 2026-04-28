@@ -576,7 +576,7 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Max Vendors Per Operator</Label>
+                    <Label>Avg Vendors Per Operator</Label>
                     <Input type="number" value={vendorNewPerCityPerMonth} onChange={(e) => setVendorNewPerCityPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
