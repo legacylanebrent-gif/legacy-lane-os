@@ -27,7 +27,7 @@ export default function Revenue() {
   const [avgMonthlyRevenuePerOp, setAvgMonthlyRevenuePerOp] = useState(() => loadValue('avgMonthlyRevenuePerOp', Math.round(AVG_OPERATOR_MONTHLY_REVENUE)));
 
   // Vendor Subscription Inputs
-  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
+  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 19));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
   const [vendorPerOperator, setVendorPerOperator] = useState(() => loadValue('vendorPerOperator', 2));
 
