@@ -43,7 +43,7 @@ export default function ComprehensiveRevenue() {
   // Referral Inputs
   const [annualReferralConv, setAnnualReferralConv] = useState(() => loadValue('annualReferralConv', 3));
   const [refAvgPropertyValue, setRefAvgPropertyValue] = useState(() => loadValue('refAvgPropertyValue', 350000));
-  const [platformIncomePercent, setPlatformIncomePercent] = useState(() => loadValue('platformIncomePercent', 30));
+  const [platformIncomePercent, setPlatformIncomePercent] = useState(() => loadValue('platformIncomePercent', 70));
   const [referralGrowth, setReferralGrowth] = useState(() => loadValue('referralGrowth', 3));
 
   // Premium Placement Inputs
