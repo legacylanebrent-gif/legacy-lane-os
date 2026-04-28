@@ -14,35 +14,14 @@ const PACKAGE_PRICES = {
   'Basic': 0
 };
 
-const loadValue = (key, defaultValue) => {
-  const saved = localStorage.getItem(`futureOpsAnalytics_${key}`);
-  return saved !== null ? JSON.parse(saved) : defaultValue;
-};
 
 export default function FutureOperatorsAnalytics() {
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Referral income inputs
-  const [leadAcceptanceRate, setLeadAcceptanceRate] = useState(() => loadValue('leadAcceptanceRate', 30));
-  const [referralConversionRate, setReferralConversionRate] = useState(() => loadValue('referralConversionRate', 25));
-  const [avgPropertyValue, setAvgPropertyValue] = useState(() => loadValue('avgPropertyValue', 350000));
-  const [referralFeePercent, setReferralFeePercent] = useState(() => loadValue('referralFeePercent', 0.15));
-  const [leadsPerOperatorPerMonth, setLeadsPerOperatorPerMonth] = useState(() => loadValue('leadsPerOperatorPerMonth', 2));
-
   useEffect(() => {
     loadOperators();
   }, []);
-  
-  // Auto-save referral inputs
-  useEffect(() => {
-    const values = {
-      leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth
-    };
-    Object.entries(values).forEach(([key, value]) => {
-      localStorage.setItem(`futureOpsAnalytics_${key}`, JSON.stringify(value));
-    });
-  }, [leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth]);
 
   const loadOperators = async () => {
     setLoading(true);
@@ -179,19 +158,11 @@ export default function FutureOperatorsAnalytics() {
     .sort((a, b) => b.monthlyRevenue - a.monthlyRevenue)
     .slice(0, 15);
   
-  // Calculate referral income potential
-  const totalLeadsPerMonth = operators.length * leadsPerOperatorPerMonth;
-  const leadsAcceptedPerMonth = totalLeadsPerMonth * (leadAcceptanceRate / 100);
-  const referralsConvertedPerMonth = leadsAcceptedPerMonth * (referralConversionRate / 100);
-  const avgReferralFeePerLead = avgPropertyValue * referralFeePercent;
-  const referralMonthlyRevenue = referralsConvertedPerMonth * avgReferralFeePerLead;
-  const referralYearlyRevenue = referralMonthlyRevenue * 12;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Operators Analytics</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Total Operators</h1>
           <p className="text-slate-600">Current database overview and revenue potential analysis</p>
         </div>
 
@@ -241,16 +212,7 @@ export default function FutureOperatorsAnalytics() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">Referral Income Potential</span>
-                <DollarSign className="w-5 h-5 opacity-75" />
-              </div>
-              <div className="text-3xl font-bold mb-1">${(referralMonthlyRevenue / 1000).toFixed(0)}K</div>
-              <div className="text-xs opacity-75">${(referralYearlyRevenue / 1000000).toFixed(2)}M annually</div>
-            </CardContent>
-          </Card>
+
         </div>
 
         {/* Package Distribution */}
@@ -437,54 +399,7 @@ export default function FutureOperatorsAnalytics() {
           </Card>
           </div>
 
-          {/* Referral Income Settings */}
-          <Card>
-          <CardHeader>
-            <CardTitle>Referral Income Projections</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <div className="text-sm font-semibold text-slate-700 mb-2">Monthly Calculation:</div>
-              <p className="text-sm text-slate-600">
-                {operators.length.toLocaleString()} operators × {leadsPerOperatorPerMonth} leads/mo × {leadAcceptanceRate}% acceptance × {referralConversionRate}% conversion × ${avgPropertyValue.toLocaleString()} × {(referralFeePercent * 100).toFixed(2)}% = <strong>${referralMonthlyRevenue.toLocaleString('en-US', {maximumFractionDigits: 0})}/month</strong>
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Leads Per Operator/Month</label>
-                <input type="number" value={leadsPerOperatorPerMonth} onChange={(e) => setLeadsPerOperatorPerMonth(Number(e.target.value))} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Lead Acceptance Rate (%)</label>
-                <input type="number" value={leadAcceptanceRate} onChange={(e) => setLeadAcceptanceRate(Number(e.target.value))} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Conversion Rate (%)</label>
-                <input type="number" value={referralConversionRate} onChange={(e) => setReferralConversionRate(Number(e.target.value))} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Avg Property Value ($)</label>
-                <input type="number" value={avgPropertyValue} onChange={(e) => setAvgPropertyValue(Number(e.target.value))} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Referral Fee % (e.g., 0.30)</label>
-                <input type="number" step="0.01" value={referralFeePercent} onChange={(e) => setReferralFeePercent(Number(e.target.value))} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
-                <div className="text-sm text-slate-600 mb-1">Monthly Potential</div>
-                <div className="text-2xl font-bold text-emerald-600">${referralMonthlyRevenue.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
-              </div>
-              <div className="p-4 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border border-teal-200">
-                <div className="text-sm text-slate-600 mb-1">Annual Potential</div>
-                <div className="text-2xl font-bold text-teal-600">${(referralYearlyRevenue / 1000000).toFixed(2)}M</div>
-              </div>
-            </div>
-          </CardContent>
-          </Card>
       </div>
     </div>
   );
