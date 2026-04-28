@@ -1,0 +1,128 @@
+{
+  "name": "Vendor",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "vendor_type": {
+      "type": "string",
+      "enum": [
+        "real_estate_agent",
+        "probate_attorney",
+        "estate_planning_attorney",
+        "elder_law_attorney",
+        "title_company",
+        "mortgage_broker",
+        "financial_advisor",
+        "cpa_tax_strategist",
+        "trust_administrator",
+        "insurance_agent",
+        "senior_move_manager",
+        "assisted_living_placement",
+        "home_care_agency",
+        "geriatric_care_manager",
+        "junk_removal",
+        "cleanout_crew",
+        "dumpster_rental",
+        "biohazard_cleanup",
+        "hoarding_cleanup",
+        "deep_cleaning",
+        "carpet_cleaning",
+        "odor_removal",
+        "home_stager",
+        "handyman",
+        "painter",
+        "landscaper",
+        "flooring_installer",
+        "antique_dealer",
+        "gold_silver_coins_buyer",
+        "vintage_reseller",
+        "consignment_shop",
+        "auction_house",
+        "appraiser",
+        "moving_company",
+        "storage_facility",
+        "pods_container",
+        "shipping_service",
+        "other"
+      ]
+    },
+    "vendor_category": {
+      "type": "string",
+      "enum": [
+        "real_estate_legal",
+        "financial_life_transition",
+        "senior_transition",
+        "cleanout_prep",
+        "cleaning_staging",
+        "light_repair_prep",
+        "buyer_facing",
+        "moving_logistics"
+      ],
+      "description": "High-level category grouping"
+    },
+    "services_offered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cities/regions covered",
+      "default": []
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "preferred",
+        "premier"
+      ],
+      "default": "standard"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "total_reviews": {
+      "type": "integer",
+      "default": 0
+    },
+    "jobs_completed": {
+      "type": "integer",
+      "default": 0
+    },
+    "response_time_hours": {
+      "type": "number"
+    },
+    "average_bid": {
+      "type": "number"
+    },
+    "insurance_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "revenue_share_rate": {
+      "type": "number",
+      "description": "Percentage"
+    }
+  },
+  "required": [
+    "company_name",
+    "vendor_type"
+  ]
+}
