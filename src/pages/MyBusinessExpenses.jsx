@@ -82,7 +82,7 @@ export default function MyBusinessExpenses() {
     starting_location: '',
     ending_location: '',
     miles_driven: '',
-    rate_per_mile: '0.67',
+    rate_per_mile: '0.70',
     purpose: '',
     round_trip: false,
     vehicle_id: ''
@@ -297,7 +297,7 @@ export default function MyBusinessExpenses() {
         starting_location: '',
         ending_location: '',
         miles_driven: '',
-        rate_per_mile: '0.67',
+        rate_per_mile: '0.70',
         purpose: '',
         round_trip: false,
         vehicle_id: primaryVehicle?.id || ''
@@ -970,10 +970,10 @@ export default function MyBusinessExpenses() {
                   step="0.01"
                   value={mileageData.rate_per_mile}
                   onChange={(e) => setMileageData({ ...mileageData, rate_per_mile: e.target.value })}
-                  placeholder="0.67"
+                  placeholder="0.70"
                   required
                 />
-                <p className="text-xs text-slate-500 mt-1">2024 IRS rate: $0.67/mile</p>
+                <p className="text-xs text-slate-500 mt-1">2025 IRS rate: $0.70/mile</p>
               </div>
             </div>
 
