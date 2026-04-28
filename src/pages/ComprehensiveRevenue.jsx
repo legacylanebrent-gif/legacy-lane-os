@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, BookOpen, Sparkles, Megaphone } from 'lucide-react';
+import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
@@ -39,11 +39,6 @@ export default function ComprehensiveRevenue() {
   const [avgAnnualSalesPerOperator, setAvgAnnualSalesPerOperator] = useState(() => loadValue('avgAnnualSalesPerOperator', 6));
   const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 50));
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 5));
-  
-  // Course Sales Inputs
-  const [avgCoursePrice, setAvgCoursePrice] = useState(() => loadValue('avgCoursePrice', 49));
-  const [courseSalesPerMonth, setCourseSalesPerMonth] = useState(() => loadValue('courseSalesPerMonth', 30));
-  const [courseGrowth, setCourseGrowth] = useState(() => loadValue('courseGrowth', 5));
   
   // Referral Fee Inputs (Estate Sale Operator referrals to realtors)
   const [estateLeadFee, setEstateLeadFee] = useState(() => loadValue('estateLeadFee', 75));
@@ -85,7 +80,6 @@ export default function ComprehensiveRevenue() {
     const values = {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
       avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
-      avgCoursePrice, courseSalesPerMonth, courseGrowth,
       estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
       estateLeadFee, leadAcceptanceRate, referralConversionRate, avgPropertyValue, referralFeePercent, leadsPerOperatorPerMonth,
      avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
@@ -99,7 +93,6 @@ export default function ComprehensiveRevenue() {
   }, [
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
-    avgCoursePrice, courseSalesPerMonth, courseGrowth,
     avgReferralFee, referralsPerMonth, referralGrowth, referralsPerOperatorPerYear,
     nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
@@ -262,8 +255,6 @@ export default function ComprehensiveRevenue() {
   const marketplaceMonthlyItems = totalOperators * (avgAnnualSalesPerOperator / 12) * avgItemsPostedPerSale;
   const marketplaceProjections = calculateProjections(marketplaceMonthlyItems * itemPostFee, marketplaceGrowth, 120);
   
-  const courseProjections = calculateProjections(courseSalesPerMonth * avgCoursePrice, courseGrowth, 120);
-  
   // Calculate referrals based on estate sale operators referring properties
   const estateLeadsPerMonth = totalOperators * leadsPerOperatorPerMonth;
   const leadsAcceptedPerMonth = estateLeadsPerMonth * (leadAcceptanceRate / 100);
@@ -293,8 +284,7 @@ export default function ComprehensiveRevenue() {
 
   const totalProjections = operatorProjections.map((_, i) => 
     operatorProjections[i] + vendorSubProjections[i] +
-    marketplaceProjections[i] + courseProjections[i] + 
-    referralProjections[i] + featureProjections[i] + adProjections[i]
+    marketplaceProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -302,7 +292,6 @@ export default function ComprehensiveRevenue() {
     'Future Operators': Math.round(operatorProjections[i]),
     'Vendor Subs': Math.round(vendorSubProjections[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
-    Courses: Math.round(courseProjections[i]),
     Referrals: Math.round(referralProjections[i]),
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
@@ -318,7 +307,6 @@ export default function ComprehensiveRevenue() {
     { name: 'Future Operators', value: getYearProjection(operatorProjections, 3) },
     { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, 3) },
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
-    { name: 'Courses', value: getYearProjection(courseProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
@@ -400,7 +388,6 @@ export default function ComprehensiveRevenue() {
                 <Area type="monotone" dataKey="Future Operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
-                <Area type="monotone" dataKey="Courses" stackId="1" stroke="#0891b2" fill="#0891b2" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
@@ -460,7 +447,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-6 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 Operators
@@ -473,10 +460,6 @@ export default function ComprehensiveRevenue() {
               <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
                 <ShoppingBag className="w-4 h-4 mr-1" />
                 Marketplace
-              </TabsTrigger>
-              <TabsTrigger value="courses" className="whitespace-nowrap flex-shrink-0">
-                <BookOpen className="w-4 h-4 mr-1" />
-                Courses
               </TabsTrigger>
               <TabsTrigger value="referrals" className="whitespace-nowrap flex-shrink-0">
                 <Award className="w-4 h-4 mr-1" />
@@ -665,61 +648,6 @@ export default function ComprehensiveRevenue() {
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(marketplaceProjections, 10) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Courses Tab */}
-          <TabsContent value="courses">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-green-600" />
-                  Course Sales Calculator
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <Label>Avg Course Price ($)</Label>
-                    <Input type="number" value={avgCoursePrice} onChange={(e) => setAvgCoursePrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Sales Per Month</Label>
-                    <Input type="number" value={courseSalesPerMonth} onChange={(e) => setCourseSalesPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Monthly Growth Rate (%)</Label>
-                    <Input type="number" value={courseGrowth} onChange={(e) => setCourseGrowth(Number(e.target.value))} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
-                    <div className="text-2xl font-bold text-green-600">
-                      ${(getYearProjection(courseProjections, 1) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
-                    <div className="text-2xl font-bold text-cyan-600">
-                      ${(getYearProjection(courseProjections, 3) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      ${(getYearProjection(courseProjections, 5) / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      ${(getYearProjection(courseProjections, 10) / 1000000).toFixed(2)}M
                     </div>
                   </div>
                 </div>
