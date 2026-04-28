@@ -248,10 +248,10 @@ export default function Revenue() {
           <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">10-Year Total</span>
+                <span className="text-sm font-medium opacity-90">5-Year Total</span>
                 <Award className="w-5 h-5 opacity-75" />
               </div>
-              <div className="text-3xl font-bold mb-1">${(year10Total / 1000000).toFixed(0)}M</div>
+              <div className="text-3xl font-bold mb-1">${(year5Total / 1000000).toFixed(2)}M</div>
               <div className="text-xs opacity-75">Cumulative revenue</div>
             </CardContent>
           </Card>
