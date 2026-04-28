@@ -566,7 +566,7 @@ export default function ComprehensiveRevenue() {
                     <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Total Vendors Billed/Month:</strong> {totalOperators.toLocaleString()} operators × {vendorNewPerCityPerMonth} vendors/operator = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
+                    <strong>Total Vendors per Month:</strong> {totalOperators.toLocaleString()} operators × {vendorNewPerCityPerMonth} vendors/operator = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
                   </div>
                 </div>
 
@@ -580,7 +580,7 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={vendorNewPerCityPerMonth} onChange={(e) => setVendorNewPerCityPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Total Vendors Billed/Month</Label>
+                    <Label>Total Vendors per Month</Label>
                     <Input type="number" value={calculatedVendorNewPerMonth} disabled className="bg-slate-100" />
                   </div>
                   <div>
