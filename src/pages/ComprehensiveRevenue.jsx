@@ -49,10 +49,7 @@ export default function ComprehensiveRevenue() {
   // Premium Placement Inputs
   const [nationalFeaturePrice, setNationalFeaturePrice] = useState(() => loadValue('nationalFeaturePrice', 179));
   const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 97));
-  const [featuresPerMonth, setFeaturesPerMonth] = useState(() => loadValue('featuresPerMonth', 12));
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 5));
-  const [nationalFeaturesPerMonth, setNationalFeaturesPerMonth] = useState(() => loadValue('nationalFeaturesPerMonth', 35));
-  const [localFeaturePercentOperators, setLocalFeaturePercentOperators] = useState(() => loadValue('localFeaturePercentOperators', 20));
   
   // Advertising Revenue Inputs
   const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
@@ -73,7 +70,7 @@ export default function ComprehensiveRevenue() {
       vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
       avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
       annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
-      nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
+      nationalFeaturePrice, localFeaturePrice, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
     };
     
@@ -84,7 +81,7 @@ export default function ComprehensiveRevenue() {
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
     annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
-    nationalFeaturePrice, localFeaturePrice, featuresPerMonth, featureGrowth, nationalFeaturesPerMonth, localFeaturePercentOperators,
+    nationalFeaturePrice, localFeaturePrice, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
     ]);
 
@@ -250,8 +247,9 @@ export default function ComprehensiveRevenue() {
   const referralMonthlyRevenue = totalOperators * (annualReferralConv / 12) * referralIncomePerConversion;
   const referralProjections = calculateProjections(referralMonthlyRevenue, referralGrowth, 120);
   
-  // Calculate features based on fixed national (35/month) and percentage local (20% per year)
-  const localFeaturesPerMonth = (totalOperators * (localFeaturePercentOperators / 100)) / 12;
+  // Every operator features 1 sale/year locally; 10% feature 1 sale/year nationally
+  const localFeaturesPerMonth = totalOperators / 12;
+  const nationalFeaturesPerMonth = (totalOperators * 0.10) / 12;
   const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
   const featureProjections = calculateProjections(totalFeatureRevenuePerMonth, featureGrowth, 120);
   
@@ -712,19 +710,22 @@ export default function ComprehensiveRevenue() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm text-slate-700 mb-2">
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
+                  <div className="text-sm text-slate-700">
                     <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
                   </div>
-                  <div className="text-sm text-slate-700 mb-2">
-                    <strong>National Features/Month:</strong> {nationalFeaturesPerMonth} features/month (fixed)
+                  <div className="text-sm text-slate-700">
+                    <strong>Local Features/Month:</strong> {totalOperators.toLocaleString()} operators × 1 sale/yr ÷ 12 = {localFeaturesPerMonth.toFixed(1)}/month × ${localFeaturePrice}
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Local Features/Month:</strong> {totalOperators.toLocaleString()} operators × {localFeaturePercentOperators}% ÷ 12 months = {localFeaturesPerMonth.toFixed(1)} local/month
+                    <strong>National Features/Month:</strong> {totalOperators.toLocaleString()} operators × 10% × 1 sale/yr ÷ 12 = {nationalFeaturesPerMonth.toFixed(1)}/month × ${nationalFeaturePrice}
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">
+                    <strong>Monthly Revenue:</strong> ${totalFeatureRevenuePerMonth.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
                     <Label>National Feature Price ($)</Label>
                     <Input type="number" value={nationalFeaturePrice} onChange={(e) => setNationalFeaturePrice(Number(e.target.value))} />
@@ -732,14 +733,6 @@ export default function ComprehensiveRevenue() {
                   <div>
                     <Label>Local Feature Price ($)</Label>
                     <Input type="number" value={localFeaturePrice} onChange={(e) => setLocalFeaturePrice(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>National Features/Month</Label>
-                    <Input type="number" value={nationalFeaturesPerMonth} onChange={(e) => setNationalFeaturesPerMonth(Number(e.target.value))} />
-                  </div>
-                  <div>
-                    <Label>Local % of Operators/Year</Label>
-                    <Input type="number" value={localFeaturePercentOperators} onChange={(e) => setLocalFeaturePercentOperators(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
