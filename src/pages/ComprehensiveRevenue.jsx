@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone } from 'lucide-react';
+import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone, Globe } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
@@ -51,6 +51,12 @@ export default function ComprehensiveRevenue() {
   const [localFeaturePrice, setLocalFeaturePrice] = useState(() => loadValue('localFeaturePrice', 97));
   const [featureGrowth, setFeatureGrowth] = useState(() => loadValue('featureGrowth', 5));
   
+  // Website Inputs
+  const [websiteSetupFee, setWebsiteSetupFee] = useState(() => loadValue('websiteSetupFee', 397));
+  const [websiteMonthlyFee, setWebsiteMonthlyFee] = useState(() => loadValue('websiteMonthlyFee', 79));
+  const [websiteNewPerMonth, setWebsiteNewPerMonth] = useState(() => loadValue('websiteNewPerMonth', 10));
+  const [websiteGrowthAfterY1, setWebsiteGrowthAfterY1] = useState(() => loadValue('websiteGrowthAfterY1', 5));
+
   // Advertising Revenue Inputs
   const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
   const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 49));
@@ -71,7 +77,8 @@ export default function ComprehensiveRevenue() {
       avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
       annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featureGrowth,
-      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
+      adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth,
+      websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -82,7 +89,8 @@ export default function ComprehensiveRevenue() {
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
     annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featureGrowth,
-    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth
+    adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth,
+    websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1
     ]);
 
   const loadOperators = async () => {
@@ -257,12 +265,31 @@ export default function ComprehensiveRevenue() {
   const adRevenuePerMonth = totalCities * (adBasicPrice + adProPrice + adPremiumPrice);
   const adProjections = calculateProjections(adRevenuePerMonth, adGrowth, 120);
 
+  // Website projections: 10 new/month flat in Y1, then 5% monthly growth after month 12
+  // Setup revenue = new sites that month × setup fee
+  // Recurring = cumulative hosted sites × monthly fee
+  const websiteSetupProjections = [];
+  const websiteRecurringProjections = [];
+  let cumulativeSites = 0;
+  let currentNewPerMonth = websiteNewPerMonth;
+  for (let i = 0; i < 120; i++) {
+    if (i >= 12) {
+      currentNewPerMonth = currentNewPerMonth * (1 + websiteGrowthAfterY1 / 100);
+    }
+    const newThisMonth = currentNewPerMonth;
+    cumulativeSites += newThisMonth;
+    websiteSetupProjections.push(newThisMonth * websiteSetupFee);
+    websiteRecurringProjections.push(cumulativeSites * websiteMonthlyFee);
+  }
+  const websiteTotalProjections = websiteSetupProjections.map((s, i) => s + websiteRecurringProjections[i]);
+
   // Create operator projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
 
   const totalProjections = operatorProjections.map((_, i) => 
     operatorProjections[i] + vendorSubProjections[i] +
-    marketplaceProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i]
+    marketplaceProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i] +
+    websiteTotalProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -273,6 +300,7 @@ export default function ComprehensiveRevenue() {
     Referrals: Math.round(referralProjections[i]),
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
+    Websites: Math.round(websiteTotalProjections[i]),
     Total: Math.round(totalProjections[i])
   }));
 
@@ -288,6 +316,7 @@ export default function ComprehensiveRevenue() {
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
+    { name: 'Websites', value: getYearProjection(websiteTotalProjections, 3) },
   ];
 
   const stateData = Object.entries(stateCounts)
@@ -369,6 +398,7 @@ export default function ComprehensiveRevenue() {
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
+                <Area type="monotone" dataKey="Websites" stackId="1" stroke="#6366f1" fill="#6366f1" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -425,7 +455,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-6 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 Operators
@@ -450,6 +480,10 @@ export default function ComprehensiveRevenue() {
               <TabsTrigger value="advertising" className="whitespace-nowrap flex-shrink-0">
                 <Megaphone className="w-4 h-4 mr-1" />
                 Ads
+              </TabsTrigger>
+              <TabsTrigger value="websites" className="whitespace-nowrap flex-shrink-0">
+                <Globe className="w-4 h-4 mr-1" />
+                Websites
               </TabsTrigger>
             </TabsList>
           </div>
@@ -843,6 +877,96 @@ export default function ComprehensiveRevenue() {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* Websites Tab */}
+          <TabsContent value="websites">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-indigo-600" />
+                  Operator Website Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded-lg space-y-1">
+                  <div className="text-sm text-slate-700">
+                    <strong>Model:</strong> Flat {websiteNewPerMonth} new sites/month in Year 1, then {websiteGrowthAfterY1}% monthly growth after that.
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Setup Revenue (one-time):</strong> new sites/month × ${websiteSetupFee} setup fee
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Recurring Revenue:</strong> cumulative hosted sites × ${websiteMonthlyFee}/month
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">
+                    <strong>Month 1 Setup:</strong> ${(websiteNewPerMonth * websiteSetupFee).toLocaleString()} &nbsp;|&nbsp;
+                    <strong>Month 1 Recurring:</strong> ${(websiteNewPerMonth * websiteMonthlyFee).toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div>
+                    <Label>Setup Fee per Site ($)</Label>
+                    <Input type="number" value={websiteSetupFee} onChange={(e) => setWebsiteSetupFee(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Hosting Fee ($)</Label>
+                    <Input type="number" value={websiteMonthlyFee} onChange={(e) => setWebsiteMonthlyFee(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>New Sites / Month (Year 1)</Label>
+                    <Input type="number" value={websiteNewPerMonth} onChange={(e) => setWebsiteNewPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth After Y1 (%)</Label>
+                    <Input type="number" value={websiteGrowthAfterY1} onChange={(e) => setWebsiteGrowthAfterY1(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                {/* Setup vs Recurring split */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-1">One-Time Setup Revenue</div>
+                    <div className="text-3xl font-bold text-amber-600 mb-1">${(getYearProjection(websiteSetupProjections, 1) / 1000).toFixed(0)}K <span className="text-base font-normal text-amber-500">Year 1</span></div>
+                    <div className="text-sm text-slate-600">${(getYearProjection(websiteSetupProjections, 3) / 1000000).toFixed(2)}M over 3 years &nbsp;·&nbsp; ${(getYearProjection(websiteSetupProjections, 5) / 1000000).toFixed(2)}M over 5 years</div>
+                  </div>
+                  <div className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-indigo-700 mb-1">Recurring Hosting Revenue</div>
+                    <div className="text-3xl font-bold text-indigo-600 mb-1">${(getYearProjection(websiteRecurringProjections, 1) / 1000).toFixed(0)}K <span className="text-base font-normal text-indigo-400">Year 1</span></div>
+                    <div className="text-sm text-slate-600">${(getYearProjection(websiteRecurringProjections, 3) / 1000000).toFixed(2)}M over 3 years &nbsp;·&nbsp; ${(getYearProjection(websiteRecurringProjections, 5) / 1000000).toFixed(2)}M over 5 years</div>
+                  </div>
+                </div>
+
+                {/* Combined totals */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(websiteTotalProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(websiteTotalProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(websiteTotalProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(websiteTotalProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
     </div>
