@@ -12,32 +12,32 @@ const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'
 // Mix: 60% Basic ($99/sale × 6/yr ÷ 12 = $49.50), 25% Bronze ($35 + $64×1.25 = $115), 10% Silver ($149), 5% Gold ($299)
 const AVG_OPERATOR_MONTHLY_REVENUE = 0.60 * 49.5 + 0.25 * 115 + 0.10 * 149 + 0.05 * 299;
 
+// Load saved values from localStorage or use defaults (module-level so useState can use it)
+const loadValue = (key, defaultValue) => {
+  const saved = localStorage.getItem(`revenue_proj_${key}`);
+  if (saved !== null) {
+    const parsed = JSON.parse(saved);
+    // Reset stale defaults
+    if (key === 'vendorSubPrice' && parsed === 79) {
+      localStorage.removeItem(`revenue_proj_${key}`);
+      return defaultValue;
+    }
+    if (key === 'avgAnnualSalesPerOperator' && parsed === 6) {
+      localStorage.removeItem(`revenue_proj_${key}`);
+      return defaultValue;
+    }
+    if (key === 'avgItemsPostedPerSale' && parsed === 50) {
+      localStorage.removeItem(`revenue_proj_${key}`);
+      return defaultValue;
+    }
+    return parsed;
+  }
+  return defaultValue;
+};
+
 export default function Revenue() {
   const [activeTab, setActiveTab] = useState('operators');
   const [savedOperators, setSavedOperators] = useState(() => loadValue('launchOperators', 100));
-
-  // Load saved values from localStorage or use defaults
-  const loadValue = (key, defaultValue) => {
-    const saved = localStorage.getItem(`revenue_proj_${key}`);
-    if (saved !== null) {
-      const parsed = JSON.parse(saved);
-      // Reset stale defaults
-      if (key === 'vendorSubPrice' && parsed === 79) {
-        localStorage.removeItem(`revenue_proj_${key}`);
-        return defaultValue;
-      }
-      if (key === 'avgAnnualSalesPerOperator' && parsed === 6) {
-        localStorage.removeItem(`revenue_proj_${key}`);
-        return defaultValue;
-      }
-      if (key === 'avgItemsPostedPerSale' && parsed === 50) {
-        localStorage.removeItem(`revenue_proj_${key}`);
-        return defaultValue;
-      }
-      return parsed;
-    }
-    return defaultValue;
-  };
 
   // Operator Growth Inputs
   const [launchOperators, setLaunchOperators] = useState(() => loadValue('launchOperators', 100));
