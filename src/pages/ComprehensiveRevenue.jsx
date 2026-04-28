@@ -32,7 +32,7 @@ export default function ComprehensiveRevenue() {
   const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
   const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
-  const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 4));
+  const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 2));
 
   // Agent Subscription Inputs
   const [agentSubPrice, setAgentSubPrice] = useState(() => loadValue('agentSubPrice', 149));
@@ -261,8 +261,8 @@ export default function ComprehensiveRevenue() {
   const currentOperatorYearlyRevenue = currentOperatorMonthlyRevenue * 12;
 
   // Calculate all additional revenue streams
-  // Use city-based calculation for vendors: total cities * new vendors per city per month
-  const calculatedVendorNewPerMonth = totalCities * vendorNewPerCityPerMonth;
+  // Use operator-based calculation for vendors: each operator refers up to N vendors
+  const calculatedVendorNewPerMonth = totalOperators * vendorNewPerCityPerMonth;
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
@@ -563,10 +563,10 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="text-sm text-slate-700 mb-2">
-                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Calculated New Vendors/Month:</strong> {totalCities.toLocaleString()} cities × {vendorNewPerCityPerMonth} vendors/city = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
+                    <strong>Calculated New Vendors/Month:</strong> {totalOperators.toLocaleString()} operators × {vendorNewPerCityPerMonth} vendors/operator = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
                   </div>
                 </div>
 
@@ -576,7 +576,7 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>New Vendors Per City Per Month</Label>
+                    <Label>Max Vendors Per Operator</Label>
                     <Input type="number" value={vendorNewPerCityPerMonth} onChange={(e) => setVendorNewPerCityPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
