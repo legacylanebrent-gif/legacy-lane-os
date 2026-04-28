@@ -551,7 +551,7 @@ export default function ComprehensiveRevenue() {
             </Card>
           </TabsContent>
 
-          {/* Vendor Subs Tab */}
+          {/* Vendor Subscriptions Tab */}
           <TabsContent value="vendorSubs">
             <Card>
               <CardHeader>
