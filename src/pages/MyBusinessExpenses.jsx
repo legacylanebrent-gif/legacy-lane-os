@@ -16,7 +16,7 @@ import {
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import CashFlowProjection from '@/components/expenses/CashFlowProjection';
-import BulkReceiptScanner from '@/components/expenses/BulkReceiptScanner';
+import BulkScanModal from '@/components/expenses/BulkScanModal';
 
 const CATEGORY_OPTIONS = [
   { value: 'advertising_marketing', label: 'Advertising & Marketing' },
@@ -51,6 +51,7 @@ export default function MyBusinessExpenses() {
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [showMileageModal, setShowMileageModal] = useState(false);
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
+  const [showBulkScanModal, setShowBulkScanModal] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [dateFilter, setDateFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -452,12 +453,12 @@ export default function MyBusinessExpenses() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
-            onClick={() => setShowScanModal(true)}
+            onClick={() => setShowBulkScanModal(true)}
             variant="outline"
             className="border-cyan-600 text-cyan-700 hover:bg-cyan-50 whitespace-nowrap"
           >
             <Receipt className="w-4 h-4 mr-2" />
-            Scan Receipt
+            Scan Receipts
           </Button>
           <Button
             onClick={() => setShowMileageModal(true)}
@@ -696,11 +697,11 @@ export default function MyBusinessExpenses() {
         </CardContent>
       </Card>
 
-      {/* Bulk Receipt Scanner Modal */}
-      <BulkReceiptScanner
-        open={showScanModal}
-        onClose={() => setShowScanModal(false)}
-        onSaved={() => { loadData(); }}
+      {/* Bulk Scan Modal */}
+      <BulkScanModal
+        open={showBulkScanModal}
+        onClose={() => setShowBulkScanModal(false)}
+        onSaved={loadData}
       />
 
       {/* Add Expense Modal */}
