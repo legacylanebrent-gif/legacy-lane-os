@@ -26,7 +26,7 @@ import LeadFunnel from './pages/LeadFunnel';
 import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
-import PropstreamLeadImport from './pages/PropstreamLeadImport';
+import CSVLeadImport from './pages/CSVLeadImport';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -96,7 +96,7 @@ const AuthenticatedApp = () => {
       <Route path="/TerritoryHeatmap" element={<LayoutWrapper currentPageName="TerritoryHeatmap"><TerritoryHeatmap /></LayoutWrapper>} />
       <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />
-      <Route path="/PropstreamLeadImport" element={<LayoutWrapper currentPageName="PropstreamLeadImport"><PropstreamLeadImport /></LayoutWrapper>} />
+      <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
