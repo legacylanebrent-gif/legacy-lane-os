@@ -50,6 +50,19 @@ function ModeWelcomeCard({ mode }) {
 }
 
 function DefaultWelcome({ user, context, onSelectAction }) {
+  const specialists = [
+    { label: 'Marketing Assistant', icon: '📢', desc: 'Email campaigns, SMS, content strategy' },
+    { label: 'Social Media Manager', icon: '📱', desc: 'Posts, captions, Reels, TikTok scripts' },
+    { label: 'Blog Writer', icon: '📝', desc: 'SEO-optimized local content' },
+    { label: 'Sale Promotion Expert', icon: '🎯', desc: '15-piece marketing packages' },
+    { label: 'Business Coach', icon: '💼', desc: 'Scaling, systems, revenue growth' },
+    { label: 'Referral Strategist', icon: '🤝', desc: 'Agent & attorney partnerships' },
+    { label: 'Objection Coach', icon: '🛡️', desc: 'Client conversation scripts' },
+    { label: 'Territory Growth Advisor', icon: '📍', desc: 'Local domination strategies' },
+    { label: 'Content Memory System', icon: '🧠', desc: 'Remembers your brand voice' },
+    { label: 'Weekly Accountability Partner', icon: '✅', desc: 'Growth plans & KPI tracking' },
+  ];
+
   const quickActions = [
     { label: 'Promote an upcoming sale', mode: 'sale_promotion_package', icon: '🎯' },
     { label: 'Create social posts', mode: 'social_media_post', icon: '📱' },
@@ -68,11 +81,24 @@ function DefaultWelcome({ user, context, onSelectAction }) {
       </div>
       <div>
         <h3 className="text-white font-bold text-lg">
-          Hi {user.full_name ? user.full_name.split(' ')[0] : 'there'}, I'm your Legacy Lane AI Coach.
+          Hi {user.full_name ? user.full_name.split(' ')[0] : 'there'} — Your 10-Specialist Team is Ready
         </h3>
         <p className="text-slate-400 text-sm mt-2 leading-relaxed">
-          I can help {context?.companyName || 'your company'} grow in {context?.territory || 'your territory'} by creating marketing, promoting sales, building referral relationships, and coaching you through business growth.
+          I'm your dedicated AI Coach covering every aspect of growing {context?.companyName || 'your company'} in {context?.territory || 'your territory'}. Think of me as 10 experts in one place.
         </p>
+      </div>
+
+      {/* Specialist Grid */}
+      <div className="bg-slate-900 rounded-lg border border-slate-700 px-3 py-3">
+        <p className="text-xs text-orange-400 font-semibold mb-3 text-left">Your 10-Person Team:</p>
+        <div className="grid grid-cols-2 gap-2">
+          {specialists.map((spec, i) => (
+            <div key={i} className="text-left bg-slate-800/60 rounded-lg p-2.5 border border-slate-700 hover:border-orange-600 transition-all">
+              <div className="text-sm font-medium text-white mb-0.5">{spec.icon} {spec.label}</div>
+              <div className="text-xs text-slate-400">{spec.desc}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -88,6 +114,12 @@ function DefaultWelcome({ user, context, onSelectAction }) {
             </p>
           </button>
         ))}
+      </div>
+
+      <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2">
+        <p className="text-xs text-slate-400 text-center">
+          💡 <span className="text-slate-300 font-medium">All 10 specialists are available anytime.</span> Switch modes above or ask me anything — I'll use the right expert.
+        </p>
       </div>
     </div>
   );
@@ -106,7 +138,8 @@ function ModeSelector({ activeMode, onSelect }) {
   const Icon = activeMode.icon;
 
   return (
-    <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-3 py-2">
+    <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-3 py-2 space-y-1.5">
+      <p className="text-xs text-slate-500 font-medium px-2">Switch Specialist:</p>
       <button
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center justify-between gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-3 py-2 transition-all"
@@ -330,9 +363,9 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
               <Brain className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white leading-tight">Legacy Lane AI Coach</h2>
+              <h2 className="text-sm font-bold text-white leading-tight">Your 10-Specialist Team</h2>
               <p className="text-xs text-slate-400 leading-tight">
-                {context ? `${context.companyName || user.full_name}` : 'Loading profile…'}
+                {context ? `${context.companyName || user.full_name} — Marketing, Sales, Growth & Coaching` : 'Loading profile…'}
               </p>
             </div>
           </div>
