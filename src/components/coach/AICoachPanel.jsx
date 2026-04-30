@@ -49,29 +49,46 @@ function ModeWelcomeCard({ mode }) {
   );
 }
 
-function DefaultWelcome({ user, context }) {
+function DefaultWelcome({ user, context, onSelectAction }) {
+  const quickActions = [
+    { label: 'Promote an upcoming sale', mode: 'sale_promotion_package', icon: '🎯' },
+    { label: 'Create social posts', mode: 'social_media_post', icon: '📱' },
+    { label: 'Write a blog', mode: 'blog_post', icon: '📝' },
+    { label: 'Build my lead plan', mode: 'lead_flow_planner', icon: '🎯' },
+    { label: 'Coach me through a business issue', mode: 'business_coaching', icon: '💼' },
+    { label: 'Help me contact real estate agents', mode: 'lead_generation', icon: '🤝' },
+    { label: "Create this week's growth plan", mode: 'weekly_growth_plan', icon: '📅' },
+    { label: 'Review my business performance', mode: 'monthly_business_review', icon: '📊' },
+  ];
+
   return (
-    <div className="text-center pt-4 pb-2">
-      <div className="w-14 h-14 mx-auto bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center mb-3 shadow-xl">
+    <div className="text-center pt-4 pb-2 space-y-4">
+      <div className="w-14 h-14 mx-auto bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center shadow-xl">
         <Brain className="w-7 h-7 text-white" />
       </div>
-      <h3 className="text-white font-bold text-base">
-        Welcome{user.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
-      </h3>
-      <p className="text-slate-400 text-xs mt-1 mb-3 leading-relaxed">
-        Your dedicated AI business partner.<br />
-        I know your company, territory, and goals.<br />
-        Choose a mode or just start talking.
-      </p>
-      {context && (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-left text-xs space-y-1 mb-3">
-          <p className="text-slate-500 font-semibold uppercase tracking-wide text-xs mb-1.5">Your Profile</p>
-          {context.companyName && <p className="text-slate-300">🏢 <span className="text-slate-500">Company:</span> {context.companyName}</p>}
-          {context.territory && <p className="text-slate-300">📍 <span className="text-slate-500">Territory:</span> {context.territory}</p>}
-          <p className="text-slate-300">📊 <span className="text-slate-500">Sales:</span> {context.totalSales} completed</p>
-          <p className="text-slate-300">💰 <span className="text-slate-500">Revenue:</span> ${context.totalRevenue.toLocaleString()}</p>
-        </div>
-      )}
+      <div>
+        <h3 className="text-white font-bold text-lg">
+          Hi {user.full_name ? user.full_name.split(' ')[0] : 'there'}, I'm your Legacy Lane AI Coach.
+        </h3>
+        <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+          I can help {context?.companyName || 'your company'} grow in {context?.territory || 'your territory'} by creating marketing, promoting sales, building referral relationships, and coaching you through business growth.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {quickActions.map((action, i) => (
+          <button
+            key={i}
+            onClick={() => onSelectAction(action.mode)}
+            className="text-left bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500 rounded-lg px-3 py-3 transition-all group"
+          >
+            <div className="text-lg mb-1">{action.icon}</div>
+            <p className="text-xs font-medium text-slate-200 group-hover:text-white leading-tight">
+              {action.label}
+            </p>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -284,6 +301,13 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
     setShowStarters(true);
   };
 
+  const handleQuickAction = (modeKey) => {
+    const mode = getModeByKey(modeKey);
+    if (mode) {
+      handleModeSelect(mode);
+    }
+  };
+
   const creditsUsed = creditAccount?.monthly_credits_used || 0;
   const creditsLimit = (creditAccount?.monthly_credit_limit || 0) + (creditAccount?.bonus_credits || 0) + (creditAccount?.rollover_credits || 0);
   const creditsAvailable = Math.max(0, creditsLimit - creditsUsed);
@@ -375,7 +399,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         {messages.length === 0 && (
           activeMode.welcome
             ? <ModeWelcomeCard mode={activeMode} />
-            : <DefaultWelcome user={user} context={context} />
+            : <DefaultWelcome user={user} context={context} onSelectAction={handleQuickAction} />
         )}
 
         {/* Screen-contextual actions */}
