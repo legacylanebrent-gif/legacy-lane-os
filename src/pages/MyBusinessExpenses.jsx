@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,6 +57,9 @@ export default function MyBusinessExpenses() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [scanningReceipt, setScanningReceipt] = useState(false);
+  const [calculatingDistance, setCalculatingDistance] = useState(false);
+  const [distanceInfo, setDistanceInfo] = useState(null); // { distance_text, duration_text, origin_address, destination_address }
+  const distanceTimerRef = React.useRef(null);
 
   const [formData, setFormData] = useState({
     expense_date: new Date().toISOString().split('T')[0],
@@ -271,6 +274,36 @@ export default function MyBusinessExpenses() {
     }
   };
 
+  const fetchDistance = async (origin, destination) => {
+    if (!origin.trim() || !destination.trim()) return;
+    setCalculatingDistance(true);
+    setDistanceInfo(null);
+    try {
+      const response = await base44.functions.invoke('calculateDistance', { origin, destination });
+      const data = response.data;
+      if (data.miles) {
+        setMileageData(prev => ({ ...prev, miles_driven: String(data.miles) }));
+        setDistanceInfo({ distance_text: data.distance_text, duration_text: data.duration_text });
+      }
+    } catch (err) {
+      console.error('Distance calc error:', err);
+    } finally {
+      setCalculatingDistance(false);
+    }
+  };
+
+  const handleLocationChange = (field, value) => {
+    const updated = { ...mileageData, [field]: value };
+    setMileageData(updated);
+    // debounce: wait 800ms after last keystroke before calling API
+    clearTimeout(distanceTimerRef.current);
+    const origin = field === 'starting_location' ? value : updated.starting_location;
+    const destination = field === 'ending_location' ? value : updated.ending_location;
+    if (origin.trim() && destination.trim()) {
+      distanceTimerRef.current = setTimeout(() => fetchDistance(origin, destination), 800);
+    }
+  };
+
   const handleAddMileage = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -294,6 +327,7 @@ export default function MyBusinessExpenses() {
       });
 
       setShowMileageModal(false);
+      setDistanceInfo(null);
       const primaryVehicle = vehicles.find(v => v.is_primary);
       setMileageData({
         expense_date: new Date().toISOString().split('T')[0],
@@ -928,8 +962,8 @@ export default function MyBusinessExpenses() {
                 <Label>Starting Location *</Label>
                 <Input
                   value={mileageData.starting_location}
-                  onChange={(e) => setMileageData({ ...mileageData, starting_location: e.target.value })}
-                  placeholder="e.g., Home, Office"
+                  onChange={(e) => handleLocationChange('starting_location', e.target.value)}
+                  placeholder="e.g., 123 Main St, City, State"
                   required
                 />
               </div>
@@ -937,12 +971,23 @@ export default function MyBusinessExpenses() {
                 <Label>Ending Location *</Label>
                 <Input
                   value={mileageData.ending_location}
-                  onChange={(e) => setMileageData({ ...mileageData, ending_location: e.target.value })}
-                  placeholder="e.g., Client Site"
+                  onChange={(e) => handleLocationChange('ending_location', e.target.value)}
+                  placeholder="e.g., 456 Oak Ave, City, State"
                   required
                 />
               </div>
             </div>
+            {calculatingDistance && (
+              <p className="text-xs text-blue-600 flex items-center gap-1">
+                <span className="inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                Calculating distance via Google Maps…
+              </p>
+            )}
+            {distanceInfo && !calculatingDistance && (
+              <div className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                <span>📍 Google Maps: <strong>{distanceInfo.distance_text}</strong> · ~{distanceInfo.duration_text} drive — auto-filled below</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
