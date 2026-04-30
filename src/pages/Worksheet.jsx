@@ -14,8 +14,6 @@ import {
   Printer, Mail, FileDown, Plus, X, Edit, Check, HandCoins, Truck, Camera
 } from 'lucide-react';
 import VenmoPaymentModal from '@/components/payment/VenmoPaymentModal';
-import CartQRScanner from '@/components/worksheet/CartQRScanner';
-import TransactionForm from '@/components/worksheet/TransactionForm';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Worksheet() {
@@ -1028,30 +1026,8 @@ Only include items with confidence > 0.3. If no items match well, return an empt
             </CardContent>
             </Card>
 
-            {/* Add Transaction Form */}
-          <TransactionForm
-            photoMode={photoMode} setPhotoMode={setPhotoMode}
-            bundleMode={bundleMode} setBundleMode={setBundleMode}
-            itemName={itemName} setItemName={setItemName}
-            quantity={quantity} setQuantity={setQuantity}
-            price={price} setPrice={setPrice}
-            paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod}
-            notes={notes} setNotes={setNotes}
-            currentTotal={currentTotal}
-            submitting={submitting}
-            handleAddTransaction={handleAddTransaction}
-            handleSaveBundle={handleSaveBundle}
-            bundleName={bundleName} setBundleName={setBundleName}
-            bundleItems={bundleItems} bundleItemInput={bundleItemInput} setBundleItemInput={setBundleItemInput}
-            bundleItemPrice={bundleItemPrice} setBundleItemPrice={setBundleItemPrice}
-            bundlePrice={bundlePrice} setBundlePrice={setBundlePrice}
-            addBundleItem={addBundleItem} removeBundleItem={removeBundleItem}
-            photoSearchQuery={photoSearchQuery} handlePhotoSearch={handlePhotoSearch}
-            searchingPhotos={searchingPhotos} photoSuggestions={photoSuggestions}
-            selectedPhoto={selectedPhoto} setSelectedPhoto={setSelectedPhoto}
-            selectPhotoItem={selectPhotoItem}
-            onScanCart={() => setShowCartScanner(true)}
-          />
+            {/* Add Transaction Form - Coming soon */}
+          <p>Transaction form placeholder</p>
 
           {/* Transaction List */}
           {transactions.length > 0 && (
