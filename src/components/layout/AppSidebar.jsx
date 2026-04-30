@@ -85,6 +85,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',  icon: DollarSign,      group: 'Admin' },
   { page: 'FutureOperatorsAnalytics', label: 'Future Ops Rev.',   icon: DollarSign,      group: 'Admin' },
   { page: 'PricingImport',          label: 'Pricing Import',      icon: BarChart3,       group: 'Admin' },
+  { page: 'AdminAICredits',         label: 'AI Credit Mgmt',      icon: Zap,             group: 'Admin' },
   { page: 'BizInABox',              label: 'Biz in a Box',        icon: Briefcase,       group: 'Admin' },
   { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
 ];

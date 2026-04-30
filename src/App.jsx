@@ -14,6 +14,7 @@ import AdminLeadsPropstream from './pages/AdminLeadsPropstream';
 import AdminLeadsWebsite from './pages/AdminLeadsWebsite';
 import AIAssistant from './pages/AIAssistant';
 import SocialAdsHub from './pages/SocialAdsHub';
+import AdminAICredits from './pages/AdminAICredits';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminLeadsWebsite" element={<LayoutWrapper currentPageName="AdminLeadsWebsite"><AdminLeadsWebsite /></LayoutWrapper>} />
       <Route path="/AIAssistant" element={<LayoutWrapper currentPageName="AIAssistant"><AIAssistant /></LayoutWrapper>} />
       <Route path="/SocialAdsHub" element={<LayoutWrapper currentPageName="SocialAdsHub"><SocialAdsHub /></LayoutWrapper>} />
+      <Route path="/AdminAICredits" element={<LayoutWrapper currentPageName="AdminAICredits"><AdminAICredits /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
