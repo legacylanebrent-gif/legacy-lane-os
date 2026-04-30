@@ -14,15 +14,30 @@ export default function CSVLeadImport() {
   const [results, setResults] = useState(null);
 
   const EXPECTED_FIELDS = {
-    contact_name: 'Contact Name',
-    contact_email: 'Email',
-    contact_phone: 'Phone',
+    contact_name: 'Owner Name',
+    contact_phone: 'Phone Number',
+    contact_email: 'Email Address',
     property_address: 'Property Address',
-    estimated_value: 'Estimated Value',
-    intent: 'Intent (estate_sale/sell_home/other)',
-    situation: 'Situation (probate/divorce/downsizing)',
-    timeline: 'Timeline (immediate/1_3_months/exploring)',
+    estimated_value: 'Est. Value',
+    source_details: 'County/Region',
     notes: 'Notes'
+  };
+
+  // Property export specific mappings
+  const PROPERTY_FIELD_MAPPINGS = {
+    'Mailing Care of Name': 'contact_name',
+    'Owner 1 First Name': 'contact_name',
+    'Phone 1': 'contact_phone',
+    'Phone 2': 'contact_phone',
+    'Email 1': 'contact_email',
+    'Email 2': 'contact_email',
+    'Address': 'property_address',
+    'City': 'property_address',
+    'State': 'property_address',
+    'Zip': 'property_address',
+    'Est. Value': 'estimated_value',
+    'County': 'source_details',
+    'Notes': 'notes'
   };
 
   const handleFileSelect = async (e) => {
@@ -46,16 +61,20 @@ export default function CSVLeadImport() {
         setHeaders(csvHeaders);
         setData(results.data.filter(row => Object.values(row).some(v => v)));
 
-        // Auto-map matching headers
+        // Auto-map using property mappings, then fallback to field name matching
         const autoMapping = {};
         csvHeaders.forEach(header => {
-          const lower = header.toLowerCase();
-          Object.keys(EXPECTED_FIELDS).forEach(field => {
-            if (lower.includes(field.replace(/_/g, ' ')) || 
-                EXPECTED_FIELDS[field].toLowerCase().includes(lower)) {
-              autoMapping[header] = field;
-            }
-          });
+          if (PROPERTY_FIELD_MAPPINGS[header]) {
+            autoMapping[header] = PROPERTY_FIELD_MAPPINGS[header];
+          } else {
+            const lower = header.toLowerCase();
+            Object.keys(EXPECTED_FIELDS).forEach(field => {
+              if (lower.includes(field.replace(/_/g, ' ')) || 
+                  EXPECTED_FIELDS[field].toLowerCase().includes(lower)) {
+                autoMapping[header] = field;
+              }
+            });
+          }
         });
         setMapping(autoMapping);
       },
@@ -82,28 +101,49 @@ export default function CSVLeadImport() {
     }
 
     // Validate required fields are mapped
-    const requiredMapped = ['contact_name', 'contact_email'].some(
-      field => Object.values(mapping).includes(field)
-    );
-    if (!requiredMapped) {
-      alert('Please map at least Contact Name or Email');
-      return;
-    }
+     const hasMappedFields = Object.values(mapping).length > 0;
+     if (!hasMappedFields) {
+       alert('Please map at least one field');
+       return;
+     }
 
     setImporting(true);
     try {
       const leads = data.map(row => {
-        const lead = {};
-        Object.entries(mapping).forEach(([csvCol, leadField]) => {
-          let value = row[csvCol];
-          if (leadField === 'estimated_value' && value) {
-            value = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
-          }
-          if (value) lead[leadField] = value;
-        });
-        lead.source = 'csv_import';
-        return lead;
-      });
+         const lead = { source: 'propstream' };
+         const addressParts = [];
+
+         Object.entries(mapping).forEach(([csvCol, leadField]) => {
+           let value = row[csvCol];
+           if (!value) return;
+
+           if (leadField === 'estimated_value') {
+             value = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+             if (value > 0) lead[leadField] = value;
+           } else if (leadField === 'property_address') {
+             addressParts.push(value);
+           } else if (leadField === 'contact_name') {
+             // Combine first and last names if needed
+             if (!lead.contact_name && value) {
+               const lastName = row['Owner 1 Last Name'] || row['Owner 2 Last Name'];
+               lead.contact_name = lastName ? `${value} ${lastName}` : value;
+             }
+           } else if (leadField === 'contact_phone' && !lead.contact_phone) {
+             lead.contact_phone = value;
+           } else if (leadField === 'contact_email' && !lead.contact_email) {
+             lead.contact_email = value;
+           } else if (leadField && value) {
+             lead[leadField] = value;
+           }
+         });
+
+         // Construct full property address
+         if (addressParts.length > 0) {
+           lead.property_address = addressParts.filter(p => p).join(', ');
+         }
+
+         return lead;
+       });
 
       const imported = [];
       const failed = [];
@@ -133,10 +173,11 @@ export default function CSVLeadImport() {
   };
 
   const downloadTemplate = () => {
-    const template = Object.values(EXPECTED_FIELDS).join(',');
+    const templateHeaders = ['Mailing Care of Name', 'Phone 1', 'Email 1', 'Address', 'City', 'State', 'Zip', 'County', 'Est. Value', 'Notes'];
+    const template = templateHeaders.join(',');
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(template));
-    element.setAttribute('download', 'lead_import_template.csv');
+    element.setAttribute('download', 'property_lead_template.csv');
     element.click();
   };
 
@@ -144,8 +185,9 @@ export default function CSVLeadImport() {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold flex items-center gap-2">
         <Upload className="w-8 h-8" />
-        CSV Lead Import
+        Property List Lead Import
       </h1>
+      <p className="text-slate-600">Import property lists from Propstream or similar exports to create leads</p>
 
       {!data.length ? (
         <Card>
@@ -164,7 +206,7 @@ export default function CSVLeadImport() {
               <label htmlFor="csvInput" className="cursor-pointer block">
                 <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
                 <p className="font-medium">Drop CSV or click to upload</p>
-                <p className="text-sm text-slate-500">Required: At least Contact Name or Email</p>
+                <p className="text-sm text-slate-500">Supports Propstream property exports and similar formats</p>
               </label>
             </div>
 
