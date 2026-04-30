@@ -7,10 +7,11 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isWatched, setIsWatched] = useState(false);
   const [businessName, setBusinessName] = useState(null);
+  const [saleTitle, setSaleTitle] = useState(null);
 
   useEffect(() => {
-    // Fetch operator business name
-    const loadBusinessName = async () => {
+    // Fetch operator business name and sale title
+    const loadDetails = async () => {
       try {
         if (item.operator_id) {
           const users = await base44.entities.User.filter({ id: item.operator_id });
@@ -18,12 +19,18 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
             setBusinessName(users[0].company_name || users[0].full_name);
           }
         }
+        if (item.estate_sale_id) {
+          const sales = await base44.entities.EstateSale.filter({ id: item.estate_sale_id });
+          if (sales.length > 0) {
+            setSaleTitle(sales[0].title);
+          }
+        }
       } catch (error) {
-        console.error('Error loading business name:', error);
+        console.error('Error loading details:', error);
       }
     };
-    loadBusinessName();
-  }, [item.operator_id]);
+    loadDetails();
+  }, [item.operator_id, item.estate_sale_id]);
 
   useEffect(() => {
     if (item.listing_type === 'AUCTION' && item.auction_end_date) {
@@ -138,7 +145,12 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
           {item.title}
         </h3>
 
-        <p className="text-sm text-slate-600 line-clamp-1 mb-3">{businessName || item.operator_name || 'Listed by Operator'}</p>
+        <div className="space-y-1 mb-3">
+          <p className="text-sm text-slate-600 line-clamp-1">{businessName || item.operator_name || 'Listed by Operator'}</p>
+          {saleTitle && (
+            <p className="text-xs text-slate-500 line-clamp-1">From: {saleTitle}</p>
+          )}
+        </div>
 
         {/* Price */}
         <div className="mb-3">
