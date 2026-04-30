@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
+import CashFlowProjection from '@/components/expenses/CashFlowProjection';
 
 const CATEGORY_OPTIONS = [
   { value: 'advertising_marketing', label: 'Advertising & Marketing' },
@@ -614,6 +615,15 @@ export default function MyBusinessExpenses() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Cash Flow Projection */}
+      <div>
+        <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-purple-600" />
+          6-Month Cash Flow Projection
+        </h2>
+        <CashFlowProjection expenses={expenses} />
       </div>
 
       {/* Expenses Table */}
