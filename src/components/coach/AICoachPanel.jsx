@@ -95,9 +95,12 @@ export default function AICoachPanel({ user, onClose }) {
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
       setTotalTokens(prev => prev + (data.usage?.total_tokens || 0));
     } catch (err) {
+      const isLimit = err?.response?.data?.error === 'credit_limit_reached' || err?.message?.includes('402');
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '⚠️ I ran into an issue connecting to the AI. Please try again in a moment.',
+        content: isLimit
+          ? '🚫 **Credit Limit Reached**\n\nYou have reached your AI credit limit for this billing period. Upgrade your plan or add more credits to continue using the Legacy Lane AI Coach.'
+          : '⚠️ I ran into an issue connecting to the AI. Please try again in a moment.',
       }]);
     } finally {
       setLoading(false);
