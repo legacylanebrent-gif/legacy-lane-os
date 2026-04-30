@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { messages, model, ai_mode } = await req.json();
+  const { messages, model, ai_mode, voice_preferences } = await req.json();
   // NOTE: any "context" from the frontend is intentionally discarded here.
   // All context is fetched below using the authenticated user.id.
   const selectedModel = model || DEFAULT_MODEL;
@@ -219,6 +219,29 @@ A scarcity-driven final-day post (60–100 words). Emphasize this is the LAST ch
       model: selectedModel,
       is_promotion_package: true,
     });
+  }
+
+  // ── Voice & Style Personalization ──
+  let voiceInstructions = '';
+  if (voice_preferences) {
+    const prefs = voice_preferences;
+    const voiceTone = prefs.voice_tone || 'neutral';
+    const languageTone = prefs.language_tone || 'warm';
+    const postLength = prefs.post_length || 'medium';
+    const urgencyLevel = prefs.urgency_level || 'balanced';
+    
+    voiceInstructions = `
+
+== OPERATOR'S VOICE & STYLE PREFERENCES ==
+Language Tone: ${languageTone} (How they prefer to sound)
+Voice Tone: ${voiceTone} (Thematic voice: faith-based, neutral, luxury, family-first, or practical)
+Post Length: ${postLength}
+Urgency Level: ${urgencyLevel}
+${prefs.preferred_cta ? `\nPreferred CTAs: ${prefs.preferred_cta}` : ''}
+${prefs.common_phrases ? `\nCommon phrases to use: ${prefs.common_phrases}` : ''}
+${prefs.disliked_phrases ? `\nAvoid these phrases: ${prefs.disliked_phrases}` : ''}
+
+CRITICAL: Use ONLY their preferred phrases, avoid disliked phrases, match their voice and tone exactly, and follow their post length preference.`;
   }
 
   const modeInstructions = {
@@ -440,7 +463,7 @@ When relevant, suggest which specialized Coach mode would give them an even deep
 
   const systemPrompt = `You are the Legacy Lane AI Coach, an OpenAI-powered business growth, marketing, and operations assistant for estate sale company operators.
 
-You are not a generic chatbot. You are personalized to the logged-in operator.
+You are not a generic chatbot. You are personalized to the logged-in operator.${voiceInstructions}
 
 == CURRENT MODE ==
 ${currentModeInstruction}

@@ -3,11 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight } from 'lucide-react';
+import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { MODE_GROUPS, ALL_MODES, getModeByKey } from './coachModes';
 import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
 import SalePromotionEngine from './SalePromotionEngine';
+import ToneAdjustmentPanel from './ToneAdjustmentPanel';
+import VoicePreferencesModal from './VoicePreferencesModal';
 
 const MODEL_OPTIONS = [
   { value: 'gpt-4o', label: 'GPT-4o', badge: 'Smart' },
@@ -197,15 +199,35 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [adjustingMessage, setAdjustingMessage] = useState(false);
   const [model, setModel] = useState('gpt-4o');
   const [context, setContext] = useState(null);
   const [showStarters, setShowStarters] = useState(true);
   const [activeMode, setActiveMode] = useState(getModeByKey('general_assistant'));
   const [creditAccount, setCreditAccount] = useState(null);
+  const [voicePreferences, setVoicePreferences] = useState(null);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [lastAssistantIndex, setLastAssistantIndex] = useState(null);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => { loadContext(); loadCredits(); }, []);
+  useEffect(() => { loadContext(); loadCredits(); loadVoicePreferences(); }, []);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+
+  const loadVoicePreferences = async () => {
+    try {
+      const me = await base44.auth.me();
+      if (me && me.voice_preferences) {
+        setVoicePreferences(typeof me.voice_preferences === 'string' ? JSON.parse(me.voice_preferences) : me.voice_preferences);
+      }
+    } catch (_) {}
+  };
+
+  const saveVoicePreferences = async (prefs) => {
+    try {
+      await base44.auth.updateMe({ voice_preferences: JSON.stringify(prefs) });
+      setVoicePreferences(prefs);
+    } catch (_) {}
+  };
 
   const loadCredits = async () => {
     try {
@@ -228,9 +250,40 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
     }
   };
 
-  const sendMessage = async (text) => {
+  const sendMessage = async (text, toneAdjustment = null) => {
     const userText = (text || input).trim();
     if (!userText || loading) return;
+
+    // If adjusting tone, send adjustment request with last assistant message
+    if (toneAdjustment && lastAssistantIndex !== null) {
+      const newMessages = [
+        ...messages,
+        { role: 'user', content: `${toneAdjustment}: "${messages[lastAssistantIndex].content.substring(0, 200)}..."` }
+      ];
+      setMessages(newMessages);
+      setInput('');
+      setAdjustingMessage(true);
+
+      try {
+        const res = await base44.functions.invoke('aiCoach', {
+          messages: newMessages,
+          model,
+          ai_mode: activeMode.key,
+          voice_preferences: voicePreferences,
+        });
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: 'assistant', content: res.data.reply };
+          return updated;
+        });
+        loadCredits();
+      } catch (err) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Could not adjust tone. Please try again.' }]);
+      } finally {
+        setAdjustingMessage(false);
+      }
+      return;
+    }
 
     const newMessages = [...messages, { role: 'user', content: userText }];
     setMessages(newMessages);
@@ -243,8 +296,10 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         messages: newMessages,
         model,
         ai_mode: activeMode.key,
+        voice_preferences: voicePreferences,
       });
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
+      setLastAssistantIndex(newMessages.length); // track last assistant message index
       loadCredits();
     } catch (err) {
       const isLimit = err?.response?.data?.error === 'credit_limit_reached' || err?.response?.status === 402;
@@ -303,6 +358,9 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
                 <RotateCcw className="w-4 h-4" />
               </button>
             )}
+            <button onClick={() => setShowVoiceModal(true)} className="text-slate-400 hover:text-orange-400 p-1 rounded" title="Voice preferences">
+              <Settings className="w-4 h-4" />
+            </button>
             <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded">
               <X className="w-5 h-5" />
             </button>
@@ -405,25 +463,34 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
 
         {/* Chat messages */}
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
-                <Brain className="w-3 h-3 text-white" />
-              </div>
-            )}
-            <div className={`max-w-[87%] rounded-2xl px-3.5 py-2.5 ${
-              msg.role === 'user'
-                ? 'bg-orange-600 text-white rounded-tr-sm'
-                : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700'
-            }`}>
-              {msg.role === 'assistant' ? (
-                <ReactMarkdown className="text-sm prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:leading-relaxed [&_ul]:my-1.5 [&_li]:my-0.5 [&_strong]:text-orange-300 [&_h2]:text-sm [&_h3]:text-xs [&_h2]:mt-3 [&_h3]:mt-2">
-                  {msg.content}
-                </ReactMarkdown>
-              ) : (
-                <p className="text-sm leading-relaxed">{msg.content}</p>
+          <div key={i}>
+            <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'assistant' && (
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+                  <Brain className="w-3 h-3 text-white" />
+                </div>
               )}
+              <div className={`max-w-[87%] rounded-2xl px-3.5 py-2.5 ${
+                msg.role === 'user'
+                  ? 'bg-orange-600 text-white rounded-tr-sm'
+                  : 'bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700'
+              }`}>
+                {msg.role === 'assistant' ? (
+                  <ReactMarkdown className="text-sm prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:leading-relaxed [&_ul]:my-1.5 [&_li]:my-0.5 [&_strong]:text-orange-300 [&_h2]:text-sm [&_h3]:text-xs [&_h2]:mt-3 [&_h3]:mt-2">
+                    {msg.content}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                )}
+              </div>
             </div>
+            {msg.role === 'assistant' && i === messages.length - 1 && (
+              <ToneAdjustmentPanel
+                onAdjust={(tone) => sendMessage(`Make this ${tone}`, tone)}
+                onSaveStyle={() => saveVoicePreferences({ ...voicePreferences, last_saved_style: new Date().toISOString() })}
+                isAdjusting={adjustingMessage}
+              />
+            )}
           </div>
         ))}
 
@@ -482,6 +549,14 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         </div>
         <p className="text-xs text-slate-600 mt-1.5 text-center">Enter to send · Shift+Enter for new line</p>
       </div>}
+
+      {/* ── Voice Preferences Modal ── */}
+      <VoicePreferencesModal
+        open={showVoiceModal}
+        onOpenChange={setShowVoiceModal}
+        preferences={voicePreferences}
+        onSave={saveVoicePreferences}
+      />
     </div>
   );
 }
