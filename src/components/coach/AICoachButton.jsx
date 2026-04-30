@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Brain } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import AICoachPanel from './AICoachPanel';
 
 const OPERATOR_ROLES = [
@@ -12,6 +13,7 @@ const OPERATOR_ROLES = [
 export default function AICoachButton() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -47,7 +49,7 @@ export default function AICoachButton() {
 
           {/* Panel */}
           <div className="fixed top-0 right-0 h-full w-full max-w-md z-50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-            <AICoachPanel user={user} onClose={() => setOpen(false)} />
+            <AICoachPanel user={user} onClose={() => setOpen(false)} currentPathname={location.pathname} />
           </div>
         </>
       )}

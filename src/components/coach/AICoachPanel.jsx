@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { MODE_GROUPS, ALL_MODES, getModeByKey } from './coachModes';
+import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
 
 const MODEL_OPTIONS = [
   { value: 'gpt-4o', label: 'GPT-4o', badge: 'Smart' },
@@ -163,7 +164,7 @@ function ModeSelector({ activeMode, onSelect }) {
   );
 }
 
-export default function AICoachPanel({ user, onClose }) {
+export default function AICoachPanel({ user, onClose, currentPathname }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -247,6 +248,8 @@ export default function AICoachPanel({ user, onClose }) {
   const isLow = creditAccount && !isExhausted && creditPct >= 75;
 
   const starters = MODE_STARTERS[activeMode.key] || MODE_STARTERS.general_assistant;
+  const screenKey = getScreenKey(currentPathname || '');
+  const screenActions = screenKey ? (SCREEN_ACTIONS[screenKey] || null) : null;
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
@@ -321,8 +324,33 @@ export default function AICoachPanel({ user, onClose }) {
             : <DefaultWelcome user={user} context={context} />
         )}
 
+        {/* Screen-contextual actions */}
+        {showStarters && messages.length === 0 && screenActions && (
+          <div className="space-y-1.5 mt-2">
+            <p className="text-xs text-orange-400 font-semibold px-0.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 inline-block" />
+              Suggested for this page:
+            </p>
+            <div className="space-y-1.5">
+              {screenActions.map((action, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    const mode = getModeByKey(action.mode);
+                    if (mode.key !== activeMode.key) setActiveMode(mode);
+                    sendMessage(action.message);
+                  }}
+                  className="w-full text-left text-xs bg-orange-950/40 hover:bg-orange-900/50 border border-orange-800/50 hover:border-orange-600 text-orange-200 hover:text-white rounded-lg px-3 py-2 transition-all leading-relaxed"
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Starter prompts */}
-        {showStarters && messages.length === 0 && starters.length > 0 && (
+        {showStarters && messages.length === 0 && !screenActions && starters.length > 0 && (
           <div className="space-y-1.5 mt-2">
             <p className="text-xs text-slate-500 font-medium px-0.5">Try asking:</p>
             <div className="space-y-1.5">
