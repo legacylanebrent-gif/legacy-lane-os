@@ -232,7 +232,21 @@ export default function AdminLeadImporter() {
   };
 
   const downloadTemplate = () => {
-    const templateHeaders = ['Mailing Care of Name', 'Owner 1 First Name', 'Owner 1 Last Name', 'Phone 1', 'Phone 2', 'Email 1', 'Email 2', 'Address', 'City', 'State', 'Zip', 'County', 'Est. Value', 'Market Value', 'Loan Amount', 'Last Sale Date', 'Last Sale Price', 'Beds', 'Baths', 'Sq Ft', 'Lot Size', 'Year Built', 'Property Type', 'Zoning', 'Owner Type', 'Notes'];
+    const templateHeaders = [
+      'Address', 'Unit #', 'City', 'State', 'Zip', 'County', 'APN',
+      'Phone 1', 'Phone 1 Type', 'Phone 1 DNC', 'Phone 2', 'Phone 2 Type', 'Phone 2 DNC',
+      'Phone 3', 'Phone 3 Type', 'Phone 3 DNC', 'Phone 4', 'Phone 4 Type', 'Phone 4 DNC',
+      'Phone 5', 'Phone 5 Type', 'Phone 5 DNC',
+      'Email 1', 'Email 2', 'Email 3', 'Email 4',
+      'Owner Occupied', 'Owner 1 First Name', 'Owner 1 Last Name', 'Owner 2 First Name', 'Owner 2 Last Name',
+      'Litigator', 'Mailing Care of Name', 'Mailing Address', 'Mailing Unit #', 'Mailing City', 'Mailing State', 'Mailing Zip', 'Mailing County', 'Do Not Mail',
+      'Property Status', 'Notes', 'Property Type', 'Bedrooms', 'Total Bathrooms', 'Building Sqft', 'Lot Size Sqft', 'Effective Year Built',
+      'Total Assessed Value', 'Last Sale Recording Date', 'Last Sale Amount', 'Total Open Loans', 'Est. Remaining balance of Open Loans',
+      'Est. Value', 'Est. Loan-to-Value', 'Est. Equity', 'Total Condition', 'Interior Condition', 'Exterior Condition', 'Bathroom Condition', 'Kitchen Condition',
+      'Foreclosure Factor', 'MLS Status', 'MLS Date', 'MLS Amount', 'Lien Amount',
+      'Marketing Lists', 'Marketing Campaigns', 'Voicemail Drops', 'Dialer', 'Postcards', 'E-Mails', 'Skip Traces',
+      'Date Added to List', 'Method of Add'
+    ];
     const csv = templateHeaders.map(h => `"${h}"`).join(',');
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));

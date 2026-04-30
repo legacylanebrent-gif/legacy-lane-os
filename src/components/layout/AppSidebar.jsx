@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles
+  UserPlus, Sparkles, Upload
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -67,6 +67,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminLeadsSocialAds',   label: 'Social Ads Leads',    icon: Award,           group: 'Admin' },
   { page: 'AdminLeadsPropstream',  label: 'Propstream Leads',    icon: Award,           group: 'Admin' },
   { page: 'AdminLeadsWebsite',     label: 'Website Leads',       icon: Award,           group: 'Admin' },
+  { page: 'AdminLeadImporter',     label: 'Lead Importer',       icon: Upload,          group: 'Admin' },
   { page: 'AdminMarketplace',       label: 'Marketplace',         icon: ShoppingBag,     group: 'Admin' },
   { page: 'AdminCourses',           label: 'Courses',             icon: GraduationCap,   group: 'Admin' },
   { page: 'AdminTickets',           label: 'Support Tickets',     icon: MessageSquare,   group: 'Admin' },
