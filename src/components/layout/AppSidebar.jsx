@@ -48,6 +48,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'IncomeTracker',          label: 'Income Tracker',      icon: TrendingUp,      group: 'Finance' },
   { page: 'MyBusinessExpenses',     label: 'Business Expenses',   icon: FileText,        group: 'Finance' },
   { page: 'AIAssistant',            label: 'AI Assistant',         icon: Sparkles,        group: 'Finance' },
+  { page: 'SocialAdsHub',           label: 'Social Ads Hub',       icon: Megaphone,       group: 'Marketing' },
 
   { page: 'RewardsCheckins',        label: 'Check-ins',           icon: MapPin,          group: 'Consumer' },
   { page: 'Favorites',              label: 'Favorites',           icon: Heart,           group: 'Consumer' },
