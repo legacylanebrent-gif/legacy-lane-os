@@ -1,0 +1,302 @@
+import {
+  MessageSquare, Tag, Share2, FileText, Mail, Smartphone,
+  Sparkles, Video, Users, Handshake, UserCheck, Map,
+  CalendarDays, BarChart3, ShieldAlert, Star, ThumbsUp,
+  Briefcase, Package, DollarSign, ClipboardList,
+} from 'lucide-react';
+
+// Grouped mode definitions — single source of truth for panel + backend
+export const MODE_GROUPS = [
+  {
+    label: 'Content Creation',
+    color: 'text-sky-400',
+    modes: [
+      {
+        key: 'sale_promotion_package',
+        label: 'Promote This Sale',
+        icon: Tag,
+        color: 'text-orange-400',
+        placeholder: 'Describe your sale — name, city, dates, featured items, any special notes…',
+        welcome: {
+          title: 'Sale Promotion Package',
+          subtitle: 'Describe your upcoming sale and I\'ll generate a complete 10-piece marketing package.',
+          deliverables: ['Facebook Post', 'Instagram Caption', 'Email Blast', 'SMS Reminder', 'Blog Post', 'Image Prompt', 'Video Script', 'Day-Before Post', 'Morning-Of Post', 'Final-Day Urgency Post'],
+          tip: 'Include: sale name, city/neighborhood, dates & times, featured items (furniture, jewelry, antiques, etc.), any special notes (cash only, gated community, etc.)',
+        },
+      },
+      {
+        key: 'social_media_post',
+        label: 'Social Media Creator',
+        icon: Share2,
+        color: 'text-sky-400',
+        placeholder: 'What do you want to post about? Which platform? (Facebook, Instagram, TikTok…)',
+        welcome: {
+          title: 'Social Media Creator',
+          subtitle: 'Tell me the platform, topic, and any featured items — I\'ll write scroll-stopping content.',
+          deliverables: ['Facebook posts', 'Instagram captions', 'TikTok/Reels hooks', 'Hashtag packs', 'Story content', 'Caption variations'],
+          tip: 'Tell me the platform, the topic, and your brand voice. I\'ll handle the rest.',
+        },
+      },
+      {
+        key: 'blog_post',
+        label: 'Blog Writer',
+        icon: FileText,
+        color: 'text-emerald-400',
+        placeholder: 'What topic should I write about? (e.g. "Estate Sale Tips for Families in Bergen County")',
+        welcome: {
+          title: 'Blog Writer',
+          subtitle: 'SEO-optimized blog posts that position you as the #1 expert in your territory.',
+          deliverables: ['500+ word SEO blog posts', 'Meta title & description', 'Local keyword targeting', 'Internal link suggestions', 'CTA at close'],
+          tip: 'Give me a topic or I\'ll suggest one based on your territory and what buyers are searching for.',
+        },
+      },
+      {
+        key: 'email_campaign',
+        label: 'Email Campaign',
+        icon: Mail,
+        color: 'text-violet-400',
+        placeholder: 'What type of email? (Sale announcement, follow-up sequence, client nurture, re-engagement…)',
+        welcome: {
+          title: 'Email Campaign Writer',
+          subtitle: 'High-converting emails for sale announcements, follow-ups, and client nurture.',
+          deliverables: ['Subject lines', 'Preview text', 'Full email body', 'CTA button copy', 'Follow-up sequences'],
+          tip: 'Tell me what stage of the client relationship this email is for.',
+        },
+      },
+      {
+        key: 'sms_campaign',
+        label: 'SMS Campaign',
+        icon: Smartphone,
+        color: 'text-green-400',
+        placeholder: 'Tell me about the sale — I\'ll write 3 SMS messages (announcement, reminder, urgency).',
+        welcome: {
+          title: 'SMS Campaign Writer',
+          subtitle: '160-character messages that drive real traffic. Three versions every time.',
+          deliverables: ['Initial announcement SMS', 'Day-before reminder SMS', 'Morning-of urgency SMS'],
+          tip: 'Give me the sale name, date, and 1–2 standout items. I\'ll write all three messages.',
+        },
+      },
+      {
+        key: 'image_prompt',
+        label: 'Image Prompt Builder',
+        icon: Sparkles,
+        color: 'text-purple-400',
+        placeholder: 'Describe the mood or items — I\'ll build 3 AI image prompts for your marketing.',
+        welcome: {
+          title: 'Image Prompt Builder',
+          subtitle: 'Professional AI image prompts for DALL-E, Midjourney, and Stable Diffusion.',
+          deliverables: ['Hero social image prompt', 'Story/Reel thumbnail prompt', 'Blog post header prompt'],
+          tip: 'Tell me the vibe — antique-filled room, jewelry close-up, lifestyle staging — and I\'ll craft prompts that generate stunning results.',
+        },
+      },
+      {
+        key: 'video_script',
+        label: 'Video Script',
+        icon: Video,
+        color: 'text-red-400',
+        placeholder: 'What is this video about? (Sale promo, team intro, educational tip, testimonial…)',
+        welcome: {
+          title: 'Video Script Builder',
+          subtitle: '30–60 second scripts with hooks, scene directions, and strong CTAs.',
+          deliverables: ['Hook (0–5s)', 'Main content (5–45s)', 'CTA close (45–60s)', 'Scene directions', 'B-roll suggestions', 'On-screen text overlays'],
+          tip: 'The hook is everything. Tell me your goal and I\'ll write a script that stops the scroll.',
+        },
+      },
+    ],
+  },
+  {
+    label: 'Lead Generation & Growth',
+    color: 'text-cyan-400',
+    modes: [
+      {
+        key: 'lead_generation',
+        label: 'Lead Generation',
+        icon: Users,
+        color: 'text-cyan-400',
+        placeholder: 'Tell me about your current lead sources — I\'ll build you a better system.',
+        welcome: {
+          title: 'Lead Generation Strategist',
+          subtitle: 'Build a steady pipeline of probate, downsizing, real estate, and digital leads.',
+          deliverables: ['Probate lead strategies', 'Digital ad guidance', 'Outreach scripts', 'Follow-up cadences', 'Conversion tips'],
+          tip: 'Tell me your territory and current monthly lead volume — I\'ll build a plan to 2x it.',
+        },
+      },
+      {
+        key: 'referral_partner_builder',
+        label: 'Referral Partners',
+        icon: Handshake,
+        color: 'text-teal-400',
+        placeholder: 'Which partner type? (Probate attorney, real estate agent, senior move manager…)',
+        welcome: {
+          title: 'Referral Partner Builder',
+          subtitle: 'Build a referral ecosystem with probate attorneys, agents, senior care managers, and more.',
+          deliverables: ['Partner outreach scripts', 'Value exchange proposals', 'Follow-up plans', 'Lunch-and-learn pitches', 'Relationship cadences'],
+          tip: 'Tell me which type of referral partner you want to target first.',
+        },
+      },
+      {
+        key: 'real_estate_agent_relations',
+        label: 'Agent Relationships',
+        icon: UserCheck,
+        color: 'text-blue-400',
+        placeholder: 'Tell me about your current agent relationships — or I\'ll help you build them from scratch.',
+        welcome: {
+          title: 'Real Estate Agent Network Builder',
+          subtitle: 'Turn local agents into your #1 referral source — consistently.',
+          deliverables: ['Agent outreach scripts', 'Co-marketing proposals', 'Lunch-and-learn pitches', 'Referral agreement templates', 'CRM follow-up sequences'],
+          tip: 'Agents have clients who need estate sales every single week. Let\'s build that pipeline.',
+        },
+      },
+      {
+        key: 'territory_growth_plan',
+        label: 'Territory Domination',
+        icon: Map,
+        color: 'text-indigo-400',
+        placeholder: 'Tell me your current territory and where you want to expand.',
+        welcome: {
+          title: 'Territory Growth Plan',
+          subtitle: 'A 90-day plan to dominate your market and expand into new areas.',
+          deliverables: ['Market mapping', 'Partner identification', 'Digital presence strategy', 'Community visibility plan', 'First 10 leads in new area'],
+          tip: 'Tell me your current territory and where you want to go. I\'ll build the roadmap.',
+        },
+      },
+      {
+        key: 'weekly_growth_plan',
+        label: 'Weekly Growth Plan',
+        icon: CalendarDays,
+        color: 'text-amber-400',
+        placeholder: 'Tell me what\'s on your plate this week — I\'ll build you a revenue-focused action plan.',
+        welcome: {
+          title: 'Weekly Growth Planner',
+          subtitle: 'A structured Monday–Friday action plan focused entirely on growing your business.',
+          deliverables: ['Daily task priorities', '3 lead gen activities', '2 content pieces', '1 referral partner touchpoint', '1 business dev action'],
+          tip: 'Tell me what\'s happening this week — upcoming sales, goals, challenges — and I\'ll build your plan.',
+        },
+      },
+      {
+        key: 'monthly_performance_review',
+        label: 'Monthly Review',
+        icon: BarChart3,
+        color: 'text-pink-400',
+        placeholder: 'Give me your monthly numbers — sales, revenue, leads — and I\'ll help you review and improve.',
+        welcome: {
+          title: 'Monthly Performance Review',
+          subtitle: 'A data-driven review of what worked, what didn\'t, and what to do next month.',
+          deliverables: ['Sales vs. goal analysis', 'Lead source review', 'Marketing ROI assessment', 'Team performance notes', '3 SMART goals for next month'],
+          tip: 'Share your numbers — even rough ones. I\'ll turn them into a clear picture and a plan.',
+        },
+      },
+    ],
+  },
+  {
+    label: 'Client Relations',
+    color: 'text-yellow-400',
+    modes: [
+      {
+        key: 'objection_handler',
+        label: 'Objection Handler',
+        icon: ShieldAlert,
+        color: 'text-yellow-400',
+        placeholder: 'What objection are you facing? ("Commission too high", "Not ready yet", "Another company offered more"…)',
+        welcome: {
+          title: 'Objection Handler',
+          subtitle: 'Word-for-word scripts to handle any estate sale objection with confidence.',
+          deliverables: ['Empathy statement', 'Reframe script', 'Value proof point', 'Close attempt', 'Fallback script'],
+          tip: 'Tell me the exact words the client said. I\'ll write your response.',
+        },
+      },
+      {
+        key: 'post_sale_followup',
+        label: 'Post-Sale Follow-Up',
+        icon: ThumbsUp,
+        color: 'text-lime-400',
+        placeholder: 'Tell me about the sale that just closed — I\'ll build your complete follow-up sequence.',
+        welcome: {
+          title: 'Post-Sale Follow-Up System',
+          subtitle: 'Turn every completed sale into reviews, referrals, and repeat business.',
+          deliverables: ['Thank-you call script', 'Follow-up text templates', 'Review request sequence', 'Referral ask script', '30/90-day nurture emails'],
+          tip: 'A sale isn\'t done until you\'ve asked for a review and a referral. Let me write those scripts.',
+        },
+      },
+      {
+        key: 'review_generation',
+        label: 'Review Generation',
+        icon: Star,
+        color: 'text-yellow-300',
+        placeholder: 'Tell me where you want reviews (Google, Facebook, etc.) and I\'ll write everything you need to ask.',
+        welcome: {
+          title: 'Review Generation System',
+          subtitle: 'Collect 5-star reviews consistently with scripts that make asking easy.',
+          deliverables: ['Verbal ask script', 'Text message template', 'Email template', 'Review link setup tips', 'Response templates (positive & negative)'],
+          tip: 'Most happy clients don\'t leave reviews because no one asked. I\'ll write the perfect ask.',
+        },
+      },
+    ],
+  },
+  {
+    label: 'Business Operations',
+    color: 'text-slate-300',
+    modes: [
+      {
+        key: 'business_coaching',
+        label: 'Business Coach',
+        icon: Briefcase,
+        color: 'text-amber-400',
+        placeholder: 'What business challenge are you facing? Or ask me anything about growing your company.',
+        welcome: null, // uses default welcome
+      },
+      {
+        key: 'vendor_relations',
+        label: 'Vendor Relations',
+        icon: Package,
+        color: 'text-orange-300',
+        placeholder: 'Which vendor type do you want to partner with or improve your relationship with?',
+        welcome: {
+          title: 'Vendor Relations Strategy',
+          subtitle: 'Build a trusted vendor network that adds value to every client and generates referral income.',
+          deliverables: ['Vendor outreach scripts', 'Partnership terms', 'Revenue share structures', 'Vendor vetting checklist', 'Client referral packet'],
+          tip: 'Tell me which vendor category you want to focus on first.',
+        },
+      },
+      {
+        key: 'pricing_consultation',
+        label: 'Pricing & Consultation',
+        icon: DollarSign,
+        color: 'text-green-300',
+        placeholder: 'Ask about pricing strategy, item valuation, consultation scripts, or closing contracts.',
+        welcome: {
+          title: 'Pricing & Consultation Advisor',
+          subtitle: 'Win more contracts at higher commission rates with expert pricing and consultation guidance.',
+          deliverables: ['Estate assessment methods', 'Item pricing frameworks', 'Markdown strategies', 'Consultation walkthrough script', 'Contract closing script'],
+          tip: 'Tell me about a specific pricing challenge or consultation you\'re preparing for.',
+        },
+      },
+      {
+        key: 'team_task_suggestions',
+        label: 'Team Task Planner',
+        icon: ClipboardList,
+        color: 'text-slate-300',
+        placeholder: 'Tell me about your team and this week\'s priorities — I\'ll build everyone\'s task list.',
+        welcome: {
+          title: 'Team Task Planner',
+          subtitle: 'Keep your whole team focused on the right things at the right time.',
+          deliverables: ['Owner priority tasks', 'Marketing tasks', 'On-site crew tasks', 'Admin tasks', 'SOP suggestions', 'Delegation guidance'],
+          tip: 'Tell me your team size and current workload. I\'ll delegate intelligently.',
+        },
+      },
+      {
+        key: 'general_assistant',
+        label: 'General Assistant',
+        icon: MessageSquare,
+        color: 'text-slate-300',
+        placeholder: 'Ask me anything about your estate sale business…',
+        welcome: null,
+      },
+    ],
+  },
+];
+
+// Flat list for easy lookup
+export const ALL_MODES = MODE_GROUPS.flatMap(g => g.modes);
+
+export const getModeByKey = (key) => ALL_MODES.find(m => m.key === key) || ALL_MODES[ALL_MODES.length - 1];
