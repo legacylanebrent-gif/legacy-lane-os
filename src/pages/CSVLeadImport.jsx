@@ -92,11 +92,7 @@ export default function CSVLeadImport() {
 
   const handleMapField = (csvHeader, leadField) => {
     const newMapping = { ...mapping };
-    if (leadField === null) {
-      delete newMapping[csvHeader];
-    } else {
-      newMapping[csvHeader] = leadField;
-    }
+    newMapping[csvHeader] = leadField;
     setMapping(newMapping);
   };
 
@@ -106,12 +102,12 @@ export default function CSVLeadImport() {
       return;
     }
 
-    // Validate required fields are mapped
-     const hasMappedFields = Object.values(mapping).length > 0;
-     if (!hasMappedFields) {
-       alert('Please map at least one field');
-       return;
-     }
+    // Validate all fields are mapped
+    const unmappedHeaders = headers.filter(h => !mapping[h]);
+    if (unmappedHeaders.length > 0) {
+      alert(`Please map all fields. Unmapped: ${unmappedHeaders.join(', ')}`);
+      return;
+    }
 
     setImporting(true);
     try {
@@ -243,10 +239,10 @@ export default function CSVLeadImport() {
                   </div>
                   <select
                     value={mapping[header] || ''}
-                    onChange={(e) => handleMapField(header, e.target.value || null)}
+                    onChange={(e) => handleMapField(header, e.target.value)}
                     className="border rounded-md p-2 text-sm"
                   >
-                    <option value="">Skip this field</option>
+                    <option value="" disabled>Select field...</option>
                     {Object.entries(EXPECTED_FIELDS).map(([field, label]) => (
                       <option key={field} value={field}>
                         {label}
