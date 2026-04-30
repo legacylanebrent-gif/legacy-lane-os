@@ -1,0 +1,121 @@
+{
+  "name": "ContentHistory",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID this content was created for"
+    },
+    "sale_title": {
+      "type": "string",
+      "description": "Name/title of the estate sale"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "facebook_post",
+        "instagram_post",
+        "email_blast",
+        "sms",
+        "blog_post",
+        "video_script",
+        "image_prompt",
+        "complete_package"
+      ],
+      "description": "Type of content created"
+    },
+    "content_pieces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Content piece name (e.g., 'Facebook Post - Day 1')"
+          },
+          "type": {
+            "type": "string",
+            "description": "Specific type (facebook_post, email, etc.)"
+          },
+          "content": {
+            "type": "string",
+            "description": "The actual content text"
+          },
+          "word_count": {
+            "type": "integer",
+            "description": "Character or word count"
+          }
+        }
+      },
+      "default": [],
+      "description": "Array of generated content pieces"
+    },
+    "sale_details": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "dates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "featured_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Key sale details used for content generation"
+    },
+    "tone_preferences": {
+      "type": "object",
+      "properties": {
+        "voice_tone": {
+          "type": "string",
+          "description": "Voice tone used (e.g., warm, professional, luxury)"
+        },
+        "language_tone": {
+          "type": "string",
+          "description": "Language tone (e.g., formal, casual, emotional)"
+        }
+      },
+      "description": "Tone/style preferences used for generation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "scheduled",
+        "published"
+      ],
+      "default": "draft",
+      "description": "Current status of saved content"
+    },
+    "ai_model_used": {
+      "type": "string",
+      "description": "Which AI model was used (gpt-4o, gpt-4o-mini)"
+    },
+    "credits_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Credits spent on generating this content"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Operator notes about this content package"
+    }
+  },
+  "required": [
+    "operator_id",
+    "content_type"
+  ]
+}

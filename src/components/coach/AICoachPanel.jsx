@@ -10,6 +10,7 @@ import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
 import SalePromotionEngine from './SalePromotionEngine';
 import ToneAdjustmentPanel from './ToneAdjustmentPanel';
 import VoicePreferencesModal from './VoicePreferencesModal';
+import GuidedContentFlow from './GuidedContentFlow';
 
 const MODEL_OPTIONS = [
   { value: 'gpt-4o', label: 'GPT-4o', badge: 'Smart' },
@@ -156,6 +157,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const [creditAccount, setCreditAccount] = useState(null);
   const [voicePreferences, setVoicePreferences] = useState(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [showContentFlow, setShowContentFlow] = useState(false);
   const [lastAssistantIndex, setLastAssistantIndex] = useState(null);
   const messagesEndRef = useRef(null);
 
@@ -202,6 +204,15 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
   const sendMessage = async (text, toneAdjustment = null) => {
     const userText = (text || input).trim();
     if (!userText || loading) return;
+
+    // Check if user is requesting guided content creation
+    const contentFlowKeywords = ['create posts', 'create content', 'create social', 'make posts', 'generate posts', 'content for'];
+    const isContentRequest = contentFlowKeywords.some(kw => userText.toLowerCase().includes(kw));
+    if (isContentRequest) {
+      setShowContentFlow(true);
+      setInput('');
+      return;
+    }
 
     // If adjusting tone, send adjustment request with last assistant message
     if (toneAdjustment && lastAssistantIndex !== null) {
@@ -506,6 +517,23 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         preferences={voicePreferences}
         onSave={saveVoicePreferences}
       />
+
+      {/* ── Guided Content Flow Modal ── */}
+      {showContentFlow && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowContentFlow(false)}
+          />
+          <div className="fixed top-0 right-0 h-full w-full max-w-2xl z-50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <GuidedContentFlow
+              user={user}
+              onClose={() => setShowContentFlow(false)}
+              onContentSaved={() => loadCredits()}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
