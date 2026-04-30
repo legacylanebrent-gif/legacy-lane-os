@@ -1,0 +1,38 @@
+{
+  "name": "OperatorAIUsageAlert",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "usage_warning",
+        "usage_critical",
+        "limit_reached",
+        "limit_exceeded",
+        "period_reset"
+      ],
+      "description": "Type of usage alert"
+    },
+    "threshold_percent": {
+      "type": "number",
+      "description": "Percentage of credit limit that triggered this alert (e.g. 75, 90, 100)"
+    },
+    "message": {
+      "type": "string",
+      "description": "Human-readable alert message shown to the operator"
+    },
+    "was_shown": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the operator has seen this alert in the UI"
+    }
+  },
+  "required": [
+    "operator_id",
+    "alert_type"
+  ]
+}

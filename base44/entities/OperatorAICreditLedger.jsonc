@@ -1,0 +1,64 @@
+{
+  "name": "OperatorAICreditLedger",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Unique identifier for the AI request (e.g. OpenAI completion ID)"
+    },
+    "ai_mode": {
+      "type": "string",
+      "enum": [
+        "coach",
+        "generate",
+        "analyze",
+        "chat",
+        "image",
+        "embedding",
+        "other"
+      ],
+      "description": "Which AI feature triggered this usage"
+    },
+    "model_used": {
+      "type": "string",
+      "description": "The OpenAI model used (e.g. gpt-4o, gpt-4o-mini)"
+    },
+    "input_tokens": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of prompt/input tokens consumed"
+    },
+    "output_tokens": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of completion/output tokens consumed"
+    },
+    "total_tokens": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total tokens consumed (input + output)"
+    },
+    "estimated_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Estimated USD cost of the request"
+    },
+    "credits_charged": {
+      "type": "integer",
+      "default": 0,
+      "description": "Platform credits deducted from the operator's account"
+    },
+    "credit_reason": {
+      "type": "string",
+      "description": "Human-readable reason for the credit charge (e.g. 'AI Coach conversation')"
+    }
+  },
+  "required": [
+    "operator_id",
+    "ai_mode"
+  ]
+}

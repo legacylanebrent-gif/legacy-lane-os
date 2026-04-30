@@ -1,0 +1,65 @@
+{
+  "name": "OperatorAICreditAccount",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "subscription_tier": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "professional",
+        "enterprise",
+        "unlimited"
+      ],
+      "default": "starter",
+      "description": "Operator's subscription tier"
+    },
+    "monthly_credit_limit": {
+      "type": "integer",
+      "default": 100000,
+      "description": "Max tokens allowed per billing period"
+    },
+    "monthly_credits_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Tokens consumed in the current billing period"
+    },
+    "bonus_credits": {
+      "type": "integer",
+      "default": 0,
+      "description": "Extra tokens granted by admin or promotions"
+    },
+    "rollover_credits": {
+      "type": "integer",
+      "default": 0,
+      "description": "Unused tokens rolled over from the previous period"
+    },
+    "current_period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the current billing period"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the current billing period"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "over_limit",
+        "suspended"
+      ],
+      "default": "active",
+      "description": "Current account status"
+    }
+  },
+  "required": [
+    "operator_id"
+  ]
+}
