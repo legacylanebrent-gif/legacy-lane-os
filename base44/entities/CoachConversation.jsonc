@@ -1,0 +1,70 @@
+{
+  "name": "CoachConversation",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "ai_mode": {
+      "type": "string",
+      "description": "Mode of the AI interaction (e.g. coach, generate, analyze)"
+    },
+    "screen_context": {
+      "type": "string",
+      "description": "Which screen/page the operator was on when they sent the message"
+    },
+    "active_sale_id": {
+      "type": "string",
+      "description": "Estate sale ID if the conversation was about a specific sale"
+    },
+    "user_message": {
+      "type": "string",
+      "description": "The message the operator sent"
+    },
+    "ai_response": {
+      "type": "string",
+      "description": "The AI's response"
+    },
+    "requested_output_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "json",
+        "markdown",
+        "list"
+      ],
+      "default": "text",
+      "description": "The format the operator requested for the output"
+    },
+    "model_used": {
+      "type": "string",
+      "description": "The OpenAI model used for this conversation"
+    },
+    "input_tokens": {
+      "type": "integer",
+      "default": 0
+    },
+    "output_tokens": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_tokens": {
+      "type": "integer",
+      "default": 0
+    },
+    "credits_charged": {
+      "type": "integer",
+      "default": 0
+    },
+    "ledger_id": {
+      "type": "string",
+      "description": "Reference to the OperatorAICreditLedger record"
+    }
+  },
+  "required": [
+    "operator_id",
+    "user_message",
+    "ai_response"
+  ]
+}
