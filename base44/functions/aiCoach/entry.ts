@@ -3,9 +3,9 @@ import OpenAI from 'npm:openai';
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
-const DEFAULT_MODEL = Deno.env.get('OPENAI_DEFAULT_MODEL') || 'gpt-4o';
-const IMAGE_MODEL = Deno.env.get('OPENAI_IMAGE_MODEL') || 'gpt-image-1';
-const EMBEDDING_MODEL = Deno.env.get('OPENAI_EMBEDDING_MODEL') || 'text-embedding-3-small';
+const DEFAULT_MODEL = 'gpt-4o';
+const IMAGE_MODEL = 'gpt-image-1';
+const EMBEDDING_MODEL = 'text-embedding-3-small';
 
 // ── Credit helpers ────────────────────────────────────────────────────────────
 
@@ -149,9 +149,9 @@ Deno.serve(async (req) => {
 
 == OPERATOR PROFILE ==
 Name: ${user.full_name || 'Operator'}
-Company: ${context?.companyName || 'Not set'}
-Territory: ${context?.territory || 'Not specified'}
-Brand Voice: ${context?.brandVoice || 'Professional, warm, and trustworthy'}
+Company: ${companyName || 'Not set'}
+Territory: ${territory || 'Not specified'}
+Brand Voice: ${brandVoice || 'Professional, warm, and trustworthy'}
 
 You must generate ALL 10 pieces of content listed below. Use the sale details the operator provided.
 Format each section with a bold header (## Section Name) and a horizontal rule (---) after it.
