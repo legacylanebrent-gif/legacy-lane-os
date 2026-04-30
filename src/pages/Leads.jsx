@@ -124,12 +124,14 @@ export default function Leads() {
         <p className="text-slate-600">Leads assigned to you and your active deal pipeline</p>
       </div>
 
-      <div className="flex items-center gap-3 mb-4">
-        <Button onClick={() => navigate('/CSVLeadImport')} className="gap-2 bg-blue-600 hover:bg-blue-700">
-          <Upload className="w-4 h-4" />
-          Import Leads from CSV
-        </Button>
-      </div>
+      {user?.role === 'admin' && (
+        <div className="flex items-center gap-3 mb-4">
+          <Button onClick={() => navigate('/CSVLeadImport')} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Upload className="w-4 h-4" />
+            Import Leads from CSV
+          </Button>
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 w-full max-w-sm">
