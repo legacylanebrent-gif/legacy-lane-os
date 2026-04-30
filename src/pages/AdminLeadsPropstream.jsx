@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database } from 'lucide-react';
+import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader } from 'lucide-react';
 
 const OWNER_TYPES = ['Absentee Owner', 'Inherited', 'Distressed', 'Pre-Foreclosure', 'High Equity', 'Free & Clear', 'Probate'];
 
@@ -28,6 +28,7 @@ export default function AdminLeadsPropstream() {
   const [selectedLead, setSelectedLead] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [scoring, setScoring] = useState(false);
   const [form, setForm] = useState({
     contact_name: '', contact_email: '', contact_phone: '',
     property_address: '', situation: '', timeline: '', estimated_value: '',
@@ -75,6 +76,16 @@ export default function AdminLeadsPropstream() {
     await base44.entities.Lead.update(leadId, { converted: true, conversion_date: new Date().toISOString() });
     setShowDetail(false);
     loadData();
+  };
+
+  const handleScoreLeads = async () => {
+    setScoring(true);
+    try {
+      const result = await base44.functions.invoke('scoreLeads', {});
+      loadData();
+    } finally {
+      setScoring(false);
+    }
   };
 
   const unassigned = leads.filter(l => !l.routed_to && !l.converted).length;
@@ -126,6 +137,10 @@ export default function AdminLeadsPropstream() {
           </TabsList>
         </Tabs>
         <Input placeholder="Search by name, address, Propstream ID..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1" />
+        <Button onClick={handleScoreLeads} disabled={scoring} variant="outline" className="gap-2">
+          {scoring ? <Loader className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+          {scoring ? 'Scoring...' : 'Score Leads'}
+        </Button>
       </div>
 
       {/* Cards */}
