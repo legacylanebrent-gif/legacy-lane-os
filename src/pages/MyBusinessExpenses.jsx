@@ -16,6 +16,7 @@ import {
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import CashFlowProjection from '@/components/expenses/CashFlowProjection';
+import BulkReceiptScanner from '@/components/expenses/BulkReceiptScanner';
 
 const CATEGORY_OPTIONS = [
   { value: 'advertising_marketing', label: 'Advertising & Marketing' },
@@ -695,31 +696,12 @@ export default function MyBusinessExpenses() {
         </CardContent>
       </Card>
 
-      {/* Scan Receipt Modal */}
-      <Dialog open={showScanModal} onOpenChange={setShowScanModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Scan Receipt</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <p className="text-sm text-slate-600">
-              Upload a photo of your receipt and we'll automatically extract the details.
-            </p>
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
-              <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleScanReceipt}
-                disabled={scanningReceipt}
-              />
-              {scanningReceipt && (
-                <p className="text-sm text-slate-600 mt-4">Scanning receipt...</p>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Bulk Receipt Scanner Modal */}
+      <BulkReceiptScanner
+        open={showScanModal}
+        onClose={() => setShowScanModal(false)}
+        onSaved={() => { loadData(); }}
+      />
 
       {/* Add Expense Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
