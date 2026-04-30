@@ -229,12 +229,18 @@ export const MODE_GROUPS = [
         label: 'Objection Handler',
         icon: ShieldAlert,
         color: 'text-yellow-400',
-        placeholder: 'What objection are you facing? ("Commission too high", "Not ready yet", "Another company offered more"…)',
+        placeholder: 'What objection are you facing?',
         welcome: {
           title: 'Objection Handler',
-          subtitle: 'Word-for-word scripts to handle any estate sale objection with confidence.',
-          deliverables: ['Empathy statement', 'Reframe script', 'Value proof point', 'Close attempt', 'Fallback script'],
-          tip: 'Tell me the exact words the client said. I\'ll write your response.',
+          subtitle: 'Scripts to confidently handle the 10 most common estate sale objections.',
+          deliverables: [
+            'Empathetic response',
+            'Professional explanation',
+            'Next question to ask',
+            'Strong closing statement',
+            'Text/email version',
+          ],
+          tip: 'Tell me the exact objection and I\'ll give you a complete 5-part response script.',
         },
       },
       {
@@ -347,6 +353,18 @@ export const getModeByKey = (key) => ALL_MODES.find(m => m.key === key) || ALL_M
 
 // Starter prompts per mode
 export const MODE_STARTERS = {
+  objection_handler: [
+    'Your commission is too high',
+    'I think these items are worth more',
+    'I want to keep selling things myself first',
+    'Another company said they can do it cheaper',
+    'I need the house cleared quickly',
+    'I\'m not ready emotionally',
+    'My siblings disagree',
+    'Can you guarantee how much the sale will make?',
+    'What happens to unsold items?',
+    'Why shouldn\'t I just donate everything?',
+  ],
   weekly_growth_plan: [
     'Build my growth plan for this week',
     'Generate this week\'s growth plan',
