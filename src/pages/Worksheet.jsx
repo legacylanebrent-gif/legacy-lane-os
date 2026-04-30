@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import VenmoPaymentModal from '@/components/payment/VenmoPaymentModal';
 import CartQRScanner from '@/components/worksheet/CartQRScanner';
-import WorksheetTransactionForm from '@/components/worksheet/TransactionForm';
+import TransactionForm from '@/components/worksheet/TransactionForm';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Worksheet() {
@@ -1037,7 +1037,7 @@ Only include items with confidence > 0.3. If no items match well, return an empt
             setQuantity={setQuantity}
             setPrice={setPrice}
           />
-          <WorksheetTransactionForm
+          <TransactionForm
             photoMode={photoMode} setPhotoMode={setPhotoMode}
             bundleMode={bundleMode} setBundleMode={setBundleMode}
             itemName={itemName} setItemName={setItemName}
