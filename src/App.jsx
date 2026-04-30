@@ -20,6 +20,11 @@ import ScanAndCart from './pages/ScanAndCart';
 import CheckoutStation from './pages/CheckoutStation';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import SalePipeline from './pages/SalePipeline';
+import ReferralOutreach from './pages/ReferralOutreach';
+import LeadFunnel from './pages/LeadFunnel';
+import TerritoryHeatmap from './pages/TerritoryHeatmap';
+import ContentCalendar from './pages/ContentCalendar';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -83,6 +88,11 @@ const AuthenticatedApp = () => {
       <Route path="/MarketplaceItemDetail" element={<LayoutWrapper currentPageName="MarketplaceItemDetail"><MarketplaceItemDetail /></LayoutWrapper>} />
       <Route path="/ScanAndCart" element={<LayoutWrapper currentPageName="ScanAndCart"><ScanAndCart /></LayoutWrapper>} />
       <Route path="/CheckoutStation" element={<LayoutWrapper currentPageName="CheckoutStation"><CheckoutStation /></LayoutWrapper>} />
+      <Route path="/SalePipeline" element={<LayoutWrapper currentPageName="SalePipeline"><SalePipeline /></LayoutWrapper>} />
+      <Route path="/ReferralOutreach" element={<LayoutWrapper currentPageName="ReferralOutreach"><ReferralOutreach /></LayoutWrapper>} />
+      <Route path="/LeadFunnel" element={<LayoutWrapper currentPageName="LeadFunnel"><LeadFunnel /></LayoutWrapper>} />
+      <Route path="/TerritoryHeatmap" element={<LayoutWrapper currentPageName="TerritoryHeatmap"><TerritoryHeatmap /></LayoutWrapper>} />
+      <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
