@@ -16,6 +16,8 @@ import AIAssistant from './pages/AIAssistant';
 import SocialAdsHub from './pages/SocialAdsHub';
 import AdminAICredits from './pages/AdminAICredits';
 import MarketplaceItemDetail from './pages/MarketplaceItemDetail';
+import ScanAndCart from './pages/ScanAndCart';
+import CheckoutStation from './pages/CheckoutStation';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -79,6 +81,8 @@ const AuthenticatedApp = () => {
       <Route path="/SocialAdsHub" element={<LayoutWrapper currentPageName="SocialAdsHub"><SocialAdsHub /></LayoutWrapper>} />
       <Route path="/AdminAICredits" element={<LayoutWrapper currentPageName="AdminAICredits"><AdminAICredits /></LayoutWrapper>} />
       <Route path="/MarketplaceItemDetail" element={<LayoutWrapper currentPageName="MarketplaceItemDetail"><MarketplaceItemDetail /></LayoutWrapper>} />
+      <Route path="/ScanAndCart" element={<LayoutWrapper currentPageName="ScanAndCart"><ScanAndCart /></LayoutWrapper>} />
+      <Route path="/CheckoutStation" element={<LayoutWrapper currentPageName="CheckoutStation"><CheckoutStation /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
