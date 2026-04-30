@@ -109,6 +109,28 @@ export const MODE_GROUPS = [
     color: 'text-cyan-400',
     modes: [
       {
+        key: 'territory_intelligence',
+        label: 'Territory Intelligence',
+        icon: Map,
+        color: 'text-green-400',
+        placeholder: 'Tell me your territory — I\'ll build a complete local strategy.',
+        welcome: {
+          title: 'Territory Intelligence',
+          subtitle: 'Leverage your geography for local referrals, content, events, and community domination.',
+          deliverables: [
+            'Local referral partner ideas',
+            'Community event opportunities',
+            'Seasonal sale opportunities',
+            'Local blog topic ideas',
+            'Real estate agent outreach angles',
+            'Senior community seminar ideas',
+            'Downsizing workshop topics',
+            'Local content hooks',
+          ],
+          tip: 'Tell me your county/city and I\'ll generate a complete local strategy customized to your area.',
+        },
+      },
+      {
         key: 'lead_generation',
         label: 'Lead Generation',
         icon: Users,
@@ -353,6 +375,16 @@ export const getModeByKey = (key) => ALL_MODES.find(m => m.key === key) || ALL_M
 
 // Starter prompts per mode
 export const MODE_STARTERS = {
+  territory_intelligence: [
+    'Build a local strategy for Monmouth County, NJ',
+    'Build a local strategy for Bergen County, NJ',
+    'Build a local strategy for Essex County, NJ',
+    'Build a local strategy for my territory',
+    'What local partnerships should I pursue?',
+    'What seasonal opportunities exist in my area?',
+    'What community events should I sponsor?',
+    'What local blog topics will drive traffic?',
+  ],
   objection_handler: [
     'Your commission is too high',
     'I think these items are worth more',
