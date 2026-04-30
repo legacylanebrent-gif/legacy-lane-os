@@ -111,6 +111,100 @@ Deno.serve(async (req) => {
     aiMemory, role, totalSales, totalRevenue,
   } = context || {};
 
+  // ── Sale Promotion Package (special full-package mode) ──
+  if (ai_mode === 'sale_promotion_package') {
+    // Look up credit cost from AICreditConfig
+    let promoCredits = 5000; // default fallback
+    try {
+      const configs = await base44.asServiceRole.entities.AICreditConfig.filter({ ai_mode: 'sale_promotion_package', is_active: true });
+      if (configs.length > 0) promoCredits = configs[0].credit_cost || promoCredits;
+    } catch (_) {}
+
+    if (available < promoCredits) {
+      return Response.json({
+        error: 'credit_limit_reached',
+        message: `This Sale Promotion Package costs ${promoCredits.toLocaleString()} credits but you only have ${available.toLocaleString()} available. Upgrade your plan or add more credits.`,
+      }, { status: 402 });
+    }
+
+    const lastUserMsg = messages[messages.length - 1]?.content || 'Generate a complete sale promotion package';
+
+    const promoSystemPrompt = `You are the Legacy Lane AI Coach generating a COMPLETE Sale Promotion Package for an estate sale operator.
+
+== OPERATOR PROFILE ==
+Name: ${user.full_name || 'Operator'}
+Company: ${context?.companyName || 'Not set'}
+Territory: ${context?.territory || 'Not specified'}
+Brand Voice: ${context?.brandVoice || 'Professional, warm, and trustworthy'}
+
+You must generate ALL 10 pieces of content listed below. Use the sale details the operator provided.
+Format each section with a bold header (## Section Name) and a horizontal rule (---) after it.
+Be specific, compelling, and personalized to their brand and territory.
+
+Generate:
+
+## 1. Facebook Post
+A long-form Facebook post (150–250 words) with strong storytelling, featured items, dates/times, address teaser (city/neighborhood only), and a call to action. Include 5–8 relevant hashtags at the bottom.
+
+## 2. Instagram Caption
+A punchy, visual-first Instagram caption (80–120 words). Lead with an attention-grabbing first line. Include a CTA and 10–15 hashtags on a new line.
+
+## 3. Email Blast
+A complete email blast with Subject Line, Preview Text, and full body (200–300 words). Include featured items, dates, address, and a clear CTA button text suggestion.
+
+## 4. SMS Reminder
+A concise SMS reminder (max 160 characters). Include sale name, date, and a short link placeholder like [LINK].
+
+## 5. Blog Post
+A full SEO blog post (400–500 words) with title, introduction, 3 body sections, and conclusion. Target keywords: estate sale + [city/territory]. Position the operator as a local expert.
+
+## 6. Image Prompt
+A detailed AI image generation prompt (for DALL-E or Midjourney) that captures the mood of the sale. Describe style, lighting, subject matter, composition, and tone.
+
+## 7. Short Video Script
+A 30–60 second video script with: Hook (0–5s), Main content (5–45s), CTA (45–60s). Include scene direction notes in [brackets].
+
+## 8. Day-Before Reminder Post
+A short social post (60–100 words) creating urgency and excitement for tomorrow's sale. Works for Facebook and Instagram.
+
+## 9. Morning-Of-Sale Post
+An energetic, real-time post (60–100 words) announcing the sale is NOW OPEN. Include doors-open time and top featured items.
+
+## 10. Final-Day Urgency Post
+A scarcity-driven final-day post (60–100 words). Emphasize this is the LAST chance. Mention reduced prices or deals available at end of day.`;
+
+    const promoCompletion = await openai.chat.completions.create({
+      model: selectedModel,
+      messages: [
+        { role: 'system', content: promoSystemPrompt },
+        { role: 'user', content: lastUserMsg },
+      ],
+      max_tokens: 3500,
+      temperature: 0.75,
+    });
+
+    const promoReply = promoCompletion.choices[0].message.content;
+    const promoUsage = promoCompletion.usage;
+
+    await recordUsage(base44, user.id, creditAccount, {
+      aiMode: 'coach',
+      modelUsed: selectedModel,
+      inputTokens: promoUsage?.prompt_tokens || 0,
+      outputTokens: promoUsage?.completion_tokens || 0,
+      totalTokens: promoCredits, // charge the configured flat credit cost
+      estimatedCost: 0,
+      reason: 'Sale Promotion Package',
+    });
+
+    return Response.json({
+      reply: promoReply,
+      usage: { prompt_tokens: promoUsage?.prompt_tokens || 0, completion_tokens: promoUsage?.completion_tokens || 0, total_tokens: promoUsage?.total_tokens || 0 },
+      available_credits_remaining: available - promoCredits,
+      model: selectedModel,
+      is_promotion_package: true,
+    });
+  }
+
   const modeInstructions = {
     general_assistant: 'You are in General Assistant mode. Answer any business question clearly and helpfully.',
     sale_promotion_package: 'You are in Sale Promotion mode. Create compelling promotional content for estate sales including headlines, descriptions, and calls to action.',
@@ -204,7 +298,7 @@ Remember: You are NOT a generic chatbot. You are their dedicated business coach 
       { role: 'system', content: systemPrompt },
       ...messages,
     ],
-    max_tokens: 1200,
+    max_tokens: 1500,
     temperature: 0.7,
   });
 

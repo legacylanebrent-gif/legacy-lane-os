@@ -263,7 +263,29 @@ export default function AICoachPanel({ user, onClose }) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-700">
-        {messages.length === 0 && (
+        {messages.length === 0 && activeMode.key === 'sale_promotion_package' && (
+          <div className="pt-4 pb-2">
+            <div className="w-14 h-14 mx-auto bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center mb-3 shadow-xl">
+              <Tag className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="text-white font-bold text-lg text-center">Sale Promotion Package</h3>
+            <p className="text-slate-400 text-sm mt-1 mb-4 leading-relaxed text-center">
+              Tell me about your upcoming estate sale and I'll generate a complete 10-piece marketing package.
+            </p>
+            <div className="bg-slate-800 border border-orange-700/40 rounded-xl p-3 text-xs space-y-1.5 mb-4">
+              <p className="text-orange-400 font-semibold mb-2">📦 What you'll get:</p>
+              {['Facebook Post', 'Instagram Caption', 'Email Blast', 'SMS Reminder', 'Blog Post', 'Image Prompt', 'Video Script', 'Day-Before Post', 'Morning-Of Post', 'Final-Day Urgency Post'].map((item, i) => (
+                <p key={i} className="text-slate-300">✓ {item}</p>
+              ))}
+            </div>
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-slate-400 mb-2">
+              <p className="font-semibold text-slate-300 mb-1">💡 Include details like:</p>
+              <p>Sale name, city/neighborhood, dates &amp; times, featured items (furniture, jewelry, antiques, etc.), any special notes (cash only, gated community, etc.)</p>
+            </div>
+          </div>
+        )}
+
+        {messages.length === 0 && activeMode.key !== 'sale_promotion_package' && (
           <div className="text-center pt-4 pb-2">
             <div className="w-16 h-16 mx-auto bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center mb-3 shadow-xl">
               <Brain className="w-8 h-8 text-white" />
@@ -287,7 +309,7 @@ export default function AICoachPanel({ user, onClose }) {
         )}
 
         {/* Suggestion chips */}
-        {showSuggestions && messages.length === 0 && (
+        {showSuggestions && messages.length === 0 && activeMode.key !== 'sale_promotion_package' && (
           <div className="space-y-2">
             <p className="text-xs text-slate-500 font-medium">Suggested topics:</p>
             <div className="flex flex-wrap gap-2">
