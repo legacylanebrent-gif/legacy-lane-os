@@ -30,6 +30,18 @@
       },
       "description": "User location coordinates"
     },
+    "territory": {
+      "type": "string",
+      "description": "Operator's primary territory / service area"
+    },
+    "brand_voice": {
+      "type": "string",
+      "description": "Operator's brand voice / tone description for AI Coach"
+    },
+    "ai_coach_memory": {
+      "type": "string",
+      "description": "Rolling summary of AI Coach conversations for personalized context"
+    },
     "primary_account_type": {
       "type": "string",
       "enum": [
@@ -142,21 +154,18 @@
     },
     "is_admin": {
       "type": "boolean",
-      "default": false,
-      "description": "Grants access to the admin panel regardless of primary account type"
+      "default": false
     },
     "divisions_access": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "Division access keys"
+      "default": []
     },
     "is_active": {
       "type": "boolean",
-      "default": true,
-      "description": "Is user account active"
+      "default": true
     },
     "social_media_credentials": {
       "type": "object",

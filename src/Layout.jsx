@@ -6,6 +6,7 @@ import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import AICoachButton from '@/components/coach/AICoachButton';
 
 const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page);
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
@@ -97,6 +98,9 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
       </div>
+
+      {/* Platform-wide AI Coach floating button */}
+      <AICoachButton />
     </div>
   );
 }
