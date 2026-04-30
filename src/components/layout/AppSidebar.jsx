@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus
+  UserPlus, Sparkles
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -47,6 +47,7 @@ export const ALL_NAV_ITEMS = [
 
   { page: 'IncomeTracker',          label: 'Income Tracker',      icon: TrendingUp,      group: 'Finance' },
   { page: 'MyBusinessExpenses',     label: 'Business Expenses',   icon: FileText,        group: 'Finance' },
+  { page: 'AIAssistant',            label: 'AI Assistant',         icon: Sparkles,        group: 'Finance' },
 
   { page: 'RewardsCheckins',        label: 'Check-ins',           icon: MapPin,          group: 'Consumer' },
   { page: 'Favorites',              label: 'Favorites',           icon: Heart,           group: 'Consumer' },
