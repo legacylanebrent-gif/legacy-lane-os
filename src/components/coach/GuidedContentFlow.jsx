@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Send, Loader2, Copy, Download, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import AIOutputActions from './AIOutputActions';
 
 const STEPS = {
   CONFIRM_SALE: 'confirm_sale',
@@ -117,6 +118,8 @@ Generate compelling, platform-optimized content that drives traffic and creates 
         content,
         word_count: content.split(/\s+/).length,
         approved: false,
+        used: false,
+        notes: '',
       };
     });
 
@@ -409,26 +412,10 @@ Generate compelling, platform-optimized content that drives traffic and creates 
               <Card key={piece.id} className={`bg-slate-900 border-slate-700 ${piece.approved ? 'border-green-600' : ''}`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-2 flex-1">
-                      <button
-                        onClick={() => toggleApprove(idx)}
-                        className={`mt-1 p-1 rounded-lg transition-colors ${piece.approved ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                      </button>
-                      <div className="flex-1">
-                        <CardTitle className="text-white text-sm">{piece.name}</CardTitle>
-                        <p className="text-xs text-slate-500 mt-1">{piece.word_count} words</p>
-                      </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-white text-sm">{piece.name}</CardTitle>
+                      <p className="text-xs text-slate-500 mt-1">{piece.word_count} words</p>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => copyToClipboard(piece.content)}
-                      className="text-slate-400 hover:text-white"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -438,45 +425,38 @@ Generate compelling, platform-optimized content that drives traffic and creates 
                     </ReactMarkdown>
                   </div>
 
-                  {rewriteIndex !== idx && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setRewriteIndex(idx)}
-                      className="w-full"
-                    >
-                      <RefreshCw className="w-3 h-3 mr-1" /> Rewrite
-                    </Button>
-                  )}
-
-                  {rewriteIndex === idx && (
-                    <div className="space-y-2">
-                      <Input
-                        value={rewritePrompt}
-                        onChange={e => setRewritePrompt(e.target.value)}
-                        placeholder="e.g., Make it shorter, Add urgency, Change tone"
-                        className="bg-slate-800 border-slate-600 text-white placeholder-slate-500 text-xs"
-                      />
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => { setRewriteIndex(null); setRewritePrompt(''); }}
-                          className="flex-1"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleRewrite(idx)}
-                          disabled={loading || !rewritePrompt.trim()}
-                          className="flex-1 bg-orange-600 hover:bg-orange-700"
-                        >
-                          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Rewrite'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  <AIOutputActions
+                    content={piece.content}
+                    contentType={piece.type}
+                    isApproved={piece.approved}
+                    isUsed={piece.used}
+                    isEditing={rewriteIndex === idx}
+                    editValue={rewritePrompt}
+                    onEditChange={setRewritePrompt}
+                    onCopy={() => copyToClipboard(piece.content)}
+                    onEdit={() => setRewriteIndex(idx)}
+                    onEditCancel={() => { setRewriteIndex(null); setRewritePrompt(''); }}
+                    onEditSave={() => handleRewrite(idx)}
+                    onRegenerate={() => setRewriteIndex(idx)}
+                    onToggleApproved={() => toggleApprove(idx)}
+                    onToggleUsed={() => {
+                      const updated = [...generatedContent];
+                      updated[idx].used = !updated[idx].used;
+                      setGeneratedContent(updated);
+                    }}
+                    onSaveToHistory={async () => {
+                      alert('Saving to Content History...');
+                    }}
+                    onSaveToSale={async () => {
+                      alert('Saving to Sale Record...');
+                    }}
+                    onSaveToCalendar={async () => {
+                      alert('Saving to Marketing Calendar...');
+                    }}
+                    onAddNotes={async (notes) => {
+                      alert(`Performance notes saved: ${notes}`);
+                    }}
+                  />
                 </CardContent>
               </Card>
             ))}
