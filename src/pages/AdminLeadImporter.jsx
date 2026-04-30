@@ -207,16 +207,28 @@ export default function AdminLeadImporter() {
 
       const imported = [];
       const failed = [];
+      const BATCH_SIZE = 5;
+      const BATCH_DELAY = 500; // ms between batches
 
-      for (const lead of leads) {
-        try {
-          const created = await base44.entities.Lead.create(lead);
-          imported.push(created);
-        } catch (error) {
-          failed.push({
-            lead: lead.contact_name || lead.contact_email || 'Unknown',
-            reason: error.message
-          });
+      for (let i = 0; i < leads.length; i += BATCH_SIZE) {
+        const batch = leads.slice(i, i + BATCH_SIZE);
+        
+        await Promise.all(
+          batch.map(lead =>
+            base44.entities.Lead.create(lead)
+              .then(created => imported.push(created))
+              .catch(error => {
+                failed.push({
+                  lead: lead.contact_name || lead.contact_email || 'Unknown',
+                  reason: error.message
+                });
+              })
+          )
+        );
+
+        // Delay between batches (except after last batch)
+        if (i + BATCH_SIZE < leads.length) {
+          await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
         }
       }
 
