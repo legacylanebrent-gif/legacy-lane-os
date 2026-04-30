@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Heart, Clock, Gavel, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isWatched, setIsWatched] = useState(false);
+  const [businessName, setBusinessName] = useState(null);
+
+  useEffect(() => {
+    // Fetch operator business name
+    const loadBusinessName = async () => {
+      try {
+        if (item.operator_id) {
+          const users = await base44.entities.User.filter({ id: item.operator_id });
+          if (users.length > 0) {
+            setBusinessName(users[0].company_name || users[0].full_name);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading business name:', error);
+      }
+    };
+    loadBusinessName();
+  }, [item.operator_id]);
 
   useEffect(() => {
     if (item.listing_type === 'AUCTION' && item.auction_end_date) {
@@ -119,7 +138,7 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
           {item.title}
         </h3>
 
-        <p className="text-sm text-slate-600 line-clamp-1 mb-3">{item.operator_name || 'Listed by Operator'}</p>
+        <p className="text-sm text-slate-600 line-clamp-1 mb-3">{businessName || item.operator_name || 'Listed by Operator'}</p>
 
         {/* Price */}
         <div className="mb-3">
