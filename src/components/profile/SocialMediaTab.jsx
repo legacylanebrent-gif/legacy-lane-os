@@ -95,6 +95,22 @@ const PLATFORMS = [
     docsUrl: 'https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api',
   },
   {
+    key: 'facebook_ads',
+    label: 'Facebook Ads Manager',
+    color: 'bg-blue-800',
+    lightColor: 'bg-blue-50 border-blue-200',
+    textColor: 'text-blue-800',
+    icon: '📣',
+    description: 'Create & manage paid ad campaigns via the Marketing API',
+    fields: [
+      { key: 'ad_account_id', label: 'Ad Account ID', placeholder: 'e.g. act_123456789', hint: 'Found in Ads Manager → Account Settings. Always prefixed with "act_"' },
+      { key: 'app_id', label: 'App ID', placeholder: 'Facebook App ID', hint: 'From developers.facebook.com → My Apps → your app → App ID' },
+      { key: 'app_secret', label: 'App Secret', placeholder: 'Facebook App Secret', secret: true, hint: 'From developers.facebook.com → My Apps → your app → App Secret' },
+      { key: 'access_token', label: 'Access Token', placeholder: 'System User or Page Access Token', secret: true, hint: 'Needs ads_management + ads_read permissions. Use a System User token for long-lived access via Business Manager → System Users' },
+    ],
+    docsUrl: 'https://developers.facebook.com/docs/marketing-apis/get-started',
+  },
+  {
     key: 'twitter',
     label: 'X (Twitter)',
     color: 'bg-slate-950',

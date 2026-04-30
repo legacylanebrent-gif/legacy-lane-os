@@ -173,6 +173,23 @@
             }
           }
         },
+        "facebook_ads": {
+          "type": "object",
+          "properties": {
+            "ad_account_id": {
+              "type": "string"
+            },
+            "app_id": {
+              "type": "string"
+            },
+            "app_secret": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          }
+        },
         "instagram": {
           "type": "object",
           "properties": {
