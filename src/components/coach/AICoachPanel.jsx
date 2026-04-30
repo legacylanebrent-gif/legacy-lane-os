@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Send, Sparkles, Loader2, RotateCcw, ChevronDown, Zap, Brain } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, RotateCcw, ChevronDown, Zap, Brain, MessageSquare, Share2, FileText, Image, Video, Briefcase, Users, Map, Handshake, ShieldAlert, TrendingUp, Tag } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const SUGGESTED_PROMPTS = [
@@ -16,6 +16,21 @@ const SUGGESTED_PROMPTS = [
   'Help me write a client onboarding email',
   'What KPIs should I track as an operator?',
   'How do I expand into a new territory?',
+];
+
+const AI_MODES = [
+  { key: 'general_assistant',       label: 'General Assistant',       icon: MessageSquare, color: 'text-slate-300',  placeholder: 'Ask me anything about your business…' },
+  { key: 'sale_promotion_package',  label: 'Promote This Sale',       icon: Tag,           color: 'text-orange-400', placeholder: 'Tell me about the sale you want to promote…' },
+  { key: 'social_media_post',       label: 'Social Media Creator',    icon: Share2,        color: 'text-sky-400',    placeholder: 'Describe what you want to post about…' },
+  { key: 'blog_post',               label: 'Blog Writer',             icon: FileText,      color: 'text-emerald-400',placeholder: 'What topic should the blog post cover?…' },
+  { key: 'image_prompt',            label: 'Image Prompt Builder',    icon: Sparkles,      color: 'text-purple-400', placeholder: 'Describe the image you want to create…' },
+  { key: 'image_generation',        label: 'Image Generator',         icon: Image,         color: 'text-pink-400',   placeholder: 'Describe the image you want me to generate…' },
+  { key: 'video_script',            label: 'Video Script Builder',    icon: Video,         color: 'text-red-400',    placeholder: 'What is the video about?…' },
+  { key: 'business_coaching',       label: 'Business Coach',          icon: Briefcase,     color: 'text-amber-400',  placeholder: 'What business challenge can I help you with?…' },
+  { key: 'lead_flow_plan',          label: 'Lead Flow Planner',       icon: Users,         color: 'text-cyan-400',   placeholder: 'Tell me about your current lead situation…' },
+  { key: 'referral_partner_builder',label: 'Referral Partner Builder',icon: Handshake,    color: 'text-teal-400',   placeholder: 'Who do you want to build referral relationships with?…' },
+  { key: 'objection_handler',       label: 'Objection Handler',       icon: ShieldAlert,   color: 'text-yellow-400', placeholder: 'What objection are you trying to overcome?…' },
+  { key: 'territory_growth_plan',   label: 'Territory Growth Plan',   icon: Map,           color: 'text-indigo-400', placeholder: 'Tell me about your current territory…' },
 ];
 
 const MODEL_OPTIONS = [
@@ -32,6 +47,8 @@ export default function AICoachPanel({ user, onClose }) {
   const [context, setContext] = useState(null);
   const [totalTokens, setTotalTokens] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [activeMode, setActiveMode] = useState(AI_MODES[0]);
+  const [showModes, setShowModes] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -90,6 +107,7 @@ export default function AICoachPanel({ user, onClose }) {
         messages: newMessages,
         context,
         model,
+        ai_mode: activeMode.key,
       });
       const data = res.data;
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
@@ -172,6 +190,42 @@ export default function AICoachPanel({ user, onClose }) {
             </Badge>
           )}
         </div>
+      </div>
+
+      {/* Mode selector */}
+      <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-3 py-2">
+        <button
+          onClick={() => setShowModes(v => !v)}
+          className="w-full flex items-center justify-between gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-3 py-2 transition-all"
+        >
+          <div className="flex items-center gap-2">
+            {React.createElement(activeMode.icon, { className: `w-3.5 h-3.5 ${activeMode.color}` })}
+            <span className="text-xs font-medium text-slate-200">{activeMode.label}</span>
+          </div>
+          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showModes ? 'rotate-180' : ''}`} />
+        </button>
+        {showModes && (
+          <div className="mt-2 grid grid-cols-2 gap-1 max-h-56 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-600">
+            {AI_MODES.map(mode => {
+              const Icon = mode.icon;
+              const isActive = activeMode.key === mode.key;
+              return (
+                <button
+                  key={mode.key}
+                  onClick={() => { setActiveMode(mode); setShowModes(false); setMessages([]); setShowSuggestions(true); setTotalTokens(0); }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs transition-all border ${
+                    isActive
+                      ? 'bg-orange-600 border-orange-500 text-white'
+                      : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-white' : mode.color}`} />
+                  <span className="leading-tight">{mode.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Messages */}
@@ -270,7 +324,7 @@ export default function AICoachPanel({ user, onClose }) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask your coach anything…"
+            placeholder={activeMode.placeholder}
             className="flex-1 bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none text-sm min-h-[44px] max-h-32 focus-visible:ring-orange-500"
             rows={1}
           />
