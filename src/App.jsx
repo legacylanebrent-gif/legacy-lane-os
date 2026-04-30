@@ -27,6 +27,7 @@ import TerritoryHeatmap from './pages/TerritoryHeatmap';
 import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
 import CSVLeadImport from './pages/CSVLeadImport';
+import AdminLeadImporter from './pages/AdminLeadImporter';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -97,6 +98,7 @@ const AuthenticatedApp = () => {
       <Route path="/ContentCalendar" element={<LayoutWrapper currentPageName="ContentCalendar"><ContentCalendar /></LayoutWrapper>} />
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />
       <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
+      <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
