@@ -177,6 +177,7 @@ export default function AdminLeadsPropstream() {
                     </>
                   )}
                   {lead.propstream_equity && <div className="flex justify-between"><span className="text-slate-500">Equity:</span><span className="text-slate-600">${lead.propstream_equity.toLocaleString()}</span></div>}
+                  {lead.propstream_last_sale_date && <div className="flex justify-between"><span className="text-slate-500">Last Sold:</span><span className="text-slate-600">{new Date(lead.propstream_last_sale_date).toLocaleDateString()}</span></div>}
                 </div>
                 {!lead.routed_to && !lead.converted && (
                   <div className="mt-3" onClick={e => e.stopPropagation()}>
