@@ -166,7 +166,7 @@ export default function AdminLeadsPropstream() {
                 <div className="space-y-1 text-sm">
                   {lead.contact_email && <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /><span className="text-cyan-600 truncate">{lead.contact_email}</span></div>}
                   {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{lead.contact_phone}</span></div>}
-                  {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600">{lead.property_address}</span></div>}
+                  {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600">{lead.property_address}{lead.property_city ? `, ${lead.property_city}` : ''}{lead.property_state ? `, ${lead.property_state}` : ''}{lead.property_zip ? ` ${lead.property_zip}` : ''}</span></div>}
                 </div>
                 <div className="space-y-2 mt-3 pt-2 border-t text-xs">
                   {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
