@@ -4,18 +4,39 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, DollarSign, Users, Building2, Package, Receipt, Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, DollarSign } from 'lucide-react';
+import TransactionForm from '@/components/worksheet/TransactionForm';
 
 export default function Worksheet() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Transaction form state
+  const [photoMode, setPhotoMode] = useState(false);
+  const [bundleMode, setBundleMode] = useState(false);
+  const [itemName, setItemName] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [notes, setNotes] = useState('');
+  
+  // Bundle state
+  const [bundleName, setBundleName] = useState('');
+  const [bundleItems, setBundleItems] = useState([]);
+  const [bundleItemInput, setBundleItemInput] = useState('');
+  const [bundleItemPrice, setBundleItemPrice] = useState('');
+  const [bundlePrice, setBundlePrice] = useState('');
+  
+  // Photo mode state
+  const [photoSearchQuery, setPhotoSearchQuery] = useState('');
+  const [searchingPhotos, setSearchingPhotos] = useState(false);
+  const [photoSuggestions, setPhotoSuggestions] = useState([]);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -49,6 +70,139 @@ export default function Worksheet() {
       setLoading(false);
     }
   };
+
+  const handleAddTransaction = async () => {
+    if (!itemName || !price || !paymentMethod) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const saleId = params.get('saleId');
+
+      const newTransaction = {
+        sale_id: saleId,
+        item_name: itemName,
+        quantity: quantity,
+        total: parseFloat(price) * quantity,
+        payment_method: paymentMethod,
+        notes: notes
+      };
+
+      await base44.entities.Transaction.create(newTransaction);
+      
+      // Reset form
+      setItemName('');
+      setQuantity(1);
+      setPrice('');
+      setPaymentMethod('cash');
+      setNotes('');
+      setPhotoMode(false);
+      
+      // Reload transactions
+      const transData = await base44.entities.Transaction.filter({ sale_id: saleId }, '-created_date');
+      setTransactions(transData);
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      alert('Failed to add transaction');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSaveBundle = async () => {
+    if (!bundleName || !bundlePrice || bundleItems.length === 0) {
+      alert('Please fill in all bundle fields');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const saleId = params.get('saleId');
+
+      const bundleTransaction = {
+        sale_id: saleId,
+        item_name: bundleName,
+        quantity: 1,
+        total: parseFloat(bundlePrice),
+        payment_method: paymentMethod,
+        notes: `Bundle: ${bundleItems.map(i => i.name).join(', ')}`
+      };
+
+      await base44.entities.Transaction.create(bundleTransaction);
+      
+      // Reset form
+      setBundleName('');
+      setBundleItems([]);
+      setBundleItemInput('');
+      setBundleItemPrice('');
+      setBundlePrice('');
+      setBundleMode(false);
+      
+      // Reload transactions
+      const transData = await base44.entities.Transaction.filter({ sale_id: saleId }, '-created_date');
+      setTransactions(transData);
+    } catch (error) {
+      console.error('Error saving bundle:', error);
+      alert('Failed to save bundle');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const addBundleItem = () => {
+    if (!bundleItemInput || !bundleItemPrice) return;
+    setBundleItems([...bundleItems, { name: bundleItemInput, price: parseFloat(bundleItemPrice) }]);
+    setBundleItemInput('');
+    setBundleItemPrice('');
+  };
+
+  const removeBundleItem = (index) => {
+    setBundleItems(bundleItems.filter((_, i) => i !== index));
+  };
+
+  const handlePhotoSearch = async (query) => {
+    setPhotoSearchQuery(query);
+    if (!query.trim() || !sale?.images) {
+      setPhotoSuggestions([]);
+      return;
+    }
+
+    setSearchingPhotos(true);
+    try {
+      const filtered = sale.images.filter(img => 
+        img.name?.toLowerCase().includes(query.toLowerCase()) ||
+        img.description?.toLowerCase().includes(query.toLowerCase())
+      );
+      setPhotoSuggestions(filtered.map(img => ({
+        name: img.name || 'Item',
+        description: img.description,
+        imageUrl: img.url,
+        suggested_price: img.price || null
+      })));
+    } catch (error) {
+      console.error('Error searching photos:', error);
+    } finally {
+      setSearchingPhotos(false);
+    }
+  };
+
+  const selectPhotoItem = (photo) => {
+    setSelectedPhoto(photo);
+    setItemName(photo.name);
+    if (photo.suggested_price) {
+      setPrice(photo.suggested_price.toString());
+    }
+  };
+
+  const handleScanCart = () => {
+    alert('Cart scanning not yet implemented');
+  };
+
+  const currentTotal = parseFloat(price) * quantity || 0;
 
   if (loading) {
     return (
@@ -93,7 +247,7 @@ export default function Worksheet() {
               <CardContent className="p-4">
                 <div className="text-sm text-slate-600 mb-1">Total Revenue</div>
                 <div className="text-2xl font-bold text-green-600">
-                  ${totalRevenue.toFixed(2)}
+                  ${(transactions.reduce((sum, t) => sum + (t.total || 0), 0)).toFixed(2)}
                 </div>
               </CardContent>
             </Card>
@@ -107,45 +261,45 @@ export default function Worksheet() {
             </Card>
           </div>
 
-          <Card className="bg-white shadow-md">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Add Transaction</h3>
-              <div className="space-y-4">
-                <div>
-                  <Label>Item Name</Label>
-                  <Input placeholder="Item name..." />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Quantity</Label>
-                    <Input type="number" min="1" defaultValue="1" />
-                  </div>
-                  <div>
-                    <Label>Price</Label>
-                    <Input type="number" step="0.01" min="0" placeholder="0.00" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Payment Method</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="credit_card">Credit Card</SelectItem>
-                      <SelectItem value="venmo">Venmo</SelectItem>
-                      <SelectItem value="check">Check</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="w-full bg-green-600 hover:bg-green-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Transaction
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <TransactionForm
+            photoMode={photoMode}
+            setPhotoMode={setPhotoMode}
+            bundleMode={bundleMode}
+            setBundleMode={setBundleMode}
+            itemName={itemName}
+            setItemName={setItemName}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            price={price}
+            setPrice={setPrice}
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
+            notes={notes}
+            setNotes={setNotes}
+            currentTotal={currentTotal}
+            submitting={submitting}
+            handleAddTransaction={handleAddTransaction}
+            handleSaveBundle={handleSaveBundle}
+            bundleName={bundleName}
+            setBundleName={setBundleName}
+            bundleItems={bundleItems}
+            bundleItemInput={bundleItemInput}
+            setBundleItemInput={setBundleItemInput}
+            bundleItemPrice={bundleItemPrice}
+            setBundleItemPrice={setBundleItemPrice}
+            bundlePrice={bundlePrice}
+            setBundlePrice={setBundlePrice}
+            addBundleItem={addBundleItem}
+            removeBundleItem={removeBundleItem}
+            photoSearchQuery={photoSearchQuery}
+            handlePhotoSearch={handlePhotoSearch}
+            searchingPhotos={searchingPhotos}
+            photoSuggestions={photoSuggestions}
+            selectedPhoto={selectedPhoto}
+            setSelectedPhoto={setSelectedPhoto}
+            selectPhotoItem={selectPhotoItem}
+            onScanCart={handleScanCart}
+          />
 
           {transactions.length > 0 && (
             <Card className="bg-white shadow-md">
