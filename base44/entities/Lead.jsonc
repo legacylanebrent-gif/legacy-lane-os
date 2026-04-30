@@ -33,21 +33,100 @@
     "contact_name_last": {
       "type": "string"
     },
+    "contact_name_2_first": {
+      "type": "string"
+    },
+    "contact_name_2_last": {
+      "type": "string"
+    },
     "contact_email": {
+      "type": "string"
+    },
+    "contact_email_2": {
+      "type": "string"
+    },
+    "contact_email_3": {
+      "type": "string"
+    },
+    "contact_email_4": {
       "type": "string"
     },
     "contact_phone": {
       "type": "string"
     },
+    "contact_phone_1_type": {
+      "type": "string"
+    },
+    "contact_phone_1_dnc": {
+      "type": "boolean"
+    },
     "contact_phone_2": {
       "type": "string"
+    },
+    "contact_phone_2_type": {
+      "type": "string"
+    },
+    "contact_phone_2_dnc": {
+      "type": "boolean"
+    },
+    "contact_phone_3": {
+      "type": "string"
+    },
+    "contact_phone_3_type": {
+      "type": "string"
+    },
+    "contact_phone_3_dnc": {
+      "type": "boolean"
+    },
+    "contact_phone_4": {
+      "type": "string"
+    },
+    "contact_phone_4_type": {
+      "type": "string"
+    },
+    "contact_phone_4_dnc": {
+      "type": "boolean"
+    },
+    "contact_phone_5": {
+      "type": "string"
+    },
+    "contact_phone_5_type": {
+      "type": "string"
+    },
+    "contact_phone_5_dnc": {
+      "type": "boolean"
     },
     "mailing_care_of": {
       "type": "string"
     },
+    "mailing_address": {
+      "type": "string"
+    },
+    "mailing_unit": {
+      "type": "string"
+    },
+    "mailing_city": {
+      "type": "string"
+    },
+    "mailing_state": {
+      "type": "string"
+    },
+    "mailing_zip": {
+      "type": "string"
+    },
+    "mailing_county": {
+      "type": "string"
+    },
+    "do_not_mail": {
+      "type": "boolean",
+      "default": false
+    },
     "property_address": {
       "type": "string",
       "description": "Full street address"
+    },
+    "property_unit": {
+      "type": "string"
     },
     "property_city": {
       "type": "string"
@@ -66,6 +145,19 @@
     },
     "property_longitude": {
       "type": "number"
+    },
+    "property_apn": {
+      "type": "string",
+      "description": "Assessor Parcel Number"
+    },
+    "property_status": {
+      "type": "string"
+    },
+    "owner_occupied": {
+      "type": "boolean"
+    },
+    "litigator": {
+      "type": "boolean"
     },
     "home_size": {
       "type": "string"
@@ -188,7 +280,7 @@
       "type": "integer"
     },
     "propstream_baths": {
-      "type": "integer"
+      "type": "number"
     },
     "propstream_sqft": {
       "type": "integer"
@@ -203,6 +295,77 @@
       "type": "string"
     },
     "propstream_zoning": {
+      "type": "string"
+    },
+    "total_assessed_value": {
+      "type": "number"
+    },
+    "total_open_loans": {
+      "type": "integer"
+    },
+    "est_remaining_balance_loans": {
+      "type": "number"
+    },
+    "est_loan_to_value": {
+      "type": "number"
+    },
+    "total_condition": {
+      "type": "string"
+    },
+    "interior_condition": {
+      "type": "string"
+    },
+    "exterior_condition": {
+      "type": "string"
+    },
+    "bathroom_condition": {
+      "type": "string"
+    },
+    "kitchen_condition": {
+      "type": "string"
+    },
+    "foreclosure_factor": {
+      "type": "string"
+    },
+    "mls_status": {
+      "type": "string"
+    },
+    "mls_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "mls_amount": {
+      "type": "number"
+    },
+    "lien_amount": {
+      "type": "number"
+    },
+    "marketing_lists": {
+      "type": "integer"
+    },
+    "marketing_campaigns": {
+      "type": "integer"
+    },
+    "voicemail_drops": {
+      "type": "integer"
+    },
+    "dialer": {
+      "type": "integer"
+    },
+    "postcards": {
+      "type": "integer"
+    },
+    "emails": {
+      "type": "integer"
+    },
+    "skip_traces": {
+      "type": "integer"
+    },
+    "date_added_to_list": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "method_of_add": {
       "type": "string"
     },
     "website_page": {

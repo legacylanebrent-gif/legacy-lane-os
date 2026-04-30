@@ -7,34 +7,81 @@ import { Upload, CheckCircle2, AlertCircle, Loader, Download, ArrowLeft } from '
 import { useNavigate } from 'react-router-dom';
 
 const CSV_FIELD_MAPPINGS = {
-  'Mailing Care of Name': 'mailing_care_of',
-  'Owner 1 First Name': 'contact_name_first',
-  'Owner 1 Last Name': 'contact_name_last',
-  'Owner 2 First Name': 'contact_name_first',
-  'Owner 2 Last Name': 'contact_name_last',
-  'Phone 1': 'contact_phone',
-  'Phone 2': 'contact_phone_2',
-  'Email 1': 'contact_email',
-  'Email 2': 'contact_email',
   'Address': 'property_address',
+  'Unit #': 'property_unit',
   'City': 'property_city',
   'State': 'property_state',
   'Zip': 'property_zip',
   'County': 'property_county',
-  'Est. Value': 'estimated_value',
-  'Market Value': 'propstream_market_value',
-  'Loan Amount': 'propstream_loan_amount',
-  'Last Sale Date': 'propstream_last_sale_date',
-  'Last Sale Price': 'propstream_last_sale_price',
-  'Beds': 'propstream_beds',
-  'Baths': 'propstream_baths',
-  'Sq Ft': 'propstream_sqft',
-  'Lot Size': 'propstream_lot_size',
-  'Year Built': 'propstream_year_built',
+  'APN': 'property_apn',
+  'Phone 1': 'contact_phone',
+  'Phone 1 Type': 'contact_phone_1_type',
+  'Phone 1 DNC': 'contact_phone_1_dnc',
+  'Phone 2': 'contact_phone_2',
+  'Phone 2 Type': 'contact_phone_2_type',
+  'Phone 2 DNC': 'contact_phone_2_dnc',
+  'Phone 3': 'contact_phone_3',
+  'Phone 3 Type': 'contact_phone_3_type',
+  'Phone 3 DNC': 'contact_phone_3_dnc',
+  'Phone 4': 'contact_phone_4',
+  'Phone 4 Type': 'contact_phone_4_type',
+  'Phone 4 DNC': 'contact_phone_4_dnc',
+  'Phone 5': 'contact_phone_5',
+  'Phone 5 Type': 'contact_phone_5_type',
+  'Phone 5 DNC': 'contact_phone_5_dnc',
+  'Email 1': 'contact_email',
+  'Email 2': 'contact_email_2',
+  'Email 3': 'contact_email_3',
+  'Email 4': 'contact_email_4',
+  'Owner Occupied': 'owner_occupied',
+  'Owner 1 First Name': 'contact_name_first',
+  'Owner 1 Last Name': 'contact_name_last',
+  'Owner 2 First Name': 'contact_name_2_first',
+  'Owner 2 Last Name': 'contact_name_2_last',
+  'Litigator': 'litigator',
+  'Mailing Care of Name': 'mailing_care_of',
+  'Mailing Address': 'mailing_address',
+  'Mailing Unit #': 'mailing_unit',
+  'Mailing City': 'mailing_city',
+  'Mailing State': 'mailing_state',
+  'Mailing Zip': 'mailing_zip',
+  'Mailing County': 'mailing_county',
+  'Do Not Mail': 'do_not_mail',
+  'Property Status': 'property_status',
+  'Notes': 'notes',
   'Property Type': 'propstream_property_type',
-  'Zoning': 'propstream_zoning',
-  'Owner Type': 'propstream_owner_type',
-  'Notes': 'notes'
+  'Bedrooms': 'propstream_beds',
+  'Total Bathrooms': 'propstream_baths',
+  'Building Sqft': 'propstream_sqft',
+  'Lot Size Sqft': 'propstream_lot_size',
+  'Effective Year Built': 'propstream_year_built',
+  'Total Assessed Value': 'total_assessed_value',
+  'Last Sale Recording Date': 'propstream_last_sale_date',
+  'Last Sale Amount': 'propstream_last_sale_price',
+  'Total Open Loans': 'total_open_loans',
+  'Est. Remaining balance of Open Loans': 'est_remaining_balance_loans',
+  'Est. Value': 'estimated_value',
+  'Est. Loan-to-Value': 'est_loan_to_value',
+  'Est. Equity': 'propstream_equity',
+  'Total Condition': 'total_condition',
+  'Interior Condition': 'interior_condition',
+  'Exterior Condition': 'exterior_condition',
+  'Bathroom Condition': 'bathroom_condition',
+  'Kitchen Condition': 'kitchen_condition',
+  'Foreclosure Factor': 'foreclosure_factor',
+  'MLS Status': 'mls_status',
+  'MLS Date': 'mls_date',
+  'MLS Amount': 'mls_amount',
+  'Lien Amount': 'lien_amount',
+  'Marketing Lists': 'marketing_lists',
+  'Marketing Campaigns': 'marketing_campaigns',
+  'Voicemail Drops': 'voicemail_drops',
+  'Dialer': 'dialer',
+  'Postcards': 'postcards',
+  'E-Mails': 'emails',
+  'Skip Traces': 'skip_traces',
+  'Date Added to List': 'date_added_to_list',
+  'Method of Add': 'method_of_add'
 };
 
 export default function AdminLeadImporter() {
@@ -99,37 +146,55 @@ export default function AdminLeadImporter() {
         // Process all CSV columns
         headers.forEach(csvCol => {
           const value = row[csvCol];
-          if (!value) return;
+          if (!value && value !== '0' && value !== 'No' && value !== 'Yes') return;
 
           const leadField = CSV_FIELD_MAPPINGS[csvCol];
 
-          if (leadField === 'estimated_value' || leadField === 'propstream_market_value' || 
-              leadField === 'propstream_loan_amount' || leadField === 'propstream_last_sale_price') {
+          if (!leadField) {
+            unmappedData[csvCol] = value;
+            return;
+          }
+
+          // Number fields
+          if (['estimated_value', 'propstream_market_value', 'propstream_loan_amount', 
+               'propstream_last_sale_price', 'total_assessed_value', 'est_remaining_balance_loans',
+               'est_loan_to_value', 'mls_amount', 'lien_amount', 'propstream_equity'].includes(leadField)) {
             const numValue = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
             if (numValue > 0) lead[leadField] = numValue;
-          } else if (leadField === 'propstream_beds' || leadField === 'propstream_baths' || leadField === 'propstream_sqft' || leadField === 'propstream_year_built') {
+          } 
+          // Integer fields
+          else if (['propstream_beds', 'propstream_year_built', 'total_open_loans',
+                    'marketing_lists', 'marketing_campaigns', 'voicemail_drops', 'dialer',
+                    'postcards', 'emails', 'skip_traces'].includes(leadField)) {
             const numValue = parseInt(value.toString().replace(/[^0-9]/g, '')) || 0;
+            if (numValue > 0 || leadField === 'marketing_lists') lead[leadField] = numValue;
+          }
+          // Float fields (baths)
+          else if (leadField === 'propstream_baths') {
+            const numValue = parseFloat(value.toString().replace(/[^0-9.]/g, '')) || 0;
             if (numValue > 0) lead[leadField] = numValue;
-          } else if (leadField === 'propstream_last_sale_date') {
+          }
+          // Date fields
+          else if (['propstream_last_sale_date', 'mls_date', 'date_added_to_list'].includes(leadField)) {
             if (value) lead[leadField] = value;
-          } else if (leadField === 'contact_name_first' || leadField === 'contact_name_last') {
-            // Combine names
-            if (leadField === 'contact_name_first') {
-              lead.contact_name_first = value;
-            } else {
-              lead.contact_name_last = value;
-            }
-          } else if (leadField) {
+          }
+          // Boolean fields
+          else if (['owner_occupied', 'litigator', 'do_not_mail', 'contact_phone_1_dnc', 
+                    'contact_phone_2_dnc', 'contact_phone_3_dnc', 'contact_phone_4_dnc', 'contact_phone_5_dnc'].includes(leadField)) {
+            const boolValue = value === 'Yes' || value === 'true' || value === true;
+            lead[leadField] = boolValue;
+          }
+          // String fields
+          else {
             lead[leadField] = value;
-          } else {
-            // Store unmapped fields
-            unmappedData[csvCol] = value;
           }
         });
 
-        // Combine first and last names
+        // Combine first and last names for owner 1
         if (lead.contact_name_first || lead.contact_name_last) {
           lead.contact_name = `${lead.contact_name_first || ''} ${lead.contact_name_last || ''}`.trim();
+        } else if (lead.mailing_care_of) {
+          lead.contact_name = lead.mailing_care_of;
         }
 
         // Store unmapped data
