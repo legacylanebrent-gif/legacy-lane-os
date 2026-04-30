@@ -157,6 +157,102 @@
       "type": "boolean",
       "default": true,
       "description": "Is user account active"
+    },
+    "social_media_credentials": {
+      "type": "object",
+      "description": "Social media API credentials for automated posting by the Coaching Agent",
+      "properties": {
+        "facebook": {
+          "type": "object",
+          "properties": {
+            "page_id": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          }
+        },
+        "instagram": {
+          "type": "object",
+          "properties": {
+            "business_account_id": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          }
+        },
+        "tiktok": {
+          "type": "object",
+          "properties": {
+            "client_key": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            },
+            "open_id": {
+              "type": "string"
+            }
+          }
+        },
+        "youtube": {
+          "type": "object",
+          "properties": {
+            "channel_id": {
+              "type": "string"
+            },
+            "client_id": {
+              "type": "string"
+            },
+            "refresh_token": {
+              "type": "string"
+            }
+          }
+        },
+        "pinterest": {
+          "type": "object",
+          "properties": {
+            "board_id": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          }
+        },
+        "linkedin": {
+          "type": "object",
+          "properties": {
+            "organization_id": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          }
+        },
+        "twitter": {
+          "type": "object",
+          "properties": {
+            "api_key": {
+              "type": "string"
+            },
+            "api_secret": {
+              "type": "string"
+            },
+            "access_token": {
+              "type": "string"
+            },
+            "access_token_secret": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default": {}
     }
   },
   "required": [

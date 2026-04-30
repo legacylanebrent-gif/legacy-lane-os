@@ -13,8 +13,9 @@ import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { 
   User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
-  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign, Share2
 } from 'lucide-react';
+import SocialMediaTab from '@/components/profile/SocialMediaTab';
 
 export default function MyProfile() {
   const [user, setUser] = useState(null);
@@ -209,11 +210,12 @@ export default function MyProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={`grid w-full ${isConsumerType ? 'grid-cols-2' : 'grid-cols-4'} max-w-2xl`}>
+        <TabsList className={`grid w-full ${isConsumerType ? 'grid-cols-2' : 'grid-cols-5'} max-w-3xl`}>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           {!isConsumerType && <TabsTrigger value="sales">My Sales</TabsTrigger>}
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           {!isConsumerType && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
+          {!isConsumerType && <TabsTrigger value="social" className="flex items-center gap-1"><Share2 className="w-3 h-3" />Social Media</TabsTrigger>}
         </TabsList>
 
         {/* Profile Tab */}
@@ -698,6 +700,13 @@ export default function MyProfile() {
             </Card>
           )}
         </TabsContent>
+
+        {/* Social Media Tab */}
+        {!isConsumerType && (
+          <TabsContent value="social" className="mt-6">
+            <SocialMediaTab user={user} />
+          </TabsContent>
+        )}
 
         {/* Subscription Tab */}
         <TabsContent value="subscription" className="space-y-6 mt-6">
