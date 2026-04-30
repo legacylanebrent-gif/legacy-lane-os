@@ -1029,14 +1029,6 @@ Only include items with confidence > 0.3. If no items match well, return an empt
             </Card>
 
             {/* Add Transaction Form */}
-          <CartQRScanner
-            open={showCartScanner}
-            onClose={() => setShowCartScanner(false)}
-            onItemsAdded={() => {}}
-            setItemName={setItemName}
-            setQuantity={setQuantity}
-            setPrice={setPrice}
-          />
           <TransactionForm
             photoMode={photoMode} setPhotoMode={setPhotoMode}
             bundleMode={bundleMode} setBundleMode={setBundleMode}
