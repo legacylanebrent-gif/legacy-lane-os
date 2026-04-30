@@ -113,9 +113,10 @@ export default function AICoachPanel({ user, onClose }) {
     setLoading(true);
 
     try {
+      // NOTE: context is NOT sent to the backend — the server fetches it
+      // directly from the authenticated user to prevent data spoofing.
       const res = await base44.functions.invoke('aiCoach', {
         messages: newMessages,
-        context,
         model,
         ai_mode: activeMode.key,
       });

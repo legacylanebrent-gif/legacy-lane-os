@@ -54,13 +54,24 @@ export default function AdminAICredits() {
   const [editForm, setEditForm] = useState({});
   const [bonusAmount, setBonusAmount] = useState('');
   const [saving, setSaving] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Pricing config state
   const [pricingConfigs, setPricingConfigs] = useState([]);
   const [editingPriceId, setEditingPriceId] = useState(null);
   const [editingPriceValue, setEditingPriceValue] = useState('');
 
-  useEffect(() => { loadData(); loadPricingConfigs(); }, []);
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      setCurrentUser(u);
+      setAuthChecked(true);
+      if (u?.role === 'admin') {
+        loadData();
+        loadPricingConfigs();
+      }
+    });
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -153,6 +164,22 @@ export default function AdminAICredits() {
     await base44.entities.OperatorAICreditAccount.update(account.id, { status: newStatus });
     await loadData();
   };
+
+  // ── Rule 5 & 6: Admin-only access guard ──
+  if (!authChecked) {
+    return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" /></div>;
+  }
+  if (currentUser?.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-2xl mb-2">🚫</p>
+          <p className="font-semibold text-slate-800">Access Denied</p>
+          <p className="text-sm text-slate-500 mt-1">Admin access required to view this page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

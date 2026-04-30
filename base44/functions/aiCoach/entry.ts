@@ -88,13 +88,18 @@ async function recordUsage(base44, operatorId, account, { requestId, aiMode, mod
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
+
+  // ── Rule 1-4: Authenticate — all context fetched server-side from the verified user identity.
+  // Never trust operator context sent from the frontend.
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { messages, context, model, ai_mode } = await req.json();
+  const { messages, model, ai_mode } = await req.json();
+  // NOTE: any "context" from the frontend is intentionally discarded here.
+  // All context is fetched below using the authenticated user.id.
   const selectedModel = model || DEFAULT_MODEL;
 
-  // ── Credit gate ──
+  // ── Rule 2: Credits are always fetched for the authenticated user only ──
   const creditAccount = await getOrCreateCreditAccount(base44, user.id);
   const available = getAvailableCredits(creditAccount);
 
@@ -105,11 +110,22 @@ Deno.serve(async (req) => {
     }, { status: 402 });
   }
 
-  // ── Build system prompt ──
-  const {
-    companyName, territory, brandVoice, recentSales,
-    aiMemory, role, totalSales, totalRevenue,
-  } = context || {};
+  // ── Rule 1 & 3: Fetch operator context server-side — never accept it from the client ──
+  let recentSales = [];
+  let totalRevenue = 0;
+  let totalSales = 0;
+  try {
+    recentSales = await base44.entities.EstateSale.filter({ operator_id: user.id }, '-created_date', 10);
+    totalSales = recentSales.length;
+    totalRevenue = recentSales.reduce((s, sale) => s + (sale.actual_revenue || 0), 0);
+  } catch (_) {}
+
+  // ── Rule 3: AI memory is read directly from the authenticated user record ──
+  const companyName = user.company_name || user.full_name;
+  const territory = user.territory || user.location_city || '';
+  const brandVoice = user.brand_voice || 'Professional, warm, and trustworthy';
+  const aiMemory = user.ai_coach_memory || '';
+  const role = user.primary_account_type;
 
   // ── Sale Promotion Package (special full-package mode) ──
   if (ai_mode === 'sale_promotion_package') {
