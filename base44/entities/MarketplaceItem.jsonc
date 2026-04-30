@@ -1,0 +1,103 @@
+{
+  "name": "MarketplaceItem",
+  "type": "object",
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "description": "Reference to the Item entity"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the operator/seller"
+    },
+    "estate_sale_id": {
+      "type": "string",
+      "description": "Optional reference to the estate sale this item came from"
+    },
+    "listing_type": {
+      "type": "string",
+      "enum": [
+        "FOR_SALE",
+        "AUCTION"
+      ],
+      "default": "FOR_SALE",
+      "description": "Whether this is a fixed-price or auction listing"
+    },
+    "price": {
+      "type": "number",
+      "description": "Fixed price for FOR_SALE items"
+    },
+    "reserve_price": {
+      "type": "number",
+      "description": "Minimum acceptable bid for auction items"
+    },
+    "auction_type": {
+      "type": "string",
+      "enum": [
+        "SIMPLE",
+        "AUTO_BID",
+        "SEALED_BID"
+      ],
+      "description": "Auction model chosen by operator"
+    },
+    "auction_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When auction starts"
+    },
+    "auction_end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When auction closes"
+    },
+    "shipping_option": {
+      "type": "string",
+      "enum": [
+        "SHIPS_ONLY",
+        "LOCAL_PICKUP_ONLY",
+        "BOTH"
+      ],
+      "default": "BOTH",
+      "description": "Shipping or pickup availability"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "description": "Flat shipping cost if applicable"
+    },
+    "pickup_location_zip": {
+      "type": "string",
+      "description": "ZIP code for local pickup"
+    },
+    "pickup_location_address": {
+      "type": "string",
+      "description": "Full address for local pickup"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "ACTIVE",
+        "SOLD",
+        "AUCTION_CLOSED",
+        "DELISTED"
+      ],
+      "default": "DRAFT",
+      "description": "Listing status"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of times item has been viewed"
+    },
+    "watch_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of people watching this item"
+    }
+  },
+  "required": [
+    "item_id",
+    "operator_id",
+    "listing_type"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "ItemMessage",
+  "type": "object",
+  "properties": {
+    "marketplace_item_id": {
+      "type": "string",
+      "description": "Reference to the MarketplaceItem this conversation is about"
+    },
+    "from_user_id": {
+      "type": "string",
+      "description": "User ID of message sender"
+    },
+    "to_user_id": {
+      "type": "string",
+      "description": "User ID of message recipient"
+    },
+    "message_text": {
+      "type": "string",
+      "description": "Message content"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "QUESTION",
+        "OFFER",
+        "NEGOTIATION"
+      ],
+      "default": "QUESTION",
+      "description": "Type of message"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether recipient has read the message"
+    }
+  },
+  "required": [
+    "marketplace_item_id",
+    "from_user_id",
+    "to_user_id",
+    "message_text"
+  ]
+}

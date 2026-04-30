@@ -1,0 +1,74 @@
+{
+  "name": "Purchase",
+  "type": "object",
+  "properties": {
+    "marketplace_item_id": {
+      "type": "string",
+      "description": "Reference to the MarketplaceItem purchased"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "User ID of the operator/seller"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "User ID of the buyer"
+    },
+    "purchase_type": {
+      "type": "string",
+      "enum": [
+        "FIXED_PRICE",
+        "AUCTION_WON"
+      ],
+      "description": "How the item was purchased"
+    },
+    "final_price": {
+      "type": "number",
+      "description": "Price paid for the item"
+    },
+    "shipping_option_chosen": {
+      "type": "string",
+      "enum": [
+        "SHIP",
+        "LOCAL_PICKUP"
+      ],
+      "description": "Shipping or local pickup selected by buyer"
+    },
+    "shipping_cost_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Shipping cost if applicable"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING_PAYMENT_OFFLINE",
+        "COMPLETED",
+        "PICKUP_SCHEDULED",
+        "PICKED_UP"
+      ],
+      "default": "PENDING_PAYMENT_OFFLINE",
+      "description": "Transaction status"
+    },
+    "meeting_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Scheduled pickup time for local pickups"
+    },
+    "buyer_notes": {
+      "type": "string",
+      "description": "Notes from buyer about the purchase"
+    },
+    "seller_notes": {
+      "type": "string",
+      "description": "Notes from seller about the purchase"
+    }
+  },
+  "required": [
+    "marketplace_item_id",
+    "seller_id",
+    "buyer_id",
+    "purchase_type",
+    "final_price"
+  ]
+}

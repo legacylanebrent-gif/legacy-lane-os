@@ -1,0 +1,41 @@
+{
+  "name": "Bid",
+  "type": "object",
+  "properties": {
+    "marketplace_item_id": {
+      "type": "string",
+      "description": "Reference to the MarketplaceItem being bid on"
+    },
+    "bidder_id": {
+      "type": "string",
+      "description": "User ID of the bidder"
+    },
+    "bid_amount": {
+      "type": "number",
+      "description": "The bid amount"
+    },
+    "bid_type": {
+      "type": "string",
+      "enum": [
+        "MANUAL",
+        "AUTO"
+      ],
+      "default": "MANUAL",
+      "description": "Manual or automatic (proxy) bid"
+    },
+    "max_auto_bid": {
+      "type": "number",
+      "description": "Maximum auto-bid ceiling for proxy bidding"
+    },
+    "is_winning_bid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is currently the winning bid"
+    }
+  },
+  "required": [
+    "marketplace_item_id",
+    "bidder_id",
+    "bid_amount"
+  ]
+}
