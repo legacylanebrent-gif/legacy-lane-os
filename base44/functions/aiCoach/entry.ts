@@ -304,10 +304,51 @@ Analyze their current territory and identify: underserved zip codes, high-probat
 Deliver a phased 90-day territory domination plan covering: (1) Market mapping, (2) Partner identification, (3) Digital presence, (4) Community visibility, (5) First 10 new leads in the new area.
 Be specific to their geography and current operational capacity.`,
 
-    weekly_growth_plan: `You are in Weekly Growth Planner mode. Generate a structured, actionable weekly business growth plan for the operator.
-Each plan should cover: Monday (admin + planning), Tuesday (outreach), Wednesday (content creation), Thursday (follow-up), Friday (review + prep).
-Prioritize tasks by revenue impact. Include: 3 lead gen activities, 2 content pieces to create, 1 referral partner touchpoint, and 1 business development action.
-Make it feel like a real business calendar, not a generic checklist. Personalize based on their recent sales activity.`,
+    weekly_growth_plan: `You are in Weekly Growth Planner mode. Generate a comprehensive, actionable THIS WEEK'S GROWTH PLAN for the operator.
+
+REQUIRED 8-SECTION STRUCTURE (all sections must be included):
+
+## 1️⃣ Marketing Tasks (3 specific, revenue-focused tasks)
+List 3 concrete marketing actions: social posting schedule, ad campaign launch, email list outreach, etc.
+Each with: Task name, action steps, expected outcome, time estimate.
+
+## 2️⃣ Referral Partner Tasks (3 specific relationship-building actions)
+List 3 outreach/follow-up actions: call attorney, lunch invitation, referral proposal, vendor check-in, etc.
+Each with: Partner type/name, exact action, talking points, expected outcome.
+
+## 3️⃣ Social Media Posts (3 specific post ideas)
+List 3 post concepts: sale promo, educational tip, testimonial, behind-the-scenes, etc.
+Each with: Platform (FB/IG), post type, headline, key talking points, recommended posting time.
+
+## 4️⃣ Blog Topic
+Suggest 1 SEO blog topic for their territory that drives organic traffic.
+Include: Topic title, why it matters, 3 section ideas, target audience, keyword opportunity.
+
+## 5️⃣ Email Campaign
+Suggest 1 email action: sale announcement, lead nurture, referral ask, review request, etc.
+Include: Campaign type, subject line, 3 key points to cover, recommended send time/day.
+
+## 6️⃣ Business Improvement Task
+Suggest 1 operational/systems improvement: pricing review, consultation script, CRM setup, team training, etc.
+Include: What to improve, why it matters, 3 steps to implement, expected benefit.
+
+## 7️⃣ Measurable Goal for This Week
+State 1 specific, trackable goal: "X new leads", "X referral calls", "X sales closed", "X followers added", etc.
+Include: Goal number, how to track, current pace, target deadline.
+
+## 8️⃣ Suggested Follow-Up List
+List 5–7 specific people/companies to contact this week: past leads, past clients, referral partners, prospects.
+Each with: Name/Company, last contact date, reason to reach out, suggested contact method.
+
+---
+CONTEXT CONSIDERATIONS:
+- Current territory: ${territory || 'Not specified'}
+- Upcoming sales: ${recentSales.length > 0 ? `${recentSales.length} active` : 'None scheduled'}
+- Overall YTD revenue: $${(totalRevenue || 0).toLocaleString()}
+- Business goals (inferred): Growth in leads, team building, territory expansion, revenue targets
+- Brand voice: ${brandVoice || 'Professional and trustworthy'}
+
+Personalize every recommendation to their specific situation. Make each task actionable TODAY.`,
 
     monthly_performance_review: `You are in Monthly Performance Review mode. Help the operator conduct a thorough monthly business review and set data-driven goals for the next month.
 Structure the review: (1) Sales volume vs. last month, (2) Revenue vs. goal, (3) Lead sources and conversion rates, (4) Best and worst performing marketing channels, (5) Referral partner activity, (6) Team performance, (7) Next month's targets and action plan.

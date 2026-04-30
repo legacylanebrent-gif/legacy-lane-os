@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, ChevronRight, Settings } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { MODE_GROUPS, ALL_MODES, getModeByKey } from './coachModes';
+import { MODE_GROUPS, ALL_MODES, getModeByKey, MODE_STARTERS } from './coachModes';
 import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
 import SalePromotionEngine from './SalePromotionEngine';
 import ToneAdjustmentPanel from './ToneAdjustmentPanel';
@@ -16,58 +16,7 @@ const MODEL_OPTIONS = [
   { value: 'gpt-4o-mini', label: 'GPT-4o Mini', badge: 'Fast' },
 ];
 
-// Suggested prompts per mode key
-const MODE_STARTERS = {
-  general_assistant: ['How do I grow my estate sale business?', 'What KPIs should I track?', 'Help me plan next month', 'How do I stand out from competitors?'],
-  sale_promotion_package: ['My next sale is in Westfield, NJ on May 10–11. Featured items: Victorian bedroom set, Waterford crystal, mid-century modern chairs. Cash and Venmo accepted.'],
-  social_media_post: ['Write a Facebook post for my upcoming sale in Bergen County this Saturday', 'Write an Instagram caption for a stunning antique bedroom set'],
-  blog_post: ['Write a blog post about estate sale tips for families in Essex County, NJ', 'SEO blog: Why hire a professional estate sale company vs. doing it yourself?'],
-  email_campaign: ['Write a 3-email sequence announcing my upcoming sale', 'Write a post-sale thank-you email with a review request'],
-  sms_campaign: ['Write 3 SMS messages for my sale this Saturday in Montclair, NJ. Featured: jewelry, antiques, collectibles.'],
-  image_prompt: ['Create image prompts for a Victorian-era estate sale in New Jersey', 'Jewelry and antiques flat lay for Instagram'],
-  video_script: ['Write a 60-second promo video for my upcoming estate sale', 'Create a "Meet Our Team" video script'],
-  lead_generation: ['Build me a 30-day lead generation plan for Bergen County', 'How do I get probate leads in my area?'],
-  referral_partner_builder: ['Write an outreach email to a probate attorney', 'Help me pitch my services to elder law attorneys'],
-  real_estate_agent_relations: ['Help me get real estate agents to refer me clients', 'Write a lunch-and-learn pitch for local agents'],
-  territory_growth_plan: ['Build a 90-day plan to expand into Somerset County', 'How do I dominate my current territory before expanding?'],
-  weekly_growth_plan: ['Build my growth plan for this week — I have one sale running and two consultations scheduled'],
-  monthly_performance_review: ['Help me review last month: 4 sales, $82,000 revenue, 12 new leads. What should I focus on next month?'],
-  objection_handler: ['"Your commission is too high — another company said they\'d do it for less"', '"We\'re not ready yet, we need more time"', '"The family can\'t agree on anything"'],
-  post_sale_followup: ['Write my post-sale follow-up sequence for a sale that just closed in Ridgewood, NJ'],
-  review_generation: ['Write everything I need to ask for a Google review after a sale', 'Write a review request text message for happy clients'],
-  business_coaching: [
-    'How do I get more estate sale leads?',
-    'How do I meet more real estate agents?',
-    'How do I get probate referrals?',
-    'How do I grow in my territory?',
-    'How do I increase average revenue per sale?',
-    'How do I improve my consultations?',
-    'How do I handle difficult sellers?',
-    'How do I build a team?',
-    'How do I stop relying only on Facebook?',
-    'What should I do this week to grow?',
-  ],
-  lead_flow_planner: [
-    'Build a plan to contact real estate agents',
-    'Build a plan to contact probate attorneys',
-    'Build a plan to contact elder law attorneys',
-    'Build a plan to contact funeral homes',
-    'Build a plan to contact senior living communities',
-    'Build a plan to contact assisted living facilities',
-    'Build a plan to contact downsizing specialists',
-    'Build a plan to contact cleanout companies',
-    'Build a plan to contact home organizers',
-    'Build a plan to contact moving companies',
-    'Build a plan to contact auction houses',
-    'Build a plan to target local Facebook groups',
-    'Build a plan to contact FSBO sellers',
-    'Build a plan to contact divorce attorneys',
-    'Build a plan to contact financial planners',
-  ],
-  vendor_relations: ['Help me build a junk removal vendor network', 'Write an outreach email to a senior move manager'],
-  pricing_consultation: ['How do I price antique furniture at an estate sale?', 'Write my consultation walkthrough script for new clients'],
-  team_task_suggestions: ['Build weekly task lists for my team of 3: me, a marketer, and an on-site crew lead'],
-};
+
 
 function ModeWelcomeCard({ mode }) {
   const w = mode.welcome;

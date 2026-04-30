@@ -167,10 +167,19 @@ export const MODE_GROUPS = [
         color: 'text-amber-400',
         placeholder: 'Tell me what\'s on your plate this week — I\'ll build you a revenue-focused action plan.',
         welcome: {
-          title: 'Weekly Growth Planner',
-          subtitle: 'A structured Monday–Friday action plan focused entirely on growing your business.',
-          deliverables: ['Daily task priorities', '3 lead gen activities', '2 content pieces', '1 referral partner touchpoint', '1 business dev action'],
-          tip: 'Tell me what\'s happening this week — upcoming sales, goals, challenges — and I\'ll build your plan.',
+          title: 'This Week\'s Growth Plan',
+          subtitle: 'A comprehensive 8-point weekly action plan customized to your territory, sales, and goals.',
+          deliverables: [
+            '3 marketing tasks',
+            '3 referral partner tasks',
+            '3 social media post ideas',
+            '1 blog topic',
+            '1 email campaign',
+            '1 business improvement',
+            '1 measurable goal',
+            'Follow-up contact list',
+          ],
+          tip: 'Just ask and I\'ll generate a complete growth plan based on your upcoming sales, territory, and business goals.',
         },
       },
       {
@@ -335,3 +344,47 @@ export const MODE_GROUPS = [
 export const ALL_MODES = MODE_GROUPS.flatMap(g => g.modes);
 
 export const getModeByKey = (key) => ALL_MODES.find(m => m.key === key) || ALL_MODES[ALL_MODES.length - 1];
+
+// Starter prompts per mode
+export const MODE_STARTERS = {
+  weekly_growth_plan: [
+    'Build my growth plan for this week',
+    'Generate this week\'s growth plan',
+    'What should I focus on this week to grow my business?',
+    'Create my weekly action plan',
+    'Build a complete growth strategy for this week',
+  ],
+  business_coaching: [
+    'How do I grow my estate sale business?',
+    'What KPIs should I track?',
+    'Help me plan next month',
+    'How do I stand out from competitors?',
+    'How do I get more leads?',
+    'How do I meet more real estate agents?',
+    'How do I get probate referrals?',
+    'How do I grow in my territory?',
+    'How do I increase average revenue per sale?',
+    'How do I improve my consultations?',
+    'How do I handle difficult sellers?',
+    'How do I build a team?',
+    'How do I stop relying only on Facebook?',
+    'What should I do this week to grow?',
+  ],
+  lead_flow_planner: [
+    'Build a plan to contact real estate agents',
+    'Build a plan to contact probate attorneys',
+    'Build a plan to contact elder law attorneys',
+    'Build a plan to contact funeral homes',
+    'Build a plan to contact senior living communities',
+    'Build a plan to contact assisted living facilities',
+    'Build a plan to contact downsizing specialists',
+    'Build a plan to contact cleanout companies',
+    'Build a plan to contact home organizers',
+    'Build a plan to contact moving companies',
+    'Build a plan to contact auction houses',
+    'Build a plan to target local Facebook groups',
+    'Build a plan to contact FSBO sellers',
+    'Build a plan to contact divorce attorneys',
+    'Build a plan to contact financial planners',
+  ],
+};
