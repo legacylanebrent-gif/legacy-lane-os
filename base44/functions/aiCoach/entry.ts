@@ -3,12 +3,17 @@ import OpenAI from 'npm:openai';
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
+const DEFAULT_MODEL = Deno.env.get('OPENAI_DEFAULT_MODEL') || 'gpt-4o';
+const IMAGE_MODEL = Deno.env.get('OPENAI_IMAGE_MODEL') || 'gpt-image-1';
+const EMBEDDING_MODEL = Deno.env.get('OPENAI_EMBEDDING_MODEL') || 'text-embedding-3-small';
+
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { messages, context, model = 'gpt-4o' } = await req.json();
+  const { messages, context, model } = await req.json();
+  const selectedModel = model || DEFAULT_MODEL;
 
   // Build rich system prompt from operator context
   const {
@@ -53,7 +58,7 @@ ${aiMemory || 'No previous coaching history yet. This is a fresh start.'}
 Remember: You are NOT a generic chatbot. You are their dedicated business coach who knows their business inside and out.`;
 
   const completion = await openai.chat.completions.create({
-    model,
+    model: selectedModel,
     messages: [
       { role: 'system', content: systemPrompt },
       ...messages,
@@ -83,6 +88,6 @@ Remember: You are NOT a generic chatbot. You are their dedicated business coach 
       completion_tokens: usage?.completion_tokens || 0,
       total_tokens: usage?.total_tokens || 0,
     },
-    model,
+    model: selectedModel,
   });
 });

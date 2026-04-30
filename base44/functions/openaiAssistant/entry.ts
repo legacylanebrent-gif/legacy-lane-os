@@ -3,6 +3,10 @@ import OpenAI from 'npm:openai';
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
+const DEFAULT_MODEL = Deno.env.get('OPENAI_DEFAULT_MODEL') || 'gpt-4o';
+const IMAGE_MODEL = Deno.env.get('OPENAI_IMAGE_MODEL') || 'gpt-image-1';
+const EMBEDDING_MODEL = Deno.env.get('OPENAI_EMBEDDING_MODEL') || 'text-embedding-3-small';
+
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
@@ -12,7 +16,7 @@ Deno.serve(async (req) => {
 
   if (mode === 'chat') {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: DEFAULT_MODEL,
       messages: [
         {
           role: 'system',
@@ -26,7 +30,7 @@ Deno.serve(async (req) => {
 
   if (mode === 'generate') {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: DEFAULT_MODEL,
       messages: [
         {
           role: 'system',
@@ -40,7 +44,7 @@ Deno.serve(async (req) => {
 
   if (mode === 'analyze') {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: DEFAULT_MODEL,
       messages: [
         {
           role: 'system',
