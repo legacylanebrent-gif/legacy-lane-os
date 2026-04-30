@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
 import {
-  Search, Zap, PauseCircle, PlayCircle, RefreshCw, Plus, Settings, ChevronRight
+  Search, Zap, PauseCircle, PlayCircle, RefreshCw, Plus, Settings, Pencil, Check, X
 } from 'lucide-react';
 
 const TIERS = ['starter', 'professional', 'enterprise', 'unlimited'];
@@ -54,7 +55,12 @@ export default function AdminAICredits() {
   const [bonusAmount, setBonusAmount] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  // Pricing config state
+  const [pricingConfigs, setPricingConfigs] = useState([]);
+  const [editingPriceId, setEditingPriceId] = useState(null);
+  const [editingPriceValue, setEditingPriceValue] = useState('');
+
+  useEffect(() => { loadData(); loadPricingConfigs(); }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -62,12 +68,29 @@ export default function AdminAICredits() {
       base44.entities.OperatorAICreditAccount.list('-updated_date', 200),
       base44.entities.User.list(),
     ]);
-    // Build user lookup by id
     const userMap = {};
     userList.forEach(u => { userMap[u.id] = u; });
     setUsers(userMap);
     setAccounts(accts);
     setLoading(false);
+  };
+
+  const loadPricingConfigs = async () => {
+    const configs = await base44.entities.AIRequestPricingConfig.list('request_type', 50);
+    setPricingConfigs(configs);
+  };
+
+  const startEditPrice = (config) => {
+    setEditingPriceId(config.id);
+    setEditingPriceValue(String(config.credits));
+  };
+
+  const savePrice = async (config) => {
+    const credits = parseInt(editingPriceValue);
+    if (isNaN(credits) || credits < 0) return;
+    await base44.entities.AIRequestPricingConfig.update(config.id, { credits });
+    setEditingPriceId(null);
+    loadPricingConfigs();
   };
 
   const filtered = accounts.filter(a => {
@@ -139,10 +162,80 @@ export default function AdminAICredits() {
           <h1 className="text-2xl font-bold text-slate-900">AI Credit Management</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage operator AI access, credit limits, and usage</p>
         </div>
-        <Button onClick={loadData} variant="outline" size="sm">
+        <Button onClick={() => { loadData(); loadPricingConfigs(); }} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
       </div>
+
+      <Tabs defaultValue="operators">
+        <TabsList>
+          <TabsTrigger value="operators">Operator Accounts</TabsTrigger>
+          <TabsTrigger value="pricing">Request Pricing</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pricing" className="mt-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">AI Request Credit Costs</CardTitle>
+              <p className="text-sm text-slate-500">Credits charged per request type. Click the pencil icon to edit any value.</p>
+            </CardHeader>
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-slate-50">
+                    <th className="text-left px-4 py-3 font-medium text-slate-600">Request Type</th>
+                    <th className="text-left px-4 py-3 font-medium text-slate-600">Description</th>
+                    <th className="text-center px-4 py-3 font-medium text-slate-600">Credits</th>
+                    <th className="text-right px-4 py-3 font-medium text-slate-600">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pricingConfigs.map(config => (
+                    <tr key={config.id} className="border-b hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-slate-900">{config.label}</p>
+                        <p className="text-xs text-slate-400 font-mono">{config.request_type}</p>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 text-xs">{config.description}</td>
+                      <td className="px-4 py-3 text-center">
+                        {editingPriceId === config.id ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <Input
+                              type="number"
+                              value={editingPriceValue}
+                              onChange={e => setEditingPriceValue(e.target.value)}
+                              className="w-20 h-7 text-center text-sm"
+                              min="0"
+                              autoFocus
+                              onKeyDown={e => { if (e.key === 'Enter') savePrice(config); if (e.key === 'Escape') setEditingPriceId(null); }}
+                            />
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-green-600" onClick={() => savePrice(config)}>
+                              <Check className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500" onClick={() => setEditingPriceId(null)}>
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Badge className="bg-orange-100 text-orange-700 border-orange-300 font-mono text-sm px-3">
+                            {config.credits}
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="ghost" onClick={() => startEditPrice(config)} className="text-slate-400 hover:text-slate-700">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="operators" className="mt-4">
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -262,6 +355,9 @@ export default function AdminAICredits() {
           </CardContent>
         </Card>
       )}
+
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Limit Modal */}
       <Dialog open={editModal} onOpenChange={setEditModal}>

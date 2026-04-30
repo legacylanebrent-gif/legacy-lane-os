@@ -32,8 +32,15 @@ function getAvailableCredits(account) {
     - (account.monthly_credits_used || 0);
 }
 
-async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inputTokens, outputTokens, totalTokens, screenContext, reason }) {
-  const creditsCharged = totalTokens;
+// Load credit cost for a given ai_mode from the config entity
+async function getCreditCost(base44, aiMode) {
+  const configs = await base44.asServiceRole.entities.AIRequestPricingConfig.filter({ request_type: aiMode, is_active: true });
+  if (configs.length > 0) return configs[0].credits || 1;
+  // Fallback: default to 1 credit if no config found
+  return 1;
+}
+
+async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inputTokens, outputTokens, totalTokens, screenContext, reason, creditsCharged }) {
   const newUsed = (account.monthly_credits_used || 0) + creditsCharged;
   const totalLimit = (account.monthly_credit_limit || 0) + (account.bonus_credits || 0) + (account.rollover_credits || 0);
 
@@ -243,8 +250,11 @@ Deno.serve(async (req) => {
   const outputTokens = usage.completion_tokens || 0;
   const totalTokens = usage.total_tokens || 0;
 
-  // 13–14. Record credits and ledger
-  const { ledgerRecord, creditsCharged } = await recordUsage(base44, effectiveOperatorId, creditAccount, {
+  // 13. Look up credit cost from config entity
+  const creditsCharged = await getCreditCost(base44, ai_mode || 'standard');
+
+  // 14. Record credits and ledger
+  const { ledgerRecord } = await recordUsage(base44, effectiveOperatorId, creditAccount, {
     aiMode: ai_mode || 'coach',
     modelUsed: DEFAULT_MODEL,
     inputTokens,
@@ -252,6 +262,7 @@ Deno.serve(async (req) => {
     totalTokens,
     screenContext: screen_context,
     reason: `AI Coach — ${screen_context || ai_mode || 'coach'}`,
+    creditsCharged,
   });
 
   // 15. Save conversation record

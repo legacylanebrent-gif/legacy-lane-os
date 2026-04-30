@@ -1,0 +1,32 @@
+{
+  "name": "AIRequestPricingConfig",
+  "type": "object",
+  "properties": {
+    "request_type": {
+      "type": "string",
+      "description": "Unique key for this request type (e.g. 'standard', 'long_form_content')"
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label shown in admin UI"
+    },
+    "credits": {
+      "type": "integer",
+      "description": "Credits charged per request of this type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of what this request type covers"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this pricing config is active"
+    }
+  },
+  "required": [
+    "request_type",
+    "label",
+    "credits"
+  ]
+}
