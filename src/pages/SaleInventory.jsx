@@ -1,629 +1,301 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import CreateItemModal from '@/components/marketplace/CreateItemModal';
-import QRCode from 'qrcode';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  ArrowLeft, Plus, Search, Package, DollarSign, Tag, 
-  Image as ImageIcon, ShoppingBag, Store, MoreVertical, Edit, Trash2, Printer, PackagePlus, CheckSquare
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SaleInventory() {
-  const navigate = useNavigate();
-  const [sale, setSale] = useState(null);
+  const [searchParams] = useSearchParams();
+  const saleId = searchParams.get('id');
+
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [sale, setSale] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [showSelectModal, setShowSelectModal] = useState(false);
-  const [selectedImages, setSelectedImages] = useState({});
-  const [addingToInventory, setAddingToInventory] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [saleId]);
+
+  useEffect(() => {
+    filterItems();
+  }, [items, searchQuery, statusFilter]);
 
   const loadData = async () => {
     try {
-      const params = new URLSearchParams(window.location.search);
-      const saleId = params.get('saleId');
-      
-      if (!saleId) {
-        alert('Sale ID not found');
-        navigate(createPageUrl('MySales'));
-        return;
+      setLoading(true);
+      if (saleId) {
+        const saleData = await base44.entities.EstateSale.filter({ id: saleId });
+        setSale(saleData[0]);
       }
 
-      const saleData = await base44.entities.EstateSale.filter({ id: saleId });
-      if (saleData.length === 0) {
-        alert('Sale not found');
-        navigate(createPageUrl('MySales'));
-        return;
-      }
-
-      setSale(saleData[0]);
-
-      // Load items for this sale
-      const itemsData = await base44.entities.Item.filter({ 
-        estate_sale_id: saleId 
-      }, '-created_date');
-      setItems(itemsData);
+      const itemData = await base44.entities.Item.filter({
+        estate_sale_id: saleId,
+      });
+      setItems(itemData || []);
     } catch (error) {
-      console.error('Error loading data:', error);
+      toast.error('Error loading inventory: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusUpdate = async (itemId, newStatus) => {
+  const filterItems = () => {
+    let filtered = items;
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        item =>
+          item.title?.toLowerCase().includes(q) ||
+          item.sku?.toLowerCase().includes(q),
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
+    setFilteredItems(filtered);
+  };
+
+  const handleDelete = async item => {
+    if (!confirm(`Delete "${item.title}"?`)) return;
+
     try {
-      await base44.entities.Item.update(itemId, { status: newStatus });
-      await loadData();
+      await base44.entities.Item.delete(item.id);
+      toast.success('Item deleted');
+      loadData();
     } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Failed to update item status');
+      toast.error('Error deleting item: ' + error.message);
     }
   };
 
-  const handleDelete = async (itemId) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-    
+  const handleStatusChange = async (item, newStatus) => {
     try {
-      await base44.entities.Item.delete(itemId);
-      await loadData();
+      await base44.entities.Item.update(item.id, { status: newStatus });
+      toast.success(`Item marked as ${newStatus}`);
+      loadData();
     } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('Failed to delete item');
+      toast.error('Error updating item: ' + error.message);
     }
   };
 
-  const handleEdit = (item) => {
-    setEditingItem(item);
-    setShowCreateModal(true);
-  };
-
-  const handlePrintQRTag = async (item) => {
-    try {
-      // Generate QR code with item detail page URL
-      const itemPath = createPageUrl('ItemDetail');
-      const itemUrl = `${window.location.origin}${itemPath.startsWith('/') ? itemPath : '/' + itemPath}?itemId=${item.id}`;
-      const qrCodeDataUrl = await QRCode.toDataURL(itemUrl, { width: 300, margin: 2 });
-
-      // Create print window
-      const printWindow = window.open('', '', 'width=600,height=600');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>QR Code Tag - ${item.title}</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-              }
-              .tag-container {
-                text-align: center;
-                border: 2px solid #000;
-                padding: 20px;
-                width: 400px;
-              }
-              .qr-code {
-                margin: 20px auto;
-              }
-              .item-title {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 10px;
-              }
-              .item-id {
-                font-size: 14px;
-                color: #666;
-                margin-top: 10px;
-              }
-              @media print {
-                body { padding: 0; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="tag-container">
-              <div class="item-title">${item.title}</div>
-              <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code" />
-              <div class="item-id">Item #${item.id.substring(0, 8)}</div>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-      alert('Failed to generate QR code');
+  const getStatusColor = status => {
+    switch (status) {
+      case 'available':
+        return 'bg-green-100 text-green-700';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'sold':
+        return 'bg-slate-100 text-slate-700';
+      case 'reserved':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-slate-100 text-slate-700';
     }
-  };
-
-  const handlePrintLabel = (item) => {
-    const printWindow = window.open('', '', 'width=600,height=400');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Label - ${item.title}</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 20px;
-              font-family: Arial, sans-serif;
-            }
-            .label-container {
-              border: 2px solid #000;
-              padding: 20px;
-              width: 400px;
-              margin: 20px auto;
-            }
-            .title {
-              font-size: 24px;
-              font-weight: bold;
-              margin-bottom: 15px;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
-            }
-            .price {
-              font-size: 32px;
-              font-weight: bold;
-              color: #0891b2;
-              margin: 15px 0;
-            }
-            .description {
-              font-size: 14px;
-              line-height: 1.5;
-              margin-top: 15px;
-              padding-top: 15px;
-              border-top: 1px solid #ccc;
-            }
-            .category {
-              font-size: 12px;
-              color: #666;
-              margin-top: 10px;
-            }
-            @media print {
-              body { padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="label-container">
-            <div class="title">${item.title}</div>
-            <div class="price">$${item.price?.toLocaleString() || '0'}</div>
-            ${item.category ? `<div class="category">${item.category}</div>` : ''}
-            ${item.description ? `<div class="description">${item.description}</div>` : ''}
-          </div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
-  };
-
-  const buildItemFromImage = (img, saleId, user) => {
-    const imageObj = typeof img === 'string' ? { url: img, name: '', description: '', price: null } : img;
-    return {
-      title: imageObj.name || 'Untitled Item',
-      description: imageObj.description || '',
-      price: imageObj.price || imageObj.user_price || imageObj.ai_first_search_price || 0,
-      images: [imageObj.url],
-      estate_sale_id: saleId,
-      seller_id: user.id,
-      seller_name: user.full_name,
-      status: 'available',
-      category: (imageObj.categories && imageObj.categories[0]) || 'estate_items',
-    };
-  };
-
-  const handleAddAllToInventory = async () => {
-    const saleImages = sale?.images || [];
-    if (saleImages.length === 0) { alert('No photos found on this sale.'); return; }
-    if (!confirm(`Add all ${saleImages.length} photos to inventory?`)) return;
-    setAddingToInventory(true);
-    try {
-      const user = await base44.auth.me();
-      // Get existing item image URLs to avoid duplicates
-      const existingUrls = new Set(items.flatMap(i => i.images || []));
-      const toAdd = saleImages.filter(img => {
-        const url = typeof img === 'string' ? img : img?.url;
-        return url && !existingUrls.has(url);
-      });
-      if (toAdd.length === 0) { alert('All photos are already in inventory.'); return; }
-      await base44.entities.Item.bulkCreate(toAdd.map(img => buildItemFromImage(img, sale.id, user)));
-      await loadData();
-      alert(`Added ${toAdd.length} item(s) to inventory.`);
-    } catch (e) {
-      alert('Failed: ' + e.message);
-    } finally {
-      setAddingToInventory(false);
-    }
-  };
-
-  const handleAddSelectedToInventory = async () => {
-    const chosen = (sale?.images || []).filter((img, i) => selectedImages[i]);
-    if (chosen.length === 0) { alert('Please select at least one photo.'); return; }
-    setAddingToInventory(true);
-    try {
-      const user = await base44.auth.me();
-      await base44.entities.Item.bulkCreate(chosen.map(img => buildItemFromImage(img, sale.id, user)));
-      await loadData();
-      setShowSelectModal(false);
-      setSelectedImages({});
-      alert(`Added ${chosen.length} item(s) to inventory.`);
-    } catch (e) {
-      alert('Failed: ' + e.message);
-    } finally {
-      setAddingToInventory(false);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      available: 'bg-green-100 text-green-700',
-      pending: 'bg-yellow-100 text-yellow-700',
-      sold: 'bg-purple-100 text-purple-700',
-      reserved: 'bg-blue-100 text-blue-700'
-    };
-    return colors[status] || 'bg-slate-100 text-slate-700';
-  };
-
-  const filteredItems = items.filter(item => 
-    !searchQuery || 
-    item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const stats = {
-    total: items.length,
-    available: items.filter(i => i.status === 'available').length,
-    sold: items.filter(i => i.status === 'sold').length,
-    totalValue: items.filter(i => i.status === 'available').reduce((sum, i) => sum + (i.price || 0), 0)
   };
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-          <div className="h-96 bg-slate-200 rounded"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cream-50 p-8">
+        <div className="max-w-6xl mx-auto">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!sale) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cream-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900">Sale not found</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cream-50">
       {/* Header */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate(createPageUrl('MySales'))}>
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-serif font-bold text-slate-900 truncate">{sale?.title}</h1>
-            <p className="text-xs text-slate-500">Marketplace Inventory</p>
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-serif font-bold text-navy-900">
+                {sale.title} — Inventory
+              </h1>
+              <p className="text-slate-600 mt-2">Manage items for sale and marketplace</p>
+            </div>
+            <Button
+              onClick={() => {
+                setEditingItem(null);
+                setShowForm(true);
+              }}
+              className="bg-gold-600 hover:bg-gold-700 gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Item
+            </Button>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { setSelectedImages({}); setShowSelectModal(true); }}
-            className="border-green-600 text-green-700 hover:bg-green-50 text-xs"
-          >
-            <CheckSquare className="w-3 h-3 mr-1" />
-            Select Items to Add
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddAllToInventory}
-            disabled={addingToInventory}
-            className="border-blue-600 text-blue-700 hover:bg-blue-50 text-xs"
-          >
-            <PackagePlus className="w-3 h-3 mr-1" />
-            {addingToInventory ? 'Adding...' : 'Add All to Inventory'}
-          </Button>
-          <Button 
-            size="sm"
-            onClick={() => {
-              setEditingItem(null);
-              setShowCreateModal(true);
-            }}
-            className="bg-orange-600 hover:bg-orange-700 text-xs"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Add to Marketplace
-          </Button>
+
+          {/* Search & Filters */}
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Search by title or SKU..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-sm"
+            >
+              <option value="all">All Status</option>
+              <option value="available">Available</option>
+              <option value="pending">Pending</option>
+              <option value="sold">Sold</option>
+              <option value="reserved">Reserved</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <CreateItemModal
-        open={showCreateModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setEditingItem(null);
-        }}
-        item={editingItem}
-        saleId={sale?.id}
-        onSuccess={loadData}
-      />
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-16">
+            <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+            <h3 className="text-xl font-semibold text-slate-700">No items found</h3>
+            <p className="text-slate-500 mt-2">
+              {items.length === 0 ? 'Create your first item to get started' : 'Try adjusting your filters'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredItems.map(item => (
+              <div
+                key={item.id}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex items-center justify-between gap-4"
+              >
+                {/* Item Info */}
+                <div className="flex-1">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-900">{item.title}</h3>
+                      <p className="text-sm text-slate-600 mt-1">{item.description}</p>
 
-      {/* Select Images Modal */}
-      <Dialog open={showSelectModal} onOpenChange={setShowSelectModal}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Select Photos to Add to Inventory</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-500">
-                {Object.values(selectedImages).filter(Boolean).length} selected
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => {
-                  const all = {};
-                  (sale?.images || []).forEach((_, i) => { all[i] = true; });
-                  setSelectedImages(all);
-                }}>Select All</Button>
-                <Button variant="outline" size="sm" onClick={() => setSelectedImages({})}>Clear</Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              {(sale?.images || []).map((img, i) => {
-                const imageObj = typeof img === 'string' ? { url: img, name: '' } : img;
-                const existingUrls = new Set(items.flatMap(it => it.images || []));
-                const alreadyAdded = existingUrls.has(imageObj.url);
-                return (
-                  <div
-                    key={i}
-                    className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                      alreadyAdded ? 'opacity-40 cursor-not-allowed border-slate-200' :
-                      selectedImages[i] ? 'border-green-500 ring-2 ring-green-300' : 'border-slate-200 hover:border-slate-400'
-                    }`}
-                    onClick={() => {
-                      if (alreadyAdded) return;
-                      setSelectedImages(prev => ({ ...prev, [i]: !prev[i] }));
-                    }}
-                  >
-                    <img src={imageObj.url} alt={imageObj.name || `Photo ${i+1}`} className="w-full aspect-square object-cover" />
-                    <div className="absolute top-1 left-1">
-                      <Checkbox checked={!!selectedImages[i]} readOnly className="bg-white" />
-                    </div>
-                    {alreadyAdded && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-1">Already added</div>
-                    )}
-                    {imageObj.name && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] px-1 py-0.5 truncate">
-                        {imageObj.name}
+                      <div className="flex gap-2 mt-3 flex-wrap">
+                        <Badge variant="secondary">{item.category}</Badge>
+                        <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
+
+                        {item.sales_channels?.includes('inventory') && (
+                          <Badge className="bg-gold-100 text-gold-700 flex items-center gap-1">
+                            <Package className="w-3 h-3" />
+                            Inventory
+                          </Badge>
+                        )}
+
+                        {item.sales_channels?.includes('marketplace') && (
+                          <Badge className="bg-sage-100 text-sage-700 flex items-center gap-1">
+                            <Globe className="w-3 h-3" />
+                            Marketplace
+                          </Badge>
+                        )}
+
+                        {item.marketplace_item_id && item.status === 'sold' && (
+                          <Badge className="bg-red-100 text-red-700 flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            Synced & Sold
+                          </Badge>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-end gap-2 pt-2 border-t">
-              <Button variant="outline" onClick={() => setShowSelectModal(false)}>Cancel</Button>
-              <Button
-                onClick={handleAddSelectedToInventory}
-                disabled={addingToInventory || Object.values(selectedImages).filter(Boolean).length === 0}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <PackagePlus className="w-4 h-4 mr-2" />
-                {addingToInventory ? 'Adding...' : `Add ${Object.values(selectedImages).filter(Boolean).length} to Inventory`}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Total Items</div>
-            <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Available</div>
-            <div className="text-2xl font-bold text-green-600">{stats.available}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Sold</div>
-            <div className="text-2xl font-bold text-purple-600">{stats.sold}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Total Value</div>
-            <div className="text-2xl font-bold text-cyan-600">
-              ${stats.totalValue.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-        <Input
-          placeholder="Search marketplace items..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {/* Items Display */}
-      {filteredItems.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Store className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-500 text-lg mb-4">
-            {searchQuery ? 'No items match your search' : 'No items listed on marketplace yet'}
-          </p>
-          {!searchQuery && (
-            <>
-              <p className="text-slate-600 mb-4">
-                Add items from this estate sale to the online marketplace to reach more buyers
-              </p>
-              <Button 
-                onClick={() => setShowCreateModal(true)}
-                className="bg-orange-600 hover:bg-orange-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Item to Marketplace
-              </Button>
-            </>
-          )}
-        </Card>
-      ) : (
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredItems.map(item => (
-            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative h-48 bg-slate-100 overflow-hidden">
-                {item.images && item.images.length > 0 ? (
-                  <img
-                    src={item.images[0]}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <ImageIcon className="w-12 h-12 text-slate-300" />
-                  </div>
-                )}
-                <Badge className={`absolute top-3 left-3 ${getStatusColor(item.status)}`}>
-                  {item.status}
-                </Badge>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="absolute top-3 right-3 h-8 w-8 bg-white/90 hover:bg-white"
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <a href={createPageUrl('ItemDetail') + '?itemId=' + item.id} target="_blank" rel="noopener noreferrer">
-                        <ImageIcon className="w-4 h-4 mr-2" />
-                        View Item Page
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEdit(item)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Item
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handlePrintQRTag(item)}>
-                      <Printer className="w-4 h-4 mr-2" />
-                      Print QR Code Tag
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handlePrintLabel(item)}>
-                      <Printer className="w-4 h-4 mr-2" />
-                      Print Price Label
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusUpdate(item.id, 'available')}
-                      disabled={item.status === 'available'}
-                    >
-                      Mark as Available
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusUpdate(item.id, 'pending')}
-                      disabled={item.status === 'pending'}
-                    >
-                      Mark as Pending
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusUpdate(item.id, 'sold')}
-                      disabled={item.status === 'sold'}
-                    >
-                      Mark as Sold
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusUpdate(item.id, 'reserved')}
-                      disabled={item.status === 'reserved'}
-                    >
-                      Mark as Reserved
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Item
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2">
-                  {item.title}
-                </h3>
-
-                <div className="space-y-2">
-                  {item.category && (
-                    <div className="flex items-center gap-1 text-sm text-slate-600">
-                      <Tag className="w-3 h-3" />
-                      <span>{item.category}</span>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-lg font-bold text-cyan-600">
-                      <DollarSign className="w-5 h-5" />
-                      <span>{item.price?.toLocaleString()}</span>
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {item.views || 0} views
+
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-gold-600">${item.price?.toLocaleString()}</p>
+                      <p className="text-xs text-slate-500 mt-1">Qty: {item.quantity}</p>
+                      {item.sku && <p className="text-xs text-slate-500">SKU: {item.sku}</p>}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  {item.status !== 'sold' && (
+                    <select
+                      value={item.status}
+                      onChange={e => handleStatusChange(item, e.target.value)}
+                      className="px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                    >
+                      <option value="available">Available</option>
+                      <option value="pending">Pending</option>
+                      <option value="reserved">Reserved</option>
+                      <option value="sold">Sold</option>
+                    </select>
+                  )}
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingItem(item);
+                      setShowForm(true);
+                    }}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(item)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Item Form Modal */}
+      {showForm && (
+        <UnifiedItemForm
+          item={editingItem}
+          saleId={saleId}
+          onClose={() => {
+            setShowForm(false);
+            setEditingItem(null);
+          }}
+          onSaved={() => {
+            setShowForm(false);
+            setEditingItem(null);
+            loadData();
+          }}
+        />
       )}
     </div>
   );

@@ -1,0 +1,231 @@
+{
+  "name": "Item",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "estate_items",
+        "furniture",
+        "art",
+        "jewelry",
+        "vehicles",
+        "home_decor",
+        "vendor_services",
+        "digital_products",
+        "education",
+        "collectibles",
+        "antiques",
+        "other"
+      ]
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "User ID of seller"
+    },
+    "seller_name": {
+      "type": "string"
+    },
+    "estate_sale_id": {
+      "type": "string",
+      "description": "If from estate sale"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "price": {
+      "type": "number"
+    },
+    "original_price": {
+      "type": "number"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "new",
+        "excellent",
+        "good",
+        "fair",
+        "poor"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "pending",
+        "sold",
+        "reserved"
+      ],
+      "default": "available",
+      "description": "Master status \u2014 synced across all channels"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "number"
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      }
+    },
+    "fulfillment_options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "shipping",
+          "pickup",
+          "digital"
+        ]
+      },
+      "default": [
+        "pickup"
+      ]
+    },
+    "shipping_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "pickup_location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "string"
+        }
+      }
+    },
+    "digital_download_url": {
+      "type": "string"
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "saves": {
+      "type": "integer",
+      "default": 0
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1
+    },
+    "rating": {
+      "type": "number"
+    },
+    "total_reviews": {
+      "type": "integer",
+      "default": 0
+    },
+    "sales_channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "inventory",
+          "marketplace"
+        ]
+      },
+      "default": [],
+      "description": "Which channels this item is listed on"
+    },
+    "inventory_display_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "hidden"
+      ],
+      "default": "active",
+      "description": "Display status specific to sale inventory"
+    },
+    "marketplace_item_id": {
+      "type": "string",
+      "description": "Reference to linked MarketplaceItem if listed there"
+    },
+    "marketplace_display_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "inactive"
+      ],
+      "default": "draft",
+      "description": "Display status specific to marketplace"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time status was synced across channels"
+    }
+  },
+  "required": [
+    "title",
+    "seller_id",
+    "price"
+  ]
+}
