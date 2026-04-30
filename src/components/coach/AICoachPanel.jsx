@@ -33,7 +33,18 @@ const MODE_STARTERS = {
   objection_handler: ['"Your commission is too high — another company said they\'d do it for less"', '"We\'re not ready yet, we need more time"', '"The family can\'t agree on anything"'],
   post_sale_followup: ['Write my post-sale follow-up sequence for a sale that just closed in Ridgewood, NJ'],
   review_generation: ['Write everything I need to ask for a Google review after a sale', 'Write a review request text message for happy clients'],
-  business_coaching: ['How do I scale from 2 to 5 sales per month?', 'What systems do I need to hire my first employee?'],
+  business_coaching: [
+    'How do I get more estate sale leads?',
+    'How do I meet more real estate agents?',
+    'How do I get probate referrals?',
+    'How do I grow in my territory?',
+    'How do I increase average revenue per sale?',
+    'How do I improve my consultations?',
+    'How do I handle difficult sellers?',
+    'How do I build a team?',
+    'How do I stop relying only on Facebook?',
+    'What should I do this week to grow?',
+  ],
   vendor_relations: ['Help me build a junk removal vendor network', 'Write an outreach email to a senior move manager'],
   pricing_consultation: ['How do I price antique furniture at an estate sale?', 'Write my consultation walkthrough script for new clients'],
   team_task_suggestions: ['Build weekly task lists for my team of 3: me, a marketer, and an on-site crew lead'],
@@ -361,12 +372,12 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         {showStarters && messages.length === 0 && !screenActions && starters.length > 0 && (
           <div className="space-y-1.5 mt-2">
             <p className="text-xs text-slate-500 font-medium px-0.5">Try asking:</p>
-            <div className="space-y-1.5">
+            <div className={activeMode.key === 'business_coaching' ? 'grid grid-cols-2 gap-1.5' : 'space-y-1.5'}>
               {starters.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => sendMessage(s)}
-                  className="w-full text-left text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white rounded-lg px-3 py-2 transition-all leading-relaxed"
+                  className={`w-full text-left text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 hover:border-amber-500/60 text-slate-300 hover:text-white rounded-lg px-3 py-2 transition-all leading-relaxed ${activeMode.key === 'business_coaching' ? 'hover:bg-amber-950/30 hover:border-amber-600/50' : ''}`}
                 >
                   {s}
                 </button>

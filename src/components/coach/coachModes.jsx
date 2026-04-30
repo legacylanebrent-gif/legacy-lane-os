@@ -242,8 +242,20 @@ export const MODE_GROUPS = [
         label: 'Business Coach',
         icon: Briefcase,
         color: 'text-amber-400',
-        placeholder: 'What business challenge are you facing? Or ask me anything about growing your company.',
-        welcome: null, // uses default welcome
+        placeholder: 'What do you want to work on? (e.g. "How do I get more estate sale leads?" or "How do I build a team?")',
+        welcome: {
+          title: 'Business Growth Coach',
+          subtitle: 'Your personal advisor for leads, revenue, team-building, and territory domination.',
+          deliverables: [
+            'Diagnosis of your situation',
+            'Recommended strategy',
+            'Step-by-step action plan',
+            'Scripts & messages',
+            'Follow-up schedule',
+            'Success metrics',
+          ],
+          tip: 'Ask me any business challenge — leads, agents, probate, revenue, consultations, team, or territory. I\'ll give you a full structured plan.',
+        },
       },
       {
         key: 'vendor_relations',
