@@ -15,11 +15,69 @@ const CATEGORIES = [
   'home_decor',
   'antiques',
   'collectibles',
+  'vehicles',
   'estate_items',
   'other',
 ];
 
 const CONDITIONS = ['new', 'excellent', 'good', 'fair', 'poor'];
+
+const CATEGORY_SPECS = {
+  furniture: [
+    { key: 'furniture_material', label: 'Material', placeholder: 'Wood type, leather, fabric, metal...' },
+    { key: 'furniture_style', label: 'Style/Era', placeholder: 'Victorian, Mid-Century Modern, Farmhouse...' },
+    { key: 'furniture_color', label: 'Color/Pattern', placeholder: 'Color or pattern description' },
+    { key: 'furniture_upholstery_condition', label: 'Upholstery Condition (if applicable)', placeholder: 'Excellent, good, worn, etc.' },
+  ],
+  art: [
+    { key: 'art_artist_name', label: 'Artist Name', placeholder: 'Artist or unknown' },
+    { key: 'art_medium', label: 'Medium', placeholder: 'Oil painting, watercolor, sculpture, print...' },
+    { key: 'art_estimated_era', label: 'Estimated Era', placeholder: 'Approximate period' },
+    { key: 'art_is_signed', label: 'Is Signed?', type: 'checkbox' },
+    { key: 'art_is_framed', label: 'Is Framed?', type: 'checkbox' },
+    { key: 'art_provenance', label: 'Provenance/Story', placeholder: 'Where it came from, history...' },
+  ],
+  jewelry: [
+    { key: 'jewelry_material', label: 'Material', placeholder: '14K gold, sterling silver, platinum, costume...' },
+    { key: 'jewelry_gemstone', label: 'Primary Gemstone', placeholder: 'Diamond, emerald, ruby, sapphire...' },
+    { key: 'jewelry_gemstone_weight', label: 'Gemstone Weight', placeholder: 'Carat weight or description' },
+    { key: 'jewelry_metal_weight', label: 'Metal Weight', placeholder: 'If known, in grams' },
+    { key: 'jewelry_authenticity', label: 'Authenticity', placeholder: 'Hallmarked, certified, etc.' },
+  ],
+  vehicles: [
+    { key: 'vehicle_make_model', label: 'Make/Model', placeholder: 'E.g., Ford F-150' },
+    { key: 'vehicle_year', label: 'Year', placeholder: 'YYYY' },
+    { key: 'vehicle_mileage', label: 'Mileage', placeholder: 'Approx. miles' },
+    { key: 'vehicle_color', label: 'Color', placeholder: 'Exterior color' },
+    { key: 'vehicle_fuel_type', label: 'Fuel Type', placeholder: 'Gas, diesel, electric, hybrid' },
+    { key: 'vehicle_condition', label: 'Condition', placeholder: 'Runs great, needs work, non-running' },
+    { key: 'vehicle_vin', label: 'VIN (Optional)', placeholder: 'For verification' },
+  ],
+  home_decor: [
+    { key: 'decor_style_theme', label: 'Style/Theme', placeholder: 'Coastal, bohemian, modern, farmhouse...' },
+    { key: 'decor_material', label: 'Material', placeholder: 'Wood, metal, ceramic, glass...' },
+    { key: 'decor_color', label: 'Color', placeholder: 'Primary color(s)' },
+    { key: 'decor_purpose', label: 'Purpose', placeholder: 'Wall art, centerpiece, outdoor, etc.' },
+  ],
+  antiques: [
+    { key: 'antique_era', label: 'Estimated Era', placeholder: 'Victorian, Edwardian, 1920s, etc.' },
+    { key: 'antique_maker', label: 'Maker/Manufacturer', placeholder: 'Known maker or unknown' },
+    { key: 'antique_rarity', label: 'Rarity Level', placeholder: 'Common, rare, very rare' },
+    { key: 'antique_authenticity_notes', label: 'Authenticity Notes', placeholder: 'Original parts, restored, etc.' },
+    { key: 'antique_provenance', label: 'Provenance', placeholder: 'Documented history or story' },
+  ],
+  collectibles: [
+    { key: 'collectible_model_edition', label: 'Model/Edition', placeholder: 'Limited edition number, variant, etc.' },
+    { key: 'collectible_condition_grade', label: 'Condition Grade', placeholder: 'Mint, near-mint, good, fair' },
+    { key: 'collectible_rarity', label: 'Rarity', placeholder: 'Common, rare, very rare' },
+    { key: 'collectible_authentication', label: 'Authentication', placeholder: 'Original packaging, certificate, etc.' },
+  ],
+  estate_items: [
+    { key: 'estate_origin_story', label: 'Origin Story', placeholder: 'Family heirloom, purchased where, etc.' },
+    { key: 'estate_era', label: 'Estimated Era', placeholder: 'When it was likely made/acquired' },
+    { key: 'estate_significance', label: 'Special Significance', placeholder: 'Why it matters or unique details' },
+  ],
+};
 
 export default function UnifiedItemForm({
   item = null,
@@ -35,10 +93,14 @@ export default function UnifiedItemForm({
     price: '',
     quantity: 1,
     sku: '',
+    brand: '',
+    size: '',
+    shipping_weight: '',
     images: [],
     sales_channels: [],
     inventory_display_status: 'active',
     marketplace_display_status: 'draft',
+    specs: {},
   });
 
   const [errors, setErrors] = useState({});
@@ -54,10 +116,14 @@ export default function UnifiedItemForm({
         price: item.price || '',
         quantity: item.quantity || 1,
         sku: item.sku || '',
+        brand: item.brand || '',
+        size: item.size || '',
+        shipping_weight: item.shipping_weight || '',
         images: item.images || [],
         sales_channels: item.sales_channels || [],
         inventory_display_status: item.inventory_display_status || 'active',
         marketplace_display_status: item.marketplace_display_status || 'draft',
+        specs: item.specs || {},
       });
     }
   }, [item]);
@@ -241,6 +307,38 @@ export default function UnifiedItemForm({
             </div>
           </div>
 
+          {/* Brand, Size, Shipping Weight */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="block font-semibold text-slate-900 text-sm">Brand (Optional)</label>
+              <Input
+                value={formData.brand}
+                onChange={e => setFormData({ ...formData, brand: e.target.value })}
+                placeholder="Brand/manufacturer"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-semibold text-slate-900 text-sm">Size (Optional)</label>
+              <Input
+                value={formData.size}
+                onChange={e => setFormData({ ...formData, size: e.target.value })}
+                placeholder="S/M/L, dimensions, etc."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-semibold text-slate-900 text-sm">Shipping Weight (lbs)</label>
+              <Input
+                type="number"
+                step="0.1"
+                value={formData.shipping_weight}
+                onChange={e => setFormData({ ...formData, shipping_weight: e.target.value })}
+                placeholder="Approx. weight"
+              />
+            </div>
+          </div>
+
           {/* SKU */}
           <div className="space-y-2">
             <label className="block font-semibold text-slate-900 text-sm">SKU (Optional)</label>
@@ -250,6 +348,49 @@ export default function UnifiedItemForm({
               placeholder="e.g., VIN-001"
             />
           </div>
+
+          {/* Category-specific specs */}
+          {CATEGORY_SPECS[formData.category] && (
+            <div className="space-y-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <p className="font-semibold text-sm text-slate-900">Additional Details for {formData.category}</p>
+              <div className="space-y-3">
+                {CATEGORY_SPECS[formData.category].map(spec => (
+                  <div key={spec.key}>
+                    <label className="block text-sm text-slate-700 font-medium mb-1">
+                      {spec.label}
+                    </label>
+                    {spec.type === 'checkbox' ? (
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.specs[spec.key] || false}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              specs: { ...formData.specs, [spec.key]: e.target.checked },
+                            })
+                          }
+                        />
+                        <span className="text-sm">{spec.label}</span>
+                      </label>
+                    ) : (
+                      <Input
+                        value={formData.specs[spec.key] || ''}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            specs: { ...formData.specs, [spec.key]: e.target.value },
+                          })
+                        }
+                        placeholder={spec.placeholder}
+                        className="text-sm"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Channel-specific settings */}
           {formData.sales_channels.includes('inventory') && (
