@@ -207,8 +207,8 @@ export default function AdminLeadImporter() {
 
       const imported = [];
       const failed = [];
-      const BATCH_SIZE = 5;
-      const BATCH_DELAY = 500; // ms between batches
+      const BATCH_SIZE = 3;
+      const BATCH_DELAY = 1000; // ms between batches
 
       for (let i = 0; i < leads.length; i += BATCH_SIZE) {
         const batch = leads.slice(i, i + BATCH_SIZE);
