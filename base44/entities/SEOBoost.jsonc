@@ -1,0 +1,117 @@
+{
+  "name": "SEOBoost",
+  "type": "object",
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "description": "Reference to the Item"
+    },
+    "marketplace_item_id": {
+      "type": "string",
+      "description": "Reference to MarketplaceItem if applicable"
+    },
+    "estate_sale_id": {
+      "type": "string",
+      "description": "Reference to EstateSale if applicable"
+    },
+    "boost_type": {
+      "type": "string",
+      "enum": [
+        "keyword_rich_title",
+        "long_tail_keywords",
+        "schema_markup",
+        "internal_links",
+        "featured_snippet"
+      ],
+      "default": "keyword_rich_title",
+      "description": "Type of SEO boost applied"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Keywords extracted and optimized"
+    },
+    "primary_keyword": {
+      "type": "string",
+      "description": "Main keyword for the item"
+    },
+    "secondary_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Related long-tail keywords"
+    },
+    "suggested_title": {
+      "type": "string",
+      "description": "SEO-optimized title suggestion"
+    },
+    "suggested_description": {
+      "type": "string",
+      "description": "SEO-optimized description with keyword integration"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "Meta description for search engines (max 160 chars)"
+    },
+    "seo_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "SEO optimization score"
+    },
+    "estimated_organic_reach": {
+      "type": "integer",
+      "description": "Estimated monthly organic search traffic"
+    },
+    "category_insights": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "trending_keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "search_volume": {
+          "type": "integer"
+        },
+        "competition": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "boost_reason": {
+      "type": "string",
+      "description": "Why this boost was applied"
+    }
+  },
+  "required": [
+    "item_id",
+    "boost_type",
+    "primary_keyword"
+  ]
+}
