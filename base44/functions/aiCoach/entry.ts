@@ -150,8 +150,27 @@ ${recentSales && recentSales.length > 0
     ? recentSales.slice(0, 5).map(s => `• ${s.title} — ${s.status} — Est. Value: $${(s.estimated_value || 0).toLocaleString()} — ${s.property_address?.city || ''}, ${s.property_address?.state || ''}`).join('\n')
     : 'No recent sales data available.'}
 
-== AI MEMORY (Past Coaching Notes) ==
-${aiMemory || 'No previous coaching history yet. This is a fresh start.'}
+== AI MEMORY (Operator Personalization) ==
+${(() => {
+  if (!aiMemory) return 'No personalization data saved yet. This is a fresh start.';
+  try {
+    const mem = JSON.parse(aiMemory);
+    const lines = [];
+    if (mem.brand_voice) lines.push(`Brand Voice: ${mem.brand_voice}`);
+    if (mem.preferred_tone) lines.push(`Preferred Tone: ${mem.preferred_tone}`);
+    if (mem.preferred_cta) lines.push(`Preferred CTA: ${mem.preferred_cta}`);
+    if (mem.service_area) lines.push(`Service Area: ${mem.service_area}`);
+    if (mem.target_customer) lines.push(`Target Customer: ${mem.target_customer}`);
+    if (mem.recurring_objections) lines.push(`Recurring Objections: ${mem.recurring_objections}`);
+    if (mem.content_style) lines.push(`Content Style: ${mem.content_style}`);
+    if (mem.business_goals) lines.push(`Business Goals: ${mem.business_goals}`);
+    if (mem.referral_focus) lines.push(`Referral Focus: ${mem.referral_focus}`);
+    if (mem.promo_preferences) lines.push(`Promo Preferences: ${mem.promo_preferences}`);
+    return lines.length > 0 ? lines.join('\n') : 'No personalization data saved yet.';
+  } catch (_) {
+    return aiMemory;
+  }
+})()}
 
 == YOUR ROLE & RESPONSIBILITIES ==
 Your job is to help the operator:
@@ -203,13 +222,59 @@ Remember: You are NOT a generic chatbot. You are their dedicated business coach 
     reason: 'AI Coach conversation',
   });
 
-  // ── Save AI memory ──
+  // ── Save AI memory (durable personalization only) ──
   try {
     const lastUserMsg = messages[messages.length - 1]?.content || '';
-    const memoryEntry = `[${new Date().toLocaleDateString()}] User: ${lastUserMsg.substring(0, 120)}... Coach: ${reply.substring(0, 200)}...`;
-    const currentMemory = user.ai_coach_memory || '';
-    const updatedMemory = (currentMemory + '\n\n' + memoryEntry).trim().slice(-4000);
-    await base44.auth.updateMe({ ai_coach_memory: updatedMemory });
+    const conversationSnippet = `User: ${lastUserMsg}\nCoach: ${reply}`;
+
+    const memoryExtractionPrompt = `You are a memory extraction system for an AI business coach.
+
+Analyze the following conversation snippet and extract ONLY durable, reusable personalization facts about the operator's business.
+
+Only extract facts that belong to one of these categories:
+- brand_voice: How they want to sound (e.g. "warm and professional", "bold and direct")
+- preferred_tone: Emotional tone preference (e.g. "compassionate", "energetic", "authoritative")
+- preferred_cta: Call-to-action phrases they like (e.g. "Call us today", "Schedule a free walkthrough")
+- service_area: Geographic area they serve (e.g. "Dallas-Fort Worth", "Northern New Jersey")
+- target_customer: Who their ideal client is (e.g. "adult children handling parent estates", "probate attorneys")
+- recurring_objections: Common client objections they face (e.g. "price is too high", "not ready yet")
+- content_style: Preferred content format (e.g. "short punchy posts", "long-form storytelling")
+- business_goals: Stated business goals (e.g. "expand to 3 new counties", "hire a second crew")
+- referral_focus: Who they want referral partnerships with (e.g. "probate attorneys", "senior move managers")
+- promo_preferences: Sale promotion preferences (e.g. "always lead with featured items", "use countdown urgency")
+
+DO NOT extract:
+- Details about a specific upcoming or past sale
+- Temporary pricing or dates
+- One-off questions or tasks
+- Anything the operator did NOT explicitly state about their business preferences
+
+If you find durable facts, return them as a compact JSON object like:
+{"brand_voice": "warm and compassionate", "service_area": "Bergen County NJ"}
+
+If there is nothing durable to save, return exactly: {}
+
+Conversation:
+${conversationSnippet}`;
+
+    const memoryCheck = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: memoryExtractionPrompt }],
+      max_tokens: 300,
+      temperature: 0,
+    });
+
+    const extracted = memoryCheck.choices[0].message.content.trim();
+    let newFacts = {};
+    try { newFacts = JSON.parse(extracted); } catch (_) { newFacts = {}; }
+
+    if (Object.keys(newFacts).length > 0) {
+      // Merge with existing structured memory
+      let existingMemory = {};
+      try { existingMemory = JSON.parse(user.ai_coach_memory || '{}'); } catch (_) { existingMemory = {}; }
+      const mergedMemory = { ...existingMemory, ...newFacts, last_updated: new Date().toISOString() };
+      await base44.auth.updateMe({ ai_coach_memory: JSON.stringify(mergedMemory) });
+    }
   } catch (e) {
     console.error('Memory save failed:', e.message);
   }
