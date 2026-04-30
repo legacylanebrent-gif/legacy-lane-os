@@ -21,11 +21,6 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
       setAuthError(null);
-      setIsAuthenticated(true);
-      // Simplified: just try to get user if token exists
-      if (appParams.token) {
-        await checkUserAuth();
-      }
     } catch (error) {
       console.error('App state check failed:', error);
       setIsLoadingPublicSettings(false);
