@@ -18,6 +18,9 @@ export default function CSVLeadImport() {
     contact_phone: 'Phone Number',
     contact_email: 'Email Address',
     property_address: 'Property Address',
+    property_city: 'City',
+    property_state: 'State',
+    property_zip: 'ZIP Code',
     estimated_value: 'Est. Value',
     source_details: 'County/Region',
     notes: 'Notes'
@@ -27,14 +30,17 @@ export default function CSVLeadImport() {
   const PROPERTY_FIELD_MAPPINGS = {
     'Mailing Care of Name': 'contact_name',
     'Owner 1 First Name': 'contact_name',
+    'Owner 1 Last Name': 'contact_name',
+    'Owner 2 First Name': 'contact_name',
+    'Owner 2 Last Name': 'contact_name',
     'Phone 1': 'contact_phone',
     'Phone 2': 'contact_phone',
     'Email 1': 'contact_email',
     'Email 2': 'contact_email',
     'Address': 'property_address',
-    'City': 'property_address',
-    'State': 'property_address',
-    'Zip': 'property_address',
+    'City': 'property_city',
+    'State': 'property_state',
+    'Zip': 'property_zip',
     'Est. Value': 'estimated_value',
     'County': 'source_details',
     'Notes': 'notes'
@@ -110,40 +116,46 @@ export default function CSVLeadImport() {
     setImporting(true);
     try {
       const leads = data.map(row => {
-         const lead = { source: 'propstream' };
-         const addressParts = [];
+          const lead = { source: 'propstream' };
+          const addressParts = [];
 
-         Object.entries(mapping).forEach(([csvCol, leadField]) => {
-           let value = row[csvCol];
-           if (!value) return;
+          Object.entries(mapping).forEach(([csvCol, leadField]) => {
+            let value = row[csvCol];
+            if (!value) return;
 
-           if (leadField === 'estimated_value') {
-             value = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
-             if (value > 0) lead[leadField] = value;
-           } else if (leadField === 'property_address') {
-             addressParts.push(value);
-           } else if (leadField === 'contact_name') {
-             // Combine first and last names if needed
-             if (!lead.contact_name && value) {
-               const lastName = row['Owner 1 Last Name'] || row['Owner 2 Last Name'];
-               lead.contact_name = lastName ? `${value} ${lastName}` : value;
-             }
-           } else if (leadField === 'contact_phone' && !lead.contact_phone) {
-             lead.contact_phone = value;
-           } else if (leadField === 'contact_email' && !lead.contact_email) {
-             lead.contact_email = value;
-           } else if (leadField && value) {
-             lead[leadField] = value;
-           }
-         });
+            if (leadField === 'estimated_value') {
+              value = parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+              if (value > 0) lead[leadField] = value;
+            } else if (leadField === 'property_address') {
+              addressParts.push(value);
+            } else if (leadField === 'property_city') {
+              lead.property_city = value;
+            } else if (leadField === 'property_state') {
+              lead.property_state = value;
+            } else if (leadField === 'property_zip') {
+              lead.property_zip = value;
+            } else if (leadField === 'contact_name') {
+              // Combine first and last names if needed
+              if (!lead.contact_name && value) {
+                const lastName = row['Owner 1 Last Name'] || row['Owner 2 Last Name'];
+                lead.contact_name = lastName ? `${value} ${lastName}` : value;
+              }
+            } else if (leadField === 'contact_phone' && !lead.contact_phone) {
+              lead.contact_phone = value;
+            } else if (leadField === 'contact_email' && !lead.contact_email) {
+              lead.contact_email = value;
+            } else if (leadField && value) {
+              lead[leadField] = value;
+            }
+          });
 
-         // Construct full property address
-         if (addressParts.length > 0) {
-           lead.property_address = addressParts.filter(p => p).join(', ');
-         }
+          // Construct full property address if needed
+          if (addressParts.length > 0) {
+            lead.property_address = addressParts.filter(p => p).join(', ');
+          }
 
-         return lead;
-       });
+          return lead;
+        });
 
       const imported = [];
       const failed = [];
@@ -174,9 +186,9 @@ export default function CSVLeadImport() {
 
   const downloadTemplate = () => {
     const templateHeaders = ['Mailing Care of Name', 'Phone 1', 'Email 1', 'Address', 'City', 'State', 'Zip', 'County', 'Est. Value', 'Notes'];
-    const template = templateHeaders.join(',');
+    const csv = templateHeaders.map(h => `"${h}"`).join(',');
     const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(template));
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
     element.setAttribute('download', 'property_lead_template.csv');
     element.click();
   };

@@ -22,7 +22,7 @@
     },
     "source_details": {
       "type": "string",
-      "description": "Campaign name, referrer, etc."
+      "description": "Campaign name, referrer, county, etc."
     },
     "contact_name": {
       "type": "string"
@@ -31,6 +31,19 @@
       "type": "string"
     },
     "contact_phone": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Full street address"
+    },
+    "property_city": {
+      "type": "string"
+    },
+    "property_state": {
+      "type": "string"
+    },
+    "property_zip": {
       "type": "string"
     },
     "home_size": {
@@ -66,9 +79,6 @@
         "investment",
         "standard"
       ]
-    },
-    "property_address": {
-      "type": "string"
     },
     "estimated_value": {
       "type": "number"
