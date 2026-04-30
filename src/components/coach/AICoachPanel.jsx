@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Send, Sparkles, Loader2, RotateCcw, ChevronDown, Zap, Brain, MessageSquare, Share2, FileText, Image, Video, Briefcase, Users, Map, Handshake, ShieldAlert, TrendingUp, Tag } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, MessageSquare, Share2, FileText, Image, Video, Briefcase, Users, Map, Handshake, ShieldAlert, Tag } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 const SUGGESTED_PROMPTS = [
@@ -45,20 +45,30 @@ export default function AICoachPanel({ user, onClose }) {
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState('gpt-4o');
   const [context, setContext] = useState(null);
-  const [totalTokens, setTotalTokens] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activeMode, setActiveMode] = useState(AI_MODES[0]);
   const [showModes, setShowModes] = useState(false);
+  const [creditAccount, setCreditAccount] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
     loadContext();
+    loadCredits();
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  const loadCredits = async () => {
+    try {
+      const accounts = await base44.entities.OperatorAICreditAccount.filter({ operator_id: user.id });
+      if (accounts.length > 0) setCreditAccount(accounts[0]);
+    } catch (e) {
+      console.error('Failed to load credits:', e);
+    }
+  };
 
   const loadContext = async () => {
     try {
@@ -111,7 +121,8 @@ export default function AICoachPanel({ user, onClose }) {
       });
       const data = res.data;
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-      setTotalTokens(prev => prev + (data.usage?.total_tokens || 0));
+      // Refresh credit balance after each message
+      loadCredits();
     } catch (err) {
       const isLimit = err?.response?.data?.error === 'credit_limit_reached' || err?.message?.includes('402');
       setMessages(prev => [...prev, {
@@ -135,8 +146,14 @@ export default function AICoachPanel({ user, onClose }) {
   const clearConversation = () => {
     setMessages([]);
     setShowSuggestions(true);
-    setTotalTokens(0);
   };
+
+  const creditsUsed = creditAccount?.monthly_credits_used || 0;
+  const creditsLimit = (creditAccount?.monthly_credit_limit || 0) + (creditAccount?.bonus_credits || 0) + (creditAccount?.rollover_credits || 0);
+  const creditsAvailable = Math.max(0, creditsLimit - creditsUsed);
+  const creditPct = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0;
+  const isExhausted = creditAccount && creditsAvailable <= 0;
+  const isLow = creditAccount && !isExhausted && creditPct >= 75;
 
   return (
     <div className="flex flex-col h-full bg-slate-950">
@@ -166,8 +183,8 @@ export default function AICoachPanel({ user, onClose }) {
           </div>
         </div>
 
-        {/* Model selector + token count */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Model selector */}
+        <div className="flex items-center gap-2">
           <Select value={model} onValueChange={setModel}>
             <SelectTrigger className="h-7 bg-slate-800 border-slate-600 text-slate-200 text-xs w-48">
               <SelectValue />
@@ -183,13 +200,29 @@ export default function AICoachPanel({ user, onClose }) {
               ))}
             </SelectContent>
           </Select>
-          {totalTokens > 0 && (
-            <Badge className="bg-slate-700 text-slate-300 text-xs border-slate-600 gap-1">
-              <Zap className="w-2.5 h-2.5" />
-              {totalTokens.toLocaleString()} tokens
-            </Badge>
-          )}
         </div>
+
+        {/* Credit status */}
+        {creditAccount && (
+          <div className="mt-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span>AI Credits</span>
+              <span className={isExhausted ? 'text-red-400' : isLow ? 'text-yellow-400' : 'text-green-400'}>
+                {creditsAvailable.toLocaleString()} available
+              </span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${isExhausted ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-green-500'}`}
+                style={{ width: `${Math.min(100, creditPct)}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-slate-500 mt-1">
+              <span>Used: {creditsUsed.toLocaleString()}</span>
+              <span>Limit: {creditsLimit.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mode selector */}
@@ -212,7 +245,7 @@ export default function AICoachPanel({ user, onClose }) {
               return (
                 <button
                   key={mode.key}
-                  onClick={() => { setActiveMode(mode); setShowModes(false); setMessages([]); setShowSuggestions(true); setTotalTokens(0); }}
+                  onClick={() => { setActiveMode(mode); setShowModes(false); setMessages([]); setShowSuggestions(true); }}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs transition-all border ${
                     isActive
                       ? 'bg-orange-600 border-orange-500 text-white'
@@ -316,6 +349,20 @@ export default function AICoachPanel({ user, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Low / exhausted credit banners */}
+      {isLow && !isExhausted && (
+        <div className="flex-shrink-0 mx-3 mb-2 flex items-start gap-2 bg-yellow-900/40 border border-yellow-700 rounded-lg px-3 py-2 text-xs text-yellow-300">
+          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span>You are running low on AI credits for this billing period.</span>
+        </div>
+      )}
+      {isExhausted && (
+        <div className="flex-shrink-0 mx-3 mb-2 flex items-start gap-2 bg-red-900/40 border border-red-700 rounded-lg px-3 py-2 text-xs text-red-300">
+          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span>You have reached your AI credit limit. Upgrade your plan or request more credits to continue.</span>
+        </div>
+      )}
+
       {/* Input */}
       <div className="flex-shrink-0 border-t border-slate-700 p-3 bg-slate-900">
         <div className="flex gap-2 items-end">
@@ -324,13 +371,14 @@ export default function AICoachPanel({ user, onClose }) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={activeMode.placeholder}
-            className="flex-1 bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none text-sm min-h-[44px] max-h-32 focus-visible:ring-orange-500"
+            placeholder={isExhausted ? 'AI credits exhausted — upgrade to continue…' : activeMode.placeholder}
+            disabled={isExhausted}
+            className="flex-1 bg-slate-800 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none text-sm min-h-[44px] max-h-32 focus-visible:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
             rows={1}
           />
           <Button
             onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
+            disabled={!input.trim() || loading || isExhausted}
             className="bg-orange-600 hover:bg-orange-700 h-11 w-11 p-0 flex-shrink-0"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
