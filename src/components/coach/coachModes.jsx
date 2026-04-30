@@ -205,16 +205,23 @@ export const MODE_GROUPS = [
         },
       },
       {
-        key: 'monthly_performance_review',
-        label: 'Monthly Review',
+        key: 'monthly_business_review',
+        label: 'Monthly Business Review',
         icon: BarChart3,
         color: 'text-pink-400',
-        placeholder: 'Give me your monthly numbers — sales, revenue, leads — and I\'ll help you review and improve.',
+        placeholder: 'Tell me your monthly metrics: sales count, leads, revenue, emails sent, referral partners contacted, content created.',
         welcome: {
-          title: 'Monthly Performance Review',
-          subtitle: 'A data-driven review of what worked, what didn\'t, and what to do next month.',
-          deliverables: ['Sales vs. goal analysis', 'Lead source review', 'Marketing ROI assessment', 'Team performance notes', '3 SMART goals for next month'],
-          tip: 'Share your numbers — even rough ones. I\'ll turn them into a clear picture and a plan.',
+          title: 'Monthly Business Review',
+          subtitle: 'A comprehensive analysis of your monthly performance with specific improvements for next month.',
+          deliverables: [
+            'What worked',
+            'What did not work',
+            'Where leads came from',
+            'What to improve next month',
+            'Recommended monthly goal',
+            'Next month\'s action plan',
+          ],
+          tip: 'Give me your numbers: sales count, leads, revenue, content pieces, emails sent, referral contacts, and any missed opportunities you noticed.',
         },
       },
       {
@@ -437,4 +444,10 @@ export const MODE_STARTERS = {
     'Build a plan to contact divorce attorneys',
     'Build a plan to contact financial planners',
   ],
-};
+  monthly_business_review: [
+    'Review my March numbers: 3 sales, $65K revenue, 8 leads, 2 referral partners contacted',
+    'Help me analyze last month: 5 sales completed, $120K revenue, 15 new leads, 10 emails sent',
+    'Review my February: 2 sales, $45K revenue, 5 leads, 3 referral partners contacted, 8 content pieces created',
+    'Analyze my monthly performance and tell me what to focus on next month',
+  ],
+  };
