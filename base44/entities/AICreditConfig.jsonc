@@ -1,0 +1,45 @@
+{
+  "name": "AICreditConfig",
+  "type": "object",
+  "properties": {
+    "ai_mode": {
+      "type": "string",
+      "description": "Unique key for this AI mode (e.g. 'general_assistant', 'blog_post')"
+    },
+    "requested_output_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "json",
+        "markdown",
+        "list",
+        "image",
+        "video_script"
+      ],
+      "default": "text",
+      "description": "Expected output format for this mode"
+    },
+    "credit_cost": {
+      "type": "integer",
+      "description": "Credits charged per request of this type",
+      "default": 1
+    },
+    "model_name": {
+      "type": "string",
+      "description": "OpenAI model used for this mode (e.g. gpt-4o, gpt-image-1)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this config is active and available"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Internal admin notes about this configuration"
+    }
+  },
+  "required": [
+    "ai_mode",
+    "credit_cost"
+  ]
+}
