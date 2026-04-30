@@ -91,6 +91,7 @@ export default function AdminLeadImporter() {
   const [headers, setHeaders] = useState([]);
   const [data, setData] = useState([]);
   const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const [results, setResults] = useState(null);
 
   useEffect(() => {
@@ -208,7 +209,7 @@ export default function AdminLeadImporter() {
       const imported = [];
       const failed = [];
       const BATCH_SIZE = 3;
-      const BATCH_DELAY = 1000; // ms between batches
+      const BATCH_DELAY = 2000; // ms between batches
 
       for (let i = 0; i < leads.length; i += BATCH_SIZE) {
         const batch = leads.slice(i, i + BATCH_SIZE);
@@ -225,6 +226,9 @@ export default function AdminLeadImporter() {
               })
           )
         );
+
+        // Update progress
+        setImportProgress(Math.min(Math.round(((i + BATCH_SIZE) / leads.length) * 100), 100));
 
         // Delay between batches (except after last batch)
         if (i + BATCH_SIZE < leads.length) {
@@ -348,26 +352,44 @@ export default function AdminLeadImporter() {
             </CardContent>
           </Card>
 
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setFile(null);
-                setHeaders([]);
-                setData([]);
-              }}
-              variant="outline"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleImport}
-              disabled={importing}
-              className="flex-1 bg-green-600 hover:bg-green-700"
-            >
-              {importing ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-              {importing ? 'Importing...' : `Import ${data.length} Leads`}
-            </Button>
+          <div className="space-y-3">
+            {importing && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Importing...</span>
+                  <span className="text-slate-600">{importProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-600 transition-all"
+                    style={{ width: `${importProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  setFile(null);
+                  setHeaders([]);
+                  setData([]);
+                  setImportProgress(0);
+                }}
+                variant="outline"
+                className="flex-1"
+                disabled={importing}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleImport}
+                disabled={importing}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {importing ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                {importing ? 'Importing...' : `Import ${data.length} Leads`}
+              </Button>
+            </div>
           </div>
         </>
       )}
