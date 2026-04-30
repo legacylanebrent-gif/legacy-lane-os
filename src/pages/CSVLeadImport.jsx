@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle2, AlertCircle, Loader, Download } from 'lucide-react';
-import Papa from 'papaparse';
 
 export default function CSVLeadImport() {
   const [file, setFile] = useState(null);
@@ -26,11 +25,15 @@ export default function CSVLeadImport() {
     notes: 'Notes'
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
 
     setFile(selectedFile);
+    
+    // Dynamically import Papa
+    const Papa = (await import('papaparse')).default;
+    
     Papa.parse(selectedFile, {
       header: true,
       complete: (results) => {
