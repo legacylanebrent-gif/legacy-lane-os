@@ -7,6 +7,7 @@ import { X, Send, Loader2, RotateCcw, ChevronDown, AlertTriangle, Brain, Chevron
 import ReactMarkdown from 'react-markdown';
 import { MODE_GROUPS, ALL_MODES, getModeByKey } from './coachModes';
 import { SCREEN_ACTIONS, getScreenKey } from './screenActions';
+import SalePromotionEngine from './SalePromotionEngine';
 
 const MODEL_OPTIONS = [
   { value: 'gpt-4o', label: 'GPT-4o', badge: 'Smart' },
@@ -314,8 +315,15 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
       {/* ── Mode Selector ── */}
       <ModeSelector activeMode={activeMode} onSelect={handleModeSelect} />
 
-      {/* ── Messages ── */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-700">
+      {/* ── Sale Promotion Engine (full-screen mode) ── */}
+      {activeMode.key === 'sale_promotion_package' && (
+        <div className="flex-1 overflow-hidden">
+          <SalePromotionEngine user={user} isExhausted={isExhausted} onCreditsUsed={loadCredits} />
+        </div>
+      )}
+
+      {/* ── Messages (all other modes) ── */}
+      {activeMode.key !== 'sale_promotion_package' && <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-700">
 
         {/* Welcome state */}
         {messages.length === 0 && (
@@ -408,24 +416,24 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         )}
 
         <div ref={messagesEndRef} />
-      </div>
+      </div>}
 
       {/* ── Credit warnings ── */}
-      {isLow && !isExhausted && (
+      {activeMode.key !== 'sale_promotion_package' && isLow && !isExhausted && (
         <div className="flex-shrink-0 mx-3 mb-1.5 flex items-start gap-2 bg-yellow-900/40 border border-yellow-700 rounded-lg px-3 py-2 text-xs text-yellow-300">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
           <span>Running low on AI credits for this billing period.</span>
         </div>
       )}
-      {isExhausted && (
+      {activeMode.key !== 'sale_promotion_package' && isExhausted && (
         <div className="flex-shrink-0 mx-3 mb-1.5 flex items-start gap-2 bg-red-900/40 border border-red-700 rounded-lg px-3 py-2 text-xs text-red-300">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
           <span>AI credit limit reached. Contact your admin to continue.</span>
         </div>
       )}
 
-      {/* ── Input ── */}
-      <div className="flex-shrink-0 border-t border-slate-700 p-3 bg-slate-900">
+      {/* ── Input (hidden for promotion engine) ── */}
+      {activeMode.key !== 'sale_promotion_package' && <div className="flex-shrink-0 border-t border-slate-700 p-3 bg-slate-900">
         <div className="flex gap-2 items-end">
           <Textarea
             value={input}
@@ -445,7 +453,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
           </Button>
         </div>
         <p className="text-xs text-slate-600 mt-1.5 text-center">Enter to send · Shift+Enter for new line</p>
-      </div>
+      </div>}
     </div>
   );
 }
