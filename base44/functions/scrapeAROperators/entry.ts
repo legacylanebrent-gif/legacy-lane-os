@@ -108,68 +108,49 @@ Deno.serve(async (req) => {
     
     console.log(`\n=== Scraped ${allCompanies.length} total companies ===`);
     
-    // Save to database
-    if (allCompanies.length > 0) {
-      console.log('Saving to database...');
-      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
-      console.log('✓ Saved to database');
-    }
-
-    // Now check for and delete duplicates
-    console.log('\n=== Checking for duplicates ===');
-    const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
+    // Upsert: fetch existing records for this state, then insert only new ones / update existing
+    console.log('\nFetching existing AR operators from database...');
+    const existingOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       { state: 'AR' },
       '-created_date',
       1000
     );
-    
-    console.log(`Total AR operators in database: ${allOperators.length}`);
 
-    const phoneMap = new Map();
-    const toDelete = [];
-    
-    for (const operator of allOperators) {
-      const phone = operator.phone;
-      
-      if (!phone) continue;
-      
-      if (phoneMap.has(phone)) {
-        toDelete.push(operator.id);
-        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
+    // Build lookup maps by source_url and phone
+    const existingByUrl = new Map(existingOperators.filter(o => o.source_url).map(o => [o.source_url, o]));
+    const existingByPhone = new Map(existingOperators.filter(o => o.phone).map(o => [o.phone, o]));
+
+    let inserted = 0;
+    let updated = 0;
+
+    for (const company of allCompanies) {
+      const existingByUrlMatch = company.source_url ? existingByUrl.get(company.source_url) : null;
+      const existingByPhoneMatch = company.phone ? existingByPhone.get(company.phone) : null;
+      const existing = existingByUrlMatch || existingByPhoneMatch;
+
+      if (existing) {
+        // Update existing record with fresh data
+        await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company);
+        updated++;
+        console.log(`Updated: ${company.company_name}`);
       } else {
-        phoneMap.set(phone, operator);
+        // Insert new record
+        await base44.asServiceRole.entities.FutureEstateOperator.create(company);
+        inserted++;
+        console.log(`Inserted: ${company.company_name}`);
       }
     }
 
-    console.log(`Found ${toDelete.length} duplicates in AR`);
-    
-    let deleted = 0;
-    const batchSize = 10;
-    
-    for (let i = 0; i < toDelete.length; i += batchSize) {
-      const batch = toDelete.slice(i, i + batchSize);
-      
-      for (const id of batch) {
-        try {
-          await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
-          deleted++;
-          console.log(`Deleted ${deleted}/${toDelete.length}`);
-        } catch (error) {
-          console.error(`Failed to delete ${id}:`, error.message);
-        }
-      }
-      
-      if (i + batchSize < toDelete.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
-    
+    const finalCount = await base44.asServiceRole.entities.FutureEstateOperator.filter(
+      { state: 'AR' }, '-created_date', 1000
+    );
+
     return Response.json({ 
       success: true,
       scraped: allCompanies.length,
-      total_in_db: allOperators.length,
-      duplicates_deleted: deleted,
-      final_count: allOperators.length - deleted
+      inserted,
+      updated,
+      final_count: finalCount.length
     });
     
   } catch (error) {
