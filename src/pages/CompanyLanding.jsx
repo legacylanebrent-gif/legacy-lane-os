@@ -62,6 +62,7 @@ const GROWTH_FEATURES = [
   { icon: DollarSign, title: 'Business Expenses Tracker', desc: 'Log, categorize, and track all business expenses per sale or company-wide — with cash flow projections and profit reports.' },
   { icon: Target, title: 'Pre-Probate Territory Leads', desc: 'Get access to pre-probate leads in your territory — reach families before they even start looking for an estate sale company.' },
   { icon: Megaphone, title: 'Facebook Ads for Leads', desc: 'Launch targeted Facebook ad campaigns directly from the platform to generate estate sale leads in your area.' },
+  { icon: Users, title: 'Full CRM for Marketing & Referrals', desc: 'Track every contact, conversation, and referral in one place — nurture leads and build lasting relationships that grow your business.' },
   { icon: DollarSign, title: 'Realtor Referral Income', desc: 'Earn a finder\'s fee by referring home sellers to real estate agents. Passive income from every sale.' },
   { icon: TrendingUp, title: 'Territory Heatmap', desc: 'Visualize where demand is highest in your region and target untapped markets strategically.' },
   { icon: Globe, title: 'National Marketplace', desc: 'List items on our national buyer network and sell to customers across the country via shipping.' },
