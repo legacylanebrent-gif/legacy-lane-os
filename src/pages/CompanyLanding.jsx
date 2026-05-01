@@ -5,7 +5,8 @@ import {
   Star, Check, ArrowRight, BarChart2, Users, ShoppingBag, Zap, MapPin,
   Camera, Bot, Mail, Phone, TrendingUp, Shield, Globe, Layers,
   ChevronDown, ChevronUp, DollarSign, Clock, Award, Sparkles,
-  Package, FileText, MessageSquare, Heart, Target, Megaphone
+  Package, FileText, MessageSquare, Heart, Target, Megaphone,
+  QrCode, Gift, Trophy, Navigation, Bell
 } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -27,8 +28,14 @@ const CUSTOMER_FEATURES = [
   { icon: Camera, title: 'Photo-Rich Listings', desc: 'High-quality photos and featured items attract more attendees before the sale even starts.' },
   { icon: ShoppingBag, title: 'Buy Online Anytime', desc: 'Customers shop your inventory 24/7 — no need to show up in person.' },
   { icon: Heart, title: 'Watchlists & Alerts', desc: 'Buyers save favorites and get notified, keeping them engaged and coming back.' },
-  { icon: MessageSquare, title: 'Direct Messaging', desc: 'Buyers message you directly to ask questions, negotiate, or make offers.' },
+  { icon: MessageSquare, title: 'Direct Item Messaging', desc: 'Buyers message you directly on specific items to ask questions, negotiate, or make offers.' },
   { icon: Shield, title: 'Trusted & Verified', desc: 'Ratings, reviews, and verified seller profiles build buyer confidence in your brand.' },
+  { icon: QrCode, title: 'Sale Check-In', desc: 'Buyers scan a QR code to check in at your sale and earn instant reward points.' },
+  { icon: Gift, title: 'Purchase Rewards', desc: 'Every purchase earns points redeemable for discounts — turning one-time shoppers into loyal regulars.' },
+  { icon: Trophy, title: 'Monthly Drawings', desc: 'Active buyers are automatically entered into monthly prize drawings, driving repeat engagement.' },
+  { icon: Navigation, title: 'Multi-Sale GPS Routes', desc: 'Buyers plan optimized driving routes across multiple sales in one day — maximizing their experience.' },
+  { icon: Bell, title: 'Multi-Company Text Alerts', desc: 'Buyers subscribe to alerts from multiple operators and get SMS notifications the moment new sales go live.' },
+  { icon: Star, title: 'VIP List Access', desc: 'Exclusive VIP buyers get early access before sales open and special post-sale bonuses — rewarding your best customers.' },
 ];
 
 const BUSINESS_FEATURES = [
