@@ -108,69 +108,17 @@ Deno.serve(async (req) => {
     
     console.log(`\n=== Scraped ${allCompanies.length} total companies ===`);
     
-    // Save to database
-    if (allCompanies.length > 0) {
-      console.log('Saving to database...');
-      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
-      console.log('✓ Saved to database');
+    const existingOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'DC' }, '-created_date', 1000);
+    const existingByUrl = new Map(existingOperators.filter(o => o.source_url).map(o => [o.source_url, o]));
+    const existingByPhone = new Map(existingOperators.filter(o => o.phone).map(o => [o.phone, o]));
+    let inserted = 0, updated = 0;
+    for (const company of allCompanies) {
+      const existing = (company.source_url ? existingByUrl.get(company.source_url) : null) || (company.phone ? existingByPhone.get(company.phone) : null);
+      if (existing) { await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company); updated++; }
+      else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
     }
-
-    // Now check for and delete duplicates
-    console.log('\n=== Checking for duplicates ===');
-    const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
-      { state: 'DC' },
-      '-created_date',
-      1000
-    );
-    
-    console.log(`Total DC operators in database: ${allOperators.length}`);
-
-    const phoneMap = new Map();
-    const toDelete = [];
-    
-    for (const operator of allOperators) {
-      const phone = operator.phone;
-      
-      if (!phone) continue;
-      
-      if (phoneMap.has(phone)) {
-        toDelete.push(operator.id);
-        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
-      } else {
-        phoneMap.set(phone, operator);
-      }
-    }
-
-    console.log(`Found ${toDelete.length} duplicates in DC`);
-    
-    let deleted = 0;
-    const batchSize = 10;
-    
-    for (let i = 0; i < toDelete.length; i += batchSize) {
-      const batch = toDelete.slice(i, i + batchSize);
-      
-      for (const id of batch) {
-        try {
-          await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
-          deleted++;
-          console.log(`Deleted ${deleted}/${toDelete.length}`);
-        } catch (error) {
-          console.error(`Failed to delete ${id}:`, error.message);
-        }
-      }
-      
-      if (i + batchSize < toDelete.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
-    
-    return Response.json({ 
-      success: true,
-      scraped: allCompanies.length,
-      total_in_db: allOperators.length,
-      duplicates_deleted: deleted,
-      final_count: allOperators.length - deleted
-    });
+    const finalCount = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'DC' }, '-created_date', 1000);
+    return Response.json({ success: true, scraped: allCompanies.length, inserted, updated, final_count: finalCount.length });
     
   } catch (error) {
     console.error('Error:', error);
