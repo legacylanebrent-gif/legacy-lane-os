@@ -4,21 +4,37 @@ import { Check, X, Minus, ArrowRight, Star, Sparkles, ChevronDown, ChevronUp } f
 
 const CATEGORIES = [
   {
-    label: 'Sale Management',
+    label: 'Sale Creation & Management',
     rows: [
       { feature: 'Create & publish estate sale listings', us: true, them: true },
       { feature: 'Unlimited sale listings', us: true, them: false },
+      { feature: 'Full sale dashboard with AI automation', us: true, them: false },
       { feature: 'Drag-and-drop photo management', us: true, them: false },
       { feature: 'Batch photo labeling & pricing', us: true, them: false },
       { feature: 'AI-powered item pricing (Google Lens)', us: true, them: false },
+      { feature: 'AI-generated item titles & descriptions', us: true, them: false },
       { feature: 'Sale scheduling with multi-date support', us: true, them: true },
+      { feature: 'Per sale task lists (setup to cleanup)', us: true, them: false },
+      { feature: 'Assign client to sale with permissions', us: true, them: false },
       { feature: 'Featured / premium listing upgrades', us: true, them: true },
-      { feature: 'QR code in-person checkout', us: true, them: false },
+      { feature: 'SEO-optimized sale pages (Google ranking)', us: true, them: 'partial' },
+    ],
+  },
+  {
+    label: 'Point of Sale & Checkout',
+    rows: [
+      { feature: 'QR code in-person checkout (POS system)', us: true, them: false },
+      { feature: 'Cart building with inventory suggestions', us: true, them: false },
+      { feature: 'Pricing database suggestions at checkout', us: true, them: false },
+      { feature: 'No more lost price tags', us: true, them: false },
+      { feature: 'Export sales sheet w/ commission breakdown', us: true, them: false },
+      { feature: 'Offer management & communication', us: true, them: false },
+      { feature: 'Buyout calculator', us: true, them: false },
       { feature: 'Inventory management dashboard', us: true, them: false },
     ],
   },
   {
-    label: 'Online Selling',
+    label: 'Online Selling & Marketplace',
     rows: [
       { feature: 'National online marketplace', us: true, them: false },
       { feature: 'Fixed-price "Buy Now" listings', us: true, them: false },
@@ -26,29 +42,57 @@ const CATEGORIES = [
       { feature: 'Proxy / auto-bid auctions', us: true, them: false },
       { feature: 'Shipping to buyers nationwide', us: true, them: false },
       { feature: 'Item status synced across channels', us: true, them: false },
-      { feature: 'Buyer watchlists & price alerts', us: true, them: false },
+      { feature: '10,000+ pricing reference database', us: true, them: false },
+      { feature: 'Post items to inventory with photos & descriptions', us: true, them: false },
     ],
   },
   {
-    label: 'Marketing & Growth',
+    label: 'AI & Marketing Automation',
     rows: [
-      { feature: 'AI content generator (posts, emails, SMS)', us: true, them: false },
+      { feature: 'AI marketing content generator', us: true, them: false },
+      { feature: 'Facebook posts — auto-generated', us: true, them: false },
+      { feature: 'Instagram captions — auto-generated', us: true, them: false },
+      { feature: 'Email blasts — auto-generated', us: true, them: false },
+      { feature: 'SMS marketing — auto-generated', us: true, them: false },
+      { feature: 'Blog articles — auto-generated', us: true, them: false },
+      { feature: 'Video scripts — auto-generated', us: true, them: false },
+      { feature: 'One-click push to all social media', us: true, them: false },
       { feature: 'Built-in email campaign tool', us: true, them: false },
       { feature: 'Built-in SMS campaign tool', us: true, them: false },
-      { feature: 'SEO-optimized sale pages', us: true, them: true },
-      { feature: 'Social media integration', us: true, them: false },
       { feature: 'Content calendar & scheduling', us: true, them: false },
       { feature: 'SEO boost per listing (AI-generated)', us: true, them: false },
       { feature: 'Facebook Ad campaign builder', us: true, them: false },
     ],
   },
   {
+    label: 'Sale Signage & Print',
+    rows: [
+      { feature: 'Printed price tags from inventory', us: true, them: false },
+      { feature: 'Category signs & sale banners', us: true, them: false },
+      { feature: 'Professional signage templates', us: true, them: false },
+    ],
+  },
+  {
+    label: 'VIP Events & Buyer Loyalty',
+    rows: [
+      { feature: 'VIP pre-sale events for top buyers', us: true, them: false },
+      { feature: 'Early access invites for VIP buyers', us: true, them: false },
+      { feature: 'Post-sale VIP bonuses', us: true, them: false },
+      { feature: 'Buyer purchase rewards & points', us: true, them: false },
+      { feature: 'Monthly prize drawings for active buyers', us: true, them: false },
+      { feature: 'Sale QR check-in with reward points', us: true, them: false },
+      { feature: 'Buyer watchlists & price alerts', us: true, them: false },
+    ],
+  },
+  {
     label: 'Lead Generation & CRM',
     rows: [
-      { feature: 'Lead capture from multiple sources', us: true, them: false },
+      { feature: 'Lead capture from website, ads & finder', us: true, them: false },
+      { feature: 'Pre-probate territory leads', us: true, them: false },
+      { feature: 'Facebook ads for lead generation (we pay)', us: true, them: false },
       { feature: 'Lead scoring & routing', us: true, them: false },
       { feature: 'Territory heatmap analytics', us: true, them: false },
-      { feature: 'Built-in CRM (contacts, pipeline)', us: true, them: false },
+      { feature: 'Full CRM (contacts, pipeline, referrals)', us: true, them: false },
       { feature: 'Activity timeline per contact', us: true, them: false },
       { feature: 'Realtor referral income tracking', us: true, them: false },
       { feature: 'Referral program for buyers', us: true, them: false },
@@ -60,11 +104,13 @@ const CATEGORIES = [
       { feature: 'Team management & role-based access', us: true, them: false },
       { feature: 'Digital contracts with expiration alerts', us: true, them: false },
       { feature: 'Revenue & commission analytics', us: true, them: false },
-      { feature: 'Expense tracking & cash flow projections', us: true, them: false },
+      { feature: 'Business expense tracking & cash flow', us: true, them: false },
+      { feature: 'Custom branded company website', us: true, them: false },
       { feature: 'AI business coach', us: true, them: false },
       { feature: 'API access & webhooks', us: true, them: false },
       { feature: 'Vendor network directory', us: true, them: false },
-      { feature: 'Buyer rewards & loyalty program', us: true, them: false },
+      { feature: 'Multi-sale GPS route planner for buyers', us: true, them: false },
+      { feature: 'Multi-company SMS text alerts for buyers', us: true, them: false },
     ],
   },
   {
@@ -73,8 +119,9 @@ const CATEGORIES = [
       { feature: 'Interactive map to find nearby sales', us: true, them: true },
       { feature: 'Photo-rich sale listings', us: true, them: true },
       { feature: 'Shop online without attending in person', us: true, them: false },
-      { feature: 'Direct buyer-seller messaging', us: true, them: false },
+      { feature: 'Direct buyer-seller item messaging', us: true, them: false },
       { feature: 'Buyer purchase history & receipts', us: true, them: false },
+      { feature: 'Trusted & verified seller profiles', us: true, them: 'partial' },
       { feature: 'Mobile-optimized buyer experience', us: true, them: 'partial' },
     ],
   },
@@ -85,12 +132,13 @@ const CATEGORIES = [
       { feature: 'No per-listing fees', us: true, them: false },
       { feature: 'Flat monthly subscription', us: true, them: false },
       { feature: '30-day money-back guarantee', us: true, them: false },
+      { feature: 'Priority support', us: true, them: false },
     ],
   },
 ];
 
 const HERO_STATS = [
-  { us: '50+', them: '~5', label: 'Platform Features' },
+  { us: '70+', them: '~5', label: 'Platform Features' },
   { us: 'Yes', them: 'No', label: 'Online Marketplace' },
   { us: 'Yes', them: 'No', label: 'AI Tools Built-In' },
   { us: '1 Month Free', them: 'None', label: 'Free Trial' },
@@ -196,7 +244,7 @@ export default function CompareEstateSales() {
             <span className="text-slate-400">EstateSales.net</span>
           </h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            EstateSales.net is a listing directory. Legacy Lane OS is a full business operating system. See exactly what you get — and what you're missing.
+            EstateSales.net is a weekend listing directory. Legacy Lane OS is a full business operating system with 70+ tools built for estate sale professionals. See every difference, side by side.
           </p>
 
           {/* Quick stat cards */}
@@ -230,7 +278,7 @@ export default function CompareEstateSales() {
               <span className="font-bold text-lg">Legacy Lane wins <span className="underline">{usWins} of {totalFeatures}</span> features</span>
             </div>
             <span className="hidden sm:block text-orange-300">·</span>
-            <span className="text-orange-200 text-sm">EstateSales.net is a directory. We're your entire business platform.</span>
+            <span className="text-orange-200 text-sm">EstateSales.net lists your sales. We run your entire business.</span>
           </div>
         </div>
       </section>
@@ -293,7 +341,7 @@ export default function CompareEstateSales() {
             <span className="text-orange-600">Own Your Business.</span>
           </h2>
           <p className="text-slate-500 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
-            EstateSales.net lists your sales. Legacy Lane OS runs your entire company — marketing, CRM, operations, AI, and more — all in one platform.
+            EstateSales.net lists your sales for the weekend. Legacy Lane OS runs your entire company — AI marketing, POS checkout, CRM, VIP events, contracts, analytics, and more — all in one platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -317,7 +365,7 @@ export default function CompareEstateSales() {
       <footer className="bg-slate-900 text-white">
         <div className="border-t border-white/10">
           <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved. · Comparison data based on publicly available information.</p>
+            <p className="text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved. · Comparison based on publicly available information.</p>
             <div className="flex items-center gap-6">
               <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
                 Features
