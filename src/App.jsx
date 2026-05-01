@@ -28,6 +28,7 @@ import ContentCalendar from './pages/ContentCalendar';
 import SEOBoostDashboard from './pages/SEOBoostDashboard';
 import CSVLeadImport from './pages/CSVLeadImport';
 import AdminLeadImporter from './pages/AdminLeadImporter';
+import CompanyLanding from './pages/CompanyLanding';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
       <Route path="/SEOBoostDashboard" element={<LayoutWrapper currentPageName="SEOBoostDashboard"><SEOBoostDashboard /></LayoutWrapper>} />
       <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
+      <Route path="/CompanyLanding" element={<CompanyLanding />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
