@@ -43,6 +43,7 @@ const BUSINESS_FEATURES = [
   { icon: Camera, title: 'AI Item Pricing, Title & Description', desc: 'Google Lens-powered AI instantly estimates market value, generates a title, and writes a description for any item you photograph.' },
   { icon: Bot, title: 'AI Marketing Generator', desc: 'Generate Facebook posts, Instagram captions, email blasts, SMS, and blog posts in seconds. Press the button and all marketing is pushed to each social media.' },
   { icon: ShoppingBag, title: 'POS System for Checkout', desc: 'Buyers scan a QR code to add items to their cart and checkout in seconds — no more cash lines or lost tags.' },
+  { icon: FileText, title: 'Export Sales Sheet w/ Commission Breakdown', desc: 'Export a full itemized sales report with commission calculations — ready to share with clients at the close of every sale.' },
   { icon: FileText, title: 'Sale Printed Signage', desc: 'Generate and print professional price tags, category signs, and sale banners directly from your inventory.' },
   { icon: Package, title: '10,000+ Pricing Database', desc: 'Access a massive built-in pricing reference database to quickly look up fair market values for estate sale items.' },
   { icon: DollarSign, title: 'Buyout Calculator', desc: 'Instantly calculate fair buyout offers based on inventory value, commission rates, and estimated sale proceeds.' },
