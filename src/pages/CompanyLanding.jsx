@@ -56,6 +56,7 @@ const BUSINESS_FEATURES = [
   { icon: FileText, title: 'Contract Management', desc: 'Digital contracts with automated expiration alerts keep you legally protected.' },
   { icon: Mail, title: 'Email & SMS Campaigns', desc: 'Built-in marketing tools reach your buyer list without needing a third-party service.' },
   { icon: Globe, title: 'SEO-Optimized Listings', desc: 'Every sale page is built to rank on Google — free organic traffic to every event you host.' },
+  { icon: Star, title: 'VIP Events', desc: 'Create exclusive VIP pre-sale events, invite your best buyers early, and reward loyalty — driving higher revenue before the doors even open.' },
 ];
 
 const GROWTH_FEATURES = [
