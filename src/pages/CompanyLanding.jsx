@@ -399,9 +399,9 @@ export default function CompanyLanding() {
         </div>
       </section>
 
-      {/* ── FOOTER CTA ── */}
-      <section className="bg-slate-900 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+      {/* ── FOOTER ── */}
+      <footer className="bg-slate-900 text-white">
+        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
           <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <span className="text-white font-bold text-xl">LL</span>
           </div>
@@ -413,9 +413,26 @@ export default function CompanyLanding() {
           >
             Claim Your Free Month <ArrowRight className="w-5 h-5" />
           </Link>
-          <p className="mt-6 text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved.</p>
         </div>
-      </section>
+
+        {/* Footer links */}
+        <div className="border-t border-white/10">
+          <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
+                Features
+              </Link>
+              <Link to="/CompareEstateSales" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
+                Compare vs EstateSales.net
+              </Link>
+              <Link to="/OperatorPackages" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
+                Pricing
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
