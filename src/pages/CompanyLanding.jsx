@@ -264,8 +264,8 @@ export default function CompanyLanding() {
               <Zap className="w-4 h-4" /> FOR YOUR BUSINESS
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4">
-              Tools That Run Your Business,<br className="hidden md:block" />
-              <span className="text-cyan-400">Not the Other Way Around</span>
+              We're Not Just a Weekend Sale Directory —<br className="hidden md:block" />
+              <span className="text-cyan-400">We Also Supply You with the Tools That Run Your Business</span>
             </h2>
             <p className="text-lg text-slate-400 max-w-xl mx-auto">
               Stop duct-taping spreadsheets and apps together. Everything you need is in one place.
