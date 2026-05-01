@@ -261,7 +261,7 @@ export default function CompanyLanding() {
             <div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Scan, Shop & Checkout In Seconds</h3>
               <p className="text-slate-600 leading-relaxed">
-                Your shoppers scan a QR code to add items to their digital cart during the sale. Checkout is lightning fast — no more cash lines, lost tags, or pricing confusion.
+                Your shoppers scan a QR code to add items to their cart and checkout in seconds — no more lost tags. As you create a bundle, items in inventory appear or items from the database are suggested with common pricing.
               </p>
             </div>
           </div>
