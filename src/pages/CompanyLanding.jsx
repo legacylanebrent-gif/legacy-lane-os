@@ -59,6 +59,7 @@ const BUSINESS_FEATURES = [
 const GROWTH_FEATURES = [
   { icon: Target, title: 'Lead Generation Machine', desc: 'Auto-capture leads from your website, ads, and the estate finder — all funneled to your dashboard.' },
   { icon: Globe, title: 'Custom Company Websites', desc: 'Get a professionally branded company website that showcases your sales, team, and services — no coding required.' },
+  { icon: DollarSign, title: 'Business Expenses Tracker', desc: 'Log, categorize, and track all business expenses per sale or company-wide — with cash flow projections and profit reports.' },
   { icon: DollarSign, title: 'Realtor Referral Income', desc: 'Earn a finder\'s fee by referring home sellers to real estate agents. Passive income from every sale.' },
   { icon: TrendingUp, title: 'Territory Heatmap', desc: 'Visualize where demand is highest in your region and target untapped markets strategically.' },
   { icon: Globe, title: 'National Marketplace', desc: 'List items on our national buyer network and sell to customers across the country via shipping.' },
