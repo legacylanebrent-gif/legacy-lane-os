@@ -46,6 +46,7 @@ const BUSINESS_FEATURES = [
   { icon: FileText, title: 'Sale Printed Signage', desc: 'Generate and print professional price tags, category signs, and sale banners directly from your inventory.' },
   { icon: Package, title: '10,000+ Pricing Database', desc: 'Access a massive built-in pricing reference database to quickly look up fair market values for estate sale items.' },
   { icon: DollarSign, title: 'Buyout Calculator', desc: 'Instantly calculate fair buyout offers based on inventory value, commission rates, and estimated sale proceeds.' },
+  { icon: Layers, title: 'Post Items to Inventory', desc: 'Quickly add items to your sale inventory with photos, pricing, and descriptions — all organized in one place.' },
   { icon: BarChart2, title: 'Revenue Analytics', desc: 'Track commissions, expenses, and profit per sale with crystal-clear financial dashboards.' },
   { icon: Users, title: 'Team Management', desc: 'Add staff with role-based access — manage your crew without sharing full account access.' },
   { icon: FileText, title: 'Contract Management', desc: 'Digital contracts with automated expiration alerts keep you legally protected.' },
