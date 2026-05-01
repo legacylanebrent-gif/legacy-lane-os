@@ -29,6 +29,7 @@ import SEOBoostDashboard from './pages/SEOBoostDashboard';
 import CSVLeadImport from './pages/CSVLeadImport';
 import AdminLeadImporter from './pages/AdminLeadImporter';
 import CompanyLanding from './pages/CompanyLanding';
+import CompareEstateSales from './pages/CompareEstateSales';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -101,6 +102,7 @@ const AuthenticatedApp = () => {
       <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
+      <Route path="/CompareEstateSales" element={<CompareEstateSales />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
