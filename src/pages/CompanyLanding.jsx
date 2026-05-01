@@ -39,7 +39,7 @@ const CUSTOMER_FEATURES = [
 ];
 
 const BUSINESS_FEATURES = [
-  { icon: Layers, title: 'Full Sale Dashboard', desc: 'Create, manage and publish estate sales from one beautifully designed control center.' },
+  { icon: Layers, title: 'Full Sale Dashboard', desc: 'Create, manage and publish estate sales from one beautifully designed control center. Create the sale, upload photos and watch AI perform the magic. Save 10+ hours per sale instantly.' },
   { icon: Camera, title: 'AI Item Pricing, Title & Description', desc: 'Google Lens-powered AI instantly estimates market value, generates a title, and writes a description for any item you photograph.' },
   { icon: Bot, title: 'AI Marketing Generator', desc: 'Generate Facebook posts, Instagram captions, email blasts, SMS, and blog posts in seconds.' },
   { icon: ShoppingBag, title: 'POS System for Checkout', desc: 'Buyers scan a QR code to add items to their cart and checkout in seconds — no more cash lines or lost tags.' },
