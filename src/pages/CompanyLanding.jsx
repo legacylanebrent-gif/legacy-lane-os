@@ -44,6 +44,7 @@ const BUSINESS_FEATURES = [
   { icon: Bot, title: 'AI Marketing Generator', desc: 'Generate Facebook posts, Instagram captions, email blasts, SMS, and blog posts in seconds.' },
   { icon: ShoppingBag, title: 'POS System for Checkout', desc: 'Buyers scan a QR code to add items to their cart and checkout in seconds — no more cash lines or lost tags.' },
   { icon: FileText, title: 'Sale Printed Signage', desc: 'Generate and print professional price tags, category signs, and sale banners directly from your inventory.' },
+  { icon: Package, title: '10,000+ Pricing Database', desc: 'Access a massive built-in pricing reference database to quickly look up fair market values for estate sale items.' },
   { icon: BarChart2, title: 'Revenue Analytics', desc: 'Track commissions, expenses, and profit per sale with crystal-clear financial dashboards.' },
   { icon: Users, title: 'Team Management', desc: 'Add staff with role-based access — manage your crew without sharing full account access.' },
   { icon: FileText, title: 'Contract Management', desc: 'Digital contracts with automated expiration alerts keep you legally protected.' },
