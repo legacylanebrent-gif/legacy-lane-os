@@ -46,6 +46,7 @@ const BUSINESS_FEATURES = [
   { icon: FileText, title: 'Export Sales Sheet w/ Commission Breakdown', desc: 'Export a full itemized sales report with commission calculations — ready to share with clients at the close of every sale.' },
   { icon: FileText, title: 'Sale Printed Signage', desc: 'Generate and print professional price tags, category signs, and sale banners directly from your inventory.' },
   { icon: Package, title: '10,000+ Pricing Database', desc: 'Access a massive built-in pricing reference database to quickly look up fair market values for estate sale items.' },
+  { icon: MessageSquare, title: 'Offer Management & Communication', desc: 'Manage incoming offers, respond to clients, and track negotiations all in one place — keeping every deal organized and moving forward.' },
   { icon: DollarSign, title: 'Buyout Calculator', desc: 'Instantly calculate fair buyout offers based on inventory value, commission rates, and estimated sale proceeds.' },
   { icon: Layers, title: 'Post Items to Inventory', desc: 'Quickly add items to your sale inventory with photos, pricing, and descriptions — all organized in one place.' },
   { icon: FileText, title: 'Per Sale Task Lists', desc: 'Assign and track tasks for every sale — from setup to cleanup — so nothing falls through the cracks.' },
