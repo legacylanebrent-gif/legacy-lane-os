@@ -6,8 +6,9 @@ import {
   Camera, Bot, Mail, Phone, TrendingUp, Shield, Globe, Layers,
   ChevronDown, ChevronUp, DollarSign, Clock, Award, Sparkles,
   Package, FileText, MessageSquare, Heart, Target, Megaphone,
-  QrCode, Gift, Trophy, Navigation, Bell
+  QrCode, Gift, Trophy, Navigation, Bell, Play
 } from 'lucide-react';
+import FeatureModal from '@/components/landing/FeatureModal';
 
 const NAV_LINKS = [
   { label: 'For Your Customers', href: '#customers' },
@@ -100,34 +101,57 @@ function FAQItem({ q, a }) {
   );
 }
 
-function FeatureCard({ icon: Icon, title, desc, accent = 'orange' }) {
+function FeatureCard({ icon: Icon, title, desc, accent = 'orange', onMoreInfo }) {
   const colors = {
     orange: 'bg-orange-100 text-orange-600',
     cyan: 'bg-cyan-100 text-cyan-600',
     green: 'bg-green-100 text-green-600',
   };
+  const btnColors = {
+    orange: 'text-orange-600 hover:bg-orange-50',
+    cyan: 'text-cyan-600 hover:bg-cyan-50',
+    green: 'text-green-600 hover:bg-green-50',
+  };
   return (
-    <div className="flex gap-4 p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${colors[accent]}`}>
-        <Icon className="w-5 h-5" />
+    <div className="flex flex-col gap-3 p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${colors[accent]}`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-slate-900 mb-1">{title}</h4>
+          <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+        </div>
       </div>
-      <div>
-        <h4 className="font-semibold text-slate-900 mb-1">{title}</h4>
-        <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
-      </div>
+      <button
+        onClick={onMoreInfo}
+        className={`self-start text-xs font-semibold px-3 py-1.5 rounded-lg border border-current/20 transition-colors ${btnColors[accent]}`}
+      >
+        More Info →
+      </button>
     </div>
   );
 }
 
 export default function CompanyLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState(null);
 
   const handleGetStarted = () => {
     base44.auth.redirectToLogin('/OperatorPackages');
   };
 
+  const openModal = (feature, accentClass) => {
+    setSelectedFeature({ ...feature, accentClass });
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      {/* ── FEATURE MODAL ── */}
+      {selectedFeature && (
+        <FeatureModal feature={selectedFeature} onClose={() => setSelectedFeature(null)} />
+      )}
 
       {/* ── NAVBAR ── */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
@@ -202,6 +226,17 @@ export default function CompanyLanding() {
             Legacy Lane OS is the all-in-one business platform built exclusively for estate sale companies — from your first sale to your hundredth.
           </p>
 
+          {/* ── VIDEO PLACEHOLDER ── */}
+          <div className="max-w-3xl mx-auto mb-10">
+            <div className="relative bg-slate-800/60 border-2 border-dashed border-slate-600 rounded-2xl overflow-hidden aspect-video flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-orange-500/60 transition-colors">
+              <div className="w-16 h-16 bg-orange-600/20 border border-orange-500/30 rounded-full flex items-center justify-center group-hover:bg-orange-600/30 transition-colors">
+                <Play className="w-7 h-7 text-orange-400 ml-1" />
+              </div>
+              <p className="text-slate-400 text-sm font-medium">Platform Overview Video</p>
+              <p className="text-slate-600 text-xs">Video coming soon</p>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/OperatorPackages"
@@ -252,7 +287,14 @@ export default function CompanyLanding() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {CUSTOMER_FEATURES.map(({ icon, title, desc }) => (
-              <FeatureCard key={title} icon={icon} title={title} desc={desc} accent="orange" />
+              <FeatureCard
+                key={title}
+                icon={icon}
+                title={title}
+                desc={desc}
+                accent="orange"
+                onMoreInfo={() => openModal({ icon, title, desc }, 'bg-orange-100 text-orange-600')}
+              />
             ))}
           </div>
 
@@ -289,12 +331,18 @@ export default function CompanyLanding() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {BUSINESS_FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+              <div key={title} className="flex flex-col bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
                 <div className="w-10 h-10 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5" />
                 </div>
                 <h4 className="font-semibold text-white mb-2">{title}</h4>
-                <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
+                <p className="text-sm text-slate-400 leading-relaxed flex-1">{desc}</p>
+                <button
+                  onClick={() => openModal({ icon: Icon, title, desc }, 'bg-cyan-500/20 text-cyan-400')}
+                  className="self-start mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 px-3 py-1.5 rounded-lg border border-cyan-700/40 hover:bg-cyan-900/30 transition-colors"
+                >
+                  More Info →
+                </button>
               </div>
             ))}
           </div>
@@ -339,7 +387,14 @@ export default function CompanyLanding() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
             {GROWTH_FEATURES.map(({ icon, title, desc }) => (
-              <FeatureCard key={title} icon={icon} title={title} desc={desc} accent="green" />
+              <FeatureCard
+                key={title}
+                icon={icon}
+                title={title}
+                desc={desc}
+                accent="green"
+                onMoreInfo={() => openModal({ icon, title, desc }, 'bg-green-100 text-green-600')}
+              />
             ))}
           </div>
 
