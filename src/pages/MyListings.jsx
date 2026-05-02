@@ -16,6 +16,7 @@ export default function MyListings() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -198,7 +199,7 @@ export default function MyListings() {
                         <Link to={createPageUrl(`ItemDetail?id=${item.id}`)} className="flex-1">
                           <Button variant="outline" className="w-full">View</Button>
                         </Link>
-                        <Button variant="outline">Edit</Button>
+                        <Button variant="outline" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -257,7 +258,7 @@ export default function MyListings() {
                             <Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>
                               <Button variant="outline" size="sm">View</Button>
                             </Link>
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button variant="outline" size="sm" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
                           </div>
                         </td>
                       </tr>
@@ -272,9 +273,12 @@ export default function MyListings() {
 
       {showCreateModal && (
         <CreateItemModal
-          onClose={() => setShowCreateModal(false)}
+          open={showCreateModal}
+          onClose={() => { setShowCreateModal(false); setEditingItem(null); }}
+          item={editingItem}
           onSuccess={() => {
             setShowCreateModal(false);
+            setEditingItem(null);
             loadData();
           }}
         />
