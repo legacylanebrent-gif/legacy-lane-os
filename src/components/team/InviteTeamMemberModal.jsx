@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,10 @@ const ROLE_OPTIONS = [
 export default function InviteTeamMemberModal({ open, onClose, operator, onSuccess }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('team_member');
-  const [personalNote, setPersonalNote] = useState('');
+  const companyName = operator?.company_name || operator?.full_name || 'our company';
+  const [personalNote, setPersonalNote] = useState(
+    `Hi! I'd like to invite you to join the ${companyName} team on EstateSalen.com. We use this platform to manage our estate sales and I think you'll find it easy and powerful to work with. Looking forward to having you on board!`
+  );
   const [step, setStep] = useState('form'); // 'form' | 'checking' | 'result'
   const [result, setResult] = useState(null); // { type: 'new' | 'existing', user?: object }
   const [sending, setSending] = useState(false);
@@ -26,7 +30,7 @@ export default function InviteTeamMemberModal({ open, onClose, operator, onSucce
   const reset = () => {
     setEmail('');
     setRole('team_member');
-    setPersonalNote('');
+    setPersonalNote(`Hi! I'd like to invite you to join the ${companyName} team on EstateSalen.com. We use this platform to manage our estate sales and I think you'll find it easy and powerful to work with. Looking forward to having you on board!`);
     setStep('form');
     setResult(null);
     setSending(false);
@@ -189,11 +193,11 @@ We're excited to have you on board!
             {/* Personal note */}
             <div>
               <Label>Personal Note <span className="text-slate-400 font-normal">(optional)</span></Label>
-              <Input
-                placeholder="e.g. Looking forward to working with you!"
+              <Textarea
                 value={personalNote}
                 onChange={(e) => setPersonalNote(e.target.value)}
-                className="mt-1"
+                className="mt-1 text-sm"
+                rows={4}
               />
             </div>
 
