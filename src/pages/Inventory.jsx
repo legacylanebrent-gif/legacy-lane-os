@@ -256,7 +256,7 @@ export default function Inventory() {
       ) : viewMode === 'grid' ? (
         <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredItems.map(item => (
-            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleEdit(item)}>
               <div className="relative h-48 bg-slate-100 overflow-hidden">
                 {item.images && item.images.length > 0 ? (
                   <img
@@ -280,17 +280,17 @@ export default function Inventory() {
                   </h3>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={e => e.stopPropagation()}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(item)}>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => handleDelete(item.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                         className="text-red-600"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -319,7 +319,7 @@ export default function Inventory() {
       ) : (
         <div className="space-y-3">
           {filteredItems.map(item => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
+            <Card key={item.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleEdit(item)}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 bg-slate-100 rounded overflow-hidden flex-shrink-0">
@@ -359,17 +359,17 @@ export default function Inventory() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={e => e.stopPropagation()}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(item)}>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleDelete(item.id)}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                           className="text-red-600"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
