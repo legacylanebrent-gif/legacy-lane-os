@@ -176,7 +176,7 @@ export default function Inventory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Inventory</h1>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Active Inventory</h1>
           <p className="text-slate-600">Manage your estate sale items and listings</p>
         </div>
         <Button 
@@ -435,14 +435,23 @@ export default function Inventory() {
                         base44.entities.Item.update(item.id, { status: newStatus });
                         setItems(items.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
                         
-                        // If marked as sold, cleanup images and trigger SEO
-                        if (newStatus === 'sold' && item.sold_price) {
+                        // If marked as sold, cleanup images, trigger SEO, and remove from marketplace
+                        if (newStatus === 'sold') {
                           try {
-                            await base44.functions.invoke('processSoldItem', {
-                              item_id: item.id,
-                              sold_price: item.sold_price,
-                              first_image_url: item.images?.[0] || null
-                            });
+                            // Remove from marketplace
+                            const marketplaceItems = await base44.entities.MarketplaceItem.filter({ item_id: item.id });
+                            for (const mi of marketplaceItems) {
+                              await base44.entities.MarketplaceItem.update(mi.id, { status: 'SOLD' });
+                            }
+                            
+                            // Cleanup images and trigger SEO
+                            if (item.sold_price) {
+                              await base44.functions.invoke('processSoldItem', {
+                                item_id: item.id,
+                                sold_price: item.sold_price,
+                                first_image_url: item.images?.[0] || null
+                              });
+                            }
                           } catch (error) {
                             console.warn('Note: Could not process sold item cleanup:', error.message);
                           }
