@@ -38,10 +38,13 @@ export default function StorageManagement() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const [editingLocation, setEditingLocation] = useState(null);
   const [formData, setFormData] = useState({
     space_name: '',
-    space_description: '',
+    space_description: ''
+  });
+  const [customizeData, setCustomizeData] = useState({
     section_name: '',
     shelving_name: '',
     shelf_number: '',
@@ -78,15 +81,12 @@ export default function StorageManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const locationPath = generateLocationPath(formData);
-    const payload = { ...formData, location_path: locationPath };
-
     try {
       if (editingLocation) {
-        await base44.entities.StorageLocation.update(editingLocation.id, payload);
+        await base44.entities.StorageLocation.update(editingLocation.id, formData);
       } else {
         await base44.entities.StorageLocation.create({
-          ...payload,
+          ...formData,
           operator_id: user.id
         });
       }
@@ -94,12 +94,7 @@ export default function StorageManagement() {
       setEditingLocation(null);
       setFormData({
         space_name: '',
-        space_description: '',
-        section_name: '',
-        shelving_name: '',
-        shelf_number: '',
-        bin_box_label: '',
-        capacity_notes: ''
+        space_description: ''
       });
       loadData();
     } catch (error) {
@@ -108,18 +103,49 @@ export default function StorageManagement() {
     }
   };
 
+  const handleCustomizeSubmit = async (e) => {
+    e.preventDefault();
+    
+    const locationPath = generateLocationPath({ ...editingLocation, ...customizeData });
+    const payload = { ...editingLocation, ...customizeData, location_path: locationPath };
+
+    try {
+      await base44.entities.StorageLocation.update(editingLocation.id, payload);
+      setShowCustomizeModal(false);
+      setEditingLocation(null);
+      setCustomizeData({
+        section_name: '',
+        shelving_name: '',
+        shelf_number: '',
+        bin_box_label: '',
+        capacity_notes: ''
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error updating location:', error);
+      alert('Failed to customize location');
+    }
+  };
+
   const handleEdit = (location) => {
     setEditingLocation(location);
     setFormData({
       space_name: location.space_name || '',
-      space_description: location.space_description || '',
+      space_description: location.space_description || ''
+    });
+    setShowModal(true);
+  };
+
+  const handleCustomize = (location) => {
+    setEditingLocation(location);
+    setCustomizeData({
       section_name: location.section_name || '',
       shelving_name: location.shelving_name || '',
       shelf_number: location.shelf_number || '',
       bin_box_label: location.bin_box_label || '',
       capacity_notes: location.capacity_notes || ''
     });
-    setShowModal(true);
+    setShowCustomizeModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -247,19 +273,14 @@ export default function StorageManagement() {
             setEditingLocation(null);
             setFormData({
               space_name: '',
-              space_description: '',
-              section_name: '',
-              shelving_name: '',
-              shelf_number: '',
-              bin_box_label: '',
-              capacity_notes: ''
+              space_description: ''
             });
             setShowModal(true);
           }}
           className="bg-orange-600 hover:bg-orange-700"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Location
+          Add Space
         </Button>
       </div>
 
@@ -293,7 +314,7 @@ export default function StorageManagement() {
             className="bg-orange-600 hover:bg-orange-700"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create Your First Location
+            Create Your First Space
           </Button>
         </Card>
       ) : (
@@ -360,17 +381,28 @@ export default function StorageManagement() {
                     onClick={() => handleEdit(location)}
                   >
                     <Edit className="w-3 h-3 mr-1" />
-                    Edit
+                    Edit Space
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 text-cyan-600 hover:bg-cyan-50"
-                    onClick={() => generateAndPrintQR(location)}
+                    className="flex-1 text-purple-600 hover:bg-purple-50"
+                    onClick={() => handleCustomize(location)}
                   >
-                    <QrCode className="w-3 h-3 mr-1" />
-                    QR Code
+                    <Lightbulb className="w-3 h-3 mr-1" />
+                    Customize
                   </Button>
+                  {location.bin_box_label && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-cyan-600 hover:bg-cyan-50"
+                      onClick={() => generateAndPrintQR(location)}
+                    >
+                      <QrCode className="w-3 h-3 mr-1" />
+                      QR Code
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -387,19 +419,19 @@ export default function StorageManagement() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Create/Edit Space Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0">
             <DialogTitle className="text-2xl font-serif text-navy-900">
-              {editingLocation ? 'Edit Storage Location' : 'Add Storage Location'}
+              {editingLocation ? 'Edit Space' : 'Create New Space'}
             </DialogTitle>
             <p className="text-sm text-slate-600 mt-2">
-              Fill in only what applies to your space. You can have just a room with bins, or add more organization levels.
+              Start by naming your storage space. You can customize the organization structure next.
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto pr-2 flex-1">
+          <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-1">
             {/* Space Name (Required) */}
             <div>
               <Label htmlFor="space_name" className="font-semibold">Space Name *</Label>
@@ -424,17 +456,41 @@ export default function StorageManagement() {
               />
             </div>
 
-            {/* Optional Tiers */}
+            {/* Submit */}
+            <div className="flex justify-end gap-3 pt-4 border-t shrink-0">
+              <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">
+                {editingLocation ? 'Update Space' : 'Create Space'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customize Space Modal */}
+      <Dialog open={showCustomizeModal} onOpenChange={setShowCustomizeModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="shrink-0">
+            <DialogTitle className="text-2xl font-serif text-navy-900">
+              Customize Space: {editingLocation?.space_name}
+            </DialogTitle>
+            <p className="text-sm text-slate-600 mt-2">
+              Add organization structure details like sections, shelving, shelves, and bins to this space.
+            </p>
+          </DialogHeader>
+
+          <form onSubmit={handleCustomizeSubmit} className="space-y-6 overflow-y-auto pr-2 flex-1">
+            {/* Organization Levels */}
             <div className="border-t pt-4">
-              <p className="text-sm font-semibold text-slate-700 mb-4">Optional Organization Levels</p>
+              <p className="text-sm font-semibold text-slate-700 mb-4">Organization Levels</p>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="section_name">Section</Label>
                   <Input
                     id="section_name"
-                    value={formData.section_name}
-                    onChange={(e) => setFormData({...formData, section_name: e.target.value})}
+                    value={customizeData.section_name}
+                    onChange={(e) => setCustomizeData({...customizeData, section_name: e.target.value})}
                     placeholder="e.g., Back Wall, Corner, Left Side"
                   />
                 </div>
@@ -443,8 +499,8 @@ export default function StorageManagement() {
                   <Label htmlFor="shelving_name">Shelving Unit</Label>
                   <Input
                     id="shelving_name"
-                    value={formData.shelving_name}
-                    onChange={(e) => setFormData({...formData, shelving_name: e.target.value})}
+                    value={customizeData.shelving_name}
+                    onChange={(e) => setCustomizeData({...customizeData, shelving_name: e.target.value})}
                     placeholder="e.g., Metal Rack A, Cabinet 1"
                   />
                 </div>
@@ -453,25 +509,23 @@ export default function StorageManagement() {
                   <Label htmlFor="shelf_number">Shelf Number</Label>
                   <Input
                     id="shelf_number"
-                    value={formData.shelf_number}
-                    onChange={(e) => setFormData({...formData, shelf_number: e.target.value})}
+                    value={customizeData.shelf_number}
+                    onChange={(e) => setCustomizeData({...customizeData, shelf_number: e.target.value})}
                     placeholder="e.g., 1, 2, Top, A, B"
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Bin/Box Label (Required) */}
-            <div>
-              <Label htmlFor="bin_box_label" className="font-semibold">Bin/Box Label *</Label>
-              <Input
-                id="bin_box_label"
-                value={formData.bin_box_label}
-                onChange={(e) => setFormData({...formData, bin_box_label: e.target.value})}
-                placeholder="e.g., A1, Box 1, Red Bin, Plastic Container"
-                required
-              />
-              <p className="text-xs text-slate-500 mt-1">The specific bin, box, or container identifier</p>
+                <div>
+                  <Label htmlFor="bin_box_label">Bin/Box Label *</Label>
+                  <Input
+                    id="bin_box_label"
+                    value={customizeData.bin_box_label}
+                    onChange={(e) => setCustomizeData({...customizeData, bin_box_label: e.target.value})}
+                    placeholder="e.g., A1, Box 1, Red Bin, Plastic Container"
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Capacity Notes */}
@@ -479,8 +533,8 @@ export default function StorageManagement() {
               <Label htmlFor="capacity_notes">Capacity Notes</Label>
               <Textarea
                 id="capacity_notes"
-                value={formData.capacity_notes}
-                onChange={(e) => setFormData({...formData, capacity_notes: e.target.value})}
+                value={customizeData.capacity_notes}
+                onChange={(e) => setCustomizeData({...customizeData, capacity_notes: e.target.value})}
                 placeholder="e.g., Holds small items, mostly full, for fragile items only"
                 rows={2}
               />
@@ -488,15 +542,15 @@ export default function StorageManagement() {
 
             {/* Preview */}
             <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Location Path Preview</p>
-              <p className="text-sm font-medium text-slate-900 break-words">{generateLocationPath(formData) || 'Your location path will appear here'}</p>
+              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Full Location Path</p>
+              <p className="text-sm font-medium text-slate-900 break-words">{generateLocationPath({ ...editingLocation, ...customizeData }) || 'Your location path will appear here'}</p>
             </div>
 
             {/* Submit */}
             <div className="flex justify-end gap-3 pt-4 border-t shrink-0">
-              <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-              <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">
-                {editingLocation ? 'Update Location' : 'Add Location'}
+              <Button type="button" variant="outline" onClick={() => setShowCustomizeModal(false)}>Cancel</Button>
+              <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">
+                Save Customization
               </Button>
             </div>
           </form>
