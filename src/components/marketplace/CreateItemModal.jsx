@@ -18,7 +18,13 @@ const CATEGORIES = [
   'sporting_goods', 'tools_hardware', 'toys_games', 'vehicles', 'other'
 ];
 
-const CONDITIONS = ['new', 'excellent', 'good', 'fair', 'poor'];
+const CONDITIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'used_like_new', label: 'Used - Like New' },
+  { value: 'used_good', label: 'Used - Good' },
+  { value: 'used_fair', label: 'Used - Fair' },
+  { value: 'for_parts', label: 'For Parts or Not Working' },
+];
 
 export default function CreateItemModal({ open, onClose, onSuccess, item, saleId }) {
   const [loading, setLoading] = useState(false);
@@ -26,7 +32,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     title: '',
     description: '',
     category: 'furniture',
-    condition: 'good',
+    condition: 'used_good',
     price: '',
     quantity: 1,
     fulfillment_options: ['pickup'],
@@ -39,7 +45,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         title: item.title || '',
         description: item.description || '',
         category: item.category || 'furniture',
-        condition: item.condition || 'good',
+        condition: item.condition || 'used_good',
         price: item.price || '',
         quantity: item.quantity || 1,
         fulfillment_options: item.fulfillment_options || ['pickup'],
@@ -50,7 +56,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         title: '',
         description: '',
         category: 'furniture',
-        condition: 'good',
+        condition: 'used_good',
         price: '',
         quantity: 1,
         fulfillment_options: ['pickup'],
@@ -164,8 +170,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
                 </SelectTrigger>
                 <SelectContent>
                   {CONDITIONS.map(cond => (
-                    <SelectItem key={cond} value={cond} className="capitalize">
-                      {cond}
+                    <SelectItem key={cond.value} value={cond.value}>
+                      {cond.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

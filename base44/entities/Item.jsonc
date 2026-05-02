@@ -82,10 +82,10 @@
       "type": "string",
       "enum": [
         "new",
-        "excellent",
-        "good",
-        "fair",
-        "poor"
+        "used_like_new",
+        "used_good",
+        "used_fair",
+        "for_parts"
       ]
     },
     "status": {
