@@ -90,11 +90,14 @@ export default function MarketplaceItemDetail() {
           }
         }
 
-        // Fetch seller name
+        // Fetch seller name + location
         if (mi.operator_id) {
           const sellers = await base44.entities.User.filter({ id: mi.operator_id });
           if (sellers.length > 0) {
-            merged.operator_name = sellers[0].company_name || sellers[0].full_name || 'Unknown Seller';
+            const seller = sellers[0];
+            merged.operator_name = seller.company_name || seller.full_name || 'Unknown Seller';
+            merged.operator_city = seller.city || seller.location_city || null;
+            merged.operator_state = seller.state || seller.location_state || null;
           }
         }
 
@@ -298,6 +301,12 @@ export default function MarketplaceItemDetail() {
                 <div className="bg-slate-50 rounded-lg p-4">
                   <p className="text-sm text-slate-600 mb-2">Sold by</p>
                   <p className="font-semibold text-slate-900">{item.operator_name || item.seller_name || 'Estate Sale Operator'}</p>
+                  {(item.operator_city || item.operator_state) && (
+                    <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+                      <MapPin className="w-3 h-3" />
+                      {[item.operator_city, item.operator_state].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                   {item.pickup_location_zip && (
                     <p className="text-sm text-slate-600 mt-2">
                       📍 Local pickup available in {item.pickup_location_zip}
@@ -390,12 +399,17 @@ export default function MarketplaceItemDetail() {
                   <div>
                     <p className="text-sm text-slate-600 mb-1">Price</p>
                     <p className="text-3xl font-bold text-gold-600">${item.price?.toLocaleString()}</p>
-                    {item.shipping_cost && item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
-                      <p className="text-xs text-slate-500 mt-1">+ ${item.shipping_cost} shipping</p>
+                    {item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {item.shipping_cost > 0 ? `+ $${item.shipping_cost} shipping` : 'Free shipping'}
+                      </p>
                     )}
                   </div>
 
-                  <Button onClick={handleBuyNow} className="w-full bg-gold-600 hover:bg-gold-700">
+                  <Button onClick={handleBuyNow} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3">
+                    Add to Cart
+                  </Button>
+                  <Button onClick={handleBuyNow} variant="outline" className="w-full">
                     Buy Now
                   </Button>
                 </>
