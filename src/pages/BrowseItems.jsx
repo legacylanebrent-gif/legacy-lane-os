@@ -94,8 +94,27 @@ export default function BrowseItems() {
   const loadMarketplaceItems = async () => {
     try {
       setLoading(true);
-      const data = await base44.entities.MarketplaceItem.filter({ status: 'ACTIVE' }, '-created_date', 500);
-      setMarketplaceItems(data || []);
+      const miList = await base44.entities.MarketplaceItem.filter({ status: 'ACTIVE' }, '-created_date', 500);
+      if (!miList || miList.length === 0) { setMarketplaceItems([]); return; }
+
+      // Fetch all linked Item records in one call
+      const itemIds = [...new Set(miList.map(mi => mi.item_id).filter(Boolean))];
+      const allItems = itemIds.length
+        ? await base44.entities.Item.filter({ id: { $in: itemIds } })
+        : [];
+      const itemMap = Object.fromEntries(allItems.map(i => [i.id, i]));
+
+      // Merge Item fields into each MarketplaceItem
+      const enriched = miList.map(mi => {
+        const linkedItem = itemMap[mi.item_id] || {};
+        return {
+          ...linkedItem,   // title, description, images, category, condition, etc.
+          ...mi,           // MI fields win (price, listing_type, shipping_option, etc.)
+          image_url: (linkedItem.images || [])[0] || null,
+        };
+      });
+
+      setMarketplaceItems(enriched);
     } catch (error) {
       console.error('Error loading marketplace items:', error);
     } finally {

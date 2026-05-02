@@ -155,8 +155,11 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
         {/* Price */}
         <div className="mb-3">
           <span className="text-2xl font-bold text-gold-600">{displayPrice}</span>
-          {item.shipping_cost && item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
+          {item.shipping_cost > 0 && item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
             <span className="text-xs text-slate-500 ml-2">+ ${item.shipping_cost} shipping</span>
+          )}
+          {(item.shipping_cost === 0 || !item.shipping_cost) && item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
+            <span className="text-xs text-green-600 ml-2">Free shipping</span>
           )}
         </div>
 
