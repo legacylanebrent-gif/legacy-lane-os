@@ -384,83 +384,122 @@ export default function Inventory() {
           ))}
         </div>
       ) : (
-        <div className="space-y-3">
-          {filteredItems.map(item => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleEdit(item)}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-slate-100 rounded overflow-hidden flex-shrink-0">
-                    {item.images && item.images.length > 0 ? (
-                      <img
-                        src={item.images[0]}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
+        <div className="overflow-x-auto border border-slate-200 rounded-lg">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold text-slate-700">Item</th>
+                <th className="px-4 py-3 text-left font-semibold text-slate-700">Category</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-700">Price</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-700">Status</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-700">Sold Price</th>
+                <th className="px-4 py-3 text-center font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map(item => (
+                <tr key={item.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-slate-100 rounded overflow-hidden flex-shrink-0">
+                        {item.images && item.images.length > 0 ? (
+                          <img
+                            src={item.images[0]}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <ImageIcon className="w-5 h-5 text-slate-300" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 cursor-pointer" onClick={() => handleEdit(item)}>
+                        <p className="font-medium text-slate-900 hover:text-orange-600">{item.title}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  </td>
+                  <td className="px-4 py-3 text-center font-semibold text-slate-900">
+                    ${item.price?.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Select
+                      value={item.status}
+                      onValueChange={(newStatus) => {
+                        base44.entities.Item.update(item.id, { status: newStatus });
+                        setItems(items.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
+                      }}
+                    >
+                      <SelectTrigger className="w-24 mx-auto" onClick={e => e.stopPropagation()}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="sold">Sold</SelectItem>
+                        <SelectItem value="reserved">Reserved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="px-4 py-3">
+                    {item.status === 'sold' ? (
+                      <Input
+                        type="number"
+                        placeholder="$0.00"
+                        value={item.sold_price || ''}
+                        onChange={(e) => {
+                          const newPrice = e.target.value ? parseFloat(e.target.value) : null;
+                          base44.entities.Item.update(item.id, { sold_price: newPrice });
+                          setItems(items.map(i => i.id === item.id ? { ...i, sold_price: newPrice } : i));
+                        }}
+                        className="w-32 text-center"
+                        onClick={e => e.stopPropagation()}
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <ImageIcon className="w-8 h-8 text-slate-300" />
-                      </div>
+                      <span className="text-slate-400">-</span>
                     )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-slate-600">
-                      {item.category && (
-                        <div className="flex items-center gap-1">
-                          <Tag className="w-3 h-3" />
-                          <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
-                        </div>
-                      )}
-                      <Badge className={getStatusColor(item.status)}>
-                        {item.status}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-cyan-600 mb-2">
-                      ${item.price?.toLocaleString()}
-                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={e => e.stopPropagation()}>
+                        <Button variant="ghost" size="sm" onClick={e => e.stopPropagation()}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
-                         <Edit className="w-4 h-4 mr-2" />
-                         Edit
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
-                         {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
-                         {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={(e) => handlePostToEtsy(e, item)} disabled={postingEtsy[item.id]}>
-                         <span className="mr-2">🧶</span>
-                         {postingEtsy[item.id] ? 'Posting...' : 'Post to Etsy'}
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={(e) => handlePostToEbay(e, item)} disabled={postingEbay[item.id]}>
-                         <span className="mr-2">🛍️</span>
-                         {postingEbay[item.id] ? 'Posting...' : 'Post to eBay'}
-                       </DropdownMenuItem>
-                       <DropdownMenuItem 
-                         onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                         className="text-red-600"
-                       >
-                         <Trash2 className="w-4 h-4 mr-2" />
-                         Delete
-                       </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
+                          {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
+                          {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handlePostToEtsy(e, item)} disabled={postingEtsy[item.id]}>
+                          <span className="mr-2">🧶</span>
+                          {postingEtsy[item.id] ? 'Posting...' : 'Post to Etsy'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handlePostToEbay(e, item)} disabled={postingEbay[item.id]}>
+                          <span className="mr-2">🛍️</span>
+                          {postingEbay[item.id] ? 'Posting...' : 'Post to eBay'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

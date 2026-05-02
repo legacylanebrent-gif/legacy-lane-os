@@ -64,6 +64,10 @@
     "price": {
       "type": "number"
     },
+    "sold_price": {
+      "type": "number",
+      "description": "Price item sold for if different from listed price"
+    },
     "original_price": {
       "type": "number"
     },
