@@ -16,6 +16,8 @@ const CATEGORY_FIELDS = {
     { key: 'has_coa', label: 'Certificate of Authenticity (COA)', type: 'checkbox' },
     { key: 'provenance', label: 'Provenance / History', type: 'text' },
     { key: 'edition', label: 'Edition (e.g. 12/50)', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
+    { key: 'appraiser_name', label: 'Appraiser Name', type: 'text' },
   ],
   artwork_prints_posters: [
     { key: 'artist_name', label: 'Artist Name', type: 'text' },
@@ -25,6 +27,7 @@ const CATEGORY_FIELDS = {
     { key: 'is_framed', label: 'Framed', type: 'checkbox' },
     { key: 'edition', label: 'Edition Number (e.g. 45/200)', type: 'text' },
     { key: 'has_coa', label: 'Certificate of Authenticity', type: 'checkbox' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   antiques: [
     { key: 'era', label: 'Era / Period', type: 'select', options: ['Pre-1800s', 'Victorian (1837–1901)', 'Edwardian (1901–1910)', 'Art Nouveau (1890–1910)', 'Art Deco (1920s–1940s)', '1940s–1960s', '1960s–1980s', 'Unknown'] },
@@ -33,6 +36,8 @@ const CATEGORY_FIELDS = {
     { key: 'material', label: 'Material', type: 'text' },
     { key: 'is_authenticated', label: 'Authenticated / Appraised', type: 'checkbox' },
     { key: 'provenance', label: 'Provenance', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
+    { key: 'appraiser_name', label: 'Appraiser Name', type: 'text' },
   ],
   furniture: [
     { key: 'material', label: 'Material', type: 'select', options: ['Solid Wood', 'Veneer', 'MDF', 'Metal', 'Glass', 'Wicker', 'Mixed', 'Other'] },
@@ -61,6 +66,7 @@ const CATEGORY_FIELDS = {
     { key: 'has_original_packaging', label: 'Original Packaging / Box', type: 'checkbox' },
     { key: 'is_authenticated', label: 'Authenticated / Graded', type: 'checkbox' },
     { key: 'grade', label: 'Grade / Condition Rating', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   coins_currency: [
     { key: 'coin_type', label: 'Coin / Currency Type', type: 'text' },
@@ -71,6 +77,7 @@ const CATEGORY_FIELDS = {
     { key: 'is_graded', label: 'Professionally Graded (PCGS/NGC)', type: 'checkbox' },
     { key: 'is_proof', label: 'Proof / Uncirculated', type: 'checkbox' },
     { key: 'metal_content', label: 'Metal Content (Gold/Silver/etc)', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   electronics: [
     { key: 'brand', label: 'Brand', type: 'text' },
@@ -90,6 +97,7 @@ const CATEGORY_FIELDS = {
     { key: 'includes_case', label: 'Includes Case', type: 'checkbox' },
     { key: 'includes_accessories', label: 'Includes Accessories (bow, picks, etc.)', type: 'checkbox' },
     { key: 'has_been_serviced', label: 'Recently Serviced', type: 'checkbox' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   vehicles: [
     { key: 'make_model', label: 'Make & Model', type: 'text' },
@@ -100,6 +108,7 @@ const CATEGORY_FIELDS = {
     { key: 'fuel_type', label: 'Fuel Type', type: 'select', options: ['Gasoline', 'Diesel', 'Electric', 'Hybrid', 'Other'] },
     { key: 'title_status', label: 'Title Status', type: 'select', options: ['Clean', 'Salvage', 'Rebuilt', 'No Title', 'Other'] },
     { key: 'runs_drives', label: 'Runs & Drives', type: 'checkbox' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   books_media: [
     { key: 'author', label: 'Author / Artist', type: 'text' },
@@ -109,6 +118,7 @@ const CATEGORY_FIELDS = {
     { key: 'is_first_edition', label: 'First Edition', type: 'checkbox' },
     { key: 'is_signed', label: 'Signed by Author / Artist', type: 'checkbox' },
     { key: 'isbn', label: 'ISBN (books)', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   rugs_textiles: [
     { key: 'rug_type', label: 'Type', type: 'select', options: ['Area Rug', 'Runner', 'Tapestry', 'Quilt', 'Blanket', 'Tablecloth', 'Other'] },
@@ -117,6 +127,7 @@ const CATEGORY_FIELDS = {
     { key: 'color_pattern', label: 'Color / Pattern', type: 'text' },
     { key: 'is_handmade', label: 'Handmade', type: 'checkbox' },
     { key: 'country_of_origin', label: 'Country of Origin', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   china_porcelain: [
     { key: 'brand_maker', label: 'Brand / Maker (e.g. Wedgwood, Lenox)', type: 'text' },
@@ -126,6 +137,7 @@ const CATEGORY_FIELDS = {
     { key: 'is_complete_set', label: 'Complete Set', type: 'checkbox' },
     { key: 'has_chips_cracks', label: 'Has Chips or Cracks', type: 'checkbox' },
     { key: 'country_of_origin', label: 'Country of Origin', type: 'text' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   glassware_crystal: [
     { key: 'brand_maker', label: 'Brand / Maker (e.g. Waterford, Baccarat)', type: 'text' },
@@ -134,6 +146,7 @@ const CATEGORY_FIELDS = {
     { key: 'num_pieces', label: 'Number of Pieces', type: 'text' },
     { key: 'has_chips_cracks', label: 'Has Chips or Cracks', type: 'checkbox' },
     { key: 'is_set', label: 'Part of a Set', type: 'checkbox' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   clocks_watches: [
     { key: 'brand', label: 'Brand / Maker', type: 'text' },
@@ -142,6 +155,7 @@ const CATEGORY_FIELDS = {
     { key: 'is_working', label: 'Working Condition', type: 'checkbox' },
     { key: 'year_era', label: 'Year / Era', type: 'text' },
     { key: 'has_key', label: 'Includes Key / Winding Tool', type: 'checkbox' },
+    { key: 'appraisal_value', label: 'Appraisal Value ($)', type: 'text' },
   ],
   tools_hardware: [
     { key: 'brand', label: 'Brand', type: 'text' },
