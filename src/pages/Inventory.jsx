@@ -304,7 +304,7 @@ export default function Inventory() {
                   {item.category && (
                     <div className="flex items-center gap-1 text-sm text-slate-600">
                       <Tag className="w-3 h-3" />
-                      <span>{item.category}</span>
+                      <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1 text-lg font-bold text-cyan-600">
@@ -344,7 +344,7 @@ export default function Inventory() {
                       {item.category && (
                         <div className="flex items-center gap-1">
                           <Tag className="w-3 h-3" />
-                          <span>{item.category}</span>
+                          <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                         </div>
                       )}
                       <Badge className={getStatusColor(item.status)}>
