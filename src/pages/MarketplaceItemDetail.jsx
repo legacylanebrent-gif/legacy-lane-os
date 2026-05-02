@@ -90,6 +90,14 @@ export default function MarketplaceItemDetail() {
           }
         }
 
+        // Fetch seller name
+        if (mi.operator_id) {
+          const sellers = await base44.entities.User.filter({ id: mi.operator_id });
+          if (sellers.length > 0) {
+            merged.operator_name = sellers[0].company_name || sellers[0].full_name || 'Unknown Seller';
+          }
+        }
+
         setItem(merged);
 
         // Load bids if auction
@@ -289,7 +297,7 @@ export default function MarketplaceItemDetail() {
                 {/* Seller Info */}
                 <div className="bg-slate-50 rounded-lg p-4">
                   <p className="text-sm text-slate-600 mb-2">Sold by</p>
-                  <p className="font-semibold text-slate-900">{item.operator_name || 'Estate Sale Operator'}</p>
+                  <p className="font-semibold text-slate-900">{item.operator_name || item.seller_name || 'Estate Sale Operator'}</p>
                   {item.pickup_location_zip && (
                     <p className="text-sm text-slate-600 mt-2">
                       📍 Local pickup available in {item.pickup_location_zip}
