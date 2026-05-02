@@ -739,15 +739,15 @@ export default function MyProfile() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-1">
-                      {subscription.plan_type.replace(/_/g, ' ')}
+                      {subscription.plan_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                     </h3>
                     <Badge className={getTierColor(subscription.tier)}>
-                      {subscription.tier} tier
+                      {subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier
                     </Badge>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-slate-900">${subscription.price}</div>
-                    <div className="text-sm text-slate-600">per {subscription.billing_period}</div>
+                    <div className="text-sm text-slate-600">per {subscription.billing_period === 'monthly' ? 'month' : subscription.billing_period === 'annually' ? 'year' : subscription.billing_period}</div>
                   </div>
                 </div>
                 <div className="grid gap-2 text-sm">
