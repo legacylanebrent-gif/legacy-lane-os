@@ -739,7 +739,7 @@ export default function MyProfile() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-1">
-                      {subscription.plan_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                      {subscription.plan_type.replace(/_/g, ' ').replace(/\boperator\b/gi, '').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase())}
                     </h3>
                     <Badge className={getTierColor(subscription.tier)}>
                       {subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier
