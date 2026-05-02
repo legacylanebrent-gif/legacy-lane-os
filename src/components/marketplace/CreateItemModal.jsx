@@ -144,7 +144,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
                 <SelectContent>
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat} value={cat}>
-                      {cat.replace(/_/g, ' ')}
+                      {cat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                     </SelectItem>
                   ))}
                 </SelectContent>
