@@ -144,7 +144,10 @@ export default function Inventory() {
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
     
-    return matchesSearch && matchesStatus && matchesCategory;
+    // Exclude sold items from main inventory (they go to SoldInventory page)
+    const isSold = item.status === 'sold';
+    
+    return !isSold && matchesSearch && matchesStatus && matchesCategory;
   });
 
   const stats = {
@@ -428,9 +431,22 @@ export default function Inventory() {
                   <td className="px-4 py-3 text-center">
                     <Select
                       value={item.status}
-                      onValueChange={(newStatus) => {
+                      onValueChange={async (newStatus) => {
                         base44.entities.Item.update(item.id, { status: newStatus });
                         setItems(items.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
+                        
+                        // If marked as sold, cleanup images and trigger SEO
+                        if (newStatus === 'sold' && item.sold_price) {
+                          try {
+                            await base44.functions.invoke('processSoldItem', {
+                              item_id: item.id,
+                              sold_price: item.sold_price,
+                              first_image_url: item.images?.[0] || null
+                            });
+                          } catch (error) {
+                            console.warn('Note: Could not process sold item cleanup:', error.message);
+                          }
+                        }
                       }}
                     >
                       <SelectTrigger className="w-24 mx-auto" onClick={e => e.stopPropagation()}>

@@ -34,6 +34,7 @@ import ReferralDashboard from './pages/ReferralDashboard';
 import ReferralBatchInvite from './pages/ReferralBatchInvite';
 import OperatorProfile from './pages/OperatorProfile';
 import OperatorDashboard from './pages/OperatorDashboard';
+import SoldInventory from './pages/SoldInventory';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -111,6 +112,7 @@ const AuthenticatedApp = () => {
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />
       <Route path="/OperatorProfile" element={<LayoutWrapper currentPageName="OperatorProfile"><OperatorProfile /></LayoutWrapper>} />
       <Route path="/OperatorDashboard" element={<LayoutWrapper currentPageName="OperatorDashboard"><OperatorDashboard /></LayoutWrapper>} />
+      <Route path="/SoldInventory" element={<LayoutWrapper currentPageName="SoldInventory"><SoldInventory /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
