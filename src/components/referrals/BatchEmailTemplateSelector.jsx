@@ -57,7 +57,7 @@ Let me know what you think!
   {
     id: 'consumer_invite',
     name: 'Shopper Invite — Consumer',
-    subject: `You're invited to find amazing estate sales near you`,
+    subject: "You're invited to find amazing estate sales near you",
     body: `Hi {{name}},
 
 I wanted to share a site I've been using to find incredible estate sales nearby — EstateSalen.com.
