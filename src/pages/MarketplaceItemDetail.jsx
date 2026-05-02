@@ -282,7 +282,7 @@ export default function MarketplaceItemDetail() {
               {/* Details */}
               <div className="p-6">
                 <div className="mb-4 flex flex-wrap gap-2">
-                  <Badge className="bg-gold-600">{isAuction ? item.auction_type + ' Auction' : 'Fixed Price'}</Badge>
+                  <Badge className="bg-orange-500 text-white">{isAuction ? item.auction_type + ' Auction' : 'Fixed Price'}</Badge>
                   {item.shipping_option === 'LOCAL_PICKUP_ONLY' && (
                     <Badge className="bg-sage-600 flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
