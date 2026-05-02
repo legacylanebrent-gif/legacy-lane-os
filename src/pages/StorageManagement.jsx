@@ -44,12 +44,14 @@ export default function StorageManagement() {
     space_name: '',
     space_description: ''
   });
-  const [customizeData, setCustomizeData] = useState({
-    section_name: '',
-    shelving_name: '',
-    shelf_number: '',
-    bin_box_label: '',
-    capacity_notes: ''
+  const [wizardStep, setWizardStep] = useState('shelving_choice');
+  const [wizardData, setWizardData] = useState({
+    hasShelving: null,
+    shelvingUnits: [],
+    currentUnit: 0,
+    currentWall: '',
+    shelvesPerUnit: 1,
+    bins: []
   });
 
   useEffect(() => {
@@ -103,29 +105,7 @@ export default function StorageManagement() {
     }
   };
 
-  const handleCustomizeSubmit = async (e) => {
-    e.preventDefault();
-    
-    const locationPath = generateLocationPath({ ...editingLocation, ...customizeData });
-    const payload = { ...editingLocation, ...customizeData, location_path: locationPath };
 
-    try {
-      await base44.entities.StorageLocation.update(editingLocation.id, payload);
-      setShowCustomizeModal(false);
-      setEditingLocation(null);
-      setCustomizeData({
-        section_name: '',
-        shelving_name: '',
-        shelf_number: '',
-        bin_box_label: '',
-        capacity_notes: ''
-      });
-      loadData();
-    } catch (error) {
-      console.error('Error updating location:', error);
-      alert('Failed to customize location');
-    }
-  };
 
   const handleEdit = (location) => {
     setEditingLocation(location);
@@ -138,14 +118,105 @@ export default function StorageManagement() {
 
   const handleCustomize = (location) => {
     setEditingLocation(location);
-    setCustomizeData({
-      section_name: location.section_name || '',
-      shelving_name: location.shelving_name || '',
-      shelf_number: location.shelf_number || '',
-      bin_box_label: location.bin_box_label || '',
-      capacity_notes: location.capacity_notes || ''
+    setWizardStep('shelving_choice');
+    setWizardData({
+      hasShelving: null,
+      shelvingUnits: [],
+      currentUnit: 0,
+      currentWall: '',
+      shelvesPerUnit: 1,
+      bins: []
     });
     setShowCustomizeModal(true);
+  };
+
+  const handleWizardNext = () => {
+    if (wizardStep === 'shelving_choice') {
+      if (wizardData.hasShelving) {
+        setWizardStep('shelving_count');
+      } else {
+        setWizardStep('bins');
+      }
+    } else if (wizardStep === 'shelving_count') {
+      const units = Array.from({ length: wizardData.shelvingUnits.length }, (_, i) => ({
+        id: i,
+        name: `Shelving Unit ${i + 1}`,
+        wall: '',
+        shelves: 1
+      }));
+      setWizardData(prev => ({ ...prev, shelvingUnits: units, currentUnit: 0 }));
+      setWizardStep('wall_selection');
+    } else if (wizardStep === 'wall_selection') {
+      if (wizardData.currentUnit < wizardData.shelvingUnits.length - 1) {
+        setWizardData(prev => ({ ...prev, currentUnit: prev.currentUnit + 1 }));
+      } else {
+        setWizardStep('shelf_count');
+        setWizardData(prev => ({ ...prev, currentUnit: 0 }));
+      }
+    } else if (wizardStep === 'shelf_count') {
+      if (wizardData.currentUnit < wizardData.shelvingUnits.length - 1) {
+        setWizardData(prev => ({ ...prev, currentUnit: prev.currentUnit + 1 }));
+      } else {
+        setWizardStep('bins');
+      }
+    }
+  };
+
+  const handleWizardComplete = async () => {
+    try {
+      const baseData = {
+        space_name: editingLocation.space_name,
+        space_description: editingLocation.space_description
+      };
+
+      if (wizardData.hasShelving) {
+        // Create entries for each unit > wall > shelf > bin combination
+        for (const unit of wizardData.shelvingUnits) {
+          for (let shelfNum = 1; shelfNum <= unit.shelves; shelfNum++) {
+            for (let binNum = 1; binNum <= 3; binNum++) { // Default 3 bins per shelf
+              const binLabel = `${unit.name} - Shelf ${shelfNum} - Bin ${binNum}`;
+              const locationPath = `${baseData.space_name} > ${unit.name} > ${unit.wall} > Shelf ${shelfNum} > Bin ${binNum}`;
+              
+              await base44.entities.StorageLocation.create({
+                ...baseData,
+                operator_id: user.id,
+                shelving_name: unit.name,
+                shelf_number: shelfNum,
+                section_name: unit.wall,
+                bin_box_label: binLabel,
+                location_path: locationPath,
+                is_active: true
+              });
+            }
+          }
+        }
+      } else {
+        // Create simple bins without shelving
+        for (let i = 1; i <= 5; i++) {
+          const binLabel = `Bin ${i}`;
+          const locationPath = `${baseData.space_name} > ${binLabel}`;
+          
+          await base44.entities.StorageLocation.create({
+            ...baseData,
+            operator_id: user.id,
+            bin_box_label: binLabel,
+            location_path: locationPath,
+            is_active: true
+          });
+        }
+      }
+
+      // Delete the original placeholder location if it has no bin_box_label
+      if (!editingLocation.bin_box_label) {
+        await base44.entities.StorageLocation.delete(editingLocation.id);
+      }
+
+      setShowCustomizeModal(false);
+      loadData();
+    } catch (error) {
+      console.error('Error completing wizard:', error);
+      alert('Failed to create storage structure');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -467,93 +538,203 @@ export default function StorageManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Customize Space Modal */}
+      {/* Customize Space Wizard Modal */}
       <Dialog open={showCustomizeModal} onOpenChange={setShowCustomizeModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0">
             <DialogTitle className="text-2xl font-serif text-navy-900">
-              Customize Space: {editingLocation?.space_name}
+              Organize {editingLocation?.space_name}
             </DialogTitle>
             <p className="text-sm text-slate-600 mt-2">
-              Add organization structure details like sections, shelving, shelves, and bins to this space.
+              Let's set up your storage structure step by step.
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleCustomizeSubmit} className="space-y-6 overflow-y-auto pr-2 flex-1">
-            {/* Organization Levels */}
-            <div className="border-t pt-4">
-              <p className="text-sm font-semibold text-slate-700 mb-4">Organization Levels</p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="section_name">Section</Label>
-                  <Input
-                    id="section_name"
-                    value={customizeData.section_name}
-                    onChange={(e) => setCustomizeData({...customizeData, section_name: e.target.value})}
-                    placeholder="e.g., Back Wall, Corner, Left Side"
-                  />
+          <div className="overflow-y-auto pr-2 flex-1 space-y-6">
+            {/* Step 1: Shelving Choice */}
+            {wizardStep === 'shelving_choice' && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="font-semibold text-slate-700">Does this space have shelving units?</p>
+                <div className="flex gap-3">
+                  <Button
+                    variant={wizardData.hasShelving === true ? 'default' : 'outline'}
+                    onClick={() => setWizardData({...wizardData, hasShelving: true})}
+                    className="flex-1"
+                  >
+                    Yes, it has shelving
+                  </Button>
+                  <Button
+                    variant={wizardData.hasShelving === false ? 'default' : 'outline'}
+                    onClick={() => setWizardData({...wizardData, hasShelving: false})}
+                    className="flex-1"
+                  >
+                    No, just loose bins
+                  </Button>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <Label htmlFor="shelving_name">Shelving Unit</Label>
-                  <Input
-                    id="shelving_name"
-                    value={customizeData.shelving_name}
-                    onChange={(e) => setCustomizeData({...customizeData, shelving_name: e.target.value})}
-                    placeholder="e.g., Metal Rack A, Cabinet 1"
-                  />
+            {/* Step 2: Shelving Count */}
+            {wizardStep === 'shelving_count' && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="font-semibold text-slate-700">How many shelving units do you have?</p>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(num => (
+                    <Button
+                      key={num}
+                      variant={wizardData.shelvingUnits.length === num ? 'default' : 'outline'}
+                      onClick={() => setWizardData({...wizardData, shelvingUnits: Array(num).fill(null)})}
+                      className="flex-1"
+                    >
+                      {num}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => setWizardData({...wizardData, shelvingUnits: Array(6).fill(null)})}
+                    className="flex-1"
+                  >
+                    6+
+                  </Button>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <Label htmlFor="shelf_number">Shelf Number</Label>
-                  <Input
-                    id="shelf_number"
-                    value={customizeData.shelf_number}
-                    onChange={(e) => setCustomizeData({...customizeData, shelf_number: e.target.value})}
-                    placeholder="e.g., 1, 2, Top, A, B"
-                  />
+            {/* Step 3: Wall Selection */}
+            {wizardStep === 'wall_selection' && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="font-semibold text-slate-700">
+                  Which wall is "Shelving Unit {wizardData.currentUnit + 1}" on?
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Back Wall', 'Left Wall', 'Right Wall', 'Front Wall', 'Corner'].map(wall => (
+                    <Button
+                      key={wall}
+                      variant={wizardData.shelvingUnits[wizardData.currentUnit]?.wall === wall ? 'default' : 'outline'}
+                      onClick={() => {
+                        const units = [...wizardData.shelvingUnits];
+                        units[wizardData.currentUnit] = {...units[wizardData.currentUnit], wall};
+                        setWizardData({...wizardData, shelvingUnits: units});
+                      }}
+                    >
+                      {wall}
+                    </Button>
+                  ))}
                 </div>
-
                 <div>
-                  <Label htmlFor="bin_box_label">Bin/Box Label *</Label>
+                  <Label htmlFor="custom_wall">Or type custom wall name:</Label>
                   <Input
-                    id="bin_box_label"
-                    value={customizeData.bin_box_label}
-                    onChange={(e) => setCustomizeData({...customizeData, bin_box_label: e.target.value})}
-                    placeholder="e.g., A1, Box 1, Red Bin, Plastic Container"
-                    required
+                    id="custom_wall"
+                    placeholder="e.g., Section A"
+                    value={wizardData.shelvingUnits[wizardData.currentUnit]?.wall || ''}
+                    onChange={(e) => {
+                      const units = [...wizardData.shelvingUnits];
+                      units[wizardData.currentUnit] = {...units[wizardData.currentUnit], wall: e.target.value};
+                      setWizardData({...wizardData, shelvingUnits: units});
+                    }}
                   />
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Capacity Notes */}
-            <div>
-              <Label htmlFor="capacity_notes">Capacity Notes</Label>
-              <Textarea
-                id="capacity_notes"
-                value={customizeData.capacity_notes}
-                onChange={(e) => setCustomizeData({...customizeData, capacity_notes: e.target.value})}
-                placeholder="e.g., Holds small items, mostly full, for fragile items only"
-                rows={2}
-              />
-            </div>
+            {/* Step 4: Shelf Count per Unit */}
+            {wizardStep === 'shelf_count' && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="font-semibold text-slate-700">
+                  How many shelves in "Shelving Unit {wizardData.currentUnit + 1}"?
+                </p>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5, 6].map(num => (
+                    <Button
+                      key={num}
+                      variant={wizardData.shelvingUnits[wizardData.currentUnit]?.shelves === num ? 'default' : 'outline'}
+                      onClick={() => {
+                        const units = [...wizardData.shelvingUnits];
+                        units[wizardData.currentUnit] = {...units[wizardData.currentUnit], shelves: num};
+                        setWizardData({...wizardData, shelvingUnits: units});
+                      }}
+                      className="flex-1"
+                    >
+                      {num}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Preview */}
-            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Full Location Path</p>
-              <p className="text-sm font-medium text-slate-900 break-words">{generateLocationPath({ ...editingLocation, ...customizeData }) || 'Your location path will appear here'}</p>
-            </div>
+            {/* Step 5: Bins Overview */}
+            {wizardStep === 'bins' && (
+              <div className="space-y-4 border-t pt-4">
+                <p className="font-semibold text-slate-700">Storage Structure Summary</p>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <p className="text-sm"><strong>Space:</strong> {editingLocation?.space_name}</p>
+                  {wizardData.hasShelving ? (
+                    <>
+                      <p className="text-sm"><strong>Shelving Units:</strong> {wizardData.shelvingUnits.length}</p>
+                      {wizardData.shelvingUnits.map((unit, idx) => (
+                        <p key={idx} className="text-xs text-slate-600 ml-4">
+                          Unit {idx + 1}: {unit.wall} ({unit.shelves} shelves, ~{unit.shelves * 3} bins)
+                        </p>
+                      ))}
+                      <p className="text-sm text-orange-600 font-semibold mt-2">
+                        Total: ~{wizardData.shelvingUnits.reduce((sum, u) => sum + (u.shelves * 3), 0)} storage locations
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm">5 loose bins will be created</p>
+                  )}
+                </div>
+                <p className="text-xs text-slate-600">
+                  Click "Create Structure" to generate all storage locations. You can add more manually afterward.
+                </p>
+              </div>
+            )}
+          </div>
 
-            {/* Submit */}
-            <div className="flex justify-end gap-3 pt-4 border-t shrink-0">
-              <Button type="button" variant="outline" onClick={() => setShowCustomizeModal(false)}>Cancel</Button>
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">
-                Save Customization
+          {/* Navigation Buttons */}
+          <div className="flex justify-between gap-3 pt-4 border-t shrink-0">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                if (wizardStep === 'shelving_choice') {
+                  setShowCustomizeModal(false);
+                } else if (wizardStep === 'shelving_count') {
+                  setWizardStep('shelving_choice');
+                } else if (wizardStep === 'wall_selection') {
+                  setWizardStep('shelving_count');
+                } else if (wizardStep === 'shelf_count') {
+                  setWizardStep('wall_selection');
+                } else {
+                  setWizardStep('shelf_count');
+                }
+              }}
+            >
+              Back
+            </Button>
+            {wizardStep !== 'bins' ? (
+              <Button 
+                type="button"
+                onClick={handleWizardNext}
+                disabled={
+                  (wizardStep === 'shelving_choice' && wizardData.hasShelving === null) ||
+                  (wizardStep === 'shelving_count' && wizardData.shelvingUnits.length === 0) ||
+                  (wizardStep === 'wall_selection' && !wizardData.shelvingUnits[wizardData.currentUnit]?.wall)
+                }
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Next
               </Button>
-            </div>
-          </form>
+            ) : (
+              <Button 
+                type="button"
+                onClick={handleWizardComplete}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Create Structure
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
