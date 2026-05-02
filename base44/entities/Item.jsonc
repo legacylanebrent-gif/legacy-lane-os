@@ -54,6 +54,14 @@
       "type": "string",
       "description": "If from estate sale"
     },
+    "storage_location_id": {
+      "type": "string",
+      "description": "Reference to StorageLocation where item is stored"
+    },
+    "storage_location_path": {
+      "type": "string",
+      "description": "Cached full location path for quick reference"
+    },
     "images": {
       "type": "array",
       "items": {

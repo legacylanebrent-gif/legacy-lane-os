@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Store, ShoppingCart } from 'lucide-react';
+import { Upload, X, Store, ShoppingCart, MapPin } from 'lucide-react';
 import CategoryFields from './CategoryFields';
 import SmartAuctionScheduler from './SmartAuctionScheduler';
 
@@ -71,8 +71,9 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
   const [images, setImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [storageLocations, setStorageLocations] = useState([]);
   const fileInputRef = useRef(null);
-  const [formData, setFormData] = useState({ ...EMPTY_FORM });
+  const [formData, setFormData] = useState({ ...EMPTY_FORM, storage_location_id: '' });
 
   const PAYMENT_OPTIONS = [
     { value: 'cash', label: 'Cash' },
@@ -86,6 +87,20 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     { value: 'square', label: 'Square' },
     { value: 'other', label: 'Other' },
   ];
+
+  useEffect(() => {
+    loadStorageLocations();
+  }, []);
+
+  const loadStorageLocations = async () => {
+    try {
+      const user = await base44.auth.me();
+      const locations = await base44.entities.StorageLocation.filter({ operator_id: user.id });
+      setStorageLocations(locations.filter(loc => loc.is_active !== false));
+    } catch (error) {
+      console.error('Error loading storage locations:', error);
+    }
+  };
 
   useEffect(() => {
     if (item) {
@@ -108,11 +123,12 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         sales_channels: item.sales_channels || ['inventory'],
         payment_methods_accepted: item.payment_methods_accepted || [],
         payment_notes: item.payment_notes || '',
+        storage_location_id: item.storage_location_id || '',
       });
       setImages(item.images || []);
       setCategorySpecs(item.category_specs || {});
     } else {
-      setFormData({ ...EMPTY_FORM });
+      setFormData({ ...EMPTY_FORM, storage_location_id: '' });
       setImages([]);
       setCategorySpecs({});
     }
@@ -156,6 +172,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
     try {
       const user = await base44.auth.me();
 
+      const selectedLocation = formData.storage_location_id ? storageLocations.find(l => l.id === formData.storage_location_id) : null;
+
       const itemPayload = {
         title: formData.title,
         description: formData.description,
@@ -177,6 +195,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
           zip: formData.pickup_location_zip,
         } : null,
         sales_channels: formData.sales_channels,
+        storage_location_id: formData.storage_location_id || null,
+        storage_location_path: selectedLocation ? selectedLocation.location_path : null,
         images,
         category_specs: categorySpecs,
       };
@@ -363,6 +383,28 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
 
           {/* Category-specific fields */}
           <CategoryFields category={formData.category} specs={categorySpecs} onChange={setCategorySpecs} />
+
+          {/* Storage Location */}
+          {storageLocations.length > 0 && (
+            <div>
+              <Label htmlFor="storage_location_id" className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4" />
+                Storage Location (Optional)
+              </Label>
+              <Select value={formData.storage_location_id || ''} onValueChange={(val) => setFormData({...formData, storage_location_id: val})}>
+                <SelectTrigger><SelectValue placeholder="Select where item is stored..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>No location assigned</SelectItem>
+                  {storageLocations.map(loc => (
+                    <SelectItem key={loc.id} value={loc.id}>
+                      {loc.location_path}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500 mt-1">Link this item to a storage location for quick lookup</p>
+            </div>
+          )}
 
           {/* Listing Type */}
           <div>

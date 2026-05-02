@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 import { 
-  Plus, Search, Package, DollarSign, Tag, Image as ImageIcon,
-  Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle, ExternalLink
-} from 'lucide-react';
+    Plus, Search, Package, DollarSign, Tag, Image as ImageIcon,
+    Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle, ExternalLink, MapPin
+  } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -377,6 +377,12 @@ export default function Inventory() {
                       <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                     </div>
                   )}
+                  {item.storage_location_path && (
+                    <div className="flex items-start gap-1 text-xs text-slate-600">
+                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span className="truncate">{item.storage_location_path}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1 text-lg font-bold text-cyan-600">
                     <DollarSign className="w-5 h-5" />
                     <span>{item.price?.toLocaleString()}</span>
@@ -422,8 +428,16 @@ export default function Inventory() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  <td className="px-4 py-3">
+                    <div className="text-slate-600">
+                      {item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                      {item.storage_location_path && (
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {item.storage_location_path}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-center font-semibold text-slate-900">
                     ${item.price?.toLocaleString()}

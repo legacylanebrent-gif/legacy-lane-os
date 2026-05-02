@@ -1,0 +1,52 @@
+{
+  "name": "StorageLocation",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the operator who owns this storage location"
+    },
+    "space_name": {
+      "type": "string",
+      "description": "Name of the storage space (e.g., Garage, Basement, Storage Unit, Room 1)"
+    },
+    "space_description": {
+      "type": "string",
+      "description": "Optional description of the space"
+    },
+    "section_name": {
+      "type": "string",
+      "description": "Optional section within the space (e.g., Back Wall, Corner, Left Side)"
+    },
+    "shelving_name": {
+      "type": "string",
+      "description": "Optional shelving unit name (e.g., Metal Rack A, Wooden Shelves, Cabinet 1)"
+    },
+    "shelf_number": {
+      "type": "string",
+      "description": "Optional shelf number or label (e.g., Top, 1, 2, 3, A, B, C)"
+    },
+    "bin_box_label": {
+      "type": "string",
+      "description": "Bin or box label/identifier (e.g., A1, Box 1, Red Bin, Plastic Container)"
+    },
+    "location_path": {
+      "type": "string",
+      "description": "Full location path for quick reference (e.g., 'Garage > Back Wall > Metal Rack A > Shelf 2 > Bin A1')"
+    },
+    "capacity_notes": {
+      "type": "string",
+      "description": "Notes about bin capacity or current contents"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this location is still in use"
+    }
+  },
+  "required": [
+    "operator_id",
+    "space_name",
+    "bin_box_label"
+  ]
+}
