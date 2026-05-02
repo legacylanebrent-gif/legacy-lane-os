@@ -207,9 +207,14 @@
       "type": "integer",
       "default": 0
     },
+    "category_specs": {
+      "type": "object",
+      "description": "Dynamic category-specific fields (artist, dimensions, signed, material, etc.)",
+      "default": {}
+    },
     "specs": {
       "type": "object",
-      "description": "Category-specific specifications",
+      "description": "Legacy category-specific specifications",
       "properties": {
         "furniture_material": {
           "type": "string"
@@ -275,54 +280,6 @@
           "type": "string"
         },
         "vehicle_vin": {
-          "type": "string"
-        },
-        "decor_style_theme": {
-          "type": "string"
-        },
-        "decor_material": {
-          "type": "string"
-        },
-        "decor_color": {
-          "type": "string"
-        },
-        "decor_purpose": {
-          "type": "string"
-        },
-        "antique_era": {
-          "type": "string"
-        },
-        "antique_maker": {
-          "type": "string"
-        },
-        "antique_authenticity_notes": {
-          "type": "string"
-        },
-        "antique_provenance": {
-          "type": "string"
-        },
-        "antique_rarity": {
-          "type": "string"
-        },
-        "collectible_model_edition": {
-          "type": "string"
-        },
-        "collectible_condition_grade": {
-          "type": "string"
-        },
-        "collectible_rarity": {
-          "type": "string"
-        },
-        "collectible_authentication": {
-          "type": "string"
-        },
-        "estate_origin_story": {
-          "type": "string"
-        },
-        "estate_era": {
-          "type": "string"
-        },
-        "estate_significance": {
           "type": "string"
         }
       }

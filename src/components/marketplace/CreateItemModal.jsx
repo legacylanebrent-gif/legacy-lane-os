@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Upload, X, ImageIcon } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import CategoryFields from './CategoryFields';
 
 const CATEGORIES = [
   'antiques', 'art', 'artwork_prints_posters', 'books_media',
@@ -29,6 +30,7 @@ const CONDITIONS = [
 
 export default function CreateItemModal({ open, onClose, onSuccess, item, saleId }) {
   const [loading, setLoading] = useState(false);
+  const [categorySpecs, setCategorySpecs] = useState({});
   const [images, setImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -57,6 +59,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         shipping_cost: item.shipping_cost || 0
       });
       setImages(item.images || []);
+      setCategorySpecs(item.category_specs || {});
     } else {
       setFormData({
         title: '',
@@ -69,6 +72,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         shipping_cost: 0
       });
       setImages([]);
+      setCategorySpecs({});
     }
   }, [item, open]);
 
@@ -105,7 +109,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         await base44.entities.Item.update(item.id, {
           ...formData,
           price: parseFloat(formData.price),
-          images
+          images,
+          category_specs: categorySpecs
         });
       } else {
         await base44.entities.Item.create({
@@ -115,7 +120,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
           seller_name: user.full_name,
           estate_sale_id: saleId,
           status: 'available',
-          images
+          images,
+          category_specs: categorySpecs
         });
       }
 
@@ -285,6 +291,13 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
               />
             </div>
           </div>
+
+          {/* Category-specific fields */}
+          <CategoryFields
+            category={formData.category}
+            specs={categorySpecs}
+            onChange={setCategorySpecs}
+          />
 
           <div>
             <Label className="mb-3 block">Fulfillment Options *</Label>
