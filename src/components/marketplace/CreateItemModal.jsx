@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Upload, X } from 'lucide-react';
 import CategoryFields from './CategoryFields';
+import SmartAuctionScheduler from './SmartAuctionScheduler';
 
 const CATEGORIES = [
   'antiques', 'art', 'artwork_prints_posters', 'books_media',
@@ -56,7 +57,10 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         price: item.price || '',
         quantity: item.quantity || 1,
         fulfillment_options: item.fulfillment_options || ['pickup'],
-        shipping_cost: item.shipping_cost || 0
+        shipping_cost: item.shipping_cost || 0,
+        listing_type: item.listing_type || 'for_sale',
+        auction_start_date: item.auction_start_date || '',
+        auction_end_date: item.auction_end_date || ''
       });
       setImages(item.images || []);
       setCategorySpecs(item.category_specs || {});
@@ -69,7 +73,10 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         price: '',
         quantity: 1,
         fulfillment_options: ['pickup'],
-        shipping_cost: 0
+        shipping_cost: 0,
+        listing_type: 'for_sale',
+        auction_start_date: '',
+        auction_end_date: ''
       });
       setImages([]);
       setCategorySpecs({});
@@ -291,6 +298,38 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
               />
             </div>
           </div>
+
+          {/* Listing Type */}
+          <div>
+            <Label className="mb-2 block">Listing Type</Label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, listing_type: 'for_sale'})}
+                className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${formData.listing_type === 'for_sale' ? 'bg-orange-600 text-white border-orange-600' : 'border-slate-200 text-slate-600 hover:border-orange-300'}`}
+              >
+                Fixed Price
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, listing_type: 'auction'})}
+                className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-all ${formData.listing_type === 'auction' ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-200 text-slate-600 hover:border-purple-300'}`}
+              >
+                Auction
+              </button>
+            </div>
+          </div>
+
+          {/* Smart Auction Scheduler */}
+          {formData.listing_type === 'auction' && (
+            <SmartAuctionScheduler
+              category={formData.category}
+              title={formData.title}
+              price={formData.price}
+              condition={formData.condition}
+              onScheduleSet={(schedule) => setFormData({ ...formData, ...schedule })}
+            />
+          )}
 
           {/* Category-specific fields */}
           <CategoryFields

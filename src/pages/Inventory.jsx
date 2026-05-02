@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 import { 
   Plus, Search, Package, DollarSign, Tag, Image as ImageIcon,
-  Filter, Grid3x3, List, MoreVertical, Edit, Trash2
+  Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle
 } from 'lucide-react';
 import {
   Select,
@@ -33,6 +33,8 @@ export default function Inventory() {
   const [viewMode, setViewMode] = useState('grid');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [seoLoading, setSeoLoading] = useState({});
+  const [seoDone, setSeoDone] = useState({});
 
   useEffect(() => {
     loadData();
@@ -57,6 +59,19 @@ export default function Inventory() {
   const handleEdit = (item) => {
     setEditingItem(item);
     setShowCreateModal(true);
+  };
+
+  const handleGenerateSEO = async (e, itemId) => {
+    e.stopPropagation();
+    setSeoLoading(prev => ({ ...prev, [itemId]: true }));
+    try {
+      await base44.functions.invoke('generateItemSEO', { item_id: itemId });
+      setSeoDone(prev => ({ ...prev, [itemId]: true }));
+    } catch (err) {
+      console.error('SEO generation failed:', err);
+    } finally {
+      setSeoLoading(prev => ({ ...prev, [itemId]: false }));
+    }
   };
 
   const handleDelete = async (itemId) => {
@@ -289,6 +304,10 @@ export default function Inventory() {
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
+                        {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
+                        {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
+                      </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                         className="text-red-600"
@@ -297,10 +316,10 @@ export default function Inventory() {
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                    </DropdownMenu>
+                    </div>
 
-                <div className="space-y-2">
+                    <div className="space-y-2">
                   {item.category && (
                     <div className="flex items-center gap-1 text-sm text-slate-600">
                       <Tag className="w-3 h-3" />
@@ -367,6 +386,10 @@ export default function Inventory() {
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
+                          {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
+                          {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
