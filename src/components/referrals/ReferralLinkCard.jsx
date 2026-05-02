@@ -1,21 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Link2, Copy, Check, Mail, Share2 } from 'lucide-react';
+import { Link2, Copy, Check, Mail, Share2, QrCode, Download } from 'lucide-react';
 
 export default function ReferralLinkCard({ user, isOperator }) {
   const [copied, setCopied] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
+  const [loadingQR, setLoadingQR] = useState(false);
 
   const referralCode = user?.id?.slice(-8).toUpperCase() || 'XXXXXXXX';
   const baseUrl = window.location.origin;
   const referralLink = isOperator
     ? `${baseUrl}/OperatorPackages?ref=${referralCode}`
     : `${baseUrl}/?ref=${referralCode}`;
+
+  useEffect(() => {
+    generateQR();
+  }, [user?.id]);
+
+  const generateQR = async () => {
+    setLoadingQR(true);
+    try {
+      const response = await base44.functions.invoke('generateReferralQR', {});
+      setQrCode(response.data.qr_data_url);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    } finally {
+      setLoadingQR(false);
+    }
+  };
+
+  const downloadQR = () => {
+    if (!qrCode) return;
+    const link = document.createElement('a');
+    link.href = qrCode;
+    link.download = `referral-qr-${referralCode}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -108,12 +136,33 @@ export default function ReferralLinkCard({ user, isOperator }) {
           </Button>
         </div>
 
-        {/* Code badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Your code:</span>
-          <span className="bg-orange-100 text-orange-700 font-mono font-bold px-3 py-0.5 rounded-full text-sm tracking-widest">
-            {referralCode}
-          </span>
+        {/* Code badge + QR */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500">Your code:</span>
+            <span className="bg-orange-100 text-orange-700 font-mono font-bold px-3 py-0.5 rounded-full text-sm tracking-widest">
+              {referralCode}
+            </span>
+          </div>
+          {qrCode && (
+            <div className="flex gap-4 items-center bg-white p-4 rounded-lg border border-orange-100">
+              <div className="flex-shrink-0">
+                <img src={qrCode} alt="Referral QR Code" className="w-24 h-24 border-2 border-orange-200 rounded" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Share Your QR Code</p>
+                <p className="text-xs text-slate-500 mb-3">Operators can scan this at estate sales to join your referral program</p>
+                <Button
+                  onClick={downloadQR}
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700 text-white gap-1.5"
+                >
+                  <Download className="w-3 h-3" />
+                  Download QR
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Email invite */}
