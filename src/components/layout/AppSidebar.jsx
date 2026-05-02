@@ -30,7 +30,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Estate Sales' },
-  { page: 'StorageManagement',      label: 'Storage Management',  icon: Warehouse,       group: 'Estate Sales', parent: 'Inventory' },
+  { page: 'StorageManagement',      label: 'Storage Management',  icon: Warehouse,       group: 'Estate Sales' },
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
   { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
 
@@ -164,9 +164,7 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
                     <Link key={item.page} to={createPageUrl(item.page)}>
                       <Button
                         variant="ghost"
-                        className={`w-full justify-start rounded-none text-sm ${
-                          item.parent ? 'px-8 h-8' : 'px-4 h-9'
-                        } ${
+                        className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
                           active
                             ? 'bg-orange-600 text-white hover:bg-orange-700'
                             : 'text-slate-300 hover:bg-slate-700 hover:text-white'
