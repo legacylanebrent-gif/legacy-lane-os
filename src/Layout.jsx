@@ -15,7 +15,7 @@ const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'm
 const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail'];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
-const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach'];
+const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller'];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
