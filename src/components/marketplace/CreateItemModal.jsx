@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 
 const CATEGORIES = [
-  'estate_items', 'furniture', 'art', 'jewelry', 'vehicles',
-  'home_decor', 'vendor_services', 'digital_products', 'education'
+  'furniture', 'art', 'jewelry', 'vehicles', 'antiques',
+  'collectibles', 'clothing_accessories', 'home_decor', 'kitchen_dining',
+  'tools_hardware', 'electronics', 'books_media', 'sporting_goods',
+  'estate_items', 'other'
 ];
 
 const CONDITIONS = ['new', 'excellent', 'good', 'fair', 'poor'];

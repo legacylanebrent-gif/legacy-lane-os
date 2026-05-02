@@ -11,17 +11,20 @@
     "category": {
       "type": "string",
       "enum": [
-        "estate_items",
         "furniture",
         "art",
         "jewelry",
         "vehicles",
-        "home_decor",
-        "vendor_services",
-        "digital_products",
-        "education",
-        "collectibles",
         "antiques",
+        "collectibles",
+        "clothing_accessories",
+        "home_decor",
+        "kitchen_dining",
+        "tools_hardware",
+        "electronics",
+        "books_media",
+        "sporting_goods",
+        "estate_items",
         "other"
       ]
     },
@@ -198,12 +201,10 @@
       "description": "Category-specific specifications",
       "properties": {
         "furniture_material": {
-          "type": "string",
-          "description": "Wood type, leather, fabric, metal, etc."
+          "type": "string"
         },
         "furniture_style": {
-          "type": "string",
-          "description": "Victorian, Mid-Century Modern, Farmhouse, etc."
+          "type": "string"
         },
         "furniture_upholstery_condition": {
           "type": "string"
@@ -215,8 +216,7 @@
           "type": "string"
         },
         "art_medium": {
-          "type": "string",
-          "description": "Oil painting, watercolor, sculpture, print, etc."
+          "type": "string"
         },
         "art_is_signed": {
           "type": "boolean"
@@ -225,27 +225,22 @@
           "type": "boolean"
         },
         "art_provenance": {
-          "type": "string",
-          "description": "Where it came from, story"
+          "type": "string"
         },
         "art_estimated_era": {
           "type": "string"
         },
         "jewelry_material": {
-          "type": "string",
-          "description": "14K gold, sterling silver, platinum, costume, etc."
+          "type": "string"
         },
         "jewelry_gemstone": {
-          "type": "string",
-          "description": "Diamond, emerald, ruby, sapphire, etc."
+          "type": "string"
         },
         "jewelry_gemstone_weight": {
-          "type": "string",
-          "description": "Carat weight or description"
+          "type": "string"
         },
         "jewelry_authenticity": {
-          "type": "string",
-          "description": "Hallmarked, certified, etc."
+          "type": "string"
         },
         "jewelry_metal_weight": {
           "type": "string"
@@ -263,8 +258,7 @@
           "type": "string"
         },
         "vehicle_condition": {
-          "type": "string",
-          "description": "Runs great, needs work, non-running"
+          "type": "string"
         },
         "vehicle_fuel_type": {
           "type": "string"
@@ -273,8 +267,7 @@
           "type": "string"
         },
         "decor_style_theme": {
-          "type": "string",
-          "description": "Coastal, bohemian, modern, etc."
+          "type": "string"
         },
         "decor_material": {
           "type": "string"
@@ -283,46 +276,37 @@
           "type": "string"
         },
         "decor_purpose": {
-          "type": "string",
-          "description": "Wall art, centerpiece, outdoor, etc."
+          "type": "string"
         },
         "antique_era": {
-          "type": "string",
-          "description": "Estimated period"
+          "type": "string"
         },
         "antique_maker": {
-          "type": "string",
-          "description": "Maker/manufacturer"
+          "type": "string"
         },
         "antique_authenticity_notes": {
           "type": "string"
         },
         "antique_provenance": {
-          "type": "string",
-          "description": "Documented history"
+          "type": "string"
         },
         "antique_rarity": {
-          "type": "string",
-          "description": "Common, rare, very rare"
+          "type": "string"
         },
         "collectible_model_edition": {
           "type": "string"
         },
         "collectible_condition_grade": {
-          "type": "string",
-          "description": "Mint, near-mint, good, fair"
+          "type": "string"
         },
         "collectible_rarity": {
-          "type": "string",
-          "description": "Common, rare, very rare"
+          "type": "string"
         },
         "collectible_authentication": {
-          "type": "string",
-          "description": "Original packaging, certificate, etc."
+          "type": "string"
         },
         "estate_origin_story": {
-          "type": "string",
-          "description": "Family heirloom, purchased where, etc."
+          "type": "string"
         },
         "estate_era": {
           "type": "string"
