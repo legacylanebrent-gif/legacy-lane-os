@@ -297,7 +297,7 @@ export default function StorageManagement() {
           </Button>
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2">
           {locations.map(location => (
             <Card key={location.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
