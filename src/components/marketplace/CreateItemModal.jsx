@@ -336,7 +336,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-gold-600 hover:bg-gold-700">
+            <Button type="submit" disabled={loading} className="bg-orange-600 hover:bg-orange-700 text-white">
               {loading ? 'Saving...' : (item ? 'Update Listing' : 'Create Listing')}
             </Button>
           </div>
