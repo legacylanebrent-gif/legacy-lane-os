@@ -16,6 +16,7 @@ import {
   Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign, Share2
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
+import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
 
 export default function MyProfile() {
   const [user, setUser] = useState(null);
@@ -210,12 +211,14 @@ export default function MyProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={`grid w-full ${isConsumerType ? 'grid-cols-2' : 'grid-cols-5'} max-w-3xl`}>
+        <TabsList className={`grid w-full ${isConsumerType ? 'grid-cols-2' : 'grid-cols-7'} max-w-4xl`}>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           {!isConsumerType && <TabsTrigger value="sales">My Sales</TabsTrigger>}
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           {!isConsumerType && <TabsTrigger value="subscription">Subscription</TabsTrigger>}
           {!isConsumerType && <TabsTrigger value="social" className="flex items-center gap-1"><Share2 className="w-3 h-3" />Social Media</TabsTrigger>}
+          {!isConsumerType && <TabsTrigger value="etsy" className="flex items-center gap-1">🧶 Etsy</TabsTrigger>}
+          {!isConsumerType && <TabsTrigger value="ebay" className="flex items-center gap-1">🛍️ eBay</TabsTrigger>}
         </TabsList>
 
         {/* Profile Tab */}
@@ -705,6 +708,20 @@ export default function MyProfile() {
         {!isConsumerType && (
           <TabsContent value="social" className="mt-6">
             <SocialMediaTab user={user} />
+          </TabsContent>
+        )}
+
+        {/* Etsy Tab */}
+        {!isConsumerType && (
+          <TabsContent value="etsy" className="mt-6">
+            <MarketplaceCredentialsTab platform="etsy" />
+          </TabsContent>
+        )}
+
+        {/* eBay Tab */}
+        {!isConsumerType && (
+          <TabsContent value="ebay" className="mt-6">
+            <MarketplaceCredentialsTab platform="ebay" />
           </TabsContent>
         )}
 

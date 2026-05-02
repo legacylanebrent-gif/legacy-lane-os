@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 import { 
   Plus, Search, Package, DollarSign, Tag, Image as ImageIcon,
-  Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle
+  Filter, Grid3x3, List, MoreVertical, Edit, Trash2, Sparkles, CheckCircle, ExternalLink
 } from 'lucide-react';
 import {
   Select,
@@ -35,6 +35,8 @@ export default function Inventory() {
   const [editingItem, setEditingItem] = useState(null);
   const [seoLoading, setSeoLoading] = useState({});
   const [seoDone, setSeoDone] = useState({});
+  const [postingEtsy, setPostingEtsy] = useState({});
+  const [postingEbay, setPostingEbay] = useState({});
 
   useEffect(() => {
     loadData();
@@ -71,6 +73,44 @@ export default function Inventory() {
       console.error('SEO generation failed:', err);
     } finally {
       setSeoLoading(prev => ({ ...prev, [itemId]: false }));
+    }
+  };
+
+  const handlePostToEtsy = async (e, item) => {
+    e.stopPropagation();
+    const userData = user || await base44.auth.me();
+    const creds = userData.etsy_credentials;
+    if (!creds?.access_token || !creds?.api_key) {
+      alert('Please set your Etsy API credentials in My Profile → Etsy tab first.');
+      return;
+    }
+    setPostingEtsy(prev => ({ ...prev, [item.id]: true }));
+    try {
+      await base44.functions.invoke('postItemToEtsy', { item_id: item.id });
+      alert(`"${item.title}" posted to Etsy successfully!`);
+    } catch (err) {
+      alert('Failed to post to Etsy: ' + err.message);
+    } finally {
+      setPostingEtsy(prev => ({ ...prev, [item.id]: false }));
+    }
+  };
+
+  const handlePostToEbay = async (e, item) => {
+    e.stopPropagation();
+    const userData = user || await base44.auth.me();
+    const creds = userData.ebay_credentials;
+    if (!creds?.access_token || !creds?.api_key) {
+      alert('Please set your eBay API credentials in My Profile → eBay tab first.');
+      return;
+    }
+    setPostingEbay(prev => ({ ...prev, [item.id]: true }));
+    try {
+      await base44.functions.invoke('postItemToEbay', { item_id: item.id });
+      alert(`"${item.title}" posted to eBay successfully!`);
+    } catch (err) {
+      alert('Failed to post to eBay: ' + err.message);
+    } finally {
+      setPostingEbay(prev => ({ ...prev, [item.id]: false }));
     }
   };
 
@@ -300,21 +340,29 @@ export default function Inventory() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
-                        {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
-                        {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
+                      {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
+                      {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => handlePostToEtsy(e, item)} disabled={postingEtsy[item.id]}>
+                      <span className="mr-2">🧶</span>
+                      {postingEtsy[item.id] ? 'Posting...' : 'Post to Etsy'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => handlePostToEbay(e, item)} disabled={postingEbay[item.id]}>
+                      <span className="mr-2">🛍️</span>
+                      {postingEbay[item.id] ? 'Posting...' : 'Post to eBay'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
                     </DropdownMenuContent>
                     </DropdownMenu>
                     </div>
@@ -383,21 +431,29 @@ export default function Inventory() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
-                          {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
-                          {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
+                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>
+                         <Edit className="w-4 h-4 mr-2" />
+                         Edit
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onClick={(e) => handleGenerateSEO(e, item.id)} disabled={seoLoading[item.id]}>
+                         {seoDone[item.id] ? <CheckCircle className="w-4 h-4 mr-2 text-green-600" /> : <Sparkles className="w-4 h-4 mr-2 text-purple-500" />}
+                         {seoLoading[item.id] ? 'Generating...' : seoDone[item.id] ? 'SEO Generated' : 'Generate SEO'}
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onClick={(e) => handlePostToEtsy(e, item)} disabled={postingEtsy[item.id]}>
+                         <span className="mr-2">🧶</span>
+                         {postingEtsy[item.id] ? 'Posting...' : 'Post to Etsy'}
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onClick={(e) => handlePostToEbay(e, item)} disabled={postingEbay[item.id]}>
+                         <span className="mr-2">🛍️</span>
+                         {postingEbay[item.id] ? 'Posting...' : 'Post to eBay'}
+                       </DropdownMenuItem>
+                       <DropdownMenuItem 
+                         onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                         className="text-red-600"
+                       >
+                         <Trash2 className="w-4 h-4 mr-2" />
+                         Delete
+                       </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
