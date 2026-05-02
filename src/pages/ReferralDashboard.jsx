@@ -4,8 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Users, DollarSign, Clock, CheckCircle, Gift, TrendingUp, Mail, Link2
+  Users, DollarSign, Clock, CheckCircle, Gift, TrendingUp, Mail, Link2, Upload
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ReferralLinkCard from '@/components/referrals/ReferralLinkCard';
 import ReferralList from '@/components/referrals/ReferralList';
 
@@ -112,6 +113,21 @@ export default function ReferralDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Batch Invite CTA (operators) */}
+      {isOperator && (
+        <Link
+          to="/ReferralBatchInvite"
+          className="flex items-center gap-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl px-6 py-4 transition-colors"
+        >
+          <Upload className="w-5 h-5 text-orange-400 flex-shrink-0" />
+          <div>
+            <p className="font-semibold">Batch Invite via CSV</p>
+            <p className="text-sm text-slate-400">Upload a contact list and send personalized emails in one click</p>
+          </div>
+          <span className="ml-auto text-orange-400 font-bold">→</span>
+        </Link>
+      )}
 
       {/* Referral Link Generator */}
       <ReferralLinkCard user={user} isOperator={isOperator} />

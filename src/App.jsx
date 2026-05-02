@@ -31,6 +31,7 @@ import AdminLeadImporter from './pages/AdminLeadImporter';
 import CompanyLanding from './pages/CompanyLanding';
 import CompareEstateSales from './pages/CompareEstateSales';
 import ReferralDashboard from './pages/ReferralDashboard';
+import ReferralBatchInvite from './pages/ReferralBatchInvite';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
       <Route path="/CompareEstateSales" element={<CompareEstateSales />} />
       <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
+      <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
