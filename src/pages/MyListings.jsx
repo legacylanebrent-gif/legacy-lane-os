@@ -161,7 +161,7 @@ export default function MyListings() {
                           item.status === 'sold' ? 'bg-gray-100 text-gray-800' :
                           'bg-blue-100 text-blue-800'
                         }>
-                          {item.status}
+                          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                         </Badge>
                       </div>
                       <p className="text-2xl font-bold text-navy-900 mb-3">
@@ -173,7 +173,7 @@ export default function MyListings() {
                           {item.views || 0}
                         </span>
                         <span>•</span>
-                        <span>{item.category}</span>
+                        <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <Link to={createPageUrl(`ItemDetail?id=${item.id}`)} className="flex-1">
