@@ -73,9 +73,27 @@ export default function MarketplaceItemDetail() {
 
       const itemData = await base44.entities.MarketplaceItem.filter({ id: itemId });
       if (itemData.length > 0) {
-        setItem(itemData[0]);
+        const mi = itemData[0];
+
+        // Fetch linked Item record to get title, description, images, category, etc.
+        let merged = { ...mi };
+        if (mi.item_id) {
+          const linkedItems = await base44.entities.Item.filter({ id: mi.item_id });
+          if (linkedItems.length > 0) {
+            const li = linkedItems[0];
+            merged = {
+              ...li,           // base item fields (title, description, images, category, condition)
+              ...mi,           // marketplace fields win (price, listing_type, shipping, etc.)
+              image_url: (li.images || [])[0] || mi.image_url || null,
+              images: li.images || [],
+            };
+          }
+        }
+
+        setItem(merged);
+
         // Load bids if auction
-        if (itemData[0].listing_type === 'AUCTION') {
+        if (mi.listing_type === 'AUCTION') {
           const bidData = await base44.entities.Bid.filter(
             { marketplace_item_id: itemId },
             '-created_date',
@@ -236,12 +254,19 @@ export default function MarketplaceItemDetail() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
               <div className="aspect-square bg-slate-100 flex items-center justify-center">
-                {item.image_url ? (
-                  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                {item.images?.length > 0 || item.image_url ? (
+                  <img src={item.images?.[0] || item.image_url} alt={item.title} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-slate-400">No image available</span>
                 )}
               </div>
+              {item.images?.length > 1 && (
+                <div className="flex gap-2 p-3 overflow-x-auto border-t">
+                  {item.images.map((url, idx) => (
+                    <img key={idx} src={url} alt="" className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border-2 border-slate-200 cursor-pointer hover:border-orange-400 transition-colors" />
+                  ))}
+                </div>
+              )}
 
               {/* Details */}
               <div className="p-6">
