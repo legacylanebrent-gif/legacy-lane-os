@@ -17,9 +17,9 @@ Deno.serve(async (req) => {
 
     const referral = referrals[0];
 
-    // Only process if referred user is a reseller and subscribed
-    if (referral.account_type !== 'reseller' || referral.status !== 'subscribed') {
-      return Response.json({ error: 'Referral not eligible for reward' }, { status: 400 });
+    // Only process if referred user is a reseller and has made their first payment
+    if (referral.account_type !== 'reseller' || !referral.first_payment_date) {
+      return Response.json({ error: 'Referral not eligible for reward - awaiting first payment' }, { status: 400 });
     }
 
     // Update referral reward status
