@@ -32,6 +32,7 @@ import CompanyLanding from './pages/CompanyLanding';
 import CompareEstateSales from './pages/CompareEstateSales';
 import ReferralDashboard from './pages/ReferralDashboard';
 import ReferralBatchInvite from './pages/ReferralBatchInvite';
+import OperatorProfile from './pages/OperatorProfile';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
       <Route path="/CompareEstateSales" element={<CompareEstateSales />} />
       <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />
+      <Route path="/OperatorProfile" element={<LayoutWrapper currentPageName="OperatorProfile"><OperatorProfile /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

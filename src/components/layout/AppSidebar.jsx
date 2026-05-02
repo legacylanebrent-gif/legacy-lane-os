@@ -26,6 +26,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Main' },
   { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
 
+  { page: 'OperatorProfile',        label: 'Business Profile',    icon: Building2,       group: 'Estate Sales' },
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Estate Sales' },
@@ -201,6 +202,11 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
               <DropdownMenuItem asChild>
                 <Link to={createPageUrl('MyProfile')}>
                   <User className="w-4 h-4 mr-2" /> My Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/OperatorProfile">
+                  <Building2 className="w-4 h-4 mr-2" /> Business Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

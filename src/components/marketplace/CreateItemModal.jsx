@@ -74,6 +74,19 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
 
+  const PAYMENT_OPTIONS = [
+    { value: 'cash', label: 'Cash' },
+    { value: 'check', label: 'Check' },
+    { value: 'credit_card', label: 'Credit/Debit Card' },
+    { value: 'venmo', label: 'Venmo' },
+    { value: 'paypal', label: 'PayPal' },
+    { value: 'zelle', label: 'Zelle' },
+    { value: 'cashapp', label: 'Cash App' },
+    { value: 'stripe', label: 'Stripe' },
+    { value: 'square', label: 'Square' },
+    { value: 'other', label: 'Other' },
+  ];
+
   useEffect(() => {
     if (item) {
       setFormData({
@@ -93,6 +106,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         pickup_location_address: item.pickup_location?.address || '',
         pickup_location_zip: item.pickup_location?.zip || '',
         sales_channels: item.sales_channels || ['inventory'],
+        payment_methods_accepted: item.payment_methods_accepted || [],
+        payment_notes: item.payment_notes || '',
       });
       setImages(item.images || []);
       setCategorySpecs(item.category_specs || {});
@@ -155,6 +170,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         auction_end_date: formData.listing_type === 'auction' ? formData.auction_end_date : null,
         shipping_option: formData.shipping_option,
         shipping_cost: formData.shipping_cost || 0,
+        payment_methods_accepted: formData.payment_methods_accepted || [],
+        payment_notes: formData.payment_notes || '',
         pickup_location: (formData.shipping_option !== 'SHIPS_ONLY') ? {
           address: formData.pickup_location_address,
           zip: formData.pickup_location_zip,
@@ -449,6 +466,39 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Payment Methods */}
+          <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+            <p className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Payment Methods Accepted</p>
+            <p className="text-xs text-slate-500">Leave blank to use your default operator payment settings.</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PAYMENT_OPTIONS.map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={(formData.payment_methods_accepted || []).includes(opt.value)}
+                    onCheckedChange={() => {
+                      const current = formData.payment_methods_accepted || [];
+                      const updated = current.includes(opt.value)
+                        ? current.filter(v => v !== opt.value)
+                        : [...current, opt.value];
+                      setFormData({ ...formData, payment_methods_accepted: updated });
+                    }}
+                  />
+                  <span className="text-sm">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            <div>
+              <Label htmlFor="payment_notes" className="text-xs text-slate-600">Payment Notes (optional)</Label>
+              <Input
+                id="payment_notes"
+                value={formData.payment_notes || ''}
+                onChange={e => setFormData({ ...formData, payment_notes: e.target.value })}
+                placeholder="e.g. Cash only at pickup, Venmo preferred"
+                className="text-sm mt-1"
+              />
+            </div>
           </div>
 
           {/* Submit */}

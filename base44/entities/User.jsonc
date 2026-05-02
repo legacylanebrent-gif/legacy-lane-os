@@ -8,15 +8,231 @@
     },
     "company_name": {
       "type": "string",
-      "description": "Company name for business users"
+      "description": "Company/business name"
+    },
+    "company_tagline": {
+      "type": "string",
+      "description": "Short tagline or slogan"
+    },
+    "company_description": {
+      "type": "string",
+      "description": "Full company description / bio"
     },
     "phone": {
       "type": "string",
-      "description": "Phone number"
+      "description": "Primary phone number"
+    },
+    "phone_secondary": {
+      "type": "string",
+      "description": "Secondary/office phone"
     },
     "profile_image_url": {
       "type": "string",
       "description": "Profile picture URL"
+    },
+    "logo_dark": {
+      "type": "string",
+      "description": "Company logo for light backgrounds (dark version)"
+    },
+    "logo_light": {
+      "type": "string",
+      "description": "Company logo for dark backgrounds (light version)"
+    },
+    "business_address_street": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "business_address_city": {
+      "type": "string",
+      "description": "City"
+    },
+    "business_address_state": {
+      "type": "string",
+      "description": "State"
+    },
+    "business_address_zip": {
+      "type": "string",
+      "description": "ZIP code"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Company website URL"
+    },
+    "company_website": {
+      "type": "string",
+      "description": "Alias for website_url"
+    },
+    "company_email": {
+      "type": "string",
+      "description": "Business contact email (if different from login email)"
+    },
+    "years_in_business": {
+      "type": "integer",
+      "description": "Number of years in business"
+    },
+    "founded_year": {
+      "type": "integer",
+      "description": "Year the company was founded"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Business or state license number"
+    },
+    "insurance_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "bonded": {
+      "type": "boolean",
+      "default": false
+    },
+    "service_area": {
+      "type": "string",
+      "description": "Legacy service area string"
+    },
+    "service_counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of counties served"
+    },
+    "service_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of cities/towns served"
+    },
+    "service_states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "States the company operates in"
+    },
+    "service_radius_miles": {
+      "type": "integer",
+      "description": "Max travel radius in miles"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Areas of specialty (e.g. antiques, jewelry, mid-century modern)"
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Professional certifications"
+    },
+    "services_offered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Services provided to clients"
+    },
+    "payment_methods_accepted": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "check",
+          "credit_card",
+          "venmo",
+          "paypal",
+          "zelle",
+          "cashapp",
+          "stripe",
+          "square",
+          "other"
+        ]
+      },
+      "default": [
+        "cash"
+      ],
+      "description": "Payment methods this operator accepts"
+    },
+    "commission_rate": {
+      "type": "number",
+      "description": "Standard commission rate (%)"
+    },
+    "minimum_sale_value": {
+      "type": "number",
+      "description": "Minimum estate sale value accepted"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Average rating (0-5)"
+    },
+    "total_reviews": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_sales_conducted": {
+      "type": "integer",
+      "default": 0
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "venmo_qr_code": {
+      "type": "string",
+      "description": "Venmo QR code image URL"
+    },
+    "venmo_username": {
+      "type": "string"
+    },
+    "paypal_email": {
+      "type": "string"
+    },
+    "zelle_phone_or_email": {
+      "type": "string"
+    },
+    "cashapp_tag": {
+      "type": "string"
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "description": "Stripe Connect account ID (if using Stripe)"
+    },
+    "square_location_id": {
+      "type": "string",
+      "description": "Square location ID (if using Square)"
+    },
+    "social_facebook": {
+      "type": "string"
+    },
+    "social_instagram": {
+      "type": "string"
+    },
+    "social_tiktok": {
+      "type": "string"
+    },
+    "social_youtube": {
+      "type": "string"
+    },
+    "social_pinterest": {
+      "type": "string"
+    },
+    "social_linkedin": {
+      "type": "string"
     },
     "location": {
       "type": "object",
@@ -32,15 +248,15 @@
     },
     "territory": {
       "type": "string",
-      "description": "Operator's primary territory / service area"
+      "description": "Primary territory / service area (legacy)"
     },
     "brand_voice": {
       "type": "string",
-      "description": "Operator's brand voice / tone description for AI Coach"
+      "description": "Brand voice / tone description for AI Coach"
     },
     "ai_coach_memory": {
       "type": "string",
-      "description": "Rolling summary of AI Coach conversations for personalized context"
+      "description": "Rolling summary of AI Coach conversations"
     },
     "primary_account_type": {
       "type": "string",
@@ -169,7 +385,7 @@
     },
     "social_media_credentials": {
       "type": "object",
-      "description": "Social media API credentials for automated posting by the Coaching Agent",
+      "description": "Social media API credentials for automated posting",
       "properties": {
         "facebook": {
           "type": "object",
