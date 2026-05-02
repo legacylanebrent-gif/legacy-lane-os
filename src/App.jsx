@@ -36,6 +36,7 @@ import OperatorProfile from './pages/OperatorProfile';
 import OperatorDashboard from './pages/OperatorDashboard';
 import SoldInventory from './pages/SoldInventory';
 import StorageManagement from './pages/StorageManagement';
+import ViewStorageContents from './pages/ViewStorageContents';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -115,6 +116,7 @@ const AuthenticatedApp = () => {
       <Route path="/OperatorDashboard" element={<LayoutWrapper currentPageName="OperatorDashboard"><OperatorDashboard /></LayoutWrapper>} />
       <Route path="/SoldInventory" element={<LayoutWrapper currentPageName="SoldInventory"><SoldInventory /></LayoutWrapper>} />
       <Route path="/StorageManagement" element={<LayoutWrapper currentPageName="StorageManagement"><StorageManagement /></LayoutWrapper>} />
+      <Route path="/ViewStorageContents" element={<LayoutWrapper currentPageName="ViewStorageContents"><ViewStorageContents /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

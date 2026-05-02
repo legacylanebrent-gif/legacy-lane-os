@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Lightbulb, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Lightbulb, Package, QrCode, Download } from 'lucide-react';
 
 const BEST_PRACTICES = [
   {
@@ -129,6 +130,96 @@ export default function StorageManagement() {
     } catch (error) {
       console.error('Error deleting location:', error);
       alert('Failed to delete location');
+    }
+  };
+
+  const generateAndPrintQR = async (location) => {
+    try {
+      // Generate QR code that links to ViewStorageContents with location ID
+      const qrUrl = `${window.location.origin}/ViewStorageContents?location_id=${location.id}`;
+      const qrDataUrl = await QRCode.toDataURL(qrUrl, {
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        quality: 0.95,
+        margin: 1,
+        width: 300,
+        color: { dark: '#000000', light: '#FFFFFF' }
+      });
+
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Print QR Code - ${location.space_name}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              background: white;
+            }
+            .container {
+              text-align: center;
+              border: 2px solid #333;
+              padding: 30px;
+              border-radius: 8px;
+              background: white;
+            }
+            h2 {
+              margin: 0 0 10px 0;
+              font-size: 18px;
+            }
+            .location-path {
+              font-size: 12px;
+              color: #666;
+              margin-bottom: 20px;
+              font-weight: bold;
+            }
+            img {
+              margin: 20px 0;
+              border: 1px solid #ddd;
+              padding: 10px;
+              border-radius: 4px;
+            }
+            .instructions {
+              font-size: 11px;
+              color: #666;
+              margin-top: 20px;
+            }
+            @media print {
+              body {
+                padding: 0;
+              }
+              .container {
+                border: none;
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Location QR Code</h2>
+            <div class="location-path">${location.location_path}</div>
+            <img src="${qrDataUrl}" alt="QR Code" />
+            <div class="instructions">Scan this code to view items stored in this location</div>
+          </div>
+          <script>
+            window.print();
+          </script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      alert('Failed to generate QR code');
     }
   };
 
@@ -270,6 +361,15 @@ export default function StorageManagement() {
                   >
                     <Edit className="w-3 h-3 mr-1" />
                     Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-cyan-600 hover:bg-cyan-50"
+                    onClick={() => generateAndPrintQR(location)}
+                  >
+                    <QrCode className="w-3 h-3 mr-1" />
+                    QR Code
                   </Button>
                   <Button
                     variant="outline"
