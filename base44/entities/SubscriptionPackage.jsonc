@@ -1,0 +1,130 @@
+{
+  "name": "SubscriptionPackage",
+  "type": "object",
+  "properties": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "consignor",
+        "vendor",
+        "investor",
+        "real_estate_agent",
+        "estate_sale_operator",
+        "biz_in_a_box",
+        "reseller"
+      ],
+      "description": "Account type this package is for"
+    },
+    "package_name": {
+      "type": "string",
+      "description": "Package tier name"
+    },
+    "tier_level": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "pro",
+        "premium"
+      ],
+      "description": "Tier level"
+    },
+    "pricing_model": {
+      "type": "string",
+      "enum": [
+        "subscription",
+        "per_item"
+      ],
+      "default": "subscription",
+      "description": "Pricing model type"
+    },
+    "monthly_price": {
+      "type": "number",
+      "description": "Monthly subscription price"
+    },
+    "annual_price": {
+      "type": "number",
+      "description": "Annual subscription price"
+    },
+    "per_item_price": {
+      "type": "number",
+      "description": "Price per item listed"
+    },
+    "per_lead_price": {
+      "type": "number",
+      "description": "Price per lead (for real estate agents)"
+    },
+    "referral_fee_percentage": {
+      "type": "number",
+      "description": "Referral fee percentage per closed client (for real estate agents)"
+    },
+    "platform_fee_percentage": {
+      "type": "number",
+      "description": "Platform fee percentage on sales"
+    },
+    "biz_in_a_box_setup_fee": {
+      "type": "number",
+      "description": "One-time setup fee for Biz in a Box"
+    },
+    "biz_in_a_box_monthly_year1": {
+      "type": "number",
+      "description": "Monthly fee for year 1 (discounted)"
+    },
+    "biz_in_a_box_revenue_share": {
+      "type": "number",
+      "description": "Revenue share percentage for Biz in a Box"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of features included",
+      "default": []
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "listings": {
+          "type": "string",
+          "description": "Number of listings allowed"
+        },
+        "photos": {
+          "type": "string",
+          "description": "Photos per listing"
+        },
+        "leads": {
+          "type": "string",
+          "description": "Monthly leads"
+        },
+        "campaigns": {
+          "type": "string",
+          "description": "Marketing campaigns"
+        },
+        "storage": {
+          "type": "string",
+          "description": "Storage capacity"
+        }
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is package currently available"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Featured/recommended package"
+    },
+    "description": {
+      "type": "string",
+      "description": "Package description"
+    }
+  },
+  "required": [
+    "account_type",
+    "package_name",
+    "tier_level",
+    "pricing_model"
+  ]
+}
