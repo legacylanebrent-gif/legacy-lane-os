@@ -389,8 +389,8 @@ export default function StorageManagement() {
 
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="text-2xl font-serif text-navy-900">
               {editingLocation ? 'Edit Storage Location' : 'Add Storage Location'}
             </DialogTitle>
@@ -399,7 +399,7 @@ export default function StorageManagement() {
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 max-h-[600px] overflow-y-auto pr-2">
+          <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto pr-2 flex-1">
             {/* Space Name (Required) */}
             <div>
               <Label htmlFor="space_name" className="font-semibold">Space Name *</Label>
@@ -493,7 +493,7 @@ export default function StorageManagement() {
             </div>
 
             {/* Submit */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t shrink-0">
               <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
               <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white">
                 {editingLocation ? 'Update Location' : 'Add Location'}
