@@ -25,10 +25,8 @@
         "furniture",
         "garden_outdoor",
         "glassware_crystal",
-        "gold_silver_jewelry",
         "holiday_seasonal",
         "home_decor",
-        "jewelry",
         "kitchen_dining",
         "lighting_lamps",
         "medical_mobility",
@@ -244,21 +242,6 @@
           "type": "string"
         },
         "art_estimated_era": {
-          "type": "string"
-        },
-        "jewelry_material": {
-          "type": "string"
-        },
-        "jewelry_gemstone": {
-          "type": "string"
-        },
-        "jewelry_gemstone_weight": {
-          "type": "string"
-        },
-        "jewelry_authenticity": {
-          "type": "string"
-        },
-        "jewelry_metal_weight": {
           "type": "string"
         },
         "vehicle_make_model": {

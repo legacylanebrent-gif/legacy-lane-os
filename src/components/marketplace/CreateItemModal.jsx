@@ -14,8 +14,8 @@ const CATEGORIES = [
   'antiques', 'art', 'artwork_prints_posters', 'books_media',
   'china_porcelain', 'clocks_watches', 'clothing_accessories', 'coins_currency',
   'collectibles', 'craft_sewing', 'electronics', 'furniture',
-  'garden_outdoor', 'glassware_crystal', 'gold_silver_jewelry', 'holiday_seasonal',
-  'home_decor', 'jewelry', 'kitchen_dining', 'lighting_lamps',
+  'garden_outdoor', 'glassware_crystal', 'holiday_seasonal',
+  'home_decor', 'kitchen_dining', 'lighting_lamps',
   'medical_mobility', 'musical_instruments', 'office_business', 'rugs_textiles',
   'sporting_goods', 'tools_hardware', 'toys_games', 'vehicles', 'other'
 ];
