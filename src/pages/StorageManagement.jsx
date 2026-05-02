@@ -399,7 +399,7 @@ export default function StorageManagement() {
             </p>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 max-h-[600px] overflow-y-auto pr-2">
             {/* Space Name (Required) */}
             <div>
               <Label htmlFor="space_name" className="font-semibold">Space Name *</Label>
