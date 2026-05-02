@@ -30,6 +30,7 @@ import CSVLeadImport from './pages/CSVLeadImport';
 import AdminLeadImporter from './pages/AdminLeadImporter';
 import CompanyLanding from './pages/CompanyLanding';
 import CompareEstateSales from './pages/CompareEstateSales';
+import ReferralDashboard from './pages/ReferralDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -103,6 +104,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
       <Route path="/CompareEstateSales" element={<CompareEstateSales />} />
+      <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
