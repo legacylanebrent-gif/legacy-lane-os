@@ -409,7 +409,7 @@ export default function MarketplaceItemDetail() {
                   <Button onClick={handleBuyNow} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3">
                     Add to Cart
                   </Button>
-                  <Button onClick={handleBuyNow} variant="outline" className="w-full">
+                  <Button onClick={handleBuyNow} className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-semibold">
                     Buy Now
                   </Button>
                 </>
