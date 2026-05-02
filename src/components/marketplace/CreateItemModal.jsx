@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Upload, X, ImageIcon } from 'lucide-react';
 
 const CATEGORIES = [
   'antiques', 'art', 'artwork_prints_posters', 'books_media',
@@ -28,6 +29,10 @@ const CONDITIONS = [
 
 export default function CreateItemModal({ open, onClose, onSuccess, item, saleId }) {
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -51,6 +56,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         fulfillment_options: item.fulfillment_options || ['pickup'],
         shipping_cost: item.shipping_cost || 0
       });
+      setImages(item.images || []);
     } else {
       setFormData({
         title: '',
@@ -62,8 +68,31 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
         fulfillment_options: ['pickup'],
         shipping_cost: 0
       });
+      setImages([]);
     }
   }, [item, open]);
+
+  const handleImageFiles = async (files) => {
+    setUploadingImages(true);
+    const uploaded = [];
+    for (const file of Array.from(files)) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      uploaded.push(file_url);
+    }
+    setImages(prev => [...prev, ...uploaded]);
+    setUploadingImages(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length) handleImageFiles(files);
+  };
+
+  const removeImage = (idx) => {
+    setImages(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,7 +104,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
       if (item) {
         await base44.entities.Item.update(item.id, {
           ...formData,
-          price: parseFloat(formData.price)
+          price: parseFloat(formData.price),
+          images
         });
       } else {
         await base44.entities.Item.create({
@@ -84,7 +114,8 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
           seller_id: user.id,
           seller_name: user.full_name,
           estate_sale_id: saleId,
-          status: 'available'
+          status: 'available',
+          images
         });
       }
 
@@ -143,6 +174,56 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
               placeholder="Describe your item..."
               rows={4}
             />
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <Label className="mb-2 block">Photos</Label>
+            <div
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${dragOver ? 'border-orange-400 bg-orange-50' : 'border-slate-200 hover:border-orange-300 hover:bg-slate-50'}`}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleImageFiles(e.target.files)}
+              />
+              {uploadingImages ? (
+                <p className="text-sm text-slate-500">Uploading...</p>
+              ) : (
+                <>
+                  <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                  <p className="text-sm text-slate-500">Drag & drop or <span className="text-orange-600 font-medium">click to upload</span></p>
+                  <p className="text-xs text-slate-400 mt-1">Multiple images supported</p>
+                </>
+              )}
+            </div>
+
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {images.map((url, idx) => (
+                  <div key={idx} className="relative group aspect-square">
+                    <img src={url} alt="" className="w-full h-full object-cover rounded-lg border border-slate-200" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    {idx === 0 && (
+                      <span className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-1 rounded">Main</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
