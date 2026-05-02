@@ -25,6 +25,21 @@
         "books_media",
         "sporting_goods",
         "estate_items",
+        "rugs_textiles",
+        "lighting_lamps",
+        "clocks_watches",
+        "musical_instruments",
+        "toys_games",
+        "garden_outdoor",
+        "holiday_seasonal",
+        "coins_currency",
+        "gold_silver_jewelry",
+        "china_porcelain",
+        "glassware_crystal",
+        "artwork_prints_posters",
+        "office_business",
+        "medical_mobility",
+        "craft_sewing",
         "other"
       ]
     },
@@ -56,16 +71,13 @@
       "type": "number"
     },
     "brand": {
-      "type": "string",
-      "description": "Brand/manufacturer name"
+      "type": "string"
     },
     "size": {
-      "type": "string",
-      "description": "Item size (S/M/L, shoe size, dimensions label, etc.)"
+      "type": "string"
     },
     "shipping_weight": {
-      "type": "number",
-      "description": "Approximate weight in pounds for shipping calculations"
+      "type": "number"
     },
     "condition": {
       "type": "string",
@@ -335,12 +347,10 @@
         "inactive",
         "hidden"
       ],
-      "default": "active",
-      "description": "Display status specific to sale inventory"
+      "default": "active"
     },
     "marketplace_item_id": {
-      "type": "string",
-      "description": "Reference to linked MarketplaceItem if listed there"
+      "type": "string"
     },
     "marketplace_display_status": {
       "type": "string",
@@ -349,13 +359,11 @@
         "active",
         "inactive"
       ],
-      "default": "draft",
-      "description": "Display status specific to marketplace"
+      "default": "draft"
     },
     "last_synced_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Last time status was synced across channels"
+      "format": "date-time"
     }
   },
   "required": [

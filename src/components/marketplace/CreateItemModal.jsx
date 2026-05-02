@@ -12,7 +12,11 @@ const CATEGORIES = [
   'furniture', 'art', 'jewelry', 'vehicles', 'antiques',
   'collectibles', 'clothing_accessories', 'home_decor', 'kitchen_dining',
   'tools_hardware', 'electronics', 'books_media', 'sporting_goods',
-  'estate_items', 'other'
+  'estate_items', 'rugs_textiles', 'lighting_lamps', 'clocks_watches',
+  'musical_instruments', 'toys_games', 'garden_outdoor', 'holiday_seasonal',
+  'coins_currency', 'gold_silver_jewelry', 'china_porcelain',
+  'glassware_crystal', 'artwork_prints_posters', 'office_business',
+  'medical_mobility', 'craft_sewing', 'other'
 ];
 
 const CONDITIONS = ['new', 'excellent', 'good', 'fair', 'poor'];
