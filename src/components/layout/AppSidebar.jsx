@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload
+  UserPlus, Sparkles, Upload, Warehouse, QrCode
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -30,6 +30,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Estate Sales' },
+  { page: 'StorageManagement',      label: 'Storage Management',  icon: Warehouse,       group: 'Estate Sales', parent: 'Inventory' },
   { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
   { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
 
@@ -163,7 +164,9 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
                     <Link key={item.page} to={createPageUrl(item.page)}>
                       <Button
                         variant="ghost"
-                        className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
+                        className={`w-full justify-start rounded-none text-sm ${
+                          item.parent ? 'px-8 h-8' : 'px-4 h-9'
+                        } ${
                           active
                             ? 'bg-orange-600 text-white hover:bg-orange-700'
                             : 'text-slate-300 hover:bg-slate-700 hover:text-white'
