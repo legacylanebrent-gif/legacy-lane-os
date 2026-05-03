@@ -52,8 +52,8 @@ import AgentPartnerships from './pages/AgentPartnerships';
 import JoinReferralExchange from './pages/JoinReferralExchange';
 import ReferralDealPipeline from './pages/ReferralDealPipeline';
 import OperatorCommissions from './pages/OperatorCommissions';
-import OperatorWalletDashboard from './pages/OperatorWalletDashboard';
-import AdminWalletDashboard from './pages/AdminWalletDashboard';
+import OperatorWalletDashboard from './pages/OperatorWalletDashboard.jsx';
+import AdminWalletDashboard from './pages/AdminWalletDashboard.jsx';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
