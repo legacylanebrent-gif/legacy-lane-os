@@ -1,0 +1,56 @@
+{
+  "name": "MasterReferralAgreement",
+  "type": "object",
+  "properties": {
+    "agreement_id": {
+      "type": "string",
+      "description": "Unique agreement identifier"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the signer"
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "operator"
+      ],
+      "description": "Whether the signer is an agent or operator"
+    },
+    "signed_name": {
+      "type": "string",
+      "description": "Full name as entered at signature"
+    },
+    "signed_email": {
+      "type": "string",
+      "description": "Email at time of signing"
+    },
+    "signed_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when agreement was signed"
+    },
+    "signed_ip": {
+      "type": "string",
+      "description": "IP address at time of signing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "default": "active",
+      "description": "Current status of the agreement"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_type",
+    "signed_name",
+    "signed_email",
+    "signed_timestamp",
+    "status"
+  ]
+}
