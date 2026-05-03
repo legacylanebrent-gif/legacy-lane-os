@@ -40,6 +40,7 @@ import ViewStorageContents from './pages/ViewStorageContents';
 import ResellerDashboard from './pages/ResellerDashboard';
 import LandingPageSaleLeak from './pages/LandingPageSaleLeak';
 import LandingPageProfitLevers from './pages/LandingPageProfitLevers';
+import LandingPageScaleReady from './pages/LandingPageScaleReady';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
       <Route path="/ResellerDashboard" element={<LayoutWrapper currentPageName="ResellerDashboard"><ResellerDashboard /></LayoutWrapper>} />
       <Route path="/LandingPageSaleLeak" element={<LandingPageSaleLeak />} />
       <Route path="/LandingPageProfitLevers" element={<LandingPageProfitLevers />} />
+      <Route path="/LandingPageScaleReady" element={<LandingPageScaleReady />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
