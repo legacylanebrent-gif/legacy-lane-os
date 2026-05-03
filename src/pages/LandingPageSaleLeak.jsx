@@ -91,7 +91,7 @@ export default function LandingPageSaleLeak() {
             </Button>
             <Button
               variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 text-base px-8 py-6 rounded-xl"
+              className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl"
             >
               See How Legacy Lane OS Works
             </Button>
