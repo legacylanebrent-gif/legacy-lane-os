@@ -43,6 +43,7 @@ import LandingPageProfitLevers from './pages/LandingPageProfitLevers';
 import LandingPageScaleReady from './pages/LandingPageScaleReady';
 import LandingPageCalculator from './pages/LandingPageCalculator';
 import LandingPageChaosToControl from './pages/LandingPageChaosToControl';
+import LandingPageOfferClose from './pages/LandingPageOfferClose';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -129,6 +130,7 @@ const AuthenticatedApp = () => {
       <Route path="/LandingPageScaleReady" element={<LandingPageScaleReady />} />
       <Route path="/LandingPageCalculator" element={<LandingPageCalculator />} />
       <Route path="/LandingPageChaosToControl" element={<LandingPageChaosToControl />} />
+      <Route path="/LandingPageOfferClose" element={<LandingPageOfferClose />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
