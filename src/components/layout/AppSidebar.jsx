@@ -96,7 +96,8 @@ export const ALL_NAV_ITEMS = [
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
   { page: 'LandingPageProfitLevers', label: 'LP: 5 Profit Levers', icon: Rocket,          group: 'Landing Pages' },
   { page: 'LandingPageScaleReady',   label: 'LP: Scale Readiness', icon: Rocket,          group: 'Landing Pages' },
-  { page: 'LandingPageCalculator',   label: 'LP: Time & Profit Calc', icon: Rocket,        group: 'Landing Pages' },
+  { page: 'LandingPageCalculator',      label: 'LP: Time & Profit Calc',   icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageChaosToControl', label: 'LP: Chaos to Control',     icon: Rocket, group: 'Landing Pages' },
 ];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
