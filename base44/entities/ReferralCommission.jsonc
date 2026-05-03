@@ -1,0 +1,82 @@
+{
+  "name": "ReferralCommission",
+  "type": "object",
+  "properties": {
+    "commission_id": {
+      "type": "string",
+      "description": "Unique commission identifier"
+    },
+    "deal_id": {
+      "type": "string",
+      "description": "Reference to the ReferralDealAgreement"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Full property address"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "User ID of the real estate agent"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "referral_agent_name": {
+      "type": "string",
+      "description": "Name of the designated referral agent"
+    },
+    "estimated_sale_price": {
+      "type": "number",
+      "description": "Estimated sale price (in cents)"
+    },
+    "estimated_commission": {
+      "type": "number",
+      "description": "Estimated total real estate commission (in cents)"
+    },
+    "referral_percentage": {
+      "type": "number",
+      "description": "Operator's referral percentage of the commission (e.g., 25 for 25%)"
+    },
+    "expected_referral_fee": {
+      "type": "number",
+      "description": "Expected referral fee to operator based on estimates (in cents)"
+    },
+    "actual_sale_price": {
+      "type": "number",
+      "description": "Actual final sale price (in cents)"
+    },
+    "actual_commission": {
+      "type": "number",
+      "description": "Actual total real estate commission earned (in cents)"
+    },
+    "actual_referral_fee": {
+      "type": "number",
+      "description": "Actual referral fee paid to operator (in cents)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "paid"
+      ],
+      "default": "pending",
+      "description": "Commission payment status"
+    },
+    "closing_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when the transaction closed"
+    }
+  },
+  "required": [
+    "commission_id",
+    "deal_id",
+    "property_address",
+    "agent_id",
+    "operator_id",
+    "referral_agent_name",
+    "status"
+  ]
+}
