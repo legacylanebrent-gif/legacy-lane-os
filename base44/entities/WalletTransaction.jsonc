@@ -12,14 +12,20 @@
     },
     "deal_id": {
       "type": "string",
-      "description": "Reference to the ReferralDealPipeline (if applicable)"
+      "description": "Reference to Houszu deal (if applicable)"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Property address associated with transaction"
     },
     "type": {
       "type": "string",
       "enum": [
         "credit",
         "adjustment",
-        "withdrawal"
+        "withdrawal",
+        "hold",
+        "clawback"
       ],
       "description": "Type of wallet transaction"
     },
@@ -32,7 +38,9 @@
       "enum": [
         "pending",
         "available",
-        "completed"
+        "completed",
+        "hold",
+        "rejected"
       ],
       "default": "pending",
       "description": "Current status of the transaction"
@@ -40,6 +48,11 @@
     "description": {
       "type": "string",
       "description": "Transaction description or notes"
+    },
+    "available_after": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When credits become available (hold release date)"
     }
   },
   "required": [

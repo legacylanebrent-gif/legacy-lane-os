@@ -52,6 +52,8 @@ import AgentPartnerships from './pages/AgentPartnerships';
 import JoinReferralExchange from './pages/JoinReferralExchange';
 import ReferralDealPipeline from './pages/ReferralDealPipeline';
 import OperatorCommissions from './pages/OperatorCommissions';
+import OperatorWalletDashboard from './pages/OperatorWalletDashboard';
+import AdminWalletDashboard from './pages/AdminWalletDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -147,6 +149,8 @@ const AuthenticatedApp = () => {
       <Route path="/JoinReferralExchange" element={<LayoutWrapper currentPageName="JoinReferralExchange"><JoinReferralExchange /></LayoutWrapper>} />
       <Route path="/ReferralDealPipeline" element={<LayoutWrapper currentPageName="ReferralDealPipeline"><ReferralDealPipeline /></LayoutWrapper>} />
       <Route path="/OperatorCommissions" element={<LayoutWrapper currentPageName="OperatorCommissions"><OperatorCommissions /></LayoutWrapper>} />
+      <Route path="/OperatorWalletDashboard" element={<LayoutWrapper currentPageName="OperatorWalletDashboard"><OperatorWalletDashboard /></LayoutWrapper>} />
+      <Route path="/AdminWalletDashboard" element={<LayoutWrapper currentPageName="AdminWalletDashboard"><AdminWalletDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

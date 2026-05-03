@@ -9,7 +9,7 @@
     "total_credits": {
       "type": "number",
       "default": 0,
-      "description": "Total credits earned (in cents)"
+      "description": "Total platform credits earned (in cents)"
     },
     "available_balance": {
       "type": "number",
@@ -19,12 +19,27 @@
     "pending_balance": {
       "type": "number",
       "default": 0,
-      "description": "Credits pending confirmation or payout (in cents)"
+      "description": "Credits pending release after hold period (in cents)"
     },
     "withdrawn_total": {
       "type": "number",
       "default": 0,
       "description": "Total credits withdrawn to date (in cents)"
+    },
+    "frozen_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Credits on hold due to dispute or investigation (in cents)"
+    },
+    "wallet_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "frozen",
+        "suspended"
+      ],
+      "default": "active",
+      "description": "Wallet operational status"
     },
     "last_updated": {
       "type": "string",
