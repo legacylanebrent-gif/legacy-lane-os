@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload, Warehouse, QrCode
+  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -91,6 +91,9 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminAICredits',         label: 'AI Credit Mgmt',      icon: Zap,             group: 'Admin' },
   { page: 'BizInABox',              label: 'Biz in a Box',        icon: Briefcase,       group: 'Admin' },
   { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
+
+  // Landing Pages (admin only)
+  { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
 ];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
@@ -110,7 +113,7 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
     return acc;
   }, {});
 
-  const groupOrder = ['Main', 'Estate Sales', 'Marketplace', 'CRM & Leads', 'Marketing', 'Education', 'Finance', 'Consumer', 'Directory', 'Admin'];
+  const groupOrder = ['Main', 'Estate Sales', 'Marketplace', 'CRM & Leads', 'Marketing', 'Education', 'Finance', 'Consumer', 'Directory', 'Admin', 'Landing Pages'];
 
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
