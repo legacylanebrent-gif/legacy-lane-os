@@ -46,6 +46,7 @@ import LandingPageChaosToControl from './pages/LandingPageChaosToControl';
 import LandingPageOfferClose from './pages/LandingPageOfferClose';
 import LandingPageFitFinder from './pages/LandingPageFitFinder';
 import LandingPageReferralEngine from './pages/LandingPageReferralEngine';
+import LandingPageAIPlan from './pages/LandingPageAIPlan';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -135,6 +136,7 @@ const AuthenticatedApp = () => {
       <Route path="/LandingPageOfferClose" element={<LandingPageOfferClose />} />
       <Route path="/LandingPageFitFinder" element={<LandingPageFitFinder />} />
       <Route path="/LandingPageReferralEngine" element={<LandingPageReferralEngine />} />
+      <Route path="/LandingPageAIPlan" element={<LandingPageAIPlan />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

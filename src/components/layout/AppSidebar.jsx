@@ -101,6 +101,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'LandingPageOfferClose',     label: 'LP: Offer & Close',         icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageFitFinder',      label: 'LP: Fit Finder Quiz',        icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageReferralEngine', label: 'LP: Referral Engine',         icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageAIPlan',         label: 'LP: AI Custom Plan',          icon: Rocket, group: 'Landing Pages' },
 ];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
