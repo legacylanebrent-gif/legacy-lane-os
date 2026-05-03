@@ -8,10 +8,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const operatorId = user.id;
+    // Allow admin to pass an operator_id override for testing
+    let body = {};
+    try { body = await req.clone().json(); } catch (_) {}
+    const operatorId = (user.role === 'admin' && body.operator_id) ? body.operator_id : user.id;
 
     // 1. Load operator territory profile
-    const profiles = await base44.entities.OperatorTerritoryProfile.filter({ operator_id: operatorId });
+    const profiles = await base44.asServiceRole.entities.OperatorTerritoryProfile.filter({ operator_id: operatorId });
     if (!profiles || profiles.length === 0) {
       return Response.json({ error: 'No territory profile found. Please create one first.' }, { status: 404 });
     }
