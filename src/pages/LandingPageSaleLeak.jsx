@@ -113,6 +113,31 @@ export default function LandingPageSaleLeak() {
             ))}
           </div>
           <p className="text-slate-600 text-base">Without a system, every sale becomes a custom project. That means more hours, more stress, more helper costs, and more chances for valuable items to be underpriced or under-marketed.</p>
+
+          <div className="bg-white border-l-4 border-orange-500 rounded-xl p-6 shadow-sm space-y-4">
+            <p className="text-lg font-semibold text-slate-900">
+              What if you had access to a system that could add one 8-hour day back to your week — for personal use instead of work?
+            </p>
+            <p className="text-slate-600 text-sm">Imagine what you could do with that time every single week:</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { emoji: '🏕️', label: 'A long weekend with your family — actually unplugged' },
+                { emoji: '🏋️', label: 'Time to work out, eat well, and feel like yourself again' },
+                { emoji: '📚', label: 'Learning a new skill, hobby, or side interest you have been putting off' },
+                { emoji: '💼', label: 'Growing your business instead of just running it' },
+                { emoji: '🌿', label: 'Rest — real rest, not just collapsing after a sale weekend' },
+                { emoji: '🎯', label: 'Working on your next opportunity instead of catching up on this one' },
+              ].map(item => (
+                <div key={item.label} className="flex items-start gap-3 bg-orange-50 border border-orange-100 rounded-lg px-4 py-3 text-sm text-slate-700">
+                  <span className="text-xl flex-shrink-0">{item.emoji}</span>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-slate-500 italic">
+              That is not a fantasy. That is what a repeatable operating system can do for your business — and your life.
+            </p>
+          </div>
         </div>
       </section>
 
