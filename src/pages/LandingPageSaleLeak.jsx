@@ -210,7 +210,7 @@ export default function LandingPageSaleLeak() {
       {/* Section 5: Main Offer */}
       <section className="py-16 px-6 bg-orange-50">
         <div className="max-w-4xl mx-auto space-y-8 text-center">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">Run Your Next Estate Sale With Less Chaos</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Spend Less Time and Profit More from Every Sale</h2>
           <p className="text-slate-600 max-w-2xl mx-auto text-lg">
             Legacy Lane OS is built for estate sale companies that want to save time, reduce manual work, and increase sale-day performance without hiring more people or piecing together disconnected tools.
           </p>
