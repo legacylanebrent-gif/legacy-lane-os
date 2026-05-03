@@ -126,7 +126,9 @@ export default function LandingPageSaleLeak() {
                 { emoji: '📚', label: 'Learning a new skill, hobby, or side interest you have been putting off' },
                 { emoji: '💼', label: 'Growing your business instead of just running it' },
                 { emoji: '🌿', label: 'Rest — real rest, not just collapsing after a sale weekend' },
-                { emoji: '🎯', label: 'Working on your next opportunity instead of catching up on this one' },
+                { emoji: '✨', label: 'A spa day, a girls trip, or just a Saturday morning that belongs to you' },
+                { emoji: '👩‍👧', label: 'Being fully present with your kids — not half-distracted by a sale in your head' },
+                { emoji: '🌸', label: 'A passion project you keep promising yourself you will start someday' },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3 bg-orange-50 border border-orange-100 rounded-lg px-4 py-3 text-sm text-slate-700">
                   <span className="text-xl flex-shrink-0">{item.emoji}</span>
