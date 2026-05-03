@@ -30,7 +30,7 @@ const LEAKS = [
     color: 'text-orange-600',
     bg: 'bg-orange-50 border-orange-200',
     title: 'Leak #1: Time Lost',
-    body: 'If setup takes 6, 8, or 10+ hours, the cost is not just your time. It is the opportunity cost of not booking more sales, marketing your company, or serving more clients.'
+    body: 'If setup takes 6, 8, or 10+ hours, the cost is not just your time. It is the opportunity cost of losing a personal day per week, not marketing your company, or serving more clients.'
   },
   {
     icon: DollarSign,
