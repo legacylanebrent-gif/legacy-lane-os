@@ -99,6 +99,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'LandingPageCalculator',      label: 'LP: Time & Profit Calc',   icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageChaosToControl', label: 'LP: Chaos to Control',     icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageOfferClose',     label: 'LP: Offer & Close',         icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageFitFinder',      label: 'LP: Fit Finder Quiz',        icon: Rocket, group: 'Landing Pages' },
 ];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
