@@ -21,7 +21,9 @@ Deno.serve(async (req) => {
     const territory = profiles[0];
 
     // 2. Call Houszu API
-    const HOUSZU_API_URL = Deno.env.get('HOUSZU_API_URL') || 'https://api.houszu.com';
+    // Strip trailing slashes and any path from the base URL to avoid double-path issues
+    const rawUrl = Deno.env.get('HOUSZU_API_URL') || 'https://api.houszu.com';
+    const HOUSZU_API_URL = rawUrl.replace(/\/api\/.*$/, '').replace(/\/$/, '');
     const HOUSZU_API_KEY = Deno.env.get('HOUSZU_API_KEY') || '';
 
     let houszuAgents = [];
