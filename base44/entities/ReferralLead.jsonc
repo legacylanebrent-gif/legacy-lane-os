@@ -1,0 +1,57 @@
+{
+  "name": "ReferralLead",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Unique lead identifier"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Full property address"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client/property owner"
+    },
+    "source_user_id": {
+      "type": "string",
+      "description": "User ID of the agent or operator who sourced/introduced the lead"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "operator"
+      ],
+      "description": "Whether the lead was sourced by an agent or operator"
+    },
+    "assigned_agent_id": {
+      "type": "string",
+      "description": "User ID of the assigned real estate agent"
+    },
+    "assigned_operator_id": {
+      "type": "string",
+      "description": "User ID of the assigned estate sale operator"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "accepted",
+        "in_progress",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Current status of the referral lead"
+    }
+  },
+  "required": [
+    "lead_id",
+    "property_address",
+    "client_name",
+    "source_user_id",
+    "source_type",
+    "status"
+  ]
+}
