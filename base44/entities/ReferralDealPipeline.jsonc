@@ -1,0 +1,89 @@
+{
+  "name": "ReferralDealPipeline",
+  "type": "object",
+  "properties": {
+    "deal_id": {
+      "type": "string",
+      "description": "Unique deal identifier (reference to ReferralDealAgreement)"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the ReferralLead"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Full property address"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client/property owner"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "User ID of the real estate agent"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "new",
+        "accepted",
+        "appointment_set",
+        "listing_signed",
+        "under_contract",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Current stage of the deal in the sales pipeline"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Estimated property value (in cents)"
+    },
+    "estimated_commission": {
+      "type": "number",
+      "description": "Estimated total real estate commission (in cents)"
+    },
+    "referral_percentage": {
+      "type": "number",
+      "description": "Operator's referral percentage of the commission (e.g., 25 for 25%)"
+    },
+    "expected_referral_fee": {
+      "type": "number",
+      "description": "Expected referral fee to operator based on estimates (in cents)"
+    },
+    "actual_sale_price": {
+      "type": "number",
+      "description": "Actual final sale price (in cents)"
+    },
+    "actual_commission": {
+      "type": "number",
+      "description": "Actual total real estate commission earned (in cents)"
+    },
+    "actual_referral_fee": {
+      "type": "number",
+      "description": "Actual referral fee paid to operator (in cents)"
+    },
+    "closing_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when the transaction closed"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the deal progression"
+    }
+  },
+  "required": [
+    "deal_id",
+    "lead_id",
+    "property_address",
+    "client_name",
+    "agent_id",
+    "operator_id",
+    "stage"
+  ]
+}
