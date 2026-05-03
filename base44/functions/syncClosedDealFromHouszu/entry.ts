@@ -19,9 +19,9 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { deal_id, operator_id, property_address, actual_referral_fee, closing_date } = body;
+  const { deal_id, operator_id, property_address, referral_amount_due_to_brent, closing_date } = body;
 
-  if (!deal_id || !operator_id || !actual_referral_fee) {
+  if (!deal_id || !operator_id || referral_amount_due_to_brent === undefined) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
@@ -44,13 +44,12 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Get OPERATOR_CREDIT_PERCENTAGE from env or default to 20%
-  const creditPercentage = parseFloat(Deno.env.get('OPERATOR_CREDIT_PERCENTAGE') || '0.20');
-  const operatorCredit = Math.round(actual_referral_fee * creditPercentage);
+  // Operator receives 30% of amount due to Brent Cramp
+  const operatorCredit = Math.round(referral_amount_due_to_brent * 0.30);
 
-  // Calculate available_after (14 days from closing)
+  // Calculate available_after (10 days from closing)
   const closingDateObj = new Date(closing_date);
-  const availableAfter = new Date(closingDateObj.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
+  const availableAfter = new Date(closingDateObj.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString();
 
   // Create wallet transaction
   const transactionId = `TXN-${Date.now()}-${operator_id.slice(-6).toUpperCase()}`;
@@ -63,7 +62,7 @@ Deno.serve(async (req) => {
     amount: operatorCredit,
     status: 'pending',
     available_after: availableAfter,
-    description: 'Platform credit from closed referral deal'
+    description: 'Platform credit (30% of referral amount) — pending 10-day hold'
   });
 
   // Update or create operator wallet

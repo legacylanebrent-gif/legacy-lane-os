@@ -89,7 +89,7 @@ export default function OperatorWalletDashboard() {
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Operator Wallet</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage your platform credits and withdrawals</p>
+          <p className="text-slate-500 text-sm mt-1">Platform credits from referral deals — Not real estate commissions</p>
         </div>
 
         {wallet?.wallet_status !== 'active' && (
@@ -124,7 +124,7 @@ export default function OperatorWalletDashboard() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-slate-500 text-sm font-medium">Available Balance</p>
+                  <p className="text-slate-500 text-sm font-medium">Available Platform Credits</p>
                   <DollarSign className="w-5 h-5 text-orange-500 opacity-20" />
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{formatCurrency(wallet?.available_balance)}</p>
@@ -132,7 +132,7 @@ export default function OperatorWalletDashboard() {
 
               <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-slate-500 text-sm font-medium">Pending Credits</p>
+                  <p className="text-slate-500 text-sm font-medium">Pending (10-day hold)</p>
                   <Clock className="w-5 h-5 text-yellow-500 opacity-20" />
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{formatCurrency(wallet?.pending_balance)}</p>
@@ -140,7 +140,7 @@ export default function OperatorWalletDashboard() {
 
               <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-slate-500 text-sm font-medium">Total Credits</p>
+                  <p className="text-slate-500 text-sm font-medium">Total Platform Credits</p>
                   <TrendingUp className="w-5 h-5 text-green-500 opacity-20" />
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{formatCurrency(wallet?.total_credits)}</p>
@@ -158,6 +158,7 @@ export default function OperatorWalletDashboard() {
             {/* Withdrawal Request */}
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h3 className="font-bold text-slate-900 mb-4">Request Withdrawal</h3>
+              <p className="text-xs text-slate-600 mb-4 p-3 bg-slate-50 rounded-lg">These are platform credits, not real estate commissions. Withdrawals may be subject to 1099 reporting.</p>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Amount ($)</label>
