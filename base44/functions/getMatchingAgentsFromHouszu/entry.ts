@@ -28,9 +28,11 @@ Deno.serve(async (req) => {
     console.log('[DEBUG] HOUSZU_API_URL value:', rawUrl);
     console.log('[DEBUG] HOUSZU_API_KEY present:', HOUSZU_API_KEY ? 'YES' : 'NO');
 
-    // Strip any /api/... path suffix — the secret may include a full endpoint path
-    const HOUSZU_BASE_URL = rawUrl.replace(/\/api\/.*$/, '').replace(/\/$/, '');
-    const endpoint = `${HOUSZU_BASE_URL}/api/getAvailableAgentsForOperatorTerritory`;
+    // Use the known base domain; fall back to secret if it looks like a full URL
+    const HOUSZU_BASE_URL = rawUrl.startsWith('http')
+      ? rawUrl.replace(/\/api\/.*$/, '').replace(/\/$/, '')
+      : 'https://housio-agent-core.base44.app';
+    const endpoint = `${HOUSZU_BASE_URL}/functions/getAvailableAgentsForOperatorTerritory`;
 
     // 3. Build request body per Houszu spec
     const requestBody = {
