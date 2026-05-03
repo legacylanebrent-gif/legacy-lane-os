@@ -1,0 +1,62 @@
+{
+  "name": "OperatorTerritoryProfile",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name of the operator"
+    },
+    "service_counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Counties the operator services"
+    },
+    "service_zip_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "ZIP codes the operator services"
+    },
+    "service_towns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Towns/cities the operator services"
+    },
+    "max_agent_partnerships": {
+      "type": "integer",
+      "default": 3,
+      "description": "Maximum number of agent partnerships allowed"
+    },
+    "current_agent_partnerships": {
+      "type": "integer",
+      "default": 0,
+      "description": "Current number of active agent partnerships"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "full",
+        "paused"
+      ],
+      "default": "available",
+      "description": "Partnership availability status"
+    }
+  },
+  "required": [
+    "operator_id",
+    "company_name"
+  ]
+}

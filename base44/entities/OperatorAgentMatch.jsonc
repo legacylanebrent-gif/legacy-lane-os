@@ -1,0 +1,44 @@
+{
+  "name": "OperatorAgentMatch",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Agent identifier from Houszu"
+    },
+    "MasterAgentID": {
+      "type": "string",
+      "description": "Master agent ID from Houszu system"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Full name of the agent"
+    },
+    "brokerage_name": {
+      "type": "string",
+      "description": "Name of the agent's brokerage"
+    },
+    "match_score": {
+      "type": "number",
+      "description": "Match score from Houszu (0\u2013100)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "Current status of the partnership request"
+    }
+  },
+  "required": [
+    "operator_id",
+    "agent_id"
+  ]
+}
