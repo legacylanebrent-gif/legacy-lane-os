@@ -1,0 +1,38 @@
+{
+  "name": "OperatorWallet",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "total_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "Total credits earned (in cents)"
+    },
+    "available_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Credits available for withdrawal (in cents)"
+    },
+    "pending_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Credits pending confirmation or payout (in cents)"
+    },
+    "withdrawn_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total credits withdrawn to date (in cents)"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time wallet was updated"
+    }
+  },
+  "required": [
+    "operator_id"
+  ]
+}
