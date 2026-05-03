@@ -39,6 +39,7 @@ import StorageManagement from './pages/StorageManagement';
 import ViewStorageContents from './pages/ViewStorageContents';
 import ResellerDashboard from './pages/ResellerDashboard';
 import LandingPageSaleLeak from './pages/LandingPageSaleLeak';
+import LandingPageProfitLevers from './pages/LandingPageProfitLevers';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -121,6 +122,7 @@ const AuthenticatedApp = () => {
       <Route path="/ViewStorageContents" element={<LayoutWrapper currentPageName="ViewStorageContents"><ViewStorageContents /></LayoutWrapper>} />
       <Route path="/ResellerDashboard" element={<LayoutWrapper currentPageName="ResellerDashboard"><ResellerDashboard /></LayoutWrapper>} />
       <Route path="/LandingPageSaleLeak" element={<LandingPageSaleLeak />} />
+      <Route path="/LandingPageProfitLevers" element={<LandingPageProfitLevers />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
