@@ -1,0 +1,73 @@
+{
+  "name": "ReferralDealAgreement",
+  "type": "object",
+  "properties": {
+    "deal_id": {
+      "type": "string",
+      "description": "Unique deal identifier"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the ReferralLead"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Full property address"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "User ID of the real estate agent"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "referral_agent_name": {
+      "type": "string",
+      "description": "Name of the designated referral agent (e.g., Brent Cramp)"
+    },
+    "referral_agent_brokerage": {
+      "type": "string",
+      "description": "Brokerage of the designated referral agent"
+    },
+    "acceptance_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when deal agreement was accepted"
+    },
+    "acceptance_ip": {
+      "type": "string",
+      "description": "IP address at time of acceptance"
+    },
+    "contract_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a contract has been generated for this deal"
+    },
+    "contract_url": {
+      "type": "string",
+      "description": "URL to the generated contract document"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed",
+        "disputed"
+      ],
+      "default": "active",
+      "description": "Current status of the deal agreement"
+    }
+  },
+  "required": [
+    "deal_id",
+    "lead_id",
+    "property_address",
+    "agent_id",
+    "operator_id",
+    "referral_agent_name",
+    "referral_agent_brokerage",
+    "acceptance_timestamp",
+    "status"
+  ]
+}
