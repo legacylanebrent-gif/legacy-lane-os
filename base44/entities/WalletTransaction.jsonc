@@ -1,0 +1,52 @@
+{
+  "name": "WalletTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction identifier"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "deal_id": {
+      "type": "string",
+      "description": "Reference to the ReferralDealPipeline (if applicable)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "credit",
+        "adjustment",
+        "withdrawal"
+      ],
+      "description": "Type of wallet transaction"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount in cents"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "available",
+        "completed"
+      ],
+      "default": "pending",
+      "description": "Current status of the transaction"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description or notes"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "operator_id",
+    "type",
+    "amount",
+    "status"
+  ]
+}
