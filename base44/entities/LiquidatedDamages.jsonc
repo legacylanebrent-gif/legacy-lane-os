@@ -1,0 +1,71 @@
+{
+  "name": "LiquidatedDamages",
+  "type": "object",
+  "properties": {
+    "violation_id": {
+      "type": "string",
+      "description": "Reference to the LeadViolationLog"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the ReferralLead"
+    },
+    "party_user_id": {
+      "type": "string",
+      "description": "User ID of the party liable for damages"
+    },
+    "party_type": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "operator"
+      ],
+      "description": "Type of party"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Property address associated with violation"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount of liquidated damages (in cents)"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for damages (e.g., 'Circumvention of non-disclosure obligation')"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "charged",
+        "appealed",
+        "resolved"
+      ],
+      "default": "pending",
+      "description": "Payment status"
+    },
+    "charged_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When damages were charged"
+    },
+    "paid_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When damages were paid"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "violation_id",
+    "lead_id",
+    "party_user_id",
+    "party_type",
+    "amount",
+    "reason"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "name": "LeadViolationLog",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to the ReferralLead"
+    },
+    "property_address": {
+      "type": "string",
+      "description": "Property address of the violated lead"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client name"
+    },
+    "introduced_by_user_id": {
+      "type": "string",
+      "description": "User ID of the party who introduced the lead"
+    },
+    "introduced_by_name": {
+      "type": "string",
+      "description": "Name of the party who introduced the lead"
+    },
+    "introduced_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the lead was introduced"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "User ID of the agent involved"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the operator involved"
+    },
+    "violation_type": {
+      "type": "string",
+      "enum": [
+        "circumvention",
+        "unauthorized_contact",
+        "non_platform_transaction",
+        "duplicate_referral"
+      ],
+      "description": "Type of violation detected"
+    },
+    "violation_description": {
+      "type": "string",
+      "description": "Detailed description of the violation"
+    },
+    "detected_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the violation was detected"
+    },
+    "detected_by": {
+      "type": "string",
+      "description": "User ID or system that detected the violation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "flagged",
+        "under_investigation",
+        "confirmed",
+        "resolved"
+      ],
+      "default": "flagged",
+      "description": "Current status of the violation"
+    },
+    "enforcement_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of enforcement actions taken (frozen_credits, liquidated_damages, etc.)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Investigator notes"
+    }
+  },
+  "required": [
+    "lead_id",
+    "property_address",
+    "violation_type",
+    "agent_id",
+    "operator_id"
+  ]
+}
