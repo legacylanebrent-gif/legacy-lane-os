@@ -20,48 +20,93 @@ Deno.serve(async (req) => {
     }
     const territory = profiles[0];
 
-    // 2. Call Houszu API
-    // Strip trailing slashes and any path from the base URL to avoid double-path issues
-    const rawUrl = Deno.env.get('HOUSZU_API_URL') || 'https://api.houszu.com';
-    const HOUSZU_API_URL = rawUrl.replace(/\/api\/.*$/, '').replace(/\/$/, '');
+    // 2. Debug: confirm secrets exist
+    const rawUrl = Deno.env.get('HOUSZU_API_URL') || '';
     const HOUSZU_API_KEY = Deno.env.get('HOUSZU_API_KEY') || '';
 
+    console.log('[DEBUG] HOUSZU_API_URL present:', rawUrl ? 'YES' : 'NO');
+    console.log('[DEBUG] HOUSZU_API_URL value:', rawUrl);
+    console.log('[DEBUG] HOUSZU_API_KEY present:', HOUSZU_API_KEY ? 'YES' : 'NO');
+
+    // Strip any /api/... path suffix — the secret may include a full endpoint path
+    const HOUSZU_BASE_URL = rawUrl.replace(/\/api\/.*$/, '').replace(/\/$/, '');
+    const endpoint = `${HOUSZU_BASE_URL}/api/getAvailableAgentsForOperatorTerritory`;
+
+    // 3. Build request body per Houszu spec
+    const requestBody = {
+      operator_id: operatorId || 'legacy_lane_test_001',
+      county: (territory.service_counties || [])[0] || '',
+      state: 'NJ',
+      zip_codes: territory.service_zip_codes || [],
+      towns: territory.service_towns || [],
+      radius: 20,
+    };
+
+    console.log('[DEBUG] Outbound endpoint:', endpoint);
+    console.log('[DEBUG] Outbound body:', JSON.stringify(requestBody));
+
+    let houszuStatus = null;
+    let houszuRawBody = null;
     let houszuAgents = [];
+    let debugMessage = '';
+
     try {
-      const houszuRes = await fetch(`${HOUSZU_API_URL}/api/getAvailableAgentsForOperatorTerritory`, {
+      const houszuRes = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${HOUSZU_API_KEY}`,
+          'x-houszu-shared-key': HOUSZU_API_KEY,
         },
-        body: JSON.stringify({
-          operator_id: operatorId,
-          service_counties: territory.service_counties || [],
-          service_zip_codes: territory.service_zip_codes || [],
-          service_towns: territory.service_towns || [],
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (houszuRes.ok) {
-        const houszuData = await houszuRes.json();
-        houszuAgents = houszuData.agents || [];
+      houszuStatus = houszuRes.status;
+      console.log('[DEBUG] Houszu response status:', houszuStatus);
+
+      const rawText = await houszuRes.text();
+      houszuRawBody = rawText;
+      console.log('[DEBUG] Houszu raw response body:', rawText);
+
+      if (houszuStatus === 401) {
+        debugMessage = 'Shared key mismatch or missing header.';
+        console.warn('[DEBUG]', debugMessage);
+      } else if (houszuStatus === 404) {
+        debugMessage = 'Houszu API URL or function path is incorrect.';
+        console.warn('[DEBUG]', debugMessage);
+      } else if (houszuStatus === 405) {
+        debugMessage = 'Function exists but method is wrong; must use POST.';
+        console.warn('[DEBUG]', debugMessage);
+      } else if (houszuRes.ok) {
+        try {
+          const houszuData = JSON.parse(rawText);
+          houszuAgents = houszuData.agents || [];
+          if (houszuAgents.length === 0) {
+            debugMessage = 'Connection works, but no matching AgentReferralProfile records were found.';
+          } else {
+            debugMessage = `Success — ${houszuAgents.length} agent(s) returned.`;
+          }
+          console.log('[DEBUG]', debugMessage);
+        } catch (_) {
+          debugMessage = 'Response was 200 but body was not valid JSON.';
+          console.warn('[DEBUG]', debugMessage, rawText);
+        }
       } else {
-        console.warn('Houszu API returned non-200:', houszuRes.status);
-        // Fall through with empty agents — don't hard fail
+        debugMessage = `Unexpected status ${houszuStatus}.`;
+        console.warn('[DEBUG]', debugMessage);
       }
     } catch (fetchErr) {
-      console.warn('Houszu API fetch error:', fetchErr.message);
-      // Fall through with empty agents
+      debugMessage = `Fetch error: ${fetchErr.message}`;
+      console.warn('[DEBUG] Houszu fetch error:', fetchErr.message);
     }
 
-    // 3. Get existing matches for this operator to avoid duplicates
-    const existingMatches = await base44.entities.OperatorAgentMatch.filter({ operator_id: operatorId });
+    // 4. Get existing matches to avoid duplicates
+    const existingMatches = await base44.asServiceRole.entities.OperatorAgentMatch.filter({ operator_id: operatorId });
     const existingAgentIds = new Set(existingMatches.map(m => m.agent_id));
 
-    // 4. Store new agents locally (only new ones not already stored)
+    // 5. Store new agents
     const newAgents = houszuAgents.filter(a => !existingAgentIds.has(String(a.agent_id || a.id)));
     for (const agent of newAgents) {
-      await base44.entities.OperatorAgentMatch.create({
+      await base44.asServiceRole.entities.OperatorAgentMatch.create({
         operator_id: operatorId,
         agent_id: String(agent.agent_id || agent.id || ''),
         MasterAgentID: String(agent.MasterAgentID || agent.master_agent_id || ''),
@@ -72,14 +117,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 5. Return all matches sorted by match_score desc
-    const allMatches = await base44.entities.OperatorAgentMatch.filter({ operator_id: operatorId });
+    // 6. Return all matches + debug info
+    const allMatches = await base44.asServiceRole.entities.OperatorAgentMatch.filter({ operator_id: operatorId });
     allMatches.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
 
     return Response.json({
       territory,
       matches: allMatches,
       new_agents_found: newAgents.length,
+      debug: {
+        houszu_url_present: !!rawUrl,
+        houszu_key_present: !!HOUSZU_API_KEY,
+        endpoint,
+        last_status: houszuStatus,
+        last_response_body: houszuRawBody,
+        agents_returned: houszuAgents.length,
+        message: debugMessage,
+        synced_at: new Date().toISOString(),
+      },
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

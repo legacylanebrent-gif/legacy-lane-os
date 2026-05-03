@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { RefreshCw, Users, Clock, CheckCircle, XCircle, Bug } from 'lucide-react';
 import TerritoryProfileCard from '@/components/agentpartner/TerritoryProfileCard';
 import AgentMatchCard from '@/components/agentpartner/AgentMatchCard';
 
@@ -20,6 +20,7 @@ export default function AgentPartnerships() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [requesting, setRequesting] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -47,6 +48,7 @@ export default function AgentPartnerships() {
       setMatches(sorted);
     }
     if (res.data?.territory) setTerritory(res.data.territory);
+    if (res.data?.debug) setDebugInfo(res.data.debug);
     setSyncing(false);
   };
 
@@ -164,6 +166,51 @@ export default function AgentPartnerships() {
             )}
           </div>
         </div>
+
+        {/* Admin Debug Panel */}
+        {user?.role === 'admin' && (
+          <div className="bg-slate-900 text-slate-100 rounded-xl p-5 space-y-3 border border-slate-700 text-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <Bug className="w-4 h-4 text-orange-400" />
+              <span className="font-bold text-orange-400 uppercase tracking-wide text-xs">Houszu Debug Panel (Admin Only)</span>
+            </div>
+            {!debugInfo ? (
+              <p className="text-slate-400 italic">Click "Sync Agents from Houszu" to populate debug info.</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                  <span className="text-slate-400">HOUSZU_API_URL present:</span>
+                  <span className={debugInfo.houszu_url_present ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                    {debugInfo.houszu_url_present ? 'YES' : 'NO'}
+                  </span>
+                  <span className="text-slate-400">HOUSZU_API_KEY present:</span>
+                  <span className={debugInfo.houszu_key_present ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                    {debugInfo.houszu_key_present ? 'YES' : 'NO'}
+                  </span>
+                  <span className="text-slate-400">Last API status:</span>
+                  <span className={debugInfo.last_status === 200 ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                    {debugInfo.last_status ?? 'N/A'}
+                  </span>
+                  <span className="text-slate-400">Agents returned:</span>
+                  <span className="text-white font-semibold">{debugInfo.agents_returned ?? 0}</span>
+                  <span className="text-slate-400">Last sync time:</span>
+                  <span className="text-white">{debugInfo.synced_at ? new Date(debugInfo.synced_at).toLocaleString() : 'N/A'}</span>
+                </div>
+                {debugInfo.message && (
+                  <div className="bg-slate-800 rounded-lg px-3 py-2 text-yellow-300 text-xs">
+                    <span className="font-bold">Message: </span>{debugInfo.message}
+                  </div>
+                )}
+                <div>
+                  <p className="text-slate-400 text-xs mb-1">Last API response body:</p>
+                  <pre className="bg-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 whitespace-pre-wrap break-all max-h-40 overflow-auto">
+                    {debugInfo.last_response_body || '(empty)'}
+                  </pre>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
