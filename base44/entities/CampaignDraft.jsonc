@@ -1,0 +1,54 @@
+{
+  "name": "CampaignDraft",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string"
+    },
+    "campaign_type": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "email_copy": {
+      "type": "string"
+    },
+    "sms_copy": {
+      "type": "string"
+    },
+    "landing_page_copy": {
+      "type": "string"
+    },
+    "followup_sequence": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "approved",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "source": {
+      "type": "string",
+      "default": "Admin AI Operator"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

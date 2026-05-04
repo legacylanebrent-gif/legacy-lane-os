@@ -1,0 +1,41 @@
+{
+  "name": "AutonomousAgentToolLog",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "action_id": {
+      "type": "string"
+    },
+    "tool_name": {
+      "type": "string"
+    },
+    "input_json": {
+      "type": "object"
+    },
+    "output_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "skipped"
+      ],
+      "default": "success"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "run_id",
+    "tool_name"
+  ]
+}

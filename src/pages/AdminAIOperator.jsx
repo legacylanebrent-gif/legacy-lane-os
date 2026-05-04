@@ -6,9 +6,14 @@ import AdminAIOutputPanel from '@/components/adminai/AdminAIOutputPanel';
 import AdminAIReportHistory from '@/components/adminai/AdminAIReportHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Brain, History, AlertTriangle, Settings } from 'lucide-react';
+import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo } from 'lucide-react';
 import AgentChainIndicator from '@/components/adminai/AgentChainIndicator';
 import AdminAISettingsPanel from '@/components/adminai/AdminAISettingsPanel';
+import AutonomousRunComposer from '@/components/autonomous/AutonomousRunComposer';
+import AutonomousRunCard from '@/components/autonomous/AutonomousRunCard';
+import AutonomousRunDetailModal from '@/components/autonomous/AutonomousRunDetailModal';
+import ExecutionConfirmModal from '@/components/autonomous/ExecutionConfirmModal';
+import ActionQueuePanel from '@/components/autonomous/ActionQueuePanel';
 
 export default function AdminAIOperator() {
   const [user, setUser] = useState(null);
@@ -23,6 +28,16 @@ export default function AdminAIOperator() {
   const [activeTab, setActiveTab] = useState('command');
   const [taskFeedback, setTaskFeedback] = useState('');
 
+  // Autonomous runs state
+  const [runs, setRuns] = useState([]);
+  const [proposing, setProposing] = useState(false);
+  const [approving, setApproving] = useState(null);
+  const [executing, setExecuting] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
+  const [selectedRun, setSelectedRun] = useState(null);
+  const [confirmExecuteRun, setConfirmExecuteRun] = useState(null);
+  const [executeFeedback, setExecuteFeedback] = useState('');
+
   useEffect(() => {
     (async () => {
       try {
@@ -30,6 +45,7 @@ export default function AdminAIOperator() {
         setUser(me);
         if (me && isAdminUser(me)) {
           loadReports();
+          loadRuns();
         }
       } catch (_) {}
       setLoading(false);
@@ -41,6 +57,73 @@ export default function AdminAIOperator() {
       const data = await base44.entities.AdminAIReport.list('-created_at', 50);
       setReports(data);
     } catch (_) { setReports([]); }
+  };
+
+  const loadRuns = async () => {
+    try {
+      const data = await base44.entities.AutonomousAgentRun.list('-created_at', 50);
+      setRuns(data);
+    } catch (_) { setRuns([]); }
+  };
+
+  const handlePropose = async (payload) => {
+    setProposing(true);
+    setExecuteFeedback('');
+    try {
+      await base44.functions.invoke('proposeAutonomousRun', payload);
+      await loadRuns();
+      setActiveTab('autonomous');
+    } catch (err) {
+      alert('Error proposing run: ' + (err?.response?.data?.error || err.message));
+    }
+    setProposing(false);
+  };
+
+  const handleApprove = async (run_id) => {
+    setApproving(run_id);
+    try {
+      await base44.functions.invoke('approveAutonomousRun', { run_id });
+      await loadRuns();
+      if (selectedRun?.id === run_id) {
+        const updated = runs.find(r => r.id === run_id);
+        if (updated) setSelectedRun({ ...updated, status: 'approved' });
+      }
+    } catch (err) {
+      alert('Approve failed: ' + (err?.response?.data?.error || err.message));
+    }
+    setApproving(null);
+  };
+
+  const handleExecuteRequest = (run_id) => {
+    const run = runs.find(r => r.id === run_id);
+    setConfirmExecuteRun(run);
+  };
+
+  const handleExecuteConfirm = async () => {
+    if (!confirmExecuteRun) return;
+    const run_id = confirmExecuteRun.id;
+    setConfirmExecuteRun(null);
+    setExecuting(run_id);
+    setExecuteFeedback('');
+    try {
+      const res = await base44.functions.invoke('executeAutonomousRun', { run_id });
+      setExecuteFeedback(`✓ ${res.data.summary}`);
+      await loadRuns();
+    } catch (err) {
+      setExecuteFeedback('Execution error: ' + (err?.response?.data?.error || err.message));
+    }
+    setExecuting(null);
+  };
+
+  const handleCancel = async (run_id) => {
+    setCancelling(run_id);
+    try {
+      await base44.functions.invoke('cancelAutonomousRun', { run_id });
+      await loadRuns();
+    } catch (err) {
+      alert('Cancel failed: ' + err.message);
+    }
+    setCancelling(null);
   };
 
   const handleSubmit = async (payload) => {
@@ -176,28 +259,38 @@ export default function AdminAIOperator() {
       {/* Main */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-slate-800/60 border border-slate-700 mb-6">
-            <TabsTrigger value="command" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400">
+          <TabsList className="bg-slate-800/60 border border-slate-700 mb-6 flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="command" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
               <Brain className="w-3.5 h-3.5 mr-1.5" />Command Console
             </TabsTrigger>
-            <TabsTrigger value="output" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400" disabled={!result}>
+            <TabsTrigger value="output" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs" disabled={!result}>
               Output Panel
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400">
-              <History className="w-3.5 h-3.5 mr-1.5" />Run History ({reports.length})
+            <TabsTrigger value="autonomous" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+              <Cpu className="w-3.5 h-3.5 mr-1.5" />Autonomous Runs {runs.length > 0 && `(${runs.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="queue" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+              <ListTodo className="w-3.5 h-3.5 mr-1.5" />Action Queue
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+              <History className="w-3.5 h-3.5 mr-1.5" />Report History
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+              <Settings className="w-3.5 h-3.5 mr-1.5" />Settings
             </TabsTrigger>
           </TabsList>
 
+          {/* Command Console */}
           <TabsContent value="command">
             <div className="space-y-4">
               <AgentChainIndicator running={running} />
               <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
                 <AdminAICommandConsole onSubmit={handleSubmit} loading={running} />
               </div>
-              <AdminAISettingsPanel user={user} />
             </div>
           </TabsContent>
 
+          {/* Output Panel */}
           <TabsContent value="output">
             <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
               <AdminAIOutputPanel
@@ -215,6 +308,59 @@ export default function AdminAIOperator() {
             </div>
           </TabsContent>
 
+          {/* Autonomous Runs */}
+          <TabsContent value="autonomous">
+            <div className="space-y-5">
+              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Cpu className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-widest">Propose New Autonomous Run</h3>
+                </div>
+                <AutonomousRunComposer onPropose={handlePropose} loading={proposing} />
+              </div>
+
+              {executeFeedback && (
+                <div className={`p-3 rounded-lg border text-sm ${executeFeedback.startsWith('✓') ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                  {executeFeedback}
+                </div>
+              )}
+
+              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest">All Runs ({runs.length})</h3>
+                  <button onClick={loadRuns} className="text-xs text-amber-400 hover:text-amber-300">↻ Refresh</button>
+                </div>
+                {runs.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 text-sm">No autonomous runs yet. Use the composer above to propose your first run.</div>
+                ) : (
+                  <div className="space-y-3">
+                    {runs.map(run => (
+                      <AutonomousRunCard
+                        key={run.id}
+                        run={run}
+                        onView={r => setSelectedRun(r)}
+                        onApprove={handleApprove}
+                        onExecute={handleExecuteRequest}
+                        onCancel={handleCancel}
+                        approving={approving}
+                        executing={executing}
+                        cancelling={cancelling}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Action Queue */}
+          <TabsContent value="queue">
+            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+              <ActionQueuePanel />
+            </div>
+          </TabsContent>
+
+          {/* History */}
           <TabsContent value="history">
             <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -224,7 +370,32 @@ export default function AdminAIOperator() {
               <AdminAIReportHistory reports={reports} onView={handleViewReport} />
             </div>
           </TabsContent>
+
+          {/* Settings */}
+          <TabsContent value="settings">
+            <AdminAISettingsPanel user={user} />
+          </TabsContent>
         </Tabs>
+
+        {/* Modals */}
+        {selectedRun && (
+          <AutonomousRunDetailModal
+            run={selectedRun}
+            onClose={() => setSelectedRun(null)}
+            onApprove={handleApprove}
+            onExecute={handleExecuteRequest}
+            approving={approving}
+            executing={executing}
+          />
+        )}
+        {confirmExecuteRun && (
+          <ExecutionConfirmModal
+            run={confirmExecuteRun}
+            onConfirm={handleExecuteConfirm}
+            onCancel={() => setConfirmExecuteRun(null)}
+            loading={executing === confirmExecuteRun?.id}
+          />
+        )}
       </div>
     </div>
   );

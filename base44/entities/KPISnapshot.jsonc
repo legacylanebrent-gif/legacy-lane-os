@@ -1,0 +1,46 @@
+{
+  "name": "KPISnapshot",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "operator_count": {
+      "type": "number",
+      "default": 0
+    },
+    "active_subscriptions": {
+      "type": "number",
+      "default": 0
+    },
+    "monthly_recurring_revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "referral_pipeline_value": {
+      "type": "number",
+      "default": 0
+    },
+    "campaign_count": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "Admin AI Operator"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

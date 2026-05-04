@@ -1,0 +1,36 @@
+{
+  "name": "TerritoryRecommendation",
+  "type": "object",
+  "properties": {
+    "territory_name": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "opportunity_score": {
+      "type": "number",
+      "default": 0
+    },
+    "reason": {
+      "type": "string"
+    },
+    "recommended_actions": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "Admin AI Operator"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "territory_name"
+  ]
+}

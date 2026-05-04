@@ -1,0 +1,90 @@
+{
+  "name": "AutonomousAgentRun",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "admin_command": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "awaiting_approval",
+        "approved",
+        "running",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "execution_mode": {
+      "type": "string"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "low"
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": true
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "result_json": {
+      "type": "object"
+    },
+    "proposed_actions_json": {
+      "type": "object"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_by_email": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title",
+    "admin_command"
+  ]
+}

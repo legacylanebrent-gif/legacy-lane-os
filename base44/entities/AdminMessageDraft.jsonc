@@ -1,0 +1,52 @@
+{
+  "name": "AdminMessageDraft",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "call_script",
+        "other"
+      ],
+      "default": "email"
+    },
+    "audience": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "approved",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "source": {
+      "type": "string",
+      "default": "Admin AI Operator"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

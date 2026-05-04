@@ -1,0 +1,83 @@
+{
+  "name": "AutonomousAgentAction",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "target_entity": {
+      "type": "string"
+    },
+    "target_record_id": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "running",
+        "completed",
+        "failed",
+        "skipped",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "low"
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": true
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "type": "object"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "run_id",
+    "action_type",
+    "title"
+  ]
+}

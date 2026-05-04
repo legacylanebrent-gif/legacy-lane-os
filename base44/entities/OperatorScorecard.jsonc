@@ -1,0 +1,36 @@
+{
+  "name": "OperatorScorecard",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number",
+      "default": 0
+    },
+    "strengths": {
+      "type": "string"
+    },
+    "weaknesses": {
+      "type": "string"
+    },
+    "recommended_actions": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "Admin AI Operator"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "operator_name"
+  ]
+}
