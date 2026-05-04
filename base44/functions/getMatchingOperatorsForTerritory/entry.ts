@@ -1,5 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
+const HOUSZU_APP_ID = "697206f0efd7bfde6e06b474";
+
 Deno.serve(async (req) => {
   try {
     if (req.method !== "POST") {
@@ -12,28 +14,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const HOUSZU_API_URL = Deno.env.get("HOUSZU_API_URL");
-    const HOUSZU_API_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || Deno.env.get("HOUSZU_API_KEY");
-
-    if (!HOUSZU_API_URL || !HOUSZU_API_KEY) {
-      return Response.json({ error: "HOUSZU_API_URL or HOUSZU_API_KEY not set" }, { status: 500 });
-    }
-
     const body = await req.json();
     // body: { agent_id, MasterAgentID, county, state, zip_codes, towns }
 
-    const resp = await fetch(`${HOUSZU_API_URL}/functions/getAvailableAgentsForOperatorTerritory`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-houszu-shared-key": HOUSZU_API_KEY,
-        "User-Agent": "LegacyLaneOS/1.0",
-      },
-      body: JSON.stringify(body),
-    });
+    const result = await base44.asServiceRole.functions.invoke(
+      "getAvailableAgentsForOperatorTerritory",
+      body,
+      { appId: HOUSZU_APP_ID }
+    );
 
-    const data = await resp.json();
-    return Response.json(data, { status: resp.status });
+    return Response.json(result);
   } catch (error) {
     console.error("[getMatchingOperatorsForTerritory] Error:", error?.message);
     return Response.json({ error: error?.message }, { status: 500 });
