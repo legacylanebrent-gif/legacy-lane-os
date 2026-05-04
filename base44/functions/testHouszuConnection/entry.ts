@@ -12,62 +12,65 @@ Deno.serve(async (req) => {
   const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY");
   const results = {};
 
-  // Test 0: housszuPing (connectivity + key match diagnostic)
+  // Test 0: housszuPing via plain fetch (no auth headers — public function)
   try {
-    const r = await base44.asServiceRole.functions.invoke(
-      "housszuPing",
-      { shared_key: HOUSZU_SHARED_KEY },
-      { appId: HOUSZU_APP_ID }
+    const pingRes = await fetch(
+      `https://base44.app/api/apps/${HOUSZU_APP_ID}/functions/housszuPing`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shared_key: HOUSZU_SHARED_KEY }),
+      }
     );
-    results.housszuPing = { success: true, response: r };
+    const pingBody = await pingRes.json();
+    results.housszuPing = { http_status: pingRes.status, response: pingBody };
   } catch (e) {
     results.housszuPing = { error: e.message };
   }
 
+  const baseUrl = `https://base44.app/api/apps/${HOUSZU_APP_ID}/functions`;
+  const headers = { "Content-Type": "application/json" };
+
   // Test 1: getDealDetails
   try {
-    const r = await base44.asServiceRole.functions.invoke(
-      "getDealDetails",
-      { deal_id: "TEST-001", shared_key: HOUSZU_SHARED_KEY },
-      { appId: HOUSZU_APP_ID }
-    );
-    results.getDealDetails = { success: true, response: r };
+    const res = await fetch(`${baseUrl}/getDealDetails`, {
+      method: "POST", headers,
+      body: JSON.stringify({ deal_id: "TEST-001", shared_key: HOUSZU_SHARED_KEY }),
+    });
+    results.getDealDetails = { http_status: res.status, response: await res.json() };
   } catch (e) {
     results.getDealDetails = { error: e.message };
   }
 
   // Test 2: getAvailableAgentsForOperatorTerritory
   try {
-    const r = await base44.asServiceRole.functions.invoke(
-      "getAvailableAgentsForOperatorTerritory",
-      { zip_codes: ["07001"], counties: ["Middlesex"], state: "NJ", shared_key: HOUSZU_SHARED_KEY },
-      { appId: HOUSZU_APP_ID }
-    );
-    results.getAvailableAgentsForOperatorTerritory = { success: true, response: r };
+    const res = await fetch(`${baseUrl}/getAvailableAgentsForOperatorTerritory`, {
+      method: "POST", headers,
+      body: JSON.stringify({ zip_codes: ["07001"], counties: ["Middlesex"], state: "NJ", shared_key: HOUSZU_SHARED_KEY }),
+    });
+    results.getAvailableAgentsForOperatorTerritory = { http_status: res.status, response: await res.json() };
   } catch (e) {
     results.getAvailableAgentsForOperatorTerritory = { error: e.message };
   }
 
   // Test 3: updateDealStage
   try {
-    const r = await base44.asServiceRole.functions.invoke(
-      "updateDealStage",
-      { deal_id: "TEST-001", new_stage: "accepted", shared_key: HOUSZU_SHARED_KEY },
-      { appId: HOUSZU_APP_ID }
-    );
-    results.updateDealStage = { success: true, response: r };
+    const res = await fetch(`${baseUrl}/updateDealStage`, {
+      method: "POST", headers,
+      body: JSON.stringify({ deal_id: "TEST-001", new_stage: "accepted", shared_key: HOUSZU_SHARED_KEY }),
+    });
+    results.updateDealStage = { http_status: res.status, response: await res.json() };
   } catch (e) {
     results.updateDealStage = { error: e.message };
   }
 
   // Test 4: closeDeal
   try {
-    const r = await base44.asServiceRole.functions.invoke(
-      "closeDeal",
-      { deal_id: "TEST-001", actual_commission: 1500000, shared_key: HOUSZU_SHARED_KEY },
-      { appId: HOUSZU_APP_ID }
-    );
-    results.closeDeal = { success: true, response: r };
+    const res = await fetch(`${baseUrl}/closeDeal`, {
+      method: "POST", headers,
+      body: JSON.stringify({ deal_id: "TEST-001", actual_commission: 1500000, shared_key: HOUSZU_SHARED_KEY }),
+    });
+    results.closeDeal = { http_status: res.status, response: await res.json() };
   } catch (e) {
     results.closeDeal = { error: e.message };
   }
