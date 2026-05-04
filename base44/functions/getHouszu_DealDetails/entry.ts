@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     }
 
     const HOUSZU_API_URL = Deno.env.get("HOUSZU_API_URL");
-    const HOUSZU_API_KEY = Deno.env.get("HOUSZU_API_KEY");
+    const HOUSZU_API_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || Deno.env.get("HOUSZU_API_KEY");
 
     const { deal_id } = await req.json();
     if (!deal_id) {

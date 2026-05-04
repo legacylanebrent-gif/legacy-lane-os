@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     }
 
     const HOUSZU_API_URL = Deno.env.get("HOUSZU_API_URL");
-    const HOUSZU_API_KEY = Deno.env.get("HOUSZU_API_KEY");
+    const HOUSZU_API_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || Deno.env.get("HOUSZU_API_KEY");
 
     if (!HOUSZU_API_URL || !HOUSZU_API_KEY) {
       return Response.json({ error: "HOUSZU_API_URL or HOUSZU_API_KEY not set" }, { status: 500 });
