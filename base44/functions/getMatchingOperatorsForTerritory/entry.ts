@@ -27,6 +27,7 @@ Deno.serve(async (req) => {
       headers: {
         "Content-Type": "application/json",
         "x-houszu-shared-key": HOUSZU_API_KEY,
+        "User-Agent": "LegacyLaneOS/1.0",
       },
       body: JSON.stringify(body),
     });

@@ -12,11 +12,18 @@ Deno.serve(async (req) => {
 
   const results = {};
 
-  // Test 1: getDealDetails
+  const commonHeaders = {
+    'Content-Type': 'application/json',
+    'x-houszu-shared-key': HOUSZU_API_KEY,
+    'User-Agent': 'LegacyLaneOS/1.0',
+  };
+
+  // Test 1: getDealDetails (POST with JSON body)
   try {
-    const r = await fetch(`${HOUSZU_API_URL}/functions/getDealDetails?deal_id=TEST-001`, {
-      method: 'GET',
-      headers: { 'x-houszu-shared-key': HOUSZU_API_KEY },
+    const r = await fetch(`${HOUSZU_API_URL}/functions/getDealDetails`, {
+      method: 'POST',
+      headers: commonHeaders,
+      body: JSON.stringify({ deal_id: 'TEST-001' }),
     });
     results.getDealDetails = { status: r.status, body: await r.text() };
   } catch (e) {
@@ -27,7 +34,7 @@ Deno.serve(async (req) => {
   try {
     const r = await fetch(`${HOUSZU_API_URL}/functions/getAvailableAgentsForOperatorTerritory`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-houszu-shared-key': HOUSZU_API_KEY },
+      headers: commonHeaders,
       body: JSON.stringify({ zip_codes: ['07001'], counties: ['Middlesex'], state: 'NJ' }),
     });
     results.getAvailableAgentsForOperatorTerritory = { status: r.status, body: await r.text() };
@@ -39,7 +46,7 @@ Deno.serve(async (req) => {
   try {
     const r = await fetch(`${HOUSZU_API_URL}/functions/updateDealStage`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-houszu-shared-key': HOUSZU_API_KEY },
+      headers: commonHeaders,
       body: JSON.stringify({ deal_id: 'TEST-001', new_stage: 'accepted' }),
     });
     results.updateDealStage = { status: r.status, body: await r.text() };
@@ -51,7 +58,7 @@ Deno.serve(async (req) => {
   try {
     const r = await fetch(`${HOUSZU_API_URL}/functions/closeDeal`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-houszu-shared-key': HOUSZU_API_KEY },
+      headers: commonHeaders,
       body: JSON.stringify({ deal_id: 'TEST-001', actual_commission: 1500000 }),
     });
     results.closeDeal = { status: r.status, body: await r.text() };

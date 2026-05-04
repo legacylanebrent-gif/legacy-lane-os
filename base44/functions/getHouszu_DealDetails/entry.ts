@@ -20,11 +20,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: "deal_id is required" }, { status: 400 });
     }
 
-    const resp = await fetch(`${HOUSZU_API_URL}/functions/getDealDetails?deal_id=${encodeURIComponent(deal_id)}`, {
-      method: "GET",
+    const resp = await fetch(`${HOUSZU_API_URL}/functions/getDealDetails`, {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         "x-houszu-shared-key": HOUSZU_API_KEY,
+        "User-Agent": "LegacyLaneOS/1.0",
       },
+      body: JSON.stringify({ deal_id }),
     });
 
     const data = await resp.json();
