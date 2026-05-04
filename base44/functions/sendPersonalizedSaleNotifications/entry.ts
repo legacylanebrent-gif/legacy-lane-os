@@ -125,7 +125,7 @@ Return in this JSON format:
                         })}
                     </p>
                 ` : ''}
-                <a href="https://app.base44.com/estate-sale-detail?id=${sale.id}" 
+                <a href="https://app.legacylane.com/EstateSaleDetail?id=${sale.id}" 
                    style="display: inline-block; background: #f97316; color: white; padding: 8px 16px; 
                           text-decoration: none; border-radius: 6px; font-weight: 500;">
                     View Details
@@ -173,7 +173,7 @@ Return in this JSON format:
 
             <div style="text-align: center; margin-top: 32px; padding-top: 24px; 
                         border-top: 1px solid #e2e8f0;">
-                <a href="https://app.base44.com/estate-sale-finder" 
+                <a href="https://app.legacylane.com/EstateSaleFinder" 
                    style="display: inline-block; background: #0891b2; color: white; 
                           padding: 12px 24px; text-decoration: none; border-radius: 8px; 
                           font-weight: 600; font-size: 16px;">

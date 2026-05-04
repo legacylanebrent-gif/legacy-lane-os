@@ -177,20 +177,44 @@ Deno.serve(async (req) => {
       const users = await base44.asServiceRole.entities.User.filter({ id: operatorId });
       const operatorUser = users[0];
       if (operatorUser?.email) {
+        const scoreColor = score >= 80 ? '#16a34a' : score >= 50 ? '#f97316' : '#64748b';
+        const emailHtml = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 16px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<tr><td style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);padding:28px 32px;text-align:center;">
+  <div style="font-family:Georgia,serif;font-size:26px;font-weight:bold;color:#ffffff;letter-spacing:1px;">Legacy Lane</div>
+  <div style="font-size:12px;color:#f97316;margin-top:4px;letter-spacing:2px;text-transform:uppercase;">OS Platform &nbsp;·&nbsp; Referral Exchange</div>
+</td></tr>
+<tr><td style="padding:36px 32px;">
+  <h2 style="margin:0 0 8px 0;font-size:22px;color:#1e293b;font-family:Georgia,serif;">You're a Top Territory Match</h2>
+  <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;">Hi ${operatorUser.full_name || 'there'},<br/><br/>A real estate agent has requested operator coverage in your service area and you ranked as a top match.</p>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:24px;">
+    <tr><td style="padding:8px 16px;font-size:13px;color:#64748b;font-weight:600;width:40%;">Agent</td><td style="padding:8px 16px;font-size:14px;color:#1e293b;">${agent_name}</td></tr>
+    <tr style="background:#fff;"><td style="padding:8px 16px;font-size:13px;color:#64748b;font-weight:600;">Territory Requested</td><td style="padding:8px 16px;font-size:14px;color:#1e293b;">${territoryDesc}</td></tr>
+    <tr><td style="padding:8px 16px;font-size:13px;color:#64748b;font-weight:600;">Your Match Score</td><td style="padding:8px 16px;font-size:20px;font-weight:800;color:${scoreColor};">${score}<span style="font-size:13px;font-weight:600;color:#64748b;"> / 100</span></td></tr>
+    <tr style="background:#fff;"><td style="padding:8px 16px;font-size:13px;color:#64748b;font-weight:600;vertical-align:top;">Match Reasons</td><td style="padding:8px 16px;font-size:13px;color:#475569;">${reasons.join('<br/>')}</td></tr>
+  </table>
+
+  <div style="text-align:center;margin:28px 0;">
+    <a href="https://app.legacylane.com/AgentPartnerships" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">Review Agent Request</a>
+  </div>
+</td></tr>
+<tr><td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">
+  <p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">Legacy Lane OS &nbsp;|&nbsp; Referral Exchange Platform</p>
+  <p style="margin:0;font-size:12px;color:#94a3b8;">This is an automated match notification. Please do not reply directly to this email.</p>
+</td></tr>
+</table></td></tr></table>
+</body></html>`;
+
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: operatorUser.email,
-          from_name: 'Legacy Lane',
-          subject: `New Agent Territory Request — You\'re a Top Match (Score: ${score}/100)`,
-          body: `Hi ${operatorUser.full_name || 'there'},\n\n` +
-            `A real estate agent (${agent_name}) has requested operator coverage in your area:\n\n` +
-            `  Territory: ${territoryDesc}\n` +
-            `  Your match score: ${score}/100\n` +
-            `  Match reasons: ${reasons.join('; ')}\n\n` +
-            `Log in to Legacy Lane OS to review the agent's request and respond:\n` +
-            `https://app.legacylane.com/AgentPartnerships\n\n` +
-            `---\n` +
-            `Legacy Lane OS | Referral Exchange\n` +
-            `This is an automated match notification. Do not reply to this email.`,
+          from_name: 'Legacy Lane OS',
+          subject: `You're a Top Match — New Agent Territory Request (Score: ${score}/100)`,
+          body: emailHtml,
         });
       }
     } catch (err) {
