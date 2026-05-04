@@ -1,0 +1,63 @@
+{
+  "name": "FutureOperatorLead",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "lead_stage": {
+      "type": "string",
+      "default": "future_operator"
+    },
+    "audience_sync_status": {
+      "type": "string",
+      "default": "not_synced"
+    },
+    "meta_custom_audience_id": {
+      "type": "string"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": []
+}

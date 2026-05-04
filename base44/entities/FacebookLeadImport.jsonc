@@ -1,0 +1,64 @@
+{
+  "name": "FacebookLeadImport",
+  "type": "object",
+  "properties": {
+    "meta_lead_id": {
+      "type": "string"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "ad_id": {
+      "type": "string"
+    },
+    "form_id": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "raw_payload": {
+      "type": "object"
+    },
+    "lead_stage": {
+      "type": "string",
+      "default": "new_facebook_lead"
+    },
+    "ai_response_status": {
+      "type": "string",
+      "default": "not_started",
+      "enum": [
+        "not_started",
+        "draft_ready",
+        "sent",
+        "failed"
+      ]
+    },
+    "admin_alert_status": {
+      "type": "string",
+      "default": "not_sent",
+      "enum": [
+        "not_sent",
+        "sent",
+        "failed"
+      ]
+    },
+    "ai_response_draft": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": []
+}

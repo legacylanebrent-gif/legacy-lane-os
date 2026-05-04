@@ -1,0 +1,81 @@
+{
+  "name": "FacebookAdCampaignDraft",
+  "type": "object",
+  "properties": {
+    "campaign_name": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "target_audience": {
+      "type": "string"
+    },
+    "landing_page_id": {
+      "type": "string"
+    },
+    "landing_page_url": {
+      "type": "string"
+    },
+    "budget_type": {
+      "type": "string"
+    },
+    "daily_budget": {
+      "type": "number"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "start_time": {
+      "type": "string"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_time": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "default": "draft",
+      "enum": [
+        "draft",
+        "awaiting_approval",
+        "approved",
+        "paused_in_meta",
+        "scheduled",
+        "launched",
+        "completed",
+        "rejected"
+      ]
+    },
+    "meta_campaign_id": {
+      "type": "string"
+    },
+    "meta_ad_set_id": {
+      "type": "string"
+    },
+    "meta_ad_ids": {
+      "type": "object"
+    },
+    "ai_strategy": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "campaign_name"
+  ]
+}

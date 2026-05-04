@@ -1,0 +1,51 @@
+{
+  "name": "FacebookAdCreativeDraft",
+  "type": "object",
+  "properties": {
+    "campaign_draft_id": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "primary_text": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "call_to_action": {
+      "type": "string"
+    },
+    "image_prompt": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "meta_creative_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "rejected",
+        "needs_revision"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "campaign_draft_id"
+  ]
+}

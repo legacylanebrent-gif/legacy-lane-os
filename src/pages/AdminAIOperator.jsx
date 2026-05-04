@@ -6,7 +6,7 @@ import AdminAIOutputPanel from '@/components/adminai/AdminAIOutputPanel';
 import AdminAIReportHistory from '@/components/adminai/AdminAIReportHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo, Share2 } from 'lucide-react';
+import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo, Share2, Megaphone } from 'lucide-react';
 import AgentChainIndicator from '@/components/adminai/AgentChainIndicator';
 import AdminAISettingsPanel from '@/components/adminai/AdminAISettingsPanel';
 import AutonomousRunComposer from '@/components/autonomous/AutonomousRunComposer';
@@ -15,6 +15,7 @@ import AutonomousRunDetailModal from '@/components/autonomous/AutonomousRunDetai
 import ExecutionConfirmModal from '@/components/autonomous/ExecutionConfirmModal';
 import ActionQueuePanel from '@/components/autonomous/ActionQueuePanel';
 import SocialAutopilotTab from '@/components/social/SocialAutopilotTab';
+import FacebookAdsAutopilotTab from '@/components/fbads/FacebookAdsAutopilotTab';
 
 export default function AdminAIOperator() {
   const [user, setUser] = useState(null);
@@ -279,6 +280,9 @@ export default function AdminAIOperator() {
             <TabsTrigger value="social" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
               <Share2 className="w-3.5 h-3.5 mr-1.5" />Social Autopilot
             </TabsTrigger>
+            <TabsTrigger value="fbads" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-500 text-xs">
+              <Megaphone className="w-3.5 h-3.5 mr-1.5" />FB Ads Autopilot
+            </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
               <Settings className="w-3.5 h-3.5 mr-1.5" />Settings
             </TabsTrigger>
@@ -378,6 +382,11 @@ export default function AdminAIOperator() {
           {/* Social Autopilot */}
           <TabsContent value="social">
             <SocialAutopilotTab user={user} />
+          </TabsContent>
+
+          {/* Facebook Ads Autopilot */}
+          <TabsContent value="fbads">
+            <FacebookAdsAutopilotTab user={user} />
           </TabsContent>
 
           {/* Settings */}

@@ -151,6 +151,34 @@ export default function AdminAISettingsPanel({ user }) {
                 className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
+
+            {/* FB Ads Settings */}
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Default Daily Ad Budget ($)</label>
+              <Input
+                type="number"
+                value={settings.default_daily_ad_budget || 25}
+                onChange={e => set('default_daily_ad_budget', parseFloat(e.target.value) || 0)}
+                className="bg-white border-slate-300 text-slate-700 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Campaign Timezone</label>
+              <Input
+                value={settings.default_campaign_timezone || 'America/New_York'}
+                onChange={e => set('default_campaign_timezone', e.target.value)}
+                className="bg-white border-slate-300 text-slate-700 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Admin Alert Phone (SMS)</label>
+              <Input
+                value={settings.admin_alert_phone || ''}
+                onChange={e => set('admin_alert_phone', e.target.value)}
+                placeholder="+1XXXXXXXXXX"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
+              />
+            </div>
           </div>
 
           {/* Toggles */}
@@ -162,10 +190,17 @@ export default function AdminAISettingsPanel({ user }) {
               { key: 'allow_social_image_generation', label: 'Social Image Generation', color: 'green' },
               { key: 'allow_social_scheduling', label: 'Social Scheduling (Make)', color: 'blue' },
               { key: 'allow_social_publishing', label: 'Direct Social Publishing', color: 'red' },
+              { key: 'allow_facebook_ads_builder', label: 'FB Ads Builder', color: 'blue' },
+              { key: 'allow_meta_audience_sync', label: 'Meta Audience Sync', color: 'blue' },
+              { key: 'allow_meta_campaign_creation', label: 'Meta Campaign Creation', color: 'amber' },
+              { key: 'allow_meta_campaign_launch', label: 'Meta Campaign Launch', color: 'red' },
+              { key: 'allow_facebook_lead_import', label: 'FB Lead Import', color: 'green' },
+              { key: 'allow_ai_lead_auto_response', label: 'AI Auto-Response', color: 'amber' },
+              { key: 'require_admin_approval_before_launch', label: 'Approval Required Before Launch', color: 'amber' },
             ].map(({ key, label, color }) => {
               const on = settings[key];
-              const colorMap = { green: on ? 'bg-green-100 text-green-700 border-green-300' : '', amber: on ? 'bg-amber-100 text-amber-700 border-amber-300' : '', blue: on ? 'bg-blue-100 text-blue-700 border-blue-300' : '', red: on ? 'bg-red-100 text-red-700 border-red-300' : '' };
-              const dotMap = { green: 'bg-green-500', amber: 'bg-amber-500', blue: 'bg-blue-500', red: 'bg-red-500' };
+              const colorMap = { green: on ? 'bg-green-100 text-green-700 border-green-300' : '', amber: on ? 'bg-amber-100 text-amber-700 border-amber-300' : '', blue: on ? 'bg-blue-100 text-blue-700 border-blue-300' : '', red: on ? 'bg-red-100 text-red-700 border-red-300' : '', purple: on ? 'bg-purple-100 text-purple-700 border-purple-300' : '' };
+              const dotMap = { green: 'bg-green-500', amber: 'bg-amber-500', blue: 'bg-blue-500', red: 'bg-red-500', purple: 'bg-purple-500' };
               return (
                 <button key={key} onClick={() => set(key, !on)}
                   className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${on ? colorMap[color] : 'bg-slate-100 text-slate-400 border-slate-300'}`}>

@@ -72,6 +72,45 @@
       "type": "string",
       "default": "Legacy Lane OS branded, polished, modern, trustworthy, estate sale business growth, cream/gold/black design direction, professional SaaS marketing style"
     },
+    "allow_facebook_ads_builder": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_meta_audience_sync": {
+      "type": "boolean",
+      "default": false
+    },
+    "allow_meta_campaign_creation": {
+      "type": "boolean",
+      "default": false
+    },
+    "allow_meta_campaign_launch": {
+      "type": "boolean",
+      "default": false
+    },
+    "allow_facebook_lead_import": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_ai_lead_auto_response": {
+      "type": "boolean",
+      "default": false
+    },
+    "require_admin_approval_before_launch": {
+      "type": "boolean",
+      "default": true
+    },
+    "default_daily_ad_budget": {
+      "type": "number",
+      "default": 25
+    },
+    "default_campaign_timezone": {
+      "type": "string",
+      "default": "America/New_York"
+    },
+    "admin_alert_phone": {
+      "type": "string"
+    },
     "created_by": {
       "type": "string"
     },
