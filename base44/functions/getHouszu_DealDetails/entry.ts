@@ -19,9 +19,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: "deal_id is required" }, { status: 400 });
     }
 
+    const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY");
     const result = await base44.asServiceRole.functions.invoke(
       "getDealDetails",
-      { deal_id },
+      { deal_id, shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
 

@@ -17,9 +17,10 @@ Deno.serve(async (req) => {
     const body = await req.json();
     // body: { agent_id, MasterAgentID, county, state, zip_codes, towns }
 
+    const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY");
     const result = await base44.asServiceRole.functions.invoke(
       "getAvailableAgentsForOperatorTerritory",
-      body,
+      { ...body, shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
 

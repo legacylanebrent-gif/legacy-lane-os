@@ -9,13 +9,14 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Admin only' }, { status: 403 });
   }
 
+  const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY");
   const results = {};
 
   // Test 1: getDealDetails
   try {
     const r = await base44.asServiceRole.functions.invoke(
       "getDealDetails",
-      { deal_id: "TEST-001" },
+      { deal_id: "TEST-001", shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
     results.getDealDetails = { success: true, response: r };
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
   try {
     const r = await base44.asServiceRole.functions.invoke(
       "getAvailableAgentsForOperatorTerritory",
-      { zip_codes: ["07001"], counties: ["Middlesex"], state: "NJ" },
+      { zip_codes: ["07001"], counties: ["Middlesex"], state: "NJ", shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
     results.getAvailableAgentsForOperatorTerritory = { success: true, response: r };
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
   try {
     const r = await base44.asServiceRole.functions.invoke(
       "updateDealStage",
-      { deal_id: "TEST-001", new_stage: "accepted" },
+      { deal_id: "TEST-001", new_stage: "accepted", shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
     results.updateDealStage = { success: true, response: r };
@@ -51,7 +52,7 @@ Deno.serve(async (req) => {
   try {
     const r = await base44.asServiceRole.functions.invoke(
       "closeDeal",
-      { deal_id: "TEST-001", actual_commission: 1500000 },
+      { deal_id: "TEST-001", actual_commission: 1500000, shared_key: HOUSZU_SHARED_KEY },
       { appId: HOUSZU_APP_ID }
     );
     results.closeDeal = { success: true, response: r };
