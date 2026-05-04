@@ -39,20 +39,20 @@ export default function AutonomousRunComposer({ onPropose, loading }) {
   return (
     <div className="space-y-5">
       {/* Warning */}
-      <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-300">
+      <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
+        <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-700">
           Autonomous runs will <strong>propose</strong> actions and wait for your approval before executing. No records are created until you approve and execute.
         </p>
       </div>
 
       {/* Quick Commands */}
       <div>
-        <p className="text-xs text-amber-400 font-semibold uppercase tracking-widest mb-2">Quick Commands</p>
+        <p className="text-xs text-amber-600 font-semibold uppercase tracking-widest mb-2">Quick Commands</p>
         <div className="flex flex-wrap gap-2">
           {QUICK_COMMANDS.map((q, i) => (
             <button key={i} onClick={() => setCommand(q)}
-              className="text-xs px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-all text-left">
+              className="text-xs px-3 py-1.5 rounded-full border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all text-left">
               {q.length > 60 ? q.slice(0, 60) + '…' : q}
             </button>
           ))}
@@ -61,31 +61,31 @@ export default function AutonomousRunComposer({ onPropose, loading }) {
 
       {/* Command Input */}
       <div>
-        <p className="text-xs text-slate-400 uppercase tracking-widest mb-1.5">Admin Command</p>
+        <p className="text-xs text-slate-500 uppercase tracking-widest mb-1.5">Admin Command</p>
         <Textarea value={command} onChange={e => setCommand(e.target.value)}
           placeholder="Describe exactly what you want the autonomous agent to build, plan, or prepare..."
-          className="min-h-[120px] bg-slate-800/60 border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 resize-none text-sm" />
+          className="min-h-[120px] bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-amber-400 resize-none text-sm" />
       </div>
 
       {/* Scope */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p className="text-xs text-slate-400 uppercase tracking-widest mb-1.5">Execution Scope</p>
+          <p className="text-xs text-slate-500 uppercase tracking-widest mb-1.5">Execution Scope</p>
           <Select value={scope} onValueChange={setScope}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
-              {SCOPES.map(s => <SelectItem key={s} value={s} className="text-slate-200 focus:bg-slate-700">{s}</SelectItem>)}
+            <SelectContent>
+              {SCOPES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <p className="text-xs text-slate-400 uppercase tracking-widest mb-1.5">Include Context</p>
+          <p className="text-xs text-slate-500 uppercase tracking-widest mb-1.5">Include Context</p>
           <div className="flex flex-wrap gap-2 mt-1">
             {CONTEXT_TOGGLES.map(ct => (
               <button key={ct.key} onClick={() => toggle(ct.key)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${ctx[ct.key] ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 'border-slate-600 bg-slate-800/40 text-slate-400'}`}>
+                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${ctx[ct.key] ? 'border-amber-400 bg-amber-100 text-amber-700' : 'border-slate-300 bg-slate-50 text-slate-500'}`}>
                 {ctx[ct.key] ? '✓ ' : ''}{ct.label}
               </button>
             ))}

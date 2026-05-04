@@ -160,27 +160,27 @@ export default function SocialAutopilotTab({ user }) {
           { label: 'Make Webhook', ok: !!settings?.allow_social_scheduling, desc: settings?.allow_social_scheduling ? 'Enabled in settings' : 'Disabled — enable in Settings' },
           { label: 'Direct Publishing', ok: false, desc: settings?.allow_social_publishing ? 'Enabled' : 'Disabled (default)' },
         ].map((s, i) => (
-          <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border text-xs ${s.ok ? 'border-green-500/30 bg-green-500/5' : 'border-slate-700/40 bg-slate-800/20'}`}>
-            {s.ok ? <Wifi className="w-3.5 h-3.5 text-green-400 flex-shrink-0" /> : <WifiOff className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />}
+          <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border text-xs ${s.ok ? 'border-green-300 bg-green-50' : 'border-slate-200 bg-slate-50'}`}>
+            {s.ok ? <Wifi className="w-3.5 h-3.5 text-green-600 flex-shrink-0" /> : <WifiOff className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
             <div>
-              <p className={`font-semibold ${s.ok ? 'text-green-400' : 'text-slate-400'}`}>{s.label}</p>
-              <p className="text-slate-500">{s.desc}</p>
+              <p className={`font-semibold ${s.ok ? 'text-green-700' : 'text-slate-500'}`}>{s.label}</p>
+              <p className="text-slate-400">{s.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Generator */}
-      <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
-        <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-widest mb-5 flex items-center gap-2">
-          <span className="text-amber-400">✦</span> Generate Monthly Content Calendar
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest mb-5 flex items-center gap-2">
+          <span className="text-amber-500">✦</span> Generate Monthly Content Calendar
         </h3>
         <SocialCalendarGenerator onGenerated={handleGenerate} loading={generating} />
       </div>
 
       {/* Feedback */}
       {feedback && (
-        <div className={`p-3 rounded-lg border text-sm ${feedback.startsWith('✓') ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+        <div className={`p-3 rounded-lg border text-sm ${feedback.startsWith('✓') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>
           {feedback}
           <button onClick={() => setFeedback('')} className="ml-3 text-xs opacity-50 hover:opacity-100">✕</button>
         </div>
@@ -188,17 +188,17 @@ export default function SocialAutopilotTab({ user }) {
 
       {/* Calendar View */}
       {calendars.length > 0 && (
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6 space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
           {/* Calendar selector + stats */}
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3 flex-wrap">
               <Select value={selectedCalendarId} onValueChange={setSelectedCalendarId}>
-                <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm w-72">
+                <SelectTrigger className="bg-white border-slate-300 text-slate-700 text-sm w-72">
                   <SelectValue placeholder="Select calendar..." />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
+                <SelectContent>
                   {calendars.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-slate-200 focus:bg-slate-700">
+                    <SelectItem key={c.id} value={c.id}>
                       {c.title}
                     </SelectItem>
                   ))}
@@ -206,35 +206,35 @@ export default function SocialAutopilotTab({ user }) {
               </Select>
               {currentCalendar && (
                 <div className="flex gap-2 flex-wrap">
-                  <Badge className="bg-slate-700/50 text-slate-400 text-xs">{posts.length} posts</Badge>
-                  <Badge className="bg-green-500/20 text-green-400 text-xs">{approvedCount} approved</Badge>
-                  <Badge className="bg-blue-500/20 text-blue-400 text-xs">{scheduledCount} scheduled</Badge>
-                  <Badge className="bg-amber-500/20 text-amber-400 text-xs">{imageReadyCount} images ready</Badge>
+                  <Badge className="bg-slate-100 text-slate-500 text-xs">{posts.length} posts</Badge>
+                  <Badge className="bg-green-100 text-green-700 text-xs">{approvedCount} approved</Badge>
+                  <Badge className="bg-blue-100 text-blue-700 text-xs">{scheduledCount} scheduled</Badge>
+                  <Badge className="bg-amber-100 text-amber-700 text-xs">{imageReadyCount} images ready</Badge>
                 </div>
               )}
             </div>
-            <Button size="sm" variant="ghost" onClick={() => loadPosts(selectedCalendarId)} className="text-slate-400 hover:text-white text-xs">
+            <Button size="sm" variant="ghost" onClick={() => loadPosts(selectedCalendarId)} className="text-slate-500 hover:text-slate-700 text-xs">
               <RefreshCw className="w-3.5 h-3.5 mr-1" />Refresh
             </Button>
           </div>
 
           {/* Bulk Actions */}
-          <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-slate-700/20 border border-slate-700/40">
-            <span className="text-xs text-slate-500 self-center mr-1">Bulk:</span>
+          <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200">
+            <span className="text-xs text-slate-400 self-center mr-1">Bulk:</span>
             <Button size="sm" variant="ghost" onClick={handleBulkApprove} disabled={bulkWorking}
-              className="text-green-400 hover:bg-green-500/10 text-xs">
+              className="text-green-600 hover:bg-green-50 text-xs">
               <CheckCircle2 className="w-3 h-3 mr-1" />Approve All Reviewed
             </Button>
             <Button size="sm" variant="ghost" onClick={handleBulkGenerateImages} disabled={bulkWorking}
-              className="text-amber-400 hover:bg-amber-500/10 text-xs">
+              className="text-amber-600 hover:bg-amber-50 text-xs">
               <Image className="w-3 h-3 mr-1" />Generate All Missing Images
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setConfirmBulkSchedule(true)} disabled={bulkWorking || !settings?.allow_social_scheduling}
-              className="text-blue-400 hover:bg-blue-500/10 text-xs">
+              className="text-blue-600 hover:bg-blue-50 text-xs">
               <Calendar className="w-3 h-3 mr-1" />Schedule All Approved
             </Button>
             {!settings?.allow_social_scheduling && (
-              <span className="text-xs text-slate-500 flex items-center gap-1"><Lock className="w-3 h-3" />Scheduling disabled in settings</span>
+              <span className="text-xs text-slate-400 flex items-center gap-1"><Lock className="w-3 h-3" />Scheduling disabled in settings</span>
             )}
           </div>
 
@@ -263,9 +263,9 @@ export default function SocialAutopilotTab({ user }) {
       )}
 
       {/* Compliance notice */}
-      <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
-        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-300/80">
+      <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50">
+        <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-700">
           <strong>Content Safety:</strong> All generated content uses cautious language around referral programs. Do not imply guaranteed referral income or that Legacy Lane/Houszu receives real estate commission. Review all posts before publishing.
         </p>
       </div>
@@ -273,13 +273,13 @@ export default function SocialAutopilotTab({ user }) {
       {/* Bulk Schedule Confirmation Modal */}
       {confirmBulkSchedule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/40 rounded-2xl w-full max-w-md p-6">
-            <h3 className="text-base font-bold text-white mb-2">Bulk Schedule Confirmation</h3>
-            <p className="text-sm text-slate-400 mb-5">
-              You are about to schedule <strong className="text-white">{posts.filter(p => p.approval_status === 'approved' && p.scheduling_status === 'not_scheduled').length} approved posts</strong> through the connected scheduler (Make/Integromat). Continue?
+          <div className="bg-white border border-amber-300 rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-base font-bold text-slate-800 mb-2">Bulk Schedule Confirmation</h3>
+            <p className="text-sm text-slate-500 mb-5">
+              You are about to schedule <strong className="text-slate-800">{posts.filter(p => p.approval_status === 'approved' && p.scheduling_status === 'not_scheduled').length} approved posts</strong> through the connected scheduler (Make/Integromat). Continue?
             </p>
             <div className="flex gap-3">
-              <Button variant="ghost" onClick={() => setConfirmBulkSchedule(false)} className="flex-1 border border-slate-700 text-slate-400 text-sm">Cancel</Button>
+              <Button variant="ghost" onClick={() => setConfirmBulkSchedule(false)} className="flex-1 border border-slate-300 text-slate-500 text-sm">Cancel</Button>
               <Button onClick={handleBulkScheduleConfirm} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm">Yes, Schedule All</Button>
             </div>
           </div>

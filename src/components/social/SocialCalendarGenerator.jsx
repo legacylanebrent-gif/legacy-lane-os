@@ -45,32 +45,32 @@ export default function SocialCalendarGenerator({ onGenerated, loading }) {
         <div>
           <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Month</label>
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
-              {MONTHS.map(m => <SelectItem key={m} value={m} className="text-slate-200 focus:bg-slate-700">{m}</SelectItem>)}
+            <SelectContent>
+              {MONTHS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div>
           <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Year</label>
-          <Input value={year} onChange={e => setYear(e.target.value)} className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm" />
+          <Input value={year} onChange={e => setYear(e.target.value)} className="bg-white border-slate-300 text-slate-700 text-sm" />
         </div>
         <div>
           <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Posts / Week</label>
           <Select value={ppw} onValueChange={setPpw}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
-              {['3','4','5','6','7'].map(n => <SelectItem key={n} value={n} className="text-slate-200 focus:bg-slate-700">{n} per week</SelectItem>)}
+            <SelectContent>
+              {['3','4','5','6','7'].map(n => <SelectItem key={n} value={n}>{n} per week</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-end">
           <button onClick={() => setIncludeImages(p => !p)}
-            className={`w-full flex items-center justify-center gap-2 text-xs px-3 py-2.5 rounded-lg border font-medium transition-all ${includeImages ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 'border-slate-600 text-slate-400'}`}>
+            className={`w-full flex items-center justify-center gap-2 text-xs px-3 py-2.5 rounded-lg border font-medium transition-all ${includeImages ? 'border-amber-400 bg-amber-100 text-amber-700' : 'border-slate-300 text-slate-400'}`}>
             {includeImages ? '✓ ' : ''}Generate Images
           </button>
         </div>
@@ -80,33 +80,33 @@ export default function SocialCalendarGenerator({ onGenerated, loading }) {
         <div>
           <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Target Audience</label>
           <Select value={audience} onValueChange={setAudience}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
-              {AUDIENCE_OPTIONS.map(a => <SelectItem key={a} value={a} className="text-slate-200 focus:bg-slate-700">{a}</SelectItem>)}
+            <SelectContent>
+              {AUDIENCE_OPTIONS.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Campaign Theme</label>
+          <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Campaign Theme</label>
           <Select value={theme} onValueChange={setTheme}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
-              {THEME_OPTIONS.map(t => <SelectItem key={t} value={t} className="text-slate-200 focus:bg-slate-700">{t}</SelectItem>)}
+            <SelectContent>
+              {THEME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div>
-        <label className="text-xs text-slate-400 uppercase tracking-widest block mb-2">Platforms</label>
+        <label className="text-xs text-slate-500 uppercase tracking-widest block mb-2">Platforms</label>
         <div className="flex flex-wrap gap-2">
           {PLATFORM_OPTIONS.map(p => (
             <button key={p} onClick={() => togglePlatform(p)}
-              className={`text-xs px-4 py-2 rounded-full border font-medium transition-all ${platforms.includes(p) ? 'border-amber-400 bg-amber-500/20 text-amber-300' : 'border-slate-600 bg-slate-800/40 text-slate-400 hover:border-slate-500'}`}>
+              className={`text-xs px-4 py-2 rounded-full border font-medium transition-all ${platforms.includes(p) ? 'border-amber-400 bg-amber-100 text-amber-700' : 'border-slate-300 bg-white text-slate-500 hover:border-slate-400'}`}>
               {platforms.includes(p) ? '✓ ' : ''}{p}
             </button>
           ))}

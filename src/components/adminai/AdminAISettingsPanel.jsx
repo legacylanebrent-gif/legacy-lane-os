@@ -73,82 +73,82 @@ export default function AdminAISettingsPanel({ user }) {
   const set = (key, val) => setSettings(s => ({ ...s, [key]: val }));
 
   return (
-    <div className="rounded-xl border border-slate-700/40 bg-slate-800/20 overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-800/40 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Settings className="w-4 h-4 text-amber-400" />
-          <span className="text-sm font-semibold text-slate-300">Advanced Admin Settings</span>
-          <span className="text-xs text-slate-500">— configure AI behavior, targets & compliance</span>
+          <Settings className="w-4 h-4 text-amber-600" />
+          <span className="text-sm font-semibold text-slate-700">Advanced Admin Settings</span>
+          <span className="text-xs text-slate-400">— configure AI behavior, targets & compliance</span>
         </div>
         {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
       </button>
 
       {open && (
-        <div className="px-5 pb-5 border-t border-slate-700/40 pt-4 space-y-5">
+        <div className="px-5 pb-5 border-t border-slate-200 pt-4 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Growth Goal */}
             <div className="md:col-span-2">
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Preferred Growth Goal</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Preferred Growth Goal</label>
               <Input
                 value={settings.preferred_growth_goal}
                 onChange={e => set('preferred_growth_goal', e.target.value)}
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
 
             {/* Revenue Target */}
             <div>
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Monthly Revenue Target ($)</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Monthly Revenue Target ($)</label>
               <Input
                 type="number"
                 value={settings.monthly_revenue_target}
                 onChange={e => set('monthly_revenue_target', parseFloat(e.target.value) || 0)}
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
 
             {/* Operator Count */}
             <div>
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Target Operator Count</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Target Operator Count</label>
               <Input
                 type="number"
                 value={settings.target_operator_count}
                 onChange={e => set('target_operator_count', parseInt(e.target.value) || 0)}
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
 
             {/* Default Market */}
             <div>
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Default Market</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Default Market</label>
               <Input
                 value={settings.default_market}
                 onChange={e => set('default_market', e.target.value)}
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
 
             {/* Target Territories */}
             <div>
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Target Territories (comma separated)</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Target Territories (comma separated)</label>
               <Input
                 value={territoriesInput}
                 onChange={e => setTerritoriesInput(e.target.value)}
                 placeholder="e.g. Essex County NJ, Bergen County NJ"
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
 
             {/* Execution Style */}
             <div className="md:col-span-2">
-              <label className="text-xs text-slate-400 uppercase tracking-widest block mb-1.5">Default Execution Style</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Default Execution Style</label>
               <Input
                 value={settings.default_execution_style}
                 onChange={e => set('default_execution_style', e.target.value)}
-                className="bg-slate-800/60 border-slate-600 text-slate-200 text-sm"
+                className="bg-white border-slate-300 text-slate-700 text-sm"
               />
             </div>
           </div>
@@ -164,12 +164,12 @@ export default function AdminAISettingsPanel({ user }) {
               { key: 'allow_social_publishing', label: 'Direct Social Publishing', color: 'red' },
             ].map(({ key, label, color }) => {
               const on = settings[key];
-              const colorMap = { green: on ? 'bg-green-500/20 text-green-400 border-green-500/40' : '', amber: on ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : '', blue: on ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : '', red: on ? 'bg-red-500/20 text-red-400 border-red-500/40' : '' };
-              const dotMap = { green: 'bg-green-400', amber: 'bg-amber-400', blue: 'bg-blue-400', red: 'bg-red-400' };
+              const colorMap = { green: on ? 'bg-green-100 text-green-700 border-green-300' : '', amber: on ? 'bg-amber-100 text-amber-700 border-amber-300' : '', blue: on ? 'bg-blue-100 text-blue-700 border-blue-300' : '', red: on ? 'bg-red-100 text-red-700 border-red-300' : '' };
+              const dotMap = { green: 'bg-green-500', amber: 'bg-amber-500', blue: 'bg-blue-500', red: 'bg-red-500' };
               return (
                 <button key={key} onClick={() => set(key, !on)}
-                  className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${on ? colorMap[color] : 'bg-slate-700/40 text-slate-500 border-slate-600'}`}>
-                  <div className={`w-3 h-3 rounded-full ${on ? dotMap[color] : 'bg-slate-500'}`} />
+                  className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${on ? colorMap[color] : 'bg-slate-100 text-slate-400 border-slate-300'}`}>
+                  <div className={`w-3 h-3 rounded-full ${on ? dotMap[color] : 'bg-slate-300'}`} />
                   {label} {on ? 'ON' : 'OFF'}
                 </button>
               );

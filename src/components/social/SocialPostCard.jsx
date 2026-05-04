@@ -20,9 +20,9 @@ const APPROVAL_COLORS = {
 };
 
 const SCHEDULE_COLORS = {
-  not_scheduled: 'text-slate-500',
-  scheduled:     'text-green-400',
-  failed:        'text-red-400',
+  not_scheduled: 'text-slate-400',
+  scheduled:     'text-green-600',
+  failed:        'text-red-600',
 };
 
 export default function SocialPostCard({ post, onGenerateImage, onApprove, onSchedule, generatingImage, approving, scheduling }) {
@@ -40,7 +40,7 @@ export default function SocialPostCard({ post, onGenerateImage, onApprove, onSch
   const sc = SCHEDULE_COLORS[post.scheduling_status] || 'text-slate-500';
 
   return (
-    <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 overflow-hidden hover:border-slate-600/70 transition-all">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpanded(e => !e)}>
         <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
@@ -50,63 +50,63 @@ export default function SocialPostCard({ post, onGenerateImage, onApprove, onSch
             <span className={`text-xs font-medium ${sc}`}>• {post.scheduling_status}</span>
           )}
           <span className="text-xs text-slate-400">{post.post_date} {post.post_time && `@ ${post.post_time}`}</span>
-          {post.topic && <span className="text-xs text-amber-400/70 truncate hidden md:block">{post.topic}</span>}
+          {post.topic && <span className="text-xs text-amber-600/80 truncate hidden md:block">{post.topic}</span>}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {post.image_status === 'generated' && <div className="w-2 h-2 rounded-full bg-green-400" title="Image ready" />}
-          {expanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-500" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500" />}
+          {post.image_status === 'generated' && <div className="w-2 h-2 rounded-full bg-green-500" title="Image ready" />}
+          {expanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
         </div>
       </div>
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="border-t border-slate-700/50 px-4 pb-4 pt-3 space-y-4">
+        <div className="border-t border-slate-200 px-4 pb-4 pt-3 space-y-4 bg-slate-50">
           {/* Caption */}
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5">Caption</p>
-            <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line">{post.caption}</p>
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-1.5">Caption</p>
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{post.caption}</p>
           </div>
 
           {/* Hashtags */}
           {post.hashtags && (
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Hashtags</p>
-              <p className="text-xs text-blue-400/80">{post.hashtags}</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Hashtags</p>
+              <p className="text-xs text-blue-600">{post.hashtags}</p>
             </div>
           )}
 
           {/* CTA */}
           {post.call_to_action && (
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Call to Action</p>
-              <p className="text-sm text-amber-400">{post.call_to_action}</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Call to Action</p>
+              <p className="text-sm text-amber-700 font-medium">{post.call_to_action}</p>
             </div>
           )}
 
           {/* Image */}
           {post.image_url ? (
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Generated Image</p>
-              <img src={post.image_url} alt="Social post" className="rounded-lg max-h-48 object-cover border border-slate-700" />
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Generated Image</p>
+              <img src={post.image_url} alt="Social post" className="rounded-lg max-h-48 object-cover border border-slate-200" />
             </div>
           ) : post.image_prompt ? (
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Image Prompt</p>
-              <p className="text-xs text-slate-400 italic">{post.image_prompt}</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Image Prompt</p>
+              <p className="text-xs text-slate-500 italic">{post.image_prompt}</p>
             </div>
           ) : null}
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2 pt-1">
             <Button size="sm" variant="ghost" onClick={handleCopy}
-              className="text-slate-300 hover:bg-slate-700 text-xs">
-              {copied ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-400" />Copied</> : <><Copy className="w-3 h-3 mr-1" />Copy Caption</>}
+              className="text-slate-600 hover:bg-slate-200 text-xs">
+              {copied ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />Copied</> : <><Copy className="w-3 h-3 mr-1" />Copy Caption</>}
             </Button>
 
             {post.image_status !== 'generated' && post.image_prompt && (
               <Button size="sm" variant="ghost" onClick={() => onGenerateImage(post.id, post.image_prompt)}
                 disabled={generatingImage === post.id}
-                className="text-amber-400 hover:bg-amber-500/10 text-xs">
+                className="text-amber-600 hover:bg-amber-50 text-xs">
                 {generatingImage === post.id
                   ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Generating...</>
                   : <><Image className="w-3 h-3 mr-1" />Generate Image</>}

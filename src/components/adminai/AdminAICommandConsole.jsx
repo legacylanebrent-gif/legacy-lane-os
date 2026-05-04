@@ -67,13 +67,13 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
     <div className="space-y-6">
       {/* Quick Commands */}
       <div>
-        <p className="text-xs text-amber-400 font-semibold uppercase tracking-widest mb-3">Quick Commands</p>
+        <p className="text-xs text-amber-600 font-semibold uppercase tracking-widest mb-3">Quick Commands</p>
         <div className="flex flex-wrap gap-2">
           {QUICK_COMMANDS.map((qc, i) => (
             <button
               key={i}
               onClick={() => handleQuickCommand(qc)}
-              className="text-xs px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:border-amber-400 transition-all"
+              className="text-xs px-3 py-1.5 rounded-full border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all"
             >
               {qc.label}
             </button>
@@ -83,39 +83,39 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
 
       {/* Command Input */}
       <div>
-        <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">Admin Command</p>
+        <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Admin Command</p>
         <Textarea
           value={command}
           onChange={e => setCommand(e.target.value)}
           placeholder='Example: Build a 30-day plan to acquire 25 new estate sale operators in New Jersey and create the campaigns, follow-up tasks, and KPIs.'
-          className="min-h-[120px] bg-slate-800/60 border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 resize-none text-sm"
+          className="min-h-[120px] bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-amber-400 resize-none text-sm"
         />
       </div>
 
       {/* Selectors Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">Command Type</p>
+          <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Command Type</p>
           <Select value={commandType} onValueChange={setCommandType}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
+            <SelectContent>
               {COMMAND_TYPES.map(t => (
-                <SelectItem key={t} value={t} className="text-slate-200 focus:bg-slate-700">{t}</SelectItem>
+                <SelectItem key={t} value={t}>{t}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">Execution Mode</p>
+          <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Execution Mode</p>
           <Select value={executionMode} onValueChange={setExecutionMode}>
-            <SelectTrigger className="bg-slate-800/60 border-slate-600 text-slate-200">
+            <SelectTrigger className="bg-white border-slate-300 text-slate-700">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-600">
+            <SelectContent>
               {EXECUTION_MODES.map(m => (
-                <SelectItem key={m.value} value={m.value} className="text-slate-200 focus:bg-slate-700">{m.label}</SelectItem>
+                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -124,7 +124,7 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
 
       {/* Context Toggles */}
       <div>
-        <p className="text-xs text-slate-400 uppercase tracking-widest mb-3">Include Context Data</p>
+        <p className="text-xs text-slate-500 uppercase tracking-widest mb-3">Include Context Data</p>
         <div className="flex flex-wrap gap-2">
           {CONTEXT_TOGGLES.map(ct => (
             <button
@@ -132,8 +132,8 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
               onClick={() => toggleContext(ct.key)}
               className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                 contextToggles[ct.key]
-                  ? 'border-amber-400 bg-amber-500/20 text-amber-300'
-                  : 'border-slate-600 bg-slate-800/40 text-slate-400 hover:border-slate-500'
+                  ? 'border-amber-400 bg-amber-100 text-amber-700'
+                  : 'border-slate-300 bg-slate-50 text-slate-500 hover:border-slate-400'
               }`}
             >
               {contextToggles[ct.key] ? '✓ ' : ''}{ct.label}

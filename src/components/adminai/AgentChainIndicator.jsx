@@ -30,8 +30,8 @@ export default function AgentChainIndicator({ running }) {
   }, [running]);
 
   return (
-    <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 mb-4">
-      <p className="text-xs text-amber-400 font-semibold uppercase tracking-widest mb-3">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-4 mb-4">
+      <p className="text-xs text-amber-600 font-semibold uppercase tracking-widest mb-3">
         Agent Chain
       </p>
 
@@ -43,9 +43,9 @@ export default function AgentChainIndicator({ running }) {
           return (
             <React.Fragment key={agent.id}>
               <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-                done   ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                active ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-[0_0_8px_rgba(245,158,11,0.3)]' :
-                         'bg-slate-700/40 text-slate-500 border border-slate-700'
+                done   ? 'bg-green-100 text-green-700 border border-green-300' :
+                active ? 'bg-amber-100 text-amber-700 border border-amber-400 shadow-sm' :
+                         'bg-slate-100 text-slate-400 border border-slate-200'
               }`}>
                 {done   ? <CheckCircle2 className="w-3 h-3" /> :
                  active ? <Loader2 className="w-3 h-3 animate-spin" /> :
@@ -53,7 +53,7 @@ export default function AgentChainIndicator({ running }) {
                 {agent.label}
               </div>
               {i < AGENTS.length - 1 && (
-                <span className={`text-xs transition-colors ${done ? 'text-green-500/50' : 'text-slate-600'}`}>→</span>
+                <span className={`text-xs transition-colors ${done ? 'text-green-400' : 'text-slate-300'}`}>→</span>
               )}
             </React.Fragment>
           );
@@ -67,13 +67,13 @@ export default function AgentChainIndicator({ running }) {
           const active = running && activeIndex === i;
           return (
             <div key={agent.id} className={`flex items-center gap-2 text-xs transition-all ${
-              done ? 'text-green-400' : active ? 'text-amber-300' : 'text-slate-500'
+              done ? 'text-green-600' : active ? 'text-amber-600' : 'text-slate-400'
             }`}>
               {done   ? <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> :
                active ? <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" /> :
                         <Circle className="w-3 h-3 flex-shrink-0" />}
               <span>{agent.label}</span>
-              {active && <span className="text-amber-400/70 italic">{agent.desc}</span>}
+              {active && <span className="text-amber-500 italic">{agent.desc}</span>}
             </div>
           );
         })}
@@ -81,7 +81,7 @@ export default function AgentChainIndicator({ running }) {
 
       {/* Status line */}
       {running && activeIndex >= 0 && activeIndex < AGENTS.length && (
-        <p className="text-xs text-amber-400/80 mt-2 italic">
+        <p className="text-xs text-amber-600 mt-2 italic">
           {AGENTS[activeIndex].desc}
         </p>
       )}

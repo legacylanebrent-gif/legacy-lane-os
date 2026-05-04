@@ -9,20 +9,20 @@ const Section = ({ title, content, color = 'amber' }) => {
   if (!content) return null;
 
   const colorMap = {
-    amber: 'border-amber-500/40 bg-amber-500/5',
-    blue: 'border-blue-500/40 bg-blue-500/5',
-    green: 'border-green-500/40 bg-green-500/5',
-    red: 'border-red-500/40 bg-red-500/5',
-    purple: 'border-purple-500/40 bg-purple-500/5',
-    cyan: 'border-cyan-500/40 bg-cyan-500/5',
+    amber: 'border-amber-300 bg-amber-50',
+    blue: 'border-blue-300 bg-blue-50',
+    green: 'border-green-300 bg-green-50',
+    red: 'border-red-300 bg-red-50',
+    purple: 'border-purple-300 bg-purple-50',
+    cyan: 'border-cyan-300 bg-cyan-50',
   };
   const headerMap = {
-    amber: 'text-amber-400',
-    blue: 'text-blue-400',
-    green: 'text-green-400',
-    red: 'text-red-400',
-    purple: 'text-purple-400',
-    cyan: 'text-cyan-400',
+    amber: 'text-amber-700',
+    blue: 'text-blue-700',
+    green: 'text-green-700',
+    red: 'text-red-700',
+    purple: 'text-purple-700',
+    cyan: 'text-cyan-700',
   };
 
   return (
@@ -35,7 +35,7 @@ const Section = ({ title, content, color = 'amber' }) => {
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
       {open && (
-        <div className="text-slate-300 text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
+        <div className="text-slate-700 text-sm leading-relaxed prose prose-sm max-w-none">
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       )}
@@ -64,15 +64,15 @@ export default function AdminAIOutputPanel({ result, onSave, onCreateTasks, savi
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-amber-400 font-serif">{result.title}</h3>
-          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs mt-1">AI Report Generated</Badge>
+          <h3 className="text-lg font-bold text-amber-700 font-serif">{result.title}</h3>
+          <Badge className="bg-green-100 text-green-700 border-green-300 text-xs mt-1">AI Report Generated</Badge>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <Button
             size="sm"
             variant="outline"
             onClick={copyAll}
-            className="border-slate-600 text-slate-300 hover:bg-slate-700 text-xs"
+            className="border-slate-300 text-slate-600 hover:bg-slate-100 text-xs"
           >
             <Copy className="w-3 h-3 mr-1" />Copy
           </Button>
@@ -81,7 +81,7 @@ export default function AdminAIOutputPanel({ result, onSave, onCreateTasks, savi
             variant="outline"
             onClick={onSave}
             disabled={saving}
-            className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 text-xs"
+            className="border-amber-400 text-amber-700 hover:bg-amber-50 text-xs"
           >
             <Save className="w-3 h-3 mr-1" />{saving ? 'Saving...' : 'Save Report'}
           </Button>
