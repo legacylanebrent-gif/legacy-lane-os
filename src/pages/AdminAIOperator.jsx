@@ -6,7 +6,9 @@ import AdminAIOutputPanel from '@/components/adminai/AdminAIOutputPanel';
 import AdminAIReportHistory from '@/components/adminai/AdminAIReportHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Brain, History, AlertTriangle } from 'lucide-react';
+import { Shield, Brain, History, AlertTriangle, Settings } from 'lucide-react';
+import AgentChainIndicator from '@/components/adminai/AgentChainIndicator';
+import AdminAISettingsPanel from '@/components/adminai/AdminAISettingsPanel';
 
 export default function AdminAIOperator() {
   const [user, setUser] = useState(null);
@@ -187,8 +189,12 @@ export default function AdminAIOperator() {
           </TabsList>
 
           <TabsContent value="command">
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
-              <AdminAICommandConsole onSubmit={handleSubmit} loading={running} />
+            <div className="space-y-4">
+              <AgentChainIndicator running={running} />
+              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+                <AdminAICommandConsole onSubmit={handleSubmit} loading={running} />
+              </div>
+              <AdminAISettingsPanel user={user} />
             </div>
           </TabsContent>
 

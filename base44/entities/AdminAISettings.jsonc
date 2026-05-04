@@ -1,0 +1,56 @@
+{
+  "name": "AdminAISettings",
+  "type": "object",
+  "properties": {
+    "preferred_growth_goal": {
+      "type": "string",
+      "default": "Grow Legacy Lane OS recurring subscription revenue"
+    },
+    "monthly_revenue_target": {
+      "type": "number",
+      "default": 25000
+    },
+    "target_operator_count": {
+      "type": "number",
+      "default": 25
+    },
+    "target_territories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "default_market": {
+      "type": "string",
+      "default": "New Jersey"
+    },
+    "referral_program_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "conservative_compliance_mode": {
+      "type": "boolean",
+      "default": true
+    },
+    "default_execution_style": {
+      "type": "string",
+      "default": "Practical, direct, revenue-focused, step-by-step"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": []
+}
