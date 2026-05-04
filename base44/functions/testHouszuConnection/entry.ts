@@ -12,6 +12,18 @@ Deno.serve(async (req) => {
   const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY");
   const results = {};
 
+  // Test 0: housszuPing (connectivity + key match diagnostic)
+  try {
+    const r = await base44.asServiceRole.functions.invoke(
+      "housszuPing",
+      { shared_key: HOUSZU_SHARED_KEY },
+      { appId: HOUSZU_APP_ID }
+    );
+    results.housszuPing = { success: true, response: r };
+  } catch (e) {
+    results.housszuPing = { error: e.message };
+  }
+
   // Test 1: getDealDetails
   try {
     const r = await base44.asServiceRole.functions.invoke(
