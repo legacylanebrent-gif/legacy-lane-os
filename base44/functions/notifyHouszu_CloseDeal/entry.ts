@@ -1,6 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
-const HOUSZU_APP_ID = "697206f0efd7bfde6e06b474";
+const HOUSZU_APP_ID = "69d11abfe3a01036002a99a2";
 
 Deno.serve(async (req) => {
   try {
