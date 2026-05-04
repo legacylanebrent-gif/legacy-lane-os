@@ -6,7 +6,7 @@ import AdminAIOutputPanel from '@/components/adminai/AdminAIOutputPanel';
 import AdminAIReportHistory from '@/components/adminai/AdminAIReportHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo } from 'lucide-react';
+import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo, Share2 } from 'lucide-react';
 import AgentChainIndicator from '@/components/adminai/AgentChainIndicator';
 import AdminAISettingsPanel from '@/components/adminai/AdminAISettingsPanel';
 import AutonomousRunComposer from '@/components/autonomous/AutonomousRunComposer';
@@ -14,6 +14,7 @@ import AutonomousRunCard from '@/components/autonomous/AutonomousRunCard';
 import AutonomousRunDetailModal from '@/components/autonomous/AutonomousRunDetailModal';
 import ExecutionConfirmModal from '@/components/autonomous/ExecutionConfirmModal';
 import ActionQueuePanel from '@/components/autonomous/ActionQueuePanel';
+import SocialAutopilotTab from '@/components/social/SocialAutopilotTab';
 
 export default function AdminAIOperator() {
   const [user, setUser] = useState(null);
@@ -275,6 +276,9 @@ export default function AdminAIOperator() {
             <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
               <History className="w-3.5 h-3.5 mr-1.5" />Report History
             </TabsTrigger>
+            <TabsTrigger value="social" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+              <Share2 className="w-3.5 h-3.5 mr-1.5" />Social Autopilot
+            </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
               <Settings className="w-3.5 h-3.5 mr-1.5" />Settings
             </TabsTrigger>
@@ -369,6 +373,11 @@ export default function AdminAIOperator() {
               </div>
               <AdminAIReportHistory reports={reports} onView={handleViewReport} />
             </div>
+          </TabsContent>
+
+          {/* Social Autopilot */}
+          <TabsContent value="social">
+            <SocialAutopilotTab user={user} />
           </TabsContent>
 
           {/* Settings */}

@@ -1,0 +1,62 @@
+{
+  "name": "SocialContentCalendar",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "month": {
+      "type": "string"
+    },
+    "year": {
+      "type": "number"
+    },
+    "campaign_theme": {
+      "type": "string"
+    },
+    "target_audience": {
+      "type": "string"
+    },
+    "platforms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "posts_per_week": {
+      "type": "number",
+      "default": 5
+    },
+    "total_posts": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "approved",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title",
+    "month",
+    "year"
+  ]
+}

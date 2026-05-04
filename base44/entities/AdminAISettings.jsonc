@@ -37,6 +37,41 @@
       "type": "string",
       "default": "Practical, direct, revenue-focused, step-by-step"
     },
+    "allow_social_calendar_creation": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_social_image_generation": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_social_scheduling": {
+      "type": "boolean",
+      "default": false
+    },
+    "allow_social_publishing": {
+      "type": "boolean",
+      "default": false
+    },
+    "default_social_platforms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "Facebook",
+        "Instagram",
+        "LinkedIn"
+      ]
+    },
+    "default_posts_per_week": {
+      "type": "number",
+      "default": 5
+    },
+    "default_social_brand_style": {
+      "type": "string",
+      "default": "Legacy Lane OS branded, polished, modern, trustworthy, estate sale business growth, cream/gold/black design direction, professional SaaS marketing style"
+    },
     "created_by": {
       "type": "string"
     },

@@ -155,29 +155,25 @@ export default function AdminAISettingsPanel({ user }) {
 
           {/* Toggles */}
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => set('referral_program_enabled', !settings.referral_program_enabled)}
-              className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${
-                settings.referral_program_enabled
-                  ? 'bg-green-500/20 text-green-400 border-green-500/40'
-                  : 'bg-slate-700/40 text-slate-500 border-slate-600'
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full ${settings.referral_program_enabled ? 'bg-green-400' : 'bg-slate-500'}`} />
-              Referral Program {settings.referral_program_enabled ? 'Enabled' : 'Disabled'}
-            </button>
-
-            <button
-              onClick={() => set('conservative_compliance_mode', !settings.conservative_compliance_mode)}
-              className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${
-                settings.conservative_compliance_mode
-                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                  : 'bg-slate-700/40 text-slate-500 border-slate-600'
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full ${settings.conservative_compliance_mode ? 'bg-amber-400' : 'bg-slate-500'}`} />
-              Conservative Compliance {settings.conservative_compliance_mode ? 'ON' : 'OFF'}
-            </button>
+            {[
+              { key: 'referral_program_enabled', label: 'Referral Program', color: 'green' },
+              { key: 'conservative_compliance_mode', label: 'Conservative Compliance', color: 'amber' },
+              { key: 'allow_social_calendar_creation', label: 'Social Calendar Creation', color: 'green' },
+              { key: 'allow_social_image_generation', label: 'Social Image Generation', color: 'green' },
+              { key: 'allow_social_scheduling', label: 'Social Scheduling (Make)', color: 'blue' },
+              { key: 'allow_social_publishing', label: 'Direct Social Publishing', color: 'red' },
+            ].map(({ key, label, color }) => {
+              const on = settings[key];
+              const colorMap = { green: on ? 'bg-green-500/20 text-green-400 border-green-500/40' : '', amber: on ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : '', blue: on ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : '', red: on ? 'bg-red-500/20 text-red-400 border-red-500/40' : '' };
+              const dotMap = { green: 'bg-green-400', amber: 'bg-amber-400', blue: 'bg-blue-400', red: 'bg-red-400' };
+              return (
+                <button key={key} onClick={() => set(key, !on)}
+                  className={`flex items-center gap-2 text-xs px-4 py-2 rounded-full border font-medium transition-all ${on ? colorMap[color] : 'bg-slate-700/40 text-slate-500 border-slate-600'}`}>
+                  <div className={`w-3 h-3 rounded-full ${on ? dotMap[color] : 'bg-slate-500'}`} />
+                  {label} {on ? 'ON' : 'OFF'}
+                </button>
+              );
+            })}
           </div>
 
           <Button

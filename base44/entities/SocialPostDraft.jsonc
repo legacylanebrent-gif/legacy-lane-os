@@ -1,0 +1,104 @@
+{
+  "name": "SocialPostDraft",
+  "type": "object",
+  "properties": {
+    "calendar_id": {
+      "type": "string"
+    },
+    "post_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "post_time": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "feature_or_benefit": {
+      "type": "string"
+    },
+    "target_audience": {
+      "type": "string"
+    },
+    "caption": {
+      "type": "string"
+    },
+    "hashtags": {
+      "type": "string"
+    },
+    "call_to_action": {
+      "type": "string"
+    },
+    "image_prompt": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "image_status": {
+      "type": "string",
+      "enum": [
+        "not_generated",
+        "generating",
+        "generated",
+        "failed"
+      ],
+      "default": "not_generated"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "needs_review",
+        "approved",
+        "rejected",
+        "revision_needed"
+      ],
+      "default": "draft"
+    },
+    "scheduling_status": {
+      "type": "string",
+      "enum": [
+        "not_scheduled",
+        "scheduled",
+        "failed"
+      ],
+      "default": "not_scheduled"
+    },
+    "publishing_status": {
+      "type": "string",
+      "enum": [
+        "not_published",
+        "published",
+        "failed"
+      ],
+      "default": "not_published"
+    },
+    "external_post_id": {
+      "type": "string"
+    },
+    "performance_json": {
+      "type": "object"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "calendar_id",
+    "platform",
+    "post_date"
+  ]
+}
