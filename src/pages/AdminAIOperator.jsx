@@ -216,39 +216,39 @@ export default function AdminAIOperator() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!user || !isAdminUser(user)) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="text-center max-w-sm">
           <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Access Denied</h2>
-          <p className="text-slate-400">Admin privileges required.</p>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h2>
+          <p className="text-slate-500">Admin privileges required.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur px-6 py-5">
+      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center">
+              <Brain className="w-5 h-5 text-amber-600" />
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-white font-serif tracking-tight">Legacy Lane Admin AI Operator</h1>
-                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">Admin Only</Badge>
+                <h1 className="text-xl font-bold text-slate-800 font-serif tracking-tight">Legacy Lane Admin AI Operator</h1>
+                <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">Admin Only</Badge>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Command the AI to analyze, plan, draft, and execute administrative growth workflows across Legacy Lane OS.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Command the AI to analyze, plan, draft, and execute administrative growth workflows across Legacy Lane OS.</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -261,29 +261,29 @@ export default function AdminAIOperator() {
       {/* Main */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-slate-800/60 border border-slate-700 mb-6 flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="command" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+          <TabsList className="bg-white border border-slate-200 mb-6 flex-wrap h-auto gap-1 p-1 shadow-sm">
+            <TabsTrigger value="command" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <Brain className="w-3.5 h-3.5 mr-1.5" />Command Console
             </TabsTrigger>
-            <TabsTrigger value="output" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs" disabled={!result}>
+            <TabsTrigger value="output" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs" disabled={!result}>
               Output Panel
             </TabsTrigger>
-            <TabsTrigger value="autonomous" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+            <TabsTrigger value="autonomous" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <Cpu className="w-3.5 h-3.5 mr-1.5" />Autonomous Runs {runs.length > 0 && `(${runs.length})`}
             </TabsTrigger>
-            <TabsTrigger value="queue" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+            <TabsTrigger value="queue" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <ListTodo className="w-3.5 h-3.5 mr-1.5" />Action Queue
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <History className="w-3.5 h-3.5 mr-1.5" />Report History
             </TabsTrigger>
-            <TabsTrigger value="social" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+            <TabsTrigger value="social" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <Share2 className="w-3.5 h-3.5 mr-1.5" />Social Autopilot
             </TabsTrigger>
             <TabsTrigger value="fbads" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-500 text-xs">
               <Megaphone className="w-3.5 h-3.5 mr-1.5" />FB Ads Autopilot
             </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 text-slate-400 text-xs">
+            <TabsTrigger value="settings" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">
               <Settings className="w-3.5 h-3.5 mr-1.5" />Settings
             </TabsTrigger>
           </TabsList>
@@ -292,7 +292,7 @@ export default function AdminAIOperator() {
           <TabsContent value="command">
             <div className="space-y-4">
               <AgentChainIndicator running={running} />
-              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
                 <AdminAICommandConsole onSubmit={handleSubmit} loading={running} />
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function AdminAIOperator() {
 
           {/* Output Panel */}
           <TabsContent value="output">
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
               <AdminAIOutputPanel
                 result={result}
                 onSave={handleSave}
@@ -309,7 +309,7 @@ export default function AdminAIOperator() {
                 creatingTasks={creatingTasks}
               />
               {taskFeedback && (
-                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+                <div className="mt-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
                   {taskFeedback}
                 </div>
               )}
@@ -319,27 +319,27 @@ export default function AdminAIOperator() {
           {/* Autonomous Runs */}
           <TabsContent value="autonomous">
             <div className="space-y-5">
-              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
                 <div className="flex items-center gap-2 mb-5">
-                  <Cpu className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-widest">Propose New Autonomous Run</h3>
+                  <Cpu className="w-4 h-4 text-amber-600" />
+                  <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest">Propose New Autonomous Run</h3>
                 </div>
                 <AutonomousRunComposer onPropose={handlePropose} loading={proposing} />
               </div>
 
               {executeFeedback && (
-                <div className={`p-3 rounded-lg border text-sm ${executeFeedback.startsWith('✓') ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+                <div className={`p-3 rounded-lg border text-sm ${executeFeedback.startsWith('✓') ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
                   {executeFeedback}
                 </div>
               )}
 
-              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest">All Runs ({runs.length})</h3>
-                  <button onClick={loadRuns} className="text-xs text-amber-400 hover:text-amber-300">↻ Refresh</button>
+                  <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest">All Runs ({runs.length})</h3>
+                  <button onClick={loadRuns} className="text-xs text-amber-600 hover:text-amber-500">↻ Refresh</button>
                 </div>
                 {runs.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500 text-sm">No autonomous runs yet. Use the composer above to propose your first run.</div>
+                  <div className="text-center py-8 text-slate-400 text-sm">No autonomous runs yet. Use the composer above to propose your first run.</div>
                 ) : (
                   <div className="space-y-3">
                     {runs.map(run => (
@@ -363,17 +363,17 @@ export default function AdminAIOperator() {
 
           {/* Action Queue */}
           <TabsContent value="queue">
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
               <ActionQueuePanel />
             </div>
           </TabsContent>
 
           {/* History */}
           <TabsContent value="history">
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-6">
+            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest">Previous AI Reports</h3>
-                <button onClick={loadReports} className="text-xs text-amber-400 hover:text-amber-300">↻ Refresh</button>
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest">Previous AI Reports</h3>
+                <button onClick={loadReports} className="text-xs text-amber-600 hover:text-amber-500">↻ Refresh</button>
               </div>
               <AdminAIReportHistory reports={reports} onView={handleViewReport} />
             </div>
