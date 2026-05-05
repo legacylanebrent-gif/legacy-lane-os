@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,10 +22,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  ArrowLeft, Plus, Mail, MessageSquare, Share2, TrendingUp,
-  Eye, MousePointer, DollarSign, Calendar, Edit, Trash2, Sparkles
+  ArrowLeft, Plus, TrendingUp, Calendar, Edit, Trash2, Sparkles
 } from 'lucide-react';
 import AISaleMarketingPackage from '@/components/marketing/AISaleMarketingPackage';
+import CampaignPostCard from '@/components/marketing/CampaignPostCard';
 
 export default function SaleMarketingCampaigns() {
   const navigate = useNavigate();
@@ -159,25 +159,7 @@ export default function SaleMarketingCampaigns() {
     }
   };
 
-  const getCampaignIcon = (type) => {
-    switch (type) {
-      case 'email': return Mail;
-      case 'sms': return MessageSquare;
-      case 'social_media': return Share2;
-      case 'advertising': return TrendingUp;
-      default: return Mail;
-    }
-  };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      in_progress: 'bg-blue-100 text-blue-700',
-      completed: 'bg-green-100 text-green-700',
-      cancelled: 'bg-slate-100 text-slate-700'
-    };
-    return colors[status] || 'bg-slate-100 text-slate-700';
-  };
 
   if (loading) {
     return (
@@ -268,84 +250,16 @@ export default function SaleMarketingCampaigns() {
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {campaigns.map(campaign => {
-            const Icon = getCampaignIcon(campaign.category);
-            return (
-              <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Icon className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{campaign.title}</CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={getStatusColor(campaign.status)}>
-                            {campaign.status}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">
-                            {campaign.category?.replace('_', ' ')}
-                          </Badge>
-                          {campaign.due_date && (
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(campaign.due_date).toLocaleDateString()}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(campaign)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(campaign.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {campaign.description && (
-                    <p className="text-slate-700 mb-4">{campaign.description}</p>
-                  )}
-                  {campaign.notes && (
-                    <div className="mb-4">
-                      <div className="text-sm font-semibold text-slate-900 mb-1">Target Audience:</div>
-                      <p className="text-sm text-slate-600">{campaign.notes}</p>
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    {campaign.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleStatusChange(campaign.id, 'in_progress')}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        Start Campaign
-                      </Button>
-                    )}
-                    {campaign.status === 'in_progress' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleStatusChange(campaign.id, 'completed')}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Mark Complete
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className="grid gap-5">
+          {campaigns.map(campaign => (
+            <CampaignPostCard
+              key={campaign.id}
+              campaign={campaign}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
         </div>
       )}
 
@@ -355,6 +269,7 @@ export default function SaleMarketingCampaigns() {
         open={showAIPackage}
         onClose={() => setShowAIPackage(false)}
         modelOverride={aiModel}
+        onSaved={loadData}
       />
 
       {/* Create/Edit Campaign Modal */}
