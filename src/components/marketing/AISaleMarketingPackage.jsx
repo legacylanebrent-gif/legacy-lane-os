@@ -35,7 +35,7 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
   }, [open, modelOverride]);
 
   const modelLabel = modelOverride === 'gpt_5_5' ? 'GPT-5.5' : 'Claude';
-  const saleImages = (sale?.photos || []).map(p => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
+  const saleImages = (sale?.images || sale?.photos || []).map(p => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
   const toggleImage = (url) => {
     setSelectedImages(prev =>
