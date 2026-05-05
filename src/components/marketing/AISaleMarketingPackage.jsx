@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +11,7 @@ const POST_NAMES = ['Early Line / VIP Post', "What's Inside? Curiosity Post", 'F
 export default function AISaleMarketingPackage({ sale, open, onClose, modelOverride, onSaved }) {
   const [step, setStep] = useState('pick'); // 'pick' | 'loading' | 'result'
   const [selectedImages, setSelectedImages] = useState([]);
+  const selectedImagesRef = useRef([]);
   const [result, setResult] = useState(null);
   const [user, setUser] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -31,6 +32,7 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
       setSavedPosts({});
       setGeneratedImages([]);
       setSelectedImages([]);
+      selectedImagesRef.current = [];
     }
   }, [open, modelOverride]);
 
@@ -38,9 +40,11 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
   const saleImages = (sale?.images || sale?.photos || []).map(p => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
   const toggleImage = (url) => {
-    setSelectedImages(prev =>
-      prev.includes(url) ? prev.filter(u => u !== url) : prev.length < 5 ? [...prev, url] : prev
-    );
+    setSelectedImages(prev => {
+      const next = prev.includes(url) ? prev.filter(u => u !== url) : prev.length < 5 ? [...prev, url] : prev;
+      selectedImagesRef.current = next;
+      return next;
+    });
   };
 
   const buildPrompt = () => {
@@ -188,12 +192,14 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
   const handleGenerateImages = async () => {
     if (!result) return;
     setGeneratingImages(true);
+    // Use ref to guarantee we read the latest selected images, not a stale closure
+    const refImages = selectedImagesRef.current;
     const imagePrompts = extractImagePrompts(typeof result === 'string' ? result : JSON.stringify(result));
     const images = [];
     for (let i = 0; i < Math.min(imagePrompts.length, 3); i++) {
       const { name, prompt } = imagePrompts[i];
       try {
-        const existingRefs = selectedImages.length > 0 ? selectedImages.slice(0, 2) : [];
+        const existingRefs = refImages.length > 0 ? refImages.slice(0, 2) : [];
         const res = await base44.integrations.Core.GenerateImage({
           prompt: prompt.slice(0, 900),
           ...(existingRefs.length > 0 ? { existing_image_urls: existingRefs } : {}),
@@ -402,12 +408,21 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
 
               {/* Generate Images Section */}
               <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-indigo-800">Post Images</p>
-                    <p className="text-xs text-indigo-600">{selectedImages.length > 0 ? `Using ${selectedImages.length} sale photo(s) as reference` : 'No sale images selected — generating from scratch'}</p>
+                    {selectedImages.length > 0 ? (
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span className="text-xs text-indigo-600">Using {selectedImages.length} reference photo{selectedImages.length > 1 ? 's' : ''}:</span>
+                        {selectedImages.map((url, i) => (
+                          <img key={i} src={url} alt={`ref ${i+1}`} className="w-7 h-7 rounded object-cover border border-indigo-300" loading="lazy" />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-indigo-500 mt-0.5">No sale images selected — generating from scratch</p>
+                    )}
                   </div>
-                  <Button size="sm" onClick={handleGenerateImages} disabled={generatingImages} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs">
+                  <Button size="sm" onClick={handleGenerateImages} disabled={generatingImages} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs flex-shrink-0">
                     {generatingImages ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating...</> : <><ImageIcon className="w-3.5 h-3.5 mr-1.5" />{generatedImages.length > 0 ? 'Regenerate All Images' : 'Generate 3 Post Images'}</>}
                   </Button>
                 </div>
