@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Copy, CheckCircle2, X, Zap } from 'lucide-react';
+import { Sparkles, Loader2, Copy, CheckCircle2, Zap, Save, ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function AISaleMarketingPackage({ sale, open, onClose, modelOverride }) {
@@ -11,10 +11,25 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
   const [result, setResult] = useState(null);
   const [user, setUser] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedCount, setSavedCount] = useState(0);
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState([]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Reset state when modal opens with a new model
+  useEffect(() => {
+    if (open) {
+      setResult(null);
+      setSavedCount(0);
+      setGeneratedImages([]);
+    }
+  }, [open, modelOverride]);
+
+  const modelLabel = modelOverride === 'gpt_5_5' ? 'GPT-5.5' : 'Claude';
 
   const buildPrompt = () => {
     const images = sale?.photos?.map(p => p.url || p).filter(Boolean) || [];
@@ -127,6 +142,8 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
   const handleGenerate = async () => {
     setLoading(true);
     setResult(null);
+    setGeneratedImages([]);
+    setSavedCount(0);
     try {
       const prompt = buildPrompt();
       const res = await base44.integrations.Core.InvokeLLM({
@@ -148,6 +165,128 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
     }
   };
 
+  // Extract image prompts from the result text
+  const extractImagePrompts = (text) => {
+    if (!text || typeof text !== 'string') return [];
+    const prompts = [];
+    // Match lines that look like AI image generation prompts (after "AI Image Prompt" headers)
+    const sections = text.split(/#+\s*/);
+    const postNames = ['Early Line / VIP Post', 'What\'s Inside? Curiosity Post', 'Final Countdown Post'];
+    
+    // Simple extraction: find lines after "AI Image Prompt" or "AI Image Generation Prompt"
+    const lines = text.split('\n');
+    let capturing = false;
+    let currentPrompt = '';
+    let promptCount = 0;
+    
+    for (const line of lines) {
+      if (/ai image (generation )?prompt/i.test(line)) {
+        if (currentPrompt.trim() && promptCount < 3) {
+          prompts.push({ name: postNames[promptCount] || `Post ${promptCount + 1}`, prompt: currentPrompt.trim() });
+          promptCount++;
+        }
+        capturing = true;
+        currentPrompt = '';
+      } else if (capturing) {
+        if (/^#+\s/.test(line) && !/ai image/i.test(line)) {
+          capturing = false;
+        } else if (line.trim()) {
+          currentPrompt += ' ' + line.trim();
+        }
+      }
+    }
+    if (currentPrompt.trim() && promptCount < 3) {
+      prompts.push({ name: postNames[promptCount] || `Post ${promptCount + 1}`, prompt: currentPrompt.trim() });
+    }
+    
+    // Fallback: just generate 3 generic prompts from sale data
+    if (prompts.length === 0) {
+      const base = `Estate sale promotional social media image for "${sale?.title || 'Estate Sale'}" in ${sale?.location || 'local area'}`;
+      return [
+        { name: 'Early Line / VIP Post', prompt: `${base}. Urgency theme, bold "DOORS OPEN EARLY" text overlay, dramatic lighting, crowd excitement vibe, vintage estate items visible in background, high contrast.` },
+        { name: 'What\'s Inside? Curiosity Post', prompt: `${base}. Curiosity theme, "WHAT'S INSIDE?" bold text overlay, collage of antiques furniture collectibles, warm inviting colors, treasure hunt feel.` },
+        { name: 'Final Countdown Post', prompt: `${base}. Final countdown theme, "LAST CHANCE" bold red text overlay, urgency, clock or timer visual element, estate sale items, dramatic lighting.` },
+      ];
+    }
+    return prompts;
+  };
+
+  const handleGenerateImages = async () => {
+    if (!result) return;
+    setGeneratingImages(true);
+    const imagePrompts = extractImagePrompts(typeof result === 'string' ? result : JSON.stringify(result));
+    const images = [];
+    for (const { name, prompt } of imagePrompts.slice(0, 3)) {
+      try {
+        const res = await base44.integrations.Core.GenerateImage({
+          prompt: prompt.slice(0, 900), // stay within limits
+        });
+        images.push({ name, url: res.url, prompt });
+      } catch (err) {
+        images.push({ name, url: null, error: err.message, prompt });
+      }
+    }
+    setGeneratedImages(images);
+    setGeneratingImages(false);
+  };
+
+  // Parse the result text into 3 post objects and save as MarketingTask records
+  const handleSaveToCampaigns = async () => {
+    if (!result || !sale) return;
+    setSaving(true);
+    const text = typeof result === 'string' ? result : JSON.stringify(result);
+    const postNames = ['Early Line / VIP Post', "What's Inside? Curiosity Post", 'Final Countdown Post'];
+    
+    // Split by numbered post sections
+    const postSections = [];
+    const splitPatterns = [
+      /(?=###?\s*(?:POST\s*)?1[:.]\s*EARLY LINE)/i,
+      /(?=###?\s*(?:POST\s*)?2[:.]\s*"?WHAT'?S INSIDE)/i,
+      /(?=###?\s*(?:POST\s*)?3[:.]\s*FINAL COUNTDOWN)/i,
+    ];
+    
+    // Simple split: divide the full text into 3 roughly equal post sections
+    // Look for the post blocks
+    const lines = text.split('\n');
+    let sections = [[], [], []];
+    let currentSection = -1;
+    
+    for (const line of lines) {
+      if (/(?:post\s*1|early line|vip post)/i.test(line) && /^#+/.test(line)) currentSection = 0;
+      else if (/(?:post\s*2|what.?s inside|curiosity)/i.test(line) && /^#+/.test(line)) currentSection = 1;
+      else if (/(?:post\s*3|final countdown|last chance)/i.test(line) && /^#+/.test(line)) currentSection = 2;
+      if (currentSection >= 0 && currentSection <= 2) sections[currentSection].push(line);
+    }
+    
+    const boostSection = text.match(/(?:boost strategy|part 6)([\s\S]*?)(?:$)/i)?.[1] || '';
+
+    let count = 0;
+    for (let i = 0; i < 3; i++) {
+      const sectionText = sections[i].join('\n').trim() || `Post ${i + 1}: AI-generated marketing post for ${sale.title}`;
+      const imageUrl = generatedImages[i]?.url || null;
+      
+      try {
+        await base44.entities.MarketingTask.create({
+          task_type: 'estate_sale',
+          sale_id: sale.id,
+          sale_title: sale.title,
+          title: `[AI-${modelLabel}] ${postNames[i]}`,
+          description: sectionText.slice(0, 2000),
+          category: 'social_media',
+          status: 'pending',
+          notes: `AI-generated by ${modelLabel} | ${imageUrl ? 'Image generated' : 'No image yet'} | ${boostSection.slice(0, 300)}`,
+          ...(imageUrl ? { image_url: imageUrl } : {}),
+        });
+        count++;
+      } catch (err) {
+        console.error('Error saving post', i, err);
+      }
+    }
+    
+    setSavedCount(count);
+    setSaving(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -157,7 +296,9 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
               <Sparkles className="w-4 h-4 text-purple-600" />
             </div>
             AI Marketing Package
-            <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs ml-1">Powered by AI Coach</Badge>
+            <Badge className={`text-xs ml-1 ${modelOverride === 'gpt_5_5' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-purple-100 text-purple-700 border-purple-200'}`}>
+              {modelLabel}
+            </Badge>
           </DialogTitle>
           <p className="text-sm text-slate-500 mt-1">
             Generate a complete promotional package — 3 posts, image specs, and boost strategy — tailored to <strong>{sale?.title}</strong>.
@@ -183,12 +324,11 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
               </div>
               <Button
                 onClick={handleGenerate}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 h-12 text-sm"
+                className={`font-bold px-8 h-12 text-sm text-white ${modelOverride === 'gpt_5_5' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-purple-600 hover:bg-purple-700'}`}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate My Marketing Package
+                Generate with {modelLabel}
               </Button>
-              <p className="text-xs text-slate-400">Uses AI Coach (claude_sonnet model) — may take 15–30 seconds</p>
             </div>
           )}
 
@@ -196,16 +336,10 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
             <div className="py-16 flex flex-col items-center gap-4">
               <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
               <div className="text-center">
-                <p className="text-slate-700 font-semibold">AI Coach is building your marketing package...</p>
+                <p className="text-slate-700 font-semibold">AI Coach ({modelLabel}) is building your marketing package...</p>
                 <p className="text-sm text-slate-400 mt-1">Analyzing sale data, crafting posts, designing specs</p>
               </div>
-              {[
-                'Reviewing sale details & location...',
-                'Crafting scroll-stopping headlines...',
-                'Building image design specs...',
-                'Writing AI image prompts...',
-                'Finalizing boost strategy...',
-              ].map((step, i) => (
+              {['Reviewing sale details & location...', 'Crafting scroll-stopping headlines...', 'Building image design specs...', 'Writing AI image prompts...', 'Finalizing boost strategy...'].map((step, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
                   <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />
                   {step}
@@ -216,17 +350,63 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
 
           {result && !loading && (
             <div className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <Badge className="bg-green-100 text-green-700 border-green-200">✓ Package Ready</Badge>
-                <div className="flex gap-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <Badge className="bg-green-100 text-green-700 border-green-200">✓ Package Ready — {modelLabel}</Badge>
+                <div className="flex gap-2 flex-wrap">
                   <Button size="sm" variant="outline" onClick={handleCopy} className="text-xs border-slate-300">
                     {copied ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1 text-green-600" />Copied!</> : <><Copy className="w-3.5 h-3.5 mr-1" />Copy All</>}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setResult(null); }} className="text-xs border-slate-300 text-slate-500">
+                  <Button size="sm" variant="outline" onClick={() => { setResult(null); setGeneratedImages([]); setSavedCount(0); }} className="text-xs border-slate-300 text-slate-500">
                     Regenerate
                   </Button>
                 </div>
               </div>
+
+              {/* Generated images strip */}
+              {generatedImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {generatedImages.map((img, i) => (
+                    <div key={i} className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                      {img.url ? (
+                        <img src={img.url} alt={img.name} className="w-full aspect-square object-cover" />
+                      ) : (
+                        <div className="w-full aspect-square flex items-center justify-center text-xs text-red-400 p-2 text-center">
+                          Failed: {img.error}
+                        </div>
+                      )}
+                      <div className="p-2 text-xs text-slate-600 font-medium truncate">{img.name}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={handleGenerateImages}
+                  disabled={generatingImages}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
+                >
+                  {generatingImages
+                    ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Images...</>
+                    : <><ImageIcon className="w-3.5 h-3.5 mr-1.5" />{generatedImages.length > 0 ? 'Regenerate Images' : 'Generate Images (3 Posts)'}</>}
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={handleSaveToCampaigns}
+                  disabled={saving || savedCount > 0}
+                  className={`text-xs text-white ${savedCount > 0 ? 'bg-green-600' : 'bg-amber-600 hover:bg-amber-700'}`}
+                >
+                  {saving
+                    ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
+                    : savedCount > 0
+                    ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />{savedCount} Posts Saved to Campaigns</>
+                    : <><Save className="w-3.5 h-3.5 mr-1.5" />Save 3 Posts to Campaigns</>}
+                </Button>
+              </div>
+
               <div className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-headings:font-semibold prose-p:text-slate-700 prose-strong:text-slate-800 prose-li:text-slate-700 bg-slate-50 rounded-xl border border-slate-200 p-5">
                 <ReactMarkdown>{typeof result === 'string' ? result : JSON.stringify(result)}</ReactMarkdown>
               </div>
