@@ -23,8 +23,9 @@ import {
 } from '@/components/ui/select';
 import {
   ArrowLeft, Plus, Mail, MessageSquare, Share2, TrendingUp,
-  Eye, MousePointer, DollarSign, Calendar, Edit, Trash2
+  Eye, MousePointer, DollarSign, Calendar, Edit, Trash2, Sparkles
 } from 'lucide-react';
+import AISaleMarketingPackage from '@/components/marketing/AISaleMarketingPackage';
 
 export default function SaleMarketingCampaigns() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export default function SaleMarketingCampaigns() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAIPackage, setShowAIPackage] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -201,10 +203,16 @@ export default function SaleMarketingCampaigns() {
             <p className="text-slate-600">{sale?.title}</p>
           </div>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-purple-600 hover:bg-purple-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Campaign
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowAIPackage(true)} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-sm">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Marketing Package
+          </Button>
+          <Button onClick={handleOpenCreate} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Campaign
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -335,6 +343,13 @@ export default function SaleMarketingCampaigns() {
           })}
         </div>
       )}
+
+      {/* AI Marketing Package Modal */}
+      <AISaleMarketingPackage
+        sale={sale}
+        open={showAIPackage}
+        onClose={() => setShowAIPackage(false)}
+      />
 
       {/* Create/Edit Campaign Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
