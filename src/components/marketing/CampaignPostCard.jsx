@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon } from 'lucide-react';
+import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon, Eye, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import PlatformPreviewModal from './PlatformPreviewModal';
+import PushToSocialModal from './PushToSocialModal';
 
 const STATUS_COLORS = {
   pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -100,8 +102,18 @@ function getCampaignIcon(type) {
   }
 }
 
+const PLATFORM_PREVIEW_BUTTONS = [
+  { name: 'Facebook', color: 'bg-[#1877F2] text-white hover:bg-[#1565d8]' },
+  { name: 'Instagram', color: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90' },
+  { name: 'TikTok', color: 'bg-black text-white hover:bg-slate-800' },
+  { name: 'LinkedIn', color: 'bg-[#0A66C2] text-white hover:bg-[#0958a8]' },
+  { name: 'Twitter/X', color: 'bg-slate-800 text-white hover:bg-slate-700' },
+];
+
 export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusChange }) {
   const [expanded, setExpanded] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showPush, setShowPush] = useState(false);
   const Icon = getCampaignIcon(campaign.category);
   const isAI = campaign.title?.startsWith('[AI-');
 
@@ -138,9 +150,41 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
       {/* 50/50 split body */}
       <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
         {/* LEFT: Social post mockup */}
-        <div className="p-4">
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Post Preview</p>
+        <div className="p-4 flex flex-col gap-3">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Post Preview</p>
           <SocialPostMockup campaign={campaign} />
+
+          {/* Platform preview buttons */}
+          <div>
+            <p className="text-[10px] text-slate-400 mb-1.5">Preview as:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {PLATFORM_PREVIEW_BUTTONS.map(p => (
+                <button
+                  key={p.name}
+                  onClick={() => setShowPreview(true)}
+                  className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition-all ${p.color}`}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Push to social buttons */}
+          <div>
+            <p className="text-[10px] text-slate-400 mb-1.5">Push post to:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {PLATFORM_PREVIEW_BUTTONS.map(p => (
+                <button
+                  key={p.name}
+                  onClick={() => setShowPush(true)}
+                  className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition-all flex items-center gap-1 ${p.color}`}
+                >
+                  <Send className="w-2.5 h-2.5" />{p.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* RIGHT: Strategy & details */}
@@ -188,6 +232,9 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
           </div>
         </div>
       </div>
+
+      <PlatformPreviewModal campaign={campaign} open={showPreview} onClose={() => setShowPreview(false)} />
+      <PushToSocialModal campaign={campaign} open={showPush} onClose={() => setShowPush(false)} />
     </div>
   );
 }
