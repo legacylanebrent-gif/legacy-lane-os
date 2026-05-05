@@ -227,7 +227,12 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
       const refUrl = refImages.length > 0 ? refImages[i % refImages.length] : null;
       const prompt = `Create a professional social media promotional post image (square 1:1 format) for an estate sale called "${saleTitle}" in ${saleLocation}.
 
-${refUrl ? `CRITICAL INSTRUCTION: Use the provided reference photo as the ACTUAL BACKGROUND of this image. Show that exact room/scene/items from the photo as the background. Do NOT replace it with generic or stock imagery.` : `Background: a well-lit estate sale room with antiques, furniture, and collectibles.`}
+${refUrl ? `CRITICAL INSTRUCTIONS FOR BACKGROUND:
+- Use the provided reference photo as the ACTUAL BACKGROUND of this image.
+- DO NOT rotate, flip, or change the orientation of the reference photo in any way.
+- Keep the photo exactly as it appears — upright, same orientation as the original.
+- If the photo is portrait or landscape, simply CENTER-CROP it to fill the square canvas. Do NOT rotate it to fit.
+- Show that exact room/scene/items from the photo as the background. Do NOT replace it with generic or stock imagery.` : `Background: a well-lit estate sale room with antiques, furniture, and collectibles.`}
 
 Text overlays to add on top of the photo background:
 - HEADLINE (large, bold, top area): "${config.overlayText}"
