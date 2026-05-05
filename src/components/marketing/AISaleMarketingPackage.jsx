@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, Copy, CheckCircle2, Zap, Save, ImageIcon, ChevronRight, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import SalePostImageCompositor from './SalePostImageCompositor';
 
 const POST_NAMES = ['Early Line / VIP Post', "What's Inside? Curiosity Post", 'Final Countdown Post'];
 
@@ -17,9 +18,9 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedPosts, setSavedPosts] = useState({});
-  const [generatingImages, setGeneratingImages] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState([]);
-  const [savingImages, setSavingImages] = useState({});
+  const [showCompositor, setShowCompositor] = useState(false);
+  const [savingImageIndex, setSavingImageIndex] = useState(null);
+  const [savedImages, setSavedImages] = useState({});
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -30,7 +31,8 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
       setStep('pick');
       setResult(null);
       setSavedPosts({});
-      setGeneratedImages([]);
+      setShowCompositor(false);
+      setSavedImages({});
       setSelectedImages([]);
       selectedImagesRef.current = [];
     }
@@ -136,7 +138,6 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
   const handleGenerate = async () => {
     setStep('loading');
     setResult(null);
-    setGeneratedImages([]);
     setSavedPosts({});
     try {
       const prompt = buildPrompt();
@@ -189,75 +190,36 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
     return prompts;
   };
 
-  const POST_IMAGE_CONFIGS = [
-    {
-      name: POST_NAMES[0],
-      overlayText: 'DOORS OPEN EARLY — VIP ACCESS',
-      theme: 'urgency and exclusivity',
-      cta: 'BE FIRST IN LINE',
-      mood: 'dramatic, high-contrast, dark overlay with bold gold typography',
-    },
-    {
-      name: POST_NAMES[1],
-      overlayText: "WHAT'S INSIDE?",
-      theme: 'curiosity and discovery',
-      cta: 'SEE EVERYTHING →',
-      mood: 'warm, inviting, slightly mysterious with bright accent colors',
-    },
-    {
-      name: POST_NAMES[2],
-      overlayText: 'LAST CHANCE — FINAL DAY',
-      theme: 'urgency and scarcity',
-      cta: 'ENDS TODAY',
-      mood: 'bold red urgency palette, strong contrast, countdown energy',
-    },
-  ];
 
-  const handleGenerateImages = async () => {
-    if (!result) return;
-    setGeneratingImages(true);
-    const refImages = selectedImagesRef.current;
-    const saleTitle = sale?.title || 'Estate Sale';
-    const saleLocation = sale?.property_address?.city || sale?.location || 'Local Area';
-    const images = [];
 
-    for (let i = 0; i < 3; i++) {
-      const config = POST_IMAGE_CONFIGS[i];
-      // Build a very explicit social media promotional post prompt
-      const refUrl = refImages.length > 0 ? refImages[i % refImages.length] : null;
-      const prompt = `Create a professional social media promotional post image (square 1:1 format) for an estate sale called "${saleTitle}" in ${saleLocation}.
+  const handleSaveCompositorImage = async (index, dataUrl) => {
+    if (!sale) return;
+    setSavingImageIndex(index);
+    try {
+      // Convert dataUrl to blob and upload
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `post_${index + 1}.jpg`, { type: 'image/jpeg' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
-${refUrl ? `CRITICAL INSTRUCTIONS FOR BACKGROUND:
-- Use the provided reference photo as the ACTUAL BACKGROUND of this image.
-- DO NOT rotate, flip, or change the orientation of the reference photo in any way.
-- Keep the photo exactly as it appears — upright, same orientation as the original.
-- If the photo is portrait or landscape, simply CENTER-CROP it to fill the square canvas. Do NOT rotate it to fit.
-- Show that exact room/scene/items from the photo as the background. Do NOT replace it with generic or stock imagery.` : `Background: a well-lit estate sale room with antiques, furniture, and collectibles.`}
-
-Text overlays to add on top of the photo background:
-- HEADLINE (large, bold, top area): "${config.overlayText}"
-- CTA (large, bold, bottom area): "${config.cta}"
-- Small subtitle: "${saleTitle} · ${saleLocation}"
-
-Design rules:
-- Single image — NOT a collage or multi-panel layout
-- Add a dark semi-transparent gradient overlay so the bold white text is readable
-- Mood: ${config.mood}
-- Typography: large, clean, high-contrast white or gold text
-- This is a ${config.theme} themed social media ad`;
-
-      try {
-        const res = await base44.integrations.Core.GenerateImage({
-          prompt,
-          ...(refUrl ? { existing_image_urls: [refUrl] } : {}),
-        });
-        images.push({ name: config.name, url: res.url, prompt });
-      } catch (err) {
-        images.push({ name: config.name, url: null, error: err.message, prompt });
-      }
+      const POST_NAMES = ['Early Line / VIP Post', "What's Inside? Curiosity Post", 'Final Countdown Post'];
+      await base44.entities.MarketingTask.create({
+        task_type: 'estate_sale',
+        sale_id: sale.id,
+        sale_title: sale.title,
+        title: `[AI-${modelLabel}] ${POST_NAMES[index]}`,
+        description: `Composited social media post image for ${sale.title}`,
+        category: 'social_media',
+        status: 'pending',
+        image_url: file_url,
+        notes: `Canvas-composited image by ${modelLabel}`,
+      });
+      setSavedImages(prev => ({ ...prev, [index]: true }));
+      if (onSaved) onSaved();
+    } catch (err) {
+      alert('Failed to save image: ' + err.message);
     }
-    setGeneratedImages(images);
-    setGeneratingImages(false);
+    setSavingImageIndex(null);
   };
 
   const parseSections = (text) => {
@@ -280,7 +242,6 @@ Design rules:
     const sections = parseSections(text);
     const boostSection = text.match(/(?:boost strategy|part 5)([\s\S]*?)(?:$)/i)?.[1] || '';
     const sectionText = sections[index].join('\n').trim() || `Post ${index + 1}: AI-generated marketing post for ${sale.title}`;
-    const imageUrl = generatedImages[index]?.url || null;
 
     try {
       await base44.entities.MarketingTask.create({
@@ -292,7 +253,6 @@ Design rules:
         category: 'social_media',
         status: 'pending',
         notes: `AI-generated by ${modelLabel} | ${boostSection.slice(0, 400)}`,
-        ...(imageUrl ? { image_url: imageUrl } : {}),
       });
       setSavedPosts(prev => ({ ...prev, [index]: true }));
       if (onSaved) onSaved();
@@ -308,32 +268,7 @@ Design rules:
     }
   };
 
-  const handleSaveImageToPost = async (index) => {
-    if (!generatedImages[index]?.url || !sale) return;
-    setSavingImages(prev => ({ ...prev, [index]: true }));
-    try {
-      const text = typeof result === 'string' ? result : JSON.stringify(result);
-      const sections = parseSections(text);
-      const sectionText = sections[index].join('\n').trim();
 
-      // Check if already saved as a campaign task and update, else create
-      await base44.entities.MarketingTask.create({
-        task_type: 'estate_sale',
-        sale_id: sale.id,
-        sale_title: sale.title,
-        title: `[AI-${modelLabel}] ${POST_NAMES[index]} — Image`,
-        description: sectionText.slice(0, 2000),
-        category: 'social_media',
-        status: 'pending',
-        image_url: generatedImages[index].url,
-        notes: `Generated image for ${POST_NAMES[index]} by ${modelLabel}`,
-      });
-      setSavingImages(prev => ({ ...prev, [index]: 'done' }));
-      if (onSaved) onSaved();
-    } catch (err) {
-      alert('Failed to save image: ' + err.message);
-    }
-  };
 
   const allSaved = [0, 1, 2].every(i => savedPosts[i]);
 
@@ -453,7 +388,7 @@ Design rules:
                 </div>
               </div>
 
-              {/* Generate Images Section */}
+              {/* Post Images Section — Canvas Compositor */}
               <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -466,39 +401,25 @@ Design rules:
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-indigo-500 mt-0.5">No sale images selected — generating from scratch</p>
+                      <p className="text-xs text-indigo-500 mt-0.5">No sale images selected — go back to select photos</p>
                     )}
                   </div>
-                  <Button size="sm" onClick={handleGenerateImages} disabled={generatingImages} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs flex-shrink-0">
-                    {generatingImages ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating...</> : <><ImageIcon className="w-3.5 h-3.5 mr-1.5" />{generatedImages.length > 0 ? 'Regenerate All Images' : 'Generate 3 Post Images'}</>}
-                  </Button>
+                  {selectedImages.length > 0 && !showCompositor && (
+                    <Button size="sm" onClick={() => setShowCompositor(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs flex-shrink-0">
+                      <ImageIcon className="w-3.5 h-3.5 mr-1.5" />Build Post Images
+                    </Button>
+                  )}
                 </div>
 
-                {generatedImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {generatedImages.map((img, i) => (
-                      <div key={i} className="rounded-lg overflow-hidden border border-indigo-200 bg-white">
-                        {img.url ? (
-                          <img src={img.url} alt={img.name} className="w-full aspect-square object-cover" />
-                        ) : (
-                          <div className="w-full aspect-square flex items-center justify-center text-xs text-red-400 p-2 text-center bg-red-50">{img.error || 'Failed'}</div>
-                        )}
-                        <div className="p-2 space-y-1">
-                          <p className="text-xs font-medium text-slate-700 leading-tight">{img.name}</p>
-                          {img.url && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleSaveImageToPost(i)}
-                              disabled={savingImages[i] === true || savingImages[i] === 'done'}
-                              className={`w-full text-xs h-7 ${savingImages[i] === 'done' ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
-                            >
-                              {savingImages[i] === 'done' ? <><CheckCircle2 className="w-3 h-3 mr-1" />Saved!</> : savingImages[i] ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save Image</>}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                {showCompositor && selectedImages.length > 0 && (
+                  <SalePostImageCompositor
+                    saleTitle={sale?.title || 'Estate Sale'}
+                    saleLocation={sale?.property_address?.city || sale?.location || ''}
+                    referenceImages={selectedImages}
+                    onSave={handleSaveCompositorImage}
+                    saving={savingImageIndex}
+                    saved={savedImages}
+                  />
                 )}
               </div>
 
