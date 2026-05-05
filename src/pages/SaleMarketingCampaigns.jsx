@@ -209,9 +209,9 @@ export default function SaleMarketingCampaigns() {
             <Sparkles className="w-4 h-4 mr-2" />
             AI Package — Claude
           </Button>
-          <Button onClick={() => { setAiModel('gpt_5_4'); setShowAIPackage(true); }} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-sm">
+          <Button onClick={() => { setAiModel('gpt_5_5'); setShowAIPackage(true); }} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-sm">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI Package — GPT-4o
+            AI Package — GPT-5.5
           </Button>
           <Button onClick={handleOpenCreate} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
             <Plus className="w-4 h-4 mr-2" />
