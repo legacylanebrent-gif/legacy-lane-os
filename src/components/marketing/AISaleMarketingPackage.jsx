@@ -224,29 +224,27 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
     for (let i = 0; i < 3; i++) {
       const config = POST_IMAGE_CONFIGS[i];
       // Build a very explicit social media promotional post prompt
-      const prompt = `Create a single professional social media promotional post image (square 1:1 format) for an estate sale.
+      const refUrl = refImages.length > 0 ? refImages[i % refImages.length] : null;
+      const prompt = `Create a professional social media promotional post image (square 1:1 format) for an estate sale called "${saleTitle}" in ${saleLocation}.
 
-IMPORTANT: This must look like a SINGLE polished social media ad — NOT a collage, NOT multiple panels, NOT a mood board.
+${refUrl ? `CRITICAL INSTRUCTION: Use the provided reference photo as the ACTUAL BACKGROUND of this image. Show that exact room/scene/items from the photo as the background. Do NOT replace it with generic or stock imagery.` : `Background: a well-lit estate sale room with antiques, furniture, and collectibles.`}
 
-Sale: "${saleTitle}" in ${saleLocation}
+Text overlays to add on top of the photo background:
+- HEADLINE (large, bold, top area): "${config.overlayText}"
+- CTA (large, bold, bottom area): "${config.cta}"
+- Small subtitle: "${saleTitle} · ${saleLocation}"
 
-Design requirements:
-- ONE cohesive background image showing estate sale items (antiques, furniture, collectibles)
-- Bold text overlay at the top or center: "${config.overlayText}"
-- Supporting call-to-action text at the bottom: "${config.cta}"
-- Mood/style: ${config.mood}
-- Theme: ${config.theme}
-- Clean, professional typography — large, readable, high contrast text
-- Dark semi-transparent gradient bar behind text for legibility
-- Style: modern real estate / auction house social media ad
-- Do NOT combine or stitch multiple photos together
-
-${refImages.length > 0 ? `Use the provided reference image(s) to match the visual style, color palette, and types of items shown — but generate a SINGLE new image, not a copy or collage of them.` : `Show a well-lit room with antique furniture, collectibles, and estate items.`}`;
+Design rules:
+- Single image — NOT a collage or multi-panel layout
+- Add a dark semi-transparent gradient overlay so the bold white text is readable
+- Mood: ${config.mood}
+- Typography: large, clean, high-contrast white or gold text
+- This is a ${config.theme} themed social media ad`;
 
       try {
         const res = await base44.integrations.Core.GenerateImage({
           prompt,
-          ...(refImages.length > 0 ? { existing_image_urls: [refImages[0]] } : {}),
+          ...(refUrl ? { existing_image_urls: [refUrl] } : {}),
         });
         images.push({ name: config.name, url: res.url, prompt });
       } catch (err) {
