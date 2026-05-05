@@ -312,34 +312,44 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
                 <p className="text-xs text-purple-600">Select up to 5 photos from your sale. These will be used as background context for generating your post images. If you skip, the AI will create visuals from scratch.</p>
               </div>
 
-              {saleImages.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {saleImages.map((url, i) => {
-                    const selected = selectedImages.includes(url);
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => toggleImage(url)}
-                        className={`relative rounded-lg overflow-hidden aspect-square border-2 transition-all ${selected ? 'border-purple-500 shadow-md' : 'border-slate-200 hover:border-slate-400'}`}
-                      >
-                        <img src={url} alt={`Sale photo ${i + 1}`} className="w-full h-full object-cover" />
-                        {selected && (
-                          <div className="absolute inset-0 bg-purple-600/30 flex items-center justify-center">
-                            <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center">
-                              <Check className="w-4 h-4 text-white" />
+              {/* Scrollable image grid */}
+              <div className="overflow-y-auto max-h-64 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                {saleImages.length > 0 ? (
+                  <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-9 gap-1.5">
+                    {saleImages.map((url, i) => {
+                      const selected = selectedImages.includes(url);
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => toggleImage(url)}
+                          className={`relative rounded overflow-hidden aspect-square border-2 transition-all flex-shrink-0 ${selected ? 'border-purple-500 shadow-md' : 'border-transparent hover:border-slate-400'}`}
+                        >
+                          <img
+                            src={url}
+                            alt={`Sale photo ${i + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            width={80}
+                            height={80}
+                          />
+                          {selected && (
+                            <div className="absolute inset-0 bg-purple-600/40 flex items-center justify-center">
+                              <div className="w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-white" />
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-                  <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No sale photos found. The AI will create visuals from scratch.</p>
-                </div>
-              )}
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-slate-400">
+                    <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">No sale photos found. The AI will create visuals from scratch.</p>
+                  </div>
+                )}
+              </div>
 
               {selectedImages.length > 0 && (
                 <p className="text-xs text-purple-600 font-medium">{selectedImages.length} image{selectedImages.length > 1 ? 's' : ''} selected</p>
