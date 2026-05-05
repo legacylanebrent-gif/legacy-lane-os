@@ -7,6 +7,19 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Megaphone, Loader2, CheckCircle2, ExternalLink, AlertTriangle, Info, X } from 'lucide-react';
 
+async function fetchSaleCity(saleId) {
+  if (!saleId) return '';
+  try {
+    const sales = await base44.entities.EstateSale.filter({ id: saleId });
+    const sale = sales[0];
+    if (!sale) return '';
+    // Try property_address.city first, then top-level city field
+    return sale.property_address?.city || sale.city || sale.location?.city || '';
+  } catch {
+    return '';
+  }
+}
+
 const OBJECTIVES = [
   {
     value: 'REACH',
@@ -88,13 +101,21 @@ export default function LaunchFbAdModal({ campaign, open, onClose }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [form, setForm] = useState(() => buildDefaults(campaign));
 
-  // Re-initialize defaults whenever modal opens or campaign changes
+  // Re-initialize defaults whenever modal opens, then enrich with real sale city
   useEffect(() => {
     if (open) {
       setForm(buildDefaults(campaign));
       setStep('form');
       setResult(null);
       setErrorMsg('');
+      // Fetch the actual sale to get the city
+      if (campaign.sale_id) {
+        fetchSaleCity(campaign.sale_id).then(city => {
+          if (city) {
+            setForm(f => ({ ...f, target_location: city }));
+          }
+        });
+      }
     }
   }, [open, campaign]);
 
