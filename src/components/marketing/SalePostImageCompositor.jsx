@@ -8,30 +8,33 @@ const POST_CONFIGS = [
     headline: 'DOORS OPEN EARLY',
     subheadline: 'VIP ACCESS',
     cta: 'BE FIRST IN LINE',
-    topColor: '#000000',
-    ctaColor: '#f59e0b',
-    gradientTop: 'rgba(0,0,0,0.75)',
-    gradientBottom: 'rgba(0,0,0,0.80)',
+    headlineColor: '#ffffff',
+    subheadlineColor: '#fbbf24',
+    ctaColor: '#fbbf24',
+    gradientTop: 'rgba(0,0,0,0.82)',
+    gradientBottom: 'rgba(0,0,0,0.88)',
   },
   {
     name: "What's Inside? Curiosity Post",
     headline: "WHAT'S INSIDE?",
     subheadline: '',
     cta: 'SEE EVERYTHING →',
-    topColor: '#ffffff',
+    headlineColor: '#ffffff',
+    subheadlineColor: '#ffffff',
     ctaColor: '#ffffff',
-    gradientTop: 'rgba(0,0,0,0.55)',
-    gradientBottom: 'rgba(0,0,0,0.65)',
+    gradientTop: 'rgba(0,0,0,0.72)',
+    gradientBottom: 'rgba(0,0,0,0.78)',
   },
   {
     name: 'Final Countdown Post',
     headline: 'LAST CHANCE',
     subheadline: 'FINAL DAY',
     cta: 'ENDS TODAY',
-    topColor: '#ffffff',
+    headlineColor: '#ffffff',
+    subheadlineColor: '#fca5a5',
     ctaColor: '#ef4444',
-    gradientTop: 'rgba(80,0,0,0.70)',
-    gradientBottom: 'rgba(120,0,0,0.80)',
+    gradientTop: 'rgba(0,0,0,0.80)',
+    gradientBottom: 'rgba(100,0,0,0.90)',
   },
 ];
 
@@ -53,42 +56,68 @@ function compositeImage(canvas, imgSrc, config, saleTitle, saleLocation) {
       const offsetY = (SIZE - drawH) / 2;
       ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
 
-      // Top gradient
-      const topGrad = ctx.createLinearGradient(0, 0, 0, SIZE * 0.45);
+      // Top gradient — covers top 42%
+      const topGrad = ctx.createLinearGradient(0, 0, 0, SIZE * 0.42);
       topGrad.addColorStop(0, config.gradientTop);
+      topGrad.addColorStop(0.7, 'rgba(0,0,0,0.2)');
       topGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = topGrad;
       ctx.fillRect(0, 0, SIZE, SIZE);
 
-      // Bottom gradient
-      const botGrad = ctx.createLinearGradient(0, SIZE * 0.55, 0, SIZE);
+      // Bottom gradient — covers bottom 40%
+      const botGrad = ctx.createLinearGradient(0, SIZE * 0.60, 0, SIZE);
       botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      botGrad.addColorStop(0.3, 'rgba(0,0,0,0.3)');
       botGrad.addColorStop(1, config.gradientBottom);
       ctx.fillStyle = botGrad;
       ctx.fillRect(0, 0, SIZE, SIZE);
 
-      // Headline (top)
-      ctx.textAlign = 'center';
-      ctx.fillStyle = config.topColor;
-      ctx.font = `bold ${SIZE * 0.115}px Impact, Arial Black, sans-serif`;
-      ctx.fillText(config.headline, SIZE / 2, SIZE * 0.18);
+      // Helper: draw text with drop shadow
+      const drawText = (text, x, y, color, font) => {
+        ctx.font = font;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      };
+
+      // Headline (top zone)
+      const headlineFont = `bold ${SIZE * 0.11}px Impact, Arial Black, sans-serif`;
+      drawText(config.headline, SIZE / 2, SIZE * 0.17, config.headlineColor, headlineFont);
 
       // Subheadline
       if (config.subheadline) {
-        ctx.font = `bold ${SIZE * 0.09}px Impact, Arial Black, sans-serif`;
-        ctx.fillText(config.subheadline, SIZE / 2, SIZE * 0.28);
+        const subFont = `bold ${SIZE * 0.075}px Impact, Arial Black, sans-serif`;
+        drawText(config.subheadline, SIZE / 2, SIZE * 0.265, config.subheadlineColor, subFont);
       }
 
-      // Sale title + location (middle-ish small)
-      ctx.font = `${SIZE * 0.038}px Arial, sans-serif`;
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      // Sale title — clean pill badge above CTA
       const subtitle = [saleTitle, saleLocation].filter(Boolean).join(' · ');
-      ctx.fillText(subtitle, SIZE / 2, SIZE * 0.88);
+      if (subtitle) {
+        ctx.font = `600 ${SIZE * 0.036}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        const textW = ctx.measureText(subtitle).width;
+        const pillX = SIZE / 2 - textW / 2 - 14;
+        const pillY = SIZE * 0.78;
+        const pillH = SIZE * 0.055;
+        const pillW = textW + 28;
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 6);
+        ctx.fill();
+        drawText(subtitle, SIZE / 2, SIZE * 0.818, 'rgba(255,255,255,0.92)', `600 ${SIZE * 0.036}px Arial, sans-serif`);
+      }
 
-      // CTA (bottom)
-      ctx.font = `bold ${SIZE * 0.115}px Impact, Arial Black, sans-serif`;
-      ctx.fillStyle = config.ctaColor;
-      ctx.fillText(config.cta, SIZE / 2, SIZE * 0.96);
+      // CTA (bottom zone) — larger, more impact
+      const ctaFont = `bold ${SIZE * 0.115}px Impact, Arial Black, sans-serif`;
+      drawText(config.cta, SIZE / 2, SIZE * 0.945, config.ctaColor, ctaFont);
 
       resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
