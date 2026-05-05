@@ -338,6 +338,7 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
               <div className="text-center">
                 <p className="text-slate-700 font-semibold">AI Coach ({modelLabel}) is building your marketing package...</p>
                 <p className="text-sm text-slate-400 mt-1">Analyzing sale data, crafting posts, designing specs</p>
+                <p className="text-xs text-amber-600 mt-2">This process can take up to 10 mins to complete. Thanks for your patience.</p>
               </div>
               {['Reviewing sale details & location...', 'Crafting scroll-stopping headlines...', 'Building image design specs...', 'Writing AI image prompts...', 'Finalizing boost strategy...'].map((step, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
