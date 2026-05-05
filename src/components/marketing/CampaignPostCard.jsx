@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon, Eye, Send } from 'lucide-react';
+import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon, Eye, Send, Megaphone, Loader2, ExternalLink } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import PlatformPreviewModal from './PlatformPreviewModal';
 import PushToSocialModal from './PushToSocialModal';
+import LaunchFbAdModal from './LaunchFbAdModal';
 
 const STATUS_COLORS = {
   pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -114,6 +115,7 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
   const [expanded, setExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showPush, setShowPush] = useState(false);
+  const [showFbAd, setShowFbAd] = useState(false);
   const Icon = getCampaignIcon(campaign.category);
   const isAI = campaign.title?.startsWith('[AI-');
 
@@ -185,6 +187,18 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
               ))}
             </div>
           </div>
+
+          {/* Launch Facebook Ad */}
+          <div>
+            <p className="text-[10px] text-slate-400 mb-1.5">Paid advertising:</p>
+            <button
+              onClick={() => setShowFbAd(true)}
+              className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg bg-[#1877F2] hover:bg-[#1565d8] text-white font-semibold transition-all w-full justify-center shadow-sm"
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              Launch Paid Facebook Ad Campaign
+            </button>
+          </div>
         </div>
 
         {/* RIGHT: Strategy & details */}
@@ -235,6 +249,7 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
 
       <PlatformPreviewModal campaign={campaign} open={showPreview} onClose={() => setShowPreview(false)} />
       <PushToSocialModal campaign={campaign} open={showPush} onClose={() => setShowPush(false)} />
+      <LaunchFbAdModal campaign={campaign} open={showFbAd} onClose={() => setShowFbAd(false)} />
     </div>
   );
 }
