@@ -7,16 +7,24 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Megaphone, Loader2, CheckCircle2, ExternalLink, AlertTriangle, Info, X } from 'lucide-react';
 
-async function fetchSaleCity(saleId) {
-  if (!saleId) return '';
+async function fetchSaleData(saleId) {
+  if (!saleId) return {};
   try {
     const sales = await base44.entities.EstateSale.filter({ id: saleId });
     const sale = sales[0];
-    if (!sale) return '';
-    // Try property_address.city first, then top-level city field
-    return sale.property_address?.city || sale.city || sale.location?.city || '';
+    if (!sale) return {};
+    const city = sale.property_address?.city || sale.city || sale.location?.city || '';
+    // Last sale date: from sale_dates array or end_date field
+    let endDate = '';
+    if (sale.sale_dates && sale.sale_dates.length > 0) {
+      const dates = sale.sale_dates.map(d => d.date).filter(Boolean).sort();
+      endDate = dates[dates.length - 1];
+    } else if (sale.end_date) {
+      endDate = sale.end_date;
+    }
+    return { city, endDate };
   } catch {
-    return '';
+    return {};
   }
 }
 
@@ -108,12 +116,14 @@ export default function LaunchFbAdModal({ campaign, open, onClose }) {
       setStep('form');
       setResult(null);
       setErrorMsg('');
-      // Fetch the actual sale to get the city
+      // Fetch the actual sale to get the city and last sale date
       if (campaign.sale_id) {
-        fetchSaleCity(campaign.sale_id).then(city => {
-          if (city) {
-            setForm(f => ({ ...f, target_location: city }));
-          }
+        fetchSaleData(campaign.sale_id).then(({ city, endDate }) => {
+          setForm(f => ({
+            ...f,
+            ...(city ? { target_location: city } : {}),
+            ...(endDate ? { end_date: endDate } : {}),
+          }));
         });
       }
     }
