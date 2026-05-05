@@ -34,6 +34,7 @@ export default function SaleMarketingCampaigns() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAIPackage, setShowAIPackage] = useState(false);
+  const [aiModel, setAiModel] = useState('claude_sonnet_4_6');
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -203,10 +204,14 @@ export default function SaleMarketingCampaigns() {
             <p className="text-slate-600">{sale?.title}</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowAIPackage(true)} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-sm">
+        <div className="flex gap-2 flex-wrap">
+          <Button onClick={() => { setAiModel('claude_sonnet_4_6'); setShowAIPackage(true); }} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-sm">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI Marketing Package
+            AI Package — Claude
+          </Button>
+          <Button onClick={() => { setAiModel('gpt_5_4'); setShowAIPackage(true); }} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-sm">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Package — GPT-4o
           </Button>
           <Button onClick={handleOpenCreate} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
             <Plus className="w-4 h-4 mr-2" />
@@ -349,6 +354,7 @@ export default function SaleMarketingCampaigns() {
         sale={sale}
         open={showAIPackage}
         onClose={() => setShowAIPackage(false)}
+        modelOverride={aiModel}
       />
 
       {/* Create/Edit Campaign Modal */}

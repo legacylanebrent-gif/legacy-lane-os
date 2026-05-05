@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, Copy, CheckCircle2, X, Zap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-export default function AISaleMarketingPackage({ sale, open, onClose }) {
+export default function AISaleMarketingPackage({ sale, open, onClose, modelOverride }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [user, setUser] = useState(null);
@@ -131,7 +131,7 @@ CRITICAL: Everything must feel tailored to THIS specific sale. No generic conten
       const prompt = buildPrompt();
       const res = await base44.integrations.Core.InvokeLLM({
         prompt,
-        model: 'claude_sonnet_4_6',
+        model: modelOverride || 'claude_sonnet_4_6',
       });
       setResult(res);
     } catch (err) {
