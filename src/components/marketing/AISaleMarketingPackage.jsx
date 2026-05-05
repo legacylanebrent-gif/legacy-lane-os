@@ -193,8 +193,10 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
     for (let i = 0; i < Math.min(imagePrompts.length, 3); i++) {
       const { name, prompt } = imagePrompts[i];
       try {
+        const existingRefs = selectedImages.length > 0 ? selectedImages.slice(0, 2) : [];
         const res = await base44.integrations.Core.GenerateImage({
           prompt: prompt.slice(0, 900),
+          ...(existingRefs.length > 0 ? { existing_image_urls: existingRefs } : {}),
         });
         images.push({ name, url: res.url, prompt });
       } catch (err) {
