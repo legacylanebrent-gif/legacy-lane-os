@@ -189,24 +189,68 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
     return prompts;
   };
 
+  const POST_IMAGE_CONFIGS = [
+    {
+      name: POST_NAMES[0],
+      overlayText: 'DOORS OPEN EARLY — VIP ACCESS',
+      theme: 'urgency and exclusivity',
+      cta: 'BE FIRST IN LINE',
+      mood: 'dramatic, high-contrast, dark overlay with bold gold typography',
+    },
+    {
+      name: POST_NAMES[1],
+      overlayText: "WHAT'S INSIDE?",
+      theme: 'curiosity and discovery',
+      cta: 'SEE EVERYTHING →',
+      mood: 'warm, inviting, slightly mysterious with bright accent colors',
+    },
+    {
+      name: POST_NAMES[2],
+      overlayText: 'LAST CHANCE — FINAL DAY',
+      theme: 'urgency and scarcity',
+      cta: 'ENDS TODAY',
+      mood: 'bold red urgency palette, strong contrast, countdown energy',
+    },
+  ];
+
   const handleGenerateImages = async () => {
     if (!result) return;
     setGeneratingImages(true);
-    // Use ref to guarantee we read the latest selected images, not a stale closure
     const refImages = selectedImagesRef.current;
-    const imagePrompts = extractImagePrompts(typeof result === 'string' ? result : JSON.stringify(result));
+    const saleTitle = sale?.title || 'Estate Sale';
+    const saleLocation = sale?.property_address?.city || sale?.location || 'Local Area';
     const images = [];
-    for (let i = 0; i < Math.min(imagePrompts.length, 3); i++) {
-      const { name, prompt } = imagePrompts[i];
+
+    for (let i = 0; i < 3; i++) {
+      const config = POST_IMAGE_CONFIGS[i];
+      // Build a very explicit social media promotional post prompt
+      const prompt = `Create a single professional social media promotional post image (square 1:1 format) for an estate sale.
+
+IMPORTANT: This must look like a SINGLE polished social media ad — NOT a collage, NOT multiple panels, NOT a mood board.
+
+Sale: "${saleTitle}" in ${saleLocation}
+
+Design requirements:
+- ONE cohesive background image showing estate sale items (antiques, furniture, collectibles)
+- Bold text overlay at the top or center: "${config.overlayText}"
+- Supporting call-to-action text at the bottom: "${config.cta}"
+- Mood/style: ${config.mood}
+- Theme: ${config.theme}
+- Clean, professional typography — large, readable, high contrast text
+- Dark semi-transparent gradient bar behind text for legibility
+- Style: modern real estate / auction house social media ad
+- Do NOT combine or stitch multiple photos together
+
+${refImages.length > 0 ? `Use the provided reference image(s) to match the visual style, color palette, and types of items shown — but generate a SINGLE new image, not a copy or collage of them.` : `Show a well-lit room with antique furniture, collectibles, and estate items.`}`;
+
       try {
-        const existingRefs = refImages.length > 0 ? refImages.slice(0, 2) : [];
         const res = await base44.integrations.Core.GenerateImage({
-          prompt: prompt.slice(0, 900),
-          ...(existingRefs.length > 0 ? { existing_image_urls: existingRefs } : {}),
+          prompt,
+          ...(refImages.length > 0 ? { existing_image_urls: [refImages[0]] } : {}),
         });
-        images.push({ name, url: res.url, prompt });
+        images.push({ name: config.name, url: res.url, prompt });
       } catch (err) {
-        images.push({ name, url: null, error: err.message, prompt });
+        images.push({ name: config.name, url: null, error: err.message, prompt });
       }
     }
     setGeneratedImages(images);
