@@ -1,0 +1,157 @@
+{
+  "name": "MarketingCampaignPerformance",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "default": "customerio"
+    },
+    "campaign_key": {
+      "type": "string"
+    },
+    "campaign_name": {
+      "type": "string"
+    },
+    "campaign_type": {
+      "type": "string",
+      "enum": [
+        "campaign",
+        "broadcast",
+        "newsletter",
+        "transactional",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "sale_title": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "date_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0
+    },
+    "delivered_count": {
+      "type": "number",
+      "default": 0
+    },
+    "opened_count": {
+      "type": "number",
+      "default": 0
+    },
+    "human_opened_count": {
+      "type": "number",
+      "default": 0
+    },
+    "clicked_count": {
+      "type": "number",
+      "default": 0
+    },
+    "human_clicked_count": {
+      "type": "number",
+      "default": 0
+    },
+    "unique_opened_count": {
+      "type": "number",
+      "default": 0
+    },
+    "unique_clicked_count": {
+      "type": "number",
+      "default": 0
+    },
+    "bounced_count": {
+      "type": "number",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "number",
+      "default": 0
+    },
+    "spam_complaint_count": {
+      "type": "number",
+      "default": 0
+    },
+    "unsubscribed_count": {
+      "type": "number",
+      "default": 0
+    },
+    "suppressed_count": {
+      "type": "number",
+      "default": 0
+    },
+    "conversion_count": {
+      "type": "number",
+      "default": 0
+    },
+    "open_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "human_open_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "click_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "human_click_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "click_to_open_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "bounce_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "unsubscribe_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "spam_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "conversion_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "last_calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "campaign_key"
+  ]
+}

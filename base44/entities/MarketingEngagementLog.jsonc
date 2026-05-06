@@ -1,0 +1,128 @@
+{
+  "name": "MarketingEngagementLog",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "default": "customerio"
+    },
+    "raw_event_type": {
+      "type": "string"
+    },
+    "normalized_event_type": {
+      "type": "string"
+    },
+    "event_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "customerio_delivery_id": {
+      "type": "string"
+    },
+    "customerio_campaign_id": {
+      "type": "string"
+    },
+    "customerio_campaign_name": {
+      "type": "string"
+    },
+    "customerio_broadcast_id": {
+      "type": "string"
+    },
+    "customerio_newsletter_id": {
+      "type": "string"
+    },
+    "customerio_message_id": {
+      "type": "string"
+    },
+    "customerio_transactional_message_id": {
+      "type": "string"
+    },
+    "customerio_action_id": {
+      "type": "string"
+    },
+    "customerio_workspace_id": {
+      "type": "string"
+    },
+    "consumer_user_id": {
+      "type": "string"
+    },
+    "consumer_email": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "sale_title": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "link_url": {
+      "type": "string"
+    },
+    "link_text": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "device_type": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "metadata_json": {
+      "type": "object"
+    },
+    "raw_payload_json": {
+      "type": "object"
+    },
+    "mapping_status": {
+      "type": "string",
+      "enum": [
+        "mapped",
+        "partially_mapped",
+        "unmapped",
+        "ignored",
+        "failed"
+      ],
+      "default": "unmapped"
+    },
+    "processing_status": {
+      "type": "string",
+      "enum": [
+        "received",
+        "processed",
+        "failed"
+      ],
+      "default": "received"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "raw_event_type"
+  ]
+}

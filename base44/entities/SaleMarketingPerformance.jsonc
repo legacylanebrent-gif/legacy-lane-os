@@ -1,0 +1,127 @@
+{
+  "name": "SaleMarketingPerformance",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string"
+    },
+    "sale_title": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "sale_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sale_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "total_recipients": {
+      "type": "number",
+      "default": 0
+    },
+    "total_sent": {
+      "type": "number",
+      "default": 0
+    },
+    "total_delivered": {
+      "type": "number",
+      "default": 0
+    },
+    "total_opened": {
+      "type": "number",
+      "default": 0
+    },
+    "total_human_opened": {
+      "type": "number",
+      "default": 0
+    },
+    "total_clicked": {
+      "type": "number",
+      "default": 0
+    },
+    "total_human_clicked": {
+      "type": "number",
+      "default": 0
+    },
+    "total_unique_clickers": {
+      "type": "number",
+      "default": 0
+    },
+    "total_bounced": {
+      "type": "number",
+      "default": 0
+    },
+    "total_unsubscribed": {
+      "type": "number",
+      "default": 0
+    },
+    "total_spam_complaints": {
+      "type": "number",
+      "default": 0
+    },
+    "direction_clicks": {
+      "type": "number",
+      "default": 0
+    },
+    "sale_page_clicks": {
+      "type": "number",
+      "default": 0
+    },
+    "image_gallery_clicks": {
+      "type": "number",
+      "default": 0
+    },
+    "save_sale_clicks": {
+      "type": "number",
+      "default": 0
+    },
+    "share_clicks": {
+      "type": "number",
+      "default": 0
+    },
+    "estimated_attendance_interest_score": {
+      "type": "number",
+      "default": 0
+    },
+    "top_clicked_url": {
+      "type": "string"
+    },
+    "top_zip_codes_json": {
+      "type": "object"
+    },
+    "top_engaged_consumers_json": {
+      "type": "object"
+    },
+    "ai_summary": {
+      "type": "string"
+    },
+    "ai_recommendations": {
+      "type": "string"
+    },
+    "last_calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sale_id"
+  ]
+}

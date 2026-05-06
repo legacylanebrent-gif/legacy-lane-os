@@ -1,0 +1,138 @@
+{
+  "name": "OperatorMarketingPerformance",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "total_campaigns": {
+      "type": "number",
+      "default": 0
+    },
+    "total_sales_promoted": {
+      "type": "number",
+      "default": 0
+    },
+    "total_recipients": {
+      "type": "number",
+      "default": 0
+    },
+    "total_sent": {
+      "type": "number",
+      "default": 0
+    },
+    "total_delivered": {
+      "type": "number",
+      "default": 0
+    },
+    "total_opened": {
+      "type": "number",
+      "default": 0
+    },
+    "total_human_opened": {
+      "type": "number",
+      "default": 0
+    },
+    "total_clicked": {
+      "type": "number",
+      "default": 0
+    },
+    "total_human_clicked": {
+      "type": "number",
+      "default": 0
+    },
+    "total_unsubscribed": {
+      "type": "number",
+      "default": 0
+    },
+    "total_bounced": {
+      "type": "number",
+      "default": 0
+    },
+    "total_spam_complaints": {
+      "type": "number",
+      "default": 0
+    },
+    "average_open_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "average_human_open_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "average_click_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "average_human_click_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "average_unsubscribe_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "best_performing_sale_id": {
+      "type": "string"
+    },
+    "best_performing_sale_title": {
+      "type": "string"
+    },
+    "weakest_performing_sale_id": {
+      "type": "string"
+    },
+    "weakest_performing_sale_title": {
+      "type": "string"
+    },
+    "audience_growth_count": {
+      "type": "number",
+      "default": 0
+    },
+    "audience_loss_count": {
+      "type": "number",
+      "default": 0
+    },
+    "net_audience_growth": {
+      "type": "number",
+      "default": 0
+    },
+    "top_zip_codes_json": {
+      "type": "object"
+    },
+    "top_categories_json": {
+      "type": "object"
+    },
+    "ai_summary": {
+      "type": "string"
+    },
+    "ai_recommendations": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "operator_id"
+  ]
+}
