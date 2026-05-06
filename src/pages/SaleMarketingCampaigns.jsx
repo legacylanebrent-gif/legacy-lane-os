@@ -72,7 +72,7 @@ export default function SaleMarketingCampaigns() {
       const campaignsData = await base44.entities.MarketingTask.filter({
         sale_id: saleId,
         task_type: 'estate_sale'
-      }, '-created_date');
+      }, 'created_date');
       setCampaigns(campaignsData);
     } catch (error) {
       console.error('Error loading data:', error);
