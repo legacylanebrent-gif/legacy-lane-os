@@ -49,7 +49,7 @@ export default function Attendance() {
       
       // Auto-generate QR code for this sale
       setQrLoading(true);
-      const checkInUrl = `https://estatesaten.com/CheckIn?saleId=${saleId}`;
+      const checkInUrl = `${window.location.origin}/CheckIn?saleId=${saleId}`;
       const dataUrl = await QRCode.toDataURL(checkInUrl, { width: 400, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } });
       setQrDataUrl(dataUrl);
       setQrLoading(false);
@@ -263,7 +263,7 @@ export default function Attendance() {
                   </div>
                   {qrDataUrl && (
                     <p className="text-xs text-slate-500 mb-2 font-mono break-all px-2">
-                      https://estatesaten.com/CheckIn?saleId={sale?.id}
+                    {window.location.origin}/CheckIn?saleId={sale?.id}
                     </p>
                   )}
                   <p className="text-sm text-slate-600">
