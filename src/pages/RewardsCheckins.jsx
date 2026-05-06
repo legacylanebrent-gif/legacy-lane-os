@@ -22,9 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { 
   MapPin, Gift, Star, TrendingUp, Calendar, Camera, Plus,
-  CheckCircle2, Award, Target, Zap, QrCode
+  CheckCircle2, Award, Target, Zap, QrCode, ShoppingBag
 } from 'lucide-react';
 import { format } from 'date-fns';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
@@ -305,6 +307,18 @@ export default function RewardsCheckins() {
                         <p className="text-xs text-slate-500 mt-2">
                           {format(new Date(checkIn.created_date), 'PPp')}
                         </p>
+                        {checkIn.location_name && checkIn.check_in_type === 'sale_visit' && (
+                          <div className="mt-3">
+                            <Link
+                              to={`${createPageUrl('RecordPurchase')}?saleLocation=${encodeURIComponent(checkIn.location_name)}`}
+                            >
+                              <Button size="sm" variant="outline" className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50">
+                                <ShoppingBag className="w-3 h-3 mr-1.5" />
+                                Record a Purchase
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

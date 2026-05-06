@@ -36,6 +36,13 @@ export default function RecordPurchase() {
   useEffect(() => {
     loadUser();
     getUserLocation();
+    // Pre-fill sale location from URL param (e.g. coming from Recent Check-ins)
+    const params = new URLSearchParams(window.location.search);
+    const prefillLocation = params.get('saleLocation');
+    if (prefillLocation) {
+      setShowCustomLocation(true);
+      setFormData(prev => ({ ...prev, custom_location: prefillLocation }));
+    }
   }, []);
 
   useEffect(() => {
