@@ -189,11 +189,11 @@ export default function SaleMarketingCampaigns() {
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => { setAiModel('claude_sonnet_4_6'); setShowAIPackage(true); }} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-sm">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI Package — Claude
+            Long Version Posts
           </Button>
-          <Button onClick={() => { setAiModel('gpt_5_5'); setShowAIPackage(true); }} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-sm">
+          <Button onClick={() => { setAiModel('creative_free'); setShowAIPackage(true); }} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-sm">
             <Sparkles className="w-4 h-4 mr-2" />
-            AI Package — GPT-5.5
+            AI Creative Posts
           </Button>
           <Button onClick={handleOpenCreate} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
             <Plus className="w-4 h-4 mr-2" />

@@ -42,7 +42,8 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
     }
   }, [open, modelOverride]);
 
-  const modelLabel = modelOverride === 'gpt_5_5' ? 'GPT-5.5' : 'Claude';
+  const isCreativeMode = modelOverride === 'creative_free';
+  const modelLabel = isCreativeMode ? 'AI Creative' : 'Long Version';
   const saleImages = (sale?.images || sale?.photos || []).map(p => (typeof p === 'string' ? p : p?.url)).filter(Boolean);
 
   const toggleImage = (url) => {
@@ -51,6 +52,22 @@ export default function AISaleMarketingPackage({ sale, open, onClose, modelOverr
       selectedImagesRef.current = next;
       return next;
     });
+  };
+
+  const buildCreativePrompt = () => {
+    const featuredItems = sale?.featured_items || [];
+    const imgList = selectedImages.length > 0 ? selectedImages.join(', ') : null;
+
+    return `You are a sharp, creative social media marketer specializing in estate sales. 
+
+Here's the sale you're promoting:
+- Title: ${sale?.title || 'Estate Sale'}
+- Location: ${sale?.property_address?.city || sale?.location || 'Local area'}
+- Dates: ${sale?.start_date ? `${sale.start_date}${sale.end_date ? ' – ' + sale.end_date : ''}` : 'See listing'}
+- Items: ${featuredItems.length > 0 ? featuredItems.join(', ') : 'Furniture, antiques, collectibles, household'}
+${imgList ? `- Reference photos: ${imgList}` : ''}
+
+Create 3 social media posts for this sale. You decide the angle, tone, and format — whatever will actually stop someone from scrolling and make them show up. Be bold. Be specific. Use the real details above. Each post should feel different from the others. Include a caption, headline, and a quick note on which platform it's best for.`;
   };
 
   const buildPrompt = () => {
@@ -144,10 +161,11 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
     setResult(null);
     setSavedPosts({});
     try {
-      const prompt = buildPrompt();
+      const prompt = isCreativeMode ? buildCreativePrompt() : buildPrompt();
+      const actualModel = isCreativeMode ? 'gpt_5_5' : (modelOverride || 'claude_sonnet_4_6');
       const res = await base44.integrations.Core.InvokeLLM({
         prompt,
-        model: modelOverride || 'claude_sonnet_4_6',
+        model: actualModel,
         ...(selectedImages.length > 0 ? { file_urls: selectedImages.slice(0, 5) } : {}),
       });
       setResult(res);
@@ -325,7 +343,7 @@ Suggest best posting times, ad spend recommendations, and one quick tip for the 
               <Sparkles className="w-4 h-4 text-purple-600" />
             </div>
             AI Marketing Package
-            <Badge className={`text-xs ml-1 ${modelOverride === 'gpt_5_5' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-purple-100 text-purple-700 border-purple-200'}`}>
+            <Badge className={`text-xs ml-1 ${isCreativeMode ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-purple-100 text-purple-700 border-purple-200'}`}>
               {modelLabel}
             </Badge>
           </DialogTitle>
