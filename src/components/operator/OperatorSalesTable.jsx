@@ -32,7 +32,7 @@ export default function OperatorSalesTable({ sales, onEdit, onDelete }) {
           <CardContent className="p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
                   <Link
                     to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
                     className="text-lg font-semibold text-slate-900 hover:text-orange-600 transition-colors"
@@ -40,6 +40,15 @@ export default function OperatorSalesTable({ sales, onEdit, onDelete }) {
                     {sale.title}
                   </Link>
                   {getStatusBadge(sale.status)}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEdit(sale)}
+                    className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
                   {sale.national_featured && (
                     <Badge className="bg-orange-600">National Featured</Badge>
                   )}
