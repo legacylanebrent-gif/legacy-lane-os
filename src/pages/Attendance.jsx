@@ -25,6 +25,9 @@ export default function Attendance() {
 
   useEffect(() => {
     loadData();
+    // Auto-refresh every 30 seconds to pick up new QR check-ins
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
@@ -46,16 +49,17 @@ export default function Attendance() {
       }
 
       setSale(saleData[0]);
-      
+
+      // Load QR check-ins for this sale
+      const checkInData = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_visit' }, '-created_date', 100);
+      setCheckins(checkInData);
+
       // Auto-generate QR code for this sale
       setQrLoading(true);
       const checkInUrl = `${window.location.origin}/CheckIn?saleId=${saleId}`;
       const dataUrl = await QRCode.toDataURL(checkInUrl, { width: 400, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } });
       setQrDataUrl(dataUrl);
       setQrLoading(false);
-
-      // TODO: Load actual check-in data
-      setCheckins([]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -300,13 +304,13 @@ export default function Attendance() {
                 ) : (
                   <div className="space-y-3">
                     {checkins.map((checkin, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div key={checkin.id || idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                         <div>
-                          <p className="font-medium">{checkin.name}</p>
-                          <p className="text-sm text-slate-600">{checkin.email}</p>
+                          <p className="font-medium text-slate-800">{checkin.notes?.replace('QR check-in by ', '') || 'Anonymous'}</p>
+                          <p className="text-xs text-slate-500">QR Scan</p>
                         </div>
                         <div className="text-right text-sm text-slate-600">
-                          {format(new Date(checkin.timestamp), 'h:mm a')}
+                          {checkin.created_date ? format(new Date(checkin.created_date), 'h:mm a') : '—'}
                         </div>
                       </div>
                     ))}

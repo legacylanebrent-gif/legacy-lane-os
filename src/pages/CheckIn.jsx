@@ -24,20 +24,20 @@ export default function CheckIn() {
       setSale(saleData);
       setUser(userData);
 
-      // If already logged in, auto check-in immediately
+      // If already logged in, auto check-in immediately — pass saleData directly to avoid stale state
       if (userData && id) {
-        doCheckIn(id, userData);
+        doCheckIn(id, userData, saleData);
       }
     }).finally(() => setLoading(false));
   }, []);
 
-  const doCheckIn = async (sid, userData) => {
+  const doCheckIn = async (sid, userData, saleData) => {
     setSubmitting(true);
     try {
       await base44.entities.CheckIn.create({
         check_in_type: 'sale_visit',
         location_id: sid,
-        location_name: sale?.title || '',
+        location_name: saleData?.title || '',
         notes: `QR check-in by ${userData?.full_name || userData?.email || 'user'}`,
         verified: true,
       });
