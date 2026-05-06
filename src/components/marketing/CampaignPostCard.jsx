@@ -271,7 +271,7 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
         </div>
       </div>
 
-      <CampaignStatsPanel campaign={campaign} />
+      <CampaignStatsPanel campaign={campaign} onRefresh={onRefresh} />
 
       <PlatformPreviewModal campaign={campaign} open={showPreview} onClose={() => setShowPreview(false)} />
       <PushToSocialModal campaign={campaign} open={showPush} onClose={() => setShowPush(false)} />

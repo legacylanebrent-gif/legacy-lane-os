@@ -1,5 +1,7 @@
-import React from 'react';
-import { Eye, Heart, MessageCircle, Share2, MousePointerClick, Bookmark, RefreshCw, TrendingUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, Heart, MessageCircle, Share2, MousePointerClick, Bookmark, RefreshCw, TrendingUp, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
 
 const STAT_FIELDS = [
   { key: 'reach',       label: 'Reach',       icon: Eye,               color: 'text-blue-600',   bg: 'bg-blue-50' },
@@ -17,7 +19,10 @@ function formatNumber(n) {
   return n.toString();
 }
 
-export default function CampaignStatsPanel({ campaign }) {
+export default function CampaignStatsPanel({ campaign, onRefresh }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshed, setRefreshed] = useState(false);
+
   const stats = campaign?.stats || {};
   const log = stats.snapshot_log || [];
   const hasAnyStats = STAT_FIELDS.some(f => stats[f.key] > 0);
@@ -35,6 +40,18 @@ export default function CampaignStatsPanel({ campaign }) {
     return { delta, up: delta > 0 };
   }
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await base44.functions.invoke('refreshCampaignStats', {});
+      setRefreshed(true);
+      setTimeout(() => setRefreshed(false), 3000);
+      if (onRefresh) onRefresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (!campaign?.launched_at) return null;
 
   return (
@@ -44,13 +61,27 @@ export default function CampaignStatsPanel({ campaign }) {
         <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
           <TrendingUp className="w-3 h-3" /> Engagement Stats
         </p>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {lastRefreshed && (
             <p className="text-[9px] text-slate-400 flex items-center gap-1">
               <RefreshCw className="w-2.5 h-2.5" />
               Updated {lastRefreshed}
             </p>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="h-6 text-[10px] px-2 border-slate-200 text-slate-600 hover:bg-white"
+          >
+            {refreshing
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : refreshed
+                ? <span className="text-green-600">✓ Refreshed</span>
+                : <><RefreshCw className="w-3 h-3 mr-1" />Refresh Stats</>
+            }
+          </Button>
         </div>
       </div>
 
