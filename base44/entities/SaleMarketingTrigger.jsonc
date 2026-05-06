@@ -1,0 +1,58 @@
+{
+  "name": "SaleMarketingTrigger",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "sale_created",
+        "sale_updated",
+        "sale_approved",
+        "sale_reminder",
+        "sale_final_day",
+        "sale_cancelled"
+      ]
+    },
+    "customerio_event_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processed",
+        "failed",
+        "skipped"
+      ],
+      "default": "pending"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "payload_json": {
+      "type": "object"
+    },
+    "eligible_consumer_count": {
+      "type": "number",
+      "default": 0
+    },
+    "events_sent_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "sale_id",
+    "trigger_type"
+  ]
+}

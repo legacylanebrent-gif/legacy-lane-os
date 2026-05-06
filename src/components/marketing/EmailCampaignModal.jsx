@@ -19,7 +19,6 @@ const EMAIL_SEQUENCE = [
 
 export default function EmailCampaignModal({ sale, open, onClose, onSaved }) {
   const [step, setStep] = useState('configure'); // configure | generating | review | saving | done
-  const [listId, setListId] = useState('');
   const [fromName, setFromName] = useState('');
   const [replyTo, setReplyTo] = useState('');
   const [scheduleDate, setScheduleDate] = useState('');
@@ -127,11 +126,11 @@ Make each email feel urgent, warm, and local. Use real details. Keep bodies unde
             email_key: seq.key,
             subject: email.subject,
             preview: email.preview,
-            mailchimp_list_id: listId || null,
             from_name: fromName || null,
             reply_to: replyTo || null,
             scheduled_send_date: scheduledDate || null,
-            mailchimp_status: 'pending_keys', // ready to activate when API keys are added
+            customerio_status: 'pending_credentials',
+            customerio_event_name: 'sale.email_campaign_scheduled',
           }),
         });
         results[seq.key] = record.id;
@@ -168,7 +167,7 @@ Make each email feel urgent, warm, and local. Use real details. Keep bodies unde
             Email Campaign Builder
             <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs ml-1">4-Email Sequence</Badge>
           </DialogTitle>
-          <p className="text-xs text-slate-500">AI-generated drip sequence — pre-scheduled and ready for Mailchimp.</p>
+          <p className="text-xs text-slate-500">AI-generated drip sequence — pre-scheduled for Customer.io delivery.</p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto min-h-0 space-y-4 p-1">
@@ -198,29 +197,25 @@ Make each email feel urgent, warm, and local. Use real details. Keep bodies unde
                 </div>
               )}
 
-              {/* Mailchimp config — optional, stored for later activation */}
+              {/* Customer.io config — stored for campaign delivery */}
               <div className="border border-slate-200 rounded-xl p-4 space-y-3">
                 <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  Mailchimp Settings <span className="text-slate-400 font-normal">(optional — store for later activation)</span>
+                  Sender Settings <span className="text-slate-400 font-normal">(optional)</span>
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Audience List ID</label>
-                    <Input value={listId} onChange={e => setListId(e.target.value)} placeholder="abc123def4" className="h-8 text-xs font-mono" />
-                  </div>
                   <div>
                     <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">From Name</label>
                     <Input value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Estate Sales" className="h-8 text-xs" />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Reply-To Email</label>
                     <Input type="email" value={replyTo} onChange={e => setReplyTo(e.target.value)} placeholder="you@yourbusiness.com" className="h-8 text-xs" />
                   </div>
                 </div>
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                  <p className="text-[11px] text-amber-700">
-                    💡 Campaigns will be saved as <strong>pending</strong> entities and pre-scheduled. Once your Mailchimp API key is added to settings, they can be activated with one click.
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2.5">
+                  <p className="text-[11px] text-indigo-700">
+                    💡 Campaigns will be saved as <strong>pending</strong> tasks. Customer.io will handle delivery once credentials are configured in the integration dashboard.
                   </p>
                 </div>
               </div>
@@ -327,7 +322,7 @@ Make each email feel urgent, warm, and local. Use real details. Keep bodies unde
               <div>
                 <p className="text-lg font-semibold text-slate-800">Email Campaign Saved!</p>
                 <p className="text-sm text-slate-500 mt-1">4 emails created as pending campaign tasks, pre-scheduled by sale date.</p>
-                <p className="text-xs text-amber-600 mt-2">Add your Mailchimp API key in settings to activate sending.</p>
+                <p className="text-xs text-indigo-600 mt-2">Connect Customer.io in the admin integration dashboard to activate delivery.</p>
               </div>
               <Button onClick={handleClose} className="bg-blue-600 hover:bg-blue-700 text-white">Done</Button>
             </div>

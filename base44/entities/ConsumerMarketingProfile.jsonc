@@ -1,0 +1,96 @@
+{
+  "name": "ConsumerMarketingProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "preferred_radius_miles": {
+      "type": "number",
+      "default": 25
+    },
+    "global_marketing_opt_in": {
+      "type": "boolean",
+      "default": true
+    },
+    "estate_sale_alerts_opt_in": {
+      "type": "boolean",
+      "default": true
+    },
+    "vip_alerts_opt_in": {
+      "type": "boolean",
+      "default": false
+    },
+    "weekly_digest_opt_in": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_synced_to_customerio_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "customerio_profile_id": {
+      "type": "string"
+    },
+    "suppression_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "unsubscribed_all",
+        "bounced",
+        "complained",
+        "suppressed"
+      ],
+      "default": "active"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "website_signup",
+        "operator_page",
+        "sale_page",
+        "import",
+        "admin_added"
+      ],
+      "default": "website_signup"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "email"
+  ]
+}

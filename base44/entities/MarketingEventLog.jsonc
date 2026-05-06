@@ -1,0 +1,51 @@
+{
+  "name": "MarketingEventLog",
+  "type": "object",
+  "properties": {
+    "event_name": {
+      "type": "string"
+    },
+    "consumer_user_id": {
+      "type": "string"
+    },
+    "consumer_email": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "payload_json": {
+      "type": "object"
+    },
+    "provider": {
+      "type": "string",
+      "default": "customerio"
+    },
+    "provider_response": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "skipped",
+        "sent",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "event_name"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "MarketingIntegrationSettings",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "default": "customerio",
+      "description": "Marketing automation provider"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_configured",
+        "connected",
+        "error",
+        "disabled"
+      ],
+      "default": "not_configured"
+    },
+    "api_mode": {
+      "type": "string",
+      "enum": [
+        "pipelines",
+        "track"
+      ],
+      "default": "pipelines"
+    },
+    "region": {
+      "type": "string",
+      "default": "us"
+    },
+    "last_tested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_success_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error_message": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    }
+  },
+  "required": []
+}

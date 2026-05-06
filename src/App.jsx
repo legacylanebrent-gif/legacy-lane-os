@@ -55,6 +55,8 @@ import OperatorCommissions from './pages/OperatorCommissions';
 import OperatorWalletDashboard from './pages/OperatorWalletDashboard.jsx';
 import AdminWalletDashboard from './pages/AdminWalletDashboard.jsx';
 import AdminAIOperator from './pages/AdminAIOperator.jsx';
+import MarketingPreferences from './pages/MarketingPreferences';
+import CustomerIODashboard from './pages/CustomerIODashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -153,6 +155,8 @@ const AuthenticatedApp = () => {
       <Route path="/OperatorWalletDashboard" element={<LayoutWrapper currentPageName="OperatorWalletDashboard"><OperatorWalletDashboard /></LayoutWrapper>} />
       <Route path="/AdminWalletDashboard" element={<LayoutWrapper currentPageName="AdminWalletDashboard"><AdminWalletDashboard /></LayoutWrapper>} />
       <Route path="/AdminAIOperator" element={<LayoutWrapper currentPageName="AdminAIOperator"><AdminAIOperator /></LayoutWrapper>} />
+      <Route path="/MarketingPreferences" element={<LayoutWrapper currentPageName="MarketingPreferences"><MarketingPreferences /></LayoutWrapper>} />
+      <Route path="/CustomerIODashboard" element={<LayoutWrapper currentPageName="CustomerIODashboard"><CustomerIODashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

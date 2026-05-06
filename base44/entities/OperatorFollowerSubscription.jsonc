@@ -1,0 +1,68 @@
+{
+  "name": "OperatorFollowerSubscription",
+  "type": "object",
+  "properties": {
+    "consumer_user_id": {
+      "type": "string"
+    },
+    "consumer_email": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "unsubscribed"
+      ],
+      "default": "active"
+    },
+    "alert_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "new_sale_alerts",
+        "sale_reminders"
+      ],
+      "description": "new_sale_alerts, sale_reminders, vip_preview, final_day_discounts, weekly_digest"
+    },
+    "subscribed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "unsubscribed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paused_until": {
+      "type": "string",
+      "format": "date"
+    },
+    "unsubscribe_reason": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": "string"
+    },
+    "last_synced_to_customerio_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "consumer_user_id",
+    "consumer_email",
+    "operator_id"
+  ]
+}
