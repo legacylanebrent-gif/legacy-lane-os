@@ -10,6 +10,7 @@ import {
   ArrowLeft, QrCode, Users, Plus, Minus, Calendar, 
   Clock, TrendingUp, UserCheck, Download, Loader2
 } from 'lucide-react';
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
 
@@ -134,7 +135,7 @@ export default function Attendance() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-slate-600 mb-1">Total Today</div>
@@ -157,12 +158,6 @@ export default function Attendance() {
           <CardContent className="p-4">
             <div className="text-sm text-slate-600 mb-1">Peak Hour</div>
             <div className="text-xl font-bold text-slate-900">{stats.peakHour}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-slate-600 mb-1">Avg Duration</div>
-            <div className="text-xl font-bold text-slate-900">{stats.avgDuration}</div>
           </CardContent>
         </Card>
       </div>
@@ -398,23 +393,101 @@ export default function Attendance() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Attendance Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-slate-500">
-                <TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-                <p className="text-lg">Analytics Dashboard Coming Soon</p>
-                <p className="text-sm mt-2">
-                  Track attendance trends, peak hours, and visitor patterns
-                </p>
+          {(() => {
+            const qrCount = checkins.filter(c => c.notes !== 'Manual count').length;
+            const manualCountDB = checkins.filter(c => c.notes === 'Manual count').length;
+            const total = checkins.length;
+            const pieData = [
+              { name: 'QR Scan', value: qrCount, color: '#16a34a' },
+              { name: 'Manual', value: manualCountDB, color: '#ea580c' },
+            ].filter(d => d.value > 0);
+
+            return (
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Pie Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Check-in Method Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {total === 0 ? (
+                      <div className="text-center py-12 text-slate-400">
+                        <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                        <p>No check-ins recorded yet</p>
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={260}>
+                        <PieChart>
+                          <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                            {pieData.map((entry, i) => (
+                              <Cell key={i} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Summary Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Cross-Reference Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-100">
+                      <div className="flex items-center gap-3">
+                        <QrCode className="w-5 h-5 text-green-600" />
+                        <div>
+                          <p className="font-semibold text-green-800">QR Scan Check-ins</p>
+                          <p className="text-xs text-green-600">Registered visitors via QR code</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-green-600">{qrCount}</p>
+                        <p className="text-xs text-green-500">{total > 0 ? Math.round((qrCount / total) * 100) : 0}% of total</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100">
+                      <div className="flex items-center gap-3">
+                        <Users className="w-5 h-5 text-orange-600" />
+                        <div>
+                          <p className="font-semibold text-orange-800">Manual Count (Guests)</p>
+                          <p className="text-xs text-orange-600">Visitors counted by operator</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-orange-600">{manualCountDB}</p>
+                        <p className="text-xs text-orange-500">{total > 0 ? Math.round((manualCountDB / total) * 100) : 0}% of total</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-cyan-50 rounded-lg border border-cyan-100">
+                      <div className="flex items-center gap-3">
+                        <TrendingUp className="w-5 h-5 text-cyan-600" />
+                        <div>
+                          <p className="font-semibold text-cyan-800">Total Attendance</p>
+                          <p className="text-xs text-cyan-600">All check-in methods combined</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-cyan-600">{total}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>
