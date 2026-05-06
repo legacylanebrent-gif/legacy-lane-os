@@ -10,6 +10,7 @@ export default function CheckIn() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [saleId, setSaleId] = useState(null);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -46,6 +47,17 @@ export default function CheckIn() {
     }
     setSubmitting(false);
     setSubmitted(true);
+
+    // 3-second countdown then redirect to sale page
+    let count = 3;
+    const timer = setInterval(() => {
+      count -= 1;
+      setCountdown(count);
+      if (count <= 0) {
+        clearInterval(timer);
+        window.location.href = `${window.location.origin}/EstateSaleDetail?id=${sid}`;
+      }
+    }, 1000);
   };
 
   const handleLoginRedirect = () => {
@@ -73,12 +85,15 @@ export default function CheckIn() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">You're checked in!</h1>
           {sale && <p className="text-slate-600 mb-1 font-medium">{sale.title}</p>}
-          <p className="text-slate-500 text-sm mb-6">Welcome — enjoy the sale!</p>
+          <p className="text-slate-500 text-sm mb-4">Welcome — enjoy the sale!</p>
           {user && (
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 mb-6">
               Your visit is saved to your account. You can log any purchases from your profile.
             </p>
           )}
+          <p className="text-sm text-cyan-600 font-medium">
+            Redirecting to sale page in {countdown}…
+          </p>
         </div>
       </div>
     );
