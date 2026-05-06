@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, QrCode, Users, Plus, Minus, Calendar, 
-  Clock, TrendingUp, UserCheck, Download
+  Clock, TrendingUp, UserCheck, Download, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import QRCode from 'qrcode';
 
 export default function Attendance() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function Attendance() {
   const [manualCount, setManualCount] = useState(0);
   const [checkins, setCheckins] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -44,6 +47,13 @@ export default function Attendance() {
 
       setSale(saleData[0]);
       
+      // Auto-generate QR code for this sale
+      setQrLoading(true);
+      const checkInUrl = `${window.location.origin}/CheckIn?saleId=${saleId}`;
+      const dataUrl = await QRCode.toDataURL(checkInUrl, { width: 400, margin: 2, color: { dark: '#0f172a', light: '#ffffff' } });
+      setQrDataUrl(dataUrl);
+      setQrLoading(false);
+
       // TODO: Load actual check-in data
       setCheckins([]);
     } catch (error) {
@@ -61,9 +71,12 @@ export default function Attendance() {
     setManualCount(prev => Math.max(0, prev - 1));
   };
 
-  const generateQRCode = () => {
-    // TODO: Generate QR code for check-in
-    alert('QR Code generation coming soon!');
+  const handleDownloadQR = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement('a');
+    a.href = qrDataUrl;
+    a.download = `checkin-qr-${sale?.id || 'sale'}.png`;
+    a.click();
   };
 
   const stats = {
@@ -239,27 +252,29 @@ export default function Attendance() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="bg-slate-50 rounded-lg p-8 text-center">
-                  <div className="w-64 h-64 bg-white mx-auto rounded-lg border-4 border-slate-200 flex items-center justify-center mb-4">
-                    <QrCode className="w-32 h-32 text-slate-300" />
+                  <div className="w-64 h-64 bg-white mx-auto rounded-lg border-4 border-slate-200 flex items-center justify-center mb-4 overflow-hidden">
+                    {qrLoading ? (
+                      <Loader2 className="w-10 h-10 text-slate-300 animate-spin" />
+                    ) : qrDataUrl ? (
+                      <img src={qrDataUrl} alt="Check-in QR Code" className="w-full h-full object-contain" />
+                    ) : (
+                      <QrCode className="w-32 h-32 text-slate-300" />
+                    )}
                   </div>
-                  <p className="text-slate-600 mb-4">
-                    QR Code generation coming soon
+                  {qrDataUrl && (
+                    <p className="text-xs text-slate-500 mb-2 font-mono break-all px-2">
+                      {window.location.origin}/CheckIn?saleId={sale?.id}
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-600">
+                    {qrDataUrl ? 'Scan to check in to this sale' : 'QR code generating...'}
                   </p>
-                  <Button 
-                    onClick={generateQRCode}
-                    className="bg-cyan-600 hover:bg-cyan-700"
-                  >
-                    Generate QR Code
-                  </Button>
                 </div>
 
                 <div className="space-y-3 pt-4 border-t">
-                  <Button variant="outline" className="w-full">
+                  <Button onClick={handleDownloadQR} disabled={!qrDataUrl} variant="outline" className="w-full">
                     <Download className="w-4 h-4 mr-2" />
                     Download QR Code
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    Print QR Code Sign
                   </Button>
                 </div>
               </CardContent>
