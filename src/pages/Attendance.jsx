@@ -304,12 +304,17 @@ export default function Attendance() {
                 ) : (
                   <div className="space-y-3">
                     {checkins.map((checkin, idx) => (
-                      <div key={checkin.id || idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div key={checkin.id || idx} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg">
                         <div>
                           <p className="font-medium text-slate-800">{checkin.notes?.replace('QR check-in by ', '') || 'Anonymous'}</p>
                           <p className="text-xs text-slate-500">QR Scan</p>
+                          {sale?.property_address && (
+                            <p className="text-xs text-cyan-700 mt-1">
+                              {[sale.property_address.street, sale.property_address.city, sale.property_address.state, sale.property_address.zip].filter(Boolean).join(', ')}
+                            </p>
+                          )}
                         </div>
-                        <div className="text-right text-sm text-slate-600">
+                        <div className="text-right text-sm text-slate-600 flex-shrink-0 ml-2">
                           {checkin.created_date ? format(new Date(checkin.created_date), 'h:mm a') : '—'}
                         </div>
                       </div>
