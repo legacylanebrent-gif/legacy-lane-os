@@ -16,9 +16,13 @@ import {
   MessageSquare,
   Plus,
   RefreshCw,
+  Settings,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function EstateSaleOperatorDashboard({ user }) {
+  const navigate = useNavigate();
   const [sales, setSales] = useState([]);
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -135,6 +139,14 @@ export default function EstateSaleOperatorDashboard({ user }) {
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </Button>
+          <Button
+            onClick={() => navigate(createPageUrl('MySales'))}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            My Sales Manager
           </Button>
           <Button
             onClick={() => setCreateModalOpen(true)}
