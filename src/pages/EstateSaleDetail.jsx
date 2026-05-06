@@ -539,21 +539,21 @@ END:VCALENDAR`;
                       </button>
                     )}
                     {sale.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => setSelectedImage(prev => prev === 0 ? sale.images.length - 1 : prev - 1)}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all"
-                        >
-                          <ChevronLeft className="w-6 h-6 text-slate-900" />
-                        </button>
-                        <button
-                          onClick={() => setSelectedImage(prev => prev === sale.images.length - 1 ? 0 : prev + 1)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all"
-                        >
-                          <ChevronRight className="w-6 h-6 text-slate-900" />
-                        </button>
-                      </>
-                    )}
+                       <>
+                         <button
+                           onClick={() => setSelectedImage(prev => prev === 0 ? sale.images.length - 1 : prev - 1)}
+                           className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                         >
+                           <ChevronLeft className="w-6 h-6 text-slate-900" />
+                         </button>
+                         <button
+                           onClick={() => setSelectedImage(prev => prev === sale.images.length - 1 ? 0 : prev + 1)}
+                           className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-3 shadow-lg hover:bg-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                         >
+                           <ChevronRight className="w-6 h-6 text-slate-900" />
+                         </button>
+                       </>
+                     )}
                     {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
                       <div className="absolute bottom-16 left-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto">
                         {sale.images[selectedImage]?.name && (
