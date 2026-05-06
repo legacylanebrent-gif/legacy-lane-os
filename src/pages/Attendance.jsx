@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, QrCode, Users, Plus, Minus, Calendar, 
-  Clock, TrendingUp, UserCheck, Download, Loader2
+  Clock, TrendingUp, UserCheck, Download, Loader2, Trash2
 } from 'lucide-react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
@@ -23,6 +23,8 @@ export default function Attendance() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [deduping, setDeduping] = useState(false);
+  const [dedupeResult, setDedupeResult] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -89,6 +91,23 @@ export default function Attendance() {
 
   const handleDecrement = () => {
     setManualCount(prev => Math.max(0, prev - 1));
+  };
+
+  const handleDeduplicateCheckins = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const saleId = params.get('saleId');
+    if (!saleId) return;
+    setDeduping(true);
+    setDedupeResult(null);
+    try {
+      const res = await base44.functions.invoke('deduplicateCheckins', { saleId });
+      setDedupeResult(res.data?.message || 'Done');
+      await loadData();
+    } catch (err) {
+      setDedupeResult('Error: ' + err.message);
+    } finally {
+      setDeduping(false);
+    }
   };
 
   const handleDownloadQR = () => {
@@ -482,6 +501,21 @@ export default function Attendance() {
                       <div className="text-right">
                         <p className="text-3xl font-bold text-cyan-600">{total}</p>
                       </div>
+                    </div>
+
+                    <div className="pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                        onClick={handleDeduplicateCheckins}
+                        disabled={deduping}
+                      >
+                        {deduping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                        Remove Duplicate Check-ins
+                      </Button>
+                      {dedupeResult && (
+                        <p className="text-xs text-center mt-2 text-slate-600">{dedupeResult}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
