@@ -16,21 +16,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'saleId is required' }, { status: 400 });
     }
 
-    // Fetch all QR check-ins (non-manual) for this sale
+    // Fetch all check-ins for this sale
     const allCheckins = await base44.asServiceRole.entities.CheckIn.filter({
       location_id: saleId,
       check_in_type: 'sale_visit',
     });
 
-    // Only deduplicate QR check-ins (manual ones have no user identity)
-    const qrCheckins = allCheckins.filter(c => c.notes !== 'Manual count');
+    // Only process QR check-ins by logged-in users (notes contains "QR check-in by")
+    // Leave manual/guest check-ins (notes === "Manual count") untouched
+    const qrLoggedInCheckins = allCheckins.filter(c => c.notes && c.notes.includes('QR check-in by'));
 
     // Group by (created_by, date) — keep the earliest, collect ids to delete
     const seen = {};
     const toDelete = [];
 
     // Sort oldest first so we keep the first occurrence
-    const sorted = [...qrCheckins].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+    const sorted = [...qrLoggedInCheckins].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
     for (const checkin of sorted) {
       const day = checkin.created_date ? new Date(checkin.created_date).toISOString().split('T')[0] : 'unknown';
