@@ -12,7 +12,15 @@ function extractContent(campaign) {
     const hm = campaign.description.match(/headline[:\s*]+([^\n]+)/i);
     const cm = campaign.description.match(/caption[:\s*]+([^\n]+(?:\n(?![A-Z][a-z]+:)[^\n]*)*)/i);
     if (hm) headline = hm[1].trim().replace(/^\*+|\*+$/g, '');
-    if (cm) caption = cm[1].trim().slice(0, 280);
+    if (cm) {
+      caption = cm[1].trim()
+        .replace(/\(Facebook\/Instagram\s*ready\)[:\s]*/gi, '')
+        .replace(/\*\*/g, '')
+        .replace(/^>\s*/gm, '')
+        .replace(/^\s*[-–—]\s*/gm, '')
+        .trim()
+        .slice(0, 280);
+    }
   }
   return { headline, caption };
 }

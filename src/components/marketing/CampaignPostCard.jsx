@@ -35,7 +35,15 @@ function SocialPostMockup({ campaign }) {
     const headlineMatch = campaign.description.match(/headline[:\s*]+([^\n]+)/i);
     const captionMatch = campaign.description.match(/caption[:\s*]+([^\n]+(?:\n(?![A-Z][a-z]+:)[^\n]*)*)/i);
     if (headlineMatch) headline = headlineMatch[1].trim().replace(/^\*+|\*+$/g, '');
-    if (captionMatch) caption = captionMatch[1].trim().slice(0, 280);
+    if (captionMatch) {
+      caption = captionMatch[1].trim()
+        .replace(/\(Facebook\/Instagram\s*ready\)[:\s]*/gi, '')  // remove "(Facebook/Instagram ready):"
+        .replace(/\*\*/g, '')                                      // remove bold markers
+        .replace(/^>\s*/gm, '')                                    // remove blockquote markers
+        .replace(/^\s*[-–—]\s*/gm, '')                            // remove leading dashes
+        .trim()
+        .slice(0, 280);
+    }
   }
 
   return (
