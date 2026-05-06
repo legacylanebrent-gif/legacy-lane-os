@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon, Eye, Send, Megaphone, Loader2, ExternalLink } from 'lucide-react';
+import { Calendar, Edit, Trash2, Share2, Mail, MessageSquare, TrendingUp, CheckCircle2, PlayCircle, ImageIcon, Eye, Send, Megaphone, Loader2, ExternalLink, Rocket, ClipboardList } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import PlatformPreviewModal from './PlatformPreviewModal';
 import PushToSocialModal from './PushToSocialModal';
 import LaunchFbAdModal from './LaunchFbAdModal';
+import CampaignLaunchModal from './CampaignLaunchModal';
+import CampaignStatsPanel from './CampaignStatsPanel';
 
 const STATUS_COLORS = {
   pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -119,13 +121,16 @@ const PLATFORM_PREVIEW_BUTTONS = [
   { name: 'Twitter/X', color: 'bg-slate-800 text-white hover:bg-slate-700' },
 ];
 
-export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusChange }) {
+export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusChange, onRefresh }) {
   const [expanded, setExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showPush, setShowPush] = useState(false);
   const [showFbAd, setShowFbAd] = useState(false);
+  const [showLaunch, setShowLaunch] = useState(false);
   const Icon = getCampaignIcon(campaign.category);
   const isAI = campaign.title?.startsWith('[AI-');
+  const checklist = campaign.launch_checklist || {};
+  const checklistDone = [checklist.caption_copied, checklist.image_downloaded, checklist.posted_to_platform, checklist.boost_enabled, checklist.team_notified].filter(Boolean).length;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
@@ -242,22 +247,41 @@ export default function CampaignPostCard({ campaign, onEdit, onDelete, onStatusC
           {/* Actions */}
           <div className="flex gap-2 mt-auto pt-2 flex-wrap">
             {campaign.status === 'pending' && (
-              <Button size="sm" onClick={() => onStatusChange(campaign.id, 'in_progress')} className="bg-blue-600 hover:bg-blue-700 text-xs h-8">
-                <PlayCircle className="w-3.5 h-3.5 mr-1.5" />Start
+              <Button size="sm" onClick={() => setShowLaunch(true)} className="bg-blue-600 hover:bg-blue-700 text-xs h-8">
+                <Rocket className="w-3.5 h-3.5 mr-1.5" />Launch Campaign
               </Button>
             )}
             {campaign.status === 'in_progress' && (
-              <Button size="sm" onClick={() => onStatusChange(campaign.id, 'completed')} className="bg-green-600 hover:bg-green-700 text-xs h-8">
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />Mark Complete
+              <>
+                <Button size="sm" onClick={() => setShowLaunch(true)} variant="outline" className="text-xs h-8 border-blue-200 text-blue-700 hover:bg-blue-50">
+                  <ClipboardList className="w-3.5 h-3.5 mr-1.5" />
+                  Checklist {checklistDone > 0 && <Badge className="ml-1 bg-blue-100 text-blue-700 border-0 text-[9px] px-1 py-0">{checklistDone}/5</Badge>}
+                </Button>
+                <Button size="sm" onClick={() => onStatusChange(campaign.id, 'completed')} className="bg-green-600 hover:bg-green-700 text-xs h-8">
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />Mark Complete
+                </Button>
+              </>
+            )}
+            {campaign.status === 'completed' && (
+              <Button size="sm" onClick={() => setShowLaunch(true)} variant="outline" className="text-xs h-8 border-slate-200 text-slate-500">
+                <ClipboardList className="w-3.5 h-3.5 mr-1.5" />View Launch Log
               </Button>
             )}
           </div>
         </div>
       </div>
 
+      <CampaignStatsPanel campaign={campaign} />
+
       <PlatformPreviewModal campaign={campaign} open={showPreview} onClose={() => setShowPreview(false)} />
       <PushToSocialModal campaign={campaign} open={showPush} onClose={() => setShowPush(false)} />
       <LaunchFbAdModal campaign={campaign} open={showFbAd} onClose={() => setShowFbAd(false)} />
+      <CampaignLaunchModal
+        campaign={campaign}
+        open={showLaunch}
+        onClose={() => setShowLaunch(false)}
+        onLaunched={onRefresh}
+      />
     </div>
   );
 }

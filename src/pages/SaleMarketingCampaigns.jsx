@@ -258,6 +258,7 @@ export default function SaleMarketingCampaigns() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onStatusChange={handleStatusChange}
+              onRefresh={loadData}
             />
           ))}
         </div>

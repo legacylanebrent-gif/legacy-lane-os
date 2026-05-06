@@ -18,6 +18,11 @@
       "type": "string",
       "description": "Estate sale title for quick reference"
     },
+    "sale_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of the sale \u2014 used to stop nightly stat tracking"
+    },
     "title": {
       "type": "string",
       "description": "Task title"
@@ -76,10 +81,110 @@
       "type": "string",
       "description": "User ID of assigned person"
     },
+    "launched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When campaign was officially launched"
+    },
     "completed_date": {
       "type": "string",
       "format": "date-time",
       "description": "When task was completed"
+    },
+    "launch_checklist": {
+      "type": "object",
+      "description": "Checklist of launch steps completed by operator",
+      "properties": {
+        "caption_copied": {
+          "type": "boolean",
+          "default": false
+        },
+        "image_downloaded": {
+          "type": "boolean",
+          "default": false
+        },
+        "posted_to_platform": {
+          "type": "boolean",
+          "default": false
+        },
+        "boost_enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "team_notified": {
+          "type": "boolean",
+          "default": false
+        },
+        "launch_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "description": "Engagement stats \u2014 updated nightly",
+      "properties": {
+        "reach": {
+          "type": "number",
+          "default": 0
+        },
+        "impressions": {
+          "type": "number",
+          "default": 0
+        },
+        "likes": {
+          "type": "number",
+          "default": 0
+        },
+        "comments": {
+          "type": "number",
+          "default": 0
+        },
+        "shares": {
+          "type": "number",
+          "default": 0
+        },
+        "clicks": {
+          "type": "number",
+          "default": 0
+        },
+        "saves": {
+          "type": "number",
+          "default": 0
+        },
+        "last_refreshed": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "snapshot_log": {
+          "type": "array",
+          "description": "Daily snapshots for trend tracking",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "reach": {
+                "type": "number"
+              },
+              "likes": {
+                "type": "number"
+              },
+              "comments": {
+                "type": "number"
+              },
+              "shares": {
+                "type": "number"
+              },
+              "clicks": {
+                "type": "number"
+              }
+            }
+          },
+          "default": []
+        }
+      }
     },
     "notes": {
       "type": "string",
