@@ -1,57 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CheckCircle2, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Calendar, Clock, Loader2, LogIn, UserPlus } from 'lucide-react';
 
 export default function CheckIn() {
   const [sale, setSale] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '' });
+  const [saleId, setSaleId] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const saleId = params.get('saleId');
-    if (saleId) {
-      base44.entities.EstateSale.filter({ id: saleId })
-        .then(res => { if (res.length > 0) setSale(res[0]); })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const id = params.get('saleId');
+    setSaleId(id);
+
+    Promise.all([
+      id ? base44.entities.EstateSale.filter({ id }).then(res => res[0] || null) : Promise.resolve(null),
+      base44.auth.me().catch(() => null),
+    ]).then(([saleData, userData]) => {
+      setSale(saleData);
+      setUser(userData);
+
+      // If already logged in, auto check-in immediately
+      if (userData && id) {
+        doCheckIn(id, userData);
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const doCheckIn = async (sid, userData) => {
     setSubmitting(true);
     try {
-      const params = new URLSearchParams(window.location.search);
-      const saleId = params.get('saleId');
       await base44.entities.CheckIn.create({
-        sale_id: saleId,
-        visitor_name: form.name,
-        visitor_email: form.email,
-        checked_in_at: new Date().toISOString(),
-        check_in_method: 'qr_code',
+        check_in_type: 'sale_visit',
+        location_id: sid,
+        location_name: sale?.title || '',
+        notes: `QR check-in by ${userData?.full_name || userData?.email || 'user'}`,
+        verified: true,
       });
-      setSubmitted(true);
     } catch (err) {
-      console.error(err);
-      // Still show success to not frustrate the visitor
-      setSubmitted(true);
+      console.error('Check-in record error:', err);
+      // Non-fatal — still show success
     }
     setSubmitting(false);
+    setSubmitted(true);
+  };
+
+  const handleLoginRedirect = () => {
+    // After login, they'll be redirected back to this same URL which will auto check-in
+    base44.auth.redirectToLogin(window.location.href);
   };
 
   const saleDates = sale?.sale_dates?.[0];
 
-  if (loading) {
+  if (loading || submitting) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+        <p className="text-slate-500 text-sm">{submitting ? 'Checking you in…' : 'Loading…'}</p>
       </div>
     );
   }
@@ -65,12 +73,18 @@ export default function CheckIn() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">You're checked in!</h1>
           {sale && <p className="text-slate-600 mb-1 font-medium">{sale.title}</p>}
-          <p className="text-slate-500 text-sm">Welcome — enjoy the sale!</p>
+          <p className="text-slate-500 text-sm mb-6">Welcome — enjoy the sale!</p>
+          {user && (
+            <p className="text-xs text-slate-400">
+              Your visit is saved to your account. You can log any purchases from your profile.
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
+  // Not logged in — prompt to login or register
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-sm overflow-hidden">
@@ -87,48 +101,43 @@ export default function CheckIn() {
           {saleDates && (
             <div className="flex items-center gap-3 mt-1 text-slate-300 text-sm">
               <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{saleDates.date}</span>
-              {saleDates.start_time && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{saleDates.start_time}</span>}
+              {saleDates.start_time && (
+                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{saleDates.start_time}</span>
+              )}
             </div>
           )}
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-6 space-y-4">
-          <p className="text-sm text-slate-500">Enter your details to check in (optional):</p>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Your Name</Label>
-            <Input
-              id="name"
-              placeholder="Jane Doe"
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            />
+        {/* Auth prompt */}
+        <div className="px-6 py-6 space-y-4">
+          <div className="text-center space-y-1 pb-2">
+            <p className="text-slate-800 font-semibold">Sign in to check in</p>
+            <p className="text-sm text-slate-500">
+              Log in or create a free account to record your visit and track your purchases.
+            </p>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="jane@example.com"
-              value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            />
-          </div>
-
-          <Button type="submit" disabled={submitting} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white h-11 text-base font-semibold">
-            {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Checking in...</> : 'Check In'}
+          <Button
+            onClick={handleLoginRedirect}
+            className="w-full h-11 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold text-base"
+          >
+            <LogIn className="w-4 h-4 mr-2" />
+            Log In & Check In
           </Button>
 
-          <button
-            type="button"
-            onClick={() => setSubmitted(true)}
-            className="w-full text-xs text-slate-400 hover:text-slate-600 text-center"
+          <Button
+            onClick={handleLoginRedirect}
+            variant="outline"
+            className="w-full h-11 font-semibold"
           >
-            Skip — check in anonymously
-          </button>
-        </form>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Create Account & Check In
+          </Button>
+
+          <p className="text-center text-xs text-slate-400 pt-1">
+            Both buttons will bring you right back here after signing in.
+          </p>
+        </div>
       </div>
     </div>
   );
