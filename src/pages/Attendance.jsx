@@ -67,8 +67,23 @@ export default function Attendance() {
     }
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = async () => {
     setManualCount(prev => prev + 1);
+    // Record a manual check-in
+    const params = new URLSearchParams(window.location.search);
+    const saleId = params.get('saleId');
+    if (saleId) {
+      await base44.entities.CheckIn.create({
+        check_in_type: 'sale_visit',
+        location_id: saleId,
+        location_name: sale?.title || '',
+        notes: 'Manual count',
+        verified: true,
+      });
+      // Refresh list
+      const updated = await base44.entities.CheckIn.filter({ location_id: saleId, check_in_type: 'sale_visit' }, '-created_date', 100);
+      setCheckins(updated);
+    }
   };
 
   const handleDecrement = () => {
@@ -234,15 +249,71 @@ export default function Attendance() {
                 </div>
 
                 <div className="pt-4">
-                  <Button className="w-full" variant="outline">
+                   <Button className="w-full" variant="outline">
                     <Download className="w-4 h-4 mr-2" />
                     Export Attendance Report
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+                </CardContent>
+                </Card>
+                </div>
+
+                {/* Check-ins Table */}
+                <Card>
+                <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5" />
+                All Check-ins ({checkins.length})
+                </CardTitle>
+                </CardHeader>
+                <CardContent>
+                {checkins.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  <UserCheck className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+                  <p>No check-ins yet</p>
+                </div>
+                ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-left">
+                        <th className="pb-2 text-slate-500 font-medium">#</th>
+                        <th className="pb-2 text-slate-500 font-medium">Visitor</th>
+                        <th className="pb-2 text-slate-500 font-medium">Type</th>
+                        <th className="pb-2 text-slate-500 font-medium">Time</th>
+                        <th className="pb-2 text-slate-500 font-medium">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {checkins.map((checkin, idx) => {
+                        const isManual = checkin.notes === 'Manual count';
+                        return (
+                          <tr key={checkin.id || idx} className="border-b border-slate-100 last:border-0">
+                            <td className="py-2 text-slate-400">{checkins.length - idx}</td>
+                            <td className="py-2 font-medium text-slate-800">
+                              {isManual ? 'Guest' : (checkin.notes?.replace('QR check-in by ', '') || 'Anonymous')}
+                            </td>
+                            <td className="py-2">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isManual ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                                {isManual ? 'Manual' : 'QR Scan'}
+                              </span>
+                            </td>
+                            <td className="py-2 text-slate-600">
+                              {checkin.created_date ? format(new Date(checkin.created_date), 'h:mm a') : '—'}
+                            </td>
+                            <td className="py-2 text-slate-500 text-xs">
+                              {checkin.created_date ? format(new Date(checkin.created_date), 'MMM d, yyyy') : '—'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                )}
+                </CardContent>
+                </Card>
+                </TabsContent>
 
         <TabsContent value="qr" className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
