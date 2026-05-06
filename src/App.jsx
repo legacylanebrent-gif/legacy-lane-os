@@ -59,6 +59,7 @@ import MarketingPreferences from './pages/MarketingPreferences';
 import CustomerIODashboard from './pages/CustomerIODashboard';
 import OperatorMarketingDashboard from './pages/OperatorMarketingDashboard';
 import CustomerIOReportingCenter from './pages/CustomerIOReportingCenter';
+import CheckIn from './pages/CheckIn';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -161,6 +162,7 @@ const AuthenticatedApp = () => {
       <Route path="/CustomerIODashboard" element={<LayoutWrapper currentPageName="CustomerIODashboard"><CustomerIODashboard /></LayoutWrapper>} />
       <Route path="/OperatorMarketingDashboard" element={<LayoutWrapper currentPageName="OperatorMarketingDashboard"><OperatorMarketingDashboard /></LayoutWrapper>} />
       <Route path="/CustomerIOReportingCenter" element={<LayoutWrapper currentPageName="CustomerIOReportingCenter"><CustomerIOReportingCenter /></LayoutWrapper>} />
+      <Route path="/CheckIn" element={<CheckIn />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
