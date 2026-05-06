@@ -21,30 +21,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 import {
-  ArrowLeft, Plus, TrendingUp, Calendar, Edit, Trash2, Sparkles
+  ArrowLeft, Plus, TrendingUp, Calendar, Edit, Trash2, Sparkles, Mail
 } from 'lucide-react';
 import AISaleMarketingPackage from '@/components/marketing/AISaleMarketingPackage';
 import CampaignPostCard from '@/components/marketing/CampaignPostCard';
+import EmailCampaignModal from '@/components/marketing/EmailCampaignModal';
 
 export default function SaleMarketingCampaigns() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAIPackage, setShowAIPackage] = useState(false);
+  const [showEmailCampaign, setShowEmailCampaign] = useState(false);
   const [aiModel, setAiModel] = useState('claude_sonnet_4_6');
-  const [editingCampaign, setEditingCampaign] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    type: 'email',
-    description: '',
-    target_audience: '',
-    message: '',
-    scheduled_date: '',
-    budget: 0
-  });
+
 
   useEffect(() => {
     loadData();
@@ -81,61 +74,8 @@ export default function SaleMarketingCampaigns() {
     }
   };
 
-  const handleOpenCreate = () => {
-    setEditingCampaign(null);
-    setFormData({
-      name: '',
-      type: 'email',
-      description: '',
-      target_audience: '',
-      message: '',
-      scheduled_date: '',
-      budget: 0
-    });
-    setShowCreateModal(true);
-  };
-
   const handleEdit = (campaign) => {
-    setEditingCampaign(campaign);
-    setFormData({
-      name: campaign.title || '',
-      type: campaign.category || 'email',
-      description: campaign.description || '',
-      target_audience: campaign.notes || '',
-      message: campaign.description || '',
-      scheduled_date: campaign.due_date || '',
-      budget: 0
-    });
-    setShowCreateModal(true);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const campaignData = {
-        task_type: 'estate_sale',
-        sale_id: sale.id,
-        sale_title: sale.title,
-        title: formData.name,
-        description: formData.description,
-        category: formData.type,
-        due_date: formData.scheduled_date,
-        status: 'pending',
-        notes: formData.target_audience
-      };
-
-      if (editingCampaign) {
-        await base44.entities.MarketingTask.update(editingCampaign.id, campaignData);
-      } else {
-        await base44.entities.MarketingTask.create(campaignData);
-      }
-
-      setShowCreateModal(false);
-      loadData();
-    } catch (error) {
-      console.error('Error saving campaign:', error);
-      alert('Failed to save campaign');
-    }
+    // Edit handled inline on CampaignPostCard
   };
 
   const handleDelete = async (campaignId) => {
@@ -195,9 +135,9 @@ export default function SaleMarketingCampaigns() {
             <Sparkles className="w-4 h-4 mr-2" />
             AI Creative Posts
           </Button>
-          <Button onClick={handleOpenCreate} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
-            <Plus className="w-4 h-4 mr-2" />
-            Create Campaign
+          <Button onClick={() => setShowEmailCampaign(true)} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-sm">
+            <Mail className="w-4 h-4 mr-2" />
+            Email Campaign
           </Button>
         </div>
       </div>
@@ -244,9 +184,9 @@ export default function SaleMarketingCampaigns() {
           <p className="text-slate-600 mb-4">
             Create campaigns to promote your estate sale through email, SMS, social media, and more
           </p>
-          <Button onClick={handleOpenCreate} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Create First Campaign
+          <Button onClick={() => setShowEmailCampaign(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Mail className="w-4 h-4 mr-2" />
+            Build Email Campaign
           </Button>
         </Card>
       ) : (
@@ -264,6 +204,14 @@ export default function SaleMarketingCampaigns() {
         </div>
       )}
 
+      {/* Email Campaign Modal */}
+      <EmailCampaignModal
+        sale={sale}
+        open={showEmailCampaign}
+        onClose={() => setShowEmailCampaign(false)}
+        onSaved={loadData}
+      />
+
       {/* AI Marketing Package Modal */}
       <AISaleMarketingPackage
         sale={sale}
@@ -273,81 +221,7 @@ export default function SaleMarketingCampaigns() {
         onSaved={loadData}
       />
 
-      {/* Create/Edit Campaign Modal */}
-      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingCampaign ? 'Edit Campaign' : 'Create Marketing Campaign'}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label>Campaign Name *</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Summer Estate Sale Email Blast"
-                required
-              />
-            </div>
 
-            <div>
-              <Label>Campaign Type *</Label>
-              <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">Email Campaign</SelectItem>
-                  <SelectItem value="sms">SMS Campaign</SelectItem>
-                  <SelectItem value="social_media">Social Media</SelectItem>
-                  <SelectItem value="advertising">Paid Advertising</SelectItem>
-                  <SelectItem value="signage">Physical Signage</SelectItem>
-                  <SelectItem value="networking">Networking</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Description</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of the campaign goals and approach"
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <Label>Target Audience</Label>
-              <Input
-                value={formData.target_audience}
-                onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
-                placeholder="e.g., Local collectors, Previous buyers, Newsletter subscribers"
-              />
-            </div>
-
-            <div>
-              <Label>Scheduled Date</Label>
-              <Input
-                type="date"
-                value={formData.scheduled_date}
-                onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
