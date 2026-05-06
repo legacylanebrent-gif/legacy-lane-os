@@ -87,7 +87,25 @@
     },
     "image_url": {
       "type": "string",
-      "description": "URL of the post image (compositor-generated or uploaded)"
+      "description": "Primary image URL (Facebook Feed 1200x628)"
+    },
+    "image_urls_by_platform": {
+      "type": "object",
+      "description": "Platform-specific image URLs keyed by platform name",
+      "properties": {
+        "facebook_feed": {
+          "type": "string",
+          "description": "Facebook Feed image URL (1200x628)"
+        },
+        "instagram_square": {
+          "type": "string",
+          "description": "Instagram Square image URL (1080x1080)"
+        },
+        "instagram_story": {
+          "type": "string",
+          "description": "Instagram Story image URL (1080x1920)"
+        }
+      }
     }
   },
   "required": [

@@ -24,7 +24,7 @@ const PLATFORM_COLORS = {
 
 function SocialPostMockup({ campaign }) {
   const isAI = campaign.title?.startsWith('[AI-');
-  const imageUrl = campaign.image_url;
+  const imageUrl = campaign.image_urls_by_platform?.facebook_feed || campaign.image_url;
   const platform = campaign.category === 'social_media' ? 'Facebook' : null;
 
   // Extract headline and caption from description if AI-generated

@@ -38,41 +38,47 @@ const POST_CONFIGS = [
   },
 ];
 
-function compositeImage(canvas, imgSrc, config, saleTitle, saleLocation) {
+// Platform dimensions: [width, height, label]
+const PLATFORMS = [
+  { key: 'facebook_feed', label: 'Facebook Feed', width: 1200, height: 628 },
+  { key: 'instagram_square', label: 'Instagram Square', width: 1080, height: 1080 },
+  { key: 'instagram_story', label: 'Instagram Story', width: 1080, height: 1920 },
+];
+
+function compositeImage(imgSrc, config, saleTitle, saleLocation, W, H) {
   return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext('2d');
-    const SIZE = 600;
-    canvas.width = SIZE;
-    canvas.height = SIZE;
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      // Center-crop to square — NEVER rotate
-      const scale = Math.max(SIZE / img.naturalWidth, SIZE / img.naturalHeight);
+      // Center-crop fill
+      const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
       const drawW = img.naturalWidth * scale;
       const drawH = img.naturalHeight * scale;
-      const offsetX = (SIZE - drawW) / 2;
-      const offsetY = (SIZE - drawH) / 2;
+      const offsetX = (W - drawW) / 2;
+      const offsetY = (H - drawH) / 2;
       ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
 
-      // Top gradient — covers top 42%
-      const topGrad = ctx.createLinearGradient(0, 0, 0, SIZE * 0.42);
+      // Top gradient — covers top 40%
+      const topGrad = ctx.createLinearGradient(0, 0, 0, H * 0.40);
       topGrad.addColorStop(0, config.gradientTop);
       topGrad.addColorStop(0.7, 'rgba(0,0,0,0.2)');
       topGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = topGrad;
-      ctx.fillRect(0, 0, SIZE, SIZE);
+      ctx.fillRect(0, 0, W, H);
 
-      // Bottom gradient — covers bottom 40%
-      const botGrad = ctx.createLinearGradient(0, SIZE * 0.60, 0, SIZE);
+      // Bottom gradient — covers bottom 38%
+      const botGrad = ctx.createLinearGradient(0, H * 0.62, 0, H);
       botGrad.addColorStop(0, 'rgba(0,0,0,0)');
       botGrad.addColorStop(0.3, 'rgba(0,0,0,0.3)');
       botGrad.addColorStop(1, config.gradientBottom);
       ctx.fillStyle = botGrad;
-      ctx.fillRect(0, 0, SIZE, SIZE);
+      ctx.fillRect(0, 0, W, H);
 
-      // Helper: draw text with drop shadow
       const drawText = (text, x, y, color, font) => {
         ctx.font = font;
         ctx.textAlign = 'center';
@@ -88,36 +94,41 @@ function compositeImage(canvas, imgSrc, config, saleTitle, saleLocation) {
         ctx.shadowOffsetY = 0;
       };
 
+      // Scale font sizes relative to shortest dimension
+      const base = Math.min(W, H);
+
       // Headline (top zone)
-      const headlineFont = `bold ${SIZE * 0.11}px Impact, Arial Black, sans-serif`;
-      drawText(config.headline, SIZE / 2, SIZE * 0.17, config.headlineColor, headlineFont);
+      drawText(config.headline, W / 2, H * 0.17, config.headlineColor,
+        `bold ${base * 0.11}px Impact, Arial Black, sans-serif`);
 
       // Subheadline
       if (config.subheadline) {
-        const subFont = `bold ${SIZE * 0.075}px Impact, Arial Black, sans-serif`;
-        drawText(config.subheadline, SIZE / 2, SIZE * 0.265, config.subheadlineColor, subFont);
+        drawText(config.subheadline, W / 2, H * 0.265, config.subheadlineColor,
+          `bold ${base * 0.075}px Impact, Arial Black, sans-serif`);
       }
 
-      // Sale title — clean pill badge above CTA
+      // Sale title pill badge
       const subtitle = [saleTitle, saleLocation].filter(Boolean).join(' · ');
       if (subtitle) {
-        ctx.font = `600 ${SIZE * 0.036}px Arial, sans-serif`;
+        const fontSize = base * 0.036;
+        ctx.font = `600 ${fontSize}px Arial, sans-serif`;
         ctx.textAlign = 'center';
         const textW = ctx.measureText(subtitle).width;
-        const pillX = SIZE / 2 - textW / 2 - 14;
-        const pillY = SIZE * 0.78;
-        const pillH = SIZE * 0.055;
+        const pillX = W / 2 - textW / 2 - 14;
+        const pillY = H * 0.78;
+        const pillH = fontSize * 1.6;
         const pillW = textW + 28;
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.beginPath();
         ctx.roundRect(pillX, pillY, pillW, pillH, 6);
         ctx.fill();
-        drawText(subtitle, SIZE / 2, SIZE * 0.818, 'rgba(255,255,255,0.92)', `600 ${SIZE * 0.036}px Arial, sans-serif`);
+        drawText(subtitle, W / 2, H * 0.818, 'rgba(255,255,255,0.92)',
+          `600 ${fontSize}px Arial, sans-serif`);
       }
 
-      // CTA (bottom zone) — larger, more impact
-      const ctaFont = `bold ${SIZE * 0.115}px Impact, Arial Black, sans-serif`;
-      drawText(config.cta, SIZE / 2, SIZE * 0.945, config.ctaColor, ctaFont);
+      // CTA (bottom)
+      drawText(config.cta, W / 2, H * 0.945, config.ctaColor,
+        `bold ${base * 0.115}px Impact, Arial Black, sans-serif`);
 
       resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
@@ -127,8 +138,8 @@ function compositeImage(canvas, imgSrc, config, saleTitle, saleLocation) {
 }
 
 export default function SalePostImageCompositor({ saleTitle, saleLocation, referenceImages, onSave, saving, saved }) {
-  const canvasRefs = [useRef(null), useRef(null), useRef(null)];
-  const [dataUrls, setDataUrls] = useState([null, null, null]);
+  // dataUrls[postIndex][platformKey] = dataUrl
+  const [dataUrls, setDataUrls] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -142,11 +153,17 @@ export default function SalePostImageCompositor({ saleTitle, saleLocation, refer
     setLoading(true);
     setError(null);
     try {
-      const results = await Promise.all(
-        POST_CONFIGS.map((config, i) => {
-          const canvas = canvasRefs[i].current;
+      const results = {};
+      await Promise.all(
+        POST_CONFIGS.map(async (config, i) => {
           const imgSrc = referenceImages[i % referenceImages.length];
-          return compositeImage(canvas, imgSrc, config, saleTitle, saleLocation);
+          results[i] = {};
+          await Promise.all(
+            PLATFORMS.map(async (platform) => {
+              const dataUrl = await compositeImage(imgSrc, config, saleTitle, saleLocation, platform.width, platform.height);
+              results[i][platform.key] = dataUrl;
+            })
+          );
         })
       );
       setDataUrls(results);
@@ -156,60 +173,92 @@ export default function SalePostImageCompositor({ saleTitle, saleLocation, refer
     setLoading(false);
   };
 
-  const handleDownload = (i) => {
-    if (!dataUrls[i]) return;
+  const handleDownload = (postIndex, platformKey) => {
+    const url = dataUrls[postIndex]?.[platformKey];
+    if (!url) return;
+    const platform = PLATFORMS.find(p => p.key === platformKey);
     const a = document.createElement('a');
-    a.href = dataUrls[i];
-    a.download = `${POST_CONFIGS[i].name.replace(/\s+/g, '_')}.jpg`;
+    a.href = url;
+    a.download = `${POST_CONFIGS[postIndex].name.replace(/\s+/g, '_')}_${platform.label.replace(/\s+/g, '_')}.jpg`;
     a.click();
   };
 
+  const allPlatformDataUrls = (postIndex) => {
+    const entry = dataUrls[postIndex];
+    if (!entry) return null;
+    const result = {};
+    PLATFORMS.forEach(p => { if (entry[p.key]) result[p.key] = entry[p.key]; });
+    return Object.keys(result).length === PLATFORMS.length ? result : null;
+  };
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {error && <p className="text-xs text-red-500">{error}</p>}
       {loading && (
         <div className="flex items-center gap-2 text-xs text-indigo-600">
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          Compositing images...
+          Compositing {POST_CONFIGS.length * PLATFORMS.length} platform images...
         </div>
       )}
-      <div className="grid grid-cols-3 gap-3">
-        {POST_CONFIGS.map((config, i) => (
-          <div key={i} className="rounded-lg overflow-hidden border border-indigo-200 bg-white">
-            <canvas
-              ref={canvasRefs[i]}
-              className="w-full aspect-square"
-              style={{ display: dataUrls[i] ? 'none' : 'block', background: '#e2e8f0' }}
-            />
-            {dataUrls[i] && (
-              <img src={dataUrls[i]} alt={config.name} className="w-full aspect-square object-cover" />
+
+      {POST_CONFIGS.map((config, postIndex) => (
+        <div key={postIndex} className="rounded-xl border border-indigo-200 bg-white p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-slate-700">{config.name}</p>
+            {allPlatformDataUrls(postIndex) && (
+              <Button
+                size="sm"
+                onClick={() => onSave(postIndex, allPlatformDataUrls(postIndex))}
+                disabled={saving === postIndex || saved[postIndex]}
+                className={`text-xs h-7 ${saved[postIndex] ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
+              >
+                {saved[postIndex]
+                  ? <><CheckCircle2 className="w-3 h-3 mr-1" />Saved All</>
+                  : saving === postIndex
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <><Save className="w-3 h-3 mr-1" />Save All Platforms</>}
+              </Button>
             )}
-            <div className="p-2 space-y-1">
-              <p className="text-xs font-medium text-slate-700 leading-tight">{config.name}</p>
-              {dataUrls[i] && (
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    onClick={() => handleDownload(i)}
-                    variant="outline"
-                    className="flex-1 text-xs h-7"
-                  >
-                    <Download className="w-3 h-3 mr-1" />DL
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => onSave(i, dataUrls[i])}
-                    disabled={saving === i || saved[i]}
-                    className={`flex-1 text-xs h-7 ${saved[i] ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
-                  >
-                    {saved[i] ? <><CheckCircle2 className="w-3 h-3 mr-1" />Saved</> : saving === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Save className="w-3 h-3 mr-1" />Save</>}
-                  </Button>
-                </div>
-              )}
-            </div>
           </div>
-        ))}
-      </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {PLATFORMS.map((platform) => {
+              const url = dataUrls[postIndex]?.[platform.key];
+              // Display at fixed preview height, correct aspect ratio
+              const aspectClass = platform.key === 'facebook_feed'
+                ? 'aspect-[1200/628]'
+                : platform.key === 'instagram_story'
+                  ? 'aspect-[9/16]'
+                  : 'aspect-square';
+
+              return (
+                <div key={platform.key} className="space-y-1">
+                  <p className="text-[10px] text-slate-500 font-medium text-center">{platform.label}</p>
+                  <p className="text-[9px] text-slate-400 text-center">{platform.width}×{platform.height}</p>
+                  <div className={`rounded overflow-hidden border border-slate-200 bg-slate-100 ${aspectClass}`}>
+                    {url
+                      ? <img src={url} alt={platform.label} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center">
+                          <Loader2 className="w-4 h-4 text-slate-300 animate-spin" />
+                        </div>
+                    }
+                  </div>
+                  {url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownload(postIndex, platform.key)}
+                      className="w-full text-[10px] h-6"
+                    >
+                      Download
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
