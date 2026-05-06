@@ -1,0 +1,33 @@
+{
+  "name": "EarlySignIn",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "sale_title": {
+      "type": "string",
+      "description": "Estate sale title for quick reference"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who signed the list"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Full name of the user who signed the list"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user signed the list"
+    }
+  },
+  "required": [
+    "sale_id",
+    "sale_title",
+    "user_email",
+    "user_name"
+  ]
+}

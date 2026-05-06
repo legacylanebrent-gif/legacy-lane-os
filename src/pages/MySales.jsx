@@ -11,7 +11,7 @@ import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users
       } from 'lucide-react';
 import {
   DropdownMenu,
@@ -447,6 +447,17 @@ export default function MySales() {
                           <Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}>
                             <FileText className="w-3 h-3 mr-1" />
                             Contracts
+                          </Link>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          asChild
+                          className="w-full border-indigo-500 text-black hover:bg-indigo-50"
+                        >
+                          <Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}>
+                            <Users className="w-3 h-3 mr-1" />
+                            Early Sign In
                           </Link>
                         </Button>
                         </div>

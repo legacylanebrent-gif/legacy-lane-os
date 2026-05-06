@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import MessageModal from '@/components/messaging/MessageModal';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import SignTheListButton from '@/components/estate/SignTheListButton';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
   Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut
@@ -813,6 +814,13 @@ END:VCALENDAR`;
                 </div>
 
                 <div className="space-y-2 mt-4">
+                  <SignTheListButton
+                    saleId={sale.id}
+                    saleTitle={sale.title}
+                    user={currentUser}
+                    onSuccess={() => {}}
+                  />
+
                   <Button 
                     onClick={() => window.location.href = createPageUrl('SaleLanding') + '?saleId=' + sale.id}
                     className="w-full bg-cyan-600 hover:bg-cyan-700 gap-2"
@@ -820,7 +828,7 @@ END:VCALENDAR`;
                     <ShoppingBag className="w-4 h-4" />
                     View Inventory Items
                   </Button>
-                  
+
                   {currentUser && (
                     <Button 
                       onClick={handleMessageOperator}
