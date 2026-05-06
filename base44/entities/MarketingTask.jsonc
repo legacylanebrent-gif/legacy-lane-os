@@ -1,0 +1,98 @@
+{
+  "name": "MarketingTask",
+  "type": "object",
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale",
+        "business"
+      ],
+      "description": "Type of marketing task"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID if task_type is estate_sale"
+    },
+    "sale_title": {
+      "type": "string",
+      "description": "Estate sale title for quick reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Task description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "social_media",
+        "advertising",
+        "networking",
+        "content",
+        "campaign",
+        "signage",
+        "other"
+      ],
+      "description": "Marketing category"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform/channel (e.g., Facebook, Instagram, Email)"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Task due date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Task status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium",
+      "description": "Task priority"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "User ID of assigned person"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When task was completed"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the post image (compositor-generated or uploaded)"
+    }
+  },
+  "required": [
+    "task_type",
+    "title",
+    "category"
+  ]
+}
