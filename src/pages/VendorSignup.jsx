@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, TrendingUp, Briefcase, Star, Network, DollarSign } from 'lucide-react';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function VendorSignup() {
   const [packages, setPackages] = useState([]);
@@ -60,22 +61,7 @@ export default function VendorSignup() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Vendor Network</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <UniversalHeader user={null} isAuthenticated={false} />
 
       {/* Back Link */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
