@@ -573,7 +573,7 @@ END:VCALENDAR`;
               {/* Image Modal */}
               <Dialog open={modalOpen} onOpenChange={setModalOpen}>
                 <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
-                  <div className="relative flex items-center justify-center bg-black h-[70vh] sm:min-h-[85vh]">
+                  <div className="relative flex items-center justify-center bg-black h-[70vh] sm:min-h-[85vh] group">
                     <img
                       src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
                       alt={sale.title}
