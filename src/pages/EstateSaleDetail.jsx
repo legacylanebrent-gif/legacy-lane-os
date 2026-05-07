@@ -47,7 +47,7 @@ export default function EstateSaleDetail() {
     const stored = localStorage.getItem(`savedImages_${saleId}`);
     return stored ? JSON.parse(stored) : [];
   });
-  const [showImageDescription, setShowImageDescription] = useState(true);
+  const [showImageDescription, setShowImageDescription] = useState(false);
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
@@ -519,6 +519,20 @@ export default function EstateSaleDetail() {
                         />
                       </button>
                     )}
+                    {/* Toggle Description Button */}
+                    {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                      <button
+                        onClick={() => setShowImageDescription(!showImageDescription)}
+                        className="absolute top-4 left-16 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
+                        title={showImageDescription ? 'Hide description' : 'Show description'}
+                      >
+                        {showImageDescription ? (
+                          <EyeOff className="w-5 h-5 text-slate-700" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-slate-700" />
+                        )}
+                      </button>
+                    )}
                     {sale.images.length > 1 && (
                        <>
                          <button
@@ -535,20 +549,6 @@ export default function EstateSaleDetail() {
                          </button>
                        </>
                      )}
-                    {/* Toggle Description Button */}
-                    {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
-                      <button
-                        onClick={() => setShowImageDescription(!showImageDescription)}
-                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-20"
-                        title={showImageDescription ? 'Hide description' : 'Show description'}
-                      >
-                        {showImageDescription ? (
-                          <EyeOff className="w-5 h-5 text-slate-700" />
-                        ) : (
-                          <Eye className="w-5 h-5 text-slate-700" />
-                        )}
-                      </button>
-                    )}
 
                     {/* Description Overlay */}
                     {showImageDescription && typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
