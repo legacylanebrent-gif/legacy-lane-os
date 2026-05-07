@@ -38,6 +38,15 @@ export default function FavoriteCompanies() {
   const [filterState, setFilterState] = useState('');
   const [filterCity, setFilterCity] = useState('');
   const [filterRadius, setFilterRadius] = useState(0); // 0 = all followed companies
+  const [expandedIds, setExpandedIds] = useState(new Set());
+
+  const toggleExpanded = (id) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
   useEffect(() => {
     loadData();
@@ -366,102 +375,114 @@ export default function FavoriteCompanies() {
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-slate-500">{filteredFollows.length} {filteredFollows.length === 1 ? 'company' : 'companies'} followed</p>
-          {filteredFollows.map(follow => (
-            <Card key={follow.id} className="border border-slate-200">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="w-6 h-6 text-orange-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 text-lg">{follow.operator_name}</h3>
-                      {(follow.operator_city || follow.operator_state) && (
-                        <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" />
-                          {[follow.operator_city, follow.operator_state].filter(Boolean).join(', ')}
-                        </p>
-                      )}
-                    </div>
+          {filteredFollows.map(follow => {
+            const isExpanded = expandedIds.has(follow.id);
+            return (
+              <Card key={follow.id} className="border border-slate-200 overflow-hidden">
+                {/* Collapsed header — always visible */}
+                <button
+                  onClick={() => toggleExpanded(follow.id)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-orange-600" />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleUnfollow(follow.id)}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Notification Preferences */}
-                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Notification Preferences</p>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-blue-500" />
-                      <span className="text-sm text-slate-700">Email Notifications</span>
-                    </div>
-                    <Switch
-                      checked={!!follow.notify_email}
-                      onCheckedChange={(val) => handleToggle(follow.id, 'notify_email', val)}
-                      disabled={saving[follow.id]}
-                    />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">{follow.operator_name}</p>
+                    {(follow.operator_city || follow.operator_state) && (
+                      <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3" />
+                        {[follow.operator_city, follow.operator_state].filter(Boolean).join(', ')}
+                      </p>
+                    )}
                   </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-slate-700">SMS Notifications</span>
+                  {/* Badge summary when collapsed */}
+                  {!isExpanded && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      {follow.notify_email && <span className="text-xs bg-blue-100 text-blue-600 rounded px-1.5 py-0.5">📧</span>}
+                      {follow.notify_sms && <span className="text-xs bg-green-100 text-green-600 rounded px-1.5 py-0.5">💬</span>}
+                      {follow.notify_inapp && <span className="text-xs bg-orange-100 text-orange-600 rounded px-1.5 py-0.5">🔔</span>}
+                      {follow.auto_favorite && <span className="text-xs bg-yellow-100 text-yellow-600 rounded px-1.5 py-0.5">⭐</span>}
                     </div>
-                    <Switch
-                      checked={!!follow.notify_sms}
-                      onCheckedChange={(val) => handleToggle(follow.id, 'notify_sms', val)}
-                      disabled={saving[follow.id]}
-                    />
-                  </div>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                </button>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-orange-500" />
-                      <span className="text-sm text-slate-700">In-App Notifications</span>
-                    </div>
-                    <Switch
-                      checked={!!follow.notify_inapp}
-                      onCheckedChange={(val) => handleToggle(follow.id, 'notify_inapp', val)}
-                      disabled={saving[follow.id]}
-                    />
-                  </div>
+                {/* Expanded content */}
+                {isExpanded && (
+                  <CardContent className="px-5 pb-5 pt-0 border-t border-slate-100">
+                    {/* Notification Preferences */}
+                    <div className="bg-slate-50 rounded-lg p-4 space-y-3 mt-4">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Notification Preferences</p>
 
-                  <div className="border-t border-slate-200 pt-3 mt-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-yellow-500" />
-                        <div>
-                          <span className="text-sm text-slate-700 font-medium">Auto-Favorite New Sales</span>
-                          <p className="text-xs text-slate-400">Automatically add new sales to your Favorite Sales list</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm text-slate-700">Email Notifications</span>
+                        </div>
+                        <Switch
+                          checked={!!follow.notify_email}
+                          onCheckedChange={(val) => handleToggle(follow.id, 'notify_email', val)}
+                          disabled={saving[follow.id]}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-green-500" />
+                          <span className="text-sm text-slate-700">SMS Notifications</span>
+                        </div>
+                        <Switch
+                          checked={!!follow.notify_sms}
+                          onCheckedChange={(val) => handleToggle(follow.id, 'notify_sms', val)}
+                          disabled={saving[follow.id]}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Bell className="w-4 h-4 text-orange-500" />
+                          <span className="text-sm text-slate-700">In-App Notifications</span>
+                        </div>
+                        <Switch
+                          checked={!!follow.notify_inapp}
+                          onCheckedChange={(val) => handleToggle(follow.id, 'notify_inapp', val)}
+                          disabled={saving[follow.id]}
+                        />
+                      </div>
+
+                      <div className="border-t border-slate-200 pt-3 mt-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <span className="text-sm text-slate-700 font-medium">Auto-Favorite New Sales</span>
+                              <p className="text-xs text-slate-400">Automatically add new sales to your Favorite Sales list</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={!!follow.auto_favorite}
+                            onCheckedChange={(val) => handleToggle(follow.id, 'auto_favorite', val)}
+                            disabled={saving[follow.id]}
+                          />
                         </div>
                       </div>
-                      <Switch
-                        checked={!!follow.auto_favorite}
-                        onCheckedChange={(val) => handleToggle(follow.id, 'auto_favorite', val)}
-                        disabled={saving[follow.id]}
-                      />
                     </div>
-                  </div>
-                </div>
 
-                {/* Active preferences summary badges */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {follow.notify_email && <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">📧 Email</Badge>}
-                  {follow.notify_sms && <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">💬 SMS</Badge>}
-                  {follow.notify_inapp && <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs">🔔 In-App</Badge>}
-                  {follow.auto_favorite && <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs">⭐ Auto-Favorite</Badge>}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUnfollow(follow.id)}
+                      className="mt-3 text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Unfollow
+                    </Button>
+                  </CardContent>
+                )}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
