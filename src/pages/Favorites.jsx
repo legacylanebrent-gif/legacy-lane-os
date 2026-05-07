@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Heart, Search, MapPin, Calendar, Trash2, Navigation, Bookmark, Clock, Archive
 } from 'lucide-react';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 
 // Determine if a sale is fully in the past (all sale dates + end times have passed)
@@ -291,8 +292,13 @@ export default function Favorites() {
                     </h3>
 
                     <div className="space-y-2 text-sm mb-4">
-                      {/* Address: shown for active, hidden for past */}
-                      {!isPast ? (
+                      {/* Address: hidden for past; revealed 24hrs before for active */}
+                      {isPast ? (
+                        <div className="flex items-start gap-2 text-slate-400 italic text-xs">
+                          <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                          <span>Address hidden — sale has ended</span>
+                        </div>
+                      ) : isSaleAddressVisible(sale) ? (
                         <div className="flex items-start gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
                           <span>
@@ -301,9 +307,9 @@ export default function Favorites() {
                           </span>
                         </div>
                       ) : (
-                        <div className="flex items-start gap-2 text-slate-400 italic text-xs">
+                        <div className="flex items-start gap-2 text-slate-400 text-xs">
                           <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                          <span>Address hidden — sale has ended</span>
+                          <span className="italic">Address revealed 24 hrs before sale · {sale.property_address?.city}, {sale.property_address?.state}</span>
                         </div>
                       )}
 
@@ -337,15 +343,17 @@ export default function Favorites() {
                             <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
                             {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
                           </Button>
-                          <Button
-                            onClick={(e) => handleGetDirections(e, sale)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Navigation className="w-4 h-4 mr-1" />
-                            Directions
-                          </Button>
+                          {isSaleAddressVisible(sale) && (
+                            <Button
+                              onClick={(e) => handleGetDirections(e, sale)}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Navigation className="w-4 h-4 mr-1" />
+                              Directions
+                            </Button>
+                          )}
                         </div>
                       )}
 

@@ -29,6 +29,7 @@ import {
   Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings
 } from 'lucide-react';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -913,10 +914,14 @@ export default function Home() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          <span>
-                            {sale.property_address?.street && `${sale.property_address.street}, `}
-                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                          </span>
+                          {isSaleAddressVisible(sale) ? (
+                            <span>
+                              {sale.property_address?.street && `${sale.property_address.street}, `}
+                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                            </span>
+                          ) : (
+                            <span className="italic text-slate-400 text-xs">Address revealed 24 hrs before sale · {sale.property_address?.city}, {sale.property_address?.state}</span>
+                          )}
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (

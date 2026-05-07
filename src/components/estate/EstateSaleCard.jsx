@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Eye, Bookmark, Navigation, DollarSign, Package } from 'lucide-react';
 import { format } from 'date-fns';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 
 export default function EstateSaleCard({ estate, onClick, expanded = false }) {
   const getStatusColor = (status) => {
@@ -61,10 +62,14 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
         {/* Location */}
         <div className="flex items-start gap-2 text-sm text-slate-600">
           <MapPin className="w-4 h-4 text-gold-600 mt-0.5 shrink-0" />
-          <span>
-            {estate.property_address?.street && `${estate.property_address.street}, `}
-            {estate.property_address?.city}, {estate.property_address?.state} {estate.property_address?.zip}
-          </span>
+          {isSaleAddressVisible(estate) ? (
+            <span>
+              {estate.property_address?.street && `${estate.property_address.street}, `}
+              {estate.property_address?.city}, {estate.property_address?.state} {estate.property_address?.zip}
+            </span>
+          ) : (
+            <span className="italic text-slate-400 text-xs">Address revealed 24 hrs before sale · {estate.property_address?.city}, {estate.property_address?.state}</span>
+          )}
         </div>
 
         {/* Dates */}
