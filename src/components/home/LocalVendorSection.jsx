@@ -165,23 +165,21 @@ export default function LocalVendorSection({ userLocation }) {
             const vendorData = vendor.data || vendor;
             const companyName = vendorData.company_name || 'Unknown Vendor';
             const vendorType = vendorData.vendor_type || 'other';
-            const vendorId = vendorData.user_id || vendor.id;
             const IconComponent = getVendorIcon(vendorType);
             
             return (
               <div
                 key={vendor.id}
-                onClick={() => window.location.href = createPageUrl('BusinessProfile') + '?id=' + vendorId}
-                className="block group cursor-pointer"
+                className="block"
               >
-                <Card className="hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-slate-200 hover:border-orange-300 overflow-hidden">
+                <Card className="hover:shadow-xl transition-all border-2 border-slate-200 overflow-hidden">
                   <CardContent className="p-4">
                     <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-gradient-to-br from-orange-50 to-cyan-50 flex items-center justify-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
                         <IconComponent className="w-8 h-8 text-white" />
                       </div>
                     </div>
-                    <h4 className="text-sm font-semibold text-slate-900 text-center mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                    <h4 className="text-sm font-semibold text-slate-900 text-center mb-2 line-clamp-2">
                       {companyName}
                     </h4>
                     <div className="flex justify-center">
