@@ -83,7 +83,7 @@ export default function ConsumerHeader({ user }) {
                 <DropdownMenuItem asChild>
                   <Link to={createPageUrl('Favorites')} className="cursor-pointer">
                     <Heart className="w-4 h-4 mr-2" />
-                    Favorites
+                    Favorite Sales
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
