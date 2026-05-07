@@ -678,7 +678,7 @@ END:VCALENDAR`;
                     {sale.sale_dates && sale.sale_dates.map((dateInfo, idx) => (
                       <div key={idx} className="bg-slate-50 rounded-lg p-3">
                         <div className="font-semibold text-slate-900">
-                          {format(new Date(dateInfo.date), 'EEEE, MMMM d, yyyy')}
+                          {format(new Date(dateInfo.date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
                         </div>
                         <div className="text-sm text-slate-600 flex items-center gap-1 mt-1">
                           <Clock className="w-4 h-4" />

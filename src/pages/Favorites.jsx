@@ -27,11 +27,10 @@ function isSalePast(sale) {
     // Parse time like "14:00" or "2:00 PM"
     const dateStr = lastDate.date;
     const timeStr = lastDate.end_time;
-    endDateTime = new Date(`${dateStr}T${convertTo24Hour(timeStr)}`);
+    endDateTime = new Date(`${dateStr}T${convertTo24Hour(timeStr)}:00`);
   } else {
-    // No end time — consider end of day
-    endDateTime = new Date(lastDate.date);
-    endDateTime.setHours(23, 59, 59);
+    // No end time — consider end of day, parse as local time
+    endDateTime = new Date(lastDate.date + 'T23:59:59');
   }
 
   return endDateTime < now;
@@ -319,7 +318,7 @@ export default function Favorites() {
                           <div className="space-y-0.5 text-sm">
                             {sale.sale_dates.map((d, idx) => (
                               <div key={idx} className="flex items-center justify-between gap-2">
-                                <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                 {d.start_time && (
                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
                                 )}

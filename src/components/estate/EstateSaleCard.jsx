@@ -79,7 +79,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
             <div className="space-y-0.5">
               {estate.sale_dates.map((d, idx) => (
                 <div key={idx}>
-                  {format(new Date(d.date), 'EEEE, MMM d, yyyy')}
+                  {format(new Date(d.date + 'T00:00:00'), 'EEEE, MMM d, yyyy')}
                   {d.start_time && ` • ${d.start_time}${d.end_time ? ` – ${d.end_time}` : ''}`}
                 </div>
               ))}

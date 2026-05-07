@@ -930,7 +930,7 @@ export default function Home() {
                             <div className="space-y-0.5 text-sm">
                               {sale.sale_dates.map((d, idx) => (
                                 <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                   {d.start_time && (
                                     <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
                                   )}
@@ -1045,7 +1045,7 @@ export default function Home() {
                             <div className="space-y-0.5 text-sm">
                               {sale.sale_dates.map((d, idx) => (
                                 <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                   {d.start_time && (
                                     <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
                                   )}
@@ -1175,7 +1175,7 @@ export default function Home() {
                             <div className="space-y-0.5 text-sm">
                               {sale.sale_dates.map((d, idx) => (
                                 <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                   {d.start_time && (
                                     <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
                                   )}
