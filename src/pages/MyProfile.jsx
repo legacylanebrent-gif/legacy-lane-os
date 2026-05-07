@@ -38,6 +38,7 @@ export default function MyProfile() {
     business_address: '',
     website_url: '',
     profile_image_url: '',
+    address_zip: '',
     early_sign_in_default: true
   });
 
@@ -69,6 +70,7 @@ export default function MyProfile() {
         business_address: userData.business_address || '',
         website_url: userData.website_url || '',
         profile_image_url: userData.profile_image_url || '',
+        address_zip: userData.address_zip || '',
         early_sign_in_default: userData.early_sign_in_default !== false
       });
 
@@ -282,6 +284,15 @@ export default function MyProfile() {
                     value={profileData.phone}
                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                     placeholder="(555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <Label>ZIP Code</Label>
+                  <Input
+                    value={profileData.address_zip}
+                    onChange={(e) => setProfileData({ ...profileData, address_zip: e.target.value })}
+                    placeholder="12345"
+                    maxLength="5"
                   />
                 </div>
                 {!isConsumerType && (
