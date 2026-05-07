@@ -494,12 +494,13 @@ export default function ItemDetail() {
                     )}
 
                     {operator.phone && (
-                      <Button variant="outline" className="w-full justify-start h-12" asChild>
-                        <a href={`tel:${operator.phone}`}>
-                          <Phone className="w-4 h-4 mr-2" />
-                          {operator.phone}
-                        </a>
-                      </Button>
+                      <a
+                        href={`tel:${operator.phone}`}
+                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
+                      >
+                        <Phone className="w-4 h-4" />
+                        {operator.phone}
+                      </a>
                     )}
                   </div>
                 </CardContent>
