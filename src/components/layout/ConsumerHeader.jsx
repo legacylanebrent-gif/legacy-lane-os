@@ -112,7 +112,7 @@ export default function ConsumerHeader({ user }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to={createPageUrl('EstateSaleFinder')} className="cursor-pointer">
+                  <Link to={createPageUrl('RoutePlanner')} className="cursor-pointer">
                     <Navigation className="w-4 h-4 mr-2" />
                     Route Planner
                   </Link>
