@@ -221,37 +221,6 @@ export default function EstateSaleDetail() {
     }
   };
 
-  const handleAddToCalendar = () => {
-    if (!sale.sale_dates || sale.sale_dates.length === 0) return;
-    
-    const firstDate = sale.sale_dates[0];
-    const startDate = new Date(firstDate.date + 'T' + convertTo24Hour(firstDate.start_time));
-    const endDate = new Date(firstDate.date + 'T' + convertTo24Hour(firstDate.end_time));
-    
-    const formatDate = (date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${formatDate(startDate)}
-DTEND:${formatDate(endDate)}
-SUMMARY:${sale.title}
-DESCRIPTION:Estate Sale at ${sale.property_address?.street || ''}
-LOCATION:${sale.property_address?.formatted_address || ''}
-END:VEVENT
-END:VCALENDAR`;
-    
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
   const convertTo24Hour = (time12h) => {
     if (!time12h) return '00:00:00';
     
@@ -427,14 +396,6 @@ END:VCALENDAR`;
                   </Button>
                   {currentUser && (
                     <>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={handleAddToCalendar}
-                        title="Add to Calendar"
-                      >
-                        <Calendar className="w-5 h-5" />
-                      </Button>
                       <Button
                         variant={isInRoute ? 'default' : 'outline'}
                         size="icon"
