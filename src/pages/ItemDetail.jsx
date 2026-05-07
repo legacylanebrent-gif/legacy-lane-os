@@ -169,6 +169,11 @@ export default function ItemDetail() {
 
   const isOperator = currentUser && sale && currentUser.id === sale.operator_id;
 
+  const formatLabel = (val) => {
+    if (!val) return '';
+    return val.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       available: 'bg-green-100 text-green-700',
@@ -274,8 +279,8 @@ export default function ItemDetail() {
                   </div>
                 )}
                 <Badge className={`absolute top-4 left-4 ${getStatusColor(item.status)}`}>
-                  {item.status}
-                </Badge>
+                   {formatLabel(item.status)}
+                 </Badge>
               </div>
             </Card>
             
@@ -375,14 +380,14 @@ export default function ItemDetail() {
                   <div className="flex flex-wrap items-center gap-2 mb-4">
                     {item.category && (
                       <Badge variant="outline" className="text-xs">
-                        <Tag className="w-3 h-3 mr-1" />
-                        {item.category}
+                       <Tag className="w-3 h-3 mr-1" />
+                       {formatLabel(item.category)}
                       </Badge>
-                    )}
-                    {item.condition && (
+                      )}
+                      {item.condition && (
                       <Badge variant="outline" className="text-xs">
-                        <Package className="w-3 h-3 mr-1" />
-                        {item.condition}
+                       <Package className="w-3 h-3 mr-1" />
+                       {formatLabel(item.condition)}
                       </Badge>
                     )}
                   </div>
