@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Download, Loader2, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Users, Download, Loader2, ClipboardList, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function EarlySignIn() {
@@ -44,6 +44,16 @@ export default function EarlySignIn() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (signerId) => {
+    if (!confirm('Remove this person from the early sign-in list?')) return;
+    try {
+      await base44.entities.EarlySignIn.delete(signerId);
+      setSigners(prev => prev.filter(s => s.id !== signerId));
+    } catch (error) {
+      console.error('Error deleting signer:', error);
     }
   };
 
@@ -149,6 +159,7 @@ export default function EarlySignIn() {
                     <th className="pb-2 px-2 text-slate-500 font-medium">Name</th>
                     <th className="pb-2 px-2 text-slate-500 font-medium">Email</th>
                     <th className="pb-2 px-2 text-slate-500 font-medium">Signed At</th>
+                    <th className="pb-2 px-2 text-slate-500 font-medium"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -159,6 +170,15 @@ export default function EarlySignIn() {
                       <td className="py-3 px-2 text-slate-600">{signer.user_email}</td>
                       <td className="py-3 px-2 text-slate-500 text-xs">
                         {signer.signed_at ? format(new Date(signer.signed_at), 'MMM d, yyyy h:mm a') : '—'}
+                      </td>
+                      <td className="py-3 px-2">
+                        <button
+                          onClick={() => handleDelete(signer.id)}
+                          className="text-red-400 hover:text-red-600 transition-colors"
+                          title="Remove from list"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
