@@ -87,6 +87,12 @@ export default function ConsumerHeader({ user }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to={createPageUrl('MyEarlySignIns')} className="cursor-pointer">
+                    <ClipboardList className="w-4 h-4 mr-2" />
+                    My Early Sign-Ins
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
                     <Receipt className="w-4 h-4 mr-2" />
                     Record Purchase
@@ -108,12 +114,6 @@ export default function ConsumerHeader({ user }) {
                   <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Browse Marketplace
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to={createPageUrl('MyEarlySignIns')} className="cursor-pointer">
-                    <ClipboardList className="w-4 h-4 mr-2" />
-                    My Early Sign-Ins
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
