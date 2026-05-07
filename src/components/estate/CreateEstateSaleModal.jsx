@@ -15,6 +15,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Upload, X, MapPin, DollarSign, Image as ImageIcon, Plus, RotateCw, Edit2, Sparkles, GripVertical, Trash2, Camera } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -88,6 +89,13 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     try {
       const userData = await base44.auth.me();
       setOperator(userData);
+      // Apply operator's default early sign-in setting to new sales
+      if (!sale) {
+        setFormData(prev => ({
+          ...prev,
+          early_sign_in_enabled: userData.early_sign_in_default !== false
+        }));
+      }
     } catch (error) {
       console.error('Error loading operator:', error);
     }
@@ -118,7 +126,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         assigned_client_id: sale.assigned_client_id || '',
         assigned_client_name: sale.assigned_client_name || '',
         assigned_client_email: sale.assigned_client_email || '',
-        assigned_client_phone: sale.assigned_client_phone || ''
+        assigned_client_phone: sale.assigned_client_phone || '',
+        early_sign_in_enabled: sale.early_sign_in_enabled !== false
       });
       setAddressInput(sale.property_address?.street || '');
     }
@@ -779,7 +788,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
       assigned_client_id: '',
       assigned_client_name: '',
       assigned_client_email: '',
-      assigned_client_phone: ''
+      assigned_client_phone: '',
+      early_sign_in_enabled: true
     });
     setStep(1);
   };
@@ -1546,6 +1556,19 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   value={formData.special_notes}
                   onChange={(e) => setFormData({...formData, special_notes: e.target.value})}
                   rows={3}
+                />
+              </div>
+
+              <div className="flex items-center justify-between border rounded-lg p-4 bg-slate-50">
+                <div>
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    Early Sign-In List
+                  </Label>
+                  <p className="text-sm text-slate-500 mt-0.5">Allow attendees to sign an early entry list for this sale</p>
+                </div>
+                <Switch
+                  checked={formData.early_sign_in_enabled !== false}
+                  onCheckedChange={(checked) => setFormData({...formData, early_sign_in_enabled: checked})}
                 />
               </div>
 

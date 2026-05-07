@@ -37,7 +37,8 @@ export default function MyProfile() {
     company_description: '',
     business_address: '',
     website_url: '',
-    profile_image_url: ''
+    profile_image_url: '',
+    early_sign_in_default: true
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -67,7 +68,8 @@ export default function MyProfile() {
         company_description: userData.company_description || '',
         business_address: userData.business_address || '',
         website_url: userData.website_url || '',
-        profile_image_url: userData.profile_image_url || ''
+        profile_image_url: userData.profile_image_url || '',
+        early_sign_in_default: userData.early_sign_in_default !== false
       });
 
       if (userData.notification_settings) {
@@ -320,6 +322,19 @@ export default function MyProfile() {
                       value={profileData.business_address}
                       onChange={(e) => setProfileData({ ...profileData, business_address: e.target.value })}
                       placeholder="123 Main St, City, State ZIP"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border rounded-lg p-4 bg-slate-50">
+                    <div>
+                      <Label className="text-base font-medium">Early Sign-In Default</Label>
+                      <p className="text-sm text-slate-500 mt-0.5">
+                        Default setting for early sign-in on all new sales you create. You can override per sale.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={profileData.early_sign_in_default !== false}
+                      onCheckedChange={(checked) => setProfileData({ ...profileData, early_sign_in_default: checked })}
                     />
                   </div>
                 </>

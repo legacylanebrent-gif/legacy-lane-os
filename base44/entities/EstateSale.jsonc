@@ -231,6 +231,11 @@
     "sms_campaign_price": {
       "type": "number",
       "description": "Price paid for SMS campaign"
+    },
+    "early_sign_in_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether early sign-in list is allowed for this sale"
     }
   },
   "required": [

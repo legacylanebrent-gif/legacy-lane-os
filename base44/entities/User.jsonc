@@ -39,6 +39,18 @@
     "address_zip": {
       "type": "string",
       "description": "ZIP code (private, not shown to others)"
+    },
+    "early_sign_in_default": {
+      "type": "boolean",
+      "default": true,
+      "description": "Default setting for early sign-in on all new sales created by this operator"
     }
-  }
+  },
+  "required": [
+    "business_name",
+    "address_street",
+    "address_city",
+    "address_state",
+    "address_zip"
+  ]
 }

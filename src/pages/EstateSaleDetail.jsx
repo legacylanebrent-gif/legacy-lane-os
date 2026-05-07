@@ -802,6 +802,7 @@ END:VCALENDAR`;
                     saleTitle={sale.title}
                     user={currentUser}
                     onSuccess={() => {}}
+                    earlySignInEnabled={sale.early_sign_in_enabled !== false}
                   />
 
                   <Button 

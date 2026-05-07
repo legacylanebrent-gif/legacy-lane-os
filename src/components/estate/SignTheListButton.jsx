@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { ClipboardList, Loader2, CheckCircle2 } from 'lucide-react';
 
-export default function SignTheListButton({ saleId, saleTitle, user, onSuccess }) {
+export default function SignTheListButton({ saleId, saleTitle, user, onSuccess, earlySignInEnabled = true }) {
   const [signing, setSigning] = useState(false);
   const [signed, setSigned] = useState(false);
   const [position, setPosition] = useState(null);
@@ -66,6 +66,15 @@ export default function SignTheListButton({ saleId, saleTitle, user, onSuccess }
       setSigning(false);
     }
   };
+
+  if (!earlySignInEnabled) {
+    return (
+      <Button disabled className="w-full bg-red-600 gap-2 cursor-not-allowed opacity-90">
+        <ClipboardList className="w-4 h-4" />
+        Sorry, No Early Sign In Allowed
+      </Button>
+    );
+  }
 
   if (checking) {
     return (
