@@ -81,12 +81,6 @@ export default function ConsumerHeader({ user }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Browse Items
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
                   <Link to={createPageUrl('Favorites')} className="cursor-pointer">
                     <Heart className="w-4 h-4 mr-2" />
                     Favorites
@@ -108,6 +102,12 @@ export default function ConsumerHeader({ user }) {
                   <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
                     <Star className="w-4 h-4 mr-2" />
                     My Rewards
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Browse Marketplace
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
