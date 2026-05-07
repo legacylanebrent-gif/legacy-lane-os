@@ -308,7 +308,7 @@ export default function Favorites() {
                       ) : (
                         <div className="flex items-start gap-2 text-slate-400 text-xs">
                           <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                          <span className="italic">Address revealed 24 hrs before sale · {sale.property_address?.city}, {sale.property_address?.state}</span>
+                          <span className="italic">Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}</span>
                         </div>
                       )}
 
