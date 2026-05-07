@@ -14,6 +14,7 @@ import {
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
   Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut, Eye, EyeOff
 } from 'lucide-react';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -721,17 +722,24 @@ END:VCALENDAR`;
                     Location
                   </h3>
                   {sale.property_address && (
-                    <a
-                      href={`https://maps.google.com/maps?q=${encodeURIComponent(
-                        `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-orange-600 hover:text-orange-700 hover:underline"
-                    >
-                      {sale.property_address.street}<br />
-                      {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
-                    </a>
+                    isSaleAddressVisible(sale) ? (
+                      <a
+                        href={`https://maps.google.com/maps?q=${encodeURIComponent(
+                          `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-600 hover:text-orange-700 hover:underline"
+                      >
+                        {sale.property_address.street}<br />
+                        {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
+                      </a>
+                    ) : (
+                      <div className="text-sm text-slate-500 italic">
+                        <p>Address will be revealed 24 hours before the sale starts</p>
+                        <p className="mt-1">{sale.property_address.city}, {sale.property_address.state}</p>
+                      </div>
+                    )
                   )}
                 </div>
 
