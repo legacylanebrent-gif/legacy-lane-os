@@ -334,8 +334,25 @@ export default function Home() {
   const geocodeZipCode = async (zip) => {
     try {
       setDebugMessage(`🔍 Searching ZIP code ${zip}...`);
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${await getGoogleMapsKey()}`);
+      const apiKey = await getGoogleMapsKey();
+      console.log('Google Maps API Key:', apiKey ? 'Present' : 'Missing');
+      
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${apiKey}`);
       const data = await response.json();
+      console.log('Geocode response:', data);
+      
+      if (data.status === 'ZERO_RESULTS' || !data.results || data.results.length === 0) {
+        setDebugMessage(`❌ Invalid ZIP code (${data.status})`);
+        setTimeout(() => setDebugMessage(''), 3000);
+        return;
+      }
+      
+      if (data.status === 'INVALID_REQUEST' || data.status === 'REQUEST_DENIED') {
+        setDebugMessage(`❌ API Error: ${data.status}`);
+        setTimeout(() => setDebugMessage(''), 3000);
+        return;
+      }
+      
       if (data.results && data.results[0]) {
         const location = data.results[0].geometry.location;
         const userLoc = { lat: location.lat, lng: location.lng };
@@ -361,13 +378,10 @@ export default function Home() {
         
         setDebugMessage(`✅ Location updated to ${zipMatch ? zipMatch[0] : zip}`);
         setTimeout(() => setDebugMessage(''), 3000);
-      } else {
-        setDebugMessage('❌ Invalid ZIP code');
-        setTimeout(() => setDebugMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
-      setDebugMessage('❌ Could not find ZIP code');
+      setDebugMessage(`❌ Error: ${error.message}`);
       setTimeout(() => setDebugMessage(''), 3000);
     }
   };
