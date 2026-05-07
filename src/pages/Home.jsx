@@ -333,6 +333,7 @@ export default function Home() {
 
   const geocodeZipCode = async (zip) => {
     try {
+      setDebugMessage(`🔍 Searching ZIP code ${zip}...`);
       const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${await getGoogleMapsKey()}`);
       const data = await response.json();
       if (data.results && data.results[0]) {
@@ -357,9 +358,17 @@ export default function Home() {
             console.log('Could not save location to profile');
           }
         }
+        
+        setDebugMessage(`✅ Location updated to ${zipMatch ? zipMatch[0] : zip}`);
+        setTimeout(() => setDebugMessage(''), 3000);
+      } else {
+        setDebugMessage('❌ Invalid ZIP code');
+        setTimeout(() => setDebugMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
+      setDebugMessage('❌ Could not find ZIP code');
+      setTimeout(() => setDebugMessage(''), 3000);
     }
   };
 
