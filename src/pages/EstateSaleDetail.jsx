@@ -50,6 +50,8 @@ export default function EstateSaleDetail() {
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [visibleThumbnails, setVisibleThumbnails] = useState(20);
+  const [isFollowingCompany, setIsFollowingCompany] = useState(false);
+  const [followingCompany, setFollowingCompany] = useState(false);
 
   useEffect(() => {
     loadSaleData();
@@ -95,9 +97,22 @@ export default function EstateSaleDetail() {
       // Try to load operator info
       if (foundSale.operator_id) {
         try {
-          const users = await base44.entities.User.list();
+          const [users, authCheck] = await Promise.all([
+            base44.entities.User.list(),
+            base44.auth.isAuthenticated()
+          ]);
           const operatorData = users.find(u => u.id === foundSale.operator_id);
           setOperator(operatorData);
+
+          // Check if user already follows this company
+          if (authCheck) {
+            const me = await base44.auth.me();
+            const existing = await base44.entities.CompanyFollow.filter({
+              consumer_user_id: me.id,
+              operator_id: foundSale.operator_id
+            });
+            setIsFollowingCompany(existing.length > 0);
+          }
         } catch (error) {
           console.log('Could not load operator info');
         }
@@ -271,6 +286,41 @@ END:VCALENDAR`;
 
   const handleMessageOperator = () => {
     setMessageModalOpen(true);
+  };
+
+  const handleFollowCompany = async () => {
+    if (!currentUser) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+    setFollowingCompany(true);
+    try {
+      if (isFollowingCompany) {
+        const existing = await base44.entities.CompanyFollow.filter({
+          consumer_user_id: currentUser.id,
+          operator_id: sale.operator_id
+        });
+        if (existing.length > 0) await base44.entities.CompanyFollow.delete(existing[0].id);
+        setIsFollowingCompany(false);
+      } else {
+        await base44.entities.CompanyFollow.create({
+          consumer_user_id: currentUser.id,
+          operator_id: sale.operator_id,
+          operator_name: operator?.company_name || operator?.full_name || sale.operator_name || '',
+          operator_city: operator?.city || '',
+          operator_state: operator?.state || '',
+          notify_email: true,
+          notify_sms: false,
+          notify_inapp: true,
+          auto_favorite: false
+        });
+        setIsFollowingCompany(true);
+      }
+    } catch (err) {
+      console.error('Error toggling company follow:', err);
+    } finally {
+      setFollowingCompany(false);
+    }
   };
 
   const handleAddToRoute = () => {
@@ -812,6 +862,18 @@ END:VCALENDAR`;
                     <ShoppingBag className="w-4 h-4" />
                     View Inventory Items
                   </Button>
+
+                  {sale.operator_id && (
+                    <Button
+                      onClick={handleFollowCompany}
+                      disabled={followingCompany}
+                      variant="outline"
+                      className={`w-full gap-2 ${isFollowingCompany ? 'border-orange-500 text-orange-600 bg-orange-50' : 'border-slate-300'}`}
+                    >
+                      <Building2 className="w-4 h-4" />
+                      {followingCompany ? '...' : isFollowingCompany ? '✓ Following Company' : 'Follow This Company'}
+                    </Button>
+                  )}
 
                   {currentUser && (
                     <Button 

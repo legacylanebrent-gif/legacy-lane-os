@@ -7,8 +7,20 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import {
-  Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, Check
+  Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp
 } from 'lucide-react';
+
+// Haversine distance in miles
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const RADIUS_OPTIONS = [15, 25, 50, 100, 0]; // 0 = all
 
 export default function FavoriteCompanies() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -19,10 +31,21 @@ export default function FavoriteCompanies() {
   const [saving, setSaving] = useState({});
   const [showBrowse, setShowBrowse] = useState(false);
   const [browseSearch, setBrowseSearch] = useState('');
+  const [browseRadius, setBrowseRadius] = useState(15);
   const [addingId, setAddingId] = useState(null);
+  const [userLocation, setUserLocation] = useState(null); // {lat, lng}
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterState, setFilterState] = useState('');
+  const [filterCity, setFilterCity] = useState('');
+  const [filterRadius, setFilterRadius] = useState(0); // 0 = all followed companies
 
   useEffect(() => {
     loadData();
+    // Load cached user location
+    const stored = localStorage.getItem('userLocation');
+    if (stored) {
+      try { setUserLocation(JSON.parse(stored)); } catch (e) {}
+    }
   }, []);
 
   const loadData = async () => {
@@ -37,7 +60,6 @@ export default function FavoriteCompanies() {
       ]);
 
       setFollows(myFollows);
-      // Filter users that are operators (have company_name or role=operator/estate_sale_operator)
       const ops = allUsers.filter(u =>
         u.company_name ||
         u.primary_account_type === 'estate_sale_operator' ||
@@ -98,20 +120,26 @@ export default function FavoriteCompanies() {
     }
   };
 
+  // Estimate operator location from city/state (use their lat/lng if stored, else skip distance filter)
+  const getOperatorLocation = (op) => {
+    if (op.location?.lat && op.location?.lng) return op.location;
+    return null;
+  };
+
+  const operatorWithinRadius = (op, radiusMiles) => {
+    if (radiusMiles === 0) return true; // "All"
+    if (!userLocation) return true; // Can't filter without user location
+    const loc = getOperatorLocation(op);
+    if (!loc) return true; // No coords for operator, include them
+    return haversine(userLocation.lat, userLocation.lng, loc.lat, loc.lng) <= radiusMiles;
+  };
+
   const followedIds = new Set(follows.map(f => f.operator_id));
 
-  const filteredFollows = follows.filter(f => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      f.operator_name?.toLowerCase().includes(q) ||
-      f.operator_city?.toLowerCase().includes(q) ||
-      f.operator_state?.toLowerCase().includes(q)
-    );
-  });
-
+  // Browse results: exclude already-followed, apply radius + search
   const browseResults = operators.filter(op => {
     if (followedIds.has(op.id)) return false;
+    if (!operatorWithinRadius(op, browseRadius)) return false;
     if (!browseSearch.trim()) return true;
     const q = browseSearch.toLowerCase();
     return (
@@ -121,6 +149,22 @@ export default function FavoriteCompanies() {
       op.state?.toLowerCase().includes(q)
     );
   });
+
+  // Followed companies filter
+  const filteredFollows = follows.filter(f => {
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !searchQuery.trim() || (
+      f.operator_name?.toLowerCase().includes(q) ||
+      f.operator_city?.toLowerCase().includes(q) ||
+      f.operator_state?.toLowerCase().includes(q)
+    );
+    const matchesState = !filterState.trim() || f.operator_state?.toLowerCase().includes(filterState.toLowerCase());
+    const matchesCity = !filterCity.trim() || f.operator_city?.toLowerCase().includes(filterCity.toLowerCase());
+    return matchesSearch && matchesState && matchesCity;
+  });
+
+  const hasActiveFilters = filterState || filterCity;
+  const uniqueStates = [...new Set(follows.map(f => f.operator_state).filter(Boolean))].sort();
 
   if (loading) {
     return (
@@ -137,10 +181,13 @@ export default function FavoriteCompanies() {
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">🏢 Favorite Companies</h1>
-          <p className="text-slate-600">Follow estate sale companies and get notified when they post new sales.</p>
+          <p className="text-slate-600">Follow companies and get notified when they post new sales.</p>
+          {userLocation && (
+            <p className="text-xs text-slate-400 mt-1">📍 Showing companies near your saved location</p>
+          )}
         </div>
         <Button
           onClick={() => setShowBrowse(!showBrowse)}
@@ -155,10 +202,36 @@ export default function FavoriteCompanies() {
       {showBrowse && (
         <Card className="border-2 border-orange-200 bg-orange-50">
           <CardContent className="p-5 space-y-4">
-            <h3 className="font-semibold text-slate-900 text-lg flex items-center gap-2">
-              <Search className="w-5 h-5 text-orange-600" />
-              Find Companies to Follow
-            </h3>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h3 className="font-semibold text-slate-900 text-lg flex items-center gap-2">
+                <Search className="w-5 h-5 text-orange-600" />
+                Find Companies to Follow
+              </h3>
+              {/* Radius selector */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-slate-600 font-medium">Within:</span>
+                {RADIUS_OPTIONS.map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setBrowseRadius(r)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                      browseRadius === r
+                        ? 'bg-orange-600 text-white border-orange-600'
+                        : 'bg-white text-slate-600 border-slate-300 hover:border-orange-400'
+                    }`}
+                  >
+                    {r === 0 ? 'All' : `${r} mi`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {!userLocation && browseRadius !== 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-sm text-amber-700">
+                ⚠️ No saved location found. Visit the home page and allow location access, or select "All" to see all companies.
+              </div>
+            )}
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -168,12 +241,17 @@ export default function FavoriteCompanies() {
                 className="pl-9 bg-white"
               />
             </div>
+
             {browseResults.length === 0 ? (
               <p className="text-slate-500 text-sm text-center py-4">
-                {browseSearch ? 'No companies found matching your search.' : 'All available companies are already followed.'}
+                {browseSearch
+                  ? 'No companies found matching your search.'
+                  : browseRadius === 0
+                  ? 'All available companies are already followed.'
+                  : `No companies found within ${browseRadius} miles. Try expanding the radius.`}
               </p>
             ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className="space-y-2 max-h-72 overflow-y-auto">
                 {browseResults.map(op => (
                   <div key={op.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 border border-slate-200">
                     <div>
@@ -201,16 +279,69 @@ export default function FavoriteCompanies() {
         </Card>
       )}
 
-      {/* Search followed companies */}
+      {/* Followed Companies — Search + Filter Bar */}
       {follows.length > 0 && (
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input
-            placeholder="Search your followed companies..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+        <div className="space-y-3">
+          <div className="flex gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-48">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Input
+                placeholder="Search followed companies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`gap-2 ${hasActiveFilters ? 'border-orange-500 text-orange-600' : ''}`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filters
+              {hasActiveFilters && <Badge className="bg-orange-600 text-white text-xs px-1.5 py-0">{[filterState, filterCity].filter(Boolean).length}</Badge>}
+              {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          {showFilters && (
+            <Card className="border border-slate-200 bg-slate-50">
+              <CardContent className="p-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Filter by State</label>
+                    <select
+                      value={filterState}
+                      onChange={e => setFilterState(e.target.value)}
+                      className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white"
+                    >
+                      <option value="">All States</option>
+                      {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Filter by City</label>
+                    <Input
+                      placeholder="e.g. Newark"
+                      value={filterCity}
+                      onChange={(e) => setFilterCity(e.target.value)}
+                      className="bg-white"
+                    />
+                  </div>
+                </div>
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3 text-slate-500 hover:text-slate-700"
+                    onClick={() => { setFilterState(''); setFilterCity(''); }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
@@ -224,7 +355,7 @@ export default function FavoriteCompanies() {
           <p className="text-slate-500 mb-6">
             {follows.length === 0
               ? 'Follow estate sale companies to get notified when they post new sales.'
-              : 'No followed companies match your search.'}
+              : 'No followed companies match your current filters.'}
           </p>
           {follows.length === 0 && (
             <Button onClick={() => setShowBrowse(true)} className="bg-orange-600 hover:bg-orange-700">
@@ -234,6 +365,7 @@ export default function FavoriteCompanies() {
         </Card>
       ) : (
         <div className="space-y-4">
+          <p className="text-sm text-slate-500">{filteredFollows.length} {filteredFollows.length === 1 ? 'company' : 'companies'} followed</p>
           {filteredFollows.map(follow => (
             <Card key={follow.id} className="border border-slate-200">
               <CardContent className="p-5">
