@@ -223,10 +223,8 @@ export default function ItemDetail() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow">
-                <span className="text-white font-bold text-sm">LL</span>
-              </div>
-              <span className="text-lg font-serif font-bold text-white hidden sm:block">Legacy Lane</span>
+              <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
+              <span className="text-lg font-serif font-bold text-white hidden sm:block">EstateSalen.com</span>
             </Link>
 
             <div className="flex items-center gap-1">
@@ -569,11 +567,9 @@ export default function ItemDetail() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">LL</span>
-                </div>
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
                 <div>
-                  <h3 className="text-2xl font-serif font-bold">Legacy Lane</h3>
+                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
                   <p className="text-sm text-orange-400">Estate Sale Finder</p>
                 </div>
               </div>
