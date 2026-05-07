@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MessageModal from '@/components/messaging/MessageModal';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 
 export default function ItemDetail() {
@@ -433,10 +434,16 @@ export default function ItemDetail() {
                         <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-medium">Location</div>
-                          <div className="text-sm text-slate-600">
-                            {sale.property_address.street && `${sale.property_address.street}, `}
-                            {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
-                          </div>
+                          {isSaleAddressVisible(sale) ? (
+                            <div className="text-sm text-slate-600">
+                              {sale.property_address.street && `${sale.property_address.street}, `}
+                              {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-slate-400 italic">
+                              Address revealed 24 hrs before sale · {sale.property_address.city}, {sale.property_address.state}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
