@@ -274,22 +274,25 @@ export default function EstateSaleDetail() {
         });
         if (existing.length > 0) await base44.entities.CompanyFollow.delete(existing[0].id);
         setIsFollowingCompany(false);
+        alert('Unfollowed company.');
       } else {
         await base44.entities.CompanyFollow.create({
           consumer_user_id: currentUser.id,
           operator_id: sale.operator_id,
           operator_name: operator?.company_name || operator?.full_name || sale.operator_name || '',
-          operator_city: operator?.city || '',
-          operator_state: operator?.state || '',
+          operator_city: operator?.address_city || operator?.city || '',
+          operator_state: operator?.address_state || operator?.state || '',
           notify_email: true,
           notify_sms: false,
           notify_inapp: true,
           auto_favorite: false
         });
         setIsFollowingCompany(true);
+        alert('✅ Company followed! Visit "Favorite Companies" in your menu to manage your followed companies.');
       }
     } catch (err) {
       console.error('Error toggling company follow:', err);
+      alert('Something went wrong. Please try again.');
     } finally {
       setFollowingCompany(false);
     }
