@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import MessageModal from '@/components/messaging/MessageModal';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import SignTheListButton from '@/components/estate/SignTheListButton';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
@@ -340,31 +341,7 @@ export default function EstateSaleDetail() {
       {isAuthenticated && currentUser ? (
         <ConsumerHeader user={currentUser} />
       ) : (
-        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xl">LL</span>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-serif font-bold text-white">Legacy Lane</h1>
-                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:text-orange-400 hover:bg-orange-500/20">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-                <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
-                  Get Started Free
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <UniversalHeader user={null} isAuthenticated={false} />
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -479,16 +456,7 @@ export default function EstateSaleDetail() {
                           </button>
                         </>
                       )}
-                      {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                          {sale.images[selectedImage]?.name && (
-                            <h4 className="text-white font-semibold text-lg">{sale.images[selectedImage].name}</h4>
-                          )}
-                          {sale.images[selectedImage]?.description && (
-                            <p className="text-white/90 text-sm mt-1">{sale.images[selectedImage].description}</p>
-                          )}
-                        </div>
-                      )}
+
                     </div>
                     <div className="p-4">
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
