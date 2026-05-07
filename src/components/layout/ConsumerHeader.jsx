@@ -37,7 +37,7 @@ export default function ConsumerHeader({ user }) {
             <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
             <div className="hidden sm:block">
               <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
-              <p className="text-xs text-orange-400">Operating System</p>
+              <p className="text-xs text-orange-400">Discover Sales Near You!</p>
             </div>
           </Link>
 
