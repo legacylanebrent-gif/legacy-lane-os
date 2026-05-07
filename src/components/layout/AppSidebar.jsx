@@ -144,7 +144,7 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
       <aside className={`bg-slate-800 text-white flex flex-col transition-all duration-300 overflow-hidden flex-shrink-0 h-screen sticky top-0 ${open ? 'w-64' : 'w-0'}`}>
         {/* Header */}
         <div className="p-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
-          <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2 min-w-0">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
             <img
               src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png"
               alt="logo"
