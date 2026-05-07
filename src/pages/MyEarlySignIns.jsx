@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { ClipboardList, MapPin, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function MyEarlySignIns() {
@@ -108,11 +108,21 @@ export default function MyEarlySignIns() {
                       </div>
                     )}
                     {sale?.sale_dates && sale.sale_dates.length > 0 && (
-                      <div className="flex items-center gap-1 text-sm text-slate-500">
-                        <Calendar className="w-4 h-4 text-orange-500" />
-                        <span>
-                          {sale.sale_dates.map(d => format(new Date(d.date), 'MMM d')).join(', ')}
-                        </span>
+                      <div className="space-y-1 mt-1">
+                        {sale.sale_dates.map((d, i) => (
+                          <div key={i} className="flex items-center gap-3 text-sm text-slate-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                              <span>{format(new Date(d.date), 'EEE, MMM d, yyyy')}</span>
+                            </div>
+                            {(d.start_time || d.end_time) && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                                <span>{d.start_time} – {d.end_time}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
                     <p className="text-xs text-slate-400">
