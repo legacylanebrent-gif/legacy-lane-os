@@ -25,6 +25,7 @@ import UniversalHeader from '@/components/layout/UniversalHeader';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
+import LocalVendorSection from '@/components/home/LocalVendorSection';
 import { t } from '@/components/terminology';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
@@ -1210,6 +1211,9 @@ export default function Home() {
           </div>
           </div>
           </section>
+
+          {/* Locally Featured Vendors */}
+          <LocalVendorSection userLocation={userLocation} />
 
           {/* National Advertising Panel */}
           <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
