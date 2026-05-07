@@ -67,14 +67,18 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
           </span>
         </div>
 
-        {/* Date */}
-        {nextSaleDate && (
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Calendar className="w-4 h-4 text-gold-600 shrink-0" />
-            <span>
-              {format(new Date(nextSaleDate.date), 'EEEE, MMMM d, yyyy')}
-              {nextSaleDate.start_time && ` • ${nextSaleDate.start_time}`}
-            </span>
+        {/* Dates */}
+        {estate.sale_dates && estate.sale_dates.length > 0 && (
+          <div className="flex items-start gap-2 text-sm text-slate-600">
+            <Calendar className="w-4 h-4 text-gold-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              {estate.sale_dates.map((d, idx) => (
+                <div key={idx}>
+                  {format(new Date(d.date), 'EEEE, MMM d, yyyy')}
+                  {d.start_time && ` • ${d.start_time}${d.end_time ? ` – ${d.end_time}` : ''}`}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

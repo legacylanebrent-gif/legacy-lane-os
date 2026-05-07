@@ -920,15 +920,17 @@ export default function Home() {
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div className="flex items-center justify-between flex-1">
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
-                              {sale.sale_dates[0].start_time && (
-                                <span className="text-xs text-slate-500">
-                                  {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </span>
-                              )}
+                          <div className="flex items-start gap-2 text-slate-600">
+                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div className="space-y-0.5 text-sm">
+                              {sale.sale_dates.map((d, idx) => (
+                                <div key={idx} className="flex items-center justify-between gap-2">
+                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  {d.start_time && (
+                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -1033,15 +1035,17 @@ export default function Home() {
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div className="flex items-center justify-between flex-1">
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
-                              {sale.sale_dates[0].start_time && (
-                                <span className="text-xs text-slate-500">
-                                  {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </span>
-                              )}
+                          <div className="flex items-start gap-2 text-slate-600">
+                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div className="space-y-0.5 text-sm">
+                              {sale.sale_dates.map((d, idx) => (
+                                <div key={idx} className="flex items-center justify-between gap-2">
+                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  {d.start_time && (
+                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -1161,15 +1165,17 @@ export default function Home() {
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <div className="flex items-center justify-between flex-1">
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
-                              {sale.sale_dates[0].start_time && (
-                                <span className="text-xs text-slate-500">
-                                  {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                                </span>
-                              )}
+                          <div className="flex items-start gap-2 text-slate-600">
+                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div className="space-y-0.5 text-sm">
+                              {sale.sale_dates.map((d, idx) => (
+                                <div key={idx} className="flex items-center justify-between gap-2">
+                                  <span>{format(new Date(d.date), 'MMM d, yyyy')}</span>
+                                  {d.start_time && (
+                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
