@@ -90,6 +90,11 @@ export default function SaleLanding() {
     return colors[status] || 'bg-slate-100 text-slate-700';
   };
 
+  const formatLabel = (val) => {
+    if (!val) return '';
+    return val.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 p-8">
@@ -221,15 +226,15 @@ export default function SaleLanding() {
                   All Items
                 </Button>
                 {categories.map(category => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? 'default' : 'outline'}
-                    onClick={() => setSelectedCategory(category)}
-                    className={selectedCategory === category ? 'bg-orange-600 hover:bg-orange-700' : ''}
-                  >
-                    {category}
-                  </Button>
-                ))}
+                   <Button
+                     key={category}
+                     variant={selectedCategory === category ? 'default' : 'outline'}
+                     onClick={() => setSelectedCategory(category)}
+                     className={selectedCategory === category ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                   >
+                     {formatLabel(category)}
+                   </Button>
+                 ))}
               </div>
             )}
           </div>
@@ -265,7 +270,7 @@ export default function SaleLanding() {
                       </div>
                     )}
                     <Badge className={`absolute top-3 left-3 ${getStatusColor(item.status)}`}>
-                      {item.status}
+                      {formatLabel(item.status)}
                     </Badge>
                   </div>
                   
@@ -277,7 +282,7 @@ export default function SaleLanding() {
                     {item.category && (
                       <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
                         <Tag className="w-3 h-3" />
-                        <span>{item.category}</span>
+                        <span>{formatLabel(item.category)}</span>
                       </div>
                     )}
                     
