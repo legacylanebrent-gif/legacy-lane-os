@@ -442,18 +442,20 @@ export default function ItemDetail() {
                     )}
 
                     {sale.sale_dates && sale.sale_dates.length > 0 && (
-                      <div className="flex items-start gap-3 text-slate-700">
-                        <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="font-medium">Sale Dates</div>
-                          <div className="text-sm text-slate-600">
-                            {format(new Date(sale.sale_dates[0].date), 'MMMM d, yyyy')}
-                            {sale.sale_dates[0].start_time && 
-                              <> • {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}</>
-                            }
-                          </div>
-                        </div>
-                      </div>
+                     <div className="flex items-start gap-3 text-slate-700">
+                       <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                       <div>
+                         <div className="font-medium">Sale Dates</div>
+                         <div className="text-sm text-slate-600 space-y-0.5">
+                           {sale.sale_dates.map((d, idx) => (
+                             <div key={idx}>
+                               {format(new Date(d.date + 'T00:00:00'), 'MMMM d, yyyy')}
+                               {d.start_time && <> • {d.start_time}{d.end_time ? ` - ${d.end_time}` : ''}</>}
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
                     )}
                   </div>
                 </CardContent>
