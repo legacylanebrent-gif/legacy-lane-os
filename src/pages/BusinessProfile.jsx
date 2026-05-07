@@ -270,13 +270,13 @@ export default function BusinessProfile() {
                     className="block group"
                   >
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow">
-                      {sale.images && sale.images.length > 0 && (
-                        <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={sale.images[0]}
-                            alt={sale.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                       {sale.images && sale.images.length > 0 && (
+                         <div className="relative h-48 overflow-hidden">
+                           <img
+                             src={typeof sale.images[0] === 'string' ? sale.images[0] : sale.images[0]?.url}
+                             alt={sale.title}
+                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                           />
                           <Badge className={`absolute top-3 right-3 ${sale.status === 'active' ? 'bg-green-600' : 'bg-blue-600'} text-white`}>
                             {sale.status === 'active' ? 'Active Now' : 'Upcoming'}
                           </Badge>
@@ -322,13 +322,13 @@ export default function BusinessProfile() {
                     className="block group"
                   >
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow opacity-90">
-                      {sale.images && sale.images.length > 0 && (
-                        <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={sale.images[0]}
-                            alt={sale.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 grayscale-[30%]"
-                          />
+                       {sale.images && sale.images.length > 0 && (
+                         <div className="relative h-48 overflow-hidden">
+                           <img
+                             src={typeof sale.images[0] === 'string' ? sale.images[0] : sale.images[0]?.url}
+                             alt={sale.title}
+                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 grayscale-[30%]"
+                           />
                           <Badge className="absolute top-3 right-3 bg-slate-600 text-white">
                             {sale.status === 'completed' ? 'Completed' : 'Cancelled'}
                           </Badge>
