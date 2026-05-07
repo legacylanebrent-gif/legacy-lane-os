@@ -695,8 +695,8 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         await base44.entities.EstateSale.create(data);
       }
 
-      onSuccess();
-      onClose();
+      if (onSuccess) onSuccess();
+      if (onClose) onClose();
       resetForm();
     } catch (error) {
       console.error('Error saving estate sale:', error);
