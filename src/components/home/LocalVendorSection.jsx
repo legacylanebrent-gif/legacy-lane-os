@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -110,12 +109,13 @@ export default function LocalVendorSection({ userLocation }) {
             const companyLogo = vendorData.company_logo || 'https://via.placeholder.com/150x150?text=Logo';
             const companyName = vendorData.company_name || 'Unknown Vendor';
             const vendorType = vendorData.vendor_type || 'other';
+            const vendorId = vendorData.user_id || vendor.id;
             
             return (
-              <Link
+              <div
                 key={vendor.id}
-                to={createPageUrl('BusinessProfile') + '?id=' + (vendorData.user_id || vendor.id)}
-                className="block group"
+                onClick={() => window.location.href = createPageUrl('BusinessProfile') + '?id=' + vendorId}
+                className="block group cursor-pointer"
               >
                 <Card className="hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-slate-200 hover:border-orange-300 overflow-hidden">
                   <CardContent className="p-4">
@@ -139,7 +139,7 @@ export default function LocalVendorSection({ userLocation }) {
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+              </div>
             );
           })}
         </div>
