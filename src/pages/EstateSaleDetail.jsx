@@ -12,7 +12,7 @@ import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import SignTheListButton from '@/components/estate/SignTheListButton';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut, Eye, EyeOff
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -45,6 +45,7 @@ export default function EstateSaleDetail() {
     const stored = localStorage.getItem(`savedImages_${saleId}`);
     return stored ? JSON.parse(stored) : [];
   });
+  const [showImageDescription, setShowImageDescription] = useState(true);
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
@@ -604,7 +605,23 @@ END:VCALENDAR`;
                          </button>
                        </>
                      )}
+                    {/* Toggle Description Button */}
                     {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                      <button
+                        onClick={() => setShowImageDescription(!showImageDescription)}
+                        className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-20"
+                        title={showImageDescription ? 'Hide description' : 'Show description'}
+                      >
+                        {showImageDescription ? (
+                          <EyeOff className="w-5 h-5 text-slate-700" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-slate-700" />
+                        )}
+                      </button>
+                    )}
+
+                    {/* Description Overlay */}
+                    {showImageDescription && typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
                       <div className="absolute bottom-16 left-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto">
                         {sale.images[selectedImage]?.name && (
                           <h4 className="text-white font-semibold text-xl mb-2">{sale.images[selectedImage].name}</h4>
