@@ -3,6 +3,11 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Building2, Scale, PiggyBank, Trash2, Sparkles, Truck, Camera, Wrench, 
+  Trees, Gavel, Home, User, Shield, Heart, Car, Package, Key, Phone,
+  Scissors, Bed, Smile, Utensils, Dribbble, ShoppingBag, Clock, Calendar
+} from 'lucide-react';
 
 export default function LocalVendorSection({ userLocation }) {
   const [vendors, setVendors] = useState([]);
@@ -72,6 +77,58 @@ export default function LocalVendorSection({ userLocation }) {
     return type ? type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Service Provider';
   };
 
+  const getVendorIcon = (vendorType) => {
+    const iconMap = {
+      real_estate_agent: Home,
+      probate_attorney: Scale,
+      estate_planning_attorney: Scale,
+      elder_law_attorney: Scale,
+      title_company: Building2,
+      mortgage_broker: PiggyBank,
+      financial_advisor: PiggyBank,
+      cpa_tax_strategist: PiggyBank,
+      trust_administrator: Shield,
+      insurance_agent: Shield,
+      senior_move_manager: Heart,
+      assisted_living_placement: Home,
+      home_care_agency: Heart,
+      geriatric_care_manager: Heart,
+      junk_removal: Trash2,
+      cleanout_crew: Sparkles,
+      dumpster_rental: Truck,
+      biohazard_cleanup: Shield,
+      hoarding_cleanup: Sparkles,
+      deep_cleaning: Sparkles,
+      carpet_cleaning: Sparkles,
+      odor_removal: Sparkles,
+      home_stager: Home,
+      handyman: Wrench,
+      painter: Wrench,
+      landscaper: Trees,
+      flooring_installer: Wrench,
+      antique_dealer: ShoppingBag,
+      gold_silver_coins_buyer: ShoppingBag,
+      vintage_reseller: ShoppingBag,
+      consignment_shop: ShoppingBag,
+      auction_house: Gavel,
+      appraiser: Building2,
+      moving_company: Truck,
+      storage_facility: Package,
+      pods_container: Package,
+      shipping_service: Truck,
+      photography: Camera,
+      repair: Wrench,
+      auctioneer: Gavel,
+      stager: Home,
+      attorney: Scale,
+      cpa: PiggyBank,
+      cleaning: Sparkles,
+      other: Building2
+    };
+    const IconComponent = iconMap[vendorType] || Building2;
+    return IconComponent;
+  };
+
   if (loading) {
     return (
       <section className="py-8 px-4 bg-white">
@@ -106,10 +163,10 @@ export default function LocalVendorSection({ userLocation }) {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {vendors.map(vendor => {
             const vendorData = vendor.data || vendor;
-            const companyLogo = vendorData.company_logo || 'https://via.placeholder.com/150x150?text=Logo';
             const companyName = vendorData.company_name || 'Unknown Vendor';
             const vendorType = vendorData.vendor_type || 'other';
             const vendorId = vendorData.user_id || vendor.id;
+            const IconComponent = getVendorIcon(vendorType);
             
             return (
               <div
@@ -119,15 +176,10 @@ export default function LocalVendorSection({ userLocation }) {
               >
                 <Card className="hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-slate-200 hover:border-orange-300 overflow-hidden">
                   <CardContent className="p-4">
-                    <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center">
-                      <img
-                        src={companyLogo}
-                        alt={companyName}
-                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/150x150?text=Logo';
-                        }}
-                      />
+                    <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-gradient-to-br from-orange-50 to-cyan-50 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                        <IconComponent className="w-8 h-8 text-white" />
+                      </div>
                     </div>
                     <h4 className="text-sm font-semibold text-slate-900 text-center mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                       {companyName}
