@@ -42,6 +42,11 @@ export default function ConsumerHeader({ user }) {
           </Link>
 
           <div className="flex items-center gap-2">
+            <Link to="/">
+              <Button variant="ghost" size="icon" className="text-orange-400 hover:text-orange-300 hover:bg-slate-700">
+                <Home className="w-5 h-5" />
+              </Button>
+            </Link>
             <MessagesDropdown />
             <NotificationsDropdown user={user} />
             <DropdownMenu>
