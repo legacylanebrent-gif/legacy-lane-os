@@ -8,54 +8,77 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
-  Heart, Search, MapPin, Calendar, Trash2, Star, Building2, Mail, Phone, Navigation, Bookmark
+  Heart, Search, MapPin, Calendar, Trash2, Navigation, Bookmark, Clock, Archive
 } from 'lucide-react';
 import { format } from 'date-fns';
+
+// Determine if a sale is fully in the past (all sale dates + end times have passed)
+function isSalePast(sale) {
+  if (!sale?.sale_dates || sale.sale_dates.length === 0) return false;
+  const now = new Date();
+  // Check if the LAST sale date has passed
+  const lastDate = sale.sale_dates[sale.sale_dates.length - 1];
+  if (!lastDate?.date) return false;
+
+  // Build end datetime
+  let endDateTime;
+  if (lastDate.end_time) {
+    // Parse time like "14:00" or "2:00 PM"
+    const dateStr = lastDate.date;
+    const timeStr = lastDate.end_time;
+    endDateTime = new Date(`${dateStr}T${convertTo24Hour(timeStr)}`);
+  } else {
+    // No end time — consider end of day
+    endDateTime = new Date(lastDate.date);
+    endDateTime.setHours(23, 59, 59);
+  }
+
+  return endDateTime < now;
+}
+
+function convertTo24Hour(time) {
+  if (!time) return '23:59';
+  if (!time.includes('AM') && !time.includes('PM') && !time.includes('am') && !time.includes('pm')) {
+    return time.length === 5 ? time : time.padStart(5, '0');
+  }
+  const [t, modifier] = time.split(' ');
+  let [hours, minutes] = t.split(':');
+  if (modifier?.toUpperCase() === 'PM' && hours !== '12') hours = String(parseInt(hours) + 12);
+  if (modifier?.toUpperCase() === 'AM' && hours === '12') hours = '00';
+  return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0')}`;
+}
 
 export default function Favorites() {
   const [favorites, setFavorites] = useState([]);
   const [saleDetails, setSaleDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('active'); // 'active' | 'past'
   const [routeSales, setRouteSales] = useState([]);
 
   useEffect(() => {
     loadFavorites();
-    loadRoute();
-  }, []);
-
-  const loadRoute = () => {
     const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
     setRouteSales(route);
-  };
+  }, []);
 
   const loadFavorites = async () => {
     try {
       const user = await base44.auth.me();
-      
-      // Load connections where user is the connected user and type is favorite
       const connections = await base44.entities.Connection.filter({
         connected_user_id: user.id,
         connection_type: 'favorite'
       });
-      
       setFavorites(connections);
-      
-      // Load estate sale details for each connection
-      const saleIds = [...new Set(connections.map(c => c.source).filter(s => s))];
+
+      const saleIds = [...new Set(connections.map(c => c.source).filter(Boolean))];
       const sales = await Promise.all(
-        saleIds.map(id => 
-          base44.entities.EstateSale.filter({ id }).then(sales => sales[0])
+        saleIds.map(id =>
+          base44.entities.EstateSale.filter({ id }).then(res => res[0])
         )
       );
-      
       const saleMap = {};
-      sales.forEach(sale => {
-        if (sale) {
-          saleMap[sale.id] = sale;
-        }
-      });
-      
+      sales.forEach(sale => { if (sale) saleMap[sale.id] = sale; });
       setSaleDetails(saleMap);
     } catch (error) {
       console.error('Error loading favorites:', error);
@@ -66,22 +89,16 @@ export default function Favorites() {
 
   const handleRemoveFavorite = async (favoriteId) => {
     if (!confirm('Remove this sale from your favorites?')) return;
-    
     try {
       await base44.entities.Connection.delete(favoriteId);
-      
-      // Also remove from localStorage
       const saved = JSON.parse(localStorage.getItem('savedSales') || '[]');
       const favorite = favorites.find(f => f.id === favoriteId);
       if (favorite?.source) {
-        const updated = saved.filter(id => id !== favorite.source);
-        localStorage.setItem('savedSales', JSON.stringify(updated));
+        localStorage.setItem('savedSales', JSON.stringify(saved.filter(id => id !== favorite.source)));
       }
-      
       loadFavorites();
     } catch (error) {
       console.error('Error removing favorite:', error);
-      alert('Failed to remove favorite');
     }
   };
 
@@ -89,15 +106,9 @@ export default function Favorites() {
     e.preventDefault();
     e.stopPropagation();
     const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
-    if (route.includes(saleId)) {
-      const updated = route.filter(id => id !== saleId);
-      localStorage.setItem('estateRoute', JSON.stringify(updated));
-      setRouteSales(updated);
-    } else {
-      route.push(saleId);
-      localStorage.setItem('estateRoute', JSON.stringify(route));
-      setRouteSales(route);
-    }
+    const updated = route.includes(saleId) ? route.filter(id => id !== saleId) : [...route, saleId];
+    localStorage.setItem('estateRoute', JSON.stringify(updated));
+    setRouteSales(updated);
   };
 
   const handleGetDirections = (e, sale) => {
@@ -109,17 +120,31 @@ export default function Favorites() {
     }
   };
 
-  const filteredFavorites = favorites.filter(fav => {
+  // Split favorites into active vs past
+  const activeFavorites = favorites.filter(fav => {
     const sale = saleDetails[fav.source];
-    if (!sale) return false;
-    
-    const query = searchQuery.toLowerCase();
-    return (
-      sale.title?.toLowerCase().includes(query) ||
-      sale.property_address?.city?.toLowerCase().includes(query) ||
-      sale.property_address?.state?.toLowerCase().includes(query)
-    );
+    return sale && !isSalePast(sale);
   });
+
+  const pastFavorites = favorites.filter(fav => {
+    const sale = saleDetails[fav.source];
+    return sale && isSalePast(sale);
+  });
+
+  const applySearch = (list) => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(fav => {
+      const sale = saleDetails[fav.source];
+      return (
+        sale?.title?.toLowerCase().includes(q) ||
+        sale?.property_address?.city?.toLowerCase().includes(q) ||
+        sale?.property_address?.state?.toLowerCase().includes(q)
+      );
+    });
+  };
+
+  const displayList = applySearch(activeTab === 'active' ? activeFavorites : pastFavorites);
 
   if (loading) {
     return (
@@ -135,54 +160,110 @@ export default function Favorites() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-6 lg:p-8 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
-            ❤️ My Favorites
-          </h1>
-          <p className="text-slate-600">{filteredFavorites.length} saved estate {filteredFavorites.length === 1 ? 'sale' : 'sales'}</p>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">❤️ My Favorites</h1>
+          <p className="text-slate-600">
+            {activeFavorites.length} active · {pastFavorites.length} past
+          </p>
         </div>
-        <Button onClick={loadFavorites} variant="outline">
-          Refresh
-        </Button>
+        <Button onClick={loadFavorites} variant="outline">Refresh</Button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab('active')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'active'
+              ? 'border-orange-500 text-orange-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <Heart className="w-4 h-4 inline mr-1" />
+          Current Favorites
+          {activeFavorites.length > 0 && (
+            <Badge className="ml-2 bg-orange-100 text-orange-700 border-orange-200">{activeFavorites.length}</Badge>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('past')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'past'
+              ? 'border-slate-500 text-slate-700'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <Archive className="w-4 h-4 inline mr-1" />
+          Past Favorites
+          {pastFavorites.length > 0 && (
+            <Badge className="ml-2 bg-slate-100 text-slate-600 border-slate-200">{pastFavorites.length}</Badge>
+          )}
+        </button>
       </div>
 
       {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
         <Input
-          placeholder="Search favorites..."
+          placeholder={`Search ${activeTab === 'past' ? 'past ' : ''}favorites...`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
         />
       </div>
 
-      {filteredFavorites.length === 0 ? (
+      {/* Past notice */}
+      {activeTab === 'past' && (
+        <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600">
+          <Clock className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+          <span>These sales have ended. Addresses are hidden to prevent unannounced visits to private properties.</span>
+        </div>
+      )}
+
+      {/* Cards */}
+      {displayList.length === 0 ? (
         <Card className="p-12 text-center">
-          <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">No Favorites Yet</h3>
+          {activeTab === 'active' ? (
+            <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          ) : (
+            <Archive className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          )}
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+            {activeTab === 'active' ? 'No Current Favorites' : 'No Past Favorites'}
+          </h3>
           <p className="text-slate-600 mb-6">
-            {searchQuery ? 'No favorites match your search.' : 'Start saving estate sales you\'re interested in!'}
+            {searchQuery
+              ? 'No favorites match your search.'
+              : activeTab === 'active'
+              ? "Start saving estate sales you're interested in!"
+              : "Sales you've favorited that have ended will appear here."}
           </p>
-          <Link to={createPageUrl('Home')}>
-            <Button className="bg-orange-600 hover:bg-orange-700">
-              Browse Estate Sales
-            </Button>
-          </Link>
+          {activeTab === 'active' && (
+            <Link to={createPageUrl('Home')}>
+              <Button className="bg-orange-600 hover:bg-orange-700">Browse Estate Sales</Button>
+            </Link>
+          )}
         </Card>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFavorites.map(favorite => {
+          {displayList.map(favorite => {
             const sale = saleDetails[favorite.source];
             if (!sale) return null;
+            const isPast = activeTab === 'past';
 
             return (
-              <Card key={favorite.id} className="overflow-hidden hover:shadow-xl transition-shadow group">
-                <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+              <Card
+                key={favorite.id}
+                className={`overflow-hidden transition-shadow group ${isPast ? 'opacity-80 hover:opacity-100' : 'hover:shadow-xl'}`}
+              >
+                <Link to={isPast ? '#' : createPageUrl('EstateSaleDetail') + '?id=' + sale.id}
+                  onClick={isPast ? (e) => e.preventDefault() : undefined}
+                >
                   {sale.images && sale.images.length > 0 && (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className={`relative h-48 overflow-hidden ${isPast ? 'grayscale' : ''}`}>
                       <img
                         src={sale.images[0].url || sale.images[0]}
                         alt={sale.title}
@@ -191,15 +272,16 @@ export default function Favorites() {
                       <div className="absolute top-3 left-3 bg-red-600 text-white rounded-full p-2 shadow-lg">
                         <Heart className="w-4 h-4 fill-current" />
                       </div>
-                      {sale.national_featured && (
-                        <Badge className="absolute top-3 right-3 bg-orange-600 text-white">
-                          National Featured
-                        </Badge>
+                      {isPast && (
+                        <div className="absolute inset-0 bg-slate-900/30 flex items-center justify-center">
+                          <Badge className="bg-slate-700 text-white text-xs px-3 py-1">Sale Ended</Badge>
+                        </div>
                       )}
-                      {!sale.national_featured && sale.local_featured && (
-                        <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">
-                          Local Featured
-                        </Badge>
+                      {!isPast && sale.national_featured && (
+                        <Badge className="absolute top-3 right-3 bg-orange-600 text-white">National Featured</Badge>
+                      )}
+                      {!isPast && !sale.national_featured && sale.local_featured && (
+                        <Badge className="absolute top-3 right-3 bg-cyan-600 text-white">Local Featured</Badge>
                       )}
                     </div>
                   )}
@@ -209,51 +291,58 @@ export default function Favorites() {
                     </h3>
 
                     <div className="space-y-2 text-sm mb-4">
-                      <div className="flex items-start gap-2 text-slate-600">
-                        <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                        <span>
-                          {sale.property_address?.street && `${sale.property_address.street}, `}
-                          {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                        </span>
-                      </div>
+                      {/* Address: shown for active, hidden for past */}
+                      {!isPast ? (
+                        <div className="flex items-start gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                          <span>
+                            {sale.property_address?.street && `${sale.property_address.street}, `}
+                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2 text-slate-400 italic text-xs">
+                          <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                          <span>Address hidden — sale has ended</span>
+                        </div>
+                      )}
 
                       {sale.sale_dates && sale.sale_dates.length > 0 && (
                         <div className="flex items-center gap-2 text-slate-600">
                           <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                          <div className="flex items-center justify-between flex-1">
-                            <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
-                            {sale.sale_dates[0].start_time && (
-                              <span className="text-xs text-slate-500">
-                                {sale.sale_dates[0].start_time} - {sale.sale_dates[0].end_time}
-                              </span>
-                            )}
-                          </div>
+                          <span>
+                            {format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}
+                            {sale.sale_dates.length > 1 && ` – ${format(new Date(sale.sale_dates[sale.sale_dates.length - 1].date), 'MMM d, yyyy')}`}
+                          </span>
                         </div>
                       )}
                     </div>
 
                     <div className="pt-4 border-t space-y-2">
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={(e) => handleAddToRoute(e, sale.id)}
-                          variant="outline"
-                          size="sm"
-                          className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
-                        >
-                          <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
-                          {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                        </Button>
-                        <Button
-                          onClick={(e) => handleGetDirections(e, sale)}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                        >
-                          <Navigation className="w-4 h-4 mr-1" />
-                          Directions
-                        </Button>
-                      </div>
-                      
+                      {/* Action buttons — only show route/directions for active sales */}
+                      {!isPast && (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={(e) => handleAddToRoute(e, sale.id)}
+                            variant="outline"
+                            size="sm"
+                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                          >
+                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                          </Button>
+                          <Button
+                            onClick={(e) => handleGetDirections(e, sale)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            <Navigation className="w-4 h-4 mr-1" />
+                            Directions
+                          </Button>
+                        </div>
+                      )}
+
                       <Button
                         onClick={(e) => {
                           e.preventDefault();
