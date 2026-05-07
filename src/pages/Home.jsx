@@ -62,7 +62,10 @@ export default function Home() {
   const [localFeatured, setLocalFeatured] = useState([]);
   const [regularSales, setRegularSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const [zipCode, setZipCode] = useState(() => {
+    // Load from localStorage on initial render
+    return localStorage.getItem('userZipCode') || '';
+  });
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -427,6 +430,26 @@ export default function Home() {
               } catch (error) {
                 console.log('Could not save location to profile');
               }
+            }
+            
+            // Try to get zip code from location and save it
+            try {
+              const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLoc.lat},${userLoc.lng}&key=${await getGoogleMapsKey()}`);
+              const data = await response.json();
+              if (data.results && data.results[0]) {
+                const addressComponents = data.results[0].address_components;
+                const zipComponent = addressComponents.find(c => c.types.includes('postal_code'));
+                if (zipComponent) {
+                  const zip = zipComponent.long_name.match(/^\d{5}/);
+                  if (zip) {
+                    const zipCodeValue = zip[0];
+                    setUserZipCode(zipCodeValue);
+                    localStorage.setItem('userZipCode', zipCodeValue);
+                  }
+                }
+              }
+            } catch (error) {
+              console.log('Could not get zip code from location');
             }
           },
           (error) => {
