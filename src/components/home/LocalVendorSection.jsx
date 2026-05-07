@@ -10,32 +10,41 @@ export default function LocalVendorSection({ userLocation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userLocation) {
-      loadNearbyVendors();
-    }
-  }, [userLocation]);
+    loadNearbyVendors();
+  }, []);
 
   const loadNearbyVendors = async () => {
     try {
+      setLoading(true);
       // Fetch all vendors
       const allVendors = await base44.entities.Vendor.list();
       
+      if (!allVendors || allVendors.length === 0) {
+        setVendors([]);
+        setLoading(false);
+        return;
+      }
+      
       // Filter vendors that have service areas and sort by rating
       const activeVendors = allVendors.filter(vendor => {
-        const serviceAreas = vendor.data?.service_areas || vendor.service_areas || [];
+        const vendorData = vendor.data || vendor;
+        const serviceAreas = vendorData.service_areas || [];
         return serviceAreas.length > 0;
       });
 
       // Sort by rating (highest first) and take top 10
       activeVendors.sort((a, b) => {
-        const ratingA = (a.data?.rating || a.rating || 0);
-        const ratingB = (b.data?.rating || b.rating || 0);
+        const dataA = a.data || a;
+        const dataB = b.data || b;
+        const ratingA = (dataA.rating || 0);
+        const ratingB = (dataB.rating || 0);
         return ratingB - ratingA;
       });
       
       setVendors(activeVendors.slice(0, 10));
     } catch (error) {
       console.error('Error loading vendors:', error);
+      setVendors([]);
     } finally {
       setLoading(false);
     }
