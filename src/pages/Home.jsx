@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
@@ -705,42 +706,7 @@ export default function Home() {
       )}
 
       {/* Header */}
-      {isAuthenticated && currentUser ? (
-        <ConsumerHeader user={currentUser} />
-      ) : (
-        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-14">
-              <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
-                <div>
-                  <h1 className="text-base font-serif font-bold text-white leading-tight">EstateSalen.com</h1>
-                  <p className="text-[10px] text-orange-400 hidden sm:block">Discover Amazing Estate Sales</p>
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="text-white hover:text-orange-400 hover:bg-orange-500/20 text-sm"
-                >
-                  <LogIn className="w-4 h-4 mr-1" />
-                  Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-3"
-                >
-                  Get Started
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Hero Section with Gradient Background */}
       <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-16 px-4 overflow-hidden">

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import { 
   MapPin, Calendar, Search, Tag, DollarSign, Heart, ShoppingBag,
   Image as ImageIcon, LogIn, LogOut, MessageSquare, LayoutDashboard, ArrowLeft
@@ -130,33 +131,7 @@ export default function SaleLanding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-      {isAuthenticated && currentUser ? (
-        <ConsumerHeader user={currentUser} />
-      ) : (
-        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-12 w-12 object-contain" />
-                <div>
-                  <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
-                  <p className="text-xs text-orange-400">Discover Amazing Estate Sales</p>
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:text-orange-400 hover:bg-orange-500/20">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-                <Button onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
-                  Get Started Free
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Sale Info */}
       <div className="bg-white border-b border-slate-200 shadow-sm">

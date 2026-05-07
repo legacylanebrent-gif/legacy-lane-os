@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MessageModal from '@/components/messaging/MessageModal';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 
@@ -218,45 +219,7 @@ export default function ItemDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-              <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
-              <span className="text-lg font-serif font-bold text-white hidden sm:block">EstateSalen.com</span>
-            </Link>
-
-            <div className="flex items-center gap-1">
-              {isAuthenticated ? (
-                <>
-                  <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Messages')} className="text-white hover:bg-slate-800 h-8 w-8">
-                    <MessageSquare className="w-4 h-4" />
-                  </Button>
-                  {currentUser && <NotificationsDropdown user={currentUser} />}
-                  <Button variant="ghost" size="sm" onClick={() => window.location.href = createPageUrl('Dashboard')} className="text-white hover:bg-slate-800 text-xs">
-                    <LayoutDashboard className="w-4 h-4 sm:mr-1" />
-                    <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => base44.auth.logout()} className="text-white hover:bg-slate-800 text-xs">
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" size="sm" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white hover:bg-slate-800 text-xs">
-                    <LogIn className="w-4 h-4 mr-1" />
-                    Sign In
-                  </Button>
-                  <Button size="sm" onClick={() => base44.auth.redirectToLogin(window.location.href)} className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3">
-                    Get Started
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
