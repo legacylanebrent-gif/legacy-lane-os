@@ -10,9 +10,10 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { format, parseISO, isSameDay } from 'date-fns';
+import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import {
   Navigation, MapPin, Calendar, Clock, Trash2, ExternalLink,
-  Route, AlertCircle, CheckCircle2, Eye
+  Route, AlertCircle, CheckCircle2, Eye, Lock
 } from 'lucide-react';
 
 // Fix Leaflet default marker icon
@@ -36,6 +37,23 @@ const todayStr = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+// Geocode a city+state to lat/lng using Google Maps API (cached)
+const cityGeoCache = {};
+const geocodeCity = async (city, state, googleApiKey) => {
+  const key = `${city},${state}`;
+  if (cityGeoCache[key]) return cityGeoCache[key];
+  try {
+    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(key)}&key=${googleApiKey}`);
+    const data = await res.json();
+    if (data.results?.[0]?.geometry?.location) {
+      const loc = data.results[0].geometry.location;
+      cityGeoCache[key] = { lat: loc.lat, lng: loc.lng };
+      return cityGeoCache[key];
+    }
+  } catch (e) { /* silent */ }
+  return null;
+};
+
 export default function RoutePlanner() {
   const [routeIds, setRouteIds] = useState([]);
   const [sales, setSales] = useState([]);
@@ -43,6 +61,8 @@ export default function RoutePlanner() {
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]);
   const [hasLocation, setHasLocation] = useState(false);
+  const [cityCoords, setCityCoords] = useState({}); // saleId -> {lat, lng} for city center fallback
+  const [googleApiKey, setGoogleApiKey] = useState('');
 
   useEffect(() => {
     const ids = JSON.parse(localStorage.getItem('estateRoute') || '[]');
@@ -57,11 +77,31 @@ export default function RoutePlanner() {
   const loadSales = async (ids) => {
     setLoading(true);
     try {
+      // Fetch Google API key
+      let apiKey = googleApiKey;
+      if (!apiKey) {
+        try {
+          const cfg = await base44.functions.invoke('getConfig', {});
+          apiKey = cfg.data?.GOOGLE_MAPS_API_KEY || '';
+          setGoogleApiKey(apiKey);
+        } catch (e) { /* silent */ }
+      }
+
       const all = await base44.entities.EstateSale.list('-created_date', 200);
       const routeSales = all.filter(s => ids.includes(s.id));
       setSales(routeSales);
 
-      // Center map on first sale with coordinates
+      // For sales whose address is NOT yet visible, geocode the city center
+      const coords = {};
+      await Promise.all(routeSales.map(async (sale) => {
+        if (!isSaleAddressVisible(sale) && sale.property_address?.city && sale.property_address?.state && apiKey) {
+          const loc = await geocodeCity(sale.property_address.city, sale.property_address.state, apiKey);
+          if (loc) coords[sale.id] = loc;
+        }
+      }));
+      setCityCoords(coords);
+
+      // Center map on first available pin
       const first = routeSales.find(s => s.location?.lat && s.location?.lng);
       if (first) {
         setMapCenter([first.location.lat, first.location.lng]);
@@ -88,14 +128,26 @@ export default function RoutePlanner() {
     setSales([]);
   };
 
+  // Returns the effective map pin: exact if address visible, city center otherwise
+  const getPin = (sale) => {
+    if (isSaleAddressVisible(sale) && sale.location?.lat && sale.location?.lng) {
+      return { lat: sale.location.lat, lng: sale.location.lng, exact: true };
+    }
+    if (cityCoords[sale.id]) {
+      return { ...cityCoords[sale.id], exact: false };
+    }
+    return null;
+  };
+
   const getDirections = (sale) => {
-    if (!sale.property_address) return;
+    if (!isSaleAddressVisible(sale) || !sale.property_address) return;
     const addr = `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`;
     window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(addr)}`, '_blank');
   };
 
   const getMultiStopDirections = () => {
-    const available = filteredSales.filter(s => s.property_address);
+    // Only include sales with visible addresses
+    const available = filteredSales.filter(s => isSaleAddressVisible(s) && s.property_address);
     if (available.length === 0) return;
     const waypoints = available.map(s =>
       `${s.property_address.street}, ${s.property_address.city}, ${s.property_address.state} ${s.property_address.zip}`
@@ -151,7 +203,7 @@ export default function RoutePlanner() {
                 />
               </div>
 
-              {filteredSales.length > 0 && (
+              {filteredSales.some(s => isSaleAddressVisible(s)) && (
                 <Button
                   onClick={getMultiStopDirections}
                   className="bg-cyan-600 hover:bg-cyan-700 gap-2"
@@ -214,7 +266,7 @@ export default function RoutePlanner() {
             </div>
 
             {/* Map */}
-            {filteredSales.some(s => s.location?.lat && s.location?.lng) && (
+            {filteredSales.some(s => getPin(s)) && (
               <Card className="overflow-hidden">
                 <MapContainer
                   center={mapCenter}
@@ -226,13 +278,19 @@ export default function RoutePlanner() {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                   />
-                  {filteredSales.map((sale, idx) =>
-                    sale.location?.lat && sale.location?.lng ? (
-                      <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                  {filteredSales.map((sale, idx) => {
+                    const pin = getPin(sale);
+                    if (!pin) return null;
+                    return (
+                      <Marker key={sale.id} position={[pin.lat, pin.lng]}>
                         <Popup>
                           <div className="text-sm">
                             <strong className="text-cyan-700">Stop {idx + 1}: {sale.title}</strong>
-                            <p className="text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                            {pin.exact ? (
+                              <p className="text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                            ) : (
+                              <p className="text-orange-500 mt-1 italic text-xs">📍 Approximate location — exact address revealed 24 hrs before sale</p>
+                            )}
                             {getSaleDateInfo(sale) && (
                               <p className="text-orange-600 font-medium mt-1 text-xs">
                                 {formatTime(getSaleDateInfo(sale).start_time)} – {formatTime(getSaleDateInfo(sale).end_time)}
@@ -241,8 +299,8 @@ export default function RoutePlanner() {
                           </div>
                         </Popup>
                       </Marker>
-                    ) : null
-                  )}
+                    );
+                  })}
                 </MapContainer>
               </Card>
             )}
@@ -278,9 +336,15 @@ export default function RoutePlanner() {
                           </div>
 
                           {sale.property_address && (
-                            <div className="flex items-start gap-1.5 text-sm text-slate-600">
+                            <div className="flex items-start gap-1.5 text-sm">
                               <MapPin className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0 mt-0.5" />
-                              <span>{sale.property_address.street}, {sale.property_address.city}, {sale.property_address.state}</span>
+                              {isSaleAddressVisible(sale) ? (
+                                <span className="text-slate-600">{sale.property_address.street}, {sale.property_address.city}, {sale.property_address.state}</span>
+                              ) : (
+                                <span className="text-slate-400 italic text-xs">
+                                  Address revealed 24 hrs before sale<br />{sale.property_address.city}, {sale.property_address.state}
+                                </span>
+                              )}
                             </div>
                           )}
 
@@ -297,8 +361,10 @@ export default function RoutePlanner() {
                               variant="outline"
                               className="flex-1 gap-1 text-xs"
                               onClick={() => getDirections(sale)}
+                              disabled={!isSaleAddressVisible(sale)}
+                              title={!isSaleAddressVisible(sale) ? 'Address revealed 24 hrs before sale' : 'Get directions'}
                             >
-                              <Navigation className="w-3 h-3" />
+                              {isSaleAddressVisible(sale) ? <Navigation className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                               Directions
                             </Button>
                             <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" asChild>
