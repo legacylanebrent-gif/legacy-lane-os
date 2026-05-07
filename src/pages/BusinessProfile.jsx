@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -112,29 +113,7 @@ export default function BusinessProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Business Directory</p>
-              </div>
-            </Link>
-
-            <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Sales
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <UniversalHeader user={currentUser} isAuthenticated={!!currentUser} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
