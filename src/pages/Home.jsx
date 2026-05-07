@@ -333,55 +333,56 @@ export default function Home() {
 
   const geocodeZipCode = async (zip) => {
     try {
-      setDebugMessage(`🔍 Searching ZIP code ${zip}...`);
-      const apiKey = await getGoogleMapsKey();
-      console.log('Google Maps API Key:', apiKey ? 'Present' : 'Missing');
+      const zipClean = zip.trim();
       
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${apiKey}`);
+      if (!/^\d{5}$/.test(zipClean)) {
+        setDebugMessage('❌ Enter 5-digit ZIP');
+        setTimeout(() => setDebugMessage(''), 3000);
+        return;
+      }
+      
+      setDebugMessage(`🔍 Finding ${zipClean}...`);
+      
+      const response = await fetch(`https://api.zippopotam.us/us/${zipClean}`);
+      
+      if (!response.ok) {
+        setDebugMessage('❌ ZIP not found');
+        setTimeout(() => setDebugMessage(''), 3000);
+        return;
+      }
+      
       const data = await response.json();
-      console.log('Geocode response:', data);
       
-      if (data.status === 'ZERO_RESULTS' || !data.results || data.results.length === 0) {
-        setDebugMessage(`❌ Invalid ZIP code (${data.status})`);
-        setTimeout(() => setDebugMessage(''), 3000);
-        return;
-      }
-      
-      if (data.status === 'INVALID_REQUEST' || data.status === 'REQUEST_DENIED') {
-        setDebugMessage(`❌ API Error: ${data.status}`);
-        setTimeout(() => setDebugMessage(''), 3000);
-        return;
-      }
-      
-      if (data.results && data.results[0]) {
-        const location = data.results[0].geometry.location;
-        const userLoc = { lat: location.lat, lng: location.lng };
+      if (data.places && data.places[0]) {
+        const place = data.places[0];
+        const userLoc = {
+          lat: parseFloat(place.latitude),
+          lng: parseFloat(place.longitude)
+        };
+        
         setUserLocation(userLoc);
         calculateMinZoom(userLoc);
-        
-        // Extract 5-digit zip code
-        const zipMatch = zip.match(/^\d{5}/);
-        if (zipMatch) {
-          setUserZipCode(zipMatch[0]);
-          localStorage.setItem('userZipCode', zipMatch[0]);
-        }
-        
-        // Save to localStorage and profile
+        setUserZipCode(zipClean);
+        localStorage.setItem('userZipCode', zipClean);
         localStorage.setItem('userLocation', JSON.stringify(userLoc));
+        
         if (currentUser && isAuthenticated) {
           try {
             await base44.auth.updateMe({ location: userLoc });
           } catch (error) {
-            console.log('Could not save location to profile');
+            console.log('Could not save to profile');
           }
         }
         
-        setDebugMessage(`✅ Location updated to ${zipMatch ? zipMatch[0] : zip}`);
+        setDebugMessage(`✅ Showing sales near ${zipClean}`);
+        setTimeout(() => setDebugMessage(''), 3000);
+      } else {
+        setDebugMessage('❌ ZIP not found');
         setTimeout(() => setDebugMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error geocoding zip:', error);
-      setDebugMessage(`❌ Error: ${error.message}`);
+      setDebugMessage('❌ Try again');
       setTimeout(() => setDebugMessage(''), 3000);
     }
   };
