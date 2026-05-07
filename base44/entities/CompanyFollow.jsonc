@@ -1,0 +1,48 @@
+{
+  "name": "CompanyFollow",
+  "type": "object",
+  "properties": {
+    "consumer_user_id": {
+      "type": "string",
+      "description": "ID of the consumer following the company"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "ID of the operator/company being followed"
+    },
+    "operator_name": {
+      "type": "string",
+      "description": "Company name for quick reference"
+    },
+    "operator_city": {
+      "type": "string"
+    },
+    "operator_state": {
+      "type": "string"
+    },
+    "notify_email": {
+      "type": "boolean",
+      "default": true,
+      "description": "Send email notifications for new sales"
+    },
+    "notify_sms": {
+      "type": "boolean",
+      "default": false,
+      "description": "Send SMS notifications for new sales"
+    },
+    "notify_inapp": {
+      "type": "boolean",
+      "default": true,
+      "description": "Send in-app notifications for new sales"
+    },
+    "auto_favorite": {
+      "type": "boolean",
+      "default": false,
+      "description": "Automatically favorite new sales posted by this company"
+    }
+  },
+  "required": [
+    "consumer_user_id",
+    "operator_id"
+  ]
+}

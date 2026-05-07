@@ -14,7 +14,7 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt, MessageSquare, Star, ClipboardList, Navigation
+  ShoppingBag, Heart, LayoutDashboard, ChevronDown, Bell, LogOut, Home, QrCode, Receipt, MessageSquare, Star, ClipboardList, Navigation, Building2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -120,6 +120,12 @@ export default function ConsumerHeader({ user }) {
                   <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Browse Marketplace
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    Favorite Companies
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -63,6 +63,7 @@ import CheckIn from './pages/CheckIn';
 import EarlySignIn from './pages/EarlySignIn';
 import MyEarlySignIns from './pages/MyEarlySignIns';
 import RoutePlanner from './pages/RoutePlanner';
+import FavoriteCompanies from './pages/FavoriteCompanies';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -169,6 +170,7 @@ const AuthenticatedApp = () => {
       <Route path="/EarlySignIn" element={<LayoutWrapper currentPageName="EarlySignIn"><EarlySignIn /></LayoutWrapper>} />
       <Route path="/MyEarlySignIns" element={<LayoutWrapper currentPageName="MyEarlySignIns"><MyEarlySignIns /></LayoutWrapper>} />
       <Route path="/RoutePlanner" element={<RoutePlanner />} />
+      <Route path="/FavoriteCompanies" element={<LayoutWrapper currentPageName="FavoriteCompanies"><FavoriteCompanies /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
