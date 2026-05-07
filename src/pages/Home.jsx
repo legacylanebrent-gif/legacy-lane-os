@@ -1028,15 +1028,24 @@ export default function Home() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          <span>
-                            {sale.property_address?.street && `${sale.property_address.street}, `}
-                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                            {sale.distance !== null && sale.distance !== undefined && (
-                              <span className="ml-2 text-xs text-orange-600 font-semibold">
-                                ({sale.distance.toFixed(1)} mi)
-                              </span>
-                            )}
-                          </span>
+                          {isSaleAddressVisible(sale) ? (
+                            <span>
+                              {sale.property_address?.street && `${sale.property_address.street}, `}
+                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                              {sale.distance !== null && sale.distance !== undefined && (
+                                <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                  ({sale.distance.toFixed(1)} mi)
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="italic text-slate-400 text-xs">
+                              Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
+                              {sale.distance !== null && sale.distance !== undefined && (
+                                <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
+                              )}
+                            </span>
+                          )}
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
@@ -1158,15 +1167,24 @@ export default function Home() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2 text-slate-600">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          <span>
-                            {sale.property_address?.street && `${sale.property_address.street}, `}
-                            {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                            {sale.distance !== null && sale.distance !== undefined && (
-                              <span className="ml-2 text-xs text-orange-600 font-semibold">
-                                ({sale.distance.toFixed(1)} mi)
-                              </span>
-                            )}
-                          </span>
+                          {isSaleAddressVisible(sale) ? (
+                            <span>
+                              {sale.property_address?.street && `${sale.property_address.street}, `}
+                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                              {sale.distance !== null && sale.distance !== undefined && (
+                                <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                  ({sale.distance.toFixed(1)} mi)
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="italic text-slate-400 text-xs">
+                              Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
+                              {sale.distance !== null && sale.distance !== undefined && (
+                                <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
+                              )}
+                            </span>
+                          )}
                         </div>
 
                         {sale.sale_dates && sale.sale_dates.length > 0 && (
