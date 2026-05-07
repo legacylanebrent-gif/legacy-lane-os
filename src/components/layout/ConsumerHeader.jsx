@@ -93,15 +93,15 @@ export default function ConsumerHeader({ user }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Record Purchase
+                  <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
+                    <QrCode className="w-4 h-4 mr-2" />
+                    Sale Checkin
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
-                    <QrCode className="w-4 h-4 mr-2" />
-                    QR Check-in
+                  <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Record Purchase
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
