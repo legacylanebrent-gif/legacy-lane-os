@@ -840,7 +840,9 @@ export default function Home() {
                     <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
                       <Popup>
                         <div className="text-sm">
-                          <strong className="text-cyan-600">{sale.title}</strong>
+                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
+                            {sale.title}
+                          </Link>
                           <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
                           {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
                         </div>
@@ -853,7 +855,9 @@ export default function Home() {
                     <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
                       <Popup>
                         <div className="text-sm">
-                          <strong>{sale.title}</strong>
+                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
+                            {sale.title}
+                          </Link>
                           <p className="text-xs text-slate-600 mt-1">{sale.property_address?.city}, {sale.property_address?.state}</p>
                           {sale.distance && <p className="text-xs text-orange-600 font-semibold mt-1">{sale.distance.toFixed(1)} mi away</p>}
                         </div>
