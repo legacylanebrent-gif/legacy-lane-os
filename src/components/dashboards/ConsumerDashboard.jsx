@@ -1,185 +1,258 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Heart, AlertCircle, MapPin, ShoppingBag, Star, Users, MessageSquare, Bell, Ticket, HandCoins } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  User, Heart, AlertCircle, MapPin, ShoppingBag, Star, Users,
+  MessageSquare, Bell, HandCoins, Route, Calendar, Image, Building2
+} from 'lucide-react';
+import SalesTimeline from './consumer/SalesTimeline';
+import RouteMapWidget from './consumer/RouteMapWidget';
+import SavedItemsGallery from './consumer/SavedItemsGallery';
 
 export default function ConsumerDashboard({ user }) {
-  const [error, setError] = useState(null);
+  const [followedSales, setFollowedSales] = useState([]);   // upcoming sales from followed operators
+  const [allFollowedSales, setAllFollowedSales] = useState([]); // for SavedItemsGallery (saved images)
+  const [followedOperatorIds, setFollowedOperatorIds] = useState([]);
+  const [savedSaleIds, setSavedSaleIds] = useState([]);
+  const [savedSales, setSavedSales] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('timeline'); // timeline | route | gallery
 
   useEffect(() => {
-    console.log('ConsumerDashboard mounted with user:', user);
-    try {
-      if (!user) {
-        console.error('No user data in ConsumerDashboard');
-        setError('No user data available');
-      }
-    } catch (e) {
-      console.error('Error in ConsumerDashboard useEffect:', e);
-      setError(e.message);
-    }
+    if (user) loadDashboardData();
   }, [user]);
 
-  console.log('ConsumerDashboard rendering, error state:', error);
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Followed companies
+      const follows = await base44.entities.CompanyFollow.filter({ consumer_user_id: user.id });
+      const opIds = follows.map(f => f.operator_id);
+      setFollowedOperatorIds(opIds);
+
+      // Saved sales from localStorage
+      const savedIds = JSON.parse(localStorage.getItem('savedSales') || '[]');
+      setSavedSaleIds(savedIds);
+
+      // Fetch all active/upcoming sales
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
+      const upcoming = allSales.filter(s =>
+        (s.status === 'upcoming' || s.status === 'active') &&
+        (s.sale_dates || []).some(d => new Date(d.date + 'T00:00:00') >= today)
+      );
+
+      // Timeline: sales from followed operators OR saved sales
+      const relevantIds = new Set([...opIds.flatMap(id =>
+        upcoming.filter(s => s.operator_id === id).map(s => s.id)
+      ), ...savedIds]);
+      const relevantSales = upcoming.filter(s => relevantIds.has(s.id));
+      setFollowedSales(relevantSales);
+
+      // Saved items gallery: sales with saved images in localStorage
+      const salesWithSavedImgs = allSales.filter(s => {
+        const stored = localStorage.getItem(`savedImages_${s.id}`);
+        if (!stored) return false;
+        try { return JSON.parse(stored).length > 0; } catch { return false; }
+      });
+      setAllFollowedSales(salesWithSavedImgs);
+
+      // Saved sales cards
+      const saved = allSales.filter(s => savedIds.includes(s.id));
+      setSavedSales(saved);
+    } catch (err) {
+      console.error('ConsumerDashboard load error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user) {
     return (
       <div className="p-6">
         <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-red-600 mb-4">
-              <AlertCircle className="w-8 h-8" />
-              <h2 className="font-bold text-2xl">No User Data</h2>
-            </div>
-            <p className="text-red-700 text-lg">Consumer dashboard cannot load without user data.</p>
+          <CardContent className="p-6 flex items-center gap-2 text-red-600">
+            <AlertCircle className="w-6 h-6" />
+            <p className="font-semibold">Consumer dashboard cannot load without user data.</p>
           </CardContent>
         </Card>
       </div>
     );
   }
+
   const quickActions = [
-    {
-      title: 'Find Estate Sales',
-      description: 'Browse upcoming estate sales near you',
-      icon: MapPin,
-      link: 'EstateSaleFinder',
-      color: 'orange'
-    },
-    {
-      title: 'My Favorites',
-      description: 'View your saved estate sales',
-      icon: Heart,
-      link: 'Favorites',
-      color: 'red'
-    },
-    {
-      title: 'Marketplace',
-      description: 'Shop items from estate sales',
-      icon: ShoppingBag,
-      link: 'BrowseItems',
-      color: 'cyan'
-    },
-    {
-      title: 'Check-ins & Rewards',
-      description: 'Check in at sales and earn rewards',
-      icon: MapPin,
-      link: 'RewardsCheckins',
-      color: 'green'
-    },
-    {
-      title: 'My Rewards',
-      description: 'View your points and reward history',
-      icon: Star,
-      link: 'MyRewards',
-      color: 'yellow'
-    },
-    {
-      title: 'My Referrals',
-      description: 'Invite friends and earn bonuses',
-      icon: Users,
-      link: 'MyReferrals',
-      color: 'purple'
-    },
-    {
-      title: 'Buyouts',
-      description: 'Request a full estate buyout',
-      icon: HandCoins,
-      link: 'Buyouts',
-      color: 'amber'
-    },
-    {
-      title: 'Support',
-      description: 'Get help with your account',
-      icon: MessageSquare,
-      link: 'MyTickets',
-      color: 'slate'
-    },
-    {
-      title: 'Notifications',
-      description: 'View your recent notifications',
-      icon: Bell,
-      link: 'Notifications',
-      color: 'indigo'
-    },
-    {
-      title: 'My Profile',
-      description: 'Edit your profile and settings',
-      icon: User,
-      link: 'MyProfile',
-      color: 'blue'
-    },
+    { title: 'Find Sales', icon: MapPin, link: 'EstateSaleFinder', color: 'bg-orange-100 text-orange-600' },
+    { title: 'Favorites', icon: Heart, link: 'Favorites', color: 'bg-red-100 text-red-600' },
+    { title: 'Marketplace', icon: ShoppingBag, link: 'BrowseItems', color: 'bg-cyan-100 text-cyan-600' },
+    { title: 'Route Planner', icon: Route, link: 'RoutePlanner', color: 'bg-indigo-100 text-indigo-600' },
+    { title: 'My Rewards', icon: Star, link: 'MyRewards', color: 'bg-yellow-100 text-yellow-600' },
+    { title: 'My Referrals', icon: Users, link: 'MyReferrals', color: 'bg-purple-100 text-purple-600' },
+    { title: 'Buyouts', icon: HandCoins, link: 'Buyouts', color: 'bg-amber-100 text-amber-600' },
+    { title: 'Support', icon: MessageSquare, link: 'MyTickets', color: 'bg-slate-100 text-slate-600' },
+    { title: 'Notifications', icon: Bell, link: 'Notifications', color: 'bg-sky-100 text-sky-600' },
+    { title: 'My Profile', icon: User, link: 'MyProfile', color: 'bg-blue-100 text-blue-600' },
   ];
 
-  const colorMap = {
-    orange: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-200' },
-    red:    { bg: 'bg-red-100',    text: 'text-red-600',    border: 'border-red-200' },
-    cyan:   { bg: 'bg-cyan-100',   text: 'text-cyan-600',   border: 'border-cyan-200' },
-    green:  { bg: 'bg-green-100',  text: 'text-green-600',  border: 'border-green-200' },
-    yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
-    purple: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
-    amber:  { bg: 'bg-amber-100',  text: 'text-amber-600',  border: 'border-amber-200' },
-    slate:  { bg: 'bg-slate-100',  text: 'text-slate-600',  border: 'border-slate-200' },
-    indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600', border: 'border-indigo-200' },
-    blue:   { bg: 'bg-blue-100',   text: 'text-blue-600',   border: 'border-blue-200' },
-  };
+  const tabs = [
+    { id: 'timeline', label: 'Sales Timeline', icon: Calendar },
+    { id: 'route', label: "Today's Route", icon: Route },
+    { id: 'gallery', label: 'Saved Photos', icon: Image },
+  ];
 
-  try {
-    return (
-      <div className="p-6 lg:p-8 space-y-8">
-        {error && (
-          <Card className="border-red-200 bg-red-50">
+  return (
+    <div className="p-4 lg:p-8 space-y-6">
+      {/* Welcome */}
+      <div>
+        <h1 className="text-3xl font-serif font-bold text-slate-900">
+          Welcome back, {user?.full_name?.split(' ')[0] || 'there'}!
+        </h1>
+        <p className="text-slate-500 mt-1 text-sm">
+          {followedOperatorIds.length > 0
+            ? `You're following ${followedOperatorIds.length} compan${followedOperatorIds.length === 1 ? 'y' : 'ies'} · ${followedSales.length} upcoming sale${followedSales.length !== 1 ? 's' : ''}`
+            : 'Follow companies to see personalized sale alerts'}
+        </p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+        {quickActions.map((a) => (
+          <Link key={a.link} to={createPageUrl(a.link)} className="flex flex-col items-center gap-1 group">
+            <div className={`w-11 h-11 rounded-xl ${a.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+              <a.icon className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] text-slate-500 text-center leading-tight">{a.title}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Main tabbed panel */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left: Personalized tabs */}
+        <div className="lg:col-span-2">
+          <Card>
+            {/* Tab bar */}
+            <div className="flex border-b border-slate-100">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold transition-colors border-b-2 ${
+                    activeTab === tab.id
+                      ? 'border-orange-500 text-orange-600 bg-orange-50'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <tab.icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
             <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-red-600">
-                <AlertCircle className="w-5 h-5" />
-                <p className="font-semibold">Error: {error}</p>
-              </div>
+              {loading ? (
+                <div className="space-y-3 animate-pulse">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-16 bg-slate-100 rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {activeTab === 'timeline' && (
+                    <SalesTimeline sales={followedSales} followedOperatorIds={followedOperatorIds} />
+                  )}
+                  {activeTab === 'route' && <RouteMapWidget />}
+                  {activeTab === 'gallery' && <SavedItemsGallery sales={allFollowedSales} />}
+                </>
+              )}
             </CardContent>
           </Card>
-        )}
-        
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
-            Welcome, {user?.full_name || 'User'}!
-          </h1>
-          <p className="text-slate-600">Everything you need, all in one place.</p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => {
-            const colors = colorMap[action.color];
-            return (
-              <Link key={index} to={createPageUrl(action.link)}>
-                <Card className={`cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border ${colors.border} h-full`}>
-                  <CardContent className="p-5">
-                    <div className={`w-11 h-11 rounded-xl ${colors.bg} flex items-center justify-center mb-3`}>
-                      <action.icon className={`h-5 w-5 ${colors.text}`} />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-1">{action.title}</h3>
-                    <p className="text-sm text-slate-500">{action.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+        {/* Right: Saved sales + follow prompt */}
+        <div className="space-y-4">
+          {/* Saved Sales */}
+          <Card>
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-red-500" />
+                Saved Sales
+                {savedSaleIds.length > 0 && (
+                  <Badge className="bg-red-100 text-red-600 border-0 text-xs">{savedSaleIds.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              {savedSales.length === 0 ? (
+                <div className="text-center py-6">
+                  <Heart className="w-8 h-8 mx-auto text-slate-200 mb-2" />
+                  <p className="text-xs text-slate-400">Heart sales while browsing to save them here</p>
+                  <Link to={createPageUrl('Home')}>
+                    <Button size="sm" variant="outline" className="mt-3 text-xs gap-1">
+                      <MapPin className="w-3 h-3" /> Browse Sales
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {savedSales.slice(0, 5).map(sale => (
+                    <Link key={sale.id} to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+                      <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                        {sale.images?.[0] ? (
+                          <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
+                            <img
+                              src={sale.images[0]?.url || sale.images[0]}
+                              alt={sale.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-4 h-4 text-slate-300" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-slate-800 truncate">{sale.title}</p>
+                          <p className="text-[10px] text-slate-400">{sale.property_address?.city}, {sale.property_address?.state}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {savedSales.length > 5 && (
+                    <Link to={createPageUrl('Favorites')}>
+                      <Button size="sm" variant="ghost" className="w-full text-xs text-slate-500 mt-1">
+                        +{savedSales.length - 5} more →
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Follow prompt if not following anyone */}
+          {followedOperatorIds.length === 0 && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="p-4 text-center">
+                <Building2 className="w-8 h-8 mx-auto text-orange-400 mb-2" />
+                <p className="text-sm font-semibold text-orange-800 mb-1">Follow Companies</p>
+                <p className="text-xs text-orange-600 mb-3">
+                  Follow your favorite estate sale companies to get a personalized timeline of their upcoming sales.
+                </p>
+                <Link to={createPageUrl('FavoriteCompanies')}>
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs gap-1">
+                    <Users className="w-3 h-3" /> Explore Companies
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
-    );
-  } catch (renderError) {
-    return (
-      <div className="p-6">
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-red-600 mb-4">
-              <AlertCircle className="w-5 h-5" />
-              <h2 className="font-bold text-xl">ConsumerDashboard Render Error</h2>
-            </div>
-            <p className="text-red-700 mb-2">Error: {renderError.message}</p>
-            <pre className="mt-4 p-4 bg-white rounded text-xs overflow-auto">
-              {renderError.stack}
-            </pre>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+    </div>
+  );
 }
