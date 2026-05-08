@@ -13,7 +13,7 @@ import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { 
   User, Building2, Mail, Phone, MapPin, Bell, CreditCard, 
-  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign, Share2
+  Save, Upload, Check, ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, FileText, ArrowRight, ShoppingBag, DollarSign, Share2, ExternalLink
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
@@ -307,75 +307,11 @@ export default function MyProfile() {
                     maxLength="5"
                   />
                 </div>
-                {!isConsumerType && (
-                  <div>
-                    <Label>Website</Label>
-                    <Input
-                      value={profileData.website_url}
-                      onChange={(e) => setProfileData({ ...profileData, website_url: e.target.value })}
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                )}
+
               </div>
 
               {!isConsumerType && (
                 <>
-                  <div>
-                    <Label>Company/Business Name</Label>
-                    <Input
-                      value={profileData.company_name}
-                      onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Business Description</Label>
-                    <Textarea
-                      value={profileData.company_description}
-                      onChange={(e) => setProfileData({ ...profileData, company_description: e.target.value })}
-                      rows={4}
-                      placeholder="Tell customers about your business..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Business Street Address</Label>
-                    <Input
-                      value={profileData.business_street}
-                      onChange={(e) => setProfileData({ ...profileData, business_street: e.target.value })}
-                      placeholder="123 Main St"
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-1">
-                      <Label>City</Label>
-                      <Input
-                        value={profileData.business_city}
-                        onChange={(e) => setProfileData({ ...profileData, business_city: e.target.value })}
-                        placeholder="Springfield"
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <Label>State</Label>
-                      <Input
-                        value={profileData.business_state}
-                        onChange={(e) => setProfileData({ ...profileData, business_state: e.target.value })}
-                        placeholder="NJ"
-                        maxLength="2"
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <Label>ZIP</Label>
-                      <Input
-                        value={profileData.business_zip}
-                        onChange={(e) => setProfileData({ ...profileData, business_zip: e.target.value })}
-                        placeholder="07081"
-                        maxLength="10"
-                      />
-                    </div>
-                  </div>
-
                   <div className="flex items-center justify-between border rounded-lg p-4 bg-slate-50">
                     <div>
                       <Label className="text-base font-medium">Early Sign-In Default</Label>
@@ -387,6 +323,18 @@ export default function MyProfile() {
                       checked={profileData.early_sign_in_default !== false}
                       onCheckedChange={(checked) => setProfileData({ ...profileData, early_sign_in_default: checked })}
                     />
+                  </div>
+
+                  <div className="flex items-center justify-between border rounded-lg p-4 bg-orange-50 border-orange-200">
+                    <div>
+                      <p className="text-sm font-semibold text-orange-800">Business Profile</p>
+                      <p className="text-xs text-orange-600 mt-0.5">Manage company name, address, branding, territory, services & payments</p>
+                    </div>
+                    <Link to="/OperatorProfile">
+                      <Button size="sm" variant="outline" className="border-orange-400 text-orange-700 hover:bg-orange-100">
+                        <ExternalLink className="w-3 h-3 mr-1" /> Open
+                      </Button>
+                    </Link>
                   </div>
                 </>
               )}
@@ -402,63 +350,7 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* Venmo QR Code Section - business users only */}
-          {!isConsumerType && <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Venmo QR Code
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-slate-600">
-                Upload your Venmo QR code to make it easy for customers to pay you
-              </p>
-              
-              {user?.venmo_qr_code && (
-                <div className="flex justify-center">
-                  <img 
-                    src={user.venmo_qr_code} 
-                    alt="Venmo QR Code" 
-                    className="w-64 h-64 object-contain border-2 border-slate-200 rounded-lg p-4 bg-white"
-                  />
-                </div>
-              )}
 
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleVenmoQRUpload}
-                  className="hidden"
-                  id="venmo-qr-upload"
-                  disabled={uploadingVenmo}
-                />
-                <Button 
-                  variant="outline"
-                  disabled={uploadingVenmo}
-                  onClick={() => document.getElementById('venmo-qr-upload').click()}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploadingVenmo ? 'Uploading...' : user?.venmo_qr_code ? 'Change QR Code' : 'Upload QR Code'}
-                </Button>
-                {user?.venmo_qr_code && (
-                  <Button 
-                    variant="ghost"
-                    onClick={async () => {
-                      if (confirm('Remove Venmo QR code?')) {
-                        await base44.auth.updateMe({ venmo_qr_code: null });
-                        setUser({...user, venmo_qr_code: null});
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>}
 
           {/* My Purchases Card */}
           <Card>
