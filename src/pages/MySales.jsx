@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 const formatTo12Hour = (time) => {
   if (!time) return '';
@@ -273,9 +274,7 @@ export default function MySales() {
                         alt={sale.title}
                         className="w-full h-full object-cover"
                       />
-                      <Badge className={`absolute top-3 right-3 ${getStatusColor(sale.status)}`}>
-                        {sale.status}
-                      </Badge>
+                      {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-3 right-3 ${getStatusColor(ds)}`}>{ds}</Badge>; })()}
                     </div>
                   )}
                   <CardContent className="p-5 flex-1">

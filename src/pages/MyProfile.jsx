@@ -19,6 +19,7 @@ import {
   Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
 
 const US_STATES = [
@@ -625,7 +626,7 @@ export default function MyProfile() {
                               <span><Eye className="w-3 h-3 inline mr-0.5" />{sale.views || 0}</span>
                             </div>
                           </div>
-                          <Badge className={sale.status === 'active' ? 'bg-green-100 text-green-700' : sale.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}>{sale.status}</Badge>
+                          {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={ds === 'active' ? 'bg-green-100 text-green-700' : ds === 'upcoming' ? 'bg-blue-100 text-blue-700' : ds === 'completed' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}>{ds}</Badge>; })()}
                         </Link>
                       ))}
                     </div>

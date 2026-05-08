@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Eye, Bookmark, Navigation, DollarSign, Package } from 'lucide-react';
 import { format } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 export default function EstateSaleCard({ estate, onClick, expanded = false }) {
   const getStatusColor = (status) => {
@@ -36,9 +37,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
           className="w-full h-full object-cover"
         />
         <div className="absolute top-3 right-3">
-          <Badge className={getStatusColor(estate.status)}>
-            {estate.status}
-          </Badge>
+          {(() => { const ds = getSaleDisplayStatus(estate); return <Badge className={getStatusColor(ds)}>{ds}</Badge>; })()}
         </div>
         {estate.premium_listing && (
           <div className="absolute top-3 left-3">
