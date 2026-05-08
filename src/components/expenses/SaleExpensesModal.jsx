@@ -283,7 +283,9 @@ function MileageView({ sale, user, onSaved, onBack }) {
 
   const [form, setForm] = useState({
     expense_date: new Date().toISOString().split('T')[0],
-    home_address: user?.home_address || user?.address || '',
+    home_address: typeof user?.home_address === 'string' ? user.home_address
+      : typeof user?.address === 'string' ? user.address
+      : (user?.home_address?.formatted_address || user?.home_address?.street || user?.address?.formatted_address || user?.address?.street || ''),
     round_trips: 1,
     rate_per_mile: '0.70',
     purpose: 'Estate sale preparation and setup'
