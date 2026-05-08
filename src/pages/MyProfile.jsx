@@ -62,7 +62,7 @@ export default function MyProfile() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('account');
-  const [integrationTab, setIntegrationTab] = useState('subscription');
+  const [marketplaceTab, setMarketplaceTab] = useState('social');
   const [uploading, setUploading] = useState({});
   const [newCounty, setNewCounty] = useState('');
   const [newCity, setNewCity] = useState('');
@@ -242,7 +242,9 @@ export default function MyProfile() {
           {!isConsumer && <TabsTrigger value="business" className="flex-1">Business</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="territory" className="flex-1">Territory & Services</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="payments" className="flex-1">Payments</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="integrations" className="flex-1">Subscription & More</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="sales" className="flex-1">My Sales</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="marketplace" className="flex-1">Social & Marketplaces</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>}
         </TabsList>
 
         {/* ─────────────── ACCOUNT TAB ─────────────── */}
@@ -591,124 +593,125 @@ export default function MyProfile() {
           </TabsContent>
         )}
 
-        {/* ─────────────── SUBSCRIPTION & MORE TAB ─────────────── */}
+        {/* ─────────────── MY SALES TAB ─────────────── */}
         {!isConsumer && (
-          <TabsContent value="integrations" className="space-y-4">
-            <div className="flex gap-2 border-b pb-3 flex-wrap">
-              {['subscription','sales','social','etsy','ebay'].map(t => (
-                <button key={t} onClick={() => setIntegrationTab(t)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${integrationTab === t ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-                  {t === 'subscription' ? 'Subscription' : t === 'sales' ? 'My Sales' : t === 'social' ? 'Social Media' : t === 'etsy' ? '🧶 Etsy' : '🛍️ eBay'}
+          <TabsContent value="sales" className="space-y-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Home className="w-5 h-5" />My Estate Sales</CardTitle></CardHeader>
+              <CardContent>
+                {estateSales.length > 0 ? (
+                  <>
+                    {subscription && (
+                      <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 rounded-lg">
+                        <div className="text-center"><div className="text-xl font-bold">{estateSales.length}</div><div className="text-xs text-slate-500">Total Sales</div></div>
+                        <div className="text-center"><div className="text-xl font-bold text-cyan-700">{estateSales.reduce((s, x) => s + (x.views || 0), 0)}</div><div className="text-xs text-slate-500">Views</div></div>
+                        <div className="text-center"><div className="text-xl font-bold text-green-700">${estateSales.reduce((s, x) => s + (x.actual_revenue || 0), 0).toLocaleString()}</div><div className="text-xs text-slate-500">Revenue</div></div>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      {estateSales.map(sale => (
+                        <Link key={sale.id} to={createPageUrl('MySales')} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors">
+                          <div>
+                            <p className="font-medium text-sm">{sale.title}</p>
+                            <div className="flex gap-3 text-xs text-slate-500 mt-0.5">
+                              {sale.property_address?.city && <span><MapPin className="w-3 h-3 inline mr-0.5" />{sale.property_address.city}, {sale.property_address.state}</span>}
+                              {sale.sale_dates?.[0]?.date && <span><Calendar className="w-3 h-3 inline mr-0.5" />{new Date(sale.sale_dates[0].date).toLocaleDateString()}</span>}
+                              <span><Eye className="w-3 h-3 inline mr-0.5" />{sale.views || 0}</span>
+                            </div>
+                          </div>
+                          <Badge className={sale.status === 'active' ? 'bg-green-100 text-green-700' : sale.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}>{sale.status}</Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Home className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-500 text-sm mb-3">No estate sales yet</p>
+                    <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700"><Link to={createPageUrl('MySales')}>Create First Sale</Link></Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* ─────────────── SOCIAL & MARKETPLACES TAB ─────────────── */}
+        {!isConsumer && (
+          <TabsContent value="marketplace" className="space-y-4">
+            <div className="flex gap-2 border-b pb-3">
+              {['social','etsy','ebay'].map(t => (
+                <button key={t} onClick={() => setMarketplaceTab(t)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${marketplaceTab === t ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+                  {t === 'social' ? 'Social Media' : t === 'etsy' ? '🧶 Etsy' : '🛍️ eBay'}
                 </button>
               ))}
             </div>
+            {marketplaceTab === 'social' && <SocialMediaTab user={user} />}
+            {marketplaceTab === 'etsy' && <MarketplaceCredentialsTab platform="etsy" />}
+            {marketplaceTab === 'ebay' && <MarketplaceCredentialsTab platform="ebay" />}
+          </TabsContent>
+        )}
 
-            {integrationTab === 'subscription' && (
-              <div className="space-y-4">
-                {subscription && (
-                  <Card>
-                    <CardHeader><CardTitle className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" />Current Plan</CardTitle></CardHeader>
-                    <CardContent>
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-2xl font-bold text-slate-900 mb-1">{subscription.plan_type.replace(/_/g, ' ').replace(/\boperator\b/gi, '').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase())}</h3>
-                          <Badge className={getTierColor(subscription.tier)}>{subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-3xl font-bold text-slate-900">${subscription.price}</div>
-                          <div className="text-sm text-slate-500">per {subscription.billing_period === 'monthly' ? 'month' : 'year'}</div>
-                        </div>
-                      </div>
-                      <div className="space-y-1 text-sm text-slate-600">
-                        <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Status: <Badge variant="outline" className="text-green-600">{subscription.status}</Badge></div>
-                        {subscription.renewal_date && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Renews {new Date(subscription.renewal_date).toLocaleDateString()}</div>}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                <Card>
-                  <CardHeader><CardTitle>Available Plans</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      {packages.map(pkg => {
-                        const isCurrent = subscription?.tier === pkg.tier_level;
-                        return (
-                          <Card key={pkg.id} className={`relative ${isCurrent ? 'border-2 border-orange-500' : ''}`}>
-                            {isCurrent && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-600">Current Plan</Badge>}
-                            <CardContent className="p-5">
-                              <div className="text-center mb-4">
-                                <Badge className={getTierColor(pkg.tier_level)}>{pkg.tier_level}</Badge>
-                                <h3 className="text-lg font-bold mt-2 mb-1">{pkg.package_name}</h3>
-                                <p className="text-xs text-slate-500 mb-3">{pkg.description}</p>
-                                <div className="text-2xl font-bold">${pkg.monthly_price}</div>
-                                <div className="text-xs text-slate-500">per month</div>
-                                {pkg.annual_price && <div className="text-xs text-cyan-600 mt-1">${pkg.annual_price}/yr</div>}
-                              </div>
-                              <div className="space-y-1.5 mb-4">
-                                {pkg.features?.slice(0, 5).map((f, i) => <div key={i} className="flex gap-2 text-xs"><Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" /><span className="text-slate-600">{f}</span></div>)}
-                                {pkg.features?.length > 5 && <p className="text-xs text-slate-400">+{pkg.features.length - 5} more</p>}
-                              </div>
-                              {!isCurrent && (
-                                <Button size="sm" className="w-full" variant={pkg.tier_level === 'premium' ? 'default' : 'outline'}>
-                                  {subscription && pkg.tier_level === 'premium' ? <><ArrowUpCircle className="w-3.5 h-3.5 mr-1" />Upgrade</> : subscription && pkg.tier_level === 'basic' ? <><ArrowDownCircle className="w-3.5 h-3.5 mr-1" />Downgrade</> : 'Select Plan'}
-                                </Button>
-                              )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+        {/* ─────────────── SUBSCRIPTION TAB ─────────────── */}
+        {!isConsumer && (
+          <TabsContent value="subscription" className="space-y-4">
+            {subscription && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" />Current Plan</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-900 mb-1">{subscription.plan_type.replace(/_/g, ' ').replace(/\boperator\b/gi, '').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase())}</h3>
+                      <Badge className={getTierColor(subscription.tier)}>{subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>
                     </div>
-                    {packages.length === 0 && <p className="text-center text-slate-500 py-8">No subscription packages available.</p>}
-                  </CardContent>
-                </Card>
-              </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-slate-900">${subscription.price}</div>
+                      <div className="text-sm text-slate-500">per {subscription.billing_period === 'monthly' ? 'month' : 'year'}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-sm text-slate-600">
+                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Status: <Badge variant="outline" className="text-green-600">{subscription.status}</Badge></div>
+                    {subscription.renewal_date && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Renews {new Date(subscription.renewal_date).toLocaleDateString()}</div>}
+                  </div>
+                </CardContent>
+              </Card>
             )}
-
-            {integrationTab === 'sales' && (
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2"><Home className="w-5 h-5" />My Estate Sales</CardTitle></CardHeader>
-                  <CardContent>
-                    {estateSales.length > 0 ? (
-                      <>
-                        {estateSales.length > 0 && subscription && (
-                          <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 rounded-lg">
-                            <div className="text-center"><div className="text-xl font-bold">{estateSales.length}</div><div className="text-xs text-slate-500">Total Sales</div></div>
-                            <div className="text-center"><div className="text-xl font-bold text-cyan-700">{estateSales.reduce((s, x) => s + (x.views || 0), 0)}</div><div className="text-xs text-slate-500">Views</div></div>
-                            <div className="text-center"><div className="text-xl font-bold text-green-700">${estateSales.reduce((s, x) => s + (x.actual_revenue || 0), 0).toLocaleString()}</div><div className="text-xs text-slate-500">Revenue</div></div>
+            <Card>
+              <CardHeader><CardTitle>Available Plans</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {packages.map(pkg => {
+                    const isCurrent = subscription?.tier === pkg.tier_level;
+                    return (
+                      <Card key={pkg.id} className={`relative ${isCurrent ? 'border-2 border-orange-500' : ''}`}>
+                        {isCurrent && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-600">Current Plan</Badge>}
+                        <CardContent className="p-5">
+                          <div className="text-center mb-4">
+                            <Badge className={getTierColor(pkg.tier_level)}>{pkg.tier_level}</Badge>
+                            <h3 className="text-lg font-bold mt-2 mb-1">{pkg.package_name}</h3>
+                            <p className="text-xs text-slate-500 mb-3">{pkg.description}</p>
+                            <div className="text-2xl font-bold">${pkg.monthly_price}</div>
+                            <div className="text-xs text-slate-500">per month</div>
+                            {pkg.annual_price && <div className="text-xs text-cyan-600 mt-1">${pkg.annual_price}/yr</div>}
                           </div>
-                        )}
-                        <div className="space-y-2">
-                          {estateSales.map(sale => (
-                            <Link key={sale.id} to={createPageUrl('MySales')} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50 transition-colors">
-                              <div>
-                                <p className="font-medium text-sm">{sale.title}</p>
-                                <div className="flex gap-3 text-xs text-slate-500 mt-0.5">
-                                  {sale.property_address?.city && <span><MapPin className="w-3 h-3 inline mr-0.5" />{sale.property_address.city}, {sale.property_address.state}</span>}
-                                  {sale.sale_dates?.[0]?.date && <span><Calendar className="w-3 h-3 inline mr-0.5" />{new Date(sale.sale_dates[0].date).toLocaleDateString()}</span>}
-                                  <span><Eye className="w-3 h-3 inline mr-0.5" />{sale.views || 0}</span>
-                                </div>
-                              </div>
-                              <Badge className={sale.status === 'active' ? 'bg-green-100 text-green-700' : sale.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}>{sale.status}</Badge>
-                            </Link>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Home className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                        <p className="text-slate-500 text-sm mb-3">No estate sales yet</p>
-                        <Button asChild size="sm" className="bg-orange-600 hover:bg-orange-700"><Link to={createPageUrl('MySales')}>Create First Sale</Link></Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {integrationTab === 'social' && <SocialMediaTab user={user} />}
-            {integrationTab === 'etsy' && <MarketplaceCredentialsTab platform="etsy" />}
-            {integrationTab === 'ebay' && <MarketplaceCredentialsTab platform="ebay" />}
+                          <div className="space-y-1.5 mb-4">
+                            {pkg.features?.slice(0, 5).map((f, i) => <div key={i} className="flex gap-2 text-xs"><Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" /><span className="text-slate-600">{f}</span></div>)}
+                            {pkg.features?.length > 5 && <p className="text-xs text-slate-400">+{pkg.features.length - 5} more</p>}
+                          </div>
+                          {!isCurrent && (
+                            <Button size="sm" className="w-full" variant={pkg.tier_level === 'premium' ? 'default' : 'outline'}>
+                              {subscription && pkg.tier_level === 'premium' ? <><ArrowUpCircle className="w-3.5 h-3.5 mr-1" />Upgrade</> : subscription && pkg.tier_level === 'basic' ? <><ArrowDownCircle className="w-3.5 h-3.5 mr-1" />Downgrade</> : 'Select Plan'}
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                {packages.length === 0 && <p className="text-center text-slate-500 py-8">No subscription packages available.</p>}
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
       </Tabs>
