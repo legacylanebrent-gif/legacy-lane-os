@@ -450,7 +450,7 @@ export default function MySales() {
                           className="w-full border-emerald-600 text-black hover:bg-emerald-50"
                         >
                           <Receipt className="w-3 h-3 mr-1" />
-                          Expenses
+                          Expenses/Mileage
                         </Button>
                         <Button 
                           variant="outline" 
