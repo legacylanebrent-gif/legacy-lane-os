@@ -1,0 +1,174 @@
+{
+  "name": "NotificationPreference",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID"
+    },
+    "new_lead_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "new_lead_email": {
+      "type": "boolean",
+      "default": true
+    },
+    "new_lead_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "sale_update_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "sale_update_email": {
+      "type": "boolean",
+      "default": true
+    },
+    "sale_update_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "contract_expiration_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "contract_expiration_email": {
+      "type": "boolean",
+      "default": true
+    },
+    "contract_expiration_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "message_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "message_email": {
+      "type": "boolean",
+      "default": true
+    },
+    "message_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "system_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "system_email": {
+      "type": "boolean",
+      "default": true
+    },
+    "system_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "marketing_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "marketing_email": {
+      "type": "boolean",
+      "default": false
+    },
+    "marketing_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "reward_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "reward_email": {
+      "type": "boolean",
+      "default": false
+    },
+    "reward_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "checkin_in_app": {
+      "type": "boolean",
+      "default": true
+    },
+    "checkin_email": {
+      "type": "boolean",
+      "default": false
+    },
+    "checkin_sms": {
+      "type": "boolean",
+      "default": false
+    },
+    "sale_alert_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Master toggle for new sale email alerts"
+    },
+    "sale_alert_email": {
+      "type": "boolean",
+      "default": true,
+      "description": "Send sale alerts via email"
+    },
+    "sale_alert_inapp": {
+      "type": "boolean",
+      "default": true,
+      "description": "Send sale alerts as in-app notifications"
+    },
+    "sale_alert_radius_miles": {
+      "type": "number",
+      "default": 25,
+      "description": "Radius in miles to search for new sales"
+    },
+    "sale_alert_zip": {
+      "type": "string",
+      "description": "ZIP code center point for radius search"
+    },
+    "sale_alert_lat": {
+      "type": "number",
+      "description": "Latitude of alert center point"
+    },
+    "sale_alert_lng": {
+      "type": "number",
+      "description": "Longitude of alert center point"
+    },
+    "sale_alert_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Item categories the user wants to be alerted about (empty = all)"
+    },
+    "sale_alert_frequency": {
+      "type": "string",
+      "enum": [
+        "instant",
+        "daily_digest",
+        "weekly_digest"
+      ],
+      "default": "instant",
+      "description": "How often to send alert emails"
+    },
+    "sale_alert_followed_only": {
+      "type": "boolean",
+      "default": false,
+      "description": "Only alert for sales from followed companies"
+    },
+    "sale_alert_min_days_notice": {
+      "type": "number",
+      "default": 0,
+      "description": "Only alert if sale starts at least N days from now (0 = any)"
+    },
+    "sale_alert_last_sent": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last alert email sent"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

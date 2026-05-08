@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Mail, MessageSquare, Save, AlertCircle, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import SaleAlertSettings from '@/components/notifications/SaleAlertSettings';
 
 const NOTIFICATION_CATEGORIES = [
   {
@@ -267,6 +268,16 @@ export default function NotificationSettings() {
           );
         })}
       </div>
+
+      {/* Sale Alert Settings */}
+      <SaleAlertSettings
+        pref={preferences}
+        onSave={async (updates) => {
+          const updated = { ...preferences, ...updates };
+          await base44.entities.NotificationPreference.update(preferences.id, updates);
+          setPreferences(updated);
+        }}
+      />
 
       {/* Save Button (Bottom) */}
       <div className="flex justify-end">
