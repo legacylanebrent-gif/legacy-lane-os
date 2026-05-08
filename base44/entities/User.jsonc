@@ -44,13 +44,150 @@
       "type": "boolean",
       "default": true,
       "description": "Default setting for early sign-in on all new sales created by this operator"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "phone_secondary": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "company_tagline": {
+      "type": "string"
+    },
+    "company_description": {
+      "type": "string"
+    },
+    "company_email": {
+      "type": "string"
+    },
+    "website_url": {
+      "type": "string"
+    },
+    "business_address_street": {
+      "type": "string",
+      "description": "Business street address"
+    },
+    "business_address_city": {
+      "type": "string",
+      "description": "Business city"
+    },
+    "business_address_state": {
+      "type": "string",
+      "description": "Business state"
+    },
+    "business_address_zip": {
+      "type": "string",
+      "description": "Business ZIP code"
+    },
+    "years_in_business": {
+      "type": "string"
+    },
+    "founded_year": {
+      "type": "string"
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "insurance_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "bonded": {
+      "type": "boolean",
+      "default": false
+    },
+    "commission_rate": {
+      "type": "string"
+    },
+    "minimum_sale_value": {
+      "type": "string"
+    },
+    "service_radius_miles": {
+      "type": "string"
+    },
+    "service_states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "services_offered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "payment_methods_accepted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "cash"
+      ]
+    },
+    "venmo_username": {
+      "type": "string"
+    },
+    "paypal_email": {
+      "type": "string"
+    },
+    "zelle_phone_or_email": {
+      "type": "string"
+    },
+    "cashapp_tag": {
+      "type": "string"
+    },
+    "stripe_account_id": {
+      "type": "string"
+    },
+    "square_location_id": {
+      "type": "string"
+    },
+    "logo_dark": {
+      "type": "string"
+    },
+    "logo_light": {
+      "type": "string"
+    },
+    "profile_image_url": {
+      "type": "string"
+    },
+    "venmo_qr_code": {
+      "type": "string"
+    },
+    "notification_settings": {
+      "type": "object"
+    },
+    "company_website": {
+      "type": "string"
     }
   },
-  "required": [
-    "business_name",
-    "address_street",
-    "address_city",
-    "address_state",
-    "address_zip"
-  ]
+  "required": []
 }
