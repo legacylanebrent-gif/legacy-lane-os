@@ -80,7 +80,8 @@ export default function MyBusinessExpenses() {
     amount: '',
     category: 'software_subscriptions',
     recurring_frequency: 'monthly',
-    description: ''
+    description: '',
+    backdate_to_tax_year: false
   });
 
   const [mileageData, setMileageData] = useState({
@@ -242,19 +243,55 @@ export default function MyBusinessExpenses() {
     }
   };
 
+  // Compute backdated dates from Jan 1 of current tax year up to (but not including) the selected next payment date
+  const getBackdatedDates = () => {
+    const freq = recurringData.recurring_frequency;
+    const taxYearStart = new Date(new Date().getFullYear(), 0, 1); // Jan 1
+    const nextDate = new Date(recurringData.expense_date);
+    const dates = [];
+    let cursor = new Date(taxYearStart);
+    while (cursor < nextDate) {
+      dates.push(cursor.toISOString().split('T')[0]);
+      if (freq === 'monthly') cursor.setMonth(cursor.getMonth() + 1);
+      else if (freq === 'quarterly') cursor.setMonth(cursor.getMonth() + 3);
+      else if (freq === 'annually') cursor.setFullYear(cursor.getFullYear() + 1);
+      else break;
+    }
+    return dates;
+  };
+
+  const backdatedDates = recurringData.backdate_to_tax_year && recurringData.expense_date && recurringData.recurring_frequency
+    ? getBackdatedDates()
+    : [];
+
   const handleAddRecurring = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await base44.entities.BusinessExpense.create({
-        ...recurringData,
+      const basePayload = {
+        vendor_name: recurringData.vendor_name,
         amount: parseFloat(recurringData.amount),
+        category: recurringData.category,
+        recurring_frequency: recurringData.recurring_frequency,
+        description: recurringData.description,
         is_recurring: true,
         tax_deductible: true,
         payment_method: 'credit_card',
         tags: []
-      });
+      };
+
+      if (recurringData.backdate_to_tax_year && backdatedDates.length > 0) {
+        // Create one entry per backdated period + the current (next) entry
+        await Promise.all([
+          ...backdatedDates.map(date =>
+            base44.entities.BusinessExpense.create({ ...basePayload, expense_date: date, tags: ['backdated'] })
+          ),
+          base44.entities.BusinessExpense.create({ ...basePayload, expense_date: recurringData.expense_date })
+        ]);
+      } else {
+        await base44.entities.BusinessExpense.create({ ...basePayload, expense_date: recurringData.expense_date });
+      }
 
       setShowRecurringModal(false);
       setRecurringData({
@@ -263,7 +300,8 @@ export default function MyBusinessExpenses() {
         amount: '',
         category: 'software_subscriptions',
         recurring_frequency: 'monthly',
-        description: ''
+        description: '',
+        backdate_to_tax_year: false
       });
       loadData();
     } catch (error) {
@@ -1227,9 +1265,53 @@ export default function MyBusinessExpenses() {
               />
             </div>
 
+            {/* Backdate to tax year start */}
+            <div className={`rounded-lg border p-4 space-y-2 transition-colors ${recurringData.backdate_to_tax_year ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="backdate_to_tax_year"
+                  checked={recurringData.backdate_to_tax_year}
+                  onChange={(e) => setRecurringData({ ...recurringData, backdate_to_tax_year: e.target.checked })}
+                  className="rounded mt-0.5"
+                />
+                <div>
+                  <Label htmlFor="backdate_to_tax_year" className="cursor-pointer font-semibold text-slate-800">
+                    Backdate to start of tax year (Jan 1, {new Date().getFullYear()})
+                  </Label>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Creates an entry for each {recurringData.recurring_frequency} period from January 1st through the next payment date above.
+                  </p>
+                </div>
+              </div>
+              {recurringData.backdate_to_tax_year && backdatedDates.length > 0 && (
+                <div className="mt-2 ml-6 bg-white rounded border border-amber-200 p-3">
+                  <p className="text-xs font-semibold text-amber-700 mb-1.5">
+                    {backdatedDates.length + 1} entries will be created:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {backdatedDates.map(d => (
+                      <span key={d} className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded">{d} <span className="text-amber-500">(backdated)</span></span>
+                    ))}
+                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">{recurringData.expense_date} (next)</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Total: <strong>${(parseFloat(recurringData.amount || 0) * (backdatedDates.length + 1)).toFixed(2)}</strong> across all entries
+                  </p>
+                </div>
+              )}
+              {recurringData.backdate_to_tax_year && backdatedDates.length === 0 && recurringData.expense_date && (
+                <p className="text-xs text-amber-600 ml-6">Next payment date is already at or before Jan 1 — no backdated entries needed.</p>
+              )}
+            </div>
+
             <div className="flex gap-3 justify-end pt-4 border-t">
               <Button type="button" variant="outline" onClick={() => setShowRecurringModal(false)}>Cancel</Button>
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">Add Recurring</Button>
+              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+                {recurringData.backdate_to_tax_year && backdatedDates.length > 0
+                  ? `Add ${backdatedDates.length + 1} Entries`
+                  : 'Add Recurring'}
+              </Button>
             </div>
           </form>
         </DialogContent>
