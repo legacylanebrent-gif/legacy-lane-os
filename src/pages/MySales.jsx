@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
+import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt
       } from 'lucide-react';
 import {
   DropdownMenu,
@@ -41,6 +42,8 @@ export default function MySales() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [showBuyoutModal, setShowBuyoutModal] = useState(false);
   const [buyoutSale, setBuyoutSale] = useState(null);
+  const [showExpensesModal, setShowExpensesModal] = useState(false);
+  const [expensesSale, setExpensesSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -164,6 +167,16 @@ export default function MySales() {
           setBuyoutSale(null);
         }}
         sale={buyoutSale}
+      />
+
+      <SaleExpensesModal
+        open={showExpensesModal}
+        onClose={() => {
+          setShowExpensesModal(false);
+          setExpensesSale(null);
+        }}
+        sale={expensesSale}
+        user={user}
       />
 
       {/* Stats Cards */}
@@ -426,6 +439,18 @@ export default function MySales() {
                         >
                           <Briefcase className="w-3 h-3 mr-1" />
                           Buyout
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            setExpensesSale(sale);
+                            setShowExpensesModal(true);
+                          }}
+                          className="w-full border-emerald-600 text-black hover:bg-emerald-50"
+                        >
+                          <Receipt className="w-3 h-3 mr-1" />
+                          Expenses
                         </Button>
                         <Button 
                           variant="outline" 
