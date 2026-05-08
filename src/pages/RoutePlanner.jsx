@@ -14,7 +14,7 @@ import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
   Navigation, MapPin, Calendar, Clock, Trash2,
-  Route, AlertCircle, CheckCircle2, Eye, Lock, GripVertical
+  Route, AlertCircle, CheckCircle2, Eye, Lock, GripVertical, Zap, Loader2
 } from 'lucide-react';
 
 // Fix Leaflet default marker icon
@@ -59,6 +59,8 @@ export default function RoutePlanner() {
   const [routeIds, setRouteIds] = useState([]);
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [optimizing, setOptimizing] = useState(false);
+  const [optimizeMsg, setOptimizeMsg] = useState('');
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [mapCenter, setMapCenter] = useState([39.8283, -98.5795]);
   const [hasLocation, setHasLocation] = useState(false);
@@ -120,6 +122,89 @@ export default function RoutePlanner() {
     localStorage.setItem('estateRoute', JSON.stringify(updated));
     setRouteIds(updated);
     setSales(prev => prev.filter(s => s.id !== saleId));
+  };
+
+  // Use Google Maps Directions API (waypoint optimization) to reorder filteredSales
+  const optimizeRoute = async () => {
+    const eligible = filteredSales.filter(s => isSaleAddressVisible(s) && s.property_address);
+    if (eligible.length < 2) {
+      setOptimizeMsg('Need at least 2 sales with visible addresses to optimize.');
+      setTimeout(() => setOptimizeMsg(''), 4000);
+      return;
+    }
+
+    setOptimizing(true);
+    setOptimizeMsg('');
+    try {
+      let apiKey = googleApiKey;
+      if (!apiKey) {
+        const cfg = await base44.functions.invoke('getConfig', {});
+        apiKey = cfg.data?.GOOGLE_MAPS_API_KEY || '';
+        setGoogleApiKey(apiKey);
+      }
+
+      if (!apiKey) throw new Error('No API key');
+
+      // Get user's current location as origin, or fall back to first stop
+      const getOrigin = () => new Promise((resolve) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve(`${pos.coords.latitude},${pos.coords.longitude}`),
+            () => {
+              const first = eligible[0];
+              resolve(`${first.property_address.street}, ${first.property_address.city}, ${first.property_address.state}`);
+            },
+            { timeout: 5000 }
+          );
+        } else {
+          const first = eligible[0];
+          resolve(`${first.property_address.street}, ${first.property_address.city}, ${first.property_address.state}`);
+        }
+      });
+
+      const origin = await getOrigin();
+
+      // Build waypoints string (all eligible stops)
+      const waypointAddresses = eligible.map(s =>
+        `${s.property_address.street}, ${s.property_address.city}, ${s.property_address.state} ${s.property_address.zip}`
+      );
+
+      // Use first stop as origin if we have a location, otherwise put it in waypoints
+      const destination = waypointAddresses[waypointAddresses.length - 1];
+      const middleWaypoints = waypointAddresses.slice(0, -1);
+
+      const waypointParam = middleWaypoints.map(w => encodeURIComponent(w)).join('|');
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=optimize:true|${waypointParam}&key=${apiKey}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.status !== 'OK') throw new Error(data.status);
+
+      // waypoint_order gives the optimized index order for the middle waypoints
+      const order = data.routes[0].waypoint_order; // indices into middleWaypoints
+      // Reconstruct: middleWaypoints reordered + destination at end
+      const reorderedMiddle = order.map(i => eligible[i]);
+      const optimizedEligible = [...reorderedMiddle, eligible[eligible.length - 1]];
+
+      // Merge: optimized eligible + ineligible sales (those without visible addresses)
+      const ineligible = filteredSales.filter(s => !eligible.includes(s));
+      const newFilteredOrder = [...optimizedEligible, ...ineligible];
+      const newSales = [...newFilteredOrder, ...unavailableSales];
+
+      setSales(newSales);
+      const newIds = newSales.map(s => s.id);
+      setRouteIds(newIds);
+      localStorage.setItem('estateRoute', JSON.stringify(newIds));
+      setOptimizeMsg(`✅ Route optimized! Stops reordered for shortest travel time.`);
+      setTimeout(() => setOptimizeMsg(''), 5000);
+    } catch (err) {
+      console.error('Optimize route error:', err);
+      setOptimizeMsg('Could not optimize route. Please try again.');
+      setTimeout(() => setOptimizeMsg(''), 4000);
+    } finally {
+      setOptimizing(false);
+    }
   };
 
   const onDragEnd = (result) => {
@@ -217,6 +302,17 @@ export default function RoutePlanner() {
                 />
               </div>
 
+              {filteredSales.filter(s => isSaleAddressVisible(s)).length >= 2 && (
+                <Button
+                  onClick={optimizeRoute}
+                  disabled={optimizing}
+                  className="bg-orange-500 hover:bg-orange-600 gap-2"
+                >
+                  {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  {optimizing ? 'Optimizing...' : 'Optimize Route'}
+                </Button>
+              )}
+
               {filteredSales.some(s => isSaleAddressVisible(s)) && (
                 <Button
                   onClick={getMultiStopDirections}
@@ -237,6 +333,12 @@ export default function RoutePlanner() {
           </div>
         </div>
       </div>
+
+      {optimizeMsg && (
+        <div className={`px-4 py-3 text-sm font-medium text-center ${optimizeMsg.startsWith('✅') ? 'bg-green-50 text-green-700 border-b border-green-200' : 'bg-red-50 text-red-700 border-b border-red-200'}`}>
+          {optimizeMsg}
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
