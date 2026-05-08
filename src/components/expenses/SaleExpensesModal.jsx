@@ -31,7 +31,6 @@ const SUGGESTED_EXPENSES = [
   { label: 'Supplies (tables, stickers, bags)', category: 'office_supplies', amount: '' },
   { label: 'Staff / Helper Wages', category: 'wages_payroll', amount: '' },
   { label: 'Cleaning Supplies', category: 'repairs_maintenance', amount: '' },
-  { label: 'Photography', category: 'other', amount: '' },
   { label: 'Dumpster Rental', category: 'other', amount: '' },
   { label: 'Meals (Sale Day)', category: 'meals_entertainment', amount: '' },
 ];
