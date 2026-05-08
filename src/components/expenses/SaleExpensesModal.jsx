@@ -275,26 +275,35 @@ function MileageView({ sale, user, onSaved, onBack }) {
   const [saving, setSaving] = useState(false);
   const [calculatingDistance, setCalculatingDistance] = useState(false);
   const [onewayMiles, setOnewayMiles] = useState(null);
+  const [addressType, setAddressType] = useState(null); // null | 'home' | 'business'
   const timerRef = useRef(null);
+
+  const homeAddress = user?.home_address || user?.address || '';
+  const businessAddress = user?.business_address || '';
 
   const saleAddress = sale?.property_address
     ? `${sale.property_address.street || ''}, ${sale.property_address.city || ''}, ${sale.property_address.state || ''} ${sale.property_address.zip || ''}`.trim().replace(/^,\s*/, '')
     : '';
 
+  const getStartingAddress = (type) => {
+    if (type === 'home') return homeAddress;
+    if (type === 'business') return businessAddress;
+    return '';
+  };
+
   const [form, setForm] = useState({
     expense_date: new Date().toISOString().split('T')[0],
-    home_address: user?.business_address || '',
+    home_address: '',
     round_trips: 1,
     rate_per_mile: '0.70',
     purpose: 'Estate sale preparation and setup'
   });
 
-  // Auto-fetch distance when home_address is filled in
-  useEffect(() => {
-    if (!form.home_address || !saleAddress) return;
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => fetchDistance(form.home_address, saleAddress), 800);
-  }, [form.home_address]);
+  // When user picks address type, pre-fill the address field
+  const handleAddressTypeSelect = (type) => {
+    setAddressType(type);
+    setForm(p => ({ ...p, home_address: getStartingAddress(type) }));
+  };
 
   const fetchDistance = async (origin, destination) => {
     setCalculatingDistance(true);
@@ -308,6 +317,58 @@ function MileageView({ sale, user, onSaved, onBack }) {
       setCalculatingDistance(false);
     }
   };
+
+  // Auto-fetch distance when home_address is filled in
+  useEffect(() => {
+    if (!form.home_address || !saleAddress) return;
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => fetchDistance(form.home_address, saleAddress), 800);
+  }, [form.home_address]);
+
+  // Show address type picker first
+  if (!addressType) {
+    return (
+      <div className="space-y-4 py-2">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+          <strong>Sale Address:</strong> {saleAddress || <span className="italic text-blue-500">No address on record</span>}
+        </div>
+        <p className="text-sm font-medium text-slate-700">Which address are you starting from?</p>
+        <div className="grid grid-cols-1 gap-3">
+          <button
+            onClick={() => handleAddressTypeSelect('home')}
+            className="flex items-start gap-4 p-4 border-2 border-slate-200 hover:border-blue-400 rounded-xl transition-colors text-left"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Car className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900">Home Address</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {homeAddress || <span className="italic text-slate-400">Not set — you can enter it manually</span>}
+              </p>
+            </div>
+          </button>
+          <button
+            onClick={() => handleAddressTypeSelect('business')}
+            className="flex items-start gap-4 p-4 border-2 border-slate-200 hover:border-orange-400 rounded-xl transition-colors text-left"
+          >
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Car className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900">Business Address</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {businessAddress || <span className="italic text-slate-400">Not set — you can enter it manually</span>}
+              </p>
+            </div>
+          </button>
+        </div>
+        <div className="pt-2 border-t flex justify-start">
+          <Button type="button" variant="outline" size="sm" onClick={onBack}>← Back</Button>
+        </div>
+      </div>
+    );
+  }
 
   const totalMiles = onewayMiles ? (onewayMiles * 2 * parseFloat(form.round_trips || 1)).toFixed(1) : null;
   const totalDeduction = totalMiles ? (parseFloat(totalMiles) * parseFloat(form.rate_per_mile)).toFixed(2) : null;
@@ -352,14 +413,16 @@ function MileageView({ sale, user, onSaved, onBack }) {
       </div>
 
       <div>
-        <Label>Your Home / Starting Address *</Label>
+        <Label>Your {addressType === 'business' ? 'Business' : 'Home'} / Starting Address *</Label>
         <Input
           placeholder="e.g., 123 Main St, Springfield, NJ 07081"
           value={form.home_address}
           onChange={e => setForm(p => ({ ...p, home_address: e.target.value }))}
           required
         />
-        <p className="text-xs text-slate-400 mt-1">Saved to your profile for future mileage entries</p>
+        <button type="button" onClick={() => setAddressType(null)} className="text-xs text-blue-500 hover:underline mt-1">
+          ← Change address type
+        </button>
       </div>
 
       {calculatingDistance && (
