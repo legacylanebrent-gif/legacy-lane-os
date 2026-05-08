@@ -1,0 +1,143 @@
+{
+  "name": "SaleConversionPipeline",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Operator user ID"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Linked Lead entity ID (optional)"
+    },
+    "estate_sale_id": {
+      "type": "string",
+      "description": "Linked EstateSale entity ID once created"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "new_lead",
+        "consultation_scheduled",
+        "contract_signed",
+        "setup_in_progress",
+        "sale_live",
+        "completed",
+        "lost"
+      ],
+      "default": "new_lead",
+      "description": "Current pipeline stage"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "property_city": {
+      "type": "string"
+    },
+    "property_state": {
+      "type": "string"
+    },
+    "situation": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "standard"
+      ]
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "commission_rate": {
+      "type": "number",
+      "default": 35
+    },
+    "notes": {
+      "type": "string"
+    },
+    "consultation_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Scheduled in-person consultation"
+    },
+    "consultation_notes": {
+      "type": "string"
+    },
+    "contract_signed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "estimated_sale_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected first day of sale"
+    },
+    "estimated_sale_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ai_timeline_generated": {
+      "type": "boolean",
+      "default": false
+    },
+    "ai_timeline_tasks": {
+      "type": "array",
+      "description": "AI-generated task list with target dates",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string"
+          },
+          "days_before_sale": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed"
+            ],
+            "default": "not_started"
+          },
+          "priority": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "lost_reason": {
+      "type": "string"
+    },
+    "actual_revenue": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "operator_id",
+    "client_name"
+  ]
+}
