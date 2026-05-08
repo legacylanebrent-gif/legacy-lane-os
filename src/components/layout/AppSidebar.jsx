@@ -20,7 +20,7 @@ import {
 export const ALL_NAV_ITEMS = [
   { page: 'Dashboard',              label: 'Dashboard',           icon: LayoutDashboard, group: 'Main' },
   { page: 'ConsumerHome',           label: 'Consumer Profile',    icon: Home,            group: 'Main' },
-  { page: 'MyProfile',              label: 'My Profile',          icon: User,            group: 'Main' },
+  { page: 'MyProfile',              label: 'Business Profile',    icon: User,            group: 'Main' },
   { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
   { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Main' },
