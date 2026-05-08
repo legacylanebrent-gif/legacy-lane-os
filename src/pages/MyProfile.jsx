@@ -237,14 +237,14 @@ export default function MyProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex gap-1 h-auto w-full max-w-2xl mb-6">
-          <TabsTrigger value="account" className="flex-1">Account</TabsTrigger>
-          {!isConsumer && <TabsTrigger value="business" className="flex-1">Business</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="territory" className="flex-1">Territory & Services</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="payments" className="flex-1">Payments</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="sales" className="flex-1">My Sales</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="marketplace" className="flex-1">Social & Marketplaces</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>}
+        <TabsList className="flex flex-wrap gap-1 h-auto w-full mb-6 justify-start bg-transparent p-0">
+          <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
+          {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Business</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Territory & Services</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
         </TabsList>
 
         {/* ─────────────── ACCOUNT TAB ─────────────── */}
