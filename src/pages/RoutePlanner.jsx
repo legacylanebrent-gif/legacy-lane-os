@@ -9,11 +9,12 @@ import { Input } from '@/components/ui/input';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { format, parseISO, isSameDay } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
-  Navigation, MapPin, Calendar, Clock, Trash2, ExternalLink,
-  Route, AlertCircle, CheckCircle2, Eye, Lock
+  Navigation, MapPin, Calendar, Clock, Trash2,
+  Route, AlertCircle, CheckCircle2, Eye, Lock, GripVertical
 } from 'lucide-react';
 
 // Fix Leaflet default marker icon
@@ -119,6 +120,19 @@ export default function RoutePlanner() {
     localStorage.setItem('estateRoute', JSON.stringify(updated));
     setRouteIds(updated);
     setSales(prev => prev.filter(s => s.id !== saleId));
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const reordered = Array.from(filteredSales);
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+    // Rebuild full sales array: reordered filtered + unavailable
+    const newSales = [...reordered, ...unavailableSales];
+    setSales(newSales);
+    const newIds = newSales.map(s => s.id);
+    setRouteIds(newIds);
+    localStorage.setItem('estateRoute', JSON.stringify(newIds));
   };
 
   const clearRoute = () => {
@@ -308,86 +322,114 @@ export default function RoutePlanner() {
             {/* Available sales on selected date */}
             {filteredSales.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-800 mb-1 flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-600" />
                   Available on {selectedDate ? format(parseISO(selectedDate), 'MMM d') : 'selected date'}
                   <Badge className="bg-green-100 text-green-700 border-0 ml-1">{filteredSales.length}</Badge>
                 </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredSales.map((sale, idx) => {
-                    const dateInfo = getSaleDateInfo(sale);
-                    return (
-                      <Card key={sale.id} className="overflow-hidden border-2 border-green-200 hover:shadow-lg transition-shadow">
-                        {sale.images?.[0] && (
-                          <div className="h-40 overflow-hidden">
-                            <img
-                              src={sale.images[0]?.url || sale.images[0]}
-                              alt={sale.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <CardContent className="p-4 space-y-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <Badge className="bg-cyan-100 text-cyan-700 border-0 text-xs mb-1">Stop {idx + 1}</Badge>
-                              <h3 className="font-semibold text-slate-900 leading-tight">{sale.title}</h3>
-                            </div>
-                          </div>
+                <p className="text-xs text-slate-400 mb-3 flex items-center gap-1"><GripVertical className="w-3 h-3" /> Drag to reorder stops</p>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="route-stops">
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="space-y-3"
+                      >
+                        {filteredSales.map((sale, idx) => {
+                          const dateInfo = getSaleDateInfo(sale);
+                          return (
+                            <Draggable key={sale.id} draggableId={sale.id} index={idx}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`rounded-xl border-2 bg-white overflow-hidden transition-shadow ${snapshot.isDragging ? 'shadow-2xl border-cyan-400' : 'border-green-200 hover:shadow-md'}`}
+                                >
+                                  <div className="flex items-stretch">
+                                    {/* Drag handle */}
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className="flex items-center justify-center w-10 bg-slate-50 border-r border-slate-200 cursor-grab active:cursor-grabbing flex-shrink-0"
+                                    >
+                                      <GripVertical className="w-4 h-4 text-slate-400" />
+                                    </div>
 
-                          {sale.property_address && (
-                            <div className="flex items-start gap-1.5 text-sm">
-                              <MapPin className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0 mt-0.5" />
-                              {isSaleAddressVisible(sale) ? (
-                                <span className="text-slate-600">{sale.property_address.street}, {sale.property_address.city}, {sale.property_address.state}</span>
-                              ) : (
-                                <span className="text-slate-400 italic text-xs">
-                                  Address revealed 24 hrs before sale<br />{sale.property_address.city}, {sale.property_address.state}
-                                </span>
+                                    {/* Thumbnail */}
+                                    {sale.images?.[0] && (
+                                      <div className="w-20 sm:w-28 h-auto overflow-hidden flex-shrink-0">
+                                        <img
+                                          src={sale.images[0]?.url || sale.images[0]}
+                                          alt={sale.title}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    )}
+
+                                    {/* Content */}
+                                    <div className="flex-1 p-3 min-w-0">
+                                      <div className="flex items-start gap-2 mb-1">
+                                        <Badge className="bg-cyan-100 text-cyan-700 border-0 text-xs flex-shrink-0">Stop {idx + 1}</Badge>
+                                        <h3 className="font-semibold text-slate-900 leading-tight text-sm truncate">{sale.title}</h3>
+                                      </div>
+
+                                      {sale.property_address && (
+                                        <div className="flex items-start gap-1 text-xs mb-1">
+                                          <MapPin className="w-3 h-3 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                          {isSaleAddressVisible(sale) ? (
+                                            <span className="text-slate-600 truncate">{sale.property_address.street}, {sale.property_address.city}, {sale.property_address.state}</span>
+                                          ) : (
+                                            <span className="text-slate-400 italic">Address revealed 24 hrs before · {sale.property_address.city}, {sale.property_address.state}</span>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {dateInfo && (dateInfo.start_time || dateInfo.end_time) && (
+                                        <div className="flex items-center gap-1 text-xs text-orange-700 font-medium mb-2">
+                                          <Clock className="w-3 h-3 flex-shrink-0" />
+                                          {formatTime(dateInfo.start_time)} – {formatTime(dateInfo.end_time)}
+                                        </div>
+                                      )}
+
+                                      <div className="flex gap-1.5">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="gap-1 text-xs h-7 px-2"
+                                          onClick={() => getDirections(sale)}
+                                          disabled={!isSaleAddressVisible(sale)}
+                                          title={!isSaleAddressVisible(sale) ? 'Address revealed 24 hrs before sale' : 'Get directions'}
+                                        >
+                                          {isSaleAddressVisible(sale) ? <Navigation className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                                          <span className="hidden sm:inline">Directions</span>
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="gap-1 text-xs h-7 px-2" asChild>
+                                          <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
+                                            <Eye className="w-3 h-3" />
+                                            <span className="hidden sm:inline">View</span>
+                                          </Link>
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="text-red-500 hover:bg-red-50 px-2 h-7"
+                                          onClick={() => removeFromRoute(sale.id)}
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               )}
-                            </div>
-                          )}
-
-                          {dateInfo && (dateInfo.start_time || dateInfo.end_time) && (
-                            <div className="flex items-center gap-1.5 text-sm text-orange-700 font-medium">
-                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                              {formatTime(dateInfo.start_time)} – {formatTime(dateInfo.end_time)}
-                            </div>
-                          )}
-
-                          <div className="flex gap-2 pt-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 gap-1 text-xs"
-                              onClick={() => getDirections(sale)}
-                              disabled={!isSaleAddressVisible(sale)}
-                              title={!isSaleAddressVisible(sale) ? 'Address revealed 24 hrs before sale' : 'Get directions'}
-                            >
-                              {isSaleAddressVisible(sale) ? <Navigation className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                              Directions
-                            </Button>
-                            <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" asChild>
-                              <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}>
-                                <Eye className="w-3 h-3" />
-                                View Sale
-                              </Link>
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-500 hover:bg-red-50 px-2"
-                              onClick={() => removeFromRoute(sale.id)}
-                              title="Remove from route"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </div>
             )}
 
