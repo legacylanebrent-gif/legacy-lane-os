@@ -334,7 +334,7 @@ function MileageView({ sale, user, onSaved, onBack }) {
 
       // Save address to user profile for future use
       if (form.home_address && !user?.business_address) {
-        await base44.auth.updateMe({ business_address: form.home_address });
+        await base44.auth.updateMe({ business_address: form.home_address, business_street: form.home_address });
       }
 
       onSaved('Mileage saved!');

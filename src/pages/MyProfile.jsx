@@ -61,13 +61,18 @@ export default function MyProfile() {
       const userData = await base44.auth.me();
       setUser(userData);
       
+      // Parse existing business_address string into parts if sub-fields not yet set
+      const existingAddress = userData.business_address || '';
       setProfileData({
         full_name: userData.full_name || '',
         email: userData.email || '',
         phone: userData.phone || '',
         company_name: userData.company_name || '',
         company_description: userData.company_description || '',
-        business_address: userData.business_address || '',
+        business_street: userData.business_street || existingAddress,
+        business_city: userData.business_city || '',
+        business_state: userData.business_state || '',
+        business_zip: userData.business_zip || userData.address_zip || '',
         website_url: userData.website_url || '',
         profile_image_url: userData.profile_image_url || '',
         address_zip: userData.address_zip || '',
@@ -122,7 +127,14 @@ export default function MyProfile() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe(profileData);
+      // Compile full business_address from parts
+      const fullAddress = [
+        profileData.business_street,
+        profileData.business_city,
+        profileData.business_state,
+        profileData.business_zip
+      ].filter(Boolean).join(', ');
+      await base44.auth.updateMe({ ...profileData, business_address: fullAddress });
       alert('Profile updated successfully!');
       await loadData();
     } catch (error) {
@@ -328,12 +340,40 @@ export default function MyProfile() {
                   </div>
 
                   <div>
-                    <Label>Business Address</Label>
+                    <Label>Business Street Address</Label>
                     <Input
-                      value={profileData.business_address}
-                      onChange={(e) => setProfileData({ ...profileData, business_address: e.target.value })}
-                      placeholder="123 Main St, City, State ZIP"
+                      value={profileData.business_street}
+                      onChange={(e) => setProfileData({ ...profileData, business_street: e.target.value })}
+                      placeholder="123 Main St"
                     />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-1">
+                      <Label>City</Label>
+                      <Input
+                        value={profileData.business_city}
+                        onChange={(e) => setProfileData({ ...profileData, business_city: e.target.value })}
+                        placeholder="Springfield"
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <Label>State</Label>
+                      <Input
+                        value={profileData.business_state}
+                        onChange={(e) => setProfileData({ ...profileData, business_state: e.target.value })}
+                        placeholder="NJ"
+                        maxLength="2"
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <Label>ZIP</Label>
+                      <Input
+                        value={profileData.business_zip}
+                        onChange={(e) => setProfileData({ ...profileData, business_zip: e.target.value })}
+                        placeholder="07081"
+                        maxLength="10"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between border rounded-lg p-4 bg-slate-50">
