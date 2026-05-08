@@ -274,15 +274,7 @@ export default function MyProfile() {
                 <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
                 <div><Label>ZIP Code</Label><Input value={form.address_zip} onChange={e => setForm(p => ({ ...p, address_zip: e.target.value }))} placeholder="12345" maxLength="5" /></div>
               </div>
-              {!isConsumer && (
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">Early Sign-In Default</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Auto-enable early sign-in for new sales you create</p>
-                  </div>
-                  <Switch checked={form.early_sign_in_default !== false} onCheckedChange={v => setForm(p => ({ ...p, early_sign_in_default: v }))} />
-                </div>
-              )}
+
             </CardContent>
           </Card>
 
@@ -449,6 +441,20 @@ export default function MyProfile() {
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">Insured</span></label>
                   <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.bonded} onCheckedChange={v => setForm(p => ({ ...p, bonded: v }))} /><span className="text-sm font-medium">Bonded</span></label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Early Sign-In Default */}
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5" />Early Sign-In Default</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">Enable Early Sign-In by Default</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Auto-enable early sign-in for new sales you create</p>
+                  </div>
+                  <Switch checked={form.early_sign_in_default !== false} onCheckedChange={v => setForm(p => ({ ...p, early_sign_in_default: v }))} />
                 </div>
               </CardContent>
             </Card>
