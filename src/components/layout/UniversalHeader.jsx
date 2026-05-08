@@ -14,7 +14,8 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  LogIn, LogOut, MessageSquare, LayoutDashboard, Bell, ChevronDown, Home
+  LogIn, LogOut, LayoutDashboard, Bell, ChevronDown, Home,
+  Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -74,20 +75,73 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Home')} className="cursor-pointer">
-                        <Home className="w-4 h-4 mr-2" />
-                        Home
+                        <Home className="w-4 h-4 mr-2" /> Home
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
+                        <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('Favorites')} className="cursor-pointer">
+                        <Heart className="w-4 h-4 mr-2" /> Favorite Sales
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('RoutePlanner')} className="cursor-pointer">
+                        <Navigation className="w-4 h-4 mr-2" /> Route Planner
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('MyEarlySignIns')} className="cursor-pointer">
+                        <ClipboardList className="w-4 h-4 mr-2" /> My Early Sign-Ins
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
+                        <QrCode className="w-4 h-4 mr-2" /> Sale Checkin
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
+                        <Receipt className="w-4 h-4 mr-2" /> Record Purchase
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
+                        <Star className="w-4 h-4 mr-2" /> My Rewards
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
+                        <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
+                        <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                        <Bell className="w-4 h-4 mr-2" /> Notification Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    {user?.role === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('AdminUsers')} className="cursor-pointer font-medium text-orange-600">
+                            <Settings className="w-4 h-4 mr-2" /> Admin Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
+                      <LogOut className="w-4 h-4 mr-2" /> Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
