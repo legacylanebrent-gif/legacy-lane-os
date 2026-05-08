@@ -283,9 +283,7 @@ function MileageView({ sale, user, onSaved, onBack }) {
 
   const [form, setForm] = useState({
     expense_date: new Date().toISOString().split('T')[0],
-    home_address: typeof user?.home_address === 'string' ? user.home_address
-      : typeof user?.address === 'string' ? user.address
-      : (user?.home_address?.formatted_address || user?.home_address?.street || user?.address?.formatted_address || user?.address?.street || ''),
+    home_address: user?.business_address || '',
     round_trips: 1,
     rate_per_mile: '0.70',
     purpose: 'Estate sale preparation and setup'
@@ -334,9 +332,9 @@ function MileageView({ sale, user, onSaved, onBack }) {
         tags: ['mileage', 'sale-expense', 'round-trip', sale.id]
       });
 
-      // Save home address to user profile for future use
-      if (form.home_address && !user?.home_address) {
-        await base44.auth.updateMe({ home_address: form.home_address });
+      // Save address to user profile for future use
+      if (form.home_address && !user?.business_address) {
+        await base44.auth.updateMe({ business_address: form.home_address });
       }
 
       onSaved('Mileage saved!');
