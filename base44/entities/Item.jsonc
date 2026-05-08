@@ -55,12 +55,10 @@
       "description": "If from estate sale"
     },
     "storage_location_id": {
-      "type": "string",
-      "description": "Reference to StorageLocation where item is stored"
+      "type": "string"
     },
     "storage_location_path": {
-      "type": "string",
-      "description": "Cached full location path for quick reference"
+      "type": "string"
     },
     "images": {
       "type": "array",
@@ -107,7 +105,46 @@
         "reserved"
       ],
       "default": "available",
-      "description": "Master status \u2014 synced across all channels"
+      "description": "Master status"
+    },
+    "sale_phase": {
+      "type": "string",
+      "enum": [
+        "pre_sale",
+        "during_sale",
+        "post_sale"
+      ],
+      "default": "during_sale",
+      "description": "When the item was sold relative to the sale event"
+    },
+    "pre_sale_allowed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator has enabled pre-sale selling for this item"
+    },
+    "post_sale_allowed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator has enabled post-sale selling for this item"
+    },
+    "sold_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when item was sold"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "buyer_contact": {
+      "type": "string"
+    },
+    "payment_method_used": {
+      "type": "string"
+    },
+    "included_in_settlement": {
+      "type": "boolean",
+      "default": false,
+      "description": "Has this item been included in a client settlement statement"
     },
     "sku": {
       "type": "string"
@@ -204,12 +241,10 @@
           "other"
         ]
       },
-      "default": [],
-      "description": "Payment methods accepted for this specific item. If empty, operator's default methods are used."
+      "default": []
     },
     "payment_notes": {
-      "type": "string",
-      "description": "Any notes about payment (e.g. 'Cash only at pickup', 'Venmo preferred')"
+      "type": "string"
     },
     "views": {
       "type": "integer",
@@ -243,65 +278,10 @@
     },
     "category_specs": {
       "type": "object",
-      "description": "Dynamic category-specific fields (artist, dimensions, signed, material, etc.)",
       "default": {}
     },
     "specs": {
-      "type": "object",
-      "description": "Legacy category-specific specifications",
-      "properties": {
-        "furniture_material": {
-          "type": "string"
-        },
-        "furniture_style": {
-          "type": "string"
-        },
-        "furniture_upholstery_condition": {
-          "type": "string"
-        },
-        "furniture_color": {
-          "type": "string"
-        },
-        "art_artist_name": {
-          "type": "string"
-        },
-        "art_medium": {
-          "type": "string"
-        },
-        "art_is_signed": {
-          "type": "boolean"
-        },
-        "art_is_framed": {
-          "type": "boolean"
-        },
-        "art_provenance": {
-          "type": "string"
-        },
-        "art_estimated_era": {
-          "type": "string"
-        },
-        "vehicle_make_model": {
-          "type": "string"
-        },
-        "vehicle_year": {
-          "type": "string"
-        },
-        "vehicle_mileage": {
-          "type": "string"
-        },
-        "vehicle_color": {
-          "type": "string"
-        },
-        "vehicle_condition": {
-          "type": "string"
-        },
-        "vehicle_fuel_type": {
-          "type": "string"
-        },
-        "vehicle_vin": {
-          "type": "string"
-        }
-      }
+      "type": "object"
     },
     "sales_channels": {
       "type": "array",
@@ -312,8 +292,7 @@
           "marketplace"
         ]
       },
-      "default": [],
-      "description": "Which channels this item is listed on"
+      "default": []
     },
     "inventory_display_status": {
       "type": "string",

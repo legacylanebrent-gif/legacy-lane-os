@@ -25,8 +25,7 @@
         "completed",
         "lost"
       ],
-      "default": "new_lead",
-      "description": "Current pipeline stage"
+      "default": "new_lead"
     },
     "client_name": {
       "type": "string"
@@ -69,8 +68,7 @@
     },
     "consultation_date": {
       "type": "string",
-      "format": "date-time",
-      "description": "Scheduled in-person consultation"
+      "format": "date-time"
     },
     "consultation_notes": {
       "type": "string"
@@ -81,12 +79,21 @@
     },
     "estimated_sale_start_date": {
       "type": "string",
-      "format": "date",
-      "description": "Expected first day of sale"
+      "format": "date"
     },
     "estimated_sale_end_date": {
       "type": "string",
       "format": "date"
+    },
+    "pre_sale_selling_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator has agreed to allow pre-sale item sales"
+    },
+    "post_sale_selling_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator has agreed to allow post-sale item sales"
     },
     "ai_timeline_generated": {
       "type": "boolean",
@@ -94,7 +101,6 @@
     },
     "ai_timeline_tasks": {
       "type": "array",
-      "description": "AI-generated task list with target dates",
       "default": [],
       "items": {
         "type": "object",
@@ -134,6 +140,49 @@
     },
     "actual_revenue": {
       "type": "number"
+    },
+    "total_paid_to_client": {
+      "type": "number",
+      "default": 0,
+      "description": "Running total of payments already made to the client"
+    },
+    "payout_records": {
+      "type": "array",
+      "default": [],
+      "description": "History of payments made to the client",
+      "items": {
+        "type": "object",
+        "properties": {
+          "payout_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "paid_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "method": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "statement_generated": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "settlement_finalized": {
+      "type": "boolean",
+      "default": false
+    },
+    "settlement_finalized_date": {
+      "type": "string",
+      "format": "date"
     }
   },
   "required": [

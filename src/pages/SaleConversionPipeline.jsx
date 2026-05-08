@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -565,6 +566,47 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             <Label className="text-sm">Consultation Notes</Label>
             <Textarea value={deal.consultation_notes||''} onChange={e=>f('consultation_notes',e.target.value)} rows={3} placeholder="Notes from the in-person consultation..." className="mt-1"/>
           </div>
+          {/* Pre/Post Sale Selling Options */}
+          <div className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50">
+            <p className="text-sm font-semibold text-slate-700">Sale Phase Selling Permissions</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Allow Pre-Sale Selling</p>
+                <p className="text-xs text-slate-500">Operator agrees to sell items before the sale event</p>
+              </div>
+              <button
+                onClick={() => f('pre_sale_selling_enabled', !deal.pre_sale_selling_enabled)}
+                className={`w-11 h-6 rounded-full transition-colors ${deal.pre_sale_selling_enabled ? 'bg-blue-500' : 'bg-slate-300'} relative`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${deal.pre_sale_selling_enabled ? 'translate-x-5' : 'translate-x-0.5'}`}/>
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700">Allow Post-Sale Selling</p>
+                <p className="text-xs text-slate-500">Operator agrees to sell remaining items after the event</p>
+              </div>
+              <button
+                onClick={() => f('post_sale_selling_enabled', !deal.post_sale_selling_enabled)}
+                className={`w-11 h-6 rounded-full transition-colors ${deal.post_sale_selling_enabled ? 'bg-purple-500' : 'bg-slate-300'} relative`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${deal.post_sale_selling_enabled ? 'translate-x-5' : 'translate-x-0.5'}`}/>
+              </button>
+            </div>
+          </div>
+
+          {/* Settlement Statement Link */}
+          <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+            <FileText className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-green-800">Settlement Statement</p>
+              <p className="text-xs text-slate-500">View financial reconciliation, payout history, and generate a PDF</p>
+            </div>
+            <Link to={`/SettlementStatement?dealId=${deal.id}`}>
+              <button className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">Open</button>
+            </Link>
+          </div>
+
           <Button onClick={onSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700 gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin"/> : null} Save Changes
           </Button>

@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import UnifiedItemForm from '@/components/inventory/UnifiedItemForm';
-import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Globe, AlertCircle, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export default function SaleInventory() {
@@ -82,11 +83,34 @@ export default function SaleInventory() {
 
   const handleStatusChange = async (item, newStatus) => {
     try {
-      await base44.entities.Item.update(item.id, { status: newStatus });
+      const updates = { status: newStatus };
+      if (newStatus === 'sold') {
+        updates.sold_date = new Date().toISOString();
+        // Determine phase based on sale dates
+        if (sale?.sale_dates?.length > 0) {
+          const today = new Date();
+          const saleStart = new Date(sale.sale_dates[0].date + 'T00:00:00');
+          const saleEnd = new Date(sale.sale_dates[sale.sale_dates.length - 1].date + 'T23:59:59');
+          if (today < saleStart) updates.sale_phase = 'pre_sale';
+          else if (today > saleEnd) updates.sale_phase = 'post_sale';
+          else updates.sale_phase = 'during_sale';
+        }
+      }
+      await base44.entities.Item.update(item.id, updates);
       toast.success(`Item marked as ${newStatus}`);
       loadData();
     } catch (error) {
       toast.error('Error updating item: ' + error.message);
+    }
+  };
+
+  const handleTogglePrePost = async (item, field) => {
+    try {
+      await base44.entities.Item.update(item.id, { [field]: !item[field] });
+      toast.success('Updated');
+      loadData();
+    } catch (error) {
+      toast.error('Error updating item');
     }
   };
 
@@ -142,16 +166,25 @@ export default function SaleInventory() {
               </h1>
               <p className="text-slate-600 mt-2">Manage items for sale and marketplace</p>
             </div>
-            <Button
-              onClick={() => {
-                setEditingItem(null);
-                setShowForm(true);
-              }}
-              className="bg-gold-600 hover:bg-gold-700 gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Item
-            </Button>
+            <div className="flex gap-2">
+              {saleId && (
+                <Link to={`/SettlementStatement?saleId=${saleId}`}>
+                  <Button variant="outline" className="gap-2 text-orange-600 border-orange-300">
+                    <FileText className="w-4 h-4" /> Settlement
+                  </Button>
+                </Link>
+              )}
+              <Button
+                onClick={() => {
+                  setEditingItem(null);
+                  setShowForm(true);
+                }}
+                className="bg-gold-600 hover:bg-gold-700 gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Item
+              </Button>
+            </div>
           </div>
 
           {/* Search & Filters */}
@@ -178,6 +211,15 @@ export default function SaleInventory() {
               <option value="reserved">Reserved</option>
             </select>
           </div>
+        </div>
+      </div>
+      
+      {/* Pre/Post sale phase legend */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 print:hidden">
+        <div className="flex gap-3 text-xs text-slate-500 flex-wrap">
+          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">Pre-Sale = sold before sale event</span>
+          <span className="bg-green-100 text-green-700 px-2 py-1 rounded">During Sale = sold during event dates</span>
+          <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">Post-Sale = sold after event ends</span>
         </div>
       </div>
 
@@ -229,6 +271,17 @@ export default function SaleInventory() {
                             Synced & Sold
                           </Badge>
                         )}
+                        {item.status === 'sold' && item.sale_phase && (
+                          <Badge className={`text-xs ${item.sale_phase === 'pre_sale' ? 'bg-blue-100 text-blue-700' : item.sale_phase === 'post_sale' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                            {item.sale_phase === 'pre_sale' ? 'Pre-Sale' : item.sale_phase === 'post_sale' ? 'Post-Sale' : 'During Sale'}
+                          </Badge>
+                        )}
+                        {item.pre_sale_allowed && item.status !== 'sold' && (
+                          <Badge className="bg-blue-50 text-blue-600 text-xs">Pre-Sale OK</Badge>
+                        )}
+                        {item.post_sale_allowed && item.status !== 'sold' && (
+                          <Badge className="bg-purple-50 text-purple-600 text-xs">Post-Sale OK</Badge>
+                        )}
                       </div>
                     </div>
 
@@ -241,7 +294,25 @@ export default function SaleInventory() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
+                  {item.status !== 'sold' && (
+                    <div className="flex flex-col gap-1 text-right">
+                      <button
+                        onClick={() => handleTogglePrePost(item, 'pre_sale_allowed')}
+                        className={`text-xs px-2 py-1 rounded border ${item.pre_sale_allowed ? 'bg-blue-100 text-blue-700 border-blue-300' : 'border-slate-200 text-slate-500'}`}
+                        title="Toggle pre-sale selling"
+                      >
+                        {item.pre_sale_allowed ? '✓' : '+'} Pre-Sale
+                      </button>
+                      <button
+                        onClick={() => handleTogglePrePost(item, 'post_sale_allowed')}
+                        className={`text-xs px-2 py-1 rounded border ${item.post_sale_allowed ? 'bg-purple-100 text-purple-700 border-purple-300' : 'border-slate-200 text-slate-500'}`}
+                        title="Toggle post-sale selling"
+                      >
+                        {item.post_sale_allowed ? '✓' : '+'} Post-Sale
+                      </button>
+                    </div>
+                  )}
                   {item.status !== 'sold' && (
                     <select
                       value={item.status}
