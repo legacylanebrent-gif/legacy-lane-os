@@ -44,10 +44,12 @@ export default function AdminFutureOperators() {
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
 
+  const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
+
   const openEdit = (operator) => {
     setEditingOperator(operator);
     setEditForm({
-      company_name: operator.company_name || '',
+      company_name: decodeHtml(operator.company_name || ''),
       email: operator.email || '',
       phone: operator.phone || '',
       website: operator.website || '',
@@ -495,7 +497,7 @@ export default function AdminFutureOperators() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Company Profile</DialogTitle>
-            <DialogDescription>{editingOperator?.company_name}</DialogDescription>
+            <DialogDescription>{decodeHtml(editingOperator?.company_name || '')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
