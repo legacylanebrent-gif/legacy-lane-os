@@ -36,6 +36,8 @@ export default function AdminFutureOperators() {
   const [importResults, setImportResults] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [enrichingIds, setEnrichingIds] = useState(new Set());
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState(null); // { done, total }
 
   const handleFindEmail = async (operatorId) => {
     setEnrichingIds(prev => new Set([...prev, operatorId]));
@@ -47,6 +49,28 @@ export default function AdminFutureOperators() {
     } finally {
       setEnrichingIds(prev => { const n = new Set(prev); n.delete(operatorId); return n; });
     }
+  };
+
+  const handleBatchFindEmails = async () => {
+    const targets = filteredOperators.filter(op => !op.email && !op.do_not_contact);
+    if (targets.length === 0) return alert('All visible companies already have emails or are marked do-not-contact.');
+    if (!confirm(`Run email finder on ${targets.length} companies in ${stateFilter}? This may take a while.`)) return;
+
+    setBatchRunning(true);
+    setBatchProgress({ done: 0, total: targets.length });
+
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        await base44.functions.invoke('enrichCompanyEmail', { company_id: targets[i].id });
+      } catch (e) {
+        // continue on individual errors
+      }
+      setBatchProgress({ done: i + 1, total: targets.length });
+    }
+
+    setBatchRunning(false);
+    setBatchProgress(null);
+    await loadOperators();
   };
 
   useEffect(() => {
@@ -214,6 +238,17 @@ export default function AdminFutureOperators() {
                 </Select>
               </div>
               
+              <Button
+                onClick={handleBatchFindEmails}
+                disabled={batchRunning || importing}
+                className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
+              >
+                {batchRunning
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{batchProgress?.done}/{batchProgress?.total}</>
+                  : <><Mail className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Batch Find Emails ({stateFilter})</span><span className="sm:hidden">Batch Emails</span></>
+                }
+              </Button>
+
               <Button 
                 onClick={handleImportCompanies}
                 disabled={importing}
