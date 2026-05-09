@@ -195,7 +195,15 @@ export default function AdminFutureOperators() {
   const allStates = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'];
 
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-  const isNew = (op) => op.created_date && new Date(op.created_date) >= fourteenDaysAgo;
+  // Only "New" if created within 14 days AND never updated after creation (i.e. truly a new insert, not a re-scrape of existing data)
+  const isNew = (op) => {
+    if (!op.created_date) return false;
+    const created = new Date(op.created_date);
+    const updated = new Date(op.updated_date);
+    const diffMs = Math.abs(updated - created);
+    const neverUpdated = diffMs < 5000; // within 5 seconds = same write, not a subsequent update
+    return created >= fourteenDaysAgo && neverUpdated;
+  };
 
   const filteredOperators = operators.filter(op => {
     const query = searchQuery.toLowerCase();
