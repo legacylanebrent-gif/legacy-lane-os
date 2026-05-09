@@ -46,6 +46,7 @@ export default function AdminFutureOperators() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updateResults, setUpdateResults] = useState(null);
+  const [newOnlyFilter, setNewOnlyFilter] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
   const [selectedScrapeStates, setSelectedScrapeStates] = useState([]);
   const [scrapeQueue, setScrapeQueue] = useState([]); // [{state, status: 'pending'|'running'|'done'|'error', result}]
@@ -193,6 +194,9 @@ export default function AdminFutureOperators() {
 
   const allStates = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'];
 
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+  const isNew = (op) => op.created_date && new Date(op.created_date) >= fourteenDaysAgo;
+
   const filteredOperators = operators.filter(op => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = !searchQuery || (
@@ -202,8 +206,9 @@ export default function AdminFutureOperators() {
       op.phone?.toLowerCase().includes(query)
     );
     const matchesPackage = packageFilter === 'all' || op.package_type === packageFilter;
+    const matchesNew = !newOnlyFilter || isNew(op);
     
-    return matchesSearch && matchesPackage;
+    return matchesSearch && matchesPackage && matchesNew;
   });
 
   const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
@@ -373,6 +378,17 @@ export default function AdminFutureOperators() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                <button
+                  onClick={() => setNewOnlyFilter(p => !p)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
+                    newOnlyFilter
+                      ? 'bg-emerald-500 text-white border-emerald-500'
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-emerald-400'
+                  }`}
+                >
+                  🆕 New (14d)
+                </button>
               </div>
               
               <Button
@@ -435,6 +451,9 @@ export default function AdminFutureOperators() {
                           <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">
                             {operator.company_name?.replace(/&amp;/g, '&')}
                           </h3>
+                          {isNew(operator) && (
+                            <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs">New</Badge>
+                          )}
                           {operator.package_type && (
                             <Badge className={getPackageColor(operator.package_type)}>
                               {operator.package_type}
