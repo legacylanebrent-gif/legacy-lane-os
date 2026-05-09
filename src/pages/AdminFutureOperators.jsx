@@ -61,6 +61,7 @@ export default function AdminFutureOperators() {
       twitter: operator.twitter || '',
       youtube: operator.youtube || '',
       enrichment_notes: operator.enrichment_notes || '',
+      alternate_emails_text: (operator.alternate_emails || []).join(', '),
       do_not_contact: operator.do_not_contact || false,
       unsubscribe_status: operator.unsubscribe_status || false,
     });
@@ -69,7 +70,12 @@ export default function AdminFutureOperators() {
   const handleSaveEdit = async () => {
     setSaving(true);
     try {
-      await base44.entities.FutureEstateOperator.update(editingOperator.id, editForm);
+      const saveData = { ...editForm };
+      saveData.alternate_emails = editForm.alternate_emails_text
+        ? editForm.alternate_emails_text.split(',').map(e => e.trim()).filter(Boolean).slice(0, 5)
+        : [];
+      delete saveData.alternate_emails_text;
+      await base44.entities.FutureEstateOperator.update(editingOperator.id, saveData);
       setOperators(prev => prev.map(op => op.id === editingOperator.id ? { ...op, ...editForm } : op));
       setEditingOperator(null);
     } catch (e) {
@@ -408,14 +414,26 @@ export default function AdminFutureOperators() {
                       )}
 
                       {operator.email && (
-                        <div className="flex items-center gap-2 col-span-full">
-                          <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
-                          <a href={`mailto:${operator.email}`} className="hover:underline truncate font-mono text-sm">
-                            {operator.email}
-                          </a>
-                          {operator.email_confidence_score != null && (
-                            <span className="text-xs text-slate-400 ml-1">({operator.email_confidence_score}% confidence)</span>
-                          )}
+                        <div className="col-span-full space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <a href={`mailto:${operator.email}`} className="hover:underline truncate font-mono text-sm font-medium">
+                              {operator.email}
+                            </a>
+                            <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
+                            {operator.email_confidence_score != null && (
+                              <span className="text-xs text-slate-400">({operator.email_confidence_score}%)</span>
+                            )}
+                          </div>
+                          {operator.alternate_emails?.length > 0 && operator.alternate_emails.map((altEmail, idx) => (
+                            <div key={idx} className="flex items-center gap-2 pl-6">
+                              <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                              <a href={`mailto:${altEmail}`} className="hover:underline truncate font-mono text-xs text-slate-600">
+                                {altEmail}
+                              </a>
+                              <Badge variant="outline" className="text-xs px-1.5 py-0 flex-shrink-0 text-slate-500">Alt {idx + 1}</Badge>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -486,8 +504,12 @@ export default function AdminFutureOperators() {
                 <Input value={editForm.company_name} onChange={e => setEditForm(p => ({ ...p, company_name: e.target.value }))} />
               </div>
               <div>
-                <Label>Email</Label>
+                <Label>Primary Email</Label>
                 <Input value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} type="email" />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Alternate Emails <span className="text-slate-400 font-normal">(comma-separated, up to 5)</span></Label>
+                <Input value={editForm.alternate_emails_text} onChange={e => setEditForm(p => ({ ...p, alternate_emails_text: e.target.value }))} placeholder="alt1@company.com, alt2@company.com" />
               </div>
               <div>
                 <Label>Phone</Label>
