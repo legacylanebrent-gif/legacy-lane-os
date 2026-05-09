@@ -128,8 +128,8 @@ export default function AdminFutureOperators() {
 
   const loadTotalCount = async () => {
     try {
-      const allData = await base44.entities.FutureEstateOperator.list('-created_date', 50000);
-      setTotalCount(allData.length);
+      const res = await base44.functions.invoke('getFutureOperatorCount', {});
+      setTotalCount(res.data.total || 0);
     } catch (error) {
       console.error('Error loading total count:', error);
     }
