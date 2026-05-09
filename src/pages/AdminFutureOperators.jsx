@@ -37,6 +37,7 @@ export default function AdminFutureOperators() {
   const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
   const [importResults, setImportResults] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [stateCount, setStateCount] = useState(null);
   const [enrichingIds, setEnrichingIds] = useState(new Set());
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState(null); // { done, total }
@@ -123,8 +124,12 @@ export default function AdminFutureOperators() {
 
   useEffect(() => {
     loadOperators();
-    loadTotalCount();
+    loadStateCount();
   }, [stateFilter]);
+
+  useEffect(() => {
+    loadTotalCount();
+  }, []);
 
   const loadTotalCount = async () => {
     try {
@@ -132,6 +137,16 @@ export default function AdminFutureOperators() {
       setTotalCount(res.data.total || 0);
     } catch (error) {
       console.error('Error loading total count:', error);
+    }
+  };
+
+  const loadStateCount = async () => {
+    setStateCount(null);
+    try {
+      const res = await base44.functions.invoke('getFutureOperatorCount', { state: stateFilter });
+      setStateCount(res.data.total || 0);
+    } catch (error) {
+      console.error('Error loading state count:', error);
     }
   };
 
@@ -235,9 +250,15 @@ export default function AdminFutureOperators() {
             US estate sale companies sourced from current competitors
           </p>
         </div>
-        <div className="text-left sm:text-right">
-          <div className="text-3xl font-bold text-slate-900">{totalCount.toLocaleString()}</div>
-          <div className="text-sm text-slate-600">Total Records in Database</div>
+        <div className="text-left sm:text-right space-y-1">
+          <div>
+            <div className="text-3xl font-bold text-slate-900">{totalCount > 0 ? totalCount.toLocaleString() : '...'}</div>
+            <div className="text-sm text-slate-600">Total Records in Database</div>
+          </div>
+          <div>
+            <div className="text-xl font-semibold text-orange-600">{stateCount !== null ? stateCount.toLocaleString() : '...'}</div>
+            <div className="text-sm text-slate-500">{stateFilter} Records</div>
+          </div>
         </div>
       </div>
 
