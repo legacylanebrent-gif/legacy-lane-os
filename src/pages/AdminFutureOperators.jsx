@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
-  Mail, Loader2, CheckCircle2, Pencil, Save, X
+  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,6 +39,7 @@ export default function AdminFutureOperators() {
   const [totalCount, setTotalCount] = useState(0);
   const [stateCount, setStateCount] = useState(null);
   const [enrichingIds, setEnrichingIds] = useState(new Set());
+  const [deduplicating, setDeduplicating] = useState(false);
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState(null); // { done, total }
   const [editingOperator, setEditingOperator] = useState(null);
@@ -97,6 +98,23 @@ export default function AdminFutureOperators() {
       alert('Error finding email: ' + e.message);
     } finally {
       setEnrichingIds(prev => { const n = new Set(prev); n.delete(operatorId); return n; });
+    }
+  };
+
+  const handleDeduplicate = async () => {
+    if (!confirm('This will scan all records and delete duplicates based on phone number, keeping the most complete record. Continue?')) return;
+    setDeduplicating(true);
+    try {
+      const res = await base44.functions.invoke('deduplicateFutureOperators', {});
+      const { total_scanned, duplicates_deleted, remaining } = res.data;
+      alert(`Done! Scanned ${total_scanned.toLocaleString()} records, deleted ${duplicates_deleted.toLocaleString()} duplicates. ${remaining.toLocaleString()} remain.`);
+      await loadTotalCount();
+      await loadStateCount();
+      await loadOperators();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setDeduplicating(false);
     }
   };
 
@@ -315,6 +333,18 @@ export default function AdminFutureOperators() {
                 {batchRunning
                   ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{batchProgress?.done}/{batchProgress?.total}</>
                   : <><Mail className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Batch Find Emails ({stateFilter})</span><span className="sm:hidden">Batch Emails</span></>
+                }
+              </Button>
+
+              <Button
+                onClick={handleDeduplicate}
+                disabled={deduplicating || importing || batchRunning}
+                variant="outline"
+                className="border-red-400 text-red-700 hover:bg-red-50 whitespace-nowrap"
+              >
+                {deduplicating
+                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deduplicating...</>
+                  : <><Trash2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Remove Duplicates</span><span className="sm:hidden">Dedupe</span></>
                 }
               </Button>
 
