@@ -7,6 +7,8 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import ConsumerHeader from '@/components/layout/ConsumerHeader';
 import AICoachButton from '@/components/coach/AICoachButton';
+import OnboardingModal from '@/components/onboarding/OnboardingModal';
+import { useOperatorOnboarding } from '@/hooks/useOperatorOnboarding';
 
 const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page);
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
@@ -21,6 +23,7 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { showOnboarding, handleClose, handleDismissPermanently } = useOperatorOnboarding(user);
 
   useEffect(() => {
     loadUserAndAccess();
@@ -85,6 +88,13 @@ export default function Layout({ children, currentPageName }) {
   // All other roles — unified sidebar layout
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
+      {showOnboarding && (
+        <OnboardingModal
+          user={user}
+          onClose={handleClose}
+          onDismissPermanently={handleDismissPermanently}
+        />
+      )}
       <AppSidebar user={user} currentPageName={currentPageName} allowedPages={allowedPages} />
 
       <div className="flex-1 flex flex-col min-w-0">

@@ -187,6 +187,29 @@
     },
     "company_website": {
       "type": "string"
+    },
+    "onboarding_shown_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times onboarding modal has been shown"
+    },
+    "onboarding_dismissed_permanently": {
+      "type": "boolean",
+      "default": false,
+      "description": "User clicked do not show again"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "User completed the full onboarding questionnaire"
+    },
+    "onboarding_completed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "onboarding_answers": {
+      "type": "object",
+      "description": "Raw answers from onboarding questionnaire"
     }
   },
   "required": []
