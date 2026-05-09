@@ -114,8 +114,16 @@ Deno.serve(async (req) => {
     if (allCompanies.length > 0) {
       console.log('Upserting to database...');
 
-      // Load all existing NJ records once for lookup
-      const existing = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'NJ' }, '-created_date', 2000);
+      // Load ALL existing NJ records with pagination
+      let existing = [];
+      let skip = 0;
+      while (true) {
+        const batch = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'NJ' }, '-created_date', 500, skip);
+        existing = existing.concat(batch);
+        if (batch.length < 500) break;
+        skip += 500;
+      }
+      console.log(`Loaded ${existing.length} existing NJ records for lookup`);
       const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
       const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
 
@@ -153,63 +161,12 @@ Deno.serve(async (req) => {
       console.log(`✓ Inserted ${inserted} new, updated ${updated} existing`);
     }
 
-    // Now check for and delete duplicates
-    console.log('\n=== Checking for duplicates ===');
-    const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
-      { state: 'NJ' },
-      '-created_date',
-      1000
-    );
-    
-    console.log(`Total NJ operators in database: ${allOperators.length}`);
-
-    const phoneMap = new Map();
-    const toDelete = [];
-    
-    for (const operator of allOperators) {
-      const phone = operator.phone;
-      
-      if (!phone) continue;
-      
-      if (phoneMap.has(phone)) {
-        toDelete.push(operator.id);
-        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
-      } else {
-        phoneMap.set(phone, operator);
-      }
-    }
-
-    console.log(`Found ${toDelete.length} duplicates in NJ`);
-    
-    let deleted = 0;
-    const batchSize = 10;
-    
-    for (let i = 0; i < toDelete.length; i += batchSize) {
-      const batch = toDelete.slice(i, i + batchSize);
-      
-      for (const id of batch) {
-        try {
-          await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
-          deleted++;
-          console.log(`Deleted ${deleted}/${toDelete.length}`);
-        } catch (error) {
-          console.error(`Failed to delete ${id}:`, error.message);
-        }
-      }
-      
-      if (i + batchSize < toDelete.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
-    
     return Response.json({ 
       success: true,
       scraped: allCompanies.length,
       inserted,
       updated,
-      total_in_db: allOperators.length,
-      duplicates_deleted: deleted,
-      final_count: allOperators.length - deleted
+      final_count: existing.length + inserted
     });
     
   } catch (error) {
