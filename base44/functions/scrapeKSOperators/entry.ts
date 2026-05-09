@@ -108,15 +108,15 @@ Deno.serve(async (req) => {
     
     console.log(`\n=== Scraped ${allCompanies.length} total companies ===`);
     
-    // Save to database
-    if (allCompanies.length > 0) {
-      console.log('Saving to database...');
-      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
-      console.log('✓ Saved to database');
+    const existing = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'KS' }, '-created_date', 2000);
+    const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
+    const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
+    let inserted = 0, updated = 0;
+    for (const company of allCompanies) {
+      const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
+      if (match) { await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, company); updated++; }
+      else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
     }
-
-    // Now check for and delete duplicates
-    console.log('\n=== Checking for duplicates ===');
     const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       { state: 'KS' },
       '-created_date',
