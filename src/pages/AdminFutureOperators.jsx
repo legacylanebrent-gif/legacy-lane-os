@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,6 +46,11 @@ export default function AdminFutureOperators() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updateResults, setUpdateResults] = useState(null);
+  const [showScrapeModal, setShowScrapeModal] = useState(false);
+  const [selectedScrapeStates, setSelectedScrapeStates] = useState([]);
+  const [scrapeQueue, setScrapeQueue] = useState([]); // [{state, status: 'pending'|'running'|'done'|'error', result}]
+  const [scrapeRunning, setScrapeRunning] = useState(false);
+  const scrapeAbortRef = useRef(false);
 
   const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
 
@@ -213,26 +218,55 @@ export default function AdminFutureOperators() {
     return colors[packageType] || 'bg-slate-100 text-slate-700';
   };
 
-  const handleUpdateState = async () => {
-    if (!confirm(`Re-scrape ${stateFilter} for new/updated companies and remove duplicates? This may take a few minutes.`)) return;
-    setUpdating(true);
-    setShowImportModal(true);
-    setImportStatus('importing');
-    setImportResults(null);
+  const handleUpdateState = () => {
+    // Pre-select the currently viewed state
+    setSelectedScrapeStates([stateFilter]);
+    setScrapeQueue([]);
+    setScrapeRunning(false);
+    scrapeAbortRef.current = false;
+    setShowScrapeModal(true);
+  };
 
-    try {
-      const response = await base44.functions.invoke('updateStateOperators', { state: stateFilter });
-      setImportResults(response.data);
-      setImportStatus('success');
-      await loadOperators();
-      await loadTotalCount();
-      await loadStateCount();
-    } catch (error) {
-      setImportStatus('error');
-      setImportResults({ error: error.message });
-    } finally {
-      setUpdating(false);
+  const toggleScrapeState = (state) => {
+    setSelectedScrapeStates(prev =>
+      prev.includes(state) ? prev.filter(s => s !== state) : [...prev, state]
+    );
+  };
+
+  const handleStartScrape = async () => {
+    const ordered = allStates.filter(s => selectedScrapeStates.includes(s));
+    const queue = ordered.map(s => ({ state: s, status: 'pending', result: null }));
+    setScrapeQueue(queue);
+    setScrapeRunning(true);
+    scrapeAbortRef.current = false;
+
+    for (let i = 0; i < ordered.length; i++) {
+      if (scrapeAbortRef.current) break;
+      const state = ordered[i];
+
+      setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'running' } : q));
+
+      try {
+        // Use the dedicated per-state scrape function: e.g. scrapeNJOperators
+        const fnName = `scrape${state.charAt(0) + state.slice(1).toLowerCase()}Operators`;
+        // Build the function name: scrapeNJOperators → scrape + NJ → scrapeNJOperators
+        const stateFnName = `scrape${state}Operators`;
+        const res = await base44.functions.invoke(stateFnName, {});
+        setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'done', result: res.data } : q));
+      } catch (err) {
+        setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'error', result: { error: err.message } } : q));
+      }
     }
+
+    setScrapeRunning(false);
+    await loadTotalCount();
+    await loadStateCount();
+    await loadOperators();
+  };
+
+  const handleStopScrape = () => {
+    scrapeAbortRef.current = true;
+    setScrapeRunning(false);
   };
 
   const closeImportModal = () => {
@@ -345,12 +379,12 @@ export default function AdminFutureOperators() {
 
               <Button 
                 onClick={handleUpdateState}
-                disabled={updating || batchRunning || deduplicating}
+                disabled={batchRunning || deduplicating || scrapeRunning}
                 className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
               >
-                {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-                <span className="hidden sm:inline">{updating ? `Updating ${stateFilter}...` : `Update ${stateFilter} Companies`}</span>
-                <span className="sm:hidden">{updating ? 'Updating...' : 'Update'}</span>
+                <Download className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Scrape States</span>
+                <span className="sm:hidden">Scrape</span>
               </Button>
               
               {packageFilter !== 'all' && (
@@ -690,6 +724,121 @@ export default function AdminFutureOperators() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scrape State Selection Modal */}
+      <Dialog open={showScrapeModal} onOpenChange={(open) => { if (!scrapeRunning) setShowScrapeModal(open); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Scrape States</DialogTitle>
+            <DialogDescription>
+              Select which states to scrape using their dedicated scrape functions, one at a time.
+            </DialogDescription>
+          </DialogHeader>
+
+          {scrapeQueue.length === 0 ? (
+            <div className="space-y-4 py-2">
+              {/* Select All / None */}
+              <div className="flex gap-3">
+                <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates([...allStates])}>Select All</Button>
+                <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates([])}>Clear</Button>
+                <span className="text-sm text-slate-500 self-center">{selectedScrapeStates.length} selected</span>
+              </div>
+
+              {/* State grid */}
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-64 overflow-y-auto p-1">
+                {allStates.map(state => (
+                  <button
+                    key={state}
+                    onClick={() => toggleScrapeState(state)}
+                    className={`px-2 py-1.5 rounded text-xs font-semibold border transition-colors ${
+                      selectedScrapeStates.includes(state)
+                        ? 'bg-orange-600 text-white border-orange-600'
+                        : 'bg-white text-slate-600 border-slate-300 hover:border-orange-400'
+                    }`}
+                  >
+                    {state}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t">
+                <Button variant="outline" onClick={() => setShowScrapeModal(false)}>Cancel</Button>
+                <Button
+                  onClick={handleStartScrape}
+                  disabled={selectedScrapeStates.length === 0}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Start Scraping {selectedScrapeStates.length} State{selectedScrapeStates.length !== 1 ? 's' : ''}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 py-2">
+              {/* Progress header */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-700">
+                  {scrapeRunning ? 'Scraping in progress...' : 'Scrape complete'}
+                </span>
+                <div className="flex gap-2">
+                  <span className="text-xs text-slate-500">
+                    {scrapeQueue.filter(q => q.status === 'done').length} done,{' '}
+                    {scrapeQueue.filter(q => q.status === 'error').length} errors,{' '}
+                    {scrapeQueue.filter(q => q.status === 'pending').length} pending
+                  </span>
+                  {scrapeRunning && (
+                    <Button size="sm" variant="outline" className="border-red-400 text-red-600 h-6 text-xs" onClick={handleStopScrape}>
+                      Stop
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* State rows */}
+              <div className="space-y-1.5 max-h-80 overflow-y-auto">
+                {scrapeQueue.map(item => (
+                  <div key={item.state} className={`flex items-center gap-3 p-2.5 rounded-lg border text-sm ${
+                    item.status === 'running' ? 'bg-orange-50 border-orange-200' :
+                    item.status === 'done' ? 'bg-green-50 border-green-200' :
+                    item.status === 'error' ? 'bg-red-50 border-red-200' :
+                    'bg-slate-50 border-slate-200'
+                  }`}>
+                    <span className="font-semibold w-8 text-slate-700">{item.state}</span>
+                    <div className="flex-1">
+                      {item.status === 'pending' && <span className="text-slate-400">Waiting...</span>}
+                      {item.status === 'running' && <span className="text-orange-600 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Scraping...</span>}
+                      {item.status === 'done' && item.result && (
+                        <span className="text-green-700 text-xs">
+                          +{item.result.inserted ?? '?'} new · {item.result.updated ?? '?'} updated · {item.result.duplicates_deleted ?? 0} dupes removed
+                        </span>
+                      )}
+                      {item.status === 'done' && !item.result && <span className="text-green-700">Done</span>}
+                      {item.status === 'error' && <span className="text-red-600 text-xs">{item.result?.error || 'Failed'}</span>}
+                    </div>
+                    <div>
+                      {item.status === 'pending' && <span className="w-4 h-4 rounded-full bg-slate-300 inline-block" />}
+                      {item.status === 'running' && <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />}
+                      {item.status === 'done' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                      {item.status === 'error' && <X className="w-4 h-4 text-red-500" />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {!scrapeRunning && (
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <Button variant="outline" onClick={() => { setScrapeQueue([]); setSelectedScrapeStates([]); setShowScrapeModal(false); }}>
+                    Close
+                  </Button>
+                  <Button variant="outline" onClick={() => setScrapeQueue([])}>
+                    Run Again
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
