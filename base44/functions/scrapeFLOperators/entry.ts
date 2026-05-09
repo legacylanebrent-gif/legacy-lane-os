@@ -79,10 +79,11 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
-    const saveWithRetry = async (company, match, maxRetries = 3) => {
+    const saveWithRetry = async (company, maxRetries = 3) => {
       let delay = 500;
       for (let i = 0; i < maxRetries; i++) {
         try {
+          const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
           if (match) {
             await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
               company_name: company.company_name, city: company.city, phone: company.phone,
@@ -107,9 +108,8 @@ Deno.serve(async (req) => {
     };
     let inserted = 0, updated = 0;
     for (const company of batch) {
-      const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
       try {
-        const result = await saveWithRetry(company, match);
+        const result = await saveWithRetry(company);
         if (result === 'created') inserted++;
         else if (result === 'updated') updated++;
       } catch (e) {}
