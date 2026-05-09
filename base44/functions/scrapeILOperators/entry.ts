@@ -74,24 +74,41 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
+    const saveWithRetry = async (company, match, maxRetries = 3) => {
+      let delay = 500;
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          if (match) {
+            await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
+              company_name: company.company_name, city: company.city, phone: company.phone,
+              website: company.website, member_since: company.member_since, package_type: company.package_type,
+              facebook: company.facebook, twitter: company.twitter, instagram: company.instagram,
+              youtube: company.youtube, pinterest: company.pinterest, source_url: company.source_url,
+            });
+            return 'updated';
+          } else {
+            await base44.asServiceRole.entities.FutureEstateOperator.create(company);
+            return 'created';
+          }
+        } catch (e) {
+          if (e.message && e.message.includes('429') && i < maxRetries - 1) {
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 2;
+          } else {
+            throw e;
+          }
+        }
+      }
+    };
     let inserted = 0, updated = 0;
     for (const company of batch) {
       const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
       try {
-        if (match) {
-          await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
-            company_name: company.company_name, city: company.city, phone: company.phone,
-            website: company.website, member_since: company.member_since, package_type: company.package_type,
-            facebook: company.facebook, twitter: company.twitter, instagram: company.instagram,
-            youtube: company.youtube, pinterest: company.pinterest, source_url: company.source_url,
-          });
-          updated++;
-        } else {
-          await base44.asServiceRole.entities.FutureEstateOperator.create(company);
-          inserted++;
-        }
+        const result = await saveWithRetry(company, match);
+        if (result === 'created') inserted++;
+        else if (result === 'updated') updated++;
       } catch (e) {}
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 100));
     }
     return Response.json({
       success: true, total_companies: allCompanies.length, all_companies: allCompanies,
