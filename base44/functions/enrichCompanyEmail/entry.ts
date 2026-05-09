@@ -173,21 +173,41 @@ Deno.serve(async (req) => {
       const pagesToCheck = priorityContactPages.filter(u => { if (seen.has(u)) return false; seen.add(u); return true; });
 
       for (const pageUrl of pagesToCheck) {
+        if (foundEmails.length >= 5) break;
         const html = await fetchPage(pageUrl);
         const emails = extractEmails(html);
         if (emails.length > 0) {
-          foundEmails = [...new Set([...foundEmails, ...emails])];
-          emailSourceUrl = pageUrl;
+          const newEmails = emails.filter(e => !foundEmails.includes(e));
+          foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
+          if (!emailSourceUrl) emailSourceUrl = pageUrl;
           emailSourceType = 'official_website';
           await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
-          break;
+        } else {
+          await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, 'No emails found', '', '', 0, '');
         }
-        await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, 'No emails found', '', '', 0, '');
       }
     }
 
-    // ── Step 2: Web search if no website or no emails found ──────────────────
-    if (foundEmails.length === 0 && serpApiKey) {
+    // ── Step 2: Scrape Facebook page for emails ──────────────────────────────
+    const facebookUrl = company.facebook || '';
+    if (facebookUrl && foundEmails.length < 5) {
+      // Try the about/contact section of their Facebook page
+      const fbPagesToTry = [facebookUrl, facebookUrl.replace(/\/$/, '') + '/about'];
+      for (const fbUrl of fbPagesToTry) {
+        const fbHtml = await fetchPage(fbUrl, 10000);
+        const fbEmails = extractEmails(fbHtml);
+        if (fbEmails.length > 0) {
+          const newEmails = fbEmails.filter(e => !foundEmails.includes(e));
+          foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
+          if (!emailSourceUrl) emailSourceUrl = fbUrl;
+          if (!emailSourceType) emailSourceType = 'facebook';
+          await logStep(base44, company_id, company.company_name, 'web_search', fbUrl, `Found ${fbEmails.length} email(s) on Facebook`, fbEmails[0], '', 0, '');
+        }
+      }
+    }
+
+    // ── Step 3: Web search if still under 5 emails ───────────────────────────
+    if (foundEmails.length < 5 && serpApiKey) {
       const query = `"${company.company_name}" ${company.city} ${company.state} estate sales email`;
       const searchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=5`;
       const html = await fetchPage(searchUrl);
@@ -195,26 +215,26 @@ Deno.serve(async (req) => {
         const data = JSON.parse(html);
         const results = data.organic_results || [];
         for (const result of results.slice(0, 3)) {
+          if (foundEmails.length >= 5) break;
           const link = result.link;
           if (!link) continue;
-          // Try to find the website
-          if (!websiteUrl && link && !link.includes('estatesales.net') && !link.includes('facebook.com')) {
+          if (!websiteUrl && !link.includes('estatesales.net') && !link.includes('facebook.com')) {
             websiteUrl = link;
           }
           const pageHtml = await fetchPage(link);
           const emails = extractEmails(pageHtml);
           if (emails.length > 0) {
-            foundEmails = [...new Set([...foundEmails, ...emails])];
-            emailSourceUrl = link;
-            emailSourceType = link.includes('facebook.com') ? 'facebook' : 'google_search';
+            const newEmails = emails.filter(e => !foundEmails.includes(e));
+            foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
+            if (!emailSourceUrl) emailSourceUrl = link;
+            if (!emailSourceType) emailSourceType = link.includes('facebook.com') ? 'facebook' : 'google_search';
             await logStep(base44, company_id, company.company_name, 'web_search', link, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
-            break;
           }
         }
       }
     }
 
-    // ── Step 3: Guess patterns from domain ───────────────────────────────────
+    // ── Step 4: Guess patterns from domain ───────────────────────────────────
     let guessedPatterns = [];
     if (foundEmails.length === 0 && websiteUrl) {
       const domain = extractDomain(websiteUrl);
