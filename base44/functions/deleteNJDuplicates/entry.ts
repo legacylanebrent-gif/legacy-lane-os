@@ -18,19 +18,27 @@ Deno.serve(async (req) => {
     
     console.log(`Total NJ operators: ${operators.length}`);
 
-    const phoneMap = new Map();
-    const toDelete = [];
-    
+    // Group by normalized phone number
+    const phoneMap = {};
     for (const operator of operators) {
-      const phone = operator.phone;
-      
-      if (!phone) continue;
-      
-      if (phoneMap.has(phone)) {
-        toDelete.push(operator.id);
-        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
-      } else {
-        phoneMap.set(phone, operator);
+      const phone = operator.phone ? operator.phone.replace(/\D/g, '') : null;
+      if (!phone || phone.length < 7) continue; // skip no-phone companies entirely
+      if (!phoneMap[phone]) phoneMap[phone] = [];
+      phoneMap[phone].push(operator);
+    }
+
+    // Keep the richest record (most populated fields), delete the rest
+    const toDelete = [];
+    for (const group of Object.values(phoneMap)) {
+      if (group.length <= 1) continue;
+      group.sort((a, b) => {
+        const scoreA = Object.values(a).filter(v => v !== null && v !== undefined && v !== '').length;
+        const scoreB = Object.values(b).filter(v => v !== null && v !== undefined && v !== '').length;
+        return scoreB - scoreA; // richest first
+      });
+      for (let i = 1; i < group.length; i++) {
+        toDelete.push(group[i].id);
+        console.log(`Duplicate: ${group[i].company_name} (${group[i].phone}) - will delete (keeping richer record)`);
       }
     }
 
