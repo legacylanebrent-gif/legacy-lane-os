@@ -503,13 +503,85 @@ export default function AdminFutureOperators() {
                 <Label>Company Name</Label>
                 <Input value={editForm.company_name} onChange={e => setEditForm(p => ({ ...p, company_name: e.target.value }))} />
               </div>
-              <div>
-                <Label>Primary Email</Label>
-                <Input value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} type="email" />
-              </div>
-              <div className="sm:col-span-2">
-                <Label>Alternate Emails <span className="text-slate-400 font-normal">(comma-separated, up to 5)</span></Label>
-                <Input value={editForm.alternate_emails_text} onChange={e => setEditForm(p => ({ ...p, alternate_emails_text: e.target.value }))} placeholder="alt1@company.com, alt2@company.com" />
+              <div className="sm:col-span-2 space-y-2">
+                <Label>Emails</Label>
+                {/* Primary email row */}
+                <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                  <Input
+                    value={editForm.email}
+                    onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))}
+                    type="email"
+                    className="flex-1 h-8 text-sm"
+                    placeholder="Primary email..."
+                  />
+                  <Badge className="bg-green-100 text-green-700 text-xs flex-shrink-0">Primary</Badge>
+                  <label className="flex items-center gap-1 text-xs text-red-600 cursor-pointer flex-shrink-0 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      className="rounded"
+                      onChange={e => { if (e.target.checked) setEditForm(p => ({ ...p, email: '' })); }}
+                    />
+                    Delete
+                  </label>
+                </div>
+                {/* Alternate email rows */}
+                {(editForm.alternate_emails_text ? editForm.alternate_emails_text.split(',').map(e => e.trim()).filter(Boolean) : []).map((altEmail, idx) => (
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-md">
+                    <Input
+                      value={altEmail}
+                      onChange={e => {
+                        const parts = editForm.alternate_emails_text.split(',').map(x => x.trim()).filter(Boolean);
+                        parts[idx] = e.target.value;
+                        setEditForm(p => ({ ...p, alternate_emails_text: parts.join(', ') }));
+                      }}
+                      type="email"
+                      className="flex-1 h-8 text-sm"
+                    />
+                    <Badge variant="outline" className="text-xs flex-shrink-0">Alt {idx + 1}</Badge>
+                    <label className="flex items-center gap-1 text-xs text-blue-600 cursor-pointer flex-shrink-0 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="rounded"
+                        onChange={e => {
+                          if (e.target.checked) {
+                            const parts = editForm.alternate_emails_text.split(',').map(x => x.trim()).filter(Boolean);
+                            const newPrimary = parts[idx];
+                            const oldPrimary = editForm.email;
+                            parts[idx] = oldPrimary;
+                            setEditForm(p => ({ ...p, email: newPrimary, alternate_emails_text: parts.join(', ') }));
+                          }
+                        }}
+                      />
+                      Make Default
+                    </label>
+                    <label className="flex items-center gap-1 text-xs text-red-600 cursor-pointer flex-shrink-0 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="rounded"
+                        onChange={e => {
+                          if (e.target.checked) {
+                            const parts = editForm.alternate_emails_text.split(',').map(x => x.trim()).filter(Boolean);
+                            parts.splice(idx, 1);
+                            setEditForm(p => ({ ...p, alternate_emails_text: parts.join(', ') }));
+                          }
+                        }}
+                      />
+                      Delete
+                    </label>
+                  </div>
+                ))}
+                <p className="text-xs text-slate-400">To add more alternates, type them comma-separated: <span className="font-mono">alt1@co.com, alt2@co.com</span></p>
+                <Input
+                  placeholder="Add alternate emails (comma-separated)..."
+                  onBlur={e => {
+                    if (!e.target.value.trim()) return;
+                    const existing = editForm.alternate_emails_text ? editForm.alternate_emails_text.split(',').map(x => x.trim()).filter(Boolean) : [];
+                    const newOnes = e.target.value.split(',').map(x => x.trim()).filter(Boolean);
+                    setEditForm(p => ({ ...p, alternate_emails_text: [...existing, ...newOnes].join(', ') }));
+                    e.target.value = '';
+                  }}
+                  className="h-8 text-sm"
+                />
               </div>
               <div>
                 <Label>Phone</Label>
