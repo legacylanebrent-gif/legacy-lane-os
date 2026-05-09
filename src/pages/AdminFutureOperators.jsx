@@ -527,7 +527,7 @@ export default function AdminFutureOperators() {
                 </div>
                 {/* Alternate email rows */}
                 {(editForm.alternate_emails_text ? editForm.alternate_emails_text.split(',').map(e => e.trim()).filter(Boolean) : []).map((altEmail, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-md">
+                  <div key={`${altEmail}-${idx}`} className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-md">
                     <Input
                       value={altEmail}
                       onChange={e => {
@@ -556,8 +556,8 @@ export default function AdminFutureOperators() {
                       type="button"
                       onClick={() => {
                         const parts = editForm.alternate_emails_text.split(',').map(x => x.trim()).filter(Boolean);
-                        parts.splice(idx, 1);
-                        setEditForm(p => ({ ...p, alternate_emails_text: parts.join(', ') }));
+                        const newParts = parts.filter((_, i) => i !== idx);
+                        setEditForm(p => ({ ...p, alternate_emails_text: newParts.join(', ') }));
                       }}
                       className="text-xs text-red-600 hover:text-red-800 flex-shrink-0 whitespace-nowrap underline"
                     >
