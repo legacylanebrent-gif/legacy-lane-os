@@ -32,9 +32,8 @@ export default function AdminFutureOperators() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stateFilter, setStateFilter] = useState('AR');
   const [packageFilter, setPackageFilter] = useState('all');
-  const [importing, setImporting] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
+  const [importStatus, setImportStatus] = useState('idle');
   const [importResults, setImportResults] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [stateCount, setStateCount] = useState(null);
@@ -45,6 +44,8 @@ export default function AdminFutureOperators() {
   const [editingOperator, setEditingOperator] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [updateResults, setUpdateResults] = useState(null);
 
   const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
 
@@ -102,12 +103,12 @@ export default function AdminFutureOperators() {
   };
 
   const handleDeduplicate = async () => {
-    if (!confirm('This will scan all records and delete duplicates based on phone number, keeping the most complete record. Continue?')) return;
+    if (!confirm(`This will scan ${stateFilter} records and delete duplicates based on phone number, keeping the most complete record. Continue?`)) return;
     setDeduplicating(true);
     try {
-      const res = await base44.functions.invoke('deduplicateFutureOperators', {});
+      const res = await base44.functions.invoke('deduplicateFutureOperators', { state: stateFilter });
       const { total_scanned, duplicates_deleted, remaining } = res.data;
-      alert(`Done! Scanned ${total_scanned.toLocaleString()} records, deleted ${duplicates_deleted.toLocaleString()} duplicates. ${remaining.toLocaleString()} remain.`);
+      alert(`Done! Scanned ${total_scanned.toLocaleString()} ${stateFilter} records, deleted ${duplicates_deleted.toLocaleString()} duplicates. ${remaining.toLocaleString()} remain.`);
       await loadTotalCount();
       await loadStateCount();
       await loadOperators();
@@ -212,31 +213,25 @@ export default function AdminFutureOperators() {
     return colors[packageType] || 'bg-slate-100 text-slate-700';
   };
 
-  const handleImportCompanies = async () => {
-
-    const functionName = `scrape${stateFilter}Operators`;
-    
-    setImporting(true);
+  const handleUpdateState = async () => {
+    if (!confirm(`Re-scrape ${stateFilter} for new/updated companies and remove duplicates? This may take a few minutes.`)) return;
+    setUpdating(true);
     setShowImportModal(true);
     setImportStatus('importing');
     setImportResults(null);
-    
+
     try {
-      const response = await base44.functions.invoke(functionName, {});
-      console.log('Import result:', response.data);
-      
+      const response = await base44.functions.invoke('updateStateOperators', { state: stateFilter });
       setImportResults(response.data);
       setImportStatus('success');
-      
-      // Reload operators and total count after import
       await loadOperators();
       await loadTotalCount();
+      await loadStateCount();
     } catch (error) {
-      console.error('Error importing companies:', error);
       setImportStatus('error');
       setImportResults({ error: error.message });
     } finally {
-      setImporting(false);
+      setUpdating(false);
     }
   };
 
@@ -327,7 +322,7 @@ export default function AdminFutureOperators() {
               
               <Button
                 onClick={handleBatchFindEmails}
-                disabled={batchRunning || importing}
+                disabled={batchRunning || updating}
                 className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
               >
                 {batchRunning
@@ -338,7 +333,7 @@ export default function AdminFutureOperators() {
 
               <Button
                 onClick={handleDeduplicate}
-                disabled={deduplicating || importing || batchRunning}
+                disabled={deduplicating || updating || batchRunning}
                 variant="outline"
                 className="border-red-400 text-red-700 hover:bg-red-50 whitespace-nowrap"
               >
@@ -349,13 +344,13 @@ export default function AdminFutureOperators() {
               </Button>
 
               <Button 
-                onClick={handleImportCompanies}
-                disabled={importing}
+                onClick={handleUpdateState}
+                disabled={updating || batchRunning || deduplicating}
                 className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
               >
-                <Download className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{importing ? 'Importing...' : 'Import and Update Companies'}</span>
-                <span className="sm:hidden">{importing ? 'Importing...' : 'Import'}</span>
+                {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                <span className="hidden sm:inline">{updating ? `Updating ${stateFilter}...` : `Update ${stateFilter} Companies`}</span>
+                <span className="sm:hidden">{updating ? 'Updating...' : 'Update'}</span>
               </Button>
               
               {packageFilter !== 'all' && (
@@ -702,7 +697,7 @@ export default function AdminFutureOperators() {
       <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Importing Companies from {stateFilter}</DialogTitle>
+            <DialogTitle>Updating Companies for {stateFilter}</DialogTitle>
             <DialogDescription>
               {importStatus === 'importing' && 'Please wait while we scrape and import companies...'}
               {importStatus === 'success' && 'Import completed successfully!'}
@@ -735,24 +730,32 @@ export default function AdminFutureOperators() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Import Complete!</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Update Complete!</h3>
                 </div>
 
                 <div className="bg-slate-50 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Companies Scraped:</span>
-                    <span className="font-semibold text-slate-900">{importResults.scraped}</span>
+                    <span className="text-sm text-slate-600">Cities Scraped:</span>
+                    <span className="font-semibold text-slate-900">{importResults.cities_scraped}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Total in Database:</span>
-                    <span className="font-semibold text-slate-900">{importResults.total_in_db}</span>
+                    <span className="text-sm text-slate-600">Companies Found:</span>
+                    <span className="font-semibold text-slate-900">{importResults.companies_found}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">New Inserted:</span>
+                    <span className="font-semibold text-green-700">{importResults.inserted}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Existing Updated:</span>
+                    <span className="font-semibold text-blue-700">{importResults.updated}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-slate-600">Duplicates Removed:</span>
                     <span className="font-semibold text-red-600">{importResults.duplicates_deleted}</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between items-center">
-                    <span className="text-sm font-semibold text-slate-900">Final Count:</span>
+                    <span className="text-sm font-semibold text-slate-900">Final Count ({stateFilter}):</span>
                     <span className="text-xl font-bold text-orange-600">{importResults.final_count}</span>
                   </div>
                 </div>
