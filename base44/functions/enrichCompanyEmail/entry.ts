@@ -140,50 +140,27 @@ Deno.serve(async (req) => {
     let emailSourceType = '';
     let websiteUrl = company.website_url || company.website || '';
 
-    // ── Step 1: Crawl official website ───────────────────────────────────────
-    if (websiteUrl) {
+    // ── Step 1: Crawl official website (skip Facebook URLs) ──────────────────
+    const isFacebookWebsite = websiteUrl && websiteUrl.includes('facebook.com');
+    if (websiteUrl && !isFacebookWebsite) {
       const domain = extractDomain(websiteUrl);
       const normalizedBase = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
 
-      // 1a. Fetch homepage and discover contact page links from hrefs
-      const homepageHtml = await fetchPage(normalizedBase);
-      const discoveredContactLinks = findContactLinks(homepageHtml, normalizedBase);
+      // Fetch homepage + contact page in parallel
+      const contactUrl = `https://${domain}/contact`;
+      const [homepageHtml, contactHtml] = await Promise.all([
+        fetchPage(normalizedBase, 6000),
+        fetchPage(contactUrl, 6000),
+      ]);
 
-      // 1b. Also build guessed contact paths
-      const guessedContactPaths = [
-        `https://${domain}/contact`,
-        `https://${domain}/contact-us`,
-        `https://${domain}/contact_us`,
-        `https://${domain}/contactus`,
-        `https://${domain}/reach-us`,
-        `https://${domain}/get-in-touch`,
-      ];
-
-      // 1c. Prioritize: discovered links first, then guessed paths, then homepage, then about
-      const priorityContactPages = [
-        ...discoveredContactLinks,
-        ...guessedContactPaths,
-        normalizedBase,
-        `https://${domain}/about`,
-        `https://${domain}/about-us`,
-      ];
-
-      // Deduplicate
-      const seen = new Set();
-      const pagesToCheck = priorityContactPages.filter(u => { if (seen.has(u)) return false; seen.add(u); return true; });
-
-      for (const pageUrl of pagesToCheck) {
-        if (foundEmails.length >= 5) break;
-        const html = await fetchPage(pageUrl);
+      for (const [html, pageUrl] of [[homepageHtml, normalizedBase], [contactHtml, contactUrl]]) {
+        if (foundEmails.length > 0) break;
         const emails = extractEmails(html);
         if (emails.length > 0) {
-          const newEmails = emails.filter(e => !foundEmails.includes(e));
-          foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
-          if (!emailSourceUrl) emailSourceUrl = pageUrl;
+          foundEmails = [...new Set([...foundEmails, ...emails])].slice(0, 5);
+          emailSourceUrl = pageUrl;
           emailSourceType = 'official_website';
           await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
-        } else {
-          await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, 'No emails found', '', '', 0, '');
         }
       }
     }
@@ -250,32 +227,29 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── Step 3: Web search if still under 5 emails ───────────────────────────
-    if (foundEmails.length < 5 && serpApiKey) {
-      const query = `"${company.company_name}" ${company.city} ${company.state} estate sales email`;
+    // ── Step 3: Web search snippets only (no page crawls to avoid timeout) ────
+    if (foundEmails.length === 0 && serpApiKey) {
+      const query = `"${company.company_name}" ${company.city} ${company.state} estate sales email contact`;
       const searchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=5`;
-      const html = await fetchPage(searchUrl);
-      if (html) {
-        const data = JSON.parse(html);
-        const results = data.organic_results || [];
-        for (const result of results.slice(0, 3)) {
-          if (foundEmails.length >= 5) break;
-          const link = result.link;
-          if (!link) continue;
-          if (!websiteUrl && !link.includes('estatesales.net') && !link.includes('facebook.com')) {
-            websiteUrl = link;
-          }
-          const pageHtml = await fetchPage(link);
-          const emails = extractEmails(pageHtml);
-          if (emails.length > 0) {
-            const newEmails = emails.filter(e => !foundEmails.includes(e));
-            foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
-            if (!emailSourceUrl) emailSourceUrl = link;
-            if (!emailSourceType) emailSourceType = link.includes('facebook.com') ? 'facebook' : 'google_search';
-            await logStep(base44, company_id, company.company_name, 'web_search', link, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
+      try {
+        const html = await fetchPage(searchUrl, 8000);
+        if (html) {
+          const data = JSON.parse(html);
+          // Extract emails from snippets only — no secondary page fetches
+          const snippetText = [
+            ...(data.organic_results || []).map(r => (r.snippet || '') + ' ' + (r.title || '')),
+            JSON.stringify(data.knowledge_graph || {}),
+            JSON.stringify(data.answer_box || {}),
+          ].join(' ');
+          const snippetEmails = extractEmails(snippetText);
+          if (snippetEmails.length > 0) {
+            foundEmails = [...new Set([...foundEmails, ...snippetEmails])].slice(0, 5);
+            if (!emailSourceUrl) emailSourceUrl = searchUrl;
+            if (!emailSourceType) emailSourceType = 'google_search';
+            await logStep(base44, company_id, company.company_name, 'web_search', searchUrl, `Found ${snippetEmails.length} email(s) in snippets`, snippetEmails[0], '', 0, '');
           }
         }
-      }
+      } catch (e) { /* non-blocking */ }
     }
 
     // ── Step 4: Guess patterns from domain ───────────────────────────────────
