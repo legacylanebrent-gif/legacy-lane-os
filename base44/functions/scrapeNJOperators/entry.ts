@@ -108,11 +108,44 @@ Deno.serve(async (req) => {
     
     console.log(`\n=== Scraped ${allCompanies.length} total companies ===`);
     
-    // Save to database
+    // Upsert: match by source_url to preserve original created_date
+    let inserted = 0;
+    let updated = 0;
     if (allCompanies.length > 0) {
-      console.log('Saving to database...');
-      await base44.asServiceRole.entities.FutureEstateOperator.bulkCreate(allCompanies);
-      console.log('✓ Saved to database');
+      console.log('Upserting to database...');
+
+      // Load all existing NJ records once for lookup
+      const existing = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'NJ' }, '-created_date', 2000);
+      const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
+      const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
+
+      for (const company of allCompanies) {
+        const match = (company.source_url && byUrl.get(company.source_url)) ||
+                      (company.phone && byPhone.get(company.phone));
+        if (match) {
+          // Update only non-sensitive fields; preserve email/enrichment data
+          await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
+            company_name: company.company_name,
+            city: company.city,
+            phone: company.phone,
+            website: company.website,
+            member_since: company.member_since,
+            package_type: company.package_type,
+            facebook: company.facebook,
+            twitter: company.twitter,
+            instagram: company.instagram,
+            youtube: company.youtube,
+            pinterest: company.pinterest,
+            source_url: company.source_url,
+          });
+          updated++;
+        } else {
+          await base44.asServiceRole.entities.FutureEstateOperator.create(company);
+          inserted++;
+        }
+        await new Promise(r => setTimeout(r, 50)); // gentle rate limit
+      }
+      console.log(`✓ Inserted ${inserted} new, updated ${updated} existing`);
     }
 
     // Now check for and delete duplicates
@@ -167,6 +200,8 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true,
       scraped: allCompanies.length,
+      inserted,
+      updated,
       total_in_db: allOperators.length,
       duplicates_deleted: deleted,
       final_count: allOperators.length - deleted
