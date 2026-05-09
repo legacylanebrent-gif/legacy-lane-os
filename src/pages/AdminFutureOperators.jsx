@@ -269,22 +269,21 @@ export default function AdminFutureOperators() {
     setScrapeQueue([]);
     setScrapeRunning(false);
     scrapeAbortRef.current = false;
-    // NJ uses batched mode
-    if (stateFilter === 'NJ') {
-      setNjBatchMode(true);
-      setNjBatchState(null);
-    } else {
-      setNjBatchMode(false);
-    }
+    // All states now use batched mode
+    setNjBatchMode(true);
+    setNjBatchState(null);
     setShowScrapeModal(true);
   };
 
   const handleNjStartBatch = async (offset = 0, cachedCompanies = null) => {
     setNjBatchState(prev => ({ ...(prev || {}), running: true }));
+    // Get the function name for the currently selected state
+    const fns = getStateFunctions(stateFilter);
+    const fnName = fns.length > 0 ? fns[0] : `scrape${stateFilter}Operators`;
     try {
       const payload = { batch_offset: offset };
       if (cachedCompanies) payload.all_companies = cachedCompanies;
-      const res = await base44.functions.invoke('scrapeNJOperators', payload);
+      const res = await base44.functions.invoke(fnName, payload);
       const data = res.data;
       setNjBatchState(prev => ({
         allCompanies: data.all_companies || cachedCompanies || [],
@@ -817,12 +816,9 @@ export default function AdminFutureOperators() {
       <Dialog open={showScrapeModal} onOpenChange={(open) => { if (!scrapeRunning && !njBatchState?.running) setShowScrapeModal(open); }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Scrape {stateFilter} — Select Functions</DialogTitle>
+            <DialogTitle>Scrape {stateFilter}</DialogTitle>
             <DialogDescription>
-              {stateFilter === 'NJ'
-                ? 'NJ uses batched saving (50 at a time) to avoid rate limit errors.'
-                : <>Choose which scrape functions to run for <strong>{stateFilter}</strong>. They will run one at a time.</>
-              }
+              Uses batched saving (50 at a time) to avoid rate limit errors.
             </DialogDescription>
           </DialogHeader>
 

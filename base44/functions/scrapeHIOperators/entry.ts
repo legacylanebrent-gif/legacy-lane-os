@@ -1,37 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
     const body = await req.json().catch(() => ({}));
     const batchOffset = body.batch_offset ?? 0;
     const cachedCompanies = body.all_companies ?? null;
     const batchSize = 50;
     let allCompanies = [];
-
     if (cachedCompanies) {
       allCompanies = cachedCompanies;
-      console.log(`Using cached list of ${allCompanies.length} companies, offset=${batchOffset}`);
     } else {
-      console.log('Fetching main HI page...');
       const mainPageResponse = await fetch('https://www.estatesales.net/companies/HI');
       const mainPageHtml = await mainPageResponse.text();
       const cityLinkRegex = /href="(\/companies\/HI\/[^"]+)"/g;
       const cityLinks = [...mainPageHtml.matchAll(cityLinkRegex)]
         .map(m => `https://www.estatesales.net${m[1]}`)
         .filter((url, idx, arr) => arr.indexOf(url) === idx);
-
-      console.log(`Found ${cityLinks.length} HI cities to process`);
-
       for (const cityUrl of cityLinks) {
         try {
           const cityResponse = await fetch(cityUrl);
           const cityHtml = await cityResponse.text();
           const companyBlocks = cityHtml.split('<app-company-city-view-row');
-
           for (let i = 1; i < companyBlocks.length; i++) {
             const block = companyBlocks[i];
             try {
@@ -54,7 +45,6 @@ Deno.serve(async (req) => {
               const instagramMatch = block.match(/href="(https?:\/\/(?:www\.)?instagram\.com\/[^"]+)"/);
               const youtubeMatch = block.match(/href="(https?:\/\/(?:www\.)?youtube\.com\/[^"]+)"/);
               const pinterestMatch = block.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
-
               if (name) {
                 allCompanies.push({
                   company_name: name, city: cityFromUrl, state: 'HI', phone, website,
@@ -67,21 +57,13 @@ Deno.serve(async (req) => {
                   source_url: companyUrl, source_state: 'HI'
                 });
               }
-            } catch (e) {
-              console.error(`Error parsing block:`, e.message);
-            }
+            } catch (e) {}
           }
-        } catch (e) {
-          console.error(`Error processing city:`, e.message);
-        }
+        } catch (e) {}
       }
-      console.log(`Scraped ${allCompanies.length} total companies`);
     }
-
     const batch = allCompanies.slice(batchOffset, batchOffset + batchSize);
     const isLastBatch = batchOffset + batchSize >= allCompanies.length;
-    console.log(`Saving batch ${batchOffset}-${batchOffset + batch.length - 1} of ${allCompanies.length}`);
-
     let existing = [];
     let skip = 0;
     while (true) {
@@ -92,9 +74,7 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
-
     let inserted = 0, updated = 0;
-
     for (const company of batch) {
       const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
       try {
@@ -110,20 +90,15 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.FutureEstateOperator.create(company);
           inserted++;
         }
-      } catch (e) {
-        console.error(`Skipped ${company.company_name}: ${e.message}`);
-      }
+      } catch (e) {}
       await new Promise(r => setTimeout(r, 200));
     }
-
-    console.log(`Batch done: inserted=${inserted}, updated=${updated}`);
     return Response.json({
       success: true, total_companies: allCompanies.length, all_companies: allCompanies,
       batch_offset: batchOffset, batch_size: batch.length, inserted, updated,
       next_offset: isLastBatch ? null : batchOffset + batchSize, is_last_batch: isLastBatch,
     });
   } catch (error) {
-    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

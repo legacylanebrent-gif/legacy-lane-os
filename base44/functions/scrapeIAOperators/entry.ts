@@ -1,35 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
     const body = await req.json().catch(() => ({}));
     const batchOffset = body.batch_offset ?? 0;
     const cachedCompanies = body.all_companies ?? null;
     const batchSize = 50;
     let allCompanies = [];
-
     if (cachedCompanies) {
       allCompanies = cachedCompanies;
-      console.log(`Using cached list of ${allCompanies.length} companies, offset=${batchOffset}`);
     } else {
-      console.log('Fetching main IA page...');
       const mainPageResponse = await fetch('https://www.estatesales.net/companies/IA');
       const mainPageHtml = await mainPageResponse.text();
       const cityLinkRegex = /href="(\/companies\/IA\/[^"]+)"/g;
       const cityLinks = [...mainPageHtml.matchAll(cityLinkRegex)]
         .map(m => `https://www.estatesales.net${m[1]}`)
         .filter((url, idx, arr) => arr.indexOf(url) === idx);
-
       for (const cityUrl of cityLinks) {
         try {
           const cityResponse = await fetch(cityUrl);
           const cityHtml = await cityResponse.text();
           const companyBlocks = cityHtml.split('<app-company-city-view-row');
-
           for (let i = 1; i < companyBlocks.length; i++) {
             const block = companyBlocks[i];
             try {
@@ -52,7 +45,6 @@ Deno.serve(async (req) => {
               const instagramMatch = block.match(/href="(https?:\/\/(?:www\.)?instagram\.com\/[^"]+)"/);
               const youtubeMatch = block.match(/href="(https?:\/\/(?:www\.)?youtube\.com\/[^"]+)"/);
               const pinterestMatch = block.match(/href="(https?:\/\/(?:www\.)?pinterest\.com\/[^"]+)"/);
-
               if (name) {
                 allCompanies.push({
                   company_name: name, city: cityFromUrl, state: 'IA', phone, website,
@@ -70,10 +62,8 @@ Deno.serve(async (req) => {
         } catch (e) {}
       }
     }
-
     const batch = allCompanies.slice(batchOffset, batchOffset + batchSize);
     const isLastBatch = batchOffset + batchSize >= allCompanies.length;
-
     let existing = [];
     let skip = 0;
     while (true) {
@@ -84,9 +74,7 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
-
     let inserted = 0, updated = 0;
-
     for (const company of batch) {
       const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
       try {
@@ -105,7 +93,6 @@ Deno.serve(async (req) => {
       } catch (e) {}
       await new Promise(r => setTimeout(r, 200));
     }
-
     return Response.json({
       success: true, total_companies: allCompanies.length, all_companies: allCompanies,
       batch_offset: batchOffset, batch_size: batch.length, inserted, updated,
