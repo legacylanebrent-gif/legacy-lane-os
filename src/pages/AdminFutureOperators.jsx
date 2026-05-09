@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
-  Mail, Loader2, CheckCircle2
+  Mail, Loader2, CheckCircle2, Pencil, Save, X
 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -38,6 +40,44 @@ export default function AdminFutureOperators() {
   const [enrichingIds, setEnrichingIds] = useState(new Set());
   const [batchRunning, setBatchRunning] = useState(false);
   const [batchProgress, setBatchProgress] = useState(null); // { done, total }
+  const [editingOperator, setEditingOperator] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (operator) => {
+    setEditingOperator(operator);
+    setEditForm({
+      company_name: operator.company_name || '',
+      email: operator.email || '',
+      phone: operator.phone || '',
+      website: operator.website || '',
+      website_url: operator.website_url || '',
+      city: operator.city || '',
+      state: operator.state || '',
+      zip_code: operator.zip_code || '',
+      county: operator.county || '',
+      facebook: operator.facebook || '',
+      instagram: operator.instagram || '',
+      twitter: operator.twitter || '',
+      youtube: operator.youtube || '',
+      enrichment_notes: operator.enrichment_notes || '',
+      do_not_contact: operator.do_not_contact || false,
+      unsubscribe_status: operator.unsubscribe_status || false,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      await base44.entities.FutureEstateOperator.update(editingOperator.id, editForm);
+      setOperators(prev => prev.map(op => op.id === editingOperator.id ? { ...op, ...editForm } : op));
+      setEditingOperator(null);
+    } catch (e) {
+      alert('Error saving: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleFindEmail = async (operatorId) => {
     setEnrichingIds(prev => new Set([...prev, operatorId]));
@@ -298,6 +338,15 @@ export default function AdminFutureOperators() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => openEdit(operator)}
+                          className="border-slate-400 text-slate-700 hover:bg-slate-50"
+                        >
+                          <Pencil className="w-3 h-3 sm:mr-1" />
+                          <span className="hidden sm:inline">Edit</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleFindEmail(operator.id)}
                           disabled={enrichingIds.has(operator.id) || operator.do_not_contact}
                           className="border-orange-400 text-orange-700 hover:bg-orange-50"
@@ -422,6 +471,92 @@ export default function AdminFutureOperators() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Operator Modal */}
+      <Dialog open={!!editingOperator} onOpenChange={(open) => !open && setEditingOperator(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Company Profile</DialogTitle>
+            <DialogDescription>{editingOperator?.company_name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <Label>Company Name</Label>
+                <Input value={editForm.company_name} onChange={e => setEditForm(p => ({ ...p, company_name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} type="email" />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input value={editForm.phone} onChange={e => setEditForm(p => ({ ...p, phone: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Website</Label>
+                <Input value={editForm.website} onChange={e => setEditForm(p => ({ ...p, website: e.target.value }))} placeholder="https://..." />
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input value={editForm.city} onChange={e => setEditForm(p => ({ ...p, city: e.target.value }))} />
+              </div>
+              <div>
+                <Label>State</Label>
+                <Input value={editForm.state} onChange={e => setEditForm(p => ({ ...p, state: e.target.value }))} maxLength={2} />
+              </div>
+              <div>
+                <Label>ZIP Code</Label>
+                <Input value={editForm.zip_code} onChange={e => setEditForm(p => ({ ...p, zip_code: e.target.value }))} />
+              </div>
+              <div>
+                <Label>County</Label>
+                <Input value={editForm.county} onChange={e => setEditForm(p => ({ ...p, county: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 border-t pt-3">
+                <Label className="text-slate-500 text-xs uppercase tracking-wide">Social Media</Label>
+              </div>
+              <div>
+                <Label>Facebook</Label>
+                <Input value={editForm.facebook} onChange={e => setEditForm(p => ({ ...p, facebook: e.target.value }))} placeholder="https://facebook.com/..." />
+              </div>
+              <div>
+                <Label>Instagram</Label>
+                <Input value={editForm.instagram} onChange={e => setEditForm(p => ({ ...p, instagram: e.target.value }))} placeholder="https://instagram.com/..." />
+              </div>
+              <div>
+                <Label>Twitter / X</Label>
+                <Input value={editForm.twitter} onChange={e => setEditForm(p => ({ ...p, twitter: e.target.value }))} />
+              </div>
+              <div>
+                <Label>YouTube</Label>
+                <Input value={editForm.youtube} onChange={e => setEditForm(p => ({ ...p, youtube: e.target.value }))} />
+              </div>
+              <div className="sm:col-span-2 border-t pt-3">
+                <Label className="text-slate-500 text-xs uppercase tracking-wide">Outreach Flags</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="dnc" checked={editForm.do_not_contact} onChange={e => setEditForm(p => ({ ...p, do_not_contact: e.target.checked }))} className="rounded" />
+                <Label htmlFor="dnc" className="font-normal cursor-pointer">Do Not Contact</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="unsub" checked={editForm.unsubscribe_status} onChange={e => setEditForm(p => ({ ...p, unsubscribe_status: e.target.checked }))} className="rounded" />
+                <Label htmlFor="unsub" className="font-normal cursor-pointer">Unsubscribed</Label>
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Notes</Label>
+                <Textarea value={editForm.enrichment_notes} onChange={e => setEditForm(p => ({ ...p, enrichment_notes: e.target.value }))} rows={3} placeholder="Internal notes..." />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setEditingOperator(null)}><X className="w-4 h-4 mr-1" />Cancel</Button>
+              <Button onClick={handleSaveEdit} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
+                <Save className="w-4 h-4 mr-1" />{saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Import Status Modal */}
       <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
