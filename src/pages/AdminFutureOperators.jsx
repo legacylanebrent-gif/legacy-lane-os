@@ -218,43 +218,64 @@ export default function AdminFutureOperators() {
     return colors[packageType] || 'bg-slate-100 text-slate-700';
   };
 
+  // All known scrape functions — map each to its state
+  const allScrapeFunctions = [
+    'scrapeAKOperators','scrapeALOperators','scrapeAROperators','scrapeAZOperators',
+    'scrapeCAOperators','scrapeCOOperators','scrapeCTOperators','scrapeDCOperators',
+    'scrapeDEOperators','scrapeFLOperators','scrapeGAOperators','scrapeHIOperators',
+    'scrapeIAOperators','scrapeIDOperators','scrapeILOperators','scrapeINOperators',
+    'scrapeKSOperators','scrapeKYOperators','scrapeLAOperators','scrapeMAOperators',
+    'scrapeMDOperators','scrapeMEOperators','scrapeMIOperators','scrapeMNOperators',
+    'scrapeMOOperators','scrapeMSOperators','scrapeMTOperators','scrapeNCOperators',
+    'scrapeNDOperators','scrapeNEOperators','scrapeNHOperators','scrapeNJOperators',
+    'scrapeNMOperators','scrapeNVOperators','scrapeNYOperators','scrapeOHOperators',
+    'scrapeOKOperators','scrapeOROperators','scrapePAOperators','scrapeRIOperators',
+    'scrapeSCOperators','scrapeSDOperators','scrapeTNOperators','scrapeTXOperators',
+    'scrapeUTOperators','scrapeVAOperators','scrapeVTOperators','scrapeWAOperators',
+    'scrapeWIOperators','scrapeWVOperators','scrapeWYOperators',
+  ];
+
+  // Get scrape functions for the currently selected state
+  const getStateFunctions = (state) => {
+    return allScrapeFunctions.filter(fn => {
+      // Match functions that contain the state abbreviation (case-insensitive, after "scrape")
+      const body = fn.replace(/^scrape/, '').replace(/Operators.*$/, '');
+      return body.toUpperCase() === state.toUpperCase() || body.toUpperCase().startsWith(state.toUpperCase());
+    });
+  };
+
   const handleUpdateState = () => {
-    // Pre-select the currently viewed state
-    setSelectedScrapeStates([stateFilter]);
+    const fns = getStateFunctions(stateFilter);
+    setSelectedScrapeStates(fns); // pre-select all functions for this state
     setScrapeQueue([]);
     setScrapeRunning(false);
     scrapeAbortRef.current = false;
     setShowScrapeModal(true);
   };
 
-  const toggleScrapeState = (state) => {
+  const toggleScrapeState = (fn) => {
     setSelectedScrapeStates(prev =>
-      prev.includes(state) ? prev.filter(s => s !== state) : [...prev, state]
+      prev.includes(fn) ? prev.filter(f => f !== fn) : [...prev, fn]
     );
   };
 
   const handleStartScrape = async () => {
-    const ordered = allStates.filter(s => selectedScrapeStates.includes(s));
-    const queue = ordered.map(s => ({ state: s, status: 'pending', result: null }));
+    const queue = selectedScrapeStates.map(fn => ({ fn, status: 'pending', result: null }));
     setScrapeQueue(queue);
     setScrapeRunning(true);
     scrapeAbortRef.current = false;
 
-    for (let i = 0; i < ordered.length; i++) {
+    for (let i = 0; i < selectedScrapeStates.length; i++) {
       if (scrapeAbortRef.current) break;
-      const state = ordered[i];
+      const fn = selectedScrapeStates[i];
 
-      setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'running' } : q));
+      setScrapeQueue(prev => prev.map(q => q.fn === fn ? { ...q, status: 'running' } : q));
 
       try {
-        // Use the dedicated per-state scrape function: e.g. scrapeNJOperators
-        const fnName = `scrape${state.charAt(0) + state.slice(1).toLowerCase()}Operators`;
-        // Build the function name: scrapeNJOperators → scrape + NJ → scrapeNJOperators
-        const stateFnName = `scrape${state}Operators`;
-        const res = await base44.functions.invoke(stateFnName, {});
-        setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'done', result: res.data } : q));
+        const res = await base44.functions.invoke(fn, {});
+        setScrapeQueue(prev => prev.map(q => q.fn === fn ? { ...q, status: 'done', result: res.data } : q));
       } catch (err) {
-        setScrapeQueue(prev => prev.map(q => q.state === state ? { ...q, status: 'error', result: { error: err.message } } : q));
+        setScrapeQueue(prev => prev.map(q => q.fn === fn ? { ...q, status: 'error', result: { error: err.message } } : q));
       }
     }
 
@@ -727,38 +748,40 @@ export default function AdminFutureOperators() {
         </DialogContent>
       </Dialog>
 
-      {/* Scrape State Selection Modal */}
+      {/* Scrape Functions Modal — scoped to current state */}
       <Dialog open={showScrapeModal} onOpenChange={(open) => { if (!scrapeRunning) setShowScrapeModal(open); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Scrape States</DialogTitle>
+            <DialogTitle>Scrape {stateFilter} — Select Functions</DialogTitle>
             <DialogDescription>
-              Select which states to scrape using their dedicated scrape functions, one at a time.
+              Choose which scrape functions to run for <strong>{stateFilter}</strong>. They will run one at a time.
             </DialogDescription>
           </DialogHeader>
 
           {scrapeQueue.length === 0 ? (
             <div className="space-y-4 py-2">
-              {/* Select All / None */}
               <div className="flex gap-3">
-                <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates([...allStates])}>Select All</Button>
+                <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates(getStateFunctions(stateFilter))}>Select All</Button>
                 <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates([])}>Clear</Button>
                 <span className="text-sm text-slate-500 self-center">{selectedScrapeStates.length} selected</span>
               </div>
 
-              {/* State grid */}
-              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-64 overflow-y-auto p-1">
-                {allStates.map(state => (
+              <div className="space-y-2">
+                {getStateFunctions(stateFilter).length === 0 && (
+                  <p className="text-sm text-slate-500">No scrape functions found for {stateFilter}.</p>
+                )}
+                {getStateFunctions(stateFilter).map(fn => (
                   <button
-                    key={state}
-                    onClick={() => toggleScrapeState(state)}
-                    className={`px-2 py-1.5 rounded text-xs font-semibold border transition-colors ${
-                      selectedScrapeStates.includes(state)
-                        ? 'bg-orange-600 text-white border-orange-600'
-                        : 'bg-white text-slate-600 border-slate-300 hover:border-orange-400'
+                    key={fn}
+                    onClick={() => toggleScrapeState(fn)}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm font-mono transition-colors ${
+                      selectedScrapeStates.includes(fn)
+                        ? 'bg-orange-50 border-orange-400 text-orange-800'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
                     }`}
                   >
-                    {state}
+                    <span className={`inline-block w-4 h-4 rounded border mr-2 align-middle ${selectedScrapeStates.includes(fn) ? 'bg-orange-500 border-orange-500' : 'border-slate-400'}`} />
+                    {fn}
                   </button>
                 ))}
               </div>
@@ -771,22 +794,20 @@ export default function AdminFutureOperators() {
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Start Scraping {selectedScrapeStates.length} State{selectedScrapeStates.length !== 1 ? 's' : ''}
+                  Run {selectedScrapeStates.length} Function{selectedScrapeStates.length !== 1 ? 's' : ''}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-3 py-2">
-              {/* Progress header */}
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-700">
-                  {scrapeRunning ? 'Scraping in progress...' : 'Scrape complete'}
+                  {scrapeRunning ? 'Running...' : 'Complete'}
                 </span>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-500">
-                    {scrapeQueue.filter(q => q.status === 'done').length} done,{' '}
-                    {scrapeQueue.filter(q => q.status === 'error').length} errors,{' '}
-                    {scrapeQueue.filter(q => q.status === 'pending').length} pending
+                    {scrapeQueue.filter(q => q.status === 'done').length}/{scrapeQueue.length} done
+                    {scrapeQueue.filter(q => q.status === 'error').length > 0 && ` · ${scrapeQueue.filter(q => q.status === 'error').length} errors`}
                   </span>
                   {scrapeRunning && (
                     <Button size="sm" variant="outline" className="border-red-400 text-red-600 h-6 text-xs" onClick={handleStopScrape}>
@@ -796,28 +817,30 @@ export default function AdminFutureOperators() {
                 </div>
               </div>
 
-              {/* State rows */}
-              <div className="space-y-1.5 max-h-80 overflow-y-auto">
+              <div className="space-y-1.5">
                 {scrapeQueue.map(item => (
-                  <div key={item.state} className={`flex items-center gap-3 p-2.5 rounded-lg border text-sm ${
+                  <div key={item.fn} className={`flex items-start gap-3 p-3 rounded-lg border text-sm ${
                     item.status === 'running' ? 'bg-orange-50 border-orange-200' :
                     item.status === 'done' ? 'bg-green-50 border-green-200' :
                     item.status === 'error' ? 'bg-red-50 border-red-200' :
                     'bg-slate-50 border-slate-200'
                   }`}>
-                    <span className="font-semibold w-8 text-slate-700">{item.state}</span>
-                    <div className="flex-1">
-                      {item.status === 'pending' && <span className="text-slate-400">Waiting...</span>}
-                      {item.status === 'running' && <span className="text-orange-600 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Scraping...</span>}
-                      {item.status === 'done' && item.result && (
-                        <span className="text-green-700 text-xs">
-                          +{item.result.inserted ?? '?'} new · {item.result.updated ?? '?'} updated · {item.result.duplicates_deleted ?? 0} dupes removed
-                        </span>
-                      )}
-                      {item.status === 'done' && !item.result && <span className="text-green-700">Done</span>}
-                      {item.status === 'error' && <span className="text-red-600 text-xs">{item.result?.error || 'Failed'}</span>}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-mono text-xs text-slate-700 truncate">{item.fn}</div>
+                      <div className="mt-0.5">
+                        {item.status === 'pending' && <span className="text-xs text-slate-400">Waiting...</span>}
+                        {item.status === 'running' && <span className="text-xs text-orange-600 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Running...</span>}
+                        {item.status === 'done' && item.result && (
+                          <span className="text-xs text-green-700">
+                            +{item.result.inserted ?? item.result.scraped ?? '?'} new · {item.result.updated ?? '?'} updated
+                            {item.result.duplicates_deleted ? ` · ${item.result.duplicates_deleted} dupes removed` : ''}
+                          </span>
+                        )}
+                        {item.status === 'done' && !item.result && <span className="text-xs text-green-700">Done</span>}
+                        {item.status === 'error' && <span className="text-xs text-red-600">{item.result?.error || 'Failed'}</span>}
+                      </div>
                     </div>
-                    <div>
+                    <div className="flex-shrink-0 mt-0.5">
                       {item.status === 'pending' && <span className="w-4 h-4 rounded-full bg-slate-300 inline-block" />}
                       {item.status === 'running' && <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />}
                       {item.status === 'done' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
@@ -829,12 +852,8 @@ export default function AdminFutureOperators() {
 
               {!scrapeRunning && (
                 <div className="flex justify-end gap-2 pt-2 border-t">
-                  <Button variant="outline" onClick={() => { setScrapeQueue([]); setSelectedScrapeStates([]); setShowScrapeModal(false); }}>
-                    Close
-                  </Button>
-                  <Button variant="outline" onClick={() => setScrapeQueue([])}>
-                    Run Again
-                  </Button>
+                  <Button variant="outline" onClick={() => { setScrapeQueue([]); setShowScrapeModal(false); }}>Close</Button>
+                  <Button variant="outline" onClick={() => setScrapeQueue([])}>Run Again</Button>
                 </div>
               )}
             </div>
