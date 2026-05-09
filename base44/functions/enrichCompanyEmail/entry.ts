@@ -47,6 +47,25 @@ function extractDomain(url) {
   } catch { return null; }
 }
 
+// Find contact page URLs by scanning href attributes in HTML
+function findContactLinks(html, baseUrl) {
+  if (!html) return [];
+  const base = new URL(baseUrl.startsWith('http') ? baseUrl : 'https://' + baseUrl);
+  const hrefRegex = /href=["']([^"']+)["']/gi;
+  const contactLinks = new Set();
+  let match;
+  while ((match = hrefRegex.exec(html)) !== null) {
+    const href = match[1];
+    if (/contact|reach|get-in-touch|email-us/i.test(href)) {
+      try {
+        const resolved = href.startsWith('http') ? href : new URL(href, base).href;
+        if (resolved.startsWith(base.origin)) contactLinks.add(resolved);
+      } catch { /* skip malformed */ }
+    }
+  }
+  return [...contactLinks].slice(0, 5);
+}
+
 async function verifyEmail(email, apiKey, provider) {
   if (!apiKey || !email) return { status: 'unknown', score: 50 };
 
@@ -124,15 +143,35 @@ Deno.serve(async (req) => {
     // ── Step 1: Crawl official website ───────────────────────────────────────
     if (websiteUrl) {
       const domain = extractDomain(websiteUrl);
-      const pagesToCheck = [
-        websiteUrl,
+      const normalizedBase = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
+
+      // 1a. Fetch homepage and discover contact page links from hrefs
+      const homepageHtml = await fetchPage(normalizedBase);
+      const discoveredContactLinks = findContactLinks(homepageHtml, normalizedBase);
+
+      // 1b. Also build guessed contact paths
+      const guessedContactPaths = [
         `https://${domain}/contact`,
         `https://${domain}/contact-us`,
+        `https://${domain}/contact_us`,
+        `https://${domain}/contactus`,
+        `https://${domain}/reach-us`,
+        `https://${domain}/get-in-touch`,
+      ];
+
+      // 1c. Prioritize: discovered links first, then guessed paths, then homepage, then about
+      const priorityContactPages = [
+        ...discoveredContactLinks,
+        ...guessedContactPaths,
+        normalizedBase,
         `https://${domain}/about`,
         `https://${domain}/about-us`,
-        `https://${domain}/footer`,
-        `https://${domain}/privacy`
       ];
+
+      // Deduplicate
+      const seen = new Set();
+      const pagesToCheck = priorityContactPages.filter(u => { if (seen.has(u)) return false; seen.add(u); return true; });
+
       for (const pageUrl of pagesToCheck) {
         const html = await fetchPage(pageUrl);
         const emails = extractEmails(html);
