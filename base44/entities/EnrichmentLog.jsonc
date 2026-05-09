@@ -1,0 +1,50 @@
+{
+  "name": "EnrichmentLog",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "FutureEstateOperator ID"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "website_crawl",
+        "web_search",
+        "pattern_guess",
+        "verification",
+        "manual_add"
+      ],
+      "description": "What action was taken"
+    },
+    "source_checked": {
+      "type": "string",
+      "description": "URL or source that was checked"
+    },
+    "result": {
+      "type": "string",
+      "description": "What happened"
+    },
+    "email_found": {
+      "type": "string",
+      "description": "Email found during this step"
+    },
+    "verification_status": {
+      "type": "string",
+      "description": "Verification result from provider"
+    },
+    "confidence_score": {
+      "type": "number"
+    },
+    "error_message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "action_type"
+  ]
+}

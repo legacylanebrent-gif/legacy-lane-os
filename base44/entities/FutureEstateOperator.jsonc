@@ -1,0 +1,162 @@
+{
+  "name": "FutureEstateOperator",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Name of the estate sale company"
+    },
+    "city": {
+      "type": "string",
+      "description": "City location"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation"
+    },
+    "zip_code": {
+      "type": "string",
+      "description": "ZIP code"
+    },
+    "county": {
+      "type": "string",
+      "description": "County"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "website": {
+      "type": "string",
+      "description": "Company website (legacy field)"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Official website URL"
+    },
+    "member_since": {
+      "type": "string",
+      "description": "Year joined EstateSales.net"
+    },
+    "package_type": {
+      "type": "string",
+      "description": "Membership package level"
+    },
+    "facebook": {
+      "type": "string",
+      "description": "Facebook profile URL"
+    },
+    "twitter": {
+      "type": "string",
+      "description": "Twitter handle or URL"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "Instagram handle or URL"
+    },
+    "youtube": {
+      "type": "string",
+      "description": "YouTube channel URL"
+    },
+    "pinterest": {
+      "type": "string",
+      "description": "Pinterest profile URL"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Original EstateSales.net profile URL"
+    },
+    "source_state": {
+      "type": "string",
+      "description": "State scraped from"
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary email address"
+    },
+    "alternate_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Other found email addresses"
+    },
+    "email_source_url": {
+      "type": "string",
+      "description": "URL where email was found"
+    },
+    "email_source_type": {
+      "type": "string",
+      "enum": [
+        "estatesales_profile",
+        "official_website",
+        "facebook",
+        "google_search",
+        "guessed_pattern",
+        "manual"
+      ],
+      "description": "How the email was discovered"
+    },
+    "email_confidence_score": {
+      "type": "number",
+      "description": "0-100 confidence score for the email"
+    },
+    "email_verified_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "valid",
+        "invalid",
+        "risky",
+        "catch_all",
+        "unknown"
+      ],
+      "default": "unverified"
+    },
+    "email_last_checked": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "searching",
+        "found",
+        "verified",
+        "failed",
+        "needs_manual_review"
+      ],
+      "default": "not_started"
+    },
+    "enrichment_notes": {
+      "type": "string"
+    },
+    "outreach_status": {
+      "type": "string",
+      "enum": [
+        "not_contacted",
+        "queued",
+        "contacted",
+        "replied",
+        "bounced",
+        "unsubscribed"
+      ],
+      "default": "not_contacted"
+    },
+    "do_not_contact": {
+      "type": "boolean",
+      "default": false
+    },
+    "unsubscribe_status": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "company_name",
+    "city",
+    "state"
+  ]
+}

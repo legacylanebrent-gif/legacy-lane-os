@@ -67,6 +67,7 @@ import FavoriteCompanies from './pages/FavoriteCompanies';
 import VendorProfile from './pages/VendorProfile';
 import SaleConversionPipelinePage from './pages/SaleConversionPipeline';
 import SettlementStatement from './pages/SettlementStatement';
+import CompanyEmailEnrichment from './pages/CompanyEmailEnrichment';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -177,6 +178,7 @@ const AuthenticatedApp = () => {
       <Route path="/VendorProfile" element={<LayoutWrapper currentPageName="VendorProfile"><VendorProfile /></LayoutWrapper>} />
       <Route path="/SaleConversionPipeline" element={<LayoutWrapper currentPageName="SaleConversionPipeline"><SaleConversionPipelinePage /></LayoutWrapper>} />
       <Route path="/SettlementStatement" element={<LayoutWrapper currentPageName="SettlementStatement"><SettlementStatement /></LayoutWrapper>} />
+      <Route path="/CompanyEmailEnrichment" element={<LayoutWrapper currentPageName="CompanyEmailEnrichment"><CompanyEmailEnrichment /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,0 +1,242 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+// ── Email regex ──────────────────────────────────────────────────────────────
+const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+async function fetchPage(url, timeoutMs = 8000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EmailEnricher/1.0)' }
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    return await res.text();
+  } catch { clearTimeout(t); return null; }
+}
+
+function extractEmails(html) {
+  if (!html) return [];
+  const decoded = html.replace(/&#64;/g, '@').replace(/%40/g, '@').replace(/\[at\]/gi, '@').replace(/\s*\(at\)\s*/gi, '@');
+  const found = decoded.match(EMAIL_REGEX) || [];
+  // Filter obvious false-positives
+  return [...new Set(found)].filter(e =>
+    !e.endsWith('.png') && !e.endsWith('.jpg') && !e.endsWith('.gif') &&
+    !e.includes('example.com') && !e.includes('sentry.io') &&
+    !e.includes('wix.com') && !e.includes('squarespace.com') &&
+    !e.includes('@2x') && e.length < 100
+  );
+}
+
+function guessPatterns(domain, ownerName) {
+  const prefixes = ['info', 'contact', 'sales', 'hello', 'support'];
+  if (ownerName) {
+    const first = ownerName.split(' ')[0].toLowerCase().replace(/[^a-z]/g, '');
+    if (first) prefixes.push(first);
+  }
+  return prefixes.map(p => `${p}@${domain}`);
+}
+
+function extractDomain(url) {
+  try {
+    const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+    return u.hostname.replace(/^www\./, '');
+  } catch { return null; }
+}
+
+async function verifyEmail(email, apiKey, provider) {
+  if (!apiKey || !email) return { status: 'unknown', score: 50 };
+
+  try {
+    if (provider === 'zerobounce') {
+      const res = await fetch(`https://api.zerobounce.net/v2/validate?api_key=${apiKey}&email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      const statusMap = { valid: 'valid', invalid: 'invalid', catch_all: 'catch_all', spamtrap: 'risky', abuse: 'risky', do_not_mail: 'risky', unknown: 'unknown' };
+      return { status: statusMap[data.status] || 'unknown', score: data.status === 'valid' ? 90 : data.status === 'catch_all' ? 60 : 10 };
+    }
+    if (provider === 'hunter') {
+      const res = await fetch(`https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(email)}&api_key=${apiKey}`);
+      const data = await res.json();
+      const s = data.data?.result;
+      const statusMap = { deliverable: 'valid', undeliverable: 'invalid', risky: 'risky', unknown: 'unknown' };
+      return { status: statusMap[s] || 'unknown', score: s === 'deliverable' ? 90 : s === 'risky' ? 50 : 10 };
+    }
+    if (provider === 'neverbounce') {
+      const res = await fetch(`https://api.neverbounce.com/v4/single/check?key=${apiKey}&email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      const statusMap = { valid: 'valid', invalid: 'invalid', disposable: 'risky', catchall: 'catch_all', unknown: 'unknown' };
+      return { status: statusMap[data.result] || 'unknown', score: data.result === 'valid' ? 90 : data.result === 'catchall' ? 60 : 10 };
+    }
+  } catch (e) {
+    return { status: 'unknown', score: 40, error: e.message };
+  }
+  return { status: 'unverified', score: 50 };
+}
+
+async function logStep(base44, companyId, companyName, actionType, sourceChecked, result, emailFound, verificationStatus, confidenceScore, errorMessage) {
+  try {
+    await base44.asServiceRole.entities.EnrichmentLog.create({
+      company_id: companyId,
+      company_name: companyName,
+      action_type: actionType,
+      source_checked: sourceChecked || '',
+      result: result || '',
+      email_found: emailFound || '',
+      verification_status: verificationStatus || '',
+      confidence_score: confidenceScore || 0,
+      error_message: errorMessage || ''
+    });
+  } catch (e) { /* non-blocking */ }
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────────
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (user?.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
+
+    const { company_id } = await req.json();
+    if (!company_id) return Response.json({ error: 'company_id required' }, { status: 400 });
+
+    const company = await base44.asServiceRole.entities.FutureEstateOperator.get(company_id);
+    if (!company) return Response.json({ error: 'Company not found' }, { status: 404 });
+
+    if (company.do_not_contact || company.unsubscribe_status) {
+      return Response.json({ skipped: true, reason: 'do_not_contact or unsubscribed' });
+    }
+
+    // Mark as searching
+    await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, { enrichment_status: 'searching' });
+
+    const verifyApiKey = Deno.env.get('EMAIL_VERIFY_API_KEY') || '';
+    const verifyProvider = Deno.env.get('EMAIL_VERIFY_PROVIDER') || 'none'; // zerobounce | hunter | neverbounce
+    const serpApiKey = Deno.env.get('SERPAPI_KEY') || '';
+
+    let foundEmails = [];
+    let emailSourceUrl = '';
+    let emailSourceType = '';
+    let websiteUrl = company.website_url || company.website || '';
+
+    // ── Step 1: Crawl official website ───────────────────────────────────────
+    if (websiteUrl) {
+      const domain = extractDomain(websiteUrl);
+      const pagesToCheck = [
+        websiteUrl,
+        `https://${domain}/contact`,
+        `https://${domain}/contact-us`,
+        `https://${domain}/about`,
+        `https://${domain}/about-us`,
+        `https://${domain}/footer`,
+        `https://${domain}/privacy`
+      ];
+      for (const pageUrl of pagesToCheck) {
+        const html = await fetchPage(pageUrl);
+        const emails = extractEmails(html);
+        if (emails.length > 0) {
+          foundEmails = [...new Set([...foundEmails, ...emails])];
+          emailSourceUrl = pageUrl;
+          emailSourceType = 'official_website';
+          await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
+          break;
+        }
+        await logStep(base44, company_id, company.company_name, 'website_crawl', pageUrl, 'No emails found', '', '', 0, '');
+      }
+    }
+
+    // ── Step 2: Web search if no website or no emails found ──────────────────
+    if (foundEmails.length === 0 && serpApiKey) {
+      const query = `"${company.company_name}" ${company.city} ${company.state} estate sales email`;
+      const searchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=5`;
+      const html = await fetchPage(searchUrl);
+      if (html) {
+        const data = JSON.parse(html);
+        const results = data.organic_results || [];
+        for (const result of results.slice(0, 3)) {
+          const link = result.link;
+          if (!link) continue;
+          // Try to find the website
+          if (!websiteUrl && link && !link.includes('estatesales.net') && !link.includes('facebook.com')) {
+            websiteUrl = link;
+          }
+          const pageHtml = await fetchPage(link);
+          const emails = extractEmails(pageHtml);
+          if (emails.length > 0) {
+            foundEmails = [...new Set([...foundEmails, ...emails])];
+            emailSourceUrl = link;
+            emailSourceType = link.includes('facebook.com') ? 'facebook' : 'google_search';
+            await logStep(base44, company_id, company.company_name, 'web_search', link, `Found ${emails.length} email(s)`, emails[0], '', 0, '');
+            break;
+          }
+        }
+      }
+    }
+
+    // ── Step 3: Guess patterns from domain ───────────────────────────────────
+    let guessedPatterns = [];
+    if (foundEmails.length === 0 && websiteUrl) {
+      const domain = extractDomain(websiteUrl);
+      if (domain) {
+        guessedPatterns = guessPatterns(domain, company.company_name);
+        foundEmails = guessedPatterns;
+        emailSourceType = 'guessed_pattern';
+        await logStep(base44, company_id, company.company_name, 'pattern_guess', websiteUrl, `Generated ${guessedPatterns.length} patterns`, guessedPatterns[0], '', 0, '');
+      }
+    }
+
+    if (foundEmails.length === 0) {
+      await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, {
+        enrichment_status: 'failed',
+        enrichment_notes: 'No email found after website crawl, web search, and pattern generation.',
+        email_last_checked: new Date().toISOString(),
+        website_url: websiteUrl || company.website_url || ''
+      });
+      return Response.json({ success: false, message: 'No email found' });
+    }
+
+    // ── Step 4: Verify emails ─────────────────────────────────────────────────
+    let bestEmail = foundEmails[0];
+    let bestScore = emailSourceType === 'official_website' ? 70 : emailSourceType === 'google_search' ? 50 : 30;
+    let bestVerifiedStatus = 'unverified';
+    const alternates = [];
+
+    for (const email of foundEmails.slice(0, 5)) {
+      const verification = await verifyEmail(email, verifyApiKey, verifyProvider);
+      await logStep(base44, company_id, company.company_name, 'verification', email, verification.status, email, verification.status, verification.score, verification.error || '');
+
+      if (verification.score > bestScore) {
+        if (bestEmail !== email) alternates.push(bestEmail);
+        bestEmail = email;
+        bestScore = verification.score;
+        bestVerifiedStatus = verification.status;
+      } else if (email !== bestEmail) {
+        alternates.push(email);
+      }
+    }
+
+    // Boost score for official website
+    if (emailSourceType === 'official_website') bestScore = Math.min(100, bestScore + 20);
+
+    const enrichmentStatus = bestScore >= 75 ? 'verified' : bestScore >= 40 ? 'found' : 'needs_manual_review';
+
+    await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, {
+      email: bestEmail,
+      alternate_emails: alternates.slice(0, 5),
+      email_source_url: emailSourceUrl,
+      email_source_type: emailSourceType,
+      email_confidence_score: bestScore,
+      email_verified_status: bestVerifiedStatus,
+      email_last_checked: new Date().toISOString(),
+      enrichment_status: enrichmentStatus,
+      enrichment_notes: `Found via ${emailSourceType}. Confidence: ${bestScore}.`,
+      website_url: websiteUrl || company.website_url || ''
+    });
+
+    return Response.json({ success: true, email: bestEmail, score: bestScore, status: bestVerifiedStatus, enrichment_status: enrichmentStatus });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});
