@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
       if (match) { await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, company); updated++; }
       else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
-      if (i > 0 && i % 10 === 0) await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 150));
     }
     const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       { state: 'OK' },

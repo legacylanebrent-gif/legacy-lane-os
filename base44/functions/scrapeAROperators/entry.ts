@@ -123,22 +123,14 @@ Deno.serve(async (req) => {
     let inserted = 0;
     let updated = 0;
 
-    for (const company of allCompanies) {
-      const existingByUrlMatch = company.source_url ? existingByUrl.get(company.source_url) : null;
-      const existingByPhoneMatch = company.phone ? existingByPhone.get(company.phone) : null;
-      const existing = existingByUrlMatch || existingByPhoneMatch;
-
-      if (existing) {
-        // Update existing record with fresh data
-        await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company);
-        updated++;
-        console.log(`Updated: ${company.company_name}`);
-      } else {
-        // Insert new record
-        await base44.asServiceRole.entities.FutureEstateOperator.create(company);
-        inserted++;
-        console.log(`Inserted: ${company.company_name}`);
-      }
+    for (let i = 0; i < allCompanies.length; i++) {
+      const company = allCompanies[i];
+      const existing = (company.source_url ? existingByUrl.get(company.source_url) : null) || (company.phone ? existingByPhone.get(company.phone) : null);
+      try {
+        if (existing) { await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company); updated++; }
+        else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
+      } catch(e) { console.error(`Skipped ${company.company_name}: ${e.message}`); }
+      await new Promise(r => setTimeout(r, 150));
     }
 
     const finalCount = await base44.asServiceRole.entities.FutureEstateOperator.filter(

@@ -112,10 +112,14 @@ Deno.serve(async (req) => {
     const existingByUrl = new Map(existingOperators.filter(o => o.source_url).map(o => [o.source_url, o]));
     const existingByPhone = new Map(existingOperators.filter(o => o.phone).map(o => [o.phone, o]));
     let inserted = 0, updated = 0;
-    for (const company of allCompanies) {
+    for (let i = 0; i < allCompanies.length; i++) {
+      const company = allCompanies[i];
       const existing = (company.source_url ? existingByUrl.get(company.source_url) : null) || (company.phone ? existingByPhone.get(company.phone) : null);
-      if (existing) { await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company); updated++; }
-      else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
+      try {
+        if (existing) { await base44.asServiceRole.entities.FutureEstateOperator.update(existing.id, company); updated++; }
+        else { await base44.asServiceRole.entities.FutureEstateOperator.create(company); inserted++; }
+      } catch(e) { console.error(`Skipped ${company.company_name}: ${e.message}`); }
+      await new Promise(r => setTimeout(r, 150));
     }
     const finalCount = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'DC' }, '-created_date', 1000);
     return Response.json({ success: true, scraped: allCompanies.length, inserted, updated, final_count: finalCount.length });

@@ -123,30 +123,32 @@ Deno.serve(async (req) => {
         const company = allCompanies[i];
         const match = (company.source_url && byUrl.get(company.source_url)) ||
                       (company.phone && byPhone.get(company.phone));
-        if (match) {
-          await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
-            company_name: company.company_name,
-            city: company.city,
-            phone: company.phone,
-            website: company.website,
-            member_since: company.member_since,
-            package_type: company.package_type,
-            facebook: company.facebook,
-            twitter: company.twitter,
-            instagram: company.instagram,
-            youtube: company.youtube,
-            pinterest: company.pinterest,
-            source_url: company.source_url,
-          });
-          updated++;
-        } else {
-          await base44.asServiceRole.entities.FutureEstateOperator.create(company);
-          inserted++;
+        try {
+          if (match) {
+            await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
+              company_name: company.company_name,
+              city: company.city,
+              phone: company.phone,
+              website: company.website,
+              member_since: company.member_since,
+              package_type: company.package_type,
+              facebook: company.facebook,
+              twitter: company.twitter,
+              instagram: company.instagram,
+              youtube: company.youtube,
+              pinterest: company.pinterest,
+              source_url: company.source_url,
+            });
+            updated++;
+          } else {
+            await base44.asServiceRole.entities.FutureEstateOperator.create(company);
+            inserted++;
+          }
+        } catch (e) {
+          console.error(`Skipped ${company.company_name}: ${e.message}`);
         }
-        // Rate limit: pause every 10 records
-        if (i > 0 && i % 10 === 0) {
-          await new Promise(r => setTimeout(r, 300));
-        }
+        // Pause after every record to avoid rate limits
+        await new Promise(r => setTimeout(r, 150));
       }
       console.log(`✓ Inserted ${inserted} new, updated ${updated} existing`);
     }
