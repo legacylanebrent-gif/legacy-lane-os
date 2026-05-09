@@ -188,21 +188,65 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── Step 2: Scrape Facebook page for emails ──────────────────────────────
+    // ── Step 2: Search for email via Facebook using SerpAPI ─────────────────
+    // Facebook blocks direct scraping and returns login-wall HTML with irrelevant emails.
+    // Instead, use SerpAPI to search the Facebook page's content for an email address.
     const facebookUrl = company.facebook || '';
-    if (facebookUrl && foundEmails.length < 5) {
-      // Try the about/contact section of their Facebook page
-      const fbPagesToTry = [facebookUrl, facebookUrl.replace(/\/$/, '') + '/about'];
-      for (const fbUrl of fbPagesToTry) {
-        const fbHtml = await fetchPage(fbUrl, 10000);
-        const fbEmails = extractEmails(fbHtml);
-        if (fbEmails.length > 0) {
-          const newEmails = fbEmails.filter(e => !foundEmails.includes(e));
-          foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
-          if (!emailSourceUrl) emailSourceUrl = fbUrl;
-          if (!emailSourceType) emailSourceType = 'facebook';
-          await logStep(base44, company_id, company.company_name, 'web_search', fbUrl, `Found ${fbEmails.length} email(s) on Facebook`, fbEmails[0], '', 0, '');
+    if (facebookUrl && foundEmails.length < 5 && serpApiKey) {
+      // Extract the Facebook page slug/username from the URL
+      const fbSlugMatch = facebookUrl.match(/facebook\.com\/([^/?#]+)/i);
+      const fbSlug = fbSlugMatch ? fbSlugMatch[1] : null;
+
+      if (fbSlug && fbSlug !== 'pages') {
+        // Search Google for the email on that specific Facebook page
+        const fbSearchQuery = `site:facebook.com/${fbSlug} email OR contact`;
+        const fbSearchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(fbSearchQuery)}&api_key=${serpApiKey}&num=3`;
+        try {
+          const fbSearchHtml = await fetchPage(fbSearchUrl, 10000);
+          if (fbSearchHtml) {
+            const fbData = JSON.parse(fbSearchHtml);
+            // Check snippets and knowledge graph for email
+            const snippets = [
+              ...(fbData.organic_results || []).map(r => (r.snippet || '') + ' ' + (r.title || '')),
+              JSON.stringify(fbData.knowledge_graph || {}),
+              JSON.stringify(fbData.answer_box || {})
+            ].join(' ');
+            const snippetEmails = extractEmails(snippets);
+            if (snippetEmails.length > 0) {
+              const newEmails = snippetEmails.filter(e => !foundEmails.includes(e));
+              foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
+              if (!emailSourceUrl) emailSourceUrl = facebookUrl;
+              if (!emailSourceType) emailSourceType = 'facebook';
+              await logStep(base44, company_id, company.company_name, 'web_search', fbSearchUrl, `Found ${snippetEmails.length} email(s) via FB search`, snippetEmails[0], '', 0, '');
+            }
+          }
+        } catch (e) {
+          await logStep(base44, company_id, company.company_name, 'web_search', facebookUrl, 'Facebook search failed', '', '', 0, e.message);
         }
+      }
+
+      // Also search Google directly: company name + facebook + email
+      if (foundEmails.length < 5) {
+        const directFbQuery = `"${company.company_name}" facebook email contact`;
+        const directFbUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(directFbQuery)}&api_key=${serpApiKey}&num=5`;
+        try {
+          const directHtml = await fetchPage(directFbUrl, 10000);
+          if (directHtml) {
+            const directData = JSON.parse(directHtml);
+            const allText = [
+              ...(directData.organic_results || []).map(r => (r.snippet || '') + ' ' + (r.title || '')),
+              JSON.stringify(directData.knowledge_graph || {}),
+            ].join(' ');
+            const directEmails = extractEmails(allText);
+            if (directEmails.length > 0) {
+              const newEmails = directEmails.filter(e => !foundEmails.includes(e));
+              foundEmails = [...foundEmails, ...newEmails].slice(0, 5);
+              if (!emailSourceUrl) emailSourceUrl = facebookUrl;
+              if (!emailSourceType) emailSourceType = 'facebook';
+              await logStep(base44, company_id, company.company_name, 'web_search', directFbUrl, `Found ${directEmails.length} email(s) via direct FB query`, directEmails[0], '', 0, '');
+            }
+          }
+        } catch (e) { /* non-blocking */ }
       }
     }
 
