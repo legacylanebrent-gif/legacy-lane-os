@@ -53,6 +53,12 @@ export default function AdminFutureOperators() {
   const [scrapeRunning, setScrapeRunning] = useState(false);
   const scrapeAbortRef = useRef(false);
 
+  // NJ batched scrape state
+  const [njBatchMode, setNjBatchMode] = useState(false);
+  const [njBatchState, setNjBatchState] = useState(null);
+  // { allCompanies, nextOffset, totalCompanies, totalInserted, totalUpdated, running }
+
+
   const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
 
   const openEdit = (operator) => {
@@ -259,11 +265,43 @@ export default function AdminFutureOperators() {
 
   const handleUpdateState = () => {
     const fns = getStateFunctions(stateFilter);
-    setSelectedScrapeStates(fns); // pre-select all functions for this state
+    setSelectedScrapeStates(fns);
     setScrapeQueue([]);
     setScrapeRunning(false);
     scrapeAbortRef.current = false;
+    // NJ uses batched mode
+    if (stateFilter === 'NJ') {
+      setNjBatchMode(true);
+      setNjBatchState(null);
+    } else {
+      setNjBatchMode(false);
+    }
     setShowScrapeModal(true);
+  };
+
+  const handleNjStartBatch = async (offset = 0, cachedCompanies = null) => {
+    setNjBatchState(prev => ({ ...(prev || {}), running: true }));
+    try {
+      const payload = { batch_offset: offset };
+      if (cachedCompanies) payload.all_companies = cachedCompanies;
+      const res = await base44.functions.invoke('scrapeNJOperators', payload);
+      const data = res.data;
+      setNjBatchState(prev => ({
+        allCompanies: data.all_companies || cachedCompanies || [],
+        nextOffset: data.next_offset,
+        totalCompanies: data.total_companies,
+        totalInserted: (prev?.totalInserted || 0) + (data.inserted || 0),
+        totalUpdated: (prev?.totalUpdated || 0) + (data.updated || 0),
+        currentOffset: offset,
+        batchSize: data.batch_size,
+        isLastBatch: data.is_last_batch,
+        running: false,
+        error: null,
+      }));
+      await loadStateCount();
+    } catch (e) {
+      setNjBatchState(prev => ({ ...(prev || {}), running: false, error: e.message }));
+    }
   };
 
   const toggleScrapeState = (fn) => {
@@ -776,16 +814,99 @@ export default function AdminFutureOperators() {
       </Dialog>
 
       {/* Scrape Functions Modal — scoped to current state */}
-      <Dialog open={showScrapeModal} onOpenChange={(open) => { if (!scrapeRunning) setShowScrapeModal(open); }}>
+      <Dialog open={showScrapeModal} onOpenChange={(open) => { if (!scrapeRunning && !njBatchState?.running) setShowScrapeModal(open); }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Scrape {stateFilter} — Select Functions</DialogTitle>
             <DialogDescription>
-              Choose which scrape functions to run for <strong>{stateFilter}</strong>. They will run one at a time.
+              {stateFilter === 'NJ'
+                ? 'NJ uses batched saving (50 at a time) to avoid rate limit errors.'
+                : <>Choose which scrape functions to run for <strong>{stateFilter}</strong>. They will run one at a time.</>
+              }
             </DialogDescription>
           </DialogHeader>
 
-          {scrapeQueue.length === 0 ? (
+          {/* NJ Batched Mode */}
+          {njBatchMode && (
+            <div className="space-y-4 py-2">
+              {!njBatchState ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-600">
+                    This will scrape all NJ cities and save companies in batches of 50. After each batch saves, you can continue to the next.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowScrapeModal(false)}>Cancel</Button>
+                    <Button onClick={() => handleNjStartBatch(0)} className="bg-orange-600 hover:bg-orange-700">
+                      <Download className="w-4 h-4 mr-2" />Start Scrape
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Progress */}
+                  <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Total companies found:</span>
+                      <span className="font-semibold">{njBatchState.totalCompanies ?? '...'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Saved so far:</span>
+                      <span className="font-semibold text-slate-700">
+                        {njBatchState.isLastBatch
+                          ? njBatchState.totalCompanies
+                          : njBatchState.currentOffset + njBatchState.batchSize
+                        } / {njBatchState.totalCompanies}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div
+                        className="bg-orange-500 h-2 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, ((njBatchState.currentOffset + njBatchState.batchSize) / njBatchState.totalCompanies) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-sm pt-1">
+                      <span className="text-green-700">+{njBatchState.totalInserted} new</span>
+                      <span className="text-blue-700">{njBatchState.totalUpdated} updated</span>
+                    </div>
+                  </div>
+
+                  {njBatchState.error && (
+                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+                      Error: {njBatchState.error}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => { setNjBatchState(null); setShowScrapeModal(false); loadOperators(); }}>
+                      {njBatchState.isLastBatch ? 'Done' : 'Close'}
+                    </Button>
+                    {!njBatchState.isLastBatch && !njBatchState.running && (
+                      <Button
+                        onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies)}
+                        className="bg-orange-600 hover:bg-orange-700"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Continue (save next 50)
+                      </Button>
+                    )}
+                    {njBatchState.running && (
+                      <Button disabled className="bg-orange-400">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving batch...
+                      </Button>
+                    )}
+                    {njBatchState.isLastBatch && !njBatchState.running && (
+                      <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                        <CheckCircle2 className="w-4 h-4" /> All batches complete!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Standard (non-NJ) mode */}
+          {!njBatchMode && scrapeQueue.length === 0 && (
             <div className="space-y-4 py-2">
               <div className="flex gap-3">
                 <Button size="sm" variant="outline" onClick={() => setSelectedScrapeStates(getStateFunctions(stateFilter))}>Select All</Button>
@@ -825,7 +946,9 @@ export default function AdminFutureOperators() {
                 </Button>
               </div>
             </div>
-          ) : (
+          )}
+
+          {!njBatchMode && scrapeQueue.length > 0 && (
             <div className="space-y-3 py-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-700">
