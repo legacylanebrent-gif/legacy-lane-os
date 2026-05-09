@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
-  Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download
+  Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
+  Mail, Loader2, CheckCircle2
 } from 'lucide-react';
 import {
   Select,
@@ -34,6 +35,19 @@ export default function AdminFutureOperators() {
   const [importStatus, setImportStatus] = useState('idle'); // idle, importing, success, error
   const [importResults, setImportResults] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [enrichingIds, setEnrichingIds] = useState(new Set());
+
+  const handleFindEmail = async (operatorId) => {
+    setEnrichingIds(prev => new Set([...prev, operatorId]));
+    try {
+      await base44.functions.invoke('enrichCompanyEmail', { company_id: operatorId });
+      await loadOperators();
+    } catch (e) {
+      alert('Error finding email: ' + e.message);
+    } finally {
+      setEnrichingIds(prev => { const n = new Set(prev); n.delete(operatorId); return n; });
+    }
+  };
 
   useEffect(() => {
     loadOperators();
@@ -245,23 +259,30 @@ export default function AdminFutureOperators() {
                         </div>
                       </div>
 
-                      {operator.source_url && (
+                      <div className="flex gap-2 flex-shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
-                          asChild
-                          className="flex-shrink-0"
+                          onClick={() => handleFindEmail(operator.id)}
+                          disabled={enrichingIds.has(operator.id) || operator.do_not_contact}
+                          className="border-orange-400 text-orange-700 hover:bg-orange-50"
                         >
-                          <a 
-                            href={operator.source_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="w-3 h-3 sm:mr-1" />
-                            <span className="hidden sm:inline">View Profile</span>
-                          </a>
+                          {enrichingIds.has(operator.id)
+                            ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Finding...</>
+                            : operator.email
+                              ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />Re-check</>
+                              : <><Mail className="w-3 h-3 mr-1" />Find Email</>
+                          }
                         </Button>
-                      )}
+                        {operator.source_url && (
+                          <Button variant="outline" size="sm" asChild className="flex-shrink-0">
+                            <a href={operator.source_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-3 h-3 sm:mr-1" />
+                              <span className="hidden sm:inline">View Profile</span>
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
@@ -299,6 +320,18 @@ export default function AdminFutureOperators() {
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
                           <span className="truncate">Member since {operator.member_since}</span>
+                        </div>
+                      )}
+
+                      {operator.email && (
+                        <div className="flex items-center gap-2 col-span-full">
+                          <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          <a href={`mailto:${operator.email}`} className="hover:underline truncate font-mono text-sm">
+                            {operator.email}
+                          </a>
+                          {operator.email_confidence_score != null && (
+                            <span className="text-xs text-slate-400 ml-1">({operator.email_confidence_score}% confidence)</span>
+                          )}
                         </div>
                       )}
                     </div>
