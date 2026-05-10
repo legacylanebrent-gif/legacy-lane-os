@@ -41,7 +41,10 @@ export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
   const referralLink = `${window.location.origin}/OperatorPackages?ref=${referralCode}`;
 
   const emailSubject = `${currentUser?.full_name || 'A colleague'} thinks you should list your estate sale company on EstateSalen.com`;
-  const emailBody = `Hi ${operator?.company_name || 'there'},\n\n${currentUser?.full_name || 'Someone'} thought you'd be a great fit for EstateSalen.com — the platform helping estate sale companies grow their business with digital listings, marketing tools, and a national buyer network.\n\nSign up through their referral link and get started today:\n${referralLink}\n\nBest,\nThe EstateSalen.com Team`;
+  const senderName = currentUser?.full_name || 'Someone';
+  const senderEmail = currentUser?.email || '';
+  const senderPhone = currentUser?.phone || currentUser?.cell_phone || '';
+  const emailBody = `Hi ${operator?.company_name || 'there'},\n\n${senderName} thought you'd be a great fit for EstateSalen.com — the platform helping estate sale companies grow their business with digital listings, marketing tools, and a national buyer network.\n\nSign up through their referral link and get started today:\n${referralLink}\n\nFeel free to reach out to ${senderName} directly:${senderEmail ? `\nEmail: ${senderEmail}` : ''}${senderPhone ? `\nCell: ${senderPhone}` : ''}\n\nBest,\nThe EstateSalen.com Team`;
 
   const handleSend = async () => {
     if (!email.trim()) return;
