@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
     const batchOffset = body.batch_offset ?? 0;
     const cachedCompanies = body.all_companies ?? null;
     const cachedExisting = body.existing_map ?? null; // { byUrl: [[url, {id}]], byPhone: [[phone, {id}]] }
-    const batchSize = 25;
+    const batchSize = 100;
     let allCompanies = [];
     let failedParses = [];
 
