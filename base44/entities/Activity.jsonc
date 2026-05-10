@@ -1,0 +1,74 @@
+{
+  "name": "Activity",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string"
+    },
+    "deal_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User who logged the activity"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "call",
+        "email",
+        "meeting",
+        "note",
+        "task",
+        "sms",
+        "postcard",
+        "site_visit",
+        "property_showing"
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "completed",
+        "cancelled"
+      ],
+      "default": "completed"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_minutes": {
+      "type": "integer"
+    },
+    "outcome": {
+      "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "contact_id",
+    "user_id",
+    "activity_type"
+  ]
+}

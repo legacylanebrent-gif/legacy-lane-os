@@ -1,0 +1,50 @@
+{
+  "name": "Offer",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "Item being offered on"
+    },
+    "offer_amount": {
+      "type": "number",
+      "description": "Offer amount"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Buyer's full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Buyer's phone number"
+    },
+    "email": {
+      "type": "string",
+      "description": "Buyer's email"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Offer status"
+    }
+  },
+  "required": [
+    "sale_id",
+    "item_name",
+    "offer_amount",
+    "full_name"
+  ]
+}

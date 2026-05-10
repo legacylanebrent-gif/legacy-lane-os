@@ -1,0 +1,89 @@
+{
+  "name": "MarketingTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "creator_id": {
+      "type": "string"
+    },
+    "template_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "postcard",
+        "letter",
+        "social_post",
+        "landing_page"
+      ]
+    },
+    "life_event": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "investment",
+        "general"
+      ]
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject or SMS preview"
+    },
+    "content": {
+      "type": "string",
+      "description": "Main content/body"
+    },
+    "design_data": {
+      "type": "object",
+      "description": "JSON for visual templates (postcard, landing page)"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Merge fields like {{first_name}}, {{property_address}}",
+      "default": []
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "introduction",
+        "follow_up",
+        "nurture",
+        "conversion",
+        "testimonial",
+        "referral"
+      ]
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false
+    },
+    "usage_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "rating": {
+      "type": "number"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "creator_id",
+    "template_type",
+    "content"
+  ]
+}

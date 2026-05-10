@@ -1,0 +1,53 @@
+{
+  "name": "AmazonSettings",
+  "type": "object",
+  "properties": {
+    "setting_key": {
+      "type": "string",
+      "description": "Unique key for the setting"
+    },
+    "affiliate_tag": {
+      "type": "string",
+      "description": "Amazon affiliate tag/tracking ID"
+    },
+    "access_key": {
+      "type": "string",
+      "description": "Amazon API access key"
+    },
+    "secret_key": {
+      "type": "string",
+      "description": "Amazon API secret key"
+    },
+    "associate_id": {
+      "type": "string",
+      "description": "Amazon Associate ID"
+    },
+    "marketplace": {
+      "type": "string",
+      "enum": [
+        "US",
+        "CA",
+        "UK",
+        "DE",
+        "FR",
+        "IT",
+        "ES",
+        "JP"
+      ],
+      "default": "US",
+      "description": "Amazon marketplace region"
+    },
+    "api_endpoint": {
+      "type": "string",
+      "description": "Amazon Product Advertising API endpoint"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Amazon integration is active"
+    }
+  },
+  "required": [
+    "setting_key"
+  ]
+}

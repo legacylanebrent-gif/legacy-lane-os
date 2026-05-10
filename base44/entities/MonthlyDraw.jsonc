@@ -1,0 +1,56 @@
+{
+  "name": "MonthlyDraw",
+  "type": "object",
+  "properties": {
+    "month": {
+      "type": "string",
+      "description": "Month in YYYY-MM format"
+    },
+    "total_participants": {
+      "type": "integer",
+      "description": "Number of users who earned points this month"
+    },
+    "total_points": {
+      "type": "integer",
+      "description": "Total points across all users"
+    },
+    "winner_user_id": {
+      "type": "string",
+      "description": "User ID of the winner"
+    },
+    "winner_name": {
+      "type": "string",
+      "description": "Name of the winner"
+    },
+    "winner_points": {
+      "type": "integer",
+      "description": "Points the winner had"
+    },
+    "prize": {
+      "type": "string",
+      "description": "Prize awarded"
+    },
+    "prize_value": {
+      "type": "number",
+      "description": "Value of the prize"
+    },
+    "draw_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the draw was conducted"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "prize_sent"
+      ],
+      "default": "pending",
+      "description": "Status of the draw"
+    }
+  },
+  "required": [
+    "month"
+  ]
+}

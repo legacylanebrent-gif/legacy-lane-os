@@ -1,0 +1,55 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1
+    },
+    "price": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "credit_card",
+        "venmo",
+        "zelle",
+        "check"
+      ],
+      "default": "cash"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "seller_amount": {
+      "type": "number",
+      "description": "80% to seller"
+    },
+    "company_amount": {
+      "type": "number",
+      "description": "20% to company"
+    }
+  },
+  "required": [
+    "sale_id",
+    "item_name",
+    "quantity",
+    "price"
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "name": "BusinessExpense",
+  "type": "object",
+  "properties": {
+    "expense_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of expense"
+    },
+    "vendor_name": {
+      "type": "string",
+      "description": "Vendor/merchant name"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Expense amount"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "advertising_marketing",
+        "auto_expenses",
+        "bank_fees",
+        "education_training",
+        "equipment_tools",
+        "insurance",
+        "internet_phone",
+        "legal_professional",
+        "meals_entertainment",
+        "office_supplies",
+        "rent_lease",
+        "repairs_maintenance",
+        "software_subscriptions",
+        "taxes_licenses",
+        "travel",
+        "utilities",
+        "wages_payroll",
+        "other"
+      ],
+      "description": "Expense category"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Custom tags for organization"
+    },
+    "description": {
+      "type": "string",
+      "description": "Expense description/notes"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "credit_card",
+        "debit_card",
+        "check",
+        "bank_transfer"
+      ],
+      "description": "Payment method used"
+    },
+    "receipt_url": {
+      "type": "string",
+      "description": "Receipt image URL"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is this a recurring expense"
+    },
+    "recurring_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "description": "How often expense recurs"
+    },
+    "tax_deductible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is expense tax deductible"
+    },
+    "reimbursable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should be reimbursed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "reimbursed"
+      ],
+      "default": "paid",
+      "description": "Expense status"
+    },
+    "business_use_percentage": {
+      "type": "number",
+      "default": 100,
+      "description": "Percentage of business use (for mixed-use items)"
+    }
+  },
+  "required": [
+    "expense_date",
+    "vendor_name",
+    "amount",
+    "category"
+  ]
+}

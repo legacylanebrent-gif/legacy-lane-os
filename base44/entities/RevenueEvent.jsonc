@@ -1,0 +1,108 @@
+{
+  "name": "RevenueEvent",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "revenue_type": {
+      "type": "string",
+      "enum": [
+        "subscription",
+        "transaction_fee",
+        "referral_fee",
+        "vendor_commission",
+        "course_sale",
+        "premium_placement",
+        "white_label_license",
+        "data_insights",
+        "estate_sale_commission",
+        "real_estate_commission",
+        "marketplace_sale",
+        "advertising"
+      ]
+    },
+    "monetization_layer": {
+      "type": "string",
+      "enum": [
+        "subscriptions",
+        "transaction_fees",
+        "referral_fees",
+        "vendor_commissions",
+        "education_sales",
+        "premium_placement",
+        "white_label_licensing",
+        "data_insights"
+      ]
+    },
+    "division": {
+      "type": "string",
+      "enum": [
+        "estate_services",
+        "real_estate",
+        "investment",
+        "marketplace",
+        "marketing",
+        "education"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "platform_fee": {
+      "type": "number"
+    },
+    "net_amount": {
+      "type": "number"
+    },
+    "related_entity_type": {
+      "type": "string"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "deal_id": {
+      "type": "string"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "refunded",
+        "disputed"
+      ],
+      "default": "completed"
+    },
+    "subscription_period": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annual"
+      ]
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "revenue_type",
+    "amount"
+  ]
+}

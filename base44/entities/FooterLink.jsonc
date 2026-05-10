@@ -1,0 +1,41 @@
+{
+  "name": "FooterLink",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "enum": [
+        "quick_links",
+        "for_businesses",
+        "resources"
+      ],
+      "description": "Footer section this link belongs to"
+    },
+    "label": {
+      "type": "string",
+      "description": "Display text for the link"
+    },
+    "page_name": {
+      "type": "string",
+      "description": "Internal page name to link to"
+    },
+    "external_url": {
+      "type": "string",
+      "description": "External URL (if not linking to internal page)"
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Display order within section"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this link is visible"
+    }
+  },
+  "required": [
+    "section",
+    "label"
+  ]
+}

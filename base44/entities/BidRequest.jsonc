@@ -1,0 +1,77 @@
+{
+  "name": "BidRequest",
+  "type": "object",
+  "properties": {
+    "requester_id": {
+      "type": "string",
+      "description": "User requesting the bid"
+    },
+    "vendor_id": {
+      "type": "string"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "timeline": {
+      "type": "string",
+      "enum": [
+        "urgent",
+        "soon",
+        "flexible"
+      ]
+    },
+    "budget_range": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "preferred_contact": {
+      "type": "string",
+      "enum": [
+        "email",
+        "phone",
+        "either"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "responded",
+        "accepted",
+        "declined",
+        "completed"
+      ],
+      "default": "pending"
+    },
+    "vendor_response": {
+      "type": "string"
+    },
+    "bid_amount": {
+      "type": "number"
+    },
+    "estimated_timeline": {
+      "type": "string"
+    },
+    "response_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "requester_id",
+    "vendor_id",
+    "service_type",
+    "description"
+  ]
+}

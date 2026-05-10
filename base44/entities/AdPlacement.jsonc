@@ -1,0 +1,77 @@
+{
+  "name": "AdPlacement",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Vendor or company ID"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "placement_type": {
+      "type": "string",
+      "enum": [
+        "national",
+        "local"
+      ],
+      "description": "National or local placement"
+    },
+    "size": {
+      "type": "string",
+      "enum": [
+        "full",
+        "half",
+        "third"
+      ],
+      "default": "full",
+      "description": "Ad size - full width, half width, or 1/3 width"
+    },
+    "zip_code": {
+      "type": "string",
+      "description": "For local placements - the target zip code"
+    },
+    "radius_miles": {
+      "type": "number",
+      "description": "For local placements - radius in miles from zip code"
+    },
+    "location_coordinates": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "Coordinates for the zip code center"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "company_url": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "company_name",
+    "placement_type"
+  ]
+}

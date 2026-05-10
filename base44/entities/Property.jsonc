@@ -1,0 +1,153 @@
+{
+  "name": "Property",
+  "type": "object",
+  "properties": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "formatted_address": {
+          "type": "string"
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "single_family",
+        "condo",
+        "townhouse",
+        "multi_family",
+        "land",
+        "commercial",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "lead",
+        "active_listing",
+        "under_contract",
+        "sold",
+        "archived"
+      ],
+      "default": "lead"
+    },
+    "situation_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "standard",
+        "investor_flip"
+      ],
+      "description": "Life-change situation"
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "Contact/User ID of owner"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Assigned real estate agent"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "list_price": {
+      "type": "number"
+    },
+    "sale_price": {
+      "type": "number"
+    },
+    "bedrooms": {
+      "type": "integer"
+    },
+    "bathrooms": {
+      "type": "number"
+    },
+    "square_feet": {
+      "type": "integer"
+    },
+    "year_built": {
+      "type": "integer"
+    },
+    "lot_size": {
+      "type": "number"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "needs_work"
+      ]
+    },
+    "condition_score": {
+      "type": "integer",
+      "description": "0-100 detailed condition scoring"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "has_estate_sale": {
+      "type": "boolean",
+      "default": false
+    },
+    "estate_sale_id": {
+      "type": "string"
+    },
+    "repair_estimate": {
+      "type": "number"
+    },
+    "arv": {
+      "type": "number",
+      "description": "After Repair Value for investors"
+    },
+    "roi_potential": {
+      "type": "number"
+    },
+    "days_on_market": {
+      "type": "integer",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "address"
+  ]
+}

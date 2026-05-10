@@ -1,0 +1,59 @@
+{
+  "name": "AmazonProduct",
+  "type": "object",
+  "properties": {
+    "product_name": {
+      "type": "string",
+      "description": "Name of the product"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "pricing_tools",
+        "display_supplies",
+        "signage",
+        "payment_processing",
+        "security",
+        "packing_materials",
+        "cleaning_supplies",
+        "equipment",
+        "other"
+      ],
+      "description": "Product category"
+    },
+    "amazon_asin": {
+      "type": "string",
+      "description": "Amazon ASIN"
+    },
+    "affiliate_link": {
+      "type": "string",
+      "description": "Amazon affiliate link"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Product image URL"
+    },
+    "price": {
+      "type": "number",
+      "description": "Product price"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Featured product"
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Display order"
+    }
+  },
+  "required": [
+    "product_name",
+    "category"
+  ]
+}

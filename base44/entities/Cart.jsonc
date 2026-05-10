@@ -1,0 +1,37 @@
+{
+  "name": "Cart",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "seller_id": {
+            "type": "string"
+          },
+          "seller_name": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

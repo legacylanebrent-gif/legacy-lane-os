@@ -1,0 +1,56 @@
+{
+  "name": "VIPInvite",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "VIP Event ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Invitee name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Invitee email"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Invitee phone"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "RSVP status"
+    },
+    "tickets_allocated": {
+      "type": "integer",
+      "default": 1,
+      "description": "Number of tickets allocated to this invite"
+    },
+    "invited_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When invite was sent"
+    },
+    "responded_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When they responded"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "event_id",
+    "name",
+    "email"
+  ]
+}

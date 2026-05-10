@@ -1,0 +1,88 @@
+{
+  "name": "Referral",
+  "type": "object",
+  "properties": {
+    "referrer_id": {
+      "type": "string",
+      "description": "User ID of the person who made the referral"
+    },
+    "referrer_name": {
+      "type": "string",
+      "description": "Name of the referrer"
+    },
+    "referrer_email": {
+      "type": "string",
+      "description": "Email of the referrer"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Unique referral code"
+    },
+    "referred_user_id": {
+      "type": "string",
+      "description": "User ID of the person who signed up"
+    },
+    "referred_user_name": {
+      "type": "string",
+      "description": "Name of the referred user"
+    },
+    "referred_user_email": {
+      "type": "string",
+      "description": "Email of the referred user"
+    },
+    "referred_company_name": {
+      "type": "string",
+      "description": "Company name of referred business"
+    },
+    "referred_email": {
+      "type": "string",
+      "description": "Email of referred business (legacy field)"
+    },
+    "account_type": {
+      "type": "string",
+      "description": "Account type of the referred user"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "signed_up",
+        "subscribed",
+        "converted",
+        "paid"
+      ],
+      "default": "pending",
+      "description": "Status of the referral"
+    },
+    "subscription_started_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When they started their subscription"
+    },
+    "first_payment_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When first payment was received"
+    },
+    "reward_amount": {
+      "type": "number",
+      "default": 25,
+      "description": "Reward amount in dollars"
+    },
+    "reward_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "sent",
+        "claimed"
+      ],
+      "default": "pending",
+      "description": "Status of the reward"
+    }
+  },
+  "required": [
+    "referrer_id",
+    "referral_code"
+  ]
+}

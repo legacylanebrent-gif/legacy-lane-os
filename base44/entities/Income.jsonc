@@ -1,0 +1,69 @@
+{
+  "name": "Income",
+  "type": "object",
+  "properties": {
+    "income_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of income"
+    },
+    "source": {
+      "type": "string",
+      "description": "Income source"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Income amount"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "estate_sale",
+        "marketplace_sale",
+        "referral_commission",
+        "course_sale",
+        "consulting",
+        "commission",
+        "rental_income",
+        "other"
+      ],
+      "description": "Income category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Income description/notes"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "Reference to related record (sale_id, transaction_id, etc)"
+    },
+    "is_automated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Was this automatically tracked from the app"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "credit_card",
+        "debit_card",
+        "check",
+        "bank_transfer",
+        "venmo",
+        "paypal"
+      ],
+      "description": "Payment method received"
+    },
+    "invoice_url": {
+      "type": "string",
+      "description": "Invoice/receipt URL"
+    }
+  },
+  "required": [
+    "income_date",
+    "source",
+    "amount",
+    "category"
+  ]
+}

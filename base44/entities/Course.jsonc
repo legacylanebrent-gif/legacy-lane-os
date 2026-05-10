@@ -1,0 +1,84 @@
+{
+  "name": "Course",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "instructor_id": {
+      "type": "string",
+      "description": "User ID of the instructor"
+    },
+    "instructor_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "estate_sale_operator",
+        "probate_consultant",
+        "investor_training",
+        "agent_life_change",
+        "real_estate_fundamentals",
+        "marketing_mastery",
+        "other"
+      ]
+    },
+    "certification_awarded": {
+      "type": "string",
+      "description": "Name of certification upon completion"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "default": 0
+    },
+    "duration_hours": {
+      "type": "number"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "beginner"
+    },
+    "published": {
+      "type": "boolean",
+      "default": false
+    },
+    "total_lessons": {
+      "type": "integer",
+      "default": 0
+    },
+    "enrollment_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "rating": {
+      "type": "number"
+    },
+    "total_reviews": {
+      "type": "integer",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "title",
+    "instructor_id"
+  ]
+}

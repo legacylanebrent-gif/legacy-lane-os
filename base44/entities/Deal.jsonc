@@ -1,0 +1,82 @@
+{
+  "name": "Deal",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "estate_sale_id": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "Assigned agent/operator"
+    },
+    "deal_type": {
+      "type": "string",
+      "enum": [
+        "real_estate",
+        "estate_sale",
+        "investment",
+        "vendor_service",
+        "education"
+      ]
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "prospecting",
+        "qualified",
+        "proposal",
+        "negotiation",
+        "closing",
+        "won",
+        "lost"
+      ],
+      "default": "prospecting"
+    },
+    "value": {
+      "type": "number"
+    },
+    "probability": {
+      "type": "integer",
+      "description": "Percentage 0-100"
+    },
+    "expected_close_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "actual_close_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "loss_reason": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "next_action_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name",
+    "contact_id",
+    "owner_id",
+    "deal_type"
+  ]
+}

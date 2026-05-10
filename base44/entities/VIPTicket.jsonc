@@ -1,0 +1,43 @@
+{
+  "name": "VIPTicket",
+  "type": "object",
+  "properties": {
+    "invite_id": {
+      "type": "string",
+      "description": "VIP Invite ID"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "VIP Event ID"
+    },
+    "ticket_code": {
+      "type": "string",
+      "description": "Unique ticket code"
+    },
+    "attendee_name": {
+      "type": "string",
+      "description": "Name on ticket"
+    },
+    "attendee_email": {
+      "type": "string",
+      "description": "Email on ticket"
+    },
+    "checked_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether attendee has checked in"
+    },
+    "check_in_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When they checked in"
+    }
+  },
+  "required": [
+    "invite_id",
+    "event_id",
+    "ticket_code",
+    "attendee_name",
+    "attendee_email"
+  ]
+}

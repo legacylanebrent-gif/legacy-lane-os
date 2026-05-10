@@ -1,0 +1,48 @@
+{
+  "name": "TicketMessage",
+  "type": "object",
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "description": "ID of the ticket this message belongs to"
+    },
+    "sender_id": {
+      "type": "string",
+      "description": "User ID of message sender"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Name of sender"
+    },
+    "sender_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin"
+      ],
+      "description": "Whether sender is user or admin"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message content"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "File URLs attached to message"
+    },
+    "is_internal": {
+      "type": "boolean",
+      "default": false,
+      "description": "Internal admin note not visible to user"
+    }
+  },
+  "required": [
+    "ticket_id",
+    "sender_id",
+    "message"
+  ]
+}

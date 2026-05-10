@@ -1,0 +1,92 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "agent_basic",
+        "agent_pro",
+        "operator_basic",
+        "operator_pro",
+        "investor_basic",
+        "investor_pro",
+        "coach_premium"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "pro",
+        "premium",
+        "enterprise"
+      ]
+    },
+    "price": {
+      "type": "number"
+    },
+    "billing_period": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annual"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "paused",
+        "expired"
+      ],
+      "default": "active"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "renewal_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "mrr": {
+      "type": "number",
+      "description": "Monthly Recurring Revenue"
+    },
+    "ltv": {
+      "type": "number",
+      "description": "Lifetime Value"
+    },
+    "churn_risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_type",
+    "price",
+    "billing_period"
+  ]
+}

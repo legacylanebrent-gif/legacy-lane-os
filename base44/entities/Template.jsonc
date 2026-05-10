@@ -1,0 +1,146 @@
+{
+  "name": "Template",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "marketing_email",
+        "marketing_sms",
+        "marketing_social",
+        "sign_yard",
+        "sign_directional",
+        "sign_banner",
+        "sign_window",
+        "contract_estate_sale",
+        "contract_consignment",
+        "contract_vendor",
+        "contract_nda",
+        "business_letterhead",
+        "business_invoice",
+        "business_receipt",
+        "business_business_card",
+        "business_brochure",
+        "notification_email",
+        "notification_sms",
+        "form_intake",
+        "form_inventory",
+        "report_sale_summary",
+        "report_financial"
+      ],
+      "description": "Template category"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "document",
+        "image",
+        "social_post"
+      ],
+      "description": "Template type"
+    },
+    "content": {
+      "type": "string",
+      "description": "Template content with dynamic field placeholders like {{field_name}}"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject line for email templates"
+    },
+    "preview_image": {
+      "type": "string",
+      "description": "Preview image URL for visual templates"
+    },
+    "available_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of available dynamic fields for this template"
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "string"
+        },
+        "height": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "inches",
+            "pixels",
+            "cm"
+          ]
+        }
+      },
+      "description": "Dimensions for print templates"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether template is active"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Default template for category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Template description"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for organizing templates"
+    },
+    "style_settings": {
+      "type": "object",
+      "properties": {
+        "font_family": {
+          "type": "string"
+        },
+        "font_size": {
+          "type": "string"
+        },
+        "colors": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string"
+            },
+            "secondary": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "background": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Style settings for templates"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "type",
+    "content"
+  ]
+}

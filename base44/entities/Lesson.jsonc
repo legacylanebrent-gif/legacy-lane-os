@@ -1,0 +1,80 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string",
+      "description": "Rich text content"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "order_index": {
+      "type": "integer"
+    },
+    "duration_minutes": {
+      "type": "integer"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "quiz": {
+      "type": "object",
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "correct_answer": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "passing_score": {
+          "type": "integer",
+          "default": 70
+        }
+      }
+    }
+  },
+  "required": [
+    "course_id",
+    "title",
+    "order_index"
+  ]
+}

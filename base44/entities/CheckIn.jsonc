@@ -1,0 +1,54 @@
+{
+  "name": "CheckIn",
+  "type": "object",
+  "properties": {
+    "check_in_type": {
+      "type": "string",
+      "enum": [
+        "sale_visit",
+        "event_attendance",
+        "daily",
+        "milestone",
+        "custom"
+      ],
+      "description": "Type of check-in"
+    },
+    "location_name": {
+      "type": "string",
+      "description": "Name of location/business"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID of related sale, event, or business"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Check-in latitude"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Check-in longitude"
+    },
+    "points_earned": {
+      "type": "integer",
+      "default": 0,
+      "description": "Points earned from this check-in"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about the check-in"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Optional photo from check-in"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether check-in was verified"
+    }
+  },
+  "required": [
+    "check_in_type"
+  ]
+}

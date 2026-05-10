@@ -1,0 +1,51 @@
+{
+  "name": "MarketingInteraction",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "template_id": {
+      "type": "string"
+    },
+    "interaction_type": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "opened",
+        "clicked",
+        "replied",
+        "converted",
+        "unsubscribed",
+        "bounced"
+      ]
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "postcard",
+        "letter",
+        "social"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional data like link clicked, device, location"
+    },
+    "attribution_value": {
+      "type": "number",
+      "description": "Revenue attributed to this interaction"
+    }
+  },
+  "required": [
+    "contact_id",
+    "interaction_type",
+    "channel"
+  ]
+}

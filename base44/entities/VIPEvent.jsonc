@@ -1,0 +1,66 @@
+{
+  "name": "VIPEvent",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "sale_title": {
+      "type": "string",
+      "description": "Estate sale title"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Operator user ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "VIP event title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Event date"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Start time"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "End time"
+    },
+    "max_attendees": {
+      "type": "integer",
+      "description": "Maximum number of VIP attendees"
+    },
+    "tickets_per_invite": {
+      "type": "integer",
+      "default": 1,
+      "description": "Number of tickets each VIP can receive"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Event status"
+    }
+  },
+  "required": [
+    "sale_id",
+    "title",
+    "event_date",
+    "start_time",
+    "end_time"
+  ]
+}

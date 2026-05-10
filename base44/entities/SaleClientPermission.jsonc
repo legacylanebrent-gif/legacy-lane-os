@@ -1,0 +1,44 @@
+{
+  "name": "SaleClientPermission",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "client_user_id": {
+      "type": "string",
+      "description": "Client user ID"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client name"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email"
+    },
+    "allowed_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of page names this client can access"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "default": "active",
+      "description": "Permission status"
+    }
+  },
+  "required": [
+    "sale_id",
+    "client_user_id",
+    "client_email"
+  ]
+}

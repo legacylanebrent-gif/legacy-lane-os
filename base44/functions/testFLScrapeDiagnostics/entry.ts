@@ -109,30 +109,30 @@ Deno.serve(async (req) => {
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
 
-    // Check for duplicates
-    let duplicates = [];
-    let newCompanies = [];
-    
-    for (const company of validCompanies) {
-      const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
-      if (match) {
-        duplicates.push({ company: company.company_name, matchedBy: company.source_url ? 'url' : 'phone' });
-      } else {
-        newCompanies.push(company);
-      }
-    }
-
-    // Try to save a small test batch (first 10)
-    const testBatch = newCompanies.slice(0, 10);
+    // Try to upsert a small test batch (first 10) — update if exists, insert if not
+    const testBatch = validCompanies.slice(0, 10);
     let saveSuccesses = 0;
+    let saveUpdates = 0;
+    let saveInserts = 0;
     let saveFailures = [];
 
-    const saveWithRetry = async (company, maxRetries = 3) => {
+    const upsertWithRetry = async (company, maxRetries = 3) => {
       let delay = 500;
       for (let i = 0; i < maxRetries; i++) {
         try {
-          await base44.asServiceRole.entities.FutureEstateOperator.create(company);
-          return 'success';
+          const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
+          if (match) {
+            await base44.asServiceRole.entities.FutureEstateOperator.update(match.id, {
+              company_name: company.company_name, city: company.city, phone: company.phone,
+              website: company.website, member_since: company.member_since, package_type: company.package_type,
+              facebook: company.facebook, twitter: company.twitter, instagram: company.instagram,
+              youtube: company.youtube, pinterest: company.pinterest, source_url: company.source_url,
+            });
+            return 'updated';
+          } else {
+            await base44.asServiceRole.entities.FutureEstateOperator.create(company);
+            return 'created';
+          }
         } catch (e) {
           if (e.message && e.message.includes('429') && i < maxRetries - 1) {
             await new Promise(r => setTimeout(r, delay));
@@ -146,12 +146,21 @@ Deno.serve(async (req) => {
 
     for (const company of testBatch) {
       try {
-        await saveWithRetry(company);
+        const result = await upsertWithRetry(company);
         saveSuccesses++;
+        if (result === 'updated') saveUpdates++;
+        else saveInserts++;
       } catch (e) {
         saveFailures.push({ company: company.company_name, error: e.message });
       }
       await new Promise(r => setTimeout(r, 100));
+    }
+
+    // Count how many would be new vs updated across all valid companies
+    let wouldUpdate = 0, wouldInsert = 0;
+    for (const company of validCompanies) {
+      const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
+      if (match) wouldUpdate++; else wouldInsert++;
     }
 
     return Response.json({
@@ -161,17 +170,17 @@ Deno.serve(async (req) => {
         validation_failures: validationFailures.length,
         valid_companies: validCompanies.length,
         existing_in_db: existing.length,
-        duplicates_found: duplicates.length,
-        potential_new_companies: newCompanies.length,
+        would_update: wouldUpdate,
+        would_insert: wouldInsert,
         test_batch_size: testBatch.length,
         test_batch_successes: saveSuccesses,
+        test_batch_updates: saveUpdates,
+        test_batch_inserts: saveInserts,
         test_batch_failures: saveFailures.length,
       },
       parse_failure_samples: parseFailures.slice(0, 10),
-      validation_failure_samples: validationFailures.slice(0, 10),
-      duplicate_samples: duplicates.slice(0, 10),
       save_failure_details: saveFailures,
-      message: `Of ${allCompanies.length} companies: ${parseFailures.length} failed parsing, ${validationFailures.length} failed validation, ${duplicates.length} are duplicates, ${newCompanies.length} are new. Test batch: ${saveSuccesses}/${testBatch.length} saves succeeded.`
+      message: `Of ${validCompanies.length} valid companies: ${wouldUpdate} would be updated, ${wouldInsert} would be inserted. Test batch (10): ${saveUpdates} updated, ${saveInserts} inserted, ${saveFailures.length} failed.`
     });
   } catch (error) {
     return Response.json({ error: error.message, stack: error.stack }, { status: 500 });

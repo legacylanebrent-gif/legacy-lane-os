@@ -1,0 +1,42 @@
+{
+  "name": "AccountSubcategory",
+  "type": "object",
+  "properties": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale_operator",
+        "real_estate_agent",
+        "investor",
+        "vendor",
+        "consignor"
+      ],
+      "description": "Account type this subcategory belongs to"
+    },
+    "subcategory_name": {
+      "type": "string",
+      "description": "Name of the subcategory"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this subcategory covers"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon name for UI display"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this subcategory is currently available"
+    },
+    "sort_order": {
+      "type": "integer",
+      "description": "Display order in lists"
+    }
+  },
+  "required": [
+    "account_type",
+    "subcategory_name"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "ProductDatabase",
+  "type": "object",
+  "properties": {
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Small thumbnail image of the product"
+    },
+    "title": {
+      "type": "string",
+      "description": "Product title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "suggested_new_price": {
+      "type": "number",
+      "description": "AI suggested retail price when new"
+    },
+    "suggested_used_price": {
+      "type": "number",
+      "description": "AI suggested estate sale price"
+    },
+    "actual_price": {
+      "type": "number",
+      "description": "Actual price the user entered for the item"
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Unique ID linking to the Item entity if created"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID this item belongs to"
+    },
+    "final_sold_price": {
+      "type": "number",
+      "description": "Actual sold price from worksheet transaction"
+    },
+    "sold_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date item was sold"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Product categories"
+    }
+  },
+  "required": [
+    "thumbnail_url",
+    "title"
+  ]
+}

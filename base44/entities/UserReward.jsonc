@@ -1,0 +1,40 @@
+{
+  "name": "UserReward",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID"
+    },
+    "action_id": {
+      "type": "string",
+      "description": "Action that was completed"
+    },
+    "action_name": {
+      "type": "string",
+      "description": "Name of the action"
+    },
+    "points_earned": {
+      "type": "integer",
+      "description": "Points earned from this action"
+    },
+    "month": {
+      "type": "string",
+      "description": "Month in YYYY-MM format"
+    },
+    "reference_id": {
+      "type": "string",
+      "description": "Reference to related entity (sale_id, referral_id, etc)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the action"
+    }
+  },
+  "required": [
+    "user_id",
+    "action_id",
+    "points_earned",
+    "month"
+  ]
+}

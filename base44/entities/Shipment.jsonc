@@ -1,0 +1,115 @@
+{
+  "name": "Shipment",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "Item being shipped"
+    },
+    "size_category": {
+      "type": "string",
+      "enum": [
+        "small",
+        "large"
+      ],
+      "description": "Small (USPS/FedEx/UPS) or Large (vendor delivery)"
+    },
+    "buyer_name": {
+      "type": "string",
+      "description": "Buyer's name"
+    },
+    "buyer_email": {
+      "type": "string",
+      "description": "Buyer's email"
+    },
+    "buyer_phone": {
+      "type": "string",
+      "description": "Buyer's phone"
+    },
+    "shipping_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      }
+    },
+    "carrier": {
+      "type": "string",
+      "enum": [
+        "usps",
+        "fedex",
+        "ups",
+        "vendor"
+      ],
+      "description": "Shipping carrier"
+    },
+    "tracking_number": {
+      "type": "string",
+      "description": "Tracking number"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "description": "Shipping cost"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Vendor ID for large item delivery"
+    },
+    "vendor_quote": {
+      "type": "number",
+      "description": "Vendor delivery quote"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "quoted",
+        "shipped",
+        "delivered"
+      ],
+      "default": "pending",
+      "description": "Shipment status"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "sale_id",
+    "item_name",
+    "size_category",
+    "buyer_name"
+  ]
+}

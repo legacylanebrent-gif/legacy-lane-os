@@ -1,0 +1,42 @@
+{
+  "name": "ItemPricing",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Photo URL"
+    },
+    "low_price": {
+      "type": "number",
+      "description": "Low end of price range"
+    },
+    "high_price": {
+      "type": "number",
+      "description": "High end of price range"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "site": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      },
+      "default": [],
+      "description": "Pricing sources from different sites"
+    }
+  },
+  "required": [
+    "sale_id",
+    "photo_url"
+  ]
+}

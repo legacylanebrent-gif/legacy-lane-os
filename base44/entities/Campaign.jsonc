@@ -1,0 +1,177 @@
+{
+  "name": "Campaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "creator_id": {
+      "type": "string"
+    },
+    "campaign_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "postcard",
+        "social",
+        "funnel",
+        "multi_channel"
+      ]
+    },
+    "life_event_target": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "investment",
+        "standard",
+        "all"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "paused",
+        "completed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "funnel_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "delay_days": {
+            "type": "integer"
+          },
+          "trigger_condition": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "target_audience": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "situations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lead_score_min": {
+          "type": "integer"
+        }
+      }
+    },
+    "automation_triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "sent": {
+          "type": "integer",
+          "default": 0
+        },
+        "opened": {
+          "type": "integer",
+          "default": 0
+        },
+        "clicked": {
+          "type": "integer",
+          "default": 0
+        },
+        "converted": {
+          "type": "integer",
+          "default": 0
+        },
+        "revenue": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recurring": {
+          "type": "boolean"
+        },
+        "frequency": {
+          "type": "string"
+        }
+      }
+    },
+    "budget": {
+      "type": "number"
+    },
+    "spent": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "creator_id",
+    "campaign_type"
+  ]
+}

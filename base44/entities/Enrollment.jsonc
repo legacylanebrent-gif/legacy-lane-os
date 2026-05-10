@@ -1,0 +1,57 @@
+{
+  "name": "Enrollment",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "course_id": {
+      "type": "string"
+    },
+    "enrolled_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "progress": {
+      "type": "number",
+      "description": "Percentage from 0-100",
+      "default": 0
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_lessons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of lesson IDs",
+      "default": []
+    },
+    "quiz_scores": {
+      "type": "object",
+      "description": "Map of lesson_id to score",
+      "default": {}
+    },
+    "certificate_issued": {
+      "type": "boolean",
+      "default": false
+    },
+    "certificate_url": {
+      "type": "string"
+    },
+    "last_accessed": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "course_id"
+  ]
+}

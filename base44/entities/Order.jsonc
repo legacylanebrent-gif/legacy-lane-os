@@ -1,0 +1,139 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string"
+    },
+    "buyer_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_title": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          },
+          "seller_id": {
+            "type": "string"
+          },
+          "seller_name": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "shipping_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "platform_fee": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "paid",
+        "processing",
+        "shipped",
+        "delivered",
+        "completed",
+        "cancelled",
+        "disputed"
+      ],
+      "default": "pending_payment"
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "escrow_status": {
+      "type": "string",
+      "enum": [
+        "held",
+        "released",
+        "refunded"
+      ],
+      "default": "held"
+    },
+    "shipping_address": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "fulfillment_method": {
+      "type": "string",
+      "enum": [
+        "shipping",
+        "pickup",
+        "digital"
+      ],
+      "default": "shipping"
+    },
+    "pickup_details": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "scheduled_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "instructions": {
+          "type": "string"
+        }
+      }
+    },
+    "tracking_number": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "items",
+    "total"
+  ]
+}

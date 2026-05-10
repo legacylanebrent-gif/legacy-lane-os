@@ -1,0 +1,44 @@
+{
+  "name": "PageAccess",
+  "type": "object",
+  "properties": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "super_admin",
+        "platform_ops",
+        "growth_team",
+        "partnerships",
+        "education_admin",
+        "finance_admin",
+        "estate_sale_operator",
+        "real_estate_agent",
+        "investor",
+        "vendor",
+        "consignor",
+        "consumer"
+      ],
+      "description": "Account type this configuration applies to"
+    },
+    "allowed_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of page names this account type can access"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this account type's access"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this access configuration is active"
+    }
+  },
+  "required": [
+    "account_type"
+  ]
+}

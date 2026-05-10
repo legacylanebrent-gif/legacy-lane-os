@@ -1,0 +1,53 @@
+{
+  "name": "PricingDatabase",
+  "type": "object",
+  "properties": {
+    "item_id": {
+      "type": "integer",
+      "description": "Auto-incrementing ID for each pricing item"
+    },
+    "category": {
+      "type": "string",
+      "description": "Item category (e.g., Furniture, Jewelry, Art)"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "Name of the item"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand or manufacturer"
+    },
+    "price_low": {
+      "type": "number",
+      "description": "Low end of price range"
+    },
+    "price_medium": {
+      "type": "number",
+      "description": "Medium price point"
+    },
+    "price_high": {
+      "type": "number",
+      "description": "High end of price range"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "unknown"
+      ],
+      "description": "Condition of item type"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the item"
+    }
+  },
+  "required": [
+    "category",
+    "item_name"
+  ]
+}

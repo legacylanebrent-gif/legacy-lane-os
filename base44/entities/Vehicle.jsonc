@@ -1,0 +1,34 @@
+{
+  "name": "Vehicle",
+  "type": "object",
+  "properties": {
+    "vehicle_name": {
+      "type": "string",
+      "description": "Nickname or identifier for the vehicle"
+    },
+    "make": {
+      "type": "string",
+      "description": "Vehicle make (e.g., Toyota, Ford)"
+    },
+    "model": {
+      "type": "string",
+      "description": "Vehicle model"
+    },
+    "year": {
+      "type": "integer",
+      "description": "Vehicle year"
+    },
+    "license_plate": {
+      "type": "string",
+      "description": "License plate number"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is this the primary vehicle"
+    }
+  },
+  "required": [
+    "vehicle_name"
+  ]
+}

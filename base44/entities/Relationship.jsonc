@@ -1,0 +1,49 @@
+{
+  "name": "Relationship",
+  "type": "object",
+  "properties": {
+    "contact_a_id": {
+      "type": "string"
+    },
+    "contact_b_id": {
+      "type": "string"
+    },
+    "relationship_type": {
+      "type": "string",
+      "enum": [
+        "family",
+        "spouse",
+        "child",
+        "parent",
+        "sibling",
+        "executor",
+        "attorney",
+        "agent",
+        "vendor",
+        "business_partner",
+        "referral_source",
+        "other"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ],
+      "default": "moderate"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contact_a_id",
+    "contact_b_id",
+    "relationship_type"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "name": "RewardAction",
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "description": "Unique action identifier"
+    },
+    "action_name": {
+      "type": "string",
+      "description": "Name of the action"
+    },
+    "action_description": {
+      "type": "string",
+      "description": "Description of what user needs to do"
+    },
+    "points": {
+      "type": "integer",
+      "description": "Points awarded for completing this action"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "engagement",
+        "social",
+        "sales",
+        "referrals",
+        "purchases",
+        "content"
+      ],
+      "description": "Category of the action"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "once",
+        "daily",
+        "weekly",
+        "unlimited"
+      ],
+      "default": "unlimited",
+      "description": "How often this action can be completed"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this action is currently available"
+    }
+  },
+  "required": [
+    "action_id",
+    "action_name",
+    "points",
+    "category"
+  ]
+}

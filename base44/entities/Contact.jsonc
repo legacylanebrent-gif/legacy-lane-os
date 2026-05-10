@@ -1,0 +1,168 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "seller",
+          "buyer",
+          "executor",
+          "vendor",
+          "investor",
+          "referral",
+          "agent",
+          "attorney",
+          "cpa",
+          "contractor"
+        ]
+      },
+      "description": "Multiple roles a contact can have",
+      "default": []
+    },
+    "lead_source": {
+      "type": "string",
+      "enum": [
+        "estate_finder",
+        "home_value_tool",
+        "referral",
+        "marketplace",
+        "education",
+        "organic",
+        "advertising"
+      ]
+    },
+    "situation": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "divorce",
+        "downsizing",
+        "relocation",
+        "foreclosure",
+        "investment",
+        "standard"
+      ]
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Agent/operator user ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "nurturing",
+        "active",
+        "closed_won",
+        "closed_lost"
+      ],
+      "default": "new"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Deal value"
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of Property IDs",
+      "default": []
+    },
+    "last_contact_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "next_follow_up": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "notes": {
+      "type": "string"
+    },
+    "lifetime_value": {
+      "type": "number",
+      "default": 0
+    },
+    "score": {
+      "type": "integer",
+      "description": "Lead score 0-100",
+      "default": 0
+    },
+    "source_campaign_id": {
+      "type": "string"
+    },
+    "deals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of Deal IDs",
+      "default": []
+    },
+    "activities_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_activity_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "name": "Expense",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Estate sale ID"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "advertising_marketing",
+        "cleaning_services",
+        "dumpster_disposal",
+        "equipment_rental",
+        "insurance",
+        "labor_wages",
+        "meals_entertainment",
+        "permits_licenses",
+        "photography",
+        "professional_services",
+        "security",
+        "signage_banners",
+        "staging_setup",
+        "supplies_materials",
+        "transportation_fuel",
+        "utilities",
+        "other"
+      ],
+      "description": "Expense category"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Expense amount"
+    },
+    "vendor": {
+      "type": "string",
+      "description": "Vendor name"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expense date"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "credit_card",
+        "debit_card",
+        "check",
+        "company_card"
+      ],
+      "default": "credit_card",
+      "description": "Payment method"
+    },
+    "description": {
+      "type": "string",
+      "description": "Expense description"
+    },
+    "receipt_url": {
+      "type": "string",
+      "description": "Receipt image URL"
+    },
+    "is_reimbursable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether expense is reimbursable"
+    }
+  },
+  "required": [
+    "sale_id",
+    "category",
+    "amount",
+    "date"
+  ]
+}

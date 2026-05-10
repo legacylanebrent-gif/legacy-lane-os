@@ -1,0 +1,93 @@
+{
+  "name": "Connection",
+  "type": "object",
+  "properties": {
+    "account_owner_id": {
+      "type": "string",
+      "description": "ID of the operator/agent/vendor who owns this connection"
+    },
+    "account_owner_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale_operator",
+        "real_estate_agent",
+        "vendor"
+      ],
+      "description": "Type of account owner"
+    },
+    "connected_user_id": {
+      "type": "string",
+      "description": "ID of the connected user"
+    },
+    "connected_user_name": {
+      "type": "string",
+      "description": "Name of connected user"
+    },
+    "connected_user_email": {
+      "type": "string",
+      "description": "Email of connected user"
+    },
+    "connected_user_phone": {
+      "type": "string",
+      "description": "Phone of connected user"
+    },
+    "connection_type": {
+      "type": "string",
+      "enum": [
+        "favorite",
+        "lead",
+        "client",
+        "referral",
+        "manual"
+      ],
+      "default": "manual",
+      "description": "How the connection was created"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "connected",
+        "archived"
+      ],
+      "default": "connected",
+      "description": "Connection status"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where the connection came from (sale_id, event, etc)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Custom tags for organizing connections"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes about this connection"
+    },
+    "last_interaction": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time interacted with this connection"
+    },
+    "total_interactions": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total number of interactions"
+    },
+    "lifetime_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Total value from this connection"
+    }
+  },
+  "required": [
+    "account_owner_id",
+    "account_owner_type",
+    "connected_user_email"
+  ]
+}
