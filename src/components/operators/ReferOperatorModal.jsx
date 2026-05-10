@@ -66,7 +66,7 @@ export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg w-[90vw]">
+      <DialogContent className="max-w-lg w-[90vw] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-orange-500" />
@@ -94,7 +94,7 @@ export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
             <Button onClick={handleClose} className="w-full">Done</Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 w-full min-w-0">
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
               <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
               <p className="text-xs text-slate-500">{operator.city}, {operator.state}</p>
@@ -107,10 +107,10 @@ export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
             </div>
 
             {/* Preview */}
-            <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
+            <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-1 overflow-hidden">
               <p className="text-xs font-semibold text-slate-600">Email Preview:</p>
               <p className="text-xs text-slate-500 italic line-clamp-3">{emailBody.split('\n').slice(0, 3).join(' ')}</p>
-              <p className="text-xs text-cyan-600 truncate">{referralLink}</p>
+              <p className="text-xs text-cyan-600 break-all">{referralLink}</p>
             </div>
 
             <div>
