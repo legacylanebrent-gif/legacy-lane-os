@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
+import ReferOperatorModal from '@/components/operators/ReferOperatorModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -52,6 +53,7 @@ export default function BrowseOperators() {
   const [selectedState, setSelectedState] = useState(null);
   const [expandedStates, setExpandedStates] = useState({});
   const [claimingOperator, setClaimingOperator] = useState(null);
+  const [referringOperator, setReferringOperator] = useState(null);
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
@@ -126,6 +128,12 @@ export default function BrowseOperators() {
         operator={claimingOperator}
         open={!!claimingOperator}
         onClose={() => setClaimingOperator(null)}
+      />
+      <ReferOperatorModal
+        operator={referringOperator}
+        open={!!referringOperator}
+        onClose={() => setReferringOperator(null)}
+        currentUser={currentUser}
       />
 
       {/* Hero */}
@@ -276,6 +284,14 @@ export default function BrowseOperators() {
                                         Claim My Company
                                       </Button>
                                     )}
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="mt-2 w-full text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
+                                      onClick={() => setReferringOperator(op)}
+                                    >
+                                      🎁 Refer & Earn $25
+                                    </Button>
                                   </CardContent>
                                 </Card>
                               ))}
