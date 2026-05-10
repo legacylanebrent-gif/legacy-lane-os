@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useLocation } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Search, ShoppingBag, Grid3x3, List, X } from 'lucide-react';
 import MarketplaceItemCard from '@/components/marketplace/MarketplaceItemCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
@@ -44,6 +46,8 @@ export default function BrowseItems() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +64,10 @@ export default function BrowseItems() {
   useEffect(() => {
     getUserLocation();
     loadMarketplaceItems();
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
   }, []);
 
   // Refilter when any filter changes
@@ -195,46 +203,36 @@ export default function BrowseItems() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gold-600 rounded-xl flex items-center justify-center">
-                <ShoppingBag className="w-6 h-6 text-white" />
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
+
+      {/* Page Title + Search Bar */}
+      <div className="bg-white border-b border-slate-200 sticky top-14 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <ShoppingBag className="w-6 h-6 text-orange-500" />
               <div>
-                <h1 className="text-3xl font-serif font-bold text-navy-900">Legacy Lane Marketplace</h1>
-                <p className="text-slate-600 mt-1">{filteredItems.length} items available</p>
+                <h1 className="text-2xl font-serif font-bold text-slate-900">Marketplace</h1>
+                <p className="text-sm text-slate-500">{filteredItems.length} items available</p>
               </div>
             </div>
-
             <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setViewMode('grid')}
-              >
+              <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('grid')}>
                 <Grid3x3 className="w-4 h-4" />
               </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setViewMode('list')}
-              >
+              <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('list')}>
                 <List className="w-4 h-4" />
               </Button>
             </div>
           </div>
-
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input
               placeholder="Search items, sellers, or keywords..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-11"
             />
           </div>
         </div>
@@ -406,6 +404,47 @@ export default function BrowseItems() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-20 px-4 mt-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
+                <div>
+                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
+                  <p className="text-sm text-orange-400">Estate Sale Finder</p>
+                </div>
+              </div>
+              <p className="text-slate-400 text-lg mb-6">
+                Discover amazing estate sales and find treasures near you. Connect with trusted estate sale companies nationwide.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><Link to={createPageUrl('SearchByState')} className="text-white hover:text-orange-400 transition-colors">Browse by State</Link></li>
+                <li><Link to={createPageUrl('BrowseOperators')} className="text-white hover:text-orange-400 transition-colors">Browse Companies</Link></li>
+                <li><Link to={createPageUrl('Home')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
+                <li><Link to={createPageUrl('BrowseItems')} className="text-white hover:text-orange-400 transition-colors">Marketplace</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
+              <ul className="space-y-2">
+                <li><Link to={createPageUrl('OperatorPackages')} className="text-white hover:text-orange-400 transition-colors">List Your Company</Link></li>
+                <li><Link to={createPageUrl('AgentSignup')} className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
+                <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
+                <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-800 pt-8 text-center">
+            <p className="text-slate-500">© {new Date().getFullYear()} EstateSalen.com. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
