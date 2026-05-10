@@ -292,6 +292,9 @@ export default function AdminFutureOperators() {
         totalCompanies: data.total_companies,
         totalInserted: (prev?.totalInserted || 0) + (data.inserted || 0),
         totalUpdated: (prev?.totalUpdated || 0) + (data.updated || 0),
+        totalFailed: (prev?.totalFailed || 0) + (data.failed || 0),
+        dbCountAfter: data.db_count_after,
+        lastErrors: data.record_errors || [],
         currentOffset: offset,
         batchSize: data.batch_size,
         isLastBatch: data.is_last_batch,
@@ -872,8 +875,26 @@ export default function AdminFutureOperators() {
                     <div className="flex justify-between text-sm pt-1">
                       <span className="text-green-700">+{njBatchState.totalInserted} new</span>
                       <span className="text-blue-700">{njBatchState.totalUpdated} updated</span>
+                      {njBatchState.totalFailed > 0 && (
+                        <span className="text-red-600">{njBatchState.totalFailed} failed</span>
+                      )}
                     </div>
+                    {njBatchState.dbCountAfter != null && (
+                      <div className="flex justify-between text-sm font-semibold border-t pt-2 mt-1">
+                        <span className="text-slate-700">Live DB count ({stateFilter}):</span>
+                        <span className="text-orange-600">{njBatchState.dbCountAfter.toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
+
+                  {njBatchState.lastErrors?.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1 max-h-32 overflow-y-auto">
+                      <p className="text-xs font-semibold text-red-700">Last batch errors ({njBatchState.lastErrors.length}):</p>
+                      {njBatchState.lastErrors.map((e, i) => (
+                        <p key={i} className="text-xs text-red-600">{e.company} ({e.city}): {e.error}</p>
+                      ))}
+                    </div>
+                  )}
 
                   {njBatchState.error && (
                     <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">

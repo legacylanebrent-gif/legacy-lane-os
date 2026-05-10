@@ -105,35 +105,51 @@ Deno.serve(async (req) => {
               facebook: company.facebook, twitter: company.twitter, instagram: company.instagram,
               youtube: company.youtube, pinterest: company.pinterest, source_url: company.source_url,
             });
-            return 'updated';
+            return { action: 'updated', error: null };
           } else {
             const created = await base44.asServiceRole.entities.FutureEstateOperator.create(company);
-            // Add to cache so subsequent saves in this batch don't duplicate
             if (company.source_url) byUrl.set(company.source_url, { id: created.id });
             if (company.phone) byPhone.set(company.phone, { id: created.id });
-            return 'created';
+            return { action: 'created', error: null };
           }
         } catch (e) {
           if (i < maxRetries - 1) {
             await new Promise(r => setTimeout(r, delay));
             delay = Math.min(delay * 2, 20000);
           } else {
-            throw e;
+            return { action: 'failed', error: e.message };
           }
         }
       }
     };
 
     let inserted = 0, updated = 0, failed = 0;
+    const record_errors = [];
     for (const company of batch) {
-      try {
-        const result = await saveWithRetry(company);
-        if (result === 'created') inserted++;
-        else if (result === 'updated') updated++;
-      } catch (e) {
+      const result = await saveWithRetry(company);
+      if (result.action === 'created') inserted++;
+      else if (result.action === 'updated') updated++;
+      else {
         failed++;
+        record_errors.push({ company: company.company_name, city: company.city, error: result.error });
       }
       await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Get live DB count for this state after saving
+    let db_count_after = null;
+    try {
+      let countCheck = [];
+      let skip = 0;
+      while (true) {
+        const page = await base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'FL' }, '-created_date', 500, skip);
+        countCheck = countCheck.concat(page);
+        if (page.length < 500) break;
+        skip += 500;
+      }
+      db_count_after = countCheck.length;
+    } catch(e) {
+      db_count_after = null;
     }
 
     // Serialize the maps back for the next batch call
@@ -150,6 +166,8 @@ Deno.serve(async (req) => {
       batch_offset: batchOffset,
       batch_size: batch.length,
       inserted, updated, failed,
+      record_errors,
+      db_count_after,
       next_offset: isLastBatch ? null : batchOffset + batchSize,
       is_last_batch: isLastBatch,
       failed_parses: failedParses.length,
