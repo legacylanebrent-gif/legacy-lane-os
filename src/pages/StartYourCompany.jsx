@@ -572,6 +572,7 @@ export default function StartYourCompany() {
                 <li><Link to={createPageUrl('SearchByState')} className="text-white hover:text-orange-400 transition-colors">Browse by State</Link></li>
                 <li><Link to={createPageUrl('BrowseOperators')} className="text-white hover:text-orange-400 transition-colors">Browse Companies</Link></li>
                 <li><Link to={createPageUrl('Home')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
+                <li><Link to={createPageUrl('BrowseItems')} className="text-white hover:text-orange-400 transition-colors">Marketplace</Link></li>
               </ul>
             </div>
             <div>
