@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
+import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -50,6 +51,7 @@ export default function BrowseOperators() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedState, setSelectedState] = useState(null);
   const [expandedStates, setExpandedStates] = useState({});
+  const [claimingOperator, setClaimingOperator] = useState(null);
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
@@ -119,6 +121,12 @@ export default function BrowseOperators() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
+
+      <ClaimCompanyModal
+        operator={claimingOperator}
+        open={!!claimingOperator}
+        onClose={() => setClaimingOperator(null)}
+      />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
@@ -257,8 +265,16 @@ export default function BrowseOperators() {
                                         <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>
                                       )}
                                     </div>
-                                    {op.package_type && (
+                                    {op.package_type ? (
                                       <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{stripHtml(op.package_type)}</Badge>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7"
+                                        onClick={() => setClaimingOperator(op)}
+                                      >
+                                        Claim My Company
+                                      </Button>
                                     )}
                                   </CardContent>
                                 </Card>
