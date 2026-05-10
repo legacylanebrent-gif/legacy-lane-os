@@ -8,11 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
-import ReferOperatorModal from '@/components/operators/ReferOperatorModal';
+import { ReferByEmailModal, logReferral } from '@/components/operators/ReferOperatorModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Search, MapPin, Building2, Phone, Globe, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Building2, Phone, Globe, ChevronDown, ChevronRight, Mail, MessageSquare } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
 
 // Strip HTML tags from a string
@@ -53,7 +53,27 @@ export default function BrowseOperators() {
   const [selectedState, setSelectedState] = useState(null);
   const [expandedStates, setExpandedStates] = useState({});
   const [claimingOperator, setClaimingOperator] = useState(null);
-  const [referringOperator, setReferringOperator] = useState(null);
+  const [emailReferOperator, setEmailReferOperator] = useState(null);
+  const [textSentId, setTextSentId] = useState(null); // tracks which op had text referral sent
+
+  const handleReferByText = async (op) => {
+    if (!currentUser) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+    const referralCode = currentUser.id.slice(-8).toUpperCase();
+    const referralLink = `${window.location.origin}/OperatorPackages?ref=${referralCode}`;
+    const smsBody = `Hi ${op.company_name}! I think you'd love EstateSalen.com — it helps estate sale companies grow with digital listings, marketing tools & a national buyer network. Sign up here: ${referralLink}`;
+
+    // Log the referral + award points
+    await logReferral({ currentUser, operator: op, contactEmail: op.email || '' });
+    setTextSentId(op.id);
+    setTimeout(() => setTextSentId(null), 3000);
+
+    // Open SMS app with pre-filled message (phone if available, otherwise blank)
+    const phone = op.phone ? op.phone.replace(/\D/g, '') : '';
+    window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
+  };
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
@@ -129,10 +149,10 @@ export default function BrowseOperators() {
         open={!!claimingOperator}
         onClose={() => setClaimingOperator(null)}
       />
-      <ReferOperatorModal
-        operator={referringOperator}
-        open={!!referringOperator}
-        onClose={() => setReferringOperator(null)}
+      <ReferByEmailModal
+        operator={emailReferOperator}
+        open={!!emailReferOperator}
+        onClose={() => setEmailReferOperator(null)}
         currentUser={currentUser}
       />
 
@@ -284,14 +304,24 @@ export default function BrowseOperators() {
                                         Claim My Company
                                       </Button>
                                     )}
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="mt-2 w-full text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
-                                      onClick={() => setReferringOperator(op)}
-                                    >
-                                      🎁 Refer & Earn $25
-                                    </Button>
+                                    <div className="mt-2 grid grid-cols-2 gap-1.5">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
+                                        onClick={() => handleReferByText(op)}
+                                      >
+                                        {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
+                                        onClick={() => setEmailReferOperator(op)}
+                                      >
+                                        ✉️ Refer by Email
+                                      </Button>
+                                    </div>
                                   </CardContent>
                                 </Card>
                               ))}
