@@ -39,6 +39,8 @@ export default function SharedFooter() {
               <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
               <li><Link to={createPageUrl('DIYSaleSignup')} className="text-white hover:text-orange-400 transition-colors">Sell Your Items</Link></li>
               <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
+              <li><Link to="/CompanyLanding" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Platform Features</Link></li>
+              <li><Link to="/CompareEstateSales" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Compare vs EstateSales.net</Link></li>
             </ul>
           </div>
         </div>
