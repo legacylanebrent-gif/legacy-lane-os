@@ -13,10 +13,16 @@ export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAnnual, setIsAnnual] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     loadPackages();
     processPostSignup();
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
   }, []);
 
   const loadPackages = async () => {
@@ -154,7 +160,7 @@ export default function OperatorPackages() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      <UniversalHeader user={null} isAuthenticated={false} />
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       <div className="max-w-7xl mx-auto py-12 px-4">
         {/* Header */}
