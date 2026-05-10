@@ -49,13 +49,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Delete with small delay between each to avoid rate limits
+    // Delete in batches of 100 with a pause between batches
     let deleted = 0;
-    for (const id of toDelete) {
-      await base44.asServiceRole.entities.FutureEstateOperator.delete(id);
-      deleted++;
-      // 150ms between deletes to stay well under rate limits
-      await new Promise(r => setTimeout(r, 150));
+    const batchSize = 100;
+    for (let i = 0; i < toDelete.length; i += batchSize) {
+      const batch = toDelete.slice(i, i + batchSize);
+      await Promise.all(batch.map(id => base44.asServiceRole.entities.FutureEstateOperator.delete(id)));
+      deleted += batch.length;
+      if (i + batchSize < toDelete.length) {
+        await new Promise(r => setTimeout(r, 500));
+      }
     }
 
     return Response.json({
