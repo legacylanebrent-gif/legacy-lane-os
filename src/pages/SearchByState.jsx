@@ -1,37 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { US_STATES } from '@/components/data/USStates';
-import { MapPin, ArrowLeft, Home as HomeIcon } from 'lucide-react';
+import UniversalHeader from '@/components/layout/UniversalHeader';
+import { base44 } from '@/api/base44Client';
+import { MapPin, Home as HomeIcon } from 'lucide-react';
 
 export default function SearchByState() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Estate Sale Finder</p>
-              </div>
-            </Link>
-
-            <Link to={createPageUrl('Home')}>
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
