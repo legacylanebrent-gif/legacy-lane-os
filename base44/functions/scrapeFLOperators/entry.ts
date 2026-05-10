@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const batchOffset = body.batch_offset ?? 0;
     const cachedCompanies = body.all_companies ?? null;
-    const batchSize = 50;
+    const batchSize = 25;
     let allCompanies = [];
     let failedParses = [];
     if (cachedCompanies) {
@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
-    const saveWithRetry = async (company, maxRetries = 3) => {
-      let delay = 500;
+    const saveWithRetry = async (company, maxRetries = 5) => {
+      let delay = 1000;
       for (let i = 0; i < maxRetries; i++) {
         try {
           const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
         if (result === 'created') inserted++;
         else if (result === 'updated') updated++;
       } catch (e) {}
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 300));
     }
     return Response.json({
       success: true, total_companies: allCompanies.length, all_companies: allCompanies,
