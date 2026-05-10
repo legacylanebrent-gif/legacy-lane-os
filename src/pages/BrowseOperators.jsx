@@ -13,6 +13,12 @@ import L from 'leaflet';
 import { Search, MapPin, Building2, Phone, Globe, ChevronDown, ChevronRight } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
 
+// Strip HTML tags from a string
+function stripHtml(str) {
+  if (!str) return str;
+  return str.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+}
+
 // Fix Leaflet default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -81,8 +87,8 @@ export default function BrowseOperators() {
 
     const result = {};
     filtered.forEach(op => {
-      const state = op.state || 'Unknown';
-      const city = op.city || 'Unknown';
+      const state = stripHtml(op.state) || 'Unknown';
+      const city = stripHtml(op.city) || 'Unknown';
       if (!result[state]) result[state] = {};
       if (!result[state][city]) result[state][city] = [];
       result[state][city].push(op);
@@ -227,32 +233,32 @@ export default function BrowseOperators() {
                           <div key={city}>
                             <div className="flex items-center gap-2 mb-3">
                               <MapPin className="w-4 h-4 text-orange-500" />
-                              <h4 className="font-semibold text-slate-700">{city}</h4>
+                              <h4 className="font-semibold text-slate-700">{stripHtml(city)}</h4>
                               <Badge variant="outline" className="text-xs">{cities[city].length}</Badge>
                             </div>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                               {cities[city].map(op => (
                                 <Card key={op.id} className="hover:shadow-md transition-shadow border-slate-200">
                                   <CardContent className="p-4">
-                                    <h5 className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{op.company_name}</h5>
-                                    <p className="text-xs text-slate-500 mb-2">{op.city}, {op.state}</p>
+                                    <h5 className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{stripHtml(op.company_name)}</h5>
+                                    <p className="text-xs text-slate-500 mb-2">{stripHtml(op.city)}, {stripHtml(op.state)}</p>
                                     <div className="space-y-1">
                                       {op.phone && (
-                                        <a href={`tel:${op.phone}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
-                                          <Phone className="w-3 h-3" /> {op.phone}
+                                        <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
+                                          <Phone className="w-3 h-3" /> {stripHtml(op.phone)}
                                         </a>
                                       )}
                                       {op.website_url && (
-                                        <a href={op.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-600 hover:underline">
+                                        <a href={stripHtml(op.website_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-600 hover:underline">
                                           <Globe className="w-3 h-3" /> Website
                                         </a>
                                       )}
                                       {op.member_since && (
-                                        <p className="text-xs text-slate-400">Member since {op.member_since}</p>
+                                        <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>
                                       )}
                                     </div>
                                     {op.package_type && (
-                                      <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{op.package_type}</Badge>
+                                      <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{stripHtml(op.package_type)}</Badge>
                                     )}
                                   </CardContent>
                                 </Card>
