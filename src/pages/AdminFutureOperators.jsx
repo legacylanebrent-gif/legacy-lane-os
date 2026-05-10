@@ -824,7 +824,7 @@ export default function AdminFutureOperators() {
           <DialogHeader>
             <DialogTitle>Scrape {stateFilter}</DialogTitle>
             <DialogDescription>
-              Scrapes all {stateFilter} cities and saves in batches of 25 to avoid rate limit errors.
+              Scrapes all {stateFilter} cities and saves in batches of 100 to avoid rate limit errors.
             </DialogDescription>
           </DialogHeader>
 
@@ -834,7 +834,7 @@ export default function AdminFutureOperators() {
               {!njBatchState ? (
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600">
-                    Scrapes all {stateFilter} cities and saves in batches of 25. Choose manual (click after each batch) or auto-run (runs all batches automatically).
+                    Scrapes all {stateFilter} cities and saves in batches of 100. Choose manual (click after each batch) or auto-run (runs all batches automatically).
                   </p>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowScrapeModal(false)}>Cancel</Button>
