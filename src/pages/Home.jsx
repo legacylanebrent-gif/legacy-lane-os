@@ -1426,6 +1426,7 @@ export default function Home() {
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li><Link to={createPageUrl('SearchByState')} className="text-white hover:text-orange-400 transition-colors">Browse by State</Link></li>
+                <li><Link to={createPageUrl('BrowseOperators')} className="text-white hover:text-orange-400 transition-colors">Browse Companies</Link></li>
                 <li><Link to={createPageUrl('Home')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
                 <li><a href="#" onClick={() => setShowSaleRequestModal(true)} className="text-white hover:text-orange-400 transition-colors">Request Service</a></li>
               </ul>
