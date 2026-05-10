@@ -304,24 +304,26 @@ export default function BrowseOperators() {
                                         Claim My Company
                                       </Button>
                                     )}
-                                    <div className="mt-2 grid grid-cols-2 gap-1.5">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
-                                        onClick={() => handleReferByText(op)}
-                                      >
-                                        {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
-                                        onClick={() => setEmailReferOperator(op)}
-                                      >
-                                        ✉️ Refer by Email
-                                      </Button>
-                                    </div>
+                                    {isAuthenticated && (
+                                      <div className="mt-2 grid grid-cols-2 gap-1.5">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
+                                          onClick={() => handleReferByText(op)}
+                                        >
+                                          {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
+                                          onClick={() => setEmailReferOperator(op)}
+                                        >
+                                          ✉️ Refer by Email
+                                        </Button>
+                                      </div>
+                                    )}
                                   </CardContent>
                                 </Card>
                               ))}
