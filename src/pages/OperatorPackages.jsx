@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Check, Star, ArrowLeft } from 'lucide-react';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
@@ -153,13 +154,7 @@ export default function OperatorPackages() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {/* Back Link */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <Link to={createPageUrl('Home')} className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900">
-          <ArrowLeft className="w-4 h-4" />
-          <span className="font-medium">Back Home</span>
-        </Link>
-      </div>
+      <UniversalHeader user={null} isAuthenticated={false} />
 
       <div className="max-w-7xl mx-auto py-12 px-4">
         {/* Header */}
