@@ -47,6 +47,7 @@ export default function AdminFutureOperators() {
   const [updating, setUpdating] = useState(false);
   const [updateResults, setUpdateResults] = useState(null);
   const [newOnlyFilter, setNewOnlyFilter] = useState(false);
+  const [sortAlpha, setSortAlpha] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
   const [selectedScrapeStates, setSelectedScrapeStates] = useState([]);
   const [scrapeQueue, setScrapeQueue] = useState([]); // [{state, status: 'pending'|'running'|'done'|'error', result}]
@@ -223,6 +224,9 @@ export default function AdminFutureOperators() {
     const matchesNew = !newOnlyFilter || isNew(op);
     
     return matchesSearch && matchesPackage && matchesNew;
+  }).sort((a, b) => {
+    if (!sortAlpha) return 0;
+    return (a.company_name || '').localeCompare(b.company_name || '');
   });
 
   const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
@@ -432,6 +436,17 @@ export default function AdminFutureOperators() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                <button
+                  onClick={() => setSortAlpha(p => !p)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
+                    sortAlpha
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                  }`}
+                >
+                  🔤 A–Z
+                </button>
 
                 <button
                   onClick={() => setNewOnlyFilter(p => !p)}
