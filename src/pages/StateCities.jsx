@@ -1,13 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { STATE_REGIONS } from '@/components/data/StateRegions';
+import UniversalHeader from '@/components/layout/UniversalHeader';
+import { base44 } from '@/api/base44Client';
 import { ArrowLeft, MapPin, Building2 } from 'lucide-react';
 
 export default function StateCities() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
+  }, []);
+
   const urlParams = new URLSearchParams(window.location.search);
   const stateCode = urlParams.get('state');
   
@@ -15,12 +27,15 @@ export default function StateCities() {
 
   if (!stateData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-4">State not found</h1>
-          <Link to={createPageUrl('SearchByState')}>
-            <Button>Back to States</Button>
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
+        <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
+        <div className="flex items-center justify-center flex-1 py-32">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-900 mb-4">State not found</h1>
+            <Link to={createPageUrl('SearchByState')}>
+              <Button>Back to States</Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -28,31 +43,18 @@ export default function StateCities() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-serif font-bold text-slate-900">Legacy Lane</h1>
-                <p className="text-xs text-orange-600">Estate Sale Finder</p>
-              </div>
-            </Link>
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
-            <Link to={createPageUrl('SearchByState')}>
-              <Button variant="ghost" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to States
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <Link to={createPageUrl('SearchByState')}>
+          <Button variant="ghost" className="gap-2 mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            Back to States
+          </Button>
+        </Link>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {/* Title Section */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
