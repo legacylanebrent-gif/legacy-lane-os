@@ -827,7 +827,7 @@ export default function AdminFutureOperators() {
           <DialogHeader>
             <DialogTitle>Scrape {stateFilter}</DialogTitle>
             <DialogDescription>
-              Scrapes all {stateFilter} cities and saves in batches of 100 to avoid rate limit errors.
+              Scrapes all {stateFilter} cities and saves in batches of 50 to avoid rate limit errors.
             </DialogDescription>
           </DialogHeader>
 
