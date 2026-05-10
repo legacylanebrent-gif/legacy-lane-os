@@ -275,9 +275,8 @@ export default function AdminFutureOperators() {
     setShowScrapeModal(true);
   };
 
-  const handleNjStartBatch = async (offset = 0, cachedCompanies = null) => {
-    setNjBatchState(prev => ({ ...(prev || {}), running: true }));
-    // Get the function name for the currently selected state
+  const handleNjStartBatch = async (offset = 0, cachedCompanies = null, autoRun = false) => {
+    setNjBatchState(prev => ({ ...(prev || {}), running: true, autoRun }));
     const fns = getStateFunctions(stateFilter);
     const fnName = fns.length > 0 ? fns[0] : `scrape${stateFilter}Operators`;
     try {
@@ -295,11 +294,16 @@ export default function AdminFutureOperators() {
         batchSize: data.batch_size,
         isLastBatch: data.is_last_batch,
         running: false,
+        autoRun,
         error: null,
       }));
       await loadStateCount();
+      // Auto-continue if not last batch and autoRun is enabled
+      if (!data.is_last_batch && autoRun) {
+        await handleNjStartBatch(data.next_offset, data.all_companies || cachedCompanies, true);
+      }
     } catch (e) {
-      setNjBatchState(prev => ({ ...(prev || {}), running: false, error: e.message }));
+      setNjBatchState(prev => ({ ...(prev || {}), running: false, autoRun: false, error: e.message }));
     }
   };
 
@@ -818,22 +822,25 @@ export default function AdminFutureOperators() {
           <DialogHeader>
             <DialogTitle>Scrape {stateFilter}</DialogTitle>
             <DialogDescription>
-              Uses batched saving (50 at a time) to avoid rate limit errors.
+              Scrapes all {stateFilter} cities and saves in batches of 25 to avoid rate limit errors.
             </DialogDescription>
           </DialogHeader>
 
-          {/* NJ Batched Mode */}
+          {/* Batched Mode */}
           {njBatchMode && (
             <div className="space-y-4 py-2">
               {!njBatchState ? (
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600">
-                    This will scrape all NJ cities and save companies in batches of 50. After each batch saves, you can continue to the next.
+                    Scrapes all {stateFilter} cities and saves in batches of 25. Choose manual (click after each batch) or auto-run (runs all batches automatically).
                   </p>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowScrapeModal(false)}>Cancel</Button>
-                    <Button onClick={() => handleNjStartBatch(0)} className="bg-orange-600 hover:bg-orange-700">
-                      <Download className="w-4 h-4 mr-2" />Start Scrape
+                    <Button onClick={() => handleNjStartBatch(0, null, false)} variant="outline" className="border-orange-400 text-orange-700">
+                      <Download className="w-4 h-4 mr-2" />Manual
+                    </Button>
+                    <Button onClick={() => handleNjStartBatch(0, null, true)} className="bg-orange-600 hover:bg-orange-700">
+                      <Download className="w-4 h-4 mr-2" />Auto-Run All
                     </Button>
                   </div>
                 </div>
@@ -872,22 +879,40 @@ export default function AdminFutureOperators() {
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2 flex-wrap">
                     <Button variant="outline" onClick={() => { setNjBatchState(null); setShowScrapeModal(false); loadOperators(); }}>
                       {njBatchState.isLastBatch ? 'Done' : 'Close'}
                     </Button>
                     {!njBatchState.isLastBatch && !njBatchState.running && (
+                      <>
+                        <Button
+                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, false)}
+                          variant="outline"
+                          className="border-orange-400 text-orange-700"
+                        >
+                          <Download className="w-4 h-4 mr-2" />Next Batch
+                        </Button>
+                        <Button
+                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, true)}
+                          className="bg-orange-600 hover:bg-orange-700"
+                        >
+                          <Download className="w-4 h-4 mr-2" />Auto-Run Rest
+                        </Button>
+                      </>
+                    )}
+                    {njBatchState.running && (
                       <Button
-                        onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies)}
-                        className="bg-orange-600 hover:bg-orange-700"
+                        onClick={() => setNjBatchState(prev => ({ ...prev, autoRun: false }))}
+                        variant="outline"
+                        className="border-red-400 text-red-600"
                       >
-                        <Download className="w-4 h-4 mr-2" />
-                        Continue (save next 50)
+                        Stop Auto-Run
                       </Button>
                     )}
                     {njBatchState.running && (
                       <Button disabled className="bg-orange-400">
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving batch...
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {njBatchState.autoRun ? 'Auto-saving...' : 'Saving batch...'}
                       </Button>
                     )}
                     {njBatchState.isLastBatch && !njBatchState.running && (
