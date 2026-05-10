@@ -203,19 +203,27 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
                   type="number"
                   step="0.01"
                   value={formData.monthly_price}
-                  onChange={(e) => setFormData({...formData, monthly_price: e.target.value})}
+                  onChange={(e) => {
+                    const monthlyPrice = parseFloat(e.target.value) || 0;
+                    const calculatedAnnual = monthlyPrice > 0 ? (monthlyPrice * 12 * 0.9).toFixed(2) : '';
+                    setFormData({
+                      ...formData,
+                      monthly_price: e.target.value,
+                      annual_price: calculatedAnnual
+                    });
+                  }}
                 />
               </div>
 
               <div>
-                <Label htmlFor="annual_price">Annual Price ($)</Label>
+                <Label htmlFor="annual_price">Annual Price ($) <span className="text-xs text-slate-500">10% off auto-calculated</span></Label>
                 <Input
                   id="annual_price"
                   type="number"
                   step="0.01"
                   value={formData.annual_price}
                   onChange={(e) => setFormData({...formData, annual_price: e.target.value})}
-                  placeholder="Optional"
+                  placeholder="Auto-calculated"
                 />
               </div>
             </div>
