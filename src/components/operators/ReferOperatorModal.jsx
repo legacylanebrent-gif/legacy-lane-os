@@ -20,12 +20,14 @@ export async function logReferral({ currentUser, operator, contactEmail }) {
     reward_amount: 25,
     reward_status: 'pending',
   });
+  const now = new Date();
   await base44.entities.UserReward.create({
     user_id: currentUser.id,
     action_id: 'operator_referral_sent',
     action_name: 'Operator Referral Sent',
     points_earned: 100,
     description: `Referred ${operator.company_name} to join EstateSalen.com`,
+    month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
   });
 }
 
