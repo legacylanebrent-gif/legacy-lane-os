@@ -205,7 +205,7 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
                   value={formData.monthly_price}
                   onChange={(e) => {
                     const monthlyPrice = parseFloat(e.target.value) || 0;
-                    const calculatedAnnual = monthlyPrice > 0 ? (monthlyPrice * 12 * 0.9).toFixed(2) : '';
+                    const calculatedAnnual = monthlyPrice > 0 ? Math.round(monthlyPrice * 12 * 0.9) : '';
                     setFormData({
                       ...formData,
                       monthly_price: e.target.value,
