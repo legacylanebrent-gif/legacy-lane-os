@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
     }
     const byUrl = new Map(existing.filter(e => e.source_url).map(e => [e.source_url, e]));
     const byPhone = new Map(existing.filter(e => e.phone).map(e => [e.phone, e]));
-    const saveWithRetry = async (company, maxRetries = 5) => {
-      let delay = 1000;
+    const saveWithRetry = async (company, maxRetries = 8) => {
+      let delay = 2000;
       for (let i = 0; i < maxRetries; i++) {
         try {
           const match = (company.source_url && byUrl.get(company.source_url)) || (company.phone && byPhone.get(company.phone));
@@ -97,27 +97,29 @@ Deno.serve(async (req) => {
             return 'created';
           }
         } catch (e) {
-          if (e.message && e.message.includes('429') && i < maxRetries - 1) {
+          if (i < maxRetries - 1) {
             await new Promise(r => setTimeout(r, delay));
-            delay *= 2;
+            delay = Math.min(delay * 2, 30000);
           } else {
             throw e;
           }
         }
       }
     };
-    let inserted = 0, updated = 0;
+    let inserted = 0, updated = 0, failed = 0;
     for (const company of batch) {
       try {
         const result = await saveWithRetry(company);
         if (result === 'created') inserted++;
         else if (result === 'updated') updated++;
-      } catch (e) {}
-      await new Promise(r => setTimeout(r, 300));
+      } catch (e) {
+        failed++;
+      }
+      await new Promise(r => setTimeout(r, 600));
     }
     return Response.json({
       success: true, total_companies: allCompanies.length, all_companies: allCompanies,
-      batch_offset: batchOffset, batch_size: batch.length, inserted, updated,
+      batch_offset: batchOffset, batch_size: batch.length, inserted, updated, failed,
       next_offset: isLastBatch ? null : batchOffset + batchSize, is_last_batch: isLastBatch,
       failed_parses: failedParses.length, failed_parse_samples: failedParses.slice(0, 10),
     });
