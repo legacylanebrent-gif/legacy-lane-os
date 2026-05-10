@@ -163,6 +163,7 @@ Deno.serve(async (req) => {
       total_companies: allCompanies.length,
       all_companies: allCompanies,
       existing_map: existingMapForNext,
+      existing_map_size_at_start: cachedExisting ? cachedExisting.byUrl.length : 0,
       batch_offset: batchOffset,
       batch_size: batch.length,
       inserted, updated, failed,
