@@ -275,17 +275,19 @@ export default function AdminFutureOperators() {
     setShowScrapeModal(true);
   };
 
-  const handleNjStartBatch = async (offset = 0, cachedCompanies = null, autoRun = false) => {
+  const handleNjStartBatch = async (offset = 0, cachedCompanies = null, cachedExisting = null, autoRun = false) => {
     setNjBatchState(prev => ({ ...(prev || {}), running: true, autoRun }));
     const fns = getStateFunctions(stateFilter);
     const fnName = fns.length > 0 ? fns[0] : `scrape${stateFilter}Operators`;
     try {
       const payload = { batch_offset: offset };
       if (cachedCompanies) payload.all_companies = cachedCompanies;
+      if (cachedExisting) payload.existing_map = cachedExisting;
       const res = await base44.functions.invoke(fnName, payload);
       const data = res.data;
       setNjBatchState(prev => ({
         allCompanies: data.all_companies || cachedCompanies || [],
+        existingMap: data.existing_map || cachedExisting,
         nextOffset: data.next_offset,
         totalCompanies: data.total_companies,
         totalInserted: (prev?.totalInserted || 0) + (data.inserted || 0),
@@ -300,7 +302,7 @@ export default function AdminFutureOperators() {
       await loadStateCount();
       // Auto-continue if not last batch and autoRun is enabled
       if (!data.is_last_batch && autoRun) {
-        await handleNjStartBatch(data.next_offset, data.all_companies || cachedCompanies, true);
+        await handleNjStartBatch(data.next_offset, data.all_companies || cachedCompanies, data.existing_map || cachedExisting, true);
       }
     } catch (e) {
       setNjBatchState(prev => ({ ...(prev || {}), running: false, autoRun: false, error: e.message }));
@@ -836,10 +838,10 @@ export default function AdminFutureOperators() {
                   </p>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowScrapeModal(false)}>Cancel</Button>
-                    <Button onClick={() => handleNjStartBatch(0, null, false)} variant="outline" className="border-orange-400 text-orange-700">
+                    <Button onClick={() => handleNjStartBatch(0, null, null, false)} variant="outline" className="border-orange-400 text-orange-700">
                       <Download className="w-4 h-4 mr-2" />Manual
                     </Button>
-                    <Button onClick={() => handleNjStartBatch(0, null, true)} className="bg-orange-600 hover:bg-orange-700">
+                    <Button onClick={() => handleNjStartBatch(0, null, null, true)} className="bg-orange-600 hover:bg-orange-700">
                       <Download className="w-4 h-4 mr-2" />Auto-Run All
                     </Button>
                   </div>
@@ -886,14 +888,14 @@ export default function AdminFutureOperators() {
                     {!njBatchState.isLastBatch && !njBatchState.running && (
                       <>
                         <Button
-                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, false)}
+                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, njBatchState.existingMap, false)}
                           variant="outline"
                           className="border-orange-400 text-orange-700"
                         >
                           <Download className="w-4 h-4 mr-2" />Next Batch
                         </Button>
                         <Button
-                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, true)}
+                          onClick={() => handleNjStartBatch(njBatchState.nextOffset, njBatchState.allCompanies, njBatchState.existingMap, true)}
                           className="bg-orange-600 hover:bg-orange-700"
                         >
                           <Download className="w-4 h-4 mr-2" />Auto-Run Rest
