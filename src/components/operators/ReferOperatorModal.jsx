@@ -66,7 +66,7 @@ export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-lg w-[90vw]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-orange-500" />
