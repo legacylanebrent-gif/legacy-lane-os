@@ -69,6 +69,7 @@ import SaleConversionPipelinePage from './pages/SaleConversionPipeline';
 import SettlementStatement from './pages/SettlementStatement';
 import CompanyEmailEnrichment from './pages/CompanyEmailEnrichment';
 import BrowseOperators from './pages/BrowseOperators';
+import HowToUse from './pages/HowToUse';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -181,6 +182,7 @@ const AuthenticatedApp = () => {
       <Route path="/SettlementStatement" element={<LayoutWrapper currentPageName="SettlementStatement"><SettlementStatement /></LayoutWrapper>} />
       <Route path="/CompanyEmailEnrichment" element={<LayoutWrapper currentPageName="CompanyEmailEnrichment"><CompanyEmailEnrichment /></LayoutWrapper>} />
       <Route path="/BrowseOperators" element={<BrowseOperators />} />
+      <Route path="/HowToUse" element={<LayoutWrapper currentPageName="HowToUse"><HowToUse /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -130,6 +130,11 @@ export default function ConsumerHeader({ user }) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
+                  <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
+                    <Heart className="w-4 h-4 mr-2" /> How to Use
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
                     <Bell className="w-4 h-4 mr-2" />
                     Notification Settings
