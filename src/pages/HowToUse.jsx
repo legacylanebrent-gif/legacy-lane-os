@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { base44 } from '@/api/base44Client';
 import { Search, MapPin, Heart, Navigation, QrCode, Star, ShoppingBag, Bell } from 'lucide-react';
 
 export default function HowToUse() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
+  }, []);
   const features = [
     {
       icon: <Search className="w-8 h-8 text-orange-500" />,
@@ -69,7 +79,7 @@ export default function HowToUse() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      <UniversalHeader />
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-16 px-4">
