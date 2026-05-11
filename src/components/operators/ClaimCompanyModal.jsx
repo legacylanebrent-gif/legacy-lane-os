@@ -47,30 +47,28 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
       enrichment_notes: `Claimed by user ${user.email} on ${new Date().toISOString()}. Pending verification.`,
     });
 
-    // Notify all admin users
+    // Notify admins via backend (service role can find admin users)
     try {
-      const adminUsers = await base44.entities.User.filter({ role: 'admin' });
-      for (const admin of adminUsers) {
-        await base44.functions.invoke('sendNotification', {
-          user_id: admin.id,
-          type: 'system',
-          title: '🏢 New Company Claim Submitted',
-          message: `${user.full_name || user.email} has claimed ${operator.company_name} (${operator.city}, ${operator.state}). Their account is pending verification.`,
-          link_to_page: 'AdminUsers',
-        });
-      }
+      await base44.functions.invoke('notifyAdminsOfApplication', {
+        applicant_user_id: user.id,
+        applicant_name: user.full_name,
+        applicant_email: user.email,
+        application_type: 'company_claim',
+        details: `${operator.company_name} (${operator.city}, ${operator.state})`,
+      });
     } catch (err) {
       console.error('Failed to notify admins:', err);
     }
 
-    // Send confirmation notification to the claimant
+    // Send confirmation in-app notification to the claimant
     try {
-      await base44.functions.invoke('sendNotification', {
+      await base44.entities.Notification.create({
         user_id: user.id,
         type: 'system',
         title: '✅ Company Claim Received',
         message: `Your claim for ${operator.company_name} has been submitted. Our team will review and approve your access within 1–2 business days.`,
         link_to_page: 'MyProfile',
+        read: false,
       });
     } catch (err) {
       console.error('Failed to send confirmation notification:', err);
