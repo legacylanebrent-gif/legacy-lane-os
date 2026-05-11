@@ -13,6 +13,7 @@ import { format, parseISO } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 import {
   Navigation, MapPin, Calendar, Clock, Trash2,
   Route, AlertCircle, CheckCircle2, Eye, Lock, GripVertical, Zap, Loader2
@@ -285,7 +286,7 @@ export default function RoutePlanner() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Sub-header / controls */}
@@ -352,7 +353,7 @@ export default function RoutePlanner() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         {/* Empty state */}
         {!loading && sales.length === 0 && (
@@ -609,6 +610,7 @@ export default function RoutePlanner() {
           </>
         )}
       </div>
+      <SharedFooter />
     </div>
   );
 }
