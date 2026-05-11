@@ -214,10 +214,8 @@ export default function CompareEstateSales() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">LL</span>
-            </div>
-            <span className="font-serif font-bold text-slate-900 text-lg hidden sm:block">Legacy Lane</span>
+          <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
+          <span className="font-serif font-bold text-slate-900 text-lg hidden sm:block">EstateSalen.com</span>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/CompanyLanding" className="text-sm text-slate-600 hover:text-slate-900 font-medium hidden sm:block">
@@ -240,11 +238,11 @@ export default function CompareEstateSales() {
             <Sparkles className="w-4 h-4" /> Honest Side-by-Side Comparison
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight mb-5">
-            Legacy Lane OS vs.<br />
+            EstateSalen.com vs.<br />
             <span className="text-slate-400">EstateSales.net</span>
           </h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            EstateSales.net is a weekend listing directory. Legacy Lane OS is a full business operating system with 70+ tools built for estate sale professionals. See every difference, side by side.
+            EstateSales.net is a weekend listing directory. EstateSalen.com is a full business operating system with 70+ tools built for estate sale professionals. See every difference, side by side.
           </p>
 
           {/* Quick stat cards */}
@@ -255,7 +253,7 @@ export default function CompareEstateSales() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-center flex-1">
                     <div className="text-orange-400 font-bold text-sm">{s.us}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">Legacy Lane</div>
+                    <div className="text-xs text-slate-500 mt-0.5">EstateSalen.com</div>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
                   <div className="text-center flex-1">
@@ -275,10 +273,10 @@ export default function CompareEstateSales() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 fill-orange-200 text-orange-200" />
-              <span className="font-bold text-lg">Legacy Lane wins <span className="underline">{usWins} of {totalFeatures}</span> features</span>
+              <span className="font-bold text-lg">EstateSalen.com wins <span className="underline">{usWins} of {totalFeatures}</span> features</span>
             </div>
             <span className="hidden sm:block text-orange-300">·</span>
-            <span className="text-orange-200 text-sm">EstateSales.net lists your sales. We run your entire business.</span>
+            <span className="text-orange-200 text-sm">EstateSales.net lists your sales. EstateSalen.com runs your entire business.</span>
           </div>
         </div>
       </section>
@@ -292,8 +290,8 @@ export default function CompareEstateSales() {
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Feature</div>
             <div className="text-center">
               <div className="inline-flex items-center gap-1.5 bg-orange-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                <span className="hidden sm:inline">Legacy Lane</span>
-                <span className="sm:hidden">LL</span>
+                <span className="hidden sm:inline">EstateSalen</span>
+                <span className="sm:hidden">ES</span>
               </div>
             </div>
             <div className="text-center">
@@ -322,7 +320,7 @@ export default function CompareEstateSales() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-orange-400">{totalFeatures}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Legacy Lane</div>
+                <div className="text-xs text-slate-400 mt-0.5">EstateSalen.com</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-slate-400">{totalFeatures - usWins}</div>
@@ -341,7 +339,7 @@ export default function CompareEstateSales() {
             <span className="text-orange-600">Own Your Business.</span>
           </h2>
           <p className="text-slate-500 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
-            EstateSales.net lists your sales for the weekend. Legacy Lane OS runs your entire company — AI marketing, POS checkout, CRM, VIP events, contracts, analytics, and more — all in one platform.
+            EstateSales.net lists your sales for the weekend. EstateSalen.com runs your entire company — AI marketing, POS checkout, CRM, VIP events, contracts, analytics, and more — all in one platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -365,7 +363,7 @@ export default function CompareEstateSales() {
       <footer className="bg-slate-900 text-white">
         <div className="border-t border-white/10">
           <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved. · Comparison based on publicly available information.</p>
+            <p className="text-slate-500 text-sm">© 2026 EstateSalen.com. All rights reserved. · Comparison based on publicly available information.</p>
             <div className="flex items-center gap-6">
               <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
                 Features

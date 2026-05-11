@@ -159,10 +159,8 @@ export default function CompanyLanding() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LL</span>
-              </div>
-              <span className="font-serif font-bold text-slate-900 text-lg hidden sm:block">Legacy Lane</span>
+              <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
+              <span className="font-serif font-bold text-slate-900 text-lg hidden sm:block">EstateSalen.com</span>
             </div>
 
             {/* Desktop nav */}
@@ -223,7 +221,7 @@ export default function CompanyLanding() {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Legacy Lane OS is the all-in-one business platform built exclusively for estate sale companies — from your first sale to your hundredth.
+            EstateSalen.com is the all-in-one business platform built exclusively for estate sale companies — from your first sale to your hundredth.
           </p>
 
           {/* ── VIDEO PLACEHOLDER ── */}
@@ -419,7 +417,7 @@ export default function CompanyLanding() {
             {[...Array(5)].map((_, i) => <Star key={i} className="w-6 h-6 fill-orange-300 text-orange-300" />)}
           </div>
           <blockquote className="text-2xl md:text-3xl font-serif italic leading-relaxed mb-6">
-            "Legacy Lane OS completely transformed how we run our business. We doubled our revenue in the first 6 months — and the AI content tool alone saves us 10 hours a week."
+            "EstateSalen.com completely transformed how we run our business. We doubled our revenue in the first 6 months — and the AI content tool alone saves us 10 hours a week."
           </blockquote>
           <p className="text-orange-200 font-medium">— Estate Sale Operator, Nashville TN</p>
         </div>
@@ -479,11 +477,9 @@ export default function CompanyLanding() {
       {/* ── FOOTER ── */}
       <footer className="bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <span className="text-white font-bold text-xl">LL</span>
-          </div>
+          <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain mx-auto mb-6" />
           <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4">Start Growing Today</h2>
-          <p className="text-slate-400 mb-8 text-lg">Join thousands of estate sale companies already on Legacy Lane OS.</p>
+          <p className="text-slate-400 mb-8 text-lg">Join thousands of estate sale companies already on EstateSalen.com.</p>
           <Link
             to="/OperatorPackages"
             className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-bold px-10 py-4 rounded-xl text-lg transition-colors"
@@ -495,7 +491,7 @@ export default function CompanyLanding() {
         {/* Footer links */}
         <div className="border-t border-white/10">
           <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm">© 2026 Legacy Lane. All rights reserved.</p>
+            <p className="text-slate-500 text-sm">© 2026 EstateSalen.com. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
                 Features

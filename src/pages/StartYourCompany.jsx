@@ -86,7 +86,7 @@ export default function StartYourCompany() {
   ];
 
   const included = [
-    'Legacy Lane brand licensing',
+    'EstateSalen.com brand licensing',
     'Complete estate sale management platform',
     'CRM and client management tools',
     'Professional website and online presence',
@@ -107,11 +107,9 @@ export default function StartYourCompany() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">LL</span>
-              </div>
+              <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-10 w-10 object-contain" />
               <div>
-                <h1 className="text-xl font-serif font-bold text-white">Legacy Lane</h1>
+                <h1 className="text-xl font-serif font-bold text-white">EstateSalen.com</h1>
                 <p className="text-xs text-orange-400">Business Opportunity</p>
               </div>
             </Link>
@@ -142,7 +140,7 @@ export default function StartYourCompany() {
           </h2>
           
           <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
-            Join the Legacy Lane network and launch a profitable estate sale business with our proven model, technology platform, and free training
+            Join the EstateSalen.com network and launch a profitable estate sale business with our proven model, technology platform, and free training
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -179,12 +177,12 @@ export default function StartYourCompany() {
         </div>
       </section>
 
-      {/* Why Legacy Lane Section */}
+      {/* Why EstateSalen.com Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-orange-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">
-              Why Start with Legacy Lane?
+              Why Start with EstateSalen.com?
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
               Everything you need to launch and grow a successful estate sale business
@@ -280,7 +278,7 @@ export default function StartYourCompany() {
               Success Stories
             </h2>
             <p className="text-xl text-slate-600">
-              Real results from Legacy Lane operators
+              Real results from EstateSalen.com operators
             </p>
           </div>
 
@@ -448,7 +446,7 @@ export default function StartYourCompany() {
                   Application Received!
                 </h3>
                 <p className="text-lg text-slate-600 mb-6">
-                  Thank you for your interest in starting an estate sale business with Legacy Lane. 
+                  Thank you for your interest in starting an estate sale business with EstateSalen.com. 
                   Our team will review your application and contact you within 1-2 business days.
                 </p>
                 <Button
@@ -490,7 +488,7 @@ export default function StartYourCompany() {
                   What are the startup costs?
                 </h4>
                 <p className="text-slate-600">
-                  There are no franchise fees or upfront costs to join Legacy Lane. You'll need basic business insurance and potentially some equipment (pricing guns, tables, etc.), but we help you source everything affordably.
+                  There are no franchise fees or upfront costs to join EstateSalen.com. You'll need basic business insurance and potentially some equipment (pricing guns, tables, etc.), but we help you source everything affordably.
                 </p>
               </CardContent>
             </Card>
@@ -523,7 +521,7 @@ export default function StartYourCompany() {
                   Is this a franchise?
                 </h4>
                 <p className="text-slate-600">
-                  No, this is not a traditional franchise. You operate as an independent business owner using the Legacy Lane platform and brand. There are no franchise fees, just revenue sharing on platform-generated leads.
+                  No, this is not a traditional franchise. You operate as an independent business owner using the EstateSalen.com platform and brand. There are no franchise fees, just revenue sharing on platform-generated leads.
                 </p>
               </CardContent>
             </Card>
@@ -538,7 +536,7 @@ export default function StartYourCompany() {
             Ready to Build Your Future?
           </h2>
           <p className="text-xl text-orange-100 mb-8">
-            Join the Legacy Lane network and start your journey to financial independence
+            Join the EstateSalen.com network and start your journey to financial independence
           </p>
           <Button
             onClick={() => document.getElementById('application-form').scrollIntoView({ behavior: 'smooth' })}
