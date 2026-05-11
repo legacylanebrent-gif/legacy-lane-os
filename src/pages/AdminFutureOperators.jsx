@@ -28,6 +28,7 @@ import {
 
 export default function AdminFutureOperators() {
   const [operators, setOperators] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [stateFilter, setStateFilter] = useState('AR');
@@ -161,6 +162,7 @@ export default function AdminFutureOperators() {
 
   useEffect(() => {
     loadTotalCount();
+    base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const loadTotalCount = async () => {
@@ -425,17 +427,19 @@ export default function AdminFutureOperators() {
                   </SelectContent>
                 </Select>
                 
-                <Select value={packageFilter} onValueChange={setPackageFilter}>
-                  <SelectTrigger className="w-full sm:w-36">
-                    <SelectValue placeholder="All Packages" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Packages</SelectItem>
-                    {uniquePackages.map(pkg => (
-                      <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {currentUser?.role === 'admin' && (
+                  <Select value={packageFilter} onValueChange={setPackageFilter}>
+                    <SelectTrigger className="w-full sm:w-36">
+                      <SelectValue placeholder="All Packages" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Packages</SelectItem>
+                      {uniquePackages.map(pkg => (
+                        <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
                 <button
                   onClick={() => setSortAlpha(p => !p)}
@@ -523,8 +527,15 @@ export default function AdminFutureOperators() {
                           {isNew(operator) && (
                             <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs">New</Badge>
                           )}
-                          {operator.package_type && (
-                            <Badge className={getPackageColor(operator.package_type)}>
+                          {/* LL OS subscriber badge — visible to everyone */}
+                          {operator.ll_os_subscriber && (
+                            <Badge className="bg-orange-100 text-orange-700 border border-orange-300 text-xs">
+                              LL OS Member
+                            </Badge>
+                          )}
+                          {/* Scraped EstateSales.net package label — admin only */}
+                          {operator.package_type && currentUser?.role === 'admin' && (
+                            <Badge className={getPackageColor(operator.package_type) + ' text-xs'} title="EstateSales.net package (admin only)">
                               {operator.package_type}
                             </Badge>
                           )}
