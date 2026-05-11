@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,13 @@ import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 export default function EstateSaleCard({ estate, onClick, expanded = false }) {
+  const [, setRefresh] = useState(0);
+
+  // Force re-render every minute to update status based on current time
+  useEffect(() => {
+    const interval = setInterval(() => setRefresh(prev => prev + 1), 60000);
+    return () => clearInterval(interval);
+  }, []);
   const getStatusColor = (status) => {
     switch (status) {
       case 'upcoming': return 'bg-blue-100 text-blue-800';
