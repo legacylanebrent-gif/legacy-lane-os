@@ -114,17 +114,13 @@ export default function ResellerDashboard() {
     <>
       <UniversalHeader user={user} isAuthenticated={!!user} />
       <div className="p-6 lg:p-8 space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Reseller Dashboard</h1>
-          <p className="text-slate-600">Track your monthly inventory and fees</p>
+        {/* CTA Button */}
+        <div className="flex justify-end">
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white w-fit gap-2">
+            <Plus className="w-4 h-4" />
+            List New Item
+          </Button>
         </div>
-        <Button className="bg-orange-600 hover:bg-orange-700 text-white w-fit gap-2">
-          <Plus className="w-4 h-4" />
-          List New Item
-        </Button>
-      </div>
 
       {/* Month Selector */}
       <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-slate-200">
