@@ -78,12 +78,12 @@ export default function MessagesDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative text-orange-400 hover:text-orange-300 hover:bg-slate-700"
-        >
-          <Mail className="h-5 w-5" />
+         <Button
+           variant="ghost"
+           size="icon"
+           className="relative text-orange-400 hover:text-orange-300 hover:bg-slate-700 pointer-events-auto"
+         >
+           <Mail className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-orange-600 text-white text-xs border-2 border-slate-800">
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -110,8 +110,8 @@ export default function MessagesDropdown() {
             </div>
           ) : (
             messages.map((conversation, idx) => (
-              <Link key={idx} to={createPageUrl('Messages')}>
-                <DropdownMenuItem className="p-3 cursor-pointer">
+              <Link key={idx} to={createPageUrl('Messages')} className="block touch-manipulation">
+                <DropdownMenuItem className="p-3 cursor-pointer pointer-events-auto">
                   <div className="flex items-start gap-3 w-full">
                     <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 font-semibold">
                       {conversation.sender_name?.charAt(0) || 'U'}
@@ -140,8 +140,8 @@ export default function MessagesDropdown() {
         </div>
         
         <DropdownMenuSeparator />
-        <Link to={createPageUrl('Messages')}>
-          <DropdownMenuItem className="cursor-pointer justify-center text-orange-600 hover:text-orange-700 font-medium">
+        <Link to={createPageUrl('Messages')} className="block touch-manipulation">
+          <DropdownMenuItem className="cursor-pointer justify-center text-orange-600 hover:text-orange-700 font-medium pointer-events-auto">
             View All Messages
           </DropdownMenuItem>
         </Link>
