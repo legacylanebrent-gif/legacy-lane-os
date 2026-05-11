@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, MessageSquare, Clock, CheckCircle, AlertCircle, Upload, Send } from 'lucide-react';
 import { format } from 'date-fns';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
@@ -173,7 +174,8 @@ export default function MyTickets() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Support Tickets</h1>
@@ -414,6 +416,8 @@ export default function MyTickets() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
+      <SharedFooter />
     </div>
   );
 }
