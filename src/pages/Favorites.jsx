@@ -161,7 +161,8 @@ export default function Favorites() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -378,6 +379,7 @@ export default function Favorites() {
           })}
         </div>
       )}
+      </div>
       <SharedFooter />
     </div>
   );
