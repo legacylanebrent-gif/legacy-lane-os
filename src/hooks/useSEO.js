@@ -28,10 +28,8 @@ export function useSEO({ title, description, image, jsonLd } = {}) {
       el.textContent = JSON.stringify(jsonLd);
     }
 
-    return () => {
-      // Reset title on unmount so it doesn't bleed into next page
-      document.title = 'EstateSalen.com — Find Estate Sales Near You';
-    };
+    // No cleanup reset — each page sets its own title on mount.
+    // A reset here would race with the incoming page's useSEO call and overwrite it.
   }, [title, description, image, jsonLd]);
 }
 
