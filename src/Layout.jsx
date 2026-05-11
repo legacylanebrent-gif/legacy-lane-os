@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
-import ConsumerHeader from '@/components/layout/ConsumerHeader';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import AICoachButton from '@/components/coach/AICoachButton';
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import { useOperatorOnboarding } from '@/hooks/useOperatorOnboarding';
@@ -115,7 +115,7 @@ export default function Layout({ children, currentPageName }) {
   if (isConsumer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
-        <ConsumerHeader user={user} />
+        <UniversalHeader user={user} isAuthenticated={!!user} />
         {children}
       </div>
     );

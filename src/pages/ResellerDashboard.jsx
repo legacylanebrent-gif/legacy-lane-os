@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SharedFooter from '@/components/layout/SharedFooter';
-import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function ResellerDashboard() {
   const [user, setUser] = useState(null);
@@ -112,7 +111,6 @@ export default function ResellerDashboard() {
 
   return (
     <>
-      <UniversalHeader user={user} isAuthenticated={!!user} />
       <div className="p-6 lg:p-8 space-y-8">
         {/* CTA Button */}
         <div className="flex justify-end">
