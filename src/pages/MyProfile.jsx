@@ -375,8 +375,41 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* Reseller Application — only for pure consumers */}
-          {isConsumer && acct !== 'reseller' && (
+          {/* Reseller Application — show based on state */}
+          {acct === 'reseller' ? (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Store className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-green-800 text-sm">Reseller Account Active</p>
+                <p className="text-xs text-green-600">You have full reseller access including buyout opportunities and the reseller dashboard.</p>
+              </div>
+              <Badge className="ml-auto bg-green-600 text-white">Approved</Badge>
+            </div>
+          ) : isConsumer && user?.reseller_application_submitted ? (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-blue-900">Reseller Application</h3>
+                      <Badge className="bg-blue-500 text-white text-xs">Pending Review</Badge>
+                    </div>
+                    <p className="text-sm text-blue-700">
+                      Your application has been submitted and is currently under review. Our team will upgrade your account within 1–2 business days.
+                    </p>
+                    {user?.reseller_application_date && (
+                      <p className="text-xs text-blue-500 mt-2">Submitted {new Date(user.reseller_application_date).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : isConsumer ? (
             <Card className="border-amber-200 bg-amber-50">
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
@@ -396,8 +429,6 @@ export default function MyProfile() {
                         if (!confirmed) return;
                         try {
                           await base44.auth.updateMe({ reseller_application_submitted: true, reseller_application_date: new Date().toISOString() });
-
-                          // Notify admins via backend (service role can find admin users)
                           await base44.functions.invoke('notifyAdminsOfApplication', {
                             applicant_user_id: user?.id,
                             applicant_name: user?.full_name,
@@ -405,8 +436,6 @@ export default function MyProfile() {
                             application_type: 'reseller',
                             details: null,
                           });
-
-                          // Confirm to the applicant in-app
                           await base44.entities.Notification.create({
                             user_id: user?.id,
                             type: 'system',
@@ -415,7 +444,7 @@ export default function MyProfile() {
                             link_to_page: 'MyProfile',
                             read: false,
                           });
-
+                          setUser(prev => ({ ...prev, reseller_application_submitted: true, reseller_application_date: new Date().toISOString() }));
                           alert('✅ Application submitted! Our team will review it and be in touch within 1–2 business days.');
                         } catch (e) {
                           alert('Something went wrong. Please try again.');
@@ -429,7 +458,7 @@ export default function MyProfile() {
                 </div>
               </CardContent>
             </Card>
-          )}
+          ) : null}
 
           <SaveBtn label="Save Account" />
         </TabsContent>
