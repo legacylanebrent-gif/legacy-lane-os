@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { 
   ArrowLeft, DollarSign, HandCoins, Plus, X
 } from 'lucide-react';
@@ -81,7 +82,8 @@ export default function Buyouts() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 mt-4">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6 mt-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -182,6 +184,8 @@ export default function Buyouts() {
           <p className="text-slate-400 text-sm mt-2">Buyout offers will appear here when created</p>
         </Card>
       )}
+      </div>
+      <SharedFooter />
     </div>
   );
 }
