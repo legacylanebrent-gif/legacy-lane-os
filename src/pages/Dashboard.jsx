@@ -10,6 +10,7 @@ import InvestorDashboard from '@/components/dashboards/InvestorDashboard';
 import ConsumerDashboard from '@/components/dashboards/ConsumerDashboard';
 import CoachDashboard from '@/components/dashboards/CoachDashboard';
 import SharedFooter from '@/components/layout/SharedFooter';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ export default function Dashboard() {
 
   return (
     <>
+      <UniversalHeader user={user} isAuthenticated={!!user} />
       {renderDashboard()}
       <SharedFooter />
     </>

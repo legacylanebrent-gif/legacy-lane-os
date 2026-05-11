@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SharedFooter from '@/components/layout/SharedFooter';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function ResellerDashboard() {
   const [user, setUser] = useState(null);
@@ -110,9 +111,11 @@ export default function ResellerDashboard() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <>
+      <UniversalHeader user={user} isAuthenticated={!!user} />
+      <div className="p-6 lg:p-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Reseller Dashboard</h1>
           <p className="text-slate-600">Track your monthly inventory and fees</p>
@@ -345,7 +348,8 @@ export default function ResellerDashboard() {
         </Card>
       )}
 
-      <SharedFooter />
-    </div>
+        <SharedFooter />
+      </div>
+    </>
   );
 }
