@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { 
   Trophy, Star, Gift, TrendingUp, Calendar, CheckCircle, 
   Users, DollarSign, Heart, Share2, Camera, ShoppingBag,
@@ -100,7 +101,8 @@ export default function MyRewards() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Rewards</h1>
@@ -317,6 +319,8 @@ export default function MyRewards() {
           </CardContent>
         </Card>
       )}
+      </div>
+      <SharedFooter />
     </div>
   );
 }
