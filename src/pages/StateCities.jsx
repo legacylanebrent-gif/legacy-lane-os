@@ -8,10 +8,24 @@ import { STATE_REGIONS } from '@/components/data/StateRegions';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import { base44 } from '@/api/base44Client';
 import { ArrowLeft, MapPin, Building2 } from 'lucide-react';
+import { useSEO } from '@/hooks/useSEO';
 
 export default function StateCities() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const stateCode = urlParams.get('state');
+  const stateData = STATE_REGIONS[stateCode];
+
+  useSEO({
+    title: stateData
+      ? `Estate Sales in ${stateData.name} — Browse by City | EstateSalen.com`
+      : 'Estate Sales by State | EstateSalen.com',
+    description: stateData
+      ? `Find estate sales across ${stateData.name}. Browse ${(stateData.largerCities?.length || 0) + (stateData.smallerCities?.length || 0)} cities with upcoming estate sales, antiques, furniture, and collectibles.`
+      : 'Find estate sales in your state on EstateSalen.com.',
+  });
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
@@ -19,11 +33,6 @@ export default function StateCities() {
       if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
     });
   }, []);
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const stateCode = urlParams.get('state');
-  
-  const stateData = STATE_REGIONS[stateCode];
 
   if (!stateData) {
     return (

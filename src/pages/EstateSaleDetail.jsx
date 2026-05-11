@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
+import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -322,6 +323,62 @@ export default function EstateSaleDetail() {
       return updated;
     });
   };
+
+  // --- Dynamic SEO (safe — hooks must not be conditional) ---
+  const saleCity = sale?.property_address?.city;
+  const saleState = sale?.property_address?.state;
+  const saleLocation = saleCity && saleState ? `${saleCity}, ${saleState}` : '';
+  const firstImage = sale?.images?.[0];
+  const firstImageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url;
+  const saleCategories = sale?.categories?.join(', ');
+  const saleDates = sale?.sale_dates?.map(d => format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')).join(', ');
+
+  const seoTitle = sale
+    ? `${sale.title}${saleLocation ? ` — Estate Sale in ${saleLocation}` : ''} | EstateSalen.com`
+    : 'Estate Sale | EstateSalen.com';
+
+  const seoDesc = sale
+    ? `${saleCategories ? `${saleCategories} available. ` : ''}Estate sale${saleLocation ? ` in ${saleLocation}` : ''}${saleDates ? `. Dates: ${saleDates}` : ''}. Find treasures and unique items on EstateSalen.com.`
+    : 'Find estate sale details, dates, photos, and items on EstateSalen.com.';
+
+  // JSON-LD Event schema for sale pages — Google rich results
+  const jsonLd = sale ? {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: sale.title,
+    description: sale.description || seoDesc,
+    image: firstImageUrl || undefined,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: {
+      '@type': 'Place',
+      name: saleLocation || 'Estate Sale Location',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: saleCity || '',
+        addressRegion: saleState || '',
+        postalCode: sale.property_address?.zip || '',
+        addressCountry: 'US',
+      },
+    },
+    startDate: sale.sale_dates?.[0]?.date || undefined,
+    endDate: sale.sale_dates?.[sale.sale_dates.length - 1]?.date || undefined,
+    organizer: {
+      '@type': 'Organization',
+      name: operator?.company_name || sale.operator_name || 'Estate Sale Company',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: window.location.href,
+    },
+    keywords: sale.categories?.join(', ') || 'estate sale, antiques, furniture, collectibles',
+  } : null;
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useSEO({ title: seoTitle, description: seoDesc, image: firstImageUrl, jsonLd });
 
   if (loading) {
     return (
@@ -874,11 +931,9 @@ export default function EstateSaleDetail() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">LL</span>
-                </div>
+                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="EstateSalen.com logo" className="h-14 w-14 object-contain" />
                 <div>
-                  <h3 className="text-2xl font-serif font-bold">Legacy Lane</h3>
+                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
                   <p className="text-sm text-orange-400">Estate Sale Finder</p>
                 </div>
               </div>
@@ -905,7 +960,7 @@ export default function EstateSaleDetail() {
           
           <div className="border-t border-slate-800 pt-8 text-center">
             <p className="text-slate-500">
-              © {new Date().getFullYear()} Legacy Lane. All rights reserved.
+              © {new Date().getFullYear()} EstateSalen.com. All rights reserved.
             </p>
           </div>
         </div>

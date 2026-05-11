@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, Navigation } from 'lucide-react';
 import EstateSaleCard from '@/components/estate/EstateSaleCard';
+import { useSEO } from '@/hooks/useSEO';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -38,6 +39,19 @@ function MapUpdater({ center, zoom }) {
 }
 
 export default function EstateSaleFinder() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const cityParam = urlParams.get('city');
+  const stateParam = urlParams.get('state');
+
+  useSEO({
+    title: cityParam
+      ? `Estate Sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''} | EstateSalen.com`
+      : 'Find Estate Sales Near You | EstateSalen.com',
+    description: cityParam
+      ? `Browse upcoming estate sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''}. Find antiques, furniture, collectibles, jewelry and more on EstateSalen.com.`
+      : 'Discover estate sales near you. Browse listings by location, find dates and photos, save favorites, and plan your route on EstateSalen.com.',
+  });
+
   const [estates, setEstates] = useState([]);
   const [filteredEstates, setFilteredEstates] = useState([]);
   const [featuredEstates, setFeaturedEstates] = useState([]);
