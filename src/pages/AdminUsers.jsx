@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft, ClipboardList, Store } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 import {
   Table,
@@ -258,6 +258,69 @@ export default function AdminUsers() {
     );
   }
 
+  // Pending applications
+  const pendingClaims = users.filter(u => u.operator_status === 'pending_verification');
+  const pendingResellers = users.filter(u => u.reseller_application_submitted === true && u.primary_account_type !== 'reseller');
+
+  const handleApproveClaim = async (user) => {
+    await base44.entities.User.update(user.id, {
+      operator_status: 'verified',
+      account_status: 'active',
+    });
+    await base44.functions.invoke('sendNotification', {
+      user_id: user.id,
+      type: 'system',
+      title: '✅ Company Claim Approved!',
+      message: `Your claim for ${user.claimed_company_name || 'your company'} has been approved. Welcome to EstateSalen.com!`,
+      link_to_page: 'OperatorDashboard',
+    });
+    loadUsers();
+  };
+
+  const handleDenyClaim = async (user) => {
+    await base44.entities.User.update(user.id, {
+      operator_status: 'denied',
+      primary_account_type: 'consumer',
+      account_status: 'active',
+    });
+    await base44.functions.invoke('sendNotification', {
+      user_id: user.id,
+      type: 'system',
+      title: 'Company Claim Update',
+      message: `We were unable to verify your claim for ${user.claimed_company_name || 'this company'}. Please contact support for assistance.`,
+    });
+    loadUsers();
+  };
+
+  const handleApproveReseller = async (user) => {
+    await base44.entities.User.update(user.id, {
+      primary_account_type: 'reseller',
+      reseller_application_submitted: false,
+      account_status: 'active',
+    });
+    await base44.functions.invoke('sendNotification', {
+      user_id: user.id,
+      type: 'system',
+      title: '🎉 Reseller Application Approved!',
+      message: 'Congratulations! Your reseller application has been approved. You now have access to buyout opportunities and the reseller dashboard.',
+      link_to_page: 'ResellerDashboard',
+    });
+    loadUsers();
+  };
+
+  const handleDenyReseller = async (user) => {
+    await base44.entities.User.update(user.id, {
+      reseller_application_submitted: false,
+    });
+    await base44.functions.invoke('sendNotification', {
+      user_id: user.id,
+      type: 'system',
+      title: 'Reseller Application Update',
+      message: 'Thank you for your interest. Your reseller application was not approved at this time. Please contact support for more information.',
+    });
+    loadUsers();
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {currentUser?.is_admin && currentUser?.primary_account_type !== 'super_admin' && (
@@ -284,6 +347,63 @@ export default function AdminUsers() {
           Add User
         </Button>
       </div>
+
+      {/* Pending Applications Panel */}
+      {(pendingClaims.length > 0 || pendingResellers.length > 0) && (
+        <Card className="border-amber-300 bg-amber-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-amber-800">
+              <ClipboardList className="w-5 h-5" />
+              Pending Applications
+              <Badge className="bg-amber-500 text-white ml-1">{pendingClaims.length + pendingResellers.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {pendingClaims.map(u => (
+              <div key={u.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{u.full_name} <span className="text-slate-400 font-normal">— {u.email}</span></p>
+                    <p className="text-xs text-slate-500">Company Claim: <strong>{u.claimed_company_name || 'Unknown'}</strong> · {u.company_city}, {u.company_state}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1 h-8" onClick={() => handleApproveClaim(u)}>
+                    <Check className="w-3.5 h-3.5" /> Approve
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 gap-1 h-8" onClick={() => handleDenyClaim(u)}>
+                    <XCircle className="w-3.5 h-3.5" /> Deny
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {pendingResellers.map(u => (
+              <div key={u.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center">
+                    <Store className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 text-sm">{u.full_name} <span className="text-slate-400 font-normal">— {u.email}</span></p>
+                    <p className="text-xs text-slate-500">Reseller Application · Applied {u.reseller_application_date ? new Date(u.reseller_application_date).toLocaleDateString() : 'recently'}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1 h-8" onClick={() => handleApproveReseller(u)}>
+                    <Check className="w-3.5 h-3.5" /> Approve
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 gap-1 h-8" onClick={() => handleDenyReseller(u)}>
+                    <XCircle className="w-3.5 h-3.5" /> Deny
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
 
 
