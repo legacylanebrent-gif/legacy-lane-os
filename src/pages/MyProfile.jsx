@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createPageUrl } from '@/utils';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { Link } from 'react-router-dom';
 import {
   User, Building2, Bell, CreditCard, Save, Upload, Check,
@@ -232,7 +233,8 @@ export default function MyProfile() {
   const isReseller = acct === 'reseller';
 
   return (
-    <div className="p-6 lg:p-8 pb-32 max-w-5xl">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 pb-32 max-w-5xl">
       <div className="mb-6">
         <h1 className="text-3xl font-serif font-bold text-slate-900">My Profile</h1>
         <p className="text-slate-500 mt-1">Manage your account, business settings, and preferences</p>
@@ -812,6 +814,8 @@ export default function MyProfile() {
           </TabsContent>
         )}
       </Tabs>
+      </div>
+      <SharedFooter />
     </div>
   );
 }
