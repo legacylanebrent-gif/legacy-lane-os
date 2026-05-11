@@ -12,6 +12,7 @@ import L from 'leaflet';
 import { format, parseISO } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import UniversalHeader from '@/components/layout/UniversalHeader';
 import {
   Navigation, MapPin, Calendar, Clock, Trash2,
   Route, AlertCircle, CheckCircle2, Eye, Lock, GripVertical, Zap, Loader2
@@ -56,6 +57,8 @@ const geocodeCity = async (city, state, googleApiKey) => {
 };
 
 export default function RoutePlanner() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [routeIds, setRouteIds] = useState([]);
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +69,13 @@ export default function RoutePlanner() {
   const [hasLocation, setHasLocation] = useState(false);
   const [cityCoords, setCityCoords] = useState({}); // saleId -> {lat, lng} for city center fallback
   const [googleApiKey, setGoogleApiKey] = useState('');
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      setIsAuthenticated(authed);
+      if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
+  }, []);
 
   useEffect(() => {
     const ids = JSON.parse(localStorage.getItem('estateRoute') || '[]');
@@ -276,8 +286,10 @@ export default function RoutePlanner() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-6">
+      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
+
+      {/* Sub-header / controls */}
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
