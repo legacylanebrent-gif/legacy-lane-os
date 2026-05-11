@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import SharedFooter from '@/components/layout/SharedFooter';
 import {
   Bell, BellOff, CheckCheck, Trash2, Mail, MessageSquare,
   ShoppingBag, Home, DollarSign, Users, TrendingUp, Calendar,
@@ -173,7 +174,8 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Notifications</h1>
@@ -303,6 +305,8 @@ export default function Notifications() {
           })
         )}
       </div>
+      </div>
+      <SharedFooter />
     </div>
   );
 }
