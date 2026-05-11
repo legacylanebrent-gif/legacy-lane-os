@@ -54,15 +54,11 @@ export default function Layout({ children, currentPageName }) {
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Set a sensible default title for every page that doesn't call useSEO itself
-  useEffect(() => {
-    const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
-    if (friendly) {
-      document.title = `${friendly} | EstateSalen.com`;
-    } else {
-      document.title = 'EstateSalen.com — Find Estate Sales Near You';
-    }
-  }, [currentPageName]);
+  // Set browser tab title immediately (synchronously) on every render when page changes
+  const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
+  if (friendly && !PUBLIC_PAGES.includes(currentPageName)) {
+    document.title = `${friendly} | EstateSalen.com`;
+  }
   const { showOnboarding, handleClose, handleDismissPermanently } = useOperatorOnboarding(user);
 
   useEffect(() => {
