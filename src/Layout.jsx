@@ -19,10 +19,50 @@ const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralL
 // Consumer-type roles that get the consumer header instead of the sidebar
 const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller'];
 
+// Friendly display names for browser tab titles
+const PAGE_TITLES = {
+  Dashboard: 'Dashboard',
+  Favorites: 'Favorites',
+  MyProfile: 'My Profile',
+  Notifications: 'Notifications',
+  MyTickets: 'My Tickets',
+  BrowseItems: 'Browse Marketplace',
+  RewardsCheckins: 'Rewards & Check-ins',
+  MyRewards: 'My Rewards',
+  MyReferrals: 'My Referrals',
+  Messages: 'Messages',
+  Inventory: 'Inventory',
+  MySales: 'My Sales',
+  SaleEditor: 'Sale Editor',
+  SaleInventory: 'Sale Inventory',
+  SaleTasks: 'Sale Tasks',
+  Attendance: 'Attendance',
+  Settings: 'Settings',
+  NotificationSettings: 'Notification Settings',
+  FavoriteCompanies: 'Favorite Companies',
+  MyEarlySignIns: 'My Early Sign-Ins',
+  RecordPurchase: 'Record Purchase',
+  RoutePlanner: 'Route Planner',
+  MarketingTasks: 'Marketing',
+  OperatorDashboard: 'Operator Dashboard',
+  OperatorProfile: 'Operator Profile',
+  AdminUsers: 'Admin — Users',
+};
+
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Set a sensible default title for every page that doesn't call useSEO itself
+  useEffect(() => {
+    const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
+    if (friendly) {
+      document.title = `${friendly} | EstateSalen.com`;
+    } else {
+      document.title = 'EstateSalen.com — Find Estate Sales Near You';
+    }
+  }, [currentPageName]);
   const { showOnboarding, handleClose, handleDismissPermanently } = useOperatorOnboarding(user);
 
   useEffect(() => {
