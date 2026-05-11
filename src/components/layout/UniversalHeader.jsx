@@ -14,7 +14,7 @@ import {
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
-  LogIn, LogOut, LayoutDashboard, Bell, ChevronDown, Home,
+  LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -47,11 +47,6 @@ export default function UniversalHeader({ user, isAuthenticated }) {
           <div className="flex items-center gap-1">
             {isAuthenticated && user ? (
               <>
-                <Link to={createPageUrl('Home')}>
-                  <Button variant="ghost" size="icon" className="text-orange-400 hover:text-orange-300 hover:bg-slate-700">
-                    <Home className="w-4 h-4" />
-                  </Button>
-                </Link>
                 <MessagesDropdown />
                 <NotificationsDropdown user={user} />
                 <DropdownMenu>
@@ -73,11 +68,6 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Home')} className="cursor-pointer">
-                        <Home className="w-4 h-4 mr-2" /> Home
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
                         <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
