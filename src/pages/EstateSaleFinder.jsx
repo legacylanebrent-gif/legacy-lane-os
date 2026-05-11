@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Input } from '@/components/ui/input';
