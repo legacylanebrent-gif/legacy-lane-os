@@ -11,6 +11,7 @@ import {
   Heart, Search, MapPin, Calendar, Trash2, Navigation, Bookmark, Clock, Archive
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { format } from 'date-fns';
 
 // Determine if a sale is fully in the past (all sale dates + end times have passed)
@@ -377,6 +378,7 @@ export default function Favorites() {
           })}
         </div>
       )}
+      <SharedFooter />
     </div>
   );
 }
