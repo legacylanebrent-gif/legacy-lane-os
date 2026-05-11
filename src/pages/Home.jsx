@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
+import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -86,6 +87,11 @@ export default function Home() {
   const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
   const [newLocation, setNewLocation] = useState(null);
   const [userZipCode, setUserZipCode] = useState('');
+
+  useSEO({
+    title: 'EstateSalen.com — Find Estate Sales Near You',
+    description: 'Discover amazing estate sales near you. Find, save, and attend estate sales across all 50 states on EstateSalen.com.',
+  });
 
   useEffect(() => {
     checkAuthAndRedirect();
