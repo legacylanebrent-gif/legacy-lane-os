@@ -229,6 +229,7 @@ export default function MyProfile() {
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   const acct = user?.primary_account_type || 'consumer';
   const isConsumer = ['consumer','executor','home_seller','buyer','downsizer','diy_seller','consignor'].includes(acct) || !acct;
+  const isReseller = acct === 'reseller';
 
   return (
     <div className="p-6 lg:p-8 pb-32 max-w-5xl">
@@ -241,10 +242,11 @@ export default function MyProfile() {
         <TabsList className="flex flex-wrap gap-1 h-auto w-full mb-6 justify-start bg-transparent p-0">
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Business</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Territory & Services</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
+          {!isConsumer && !isReseller && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Territory & Services</TabsTrigger>}
+          {!isConsumer && !isReseller && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
+          {!isConsumer && !isReseller && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
+          {!isConsumer && !isReseller && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
+          {!isConsumer && isReseller && subscription?.tier === 'pro' && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
         </TabsList>
 
@@ -468,6 +470,7 @@ export default function MyProfile() {
           <TabsContent value="business" className="space-y-6">
             {/* Branding */}
             <Card>
+
               <CardHeader><CardTitle className="flex items-center gap-2"><ImageIcon className="w-5 h-5" />Branding</CardTitle></CardHeader>
               <CardContent className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -513,44 +516,46 @@ export default function MyProfile() {
               </CardContent>
             </Card>
 
-            {/* Credentials */}
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Credentials & Business Details</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="State license" /></div>
-                  <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="10" /></div>
-                  <div><Label>Year Founded</Label><Input type="number" value={form.founded_year} onChange={e => setForm(p => ({ ...p, founded_year: e.target.value }))} placeholder="2010" /></div>
-                  <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="35" /></div>
-                  <div><Label>Min. Sale Value ($)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="5000" /></div>
-                </div>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">Insured</span></label>
-                  <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.bonded} onCheckedChange={v => setForm(p => ({ ...p, bonded: v }))} /><span className="text-sm font-medium">Bonded</span></label>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Early Sign-In Default */}
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5" />Early Sign-In Default</CardTitle></CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">Enable Early Sign-In by Default</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Auto-enable early sign-in for new sales you create</p>
-                  </div>
-                  <Switch checked={form.early_sign_in_default !== false} onCheckedChange={v => setForm(p => ({ ...p, early_sign_in_default: v }))} />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Credentials & Early Sign-In — not shown to resellers */}
+            {!isReseller && (
+              <>
+                <Card>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Credentials & Business Details</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="State license" /></div>
+                      <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="10" /></div>
+                      <div><Label>Year Founded</Label><Input type="number" value={form.founded_year} onChange={e => setForm(p => ({ ...p, founded_year: e.target.value }))} placeholder="2010" /></div>
+                      <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="35" /></div>
+                      <div><Label>Min. Sale Value ($)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="5000" /></div>
+                    </div>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">Insured</span></label>
+                      <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.bonded} onCheckedChange={v => setForm(p => ({ ...p, bonded: v }))} /><span className="text-sm font-medium">Bonded</span></label>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5" />Early Sign-In Default</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">Enable Early Sign-In by Default</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Auto-enable early sign-in for new sales you create</p>
+                      </div>
+                      <Switch checked={form.early_sign_in_default !== false} onCheckedChange={v => setForm(p => ({ ...p, early_sign_in_default: v }))} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
 
             <SaveBtn label="Save Business Profile" />
           </TabsContent>
         )}
 
         {/* ─────────────── TERRITORY & SERVICES TAB ─────────────── */}
-        {!isConsumer && (
+        {!isConsumer && !isReseller && (
           <TabsContent value="territory" className="space-y-6">
             {/* States */}
             <Card>
@@ -633,7 +638,7 @@ export default function MyProfile() {
         )}
 
         {/* ─────────────── PAYMENTS TAB ─────────────── */}
-        {!isConsumer && (
+        {!isConsumer && !isReseller && (
           <TabsContent value="payments" className="space-y-6">
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5" />Accepted Payment Methods</CardTitle></CardHeader>
@@ -686,7 +691,7 @@ export default function MyProfile() {
         )}
 
         {/* ─────────────── MY SALES TAB ─────────────── */}
-        {!isConsumer && (
+        {!isConsumer && !isReseller && (
           <TabsContent value="sales" className="space-y-4">
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><Home className="w-5 h-5" />My Estate Sales</CardTitle></CardHeader>
@@ -729,7 +734,7 @@ export default function MyProfile() {
         )}
 
         {/* ─────────────── SOCIAL & MARKETPLACES TAB ─────────────── */}
-        {!isConsumer && (
+        {!isConsumer && (!isReseller || subscription?.tier === 'pro') && (
           <TabsContent value="marketplace" className="space-y-4">
             <div className="flex gap-2 border-b pb-3">
               {['social','etsy','ebay'].map(t => (
