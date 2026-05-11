@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import SharedFooter from '@/components/layout/SharedFooter';
 import QRCode from 'qrcode';
 import { 
   Users, DollarSign, Gift, Copy, Download, CheckCircle, 
@@ -90,7 +91,8 @@ export default function MyReferrals() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1 p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Referrals</h1>
@@ -295,6 +297,8 @@ export default function MyReferrals() {
           </p>
         </Card>
       )}
+      </div>
+      <SharedFooter />
     </div>
   );
 }
