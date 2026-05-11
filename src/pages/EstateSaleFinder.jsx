@@ -211,14 +211,14 @@ export default function EstateSaleFinder() {
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 onClick={() => setViewMode('grid')}
-                className={viewMode === 'grid' ? 'bg-navy-900' : 'border-slate-300'}
+                className={viewMode === 'grid' ? 'bg-navy-900' : 'border-slate-300 text-slate-900'}
               >
                 Grid View
               </Button>
               <Button
                 variant={viewMode === 'map' ? 'default' : 'outline'}
                 onClick={() => setViewMode('map')}
-                className={viewMode === 'map' ? 'bg-navy-900' : 'border-slate-300'}
+                className={viewMode === 'map' ? 'bg-navy-900' : 'border-slate-300 text-slate-900'}
               >
                 Map View
               </Button>
