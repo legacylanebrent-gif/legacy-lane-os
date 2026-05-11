@@ -12,6 +12,7 @@ import {
   Calendar, Grid3x3, List
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 export default function ResellerDashboard() {
   const [user, setUser] = useState(null);
@@ -343,6 +344,8 @@ export default function ResellerDashboard() {
           </CardContent>
         </Card>
       )}
+
+      <SharedFooter />
     </div>
   );
 }
