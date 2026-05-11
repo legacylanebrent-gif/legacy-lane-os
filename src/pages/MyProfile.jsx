@@ -16,7 +16,7 @@ import {
   User, Building2, Bell, CreditCard, Save, Upload, Check,
   ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, ArrowRight,
   ShoppingBag, Share2, MapPin, Globe, Shield, Star,
-  Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone
+  Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
@@ -374,6 +374,42 @@ export default function MyProfile() {
               )}
             </CardContent>
           </Card>
+
+          {/* Reseller Application — only for pure consumers */}
+          {isConsumer && acct !== 'reseller' && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-amber-900 mb-1">Become a Reseller</h3>
+                    <p className="text-sm text-amber-700 mb-3">
+                      Resellers get access to estate sale buyout opportunities, early access to bulk lots, and a dedicated reseller dashboard. Apply to upgrade your account today.
+                    </p>
+                    <Button
+                      size="sm"
+                      className="bg-amber-600 hover:bg-amber-700 text-white gap-2"
+                      onClick={async () => {
+                        const confirmed = window.confirm('Apply to become a Reseller? Our team will review your application and upgrade your account within 1–2 business days.');
+                        if (!confirmed) return;
+                        try {
+                          await base44.auth.updateMe({ reseller_application_submitted: true, reseller_application_date: new Date().toISOString() });
+                          alert('✅ Application submitted! Our team will review it and be in touch within 1–2 business days.');
+                        } catch (e) {
+                          alert('Something went wrong. Please try again.');
+                        }
+                      }}
+                    >
+                      <Store className="w-4 h-4" />
+                      Apply to Become a Reseller
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <SaveBtn label="Save Account" />
         </TabsContent>

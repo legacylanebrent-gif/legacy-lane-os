@@ -85,6 +85,9 @@ export default function ConsumerDashboard({ user }) {
     );
   }
 
+  const role = user?.primary_account_type || 'consumer';
+  const canSeeBuyouts = ['reseller', 'operator', 'estate_sale_operator', 'admin'].includes(role) || user?.role === 'admin';
+
   const quickActions = [
     { title: 'Find Sales', icon: MapPin, link: 'EstateSaleFinder', color: 'bg-orange-100 text-orange-600' },
     { title: 'Favorites', icon: Heart, link: 'Favorites', color: 'bg-red-100 text-red-600' },
@@ -92,7 +95,7 @@ export default function ConsumerDashboard({ user }) {
     { title: 'Route Planner', icon: Route, link: 'RoutePlanner', color: 'bg-indigo-100 text-indigo-600' },
     { title: 'My Rewards', icon: Star, link: 'MyRewards', color: 'bg-yellow-100 text-yellow-600' },
     { title: 'My Referrals', icon: Users, link: 'MyReferrals', color: 'bg-purple-100 text-purple-600' },
-    { title: 'Buyouts', icon: HandCoins, link: 'Buyouts', color: 'bg-amber-100 text-amber-600' },
+    ...(canSeeBuyouts ? [{ title: 'Buyouts', icon: HandCoins, link: 'Buyouts', color: 'bg-amber-100 text-amber-600' }] : []),
     { title: 'Support', icon: MessageSquare, link: 'MyTickets', color: 'bg-slate-100 text-slate-600' },
     { title: 'Notifications', icon: Bell, link: 'Notifications', color: 'bg-sky-100 text-sky-600' },
     { title: 'My Profile', icon: User, link: 'MyProfile', color: 'bg-blue-100 text-blue-600' },
