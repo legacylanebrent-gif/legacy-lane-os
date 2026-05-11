@@ -14,14 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Receipt, Calendar, DollarSign } from 'lucide-react';
+import { Receipt, Calendar, DollarSign, Search, Info, MapPin } from 'lucide-react';
 
 export default function RecordPurchase() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [nearbySales, setNearbySales] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
+  const [checkinSales, setCheckinSales] = useState([]); // sales from check-ins last 14 days
+  const [activeSales, setActiveSales] = useState([]);   // active/recent sales found via search
+  const [searchingActive, setSearchingActive] = useState(false);
+  const [activeSearchDone, setActiveSearchDone] = useState(false);
   const [showCustomLocation, setShowCustomLocation] = useState(false);
   const [errorDetails, setErrorDetails] = useState(null);
   const [formData, setFormData] = useState({
@@ -34,84 +36,85 @@ export default function RecordPurchase() {
   });
 
   useEffect(() => {
-    loadUser();
-    getUserLocation();
-    // Pre-fill sale location from URL param (e.g. coming from Recent Check-ins)
-    const params = new URLSearchParams(window.location.search);
-    const prefillLocation = params.get('saleLocation');
-    if (prefillLocation) {
-      setShowCustomLocation(true);
-      setFormData(prev => ({ ...prev, custom_location: prefillLocation }));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userLocation) {
-      loadNearbySales();
-    }
-  }, [userLocation]);
-
-  const loadUser = async () => {
-    try {
+    const init = async () => {
       const userData = await base44.auth.me();
       setUser(userData);
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  };
+      await loadCheckinSales(userData);
 
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.log('Geolocation error:', error);
-        }
-      );
-    }
-  };
+      // Pre-fill sale location from URL param
+      const params = new URLSearchParams(window.location.search);
+      const prefillLocation = params.get('saleLocation');
+      if (prefillLocation) {
+        setShowCustomLocation(true);
+        setFormData(prev => ({ ...prev, custom_location: prefillLocation }));
+      }
+    };
+    init();
+  }, []);
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 3959; // Radius of Earth in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  const loadNearbySales = async () => {
+  const loadCheckinSales = async (userData) => {
     try {
-      const allSales = await base44.entities.EstateSale.list('-created_date', 100);
-      const activeSales = allSales.filter(s => s.status === 'upcoming' || s.status === 'active');
-      
-      const salesWithDistance = activeSales
-        .filter(sale => sale.location && sale.location.lat && sale.location.lng)
-        .map(sale => ({
-          ...sale,
-          distance: calculateDistance(
-            userLocation.lat,
-            userLocation.lng,
-            sale.location.lat,
-            sale.location.lng
-          )
-        }))
-        .filter(sale => sale.distance < 25)
-        .sort((a, b) => a.distance - b.distance);
-      
-      setNearbySales(salesWithDistance);
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 14);
+
+      // Get user's check-ins from the past 14 days
+      const checkIns = await base44.entities.CheckIn.filter({ created_by: userData.email });
+      const recentCheckIns = checkIns.filter(c => new Date(c.created_date) >= cutoff);
+
+      if (recentCheckIns.length === 0) return;
+
+      // Get unique sale IDs from check-ins
+      const saleIds = [...new Set(recentCheckIns.map(c => c.location_id).filter(Boolean))];
+
+      // Fetch those sales
+      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
+      const matched = allSales.filter(s => saleIds.includes(s.id));
+
+      // Also include sales matched by name from check-ins (location_name)
+      const locationNames = [...new Set(recentCheckIns.map(c => c.location_name).filter(Boolean))];
+      const byName = allSales.filter(s =>
+        !matched.find(m => m.id === s.id) &&
+        locationNames.some(n => s.title?.toLowerCase().includes(n.toLowerCase()) || n.toLowerCase().includes(s.title?.toLowerCase()))
+      );
+
+      setCheckinSales([...matched, ...byName]);
     } catch (error) {
-      console.error('Error loading nearby sales:', error);
+      console.error('Error loading check-in sales:', error);
     }
   };
+
+  const searchActiveSales = async () => {
+    setSearchingActive(true);
+    try {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
+      const eligible = allSales.filter(s => {
+        if (s.status === 'active' || s.status === 'upcoming') return true;
+        // Archived/completed but had a sale date within last 3 days
+        if ((s.status === 'completed' || s.status === 'archived') && s.sale_dates?.length > 0) {
+          const lastDate = s.sale_dates[s.sale_dates.length - 1]?.date;
+          if (lastDate && new Date(lastDate + 'T23:59:59') >= threeDaysAgo) return true;
+        }
+        return false;
+      });
+
+      // Exclude ones already in checkinSales
+      const existing = new Set(checkinSales.map(s => s.id));
+      setActiveSales(eligible.filter(s => !existing.has(s.id)));
+      setActiveSearchDone(true);
+    } catch (error) {
+      console.error('Error searching active sales:', error);
+    } finally {
+      setSearchingActive(false);
+    }
+  };
+
+  const allLocationOptions = [
+    ...checkinSales.map(s => ({ id: s.id, label: s.title, badge: 'Checked In' })),
+    ...activeSales.map(s => ({ id: s.id, label: s.title, badge: s.status === 'active' ? 'Active' : s.status === 'upcoming' ? 'Upcoming' : 'Recent' })),
+  ];
 
   const handleLocationChange = (value) => {
     if (value === 'other') {
@@ -233,6 +236,13 @@ export default function RecordPurchase() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Info notice */}
+            <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-5">
+              <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-800">
+                You can only record a purchase for a sale you've <strong>checked in at</strong>, or one that is <strong>currently active</strong> or <strong>ended within the past 3 days</strong>.
+              </p>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="item_name">Item or Bundle Items *</Label>
@@ -277,24 +287,57 @@ export default function RecordPurchase() {
               </div>
 
               <div>
-                <Label htmlFor="sale_location">Sale Location *</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label htmlFor="sale_location">Sale Location *</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 text-xs h-7"
+                    onClick={searchActiveSales}
+                    disabled={searchingActive}
+                  >
+                    <Search className="w-3 h-3" />
+                    {searchingActive ? 'Searching...' : 'Search Active & Recent Sales'}
+                  </Button>
+                </div>
+
+                {checkinSales.length === 0 && !activeSearchDone && (
+                  <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    No check-ins found in the past 14 days. Use the search button to find active or recent sales.
+                  </p>
+                )}
+
                 <Select onValueChange={handleLocationChange} value={showCustomLocation ? 'other' : formData.sale_location}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a sale location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {nearbySales.length === 0 && !userLocation && (
-                      <SelectItem value="loading" disabled>Loading nearby sales...</SelectItem>
+                    {allLocationOptions.length === 0 && (
+                      <SelectItem value="__none" disabled>No sales found — use search above or enter custom</SelectItem>
                     )}
-                    {nearbySales.length === 0 && userLocation && (
-                      <SelectItem value="none" disabled>No nearby sales found</SelectItem>
+                    {checkinSales.length > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Your Recent Check-ins (14 days)</div>
+                        {checkinSales.map(sale => (
+                          <SelectItem key={sale.id} value={sale.title}>
+                            ✅ {sale.title}
+                          </SelectItem>
+                        ))}
+                      </>
                     )}
-                    {nearbySales.map(sale => (
-                      <SelectItem key={sale.id} value={sale.title}>
-                        {sale.title} ({sale.distance.toFixed(1)} mi)
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="other">Other (Custom Location)</SelectItem>
+                    {activeSales.length > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wide mt-1">Active & Recent Sales</div>
+                        {activeSales.map(sale => (
+                          <SelectItem key={sale.id} value={sale.title}>
+                            📍 {sale.title}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                    <SelectItem value="other">✏️ Other (Enter Custom Location)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
