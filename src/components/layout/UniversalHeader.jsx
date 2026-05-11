@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,6 +20,7 @@ import {
 import { base44 } from '@/api/base44Client';
 
 export default function UniversalHeader({ user, isAuthenticated }) {
+  const navigate = useNavigate();
   const userInitials = user?.full_name
     ?.split(' ')
     .map(n => n[0])
@@ -28,6 +29,10 @@ export default function UniversalHeader({ user, isAuthenticated }) {
 
   const handleLogout = async () => {
     await base44.auth.logout(createPageUrl('Home'));
+  };
+
+  const handleMenuItemClick = (page) => {
+    navigate(createPageUrl(page));
   };
 
   return (
@@ -68,69 +73,45 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
-                        <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('Dashboard')}>
+                      <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Favorites')} className="cursor-pointer">
-                        <Heart className="w-4 h-4 mr-2" /> Favorite Sales
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('Favorites')}>
+                      <Heart className="w-4 h-4 mr-2" /> Favorite Sales
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('RoutePlanner')} className="cursor-pointer">
-                        <Navigation className="w-4 h-4 mr-2" /> Route Planner
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('RoutePlanner')}>
+                      <Navigation className="w-4 h-4 mr-2" /> Route Planner
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('MyEarlySignIns')} className="cursor-pointer">
-                        <ClipboardList className="w-4 h-4 mr-2" /> My Early Sign-Ins
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('MyEarlySignIns')}>
+                      <ClipboardList className="w-4 h-4 mr-2" /> My Early Sign-Ins
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
-                        <QrCode className="w-4 h-4 mr-2" /> Sale Checkin
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('RewardsCheckins')}>
+                      <QrCode className="w-4 h-4 mr-2" /> Sale Checkin
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
-                        <Receipt className="w-4 h-4 mr-2" /> Record Purchase
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('RecordPurchase')}>
+                      <Receipt className="w-4 h-4 mr-2" /> Record Purchase
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
-                        <Star className="w-4 h-4 mr-2" /> My Rewards
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('MyRewards')}>
+                      <Star className="w-4 h-4 mr-2" /> My Rewards
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
-                        <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('BrowseItems')}>
+                      <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
-                        <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('FavoriteCompanies')}>
+                      <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
-                        <HelpCircle className="w-4 h-4 mr-2" /> How to Use
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('HowToUse')}>
+                      <HelpCircle className="w-4 h-4 mr-2" /> How to Use
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                        <Bell className="w-4 h-4 mr-2" /> Notification Settings
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleMenuItemClick('NotificationSettings')}>
+                      <Bell className="w-4 h-4 mr-2" /> Notification Settings
                     </DropdownMenuItem>
                     {user?.role === 'admin' && (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('AdminUsers')} className="cursor-pointer font-medium text-orange-600">
-                            <Settings className="w-4 h-4 mr-2" /> Admin Dashboard
-                          </Link>
+                        <DropdownMenuItem onClick={() => handleMenuItemClick('AdminUsers')} className="font-medium text-orange-600">
+                          <Settings className="w-4 h-4 mr-2" /> Admin Dashboard
                         </DropdownMenuItem>
                       </>
                     )}
