@@ -35,13 +35,10 @@ export default function UniversalHeader({ user, isAuthenticated }) {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-8 w-8 object-contain" />
-            <div>
-              <h1 className="text-base font-serif font-bold text-white leading-tight">EstateSalen.com</h1>
-              <p className="text-[10px] text-orange-400 hidden sm:block">Discover Amazing Estate Sales</p>
-            </div>
-          </Link>
+           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+             <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-9 w-9 object-contain" />
+             <h1 className="text-lg font-serif font-bold text-white leading-tight hidden sm:block">EstateSalen.com</h1>
+           </Link>
 
           {/* Right Side - User Options */}
           <div className="flex items-center gap-1">
