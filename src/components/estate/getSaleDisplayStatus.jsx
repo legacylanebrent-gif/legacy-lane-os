@@ -7,18 +7,34 @@ export function getSaleDisplayStatus(sale) {
     const now = new Date();
 
     const activeSales = sale.sale_dates.filter(saleDate => {
-      const saleStart = new Date(`${saleDate.date}T${saleDate.start_time || '00:00'}`);
-      const saleEnd = new Date(`${saleDate.date}T${saleDate.end_time || '23:59'}`);
+      // Parse date in local timezone
+      const [year, month, day] = saleDate.date.split('-');
+      const saleStart = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
+        parseInt(saleDate.start_time?.split(':')[0] || 0), 
+        parseInt(saleDate.start_time?.split(':')[1] || 0)
+      );
+      const saleEnd = new Date(parseInt(year), parseInt(month) - 1, parseInt(day),
+        parseInt(saleDate.end_time?.split(':')[0] || 23),
+        parseInt(saleDate.end_time?.split(':')[1] || 59)
+      );
       return now >= saleStart && now <= saleEnd;
     });
 
     const upcomingSales = sale.sale_dates.filter(saleDate => {
-      const saleStart = new Date(`${saleDate.date}T${saleDate.start_time || '00:00'}`);
+      const [year, month, day] = saleDate.date.split('-');
+      const saleStart = new Date(parseInt(year), parseInt(month) - 1, parseInt(day),
+        parseInt(saleDate.start_time?.split(':')[0] || 0),
+        parseInt(saleDate.start_time?.split(':')[1] || 0)
+      );
       return saleStart > now;
     });
 
     const pastSales = sale.sale_dates.filter(saleDate => {
-      const saleEnd = new Date(`${saleDate.date}T${saleDate.end_time || '23:59'}`);
+      const [year, month, day] = saleDate.date.split('-');
+      const saleEnd = new Date(parseInt(year), parseInt(month) - 1, parseInt(day),
+        parseInt(saleDate.end_time?.split(':')[0] || 23),
+        parseInt(saleDate.end_time?.split(':')[1] || 59)
+      );
       return now > saleEnd;
     });
 
