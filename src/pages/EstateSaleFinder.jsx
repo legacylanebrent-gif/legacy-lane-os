@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, Navigation } from 'lucide-react';
 import EstateSaleCard from '@/components/estate/EstateSaleCard';
 import { useSEO } from '@/hooks/useSEO';
+import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -52,6 +54,7 @@ export default function EstateSaleFinder() {
       : 'Discover estate sales near you. Browse listings by location, find dates and photos, save favorites, and plan your route on EstateSalen.com.',
   });
 
+  const [user, setUser] = useState(null);
   const [estates, setEstates] = useState([]);
   const [filteredEstates, setFilteredEstates] = useState([]);
   const [featuredEstates, setFeaturedEstates] = useState([]);
@@ -65,6 +68,7 @@ export default function EstateSaleFinder() {
   const [isBrowsingByRegion, setIsBrowsingByRegion] = useState(false);
 
   useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
     getUserLocation();
     loadEstates();
   }, []);
@@ -182,6 +186,7 @@ export default function EstateSaleFinder() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
+      <UniversalHeader user={user} isAuthenticated={!!user} />
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -387,6 +392,7 @@ export default function EstateSaleFinder() {
           </div>
         )}
       </div>
+      <SharedFooter />
     </div>
   );
 }
