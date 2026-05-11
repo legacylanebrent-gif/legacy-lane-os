@@ -5,8 +5,8 @@ export function getSaleDisplayStatus(sale) {
   // Completed: hidden from frontend
   if (sale.status === 'completed') return 'completed';
   
-  // Active status with date-based display logic
-  if (sale.status === 'active' && sale.sale_dates && sale.sale_dates.length > 0) {
+  // Active or upcoming status with date-based display logic
+  if ((sale.status === 'active' || sale.status === 'upcoming') && sale.sale_dates && sale.sale_dates.length > 0) {
     const now = new Date();
     
     const upcomingSales = sale.sale_dates.filter(saleDate => {
