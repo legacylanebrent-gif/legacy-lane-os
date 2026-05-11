@@ -47,6 +47,35 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
       enrichment_notes: `Claimed by user ${user.email} on ${new Date().toISOString()}. Pending verification.`,
     });
 
+    // Notify all admin users
+    try {
+      const adminUsers = await base44.entities.User.filter({ role: 'admin' });
+      for (const admin of adminUsers) {
+        await base44.functions.invoke('sendNotification', {
+          user_id: admin.id,
+          type: 'system',
+          title: '🏢 New Company Claim Submitted',
+          message: `${user.full_name || user.email} has claimed ${operator.company_name} (${operator.city}, ${operator.state}). Their account is pending verification.`,
+          link_to_page: 'AdminUsers',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to notify admins:', err);
+    }
+
+    // Send confirmation notification to the claimant
+    try {
+      await base44.functions.invoke('sendNotification', {
+        user_id: user.id,
+        type: 'system',
+        title: '✅ Company Claim Received',
+        message: `Your claim for ${operator.company_name} has been submitted. Our team will review and approve your access within 1–2 business days.`,
+        link_to_page: 'MyProfile',
+      });
+    } catch (err) {
+      console.error('Failed to send confirmation notification:', err);
+    }
+
     setStep('success');
     setSubmitting(false);
   };

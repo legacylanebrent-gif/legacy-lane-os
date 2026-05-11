@@ -396,6 +396,28 @@ export default function MyProfile() {
                         if (!confirmed) return;
                         try {
                           await base44.auth.updateMe({ reseller_application_submitted: true, reseller_application_date: new Date().toISOString() });
+
+                          // Notify admins
+                          const adminUsers = await base44.entities.User.filter({ role: 'admin' });
+                          for (const admin of adminUsers) {
+                            await base44.functions.invoke('sendNotification', {
+                              user_id: admin.id,
+                              type: 'system',
+                              title: '🛒 New Reseller Application',
+                              message: `${user?.full_name || user?.email} has applied to become a Reseller. Review and approve their account in Admin Users.`,
+                              link_to_page: 'AdminUsers',
+                            });
+                          }
+
+                          // Confirm to the applicant
+                          await base44.functions.invoke('sendNotification', {
+                            user_id: user?.id,
+                            type: 'system',
+                            title: '✅ Reseller Application Received',
+                            message: 'Your application to become a Reseller has been submitted. Our team will review it and be in touch within 1–2 business days.',
+                            link_to_page: 'MyProfile',
+                          });
+
                           alert('✅ Application submitted! Our team will review it and be in touch within 1–2 business days.');
                         } catch (e) {
                           alert('Something went wrong. Please try again.');
