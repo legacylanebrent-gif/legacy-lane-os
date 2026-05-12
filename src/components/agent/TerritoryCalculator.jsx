@@ -67,8 +67,9 @@ export default function TerritoryCalculator() {
     setResult(null);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `What is the approximate current total population of ${name}${state ? ', ' + state : ''}? Reply with ONLY a single integer number, no commas, no text.`,
-        response_json_schema: { type: 'object', properties: { population: { type: 'number' } } }
+        prompt: `What is the total population of ${name}${state ? ', ' + state : ''}? Use your knowledge of US Census Bureau data. This is a county-level population figure. For reference: large suburban counties like Monmouth County NJ have ~650,000 people, Orange County CA has ~3.1 million, a small rural county might have 20,000-50,000. Provide the accurate county population as a single integer with no text, no commas, no explanation.`,
+        response_json_schema: { type: 'object', properties: { population: { type: 'number' } } },
+        add_context_from_internet: true
       });
       setCountyData({ name, population: res?.population || null, populationLoading: false });
     } catch {
