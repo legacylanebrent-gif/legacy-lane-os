@@ -116,8 +116,9 @@ export default function TerritoryCalculator() {
     const basePerUnit = avgPop < 50000 ? 500 : avgPop < 150000 ? 1200 : 2500;
     const buyIn = isExclusive ? Math.round(basePerUnit * numCities * 1.5 / 100) * 100 : 0;
     const monthlyFee = isExclusive ? 0 : Math.round(basePerUnit * numCities * 0.12 / 10) * 10;
-    const baseLeads = avgPop < 50000 ? 8 : avgPop < 150000 ? 15 : 25;
-    const annualLeads = Math.round(baseLeads * leadMultiplier * numCities);
+    // 1 lead opportunity per 12,000 residents — scales directly with real population
+    const baseLeads = Math.round(totalPop / 12000);
+    const annualLeads = Math.round(baseLeads * leadMultiplier);
     const closedDeals = Math.round(annualLeads * 0.18);
     const agentCommission = (parseFloat(commissionPct) || 3) / 100;
     const gci = Math.round(closedDeals * avgPrice * agentCommission);
