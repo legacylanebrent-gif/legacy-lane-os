@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import SharedFooter from '@/components/layout/SharedFooter';
 import TerritoryCalculator from '@/components/agent/TerritoryCalculator';
+import TerritoryProfitShareCalculator from '@/components/agent/TerritoryProfitShareCalculator';
 import AgentApplicationForm from '@/components/agent/AgentApplicationForm';
 
 const preferredFeatures = [
@@ -255,36 +256,7 @@ export default function AgentSignup() {
             </div>
           </div>
 
-          {/* Example calc */}
-          <div className="bg-white border-2 border-blue-200 rounded-2xl p-8">
-            <h4 className="font-bold text-slate-900 mb-5 text-center">Example: Territory Revenue Stack</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100">
-                    <th className="text-left text-slate-500 font-medium pb-3">What You Recruit</th>
-                    <th className="text-right text-slate-500 font-medium pb-3">Their Monthly Fee</th>
-                    <th className="text-right text-slate-500 font-medium pb-3">Your 20% Share</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {[
-                    { label: '3 Estate Sale Companies', fee: '$297', share: '$59/mo' },
-                    { label: '5 Estate Sale Companies', fee: '$495', share: '$99/mo' },
-                    { label: '5 Resellers / Consignors', fee: '$250', share: '$50/mo' },
-                    { label: '10 Total Active Members', fee: '$990', share: '$198/mo' },
-                  ].map((row, i) => (
-                    <tr key={i} className={i === 3 ? 'bg-blue-50 font-semibold' : ''}>
-                      <td className="py-3 text-slate-700">{row.label}</td>
-                      <td className="py-3 text-right text-slate-600">{row.fee}</td>
-                      <td className="py-3 text-right text-blue-700 font-bold">{row.share}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="text-slate-400 text-xs mt-4 text-center">Revenue share is paid monthly on active subscriptions. Exact subscription amounts vary by plan tier.</p>
-          </div>
+          <TerritoryProfitShareCalculator />
         </div>
       </section>
 
@@ -354,16 +326,16 @@ export default function AgentSignup() {
                   </p>
                   <div className="flex gap-3 mt-3">
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">$99/mo operator</p>
-                      <p className="text-blue-500 text-xs">= $19.80/mo to you</p>
+                      <p className="text-blue-900 font-bold text-sm">$129/mo operator</p>
+                      <p className="text-blue-500 text-xs">= $25.80/mo to you</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
                       <p className="text-blue-900 font-bold text-sm">5 operators recruited</p>
-                      <p className="text-blue-500 text-xs">= ~$99/mo passive</p>
+                      <p className="text-blue-500 text-xs">= ~$129/mo passive</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
                       <p className="text-blue-900 font-bold text-sm">10 operators</p>
-                      <p className="text-blue-500 text-xs">= ~$198/mo passive</p>
+                      <p className="text-blue-500 text-xs">= ~$258/mo passive</p>
                     </div>
                   </div>
                 </div>
