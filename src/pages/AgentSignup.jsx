@@ -75,7 +75,7 @@ export default function AgentSignup() {
               Apply for Territory Access <ArrowRight className="w-5 h-5" />
             </Button>
             <a href="https://houszu.com" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-slate-500 text-slate-200 hover:bg-slate-700 px-8 py-6 text-lg rounded-xl">
+              <Button variant="outline" className="border-slate-400 text-white bg-slate-700 hover:bg-slate-600 px-8 py-6 text-lg rounded-xl">
                 Learn About Houszu for Agents
               </Button>
             </a>
