@@ -22,7 +22,6 @@ export default function TerritoryCalculator() {
     numCities: 1,
     estPopulation: '',
     avgSalePrice: '',
-    annualVolume: '',
     accessLevel: 'preferred',
     leadTier: 'medium',
   });
@@ -34,14 +33,14 @@ export default function TerritoryCalculator() {
     const cities = parseInt(form.numCities) || 1;
     const pop = parseInt(form.estPopulation) || 50000;
     const avgPrice = parseInt(form.avgSalePrice) || 350000;
-    const volume = parseInt(form.annualVolume) || 20;
     const leadMultiplier = { low: 0.5, medium: 1, high: 1.8 }[form.leadTier];
     const isExclusive = form.accessLevel === 'exclusive';
 
     const basePerCity = pop < 50000 ? 500 : pop < 150000 ? 1200 : 2500;
     const buyIn = isExclusive ? Math.round(basePerCity * cities * 1.5 / 100) * 100 : 0;
     const monthlyFee = isExclusive ? 0 : Math.round(basePerCity * cities * 0.12 / 10) * 10;
-    const annualLeads = Math.round(volume * leadMultiplier * cities);
+    const baseLeads = pop < 50000 ? 8 : pop < 150000 ? 15 : 25;
+    const annualLeads = Math.round(baseLeads * leadMultiplier * cities);
     const conversionRate = 0.18;
     const closedDeals = Math.round(annualLeads * conversionRate);
     const gci = Math.round(closedDeals * avgPrice * 0.03);
@@ -127,24 +126,15 @@ export default function TerritoryCalculator() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Avg. Home Sale Price ($)</label>
-                  <input
-                    type="number"
-                    className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
-                    placeholder="e.g. 375000"
-                    value={form.avgSalePrice} onChange={e => set('avgSalePrice', e.target.value)}
-                  />
+                    <label className="block text-sm text-slate-400 mb-1">Avg. Home Sale Price ($)</label>
+                    <input
+                      type="number"
+                      className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
+                      placeholder="e.g. 375000"
+                      value={form.avgSalePrice} onChange={e => set('avgSalePrice', e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Est. Annual Estate Sales</label>
-                  <input
-                    type="number"
-                    className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
-                    placeholder="e.g. 25"
-                    value={form.annualVolume} onChange={e => set('annualVolume', e.target.value)}
-                  />
-                </div>
-              </div>
 
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Desired Access Level</label>
