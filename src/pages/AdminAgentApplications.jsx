@@ -7,6 +7,7 @@ import { Check, XCircle, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 
 const statusColors = {
   pending: 'bg-amber-100 text-amber-700',
+  reviewing: 'bg-blue-100 text-blue-700',
   approved: 'bg-green-100 text-green-700',
   denied: 'bg-red-100 text-red-700',
 };
@@ -45,8 +46,8 @@ export default function AdminAgentApplications() {
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
-  const pending = apps.filter(a => a.status === 'pending');
-  const reviewed = apps.filter(a => a.status !== 'pending');
+  const pending = apps.filter(a => a.status === 'pending' || a.status === 'reviewing');
+  const reviewed = apps.filter(a => a.status === 'approved' || a.status === 'denied');
 
   const AppCard = ({ app }) => (
     <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
@@ -98,8 +99,13 @@ export default function AdminAgentApplications() {
             <p className="text-xs text-slate-500 mb-0.5">Why Should Be Considered</p>
             <p className="text-slate-700 text-sm bg-slate-50 rounded p-3 whitespace-pre-wrap">{app.why_should_be_considered || '—'}</p>
           </div>
-          {app.status === 'pending' && (
-            <div className="flex gap-2 pt-1">
+          {(app.status === 'pending' || app.status === 'reviewing') && (
+            <div className="flex gap-2 pt-1 flex-wrap">
+              {app.status === 'pending' && (
+                <Button size="sm" variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50 gap-1" onClick={() => updateStatus(app.id, 'reviewing')}>
+                  <RefreshCw className="w-3.5 h-3.5" /> Mark as Reviewing
+                </Button>
+              )}
               <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1" onClick={() => updateStatus(app.id, 'approved')}>
                 <Check className="w-3.5 h-3.5" /> Approve
               </Button>
