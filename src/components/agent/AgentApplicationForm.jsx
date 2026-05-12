@@ -17,7 +17,7 @@ export default function AgentApplicationForm() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', brokerage: '', licenseState: '',
     citiesRequested: '', countyRequested: '', interestedIn: '',
-    monthlyBudget: '', avgSalePrice: '', closedLastYear: '',
+    avgSalePrice: '',
     hasEstateSaleRelationships: '', whyShouldBeConsidered: ''
   });
   const [submitted, setSubmitted] = useState(false);
@@ -165,23 +165,8 @@ export default function AgentApplicationForm() {
           </div>
         </div>
         <div>
-          <label className={labelClass}>Current Monthly Marketing Budget</label>
-          <select className={inputClass} value={form.monthlyBudget} onChange={e => set('monthlyBudget', e.target.value)}>
-            <option value="">Select range</option>
-            <option value="under500">Under $500</option>
-            <option value="500-1000">$500 – $1,000</option>
-            <option value="1000-2500">$1,000 – $2,500</option>
-            <option value="2500-5000">$2,500 – $5,000</option>
-            <option value="over5000">Over $5,000</option>
-          </select>
-        </div>
-        <div>
           <label className={labelClass}>Average Sale Price in Your Market</label>
           <input type="number" className={inputClass} placeholder="e.g. 375000" value={form.avgSalePrice} onChange={e => set('avgSalePrice', e.target.value)} />
-        </div>
-        <div>
-          <label className={labelClass}>Listings Closed Last 12 Months</label>
-          <input type="number" className={inputClass} placeholder="e.g. 12" value={form.closedLastYear} onChange={e => set('closedLastYear', e.target.value)} />
         </div>
         <div>
           <label className={labelClass}>Do You Have Estate Sale Company Relationships?</label>
