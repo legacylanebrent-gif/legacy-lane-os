@@ -125,13 +125,20 @@ export default function AgentApplicationForm() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <label className={labelClass}>Cities Requested *</label>
-          <input required className={inputClass} placeholder="e.g. Orlando, Kissimmee, Winter Park" value={form.citiesRequested} onChange={e => set('citiesRequested', e.target.value)} />
+          <label className={labelClass}>Cities Requested {form.interestedIn === 'preferred' && '*'}</label>
+          <input
+            required={form.interestedIn === 'preferred'}
+            className={inputClass}
+            placeholder="e.g. Orlando, Kissimmee, Winter Park"
+            value={form.citiesRequested}
+            onChange={e => set('citiesRequested', e.target.value)}
+          />
         </div>
         <div>
-          <label className={labelClass}>County Requested</label>
+          <label className={labelClass}>County Requested {form.interestedIn === 'exclusive' && '*'}</label>
           <div className="relative">
             <input
+              required={form.interestedIn === 'exclusive'}
               className={inputClass}
               placeholder="e.g. Orange County"
               value={form.countyRequested}
