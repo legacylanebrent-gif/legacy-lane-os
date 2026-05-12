@@ -11,10 +11,12 @@ Deno.serve(async (req) => {
     const titles = {
       company_claim: '🏢 New Company Claim Submitted',
       reseller: '🛒 New Reseller Application',
+      agent_territory: '🏡 New Agent Territory Application',
     };
     const messages = {
       company_claim: `${applicant_name || applicant_email} has claimed ${details || 'a company'}. Pending verification in Admin Users.`,
       reseller: `${applicant_name || applicant_email} has applied to become a Reseller. Review in Admin Users.`,
+      agent_territory: `${applicant_name || applicant_email} has submitted a territory application. Details: ${details}`,
     };
 
     const title = titles[application_type] || 'New Application';

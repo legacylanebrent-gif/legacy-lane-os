@@ -63,10 +63,34 @@ export default function AgentApplicationForm() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real implementation, this would call a backend function
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await base44.functions.invoke('notifyAdminsOfApplication', {
+        applicant_name: form.name,
+        applicant_email: form.email,
+        application_type: 'agent_territory',
+        details: `
+          Phone: ${form.phone}
+          Brokerage: ${form.brokerage}
+          License State: ${form.licenseState}
+          Interested In: ${form.interestedIn}
+          Cities Requested: ${form.citiesRequested}
+          County Requested: ${form.countyRequested}
+          Avg Sale Price: ${form.avgSalePrice}
+          Estate Sale Relationships: ${form.hasEstateSaleRelationships}
+          Why Considered: ${form.whyShouldBeConsidered}
+        `.trim(),
+      });
+    } catch (err) {
+      console.error('Failed to notify admins:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   if (submitted) {
@@ -192,9 +216,9 @@ export default function AgentApplicationForm() {
         />
       </div>
 
-      <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 text-lg flex items-center justify-center gap-2">
-        <Send className="w-5 h-5" />
-        Submit Territory Application
+      <Button type="submit" disabled={submitting} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 text-lg flex items-center justify-center gap-2">
+        {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+        {submitting ? 'Submitting…' : 'Submit Territory Application'}
       </Button>
 
       <p className="text-slate-500 text-xs text-center leading-relaxed">
