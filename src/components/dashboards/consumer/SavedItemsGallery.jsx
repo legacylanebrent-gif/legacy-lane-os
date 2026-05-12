@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Heart, ChevronLeft, ChevronRight, ExternalLink, X } from 'lucide-react';
+import { Heart, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 export default function SavedItemsGallery({ sales }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIdx, setLightboxIdx] = useState(0);
   const [lightboxSale, setLightboxSale] = useState(null);
+  // bump this to force re-render after localStorage change
+  const [version, setVersion] = useState(0);
+
+  const removeSavedImage = useCallback((e, saleId, imageIdx) => {
+    e.stopPropagation();
+    const stored = localStorage.getItem(`savedImages_${saleId}`);
+    if (!stored) return;
+    const indices = JSON.parse(stored).filter(i => i !== imageIdx);
+    if (indices.length === 0) {
+      localStorage.removeItem(`savedImages_${saleId}`);
+    } else {
+      localStorage.setItem(`savedImages_${saleId}`, JSON.stringify(indices));
+    }
+    setVersion(v => v + 1);
+  }, []);
 
   // Aggregate saved images from localStorage across all followed sales
   const savedItems = [];
@@ -61,25 +75,32 @@ export default function SavedItemsGallery({ sales }) {
     <>
       {/* Gallery grid */}
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-        {savedItems.map((item, i) => (
-          <button
+        {savedItems.map((item) => (
+          <div
             key={`${item.sale.id}-${item.imageIdx}`}
-            onClick={() => openLightbox(item)}
             className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 hover:border-orange-400 hover:shadow-md transition-all group"
           >
-            <img
-              src={item.url}
-              alt={item.name || item.sale.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="bg-white/90 rounded-full p-0.5">
-                <Heart className="w-3 h-3 fill-red-500 text-red-500" />
-              </div>
-            </div>
-          </button>
+            <button
+              onClick={() => openLightbox(item)}
+              className="w-full h-full"
+            >
+              <img
+                src={item.url}
+                alt={item.name || item.sale.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+            </button>
+            {/* Always-visible unfavorite button */}
+            <button
+              onClick={(e) => removeSavedImage(e, item.sale.id, item.imageIdx)}
+              className="absolute top-1 right-1 bg-white/90 rounded-full p-1 hover:bg-red-50 hover:scale-110 transition-all shadow-sm"
+              title="Remove from saved"
+            >
+              <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
+            </button>
+          </div>
         ))}
       </div>
 
