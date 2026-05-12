@@ -29,6 +29,7 @@ export default function TerritoryCalculator() {
   const [countyAvgPrice, setCountyAvgPrice] = useState('');
 
   const [leadTier, setLeadTier] = useState('medium');
+  const [commissionPct, setCommissionPct] = useState('3');
   const [result, setResult] = useState(null);
 
   // ─── City mode helpers ─────────────────────────────────────────────────────
@@ -118,7 +119,8 @@ export default function TerritoryCalculator() {
     const baseLeads = avgPop < 50000 ? 8 : avgPop < 150000 ? 15 : 25;
     const annualLeads = Math.round(baseLeads * leadMultiplier * numCities);
     const closedDeals = Math.round(annualLeads * 0.18);
-    const gci = Math.round(closedDeals * avgPrice * 0.03);
+    const agentCommission = (parseFloat(commissionPct) || 3) / 100;
+    const gci = Math.round(closedDeals * avgPrice * agentCommission);
     const referralObligation = Math.round(gci * 0.20);
     const netGCI = gci - referralObligation;
     const annualCost = isExclusive ? Math.round(buyIn * 0.25) : monthlyFee * 12;
@@ -320,6 +322,25 @@ export default function TerritoryCalculator() {
                 </>
               )}
 
+              {/* Commission % */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Your Listing Commission %</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0.5"
+                    max="10"
+                    step="0.25"
+                    className="w-28 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
+                    placeholder="e.g. 3"
+                    value={commissionPct}
+                    onChange={e => { setCommissionPct(e.target.value); setResult(null); }}
+                  />
+                  <span className="text-slate-400 text-sm">% of closing price</span>
+                </div>
+                <p className="text-slate-500 text-xs mt-1">Agent's side of the commission used to calculate GCI.</p>
+              </div>
+
               {/* Lead Tier */}
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Expected Lead Volume</label>
@@ -427,7 +448,7 @@ export default function TerritoryCalculator() {
                     <CardContent className="p-4">
                       <p className="text-slate-400 text-xs mb-1">Est. Gross GCI</p>
                       <p className="text-2xl font-bold text-green-400">${result.gci.toLocaleString()}</p>
-                      <p className="text-slate-500 text-xs">at 3% agent commission</p>
+                      <p className="text-slate-500 text-xs">at {commissionPct || 3}% agent commission</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-slate-800 border-slate-700">
