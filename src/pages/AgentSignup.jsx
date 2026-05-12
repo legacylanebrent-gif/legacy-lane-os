@@ -340,6 +340,17 @@ export default function AgentSignup() {
                   </div>
                 </div>
 
+                {/* Investment pricing range explanation */}
+                <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
+                  <TrendingUp className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-orange-800 text-sm font-bold">Territory Buy-In Investment</p>
+                    <p className="text-orange-700 text-xs mt-0.5 leading-relaxed">
+                      <strong>$3,800</strong> as a one-time investment, or spread out over <strong>12 months</strong> at <strong>$5,320</strong> total (monthly payments available).
+                    </p>
+                  </div>
+                </div>
+
                 {/* Guarantee banner */}
                 <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
                   <ShieldCheck className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
