@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Check, MapPin, Shield, Zap, Star, AlertTriangle,
-  Building2, Home, ArrowRight, TrendingUp, Users, Award, Lock, ChevronRight
+  Building2, Home, ArrowRight, TrendingUp, Users, Award, Lock, ChevronRight, ShieldCheck
 } from 'lucide-react';
 import SharedFooter from '@/components/layout/SharedFooter';
 import TerritoryCalculator from '@/components/agent/TerritoryCalculator';
@@ -167,7 +167,7 @@ export default function AgentSignup() {
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-slate-900 mb-2">Own Your Territory</h3>
                 <p className="text-slate-500 text-sm mb-6">Best for agents who want priority or exclusive access in selected cities or regions.</p>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-6">
                   {exclusiveFeatures.map((f, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
@@ -175,6 +175,18 @@ export default function AgentSignup() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Guarantee banner */}
+                <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-emerald-800 text-sm font-bold">Territory Owner Guarantee</p>
+                    <p className="text-emerald-700 text-xs mt-0.5 leading-relaxed">
+                      Earn at least <span className="font-bold">5× your annual investment</span> in GCI from platform leads — or your next year's fees are <span className="font-bold">free</span>.
+                    </p>
+                  </div>
+                </div>
+
                 <Button onClick={scrollToForm} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3">
                   Check Territory Availability
                 </Button>
