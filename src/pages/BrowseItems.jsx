@@ -9,6 +9,7 @@ import { Search, ShoppingBag, Grid3x3, List, X } from 'lucide-react';
 import MarketplaceItemCard from '@/components/marketplace/MarketplaceItemCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
@@ -203,7 +204,7 @@ export default function BrowseItems() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
       {/* Page Title + Search Bar */}
@@ -239,7 +240,7 @@ export default function BrowseItems() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Filters */}
           <div className="lg:col-span-1">
@@ -405,46 +406,7 @@ export default function BrowseItems() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-20 px-4 mt-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
-                <div>
-                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
-                  <p className="text-sm text-orange-400">Estate Sale Finder</p>
-                </div>
-              </div>
-              <p className="text-slate-400 text-lg mb-6">
-                Discover amazing estate sales and find treasures near you. Connect with trusted estate sale companies nationwide.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><Link to={createPageUrl('SearchByState')} className="text-white hover:text-orange-400 transition-colors">Browse by State</Link></li>
-                <li><Link to={createPageUrl('BrowseOperators')} className="text-white hover:text-orange-400 transition-colors">Browse Companies</Link></li>
-                <li><Link to={createPageUrl('Home')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
-                <li><Link to={createPageUrl('BrowseItems')} className="text-white hover:text-orange-400 transition-colors">Marketplace</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
-              <ul className="space-y-2">
-                <li><Link to={createPageUrl('OperatorPackages')} className="text-white hover:text-orange-400 transition-colors">List Your Company</Link></li>
-                <li><Link to={createPageUrl('AgentSignup')} className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
-                <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
-                <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 pt-8 text-center">
-            <p className="text-slate-500">© {new Date().getFullYear()} EstateSalen.com. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
     </div>
   );
 }
