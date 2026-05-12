@@ -219,10 +219,18 @@ export default function BrowseItems() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('grid')}>
+              <Button 
+                size="icon" 
+                onClick={() => setViewMode('grid')}
+                className={viewMode === 'grid' ? 'bg-navy-900 text-white hover:bg-navy-800' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}
+              >
                 <Grid3x3 className="w-4 h-4" />
               </Button>
-              <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('list')}>
+              <Button 
+                size="icon" 
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-navy-900 text-white hover:bg-navy-800' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}
+              >
                 <List className="w-4 h-4" />
               </Button>
             </div>
