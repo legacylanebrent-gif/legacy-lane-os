@@ -121,6 +121,101 @@ export default function AgentSignup() {
         </div>
       </section>
 
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────── */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <Badge className="bg-orange-100 text-orange-800 mb-4 px-4 py-1.5">How It Works</Badge>
+            <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">
+              From Lead to Living Room — Before the Competition Knows
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Here's exactly how a referral opportunity flows from our platform all the way to you being the agent the family already trusts when it's time to sell.
+            </p>
+          </div>
+
+          {/* Steps */}
+          <div className="relative">
+            {/* Vertical connector line */}
+            <div className="hidden md:block absolute left-8 top-10 bottom-10 w-0.5 bg-gradient-to-b from-orange-300 via-orange-400 to-emerald-400" />
+
+            <div className="space-y-8">
+
+              {/* Step 1 */}
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-xl shadow-lg z-10">1</div>
+                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex-1">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Platform Generates the Lead</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    EstateSalen.com and Legacy Lane OS run paid advertising, SEO campaigns, and outreach that bring in homeowners dealing with probate, downsizing, inherited homes, senior moves, and other life transitions. These are real families who need real help — and they reach out to us first.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-16 h-16 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-xl shadow-lg z-10">2</div>
+                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex-1">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Is Routed to the Local Estate Sale Company</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    The qualified lead is sent directly to your partnered estate sale company in that territory. Their team follows up and books an <strong className="text-slate-800">in-person consultation appointment</strong> at the home — their core service. This is not a cold call. This is a scheduled, professional consultation with a family that asked for help.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-16 h-16 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold text-xl shadow-lg z-10">3</div>
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6 flex-1 shadow-sm">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-xl font-bold text-slate-900">Your Profile Is in the Consultation Packet</h3>
+                    <Badge className="bg-orange-500 text-white text-xs">The Key Step</Badge>
+                  </div>
+                  <p className="text-slate-600 leading-relaxed mb-4">
+                    When the estate sale company walks into that consultation, they bring a professional packet for the homeowner. <strong className="text-slate-800">Your information is a full page inside that packet</strong> — not a business card, not a footnote. A full dedicated page that tells the homeowner exactly who you are, what you do, and why you're the right real estate professional to help them with the next step.
+                  </p>
+                  {/* Packet callout */}
+                  <div className="bg-white border border-orange-200 rounded-xl p-5 flex gap-4 items-start">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm mb-1">What Your Page in the Packet Communicates:</p>
+                      <ul className="space-y-1.5 text-sm text-slate-600">
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> Your name, photo, credentials, and contact info</li>
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> Your experience with life-transition real estate (probate, downsizing, inherited homes)</li>
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> The value of working with a real estate agent and an estate sale company <em>together as a team</em></li>
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> How the two services complement each other — personal property first, real property second — creating a seamless transition for the family</li>
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> A warm endorsement from the estate sale company presenting you as their trusted agent partner</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-lg z-10">4</div>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex-1">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">You're Already the Agent Before They Even Call You</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    By the time the homeowner is ready to think about selling the property, they've already seen your name, your face, and your value — introduced and endorsed by the company they just hired to help them. <strong className="text-slate-800">You didn't cold-call. You didn't compete with five other agents. You were already in the room.</strong>
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Summary banner */}
+          <div className="mt-14 bg-slate-900 rounded-2xl p-8 text-center">
+            <p className="text-slate-300 text-lg leading-relaxed max-w-3xl mx-auto">
+              This is what makes the Legacy Lane OS partnership different from any other lead source. It's not about volume. It's about being <span className="text-orange-400 font-bold">the trusted agent already endorsed inside the home</span> — before anyone else even knows the opportunity exists.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── PARTICIPATION CARDS ──────────────────────────────────────── */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
