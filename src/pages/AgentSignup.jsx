@@ -345,8 +345,11 @@ export default function AgentSignup() {
                   <TrendingUp className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-orange-800 text-sm font-bold">Territory Buy-In Investment</p>
-                    <p className="text-orange-700 text-xs mt-0.5 leading-relaxed">
+                    <p className="text-orange-700 text-xs mt-0.5 leading-relaxed mb-2">
                       <strong>$3,800</strong> as a one-time investment, or spread out over <strong>12 months</strong> at <strong>$5,320</strong> total (monthly payments available).
+                    </p>
+                    <p className="text-orange-700 text-xs leading-relaxed">
+                      <strong>Note:</strong> On your first referral deal closing, full payment of any remaining balance is due.
                     </p>
                   </div>
                 </div>
