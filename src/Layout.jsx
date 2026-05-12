@@ -17,7 +17,7 @@ const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'm
 const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse'];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
-const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller'];
+const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller', 'real_estate_agent'];
 
 // Friendly display names for browser tab titles
 const PAGE_TITLES = {

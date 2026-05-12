@@ -15,7 +15,8 @@ import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
-  Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle
+  Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
+  Users, FileText, BarChart2, Send
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -110,6 +111,37 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
                       </Link>
                     </DropdownMenuItem>
+                    {user?.primary_account_type === 'real_estate_agent' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="text-xs text-orange-600 font-bold uppercase tracking-wide">Agent Tools</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('AgentOperatorPortal')} className="cursor-pointer">
+                            <Users className="w-4 h-4 mr-2" /> Operator Partnerships
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('AgentPartnerships')} className="cursor-pointer">
+                            <Send className="w-4 h-4 mr-2" /> Agent Partnerships
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('ReferralDealPipeline')} className="cursor-pointer">
+                            <BarChart2 className="w-4 h-4 mr-2" /> Referral Deal Pipeline
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('ReferralDashboard')} className="cursor-pointer">
+                            <FileText className="w-4 h-4 mr-2" /> Referral Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('JoinReferralExchange')} className="cursor-pointer">
+                            <Users className="w-4 h-4 mr-2" /> Join Referral Exchange
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
