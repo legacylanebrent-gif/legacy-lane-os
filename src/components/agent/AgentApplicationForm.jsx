@@ -69,24 +69,30 @@ export default function AgentApplicationForm() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // Save the application to the database
+      await base44.entities.AgentTerritoryApplication.create({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        brokerage: form.brokerage,
+        license_state: form.licenseState,
+        interested_in: form.interestedIn,
+        cities_requested: form.citiesRequested,
+        county_requested: form.countyRequested,
+        avg_sale_price: form.avgSalePrice ? Number(form.avgSalePrice) : null,
+        has_estate_sale_relationships: form.hasEstateSaleRelationships,
+        why_should_be_considered: form.whyShouldBeConsidered,
+        status: 'pending',
+      });
+      // Notify admins
       await base44.functions.invoke('notifyAdminsOfApplication', {
         applicant_name: form.name,
         applicant_email: form.email,
         application_type: 'agent_territory',
-        details: `
-          Phone: ${form.phone}
-          Brokerage: ${form.brokerage}
-          License State: ${form.licenseState}
-          Interested In: ${form.interestedIn}
-          Cities Requested: ${form.citiesRequested}
-          County Requested: ${form.countyRequested}
-          Avg Sale Price: ${form.avgSalePrice}
-          Estate Sale Relationships: ${form.hasEstateSaleRelationships}
-          Why Considered: ${form.whyShouldBeConsidered}
-        `.trim(),
+        details: `Brokerage: ${form.brokerage} | State: ${form.licenseState} | Interest: ${form.interestedIn} | Cities: ${form.citiesRequested} | County: ${form.countyRequested}`,
       });
     } catch (err) {
-      console.error('Failed to notify admins:', err);
+      console.error('Failed to submit application:', err);
     } finally {
       setSubmitting(false);
       setSubmitted(true);

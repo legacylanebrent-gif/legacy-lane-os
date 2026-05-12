@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const messages = {
       company_claim: `${applicant_name || applicant_email} has claimed ${details || 'a company'}. Pending verification in Admin Users.`,
       reseller: `${applicant_name || applicant_email} has applied to become a Reseller. Review in Admin Users.`,
-      agent_territory: `${applicant_name || applicant_email} has submitted a territory application. Details: ${details}`,
+      agent_territory: `${applicant_name || applicant_email} has submitted an agent territory application. Click to review.`,
     };
 
     const title = titles[application_type] || 'New Application';
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         type: 'system',
         title,
         message,
-        link_to_page: 'AdminUsers',
+        link_to_page: application_type === 'agent_territory' ? 'AdminAgentApplications' : 'AdminUsers',
         read: false,
       });
     }

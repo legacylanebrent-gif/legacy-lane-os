@@ -1,0 +1,60 @@
+{
+  "name": "AgentTerritoryApplication",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "brokerage": {
+      "type": "string"
+    },
+    "license_state": {
+      "type": "string"
+    },
+    "interested_in": {
+      "type": "string",
+      "enum": [
+        "preferred",
+        "exclusive",
+        "unsure"
+      ]
+    },
+    "cities_requested": {
+      "type": "string"
+    },
+    "county_requested": {
+      "type": "string"
+    },
+    "avg_sale_price": {
+      "type": "number"
+    },
+    "has_estate_sale_relationships": {
+      "type": "string"
+    },
+    "why_should_be_considered": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "denied"
+      ],
+      "default": "pending"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ]
+}

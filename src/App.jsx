@@ -71,6 +71,7 @@ import CompanyEmailEnrichment from './pages/CompanyEmailEnrichment';
 import BrowseOperators from './pages/BrowseOperators';
 import HowToUse from './pages/HowToUse';
 import AgentOperatorPortal from './pages/AgentOperatorPortal';
+import AdminAgentApplications from './pages/AdminAgentApplications';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -185,6 +186,7 @@ const AuthenticatedApp = () => {
       <Route path="/BrowseOperators" element={<BrowseOperators />} />
       <Route path="/HowToUse" element={<LayoutWrapper currentPageName="HowToUse"><HowToUse /></LayoutWrapper>} />
       <Route path="/AgentOperatorPortal" element={<LayoutWrapper currentPageName="AgentOperatorPortal"><AgentOperatorPortal /></LayoutWrapper>} />
+      <Route path="/AdminAgentApplications" element={<LayoutWrapper currentPageName="AdminAgentApplications"><AdminAgentApplications /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
