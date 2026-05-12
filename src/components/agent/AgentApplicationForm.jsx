@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Send } from 'lucide-react';
+import { CheckCircle, Send, Loader2, XCircle } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
@@ -20,8 +21,33 @@ export default function AgentApplicationForm() {
     hasEstateSaleRelationships: '', whyShouldBeConsidered: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [countyStatus, setCountyStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
+  const debounceRef = useRef(null);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+
+  const checkCountyAvailability = async (county) => {
+    const trimmed = county.trim();
+    if (!trimmed) { setCountyStatus(null); return; }
+    setCountyStatus('checking');
+    // Search OperatorTerritoryProfile records where service_counties contains this county
+    const all = await base44.entities.OperatorTerritoryProfile.list();
+    const claimed = all.some(profile =>
+      (profile.service_counties || []).some(c =>
+        c.toLowerCase() === trimmed.toLowerCase()
+      )
+    );
+    setCountyStatus(claimed ? 'taken' : 'available');
+  };
+
+  const handleCountyChange = (val) => {
+    set('countyRequested', val);
+    setCountyStatus(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.trim()) {
+      debounceRef.current = setTimeout(() => checkCountyAvailability(val), 700);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -90,7 +116,32 @@ export default function AgentApplicationForm() {
         </div>
         <div>
           <label className={labelClass}>County Requested</label>
-          <input className={inputClass} placeholder="e.g. Orange County" value={form.countyRequested} onChange={e => set('countyRequested', e.target.value)} />
+          <div className="relative">
+            <input
+              className={inputClass}
+              placeholder="e.g. Orange County"
+              value={form.countyRequested}
+              onChange={e => handleCountyChange(e.target.value)}
+            />
+            {countyStatus === 'checking' && (
+              <div className="mt-2 flex items-center gap-2 text-slate-400 text-xs">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Checking availability…
+              </div>
+            )}
+            {countyStatus === 'available' && (
+              <div className="mt-2 flex items-center gap-2 text-emerald-400 text-xs font-medium">
+                <CheckCircle className="w-3.5 h-3.5" />
+                This county appears to be available!
+              </div>
+            )}
+            {countyStatus === 'taken' && (
+              <div className="mt-2 flex items-center gap-2 text-orange-400 text-xs font-medium">
+                <XCircle className="w-3.5 h-3.5" />
+                This county may already be claimed. You can still apply — our team will review.
+              </div>
+            )}
+          </div>
         </div>
         <div>
           <label className={labelClass}>Current Monthly Marketing Budget</label>
