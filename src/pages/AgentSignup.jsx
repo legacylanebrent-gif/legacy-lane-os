@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Building2, Users, TrendingUp, Target, Award } from 'lucide-react';
-import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 
 export default function AgentSignup() {
@@ -54,15 +53,8 @@ export default function AgentSignup() {
     { icon: Award, title: 'Preferred Status', description: 'Stand out as a verified preferred agent' }
   ];
 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 flex flex-col">
-      <UniversalHeader user={user} isAuthenticated={!!user} />
 
       <div className="flex-1">
       {/* Hero Section */}
