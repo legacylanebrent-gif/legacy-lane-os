@@ -27,6 +27,8 @@ const exclusiveFeatures = [
   'Stronger positioning with estate sale company partners',
   'Territory protection subject to performance standards',
   '20% referral fee still applies on closed platform-generated deals',
+  'Recruit estate sale companies & resellers — earn 20% of their monthly platform revenue',
+  'Build a passive income stream from every operator you bring into your territory',
 ];
 
 const benefits = [
@@ -216,6 +218,76 @@ export default function AgentSignup() {
         </div>
       </section>
 
+      {/* ── TERRITORY REVENUE SHARE ──────────────────────────────────── */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-slate-50 border-y border-blue-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge className="bg-blue-100 text-blue-800 mb-4 px-4 py-1.5">Territory Owner Perk</Badge>
+            <h2 className="text-3xl font-serif font-bold text-slate-900 mb-3">
+              Recruit Operators. Earn Passive Monthly Revenue.
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies and resellers in your territory and earn <strong className="text-slate-700">20% of their monthly platform subscription</strong> every single month they remain active.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-10">
+            <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Building2 className="w-6 h-6 text-blue-600" />
+              </div>
+              <h4 className="font-bold text-slate-900 mb-1">Recruit Estate Sale Companies</h4>
+              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner.</p>
+            </div>
+            <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Users className="w-6 h-6 text-blue-600" />
+              </div>
+              <h4 className="font-bold text-slate-900 mb-1">Recruit Resellers</h4>
+              <p className="text-slate-500 text-sm leading-relaxed">Bring in resellers, consignors, and vintage dealers in your area who benefit from the EstateSalen.com marketplace.</p>
+            </div>
+            <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
+              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="w-6 h-6 text-emerald-600" />
+              </div>
+              <h4 className="font-bold text-slate-900 mb-1">Earn 20% Monthly — Forever</h4>
+              <p className="text-slate-500 text-sm leading-relaxed">Every active member you recruit generates 20% of their monthly subscription back to you — recurring, passive income from your territory.</p>
+            </div>
+          </div>
+
+          {/* Example calc */}
+          <div className="bg-white border-2 border-blue-200 rounded-2xl p-8">
+            <h4 className="font-bold text-slate-900 mb-5 text-center">Example: Territory Revenue Stack</h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left text-slate-500 font-medium pb-3">What You Recruit</th>
+                    <th className="text-right text-slate-500 font-medium pb-3">Their Monthly Fee</th>
+                    <th className="text-right text-slate-500 font-medium pb-3">Your 20% Share</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {[
+                    { label: '3 Estate Sale Companies', fee: '$297', share: '$59/mo' },
+                    { label: '5 Estate Sale Companies', fee: '$495', share: '$99/mo' },
+                    { label: '5 Resellers / Consignors', fee: '$250', share: '$50/mo' },
+                    { label: '10 Total Active Members', fee: '$990', share: '$198/mo' },
+                  ].map((row, i) => (
+                    <tr key={i} className={i === 3 ? 'bg-blue-50 font-semibold' : ''}>
+                      <td className="py-3 text-slate-700">{row.label}</td>
+                      <td className="py-3 text-right text-slate-600">{row.fee}</td>
+                      <td className="py-3 text-right text-blue-700 font-bold">{row.share}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-slate-400 text-xs mt-4 text-center">Revenue share is paid monthly on active subscriptions. Exact subscription amounts vary by plan tier.</p>
+          </div>
+        </div>
+      </section>
+
       {/* ── PARTICIPATION CARDS ──────────────────────────────────────── */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
@@ -270,6 +342,31 @@ export default function AgentSignup() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Revenue share banner */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4 text-blue-600 shrink-0" />
+                    <p className="text-blue-900 text-sm font-bold">Territory Recruitment Revenue Share</p>
+                  </div>
+                  <p className="text-blue-700 text-xs leading-relaxed mb-2">
+                    As a Territory Owner, you can recruit <strong>estate sale companies</strong> and <strong>resellers</strong> in your territory to join the platform. For every company you bring in, you earn <strong>20% of their monthly platform subscription revenue</strong> — for as long as they remain active members.
+                  </p>
+                  <div className="flex gap-3 mt-3">
+                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
+                      <p className="text-blue-900 font-bold text-sm">$99/mo operator</p>
+                      <p className="text-blue-500 text-xs">= $19.80/mo to you</p>
+                    </div>
+                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
+                      <p className="text-blue-900 font-bold text-sm">5 operators recruited</p>
+                      <p className="text-blue-500 text-xs">= ~$99/mo passive</p>
+                    </div>
+                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
+                      <p className="text-blue-900 font-bold text-sm">10 operators</p>
+                      <p className="text-blue-500 text-xs">= ~$198/mo passive</p>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Guarantee banner */}
                 <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
