@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calculator, TrendingUp, DollarSign, MapPin } from 'lucide-react';
+import { Calculator, MapPin, Plus, Trash2, Loader2, CheckCircle2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
@@ -15,32 +16,70 @@ const US_STATES = [
 ];
 
 export default function TerritoryCalculator() {
-  const [form, setForm] = useState({
-    state: '',
-    county: '',
-    cities: '',
-    numCities: 1,
-    estPopulation: '',
-    avgSalePrice: '',
-    accessLevel: 'preferred',
-    leadTier: 'medium',
-  });
+  const [state, setState] = useState('');
+  const [county, setCounty] = useState('');
+  const [cities, setCities] = useState([]); // [{ name, population, populationLoading, avgClosingPrice }]
+  const [cityInput, setCityInput] = useState('');
+  const [accessLevel, setAccessLevel] = useState('preferred');
+  const [leadTier, setLeadTier] = useState('medium');
   const [result, setResult] = useState(null);
 
-  const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+  const addCity = async () => {
+    const name = cityInput.trim();
+    if (!name) return;
+    const newCity = { name, population: null, populationLoading: true, avgClosingPrice: '' };
+    setCities(prev => [...prev, newCity]);
+    setCityInput('');
+
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `What is the approximate current population of ${name}${state ? ', ' + state : ''}? Reply with ONLY a single integer number, no commas, no text, no explanation. Just the number.`,
+        response_json_schema: {
+          type: 'object',
+          properties: { population: { type: 'number' } }
+        }
+      });
+      const pop = res?.population || null;
+      setCities(prev => prev.map(c =>
+        c.name === name && c.populationLoading
+          ? { ...c, population: pop, populationLoading: false }
+          : c
+      ));
+    } catch {
+      setCities(prev => prev.map(c =>
+        c.name === name && c.populationLoading
+          ? { ...c, population: null, populationLoading: false }
+          : c
+      ));
+    }
+  };
+
+  const removeCity = (index) => {
+    setCities(prev => prev.filter((_, i) => i !== index));
+    setResult(null);
+  };
+
+  const updateClosingPrice = (index, val) => {
+    setCities(prev => prev.map((c, i) => i === index ? { ...c, avgClosingPrice: val } : c));
+    setResult(null);
+  };
+
+  const canCalculate = cities.length > 0 && cities.every(c => !c.populationLoading && c.avgClosingPrice);
 
   const calculate = () => {
-    const cities = parseInt(form.numCities) || 1;
-    const pop = parseInt(form.estPopulation) || 50000;
-    const avgPrice = parseInt(form.avgSalePrice) || 350000;
-    const leadMultiplier = { low: 0.5, medium: 1, high: 1.8 }[form.leadTier];
-    const isExclusive = form.accessLevel === 'exclusive';
+    const numCities = cities.length;
+    const totalPop = cities.reduce((sum, c) => sum + (c.population || 50000), 0);
+    const avgPop = totalPop / numCities;
+    const avgPrice = cities.reduce((sum, c) => sum + (parseInt(c.avgClosingPrice) || 350000), 0) / numCities;
 
-    const basePerCity = pop < 50000 ? 500 : pop < 150000 ? 1200 : 2500;
-    const buyIn = isExclusive ? Math.round(basePerCity * cities * 1.5 / 100) * 100 : 0;
-    const monthlyFee = isExclusive ? 0 : Math.round(basePerCity * cities * 0.12 / 10) * 10;
-    const baseLeads = pop < 50000 ? 8 : pop < 150000 ? 15 : 25;
-    const annualLeads = Math.round(baseLeads * leadMultiplier * cities);
+    const leadMultiplier = { low: 0.5, medium: 1, high: 1.8 }[leadTier];
+    const isExclusive = accessLevel === 'exclusive';
+
+    const basePerCity = avgPop < 50000 ? 500 : avgPop < 150000 ? 1200 : 2500;
+    const buyIn = isExclusive ? Math.round(basePerCity * numCities * 1.5 / 100) * 100 : 0;
+    const monthlyFee = isExclusive ? 0 : Math.round(basePerCity * numCities * 0.12 / 10) * 10;
+    const baseLeads = avgPop < 50000 ? 8 : avgPop < 150000 ? 15 : 25;
+    const annualLeads = Math.round(baseLeads * leadMultiplier * numCities);
     const conversionRate = 0.18;
     const closedDeals = Math.round(annualLeads * conversionRate);
     const gci = Math.round(closedDeals * avgPrice * 0.03);
@@ -49,7 +88,7 @@ export default function TerritoryCalculator() {
     const annualCost = isExclusive ? Math.round(buyIn * 0.25) : monthlyFee * 12;
     const roi = annualCost > 0 ? Math.round(((netGCI - annualCost) / annualCost) * 100) : null;
 
-    setResult({ buyIn, monthlyFee, annualLeads, closedDeals, gci, referralObligation, netGCI, roi, isExclusive, annualCost });
+    setResult({ buyIn, monthlyFee, annualLeads, closedDeals, gci, referralObligation, netGCI, roi, isExclusive, annualCost, avgPop: Math.round(avgPop), avgPrice: Math.round(avgPrice), numCities });
   };
 
   return (
@@ -61,7 +100,7 @@ export default function TerritoryCalculator() {
           </div>
           <h2 className="text-4xl font-serif font-bold text-white mb-4">Estimate Your Territory Buy-In</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Use this calculator to get a rough picture of territory costs, potential lead volume, and estimated GCI impact. All outputs are illustrative estimates only.
+            Add your target cities one at a time. We'll look up the population automatically — then you enter the average closing price for each market.
           </p>
         </div>
 
@@ -73,77 +112,112 @@ export default function TerritoryCalculator() {
                 <MapPin className="w-5 h-5 text-orange-400" /> Territory Details
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
+
+              {/* State + County */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-slate-400 mb-1">State</label>
                   <select
                     className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm"
-                    value={form.state} onChange={e => set('state', e.target.value)}
+                    value={state} onChange={e => setState(e.target.value)}
                   >
                     <option value="">Select state</option>
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">County</label>
+                  <label className="block text-sm text-slate-400 mb-1">County (optional)</label>
                   <input
                     className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
                     placeholder="e.g. Orange County"
-                    value={form.county} onChange={e => set('county', e.target.value)}
+                    value={county} onChange={e => setCounty(e.target.value)}
                   />
                 </div>
               </div>
 
+              {/* Add City */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Cities Requested</label>
-                <input
-                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
-                  placeholder="e.g. Orlando, Kissimmee, Ocoee"
-                  value={form.cities} onChange={e => set('cities', e.target.value)}
-                />
+                <label className="block text-sm text-slate-400 mb-1">Add a City</label>
+                <div className="flex gap-2">
+                  <input
+                    className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
+                    placeholder="e.g. Orlando"
+                    value={cityInput}
+                    onChange={e => setCityInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && addCity()}
+                  />
+                  <Button
+                    onClick={addCity}
+                    disabled={!cityInput.trim()}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-3"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-slate-500 text-xs mt-1">AI will look up the approximate population automatically.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Number of Cities</label>
-                  <input
-                    type="number" min="1" max="20"
-                    className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm"
-                    value={form.numCities} onChange={e => set('numCities', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Est. Population</label>
-                  <input
-                    type="number"
-                    className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
-                    placeholder="e.g. 80000"
-                    value={form.estPopulation} onChange={e => set('estPopulation', e.target.value)}
-                  />
-                </div>
-              </div>
+              {/* City List */}
+              {cities.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Your Cities</p>
+                  {cities.map((city, i) => (
+                    <div key={i} className="bg-slate-700/50 border border-slate-600 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-semibold">{city.name}</span>
+                          {city.populationLoading ? (
+                            <span className="flex items-center gap-1 text-slate-400 text-xs">
+                              <Loader2 className="w-3 h-3 animate-spin" /> Looking up population...
+                            </span>
+                          ) : city.population ? (
+                            <span className="flex items-center gap-1 text-green-400 text-xs">
+                              <CheckCircle2 className="w-3 h-3" /> ~{city.population.toLocaleString()} residents
+                            </span>
+                          ) : (
+                            <span className="text-slate-500 text-xs">Population unknown</span>
+                          )}
+                        </div>
+                        <button onClick={() => removeCity(i)} className="text-slate-500 hover:text-red-400 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Avg. Closing Price in {city.name} ($)</label>
+                        <input
+                          type="number"
+                          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
+                          placeholder="e.g. 375000"
+                          value={city.avgClosingPrice}
+                          onChange={e => updateClosingPrice(i, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm text-slate-400 mb-1">Avg. Home Sale Price ($)</label>
-                    <input
-                      type="number"
-                      className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm placeholder-slate-500"
-                      placeholder="e.g. 375000"
-                      value={form.avgSalePrice} onChange={e => set('avgSalePrice', e.target.value)}
-                    />
-                  </div>
+                  {/* Summary row */}
+                  {cities.length > 1 && (
+                    <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg px-3 py-2 text-xs text-slate-400">
+                      {cities.length} cities · Avg pop: {cities.filter(c => c.population).length > 0
+                        ? Math.round(cities.filter(c => c.population).reduce((s, c) => s + c.population, 0) / cities.filter(c => c.population).length).toLocaleString()
+                        : '—'} · Avg price: {cities.filter(c => c.avgClosingPrice).length > 0
+                        ? '$' + Math.round(cities.filter(c => c.avgClosingPrice).reduce((s, c) => s + parseInt(c.avgClosingPrice || 0), 0) / cities.filter(c => c.avgClosingPrice).length).toLocaleString()
+                        : '—'}
+                    </div>
+                  )}
                 </div>
+              )}
 
+              {/* Access Level */}
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Desired Access Level</label>
                 <div className="flex gap-2">
                   {['preferred', 'exclusive'].map(l => (
                     <button
                       key={l}
-                      onClick={() => set('accessLevel', l)}
-                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${form.accessLevel === l ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                      onClick={() => setAccessLevel(l)}
+                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${accessLevel === l ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
                     >
                       {l === 'preferred' ? 'Preferred Agent' : 'Territory Owner'}
                     </button>
@@ -151,14 +225,15 @@ export default function TerritoryCalculator() {
                 </div>
               </div>
 
+              {/* Lead Tier */}
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Expected Lead Volume</label>
                 <div className="flex gap-2">
                   {['low', 'medium', 'high'].map(t => (
                     <button
                       key={t}
-                      onClick={() => set('leadTier', t)}
-                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${form.leadTier === t ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                      onClick={() => setLeadTier(t)}
+                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${leadTier === t ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
                     >
                       {t}
                     </button>
@@ -166,9 +241,18 @@ export default function TerritoryCalculator() {
                 </div>
               </div>
 
-              <Button onClick={calculate} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3">
+              <Button
+                onClick={calculate}
+                disabled={!canCalculate}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 Calculate My Territory Estimate
               </Button>
+              {cities.length > 0 && !canCalculate && (
+                <p className="text-slate-500 text-xs text-center -mt-2">
+                  Enter an avg. closing price for each city to calculate.
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -178,11 +262,18 @@ export default function TerritoryCalculator() {
               <div className="h-full flex items-center justify-center">
                 <div className="text-center text-slate-500">
                   <Calculator className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg">Fill in your territory details and click Calculate to see your estimates.</p>
+                  <p className="text-lg">Add cities, enter closing prices, and click Calculate to see your estimates.</p>
                 </div>
               </div>
             ) : (
               <>
+                {/* Territory summary */}
+                <div className="bg-slate-700/40 border border-slate-600 rounded-lg px-4 py-3 text-xs text-slate-400 flex gap-4 flex-wrap">
+                  <span><span className="text-white font-semibold">{result.numCities}</span> cities</span>
+                  <span>Avg pop: <span className="text-white font-semibold">{result.avgPop.toLocaleString()}</span></span>
+                  <span>Avg closing: <span className="text-white font-semibold">${result.avgPrice.toLocaleString()}</span></span>
+                </div>
+
                 {result.isExclusive ? (
                   <Card className="bg-orange-500/10 border-orange-500/40">
                     <CardContent className="p-6">
@@ -253,7 +344,7 @@ export default function TerritoryCalculator() {
                 )}
 
                 <p className="text-slate-500 text-xs leading-relaxed">
-                  This calculator is for planning purposes only. Final territory pricing depends on availability, market size, expected lead volume, estate sale company coverage, home values, and platform growth. All numbers are illustrative estimates.
+                  This calculator is for planning purposes only. Population data is AI-estimated. Final territory pricing depends on availability, market size, estate sale company coverage, and platform growth. All numbers are illustrative estimates.
                 </p>
               </>
             )}
