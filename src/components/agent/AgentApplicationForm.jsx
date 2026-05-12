@@ -26,6 +26,20 @@ export default function AgentApplicationForm() {
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
 
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (!user) return;
+      setForm(prev => ({
+        ...prev,
+        name: user.full_name || prev.name,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+        brokerage: user.company_name || user.brokerage || prev.brokerage,
+        licenseState: user.state || user.license_state || prev.licenseState,
+      }));
+    }).catch(() => {});
+  }, []);
+
   const checkCountyAvailability = async (county) => {
     const trimmed = county.trim();
     if (!trimmed) { setCountyStatus(null); return; }
