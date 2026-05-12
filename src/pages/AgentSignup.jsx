@@ -100,9 +100,22 @@ export default function AgentSignup() {
           <p className="text-xl text-slate-600 leading-relaxed mb-8">
             Before a home is listed, before the family calls three agents, and before the property becomes public — an estate sale company may already be inside the home helping the family solve the personal property problem. That creates a powerful opportunity for the right real estate agent.
           </p>
-          <div className="bg-white border-l-4 border-orange-500 rounded-xl p-8 text-left shadow-sm">
+          <div className="bg-white border-l-4 border-orange-500 rounded-xl p-8 text-left shadow-sm mb-6">
             <p className="text-slate-700 text-lg leading-relaxed">
               <strong className="text-slate-900">Legacy Lane OS</strong> gives estate sale companies a way to refer real estate opportunities to trusted agents — while giving agents access to a relationship-driven lead source that most competitors never see. This is not a cold internet lead. This is a warm introduction from a company already inside the home.
+            </p>
+          </div>
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-left shadow-sm mb-6">
+            <p className="text-slate-700 text-lg leading-relaxed">
+              We spend <strong className="text-slate-900">thousands of dollars per month</strong> generating leads for estate sale companies — because we know they are often the first company in line to resolve the clutter and organization side of a home that will inevitably be listed on the market. Becoming an agent partner or territory owner gives you exclusive access to one of the most valuable referral pipelines in residential real estate.
+            </p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-left shadow-sm">
+            <p className="text-slate-700 text-lg leading-relaxed mb-4">
+              All referrals flow through a real estate brokerage as per normal. The estate sale company also receives a portion in <strong className="text-slate-900">marketing credits</strong> to be applied toward future leads and services on EstateSalen.com.
+            </p>
+            <p className="text-slate-600 leading-relaxed">
+              Because of this, there is a strong mutual incentive for the estate sale company to remain loyal to their agent partner — creating a self-reinforcing relationship that benefits everyone involved.
             </p>
           </div>
         </div>
