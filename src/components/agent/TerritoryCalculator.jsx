@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calculator, MapPin, Plus, Trash2, Loader2, CheckCircle2 } from 'lucide-react';
+import { Calculator, MapPin, Plus, Trash2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const US_STATES = [
@@ -225,6 +225,19 @@ export default function TerritoryCalculator() {
                 </div>
               </div>
 
+              {/* Territory Owner Guarantee */}
+              {accessLevel === 'exclusive' && (
+                <div className="bg-emerald-500/10 border border-emerald-500/40 rounded-lg px-4 py-3 flex gap-3 items-start">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-emerald-300 text-sm font-semibold">Territory Owner Guarantee</p>
+                    <p className="text-emerald-400/80 text-xs mt-0.5 leading-relaxed">
+                      Receive at least <span className="font-bold text-emerald-300">5× your annual investment</span> in GCI from platform leads — or your next year's monthly fees are on us.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Lead Tier */}
               <div>
                 <label className="block text-sm text-slate-400 mb-1">Expected Lead Volume</label>
@@ -275,16 +288,32 @@ export default function TerritoryCalculator() {
                 </div>
 
                 {result.isExclusive ? (
-                  <Card className="bg-orange-500/10 border-orange-500/40">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-300 text-sm">Territory Buy-In Range</span>
-                        <Badge className="bg-orange-500 text-white">One-Time</Badge>
-                      </div>
-                      <div className="text-3xl font-bold text-white">${result.buyIn.toLocaleString()} – ${(result.buyIn * 1.4).toLocaleString()}</div>
-                      <p className="text-slate-400 text-xs mt-1">No monthly participation fee required</p>
-                    </CardContent>
-                  </Card>
+                  <>
+                    <Card className="bg-orange-500/10 border-orange-500/40">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-slate-300 text-sm">Territory Buy-In Range</span>
+                          <Badge className="bg-orange-500 text-white">One-Time</Badge>
+                        </div>
+                        <div className="text-3xl font-bold text-white">${result.buyIn.toLocaleString()} – ${(result.buyIn * 1.4).toLocaleString()}</div>
+                        <p className="text-slate-400 text-xs mt-1">No monthly participation fee required</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-emerald-500/10 border-2 border-emerald-500/50">
+                      <CardContent className="p-5 flex gap-4 items-start">
+                        <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-emerald-300 font-bold text-sm">Territory Owner Guarantee</p>
+                            <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs">Included</Badge>
+                          </div>
+                          <p className="text-emerald-400/90 text-xs leading-relaxed">
+                            We guarantee you'll earn at least <span className="font-bold text-emerald-200">5× your annual investment</span> (${result.annualCost > 0 ? (result.annualCost * 5).toLocaleString() : '—'} in GCI) from platform-referred leads. If we fall short, <span className="font-bold text-emerald-200">your following year's fees are free.</span>
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 ) : (
                   <Card className="bg-blue-500/10 border-blue-500/40">
                     <CardContent className="p-6">
