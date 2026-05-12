@@ -67,7 +67,7 @@ export default function TerritoryCalculator() {
     setResult(null);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `What is the total population of ${name}${state ? ', ' + state : ''}? Use your knowledge of US Census Bureau data. This is a county-level population figure. For reference: large suburban counties like Monmouth County NJ have ~650,000 people, Orange County CA has ~3.1 million, a small rural county might have 20,000-50,000. Provide the accurate county population as a single integer with no text, no commas, no explanation.`,
+        prompt: `What is the total POPULATION (number of people / residents) of ${name}${state ? ', ' + state : ''}? Use US Census Bureau data. Do NOT return housing units, households, or square miles — return only the total number of PEOPLE living in this county. For reference: Monmouth County NJ = 651,000 people, Orange County CA = 3,190,000 people, Napa County CA = 137,000 people, a small rural county = 20,000-60,000 people. Return a single integer representing total residents only.`,
         response_json_schema: { type: 'object', properties: { population: { type: 'number' } } },
         add_context_from_internet: true
       });
