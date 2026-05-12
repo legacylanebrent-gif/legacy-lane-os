@@ -323,14 +323,6 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      {currentUser?.is_admin && currentUser?.primary_account_type !== 'super_admin' && (
-        <Link to={createPageUrl('MySales')}>
-          <Button variant="outline" size="sm" className="mb-2 border-orange-400 text-orange-700 hover:bg-orange-50">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to My Sales
-          </Button>
-        </Link>
-      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
