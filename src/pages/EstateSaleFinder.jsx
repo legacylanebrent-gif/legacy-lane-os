@@ -210,13 +210,23 @@ export default function EstateSaleFinder() {
             <div className="flex gap-2">
               <Button
                 onClick={() => setViewMode('grid')}
-                className={viewMode === 'grid' ? 'bg-navy-900 text-white hover:bg-navy-800' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}
+                style={{
+                  backgroundColor: viewMode === 'grid' ? '#1e293b' : '#ffffff',
+                  color: viewMode === 'grid' ? '#ffffff' : '#475569',
+                  borderColor: viewMode === 'grid' ? 'transparent' : '#e2e8f0',
+                  borderWidth: '1px'
+                }}
               >
                 Grid View
               </Button>
               <Button
                 onClick={() => setViewMode('map')}
-                className={viewMode === 'map' ? 'bg-navy-900 text-white hover:bg-navy-800' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}
+                style={{
+                  backgroundColor: viewMode === 'map' ? '#1e293b' : '#ffffff',
+                  color: viewMode === 'map' ? '#ffffff' : '#475569',
+                  borderColor: viewMode === 'map' ? 'transparent' : '#e2e8f0',
+                  borderWidth: '1px'
+                }}
               >
                 Map View
               </Button>
