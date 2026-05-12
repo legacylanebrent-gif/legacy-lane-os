@@ -9,7 +9,8 @@ const OPERATOR_PLANS = [
   { name: 'Enterprise', price: 197 },
 ];
 const RESELLER_PLAN_PRICE = 47; // Reseller Pro
-const PROFIT_SHARE_PCT = 0.20;
+const HARD_COST_PCT = 0.25; // 25% hard costs
+const PROFIT_SHARE_PCT = 0.20; // 20% of net profit (75% of revenue)
 
 export default function TerritoryProfitShareCalculator() {
   const [totalOperators, setTotalOperators] = useState(7723);
@@ -27,19 +28,20 @@ export default function TerritoryProfitShareCalculator() {
   const operatorMonthly = numOperators * operatorPlan.price;
   const resellerMonthly = numResellers * RESELLER_PLAN_PRICE;
   const totalMonthly = operatorMonthly + resellerMonthly;
-  const yourShare = totalMonthly * PROFIT_SHARE_PCT;
+  const netRevenue = totalMonthly * (1 - HARD_COST_PCT); // 75% after costs
+  const yourShare = netRevenue * PROFIT_SHARE_PCT;
   const yourAnnual = yourShare * 12;
 
   const rows = [
     {
       label: `${numOperators} Estate Sale ${numOperators === 1 ? 'Company' : 'Companies'} (${operatorPlan.name})`,
       fee: `$${operatorMonthly.toLocaleString()}/mo`,
-      share: `$${Math.round(operatorMonthly * PROFIT_SHARE_PCT)}/mo`,
+      share: `$${Math.round(operatorMonthly * (1 - HARD_COST_PCT) * PROFIT_SHARE_PCT)}/mo`,
     },
     {
       label: `${numResellers} Reseller${numResellers === 1 ? '' : 's'} (Pro)`,
       fee: `$${resellerMonthly.toLocaleString()}/mo`,
-      share: `$${Math.round(resellerMonthly * PROFIT_SHARE_PCT)}/mo`,
+      share: `$${Math.round(resellerMonthly * (1 - HARD_COST_PCT) * PROFIT_SHARE_PCT)}/mo`,
     },
     {
       label: `Total (${numOperators + numResellers} active members)`,
@@ -142,8 +144,9 @@ export default function TerritoryProfitShareCalculator() {
       </div>
 
       <p className="text-slate-400 text-xs mt-4 text-center">
-        Based on real platform subscription prices: Operator Growth $49/mo · Professional $129/mo · Enterprise $197/mo · Reseller Pro $47/mo. 
-        Profit share is 20% of net platform profit on active subscriptions. Actual amounts subject to final agreement terms.
+        Based on real platform subscription prices: Operator Growth $49/mo · Professional $129/mo · Enterprise $197/mo · Reseller Pro $47/mo.
+        Calculation: 25% hard costs deducted from gross revenue → 20% profit share applied to the remaining 75% net profit.
+        Actual amounts subject to final agreement terms.
       </p>
     </div>
   );
