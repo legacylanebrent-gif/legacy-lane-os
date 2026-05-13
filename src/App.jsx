@@ -72,6 +72,7 @@ import BrowseOperators from './pages/BrowseOperators';
 import HowToUse from './pages/HowToUse';
 import AgentOperatorPortal from './pages/AgentOperatorPortal';
 import AdminAgentApplications from './pages/AdminAgentApplications';
+import AgentDashboard from './pages/AgentDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -187,6 +188,7 @@ const AuthenticatedApp = () => {
       <Route path="/HowToUse" element={<LayoutWrapper currentPageName="HowToUse"><HowToUse /></LayoutWrapper>} />
       <Route path="/AgentOperatorPortal" element={<LayoutWrapper currentPageName="AgentOperatorPortal"><AgentOperatorPortal /></LayoutWrapper>} />
       <Route path="/AdminAgentApplications" element={<LayoutWrapper currentPageName="AdminAgentApplications"><AdminAgentApplications /></LayoutWrapper>} />
+      <Route path="/AgentDashboard" element={<LayoutWrapper currentPageName="AgentDashboard"><AgentDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
