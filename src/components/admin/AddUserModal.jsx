@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -129,12 +129,28 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
   });
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [countySearch, setCountySearch] = useState('');
+  const [existingCounties, setExistingCounties] = useState([]);
+  const [showCountySuggestions, setShowCountySuggestions] = useState(false);
+  const countyRef = useRef(null);
   const [uploadingLightLogo, setUploadingLightLogo] = useState(false);
   const [uploadingDarkLogo, setUploadingDarkLogo] = useState(false);
   const [uploadingTeamLogo, setUploadingTeamLogo] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const loadCounties = async () => {
+      const apps = await base44.entities.AgentTerritoryApplication.filter({ status: 'approved' });
+      const counties = apps
+        .filter(a => a.county_requested)
+        .map(a => ({ county: a.county_requested, name: a.name, email: a.email, state: a.license_state }));
+      setExistingCounties(counties);
+    };
+    loadCounties();
+  }, []);
+
+  useEffect(() => {
     if (editUser) {
+      setCountySearch(editUser.county_requested || '');
       setFormData({
         full_name: editUser.full_name || '',
         email: editUser.email || '',
@@ -936,20 +952,6 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
             )}
 
             {formData.primary_account_type === 'real_estate_agent' && (
-              <div>
-                <Label htmlFor="service_areas">Service Areas (comma separated)</Label>
-                <Input
-                  id="service_areas"
-                  placeholder="Los Angeles, Orange County, San Diego"
-                  onChange={(e) => setFormData({
-                    ...formData, 
-                    service_areas: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                  })}
-                />
-              </div>
-            )}
-
-            {formData.primary_account_type === 'real_estate_agent' && (
               <>
                 <Separator />
                 <div className="space-y-4">
@@ -996,13 +998,46 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                       />
                       <p className="text-xs text-slate-400 mt-1">Comma-separated city names</p>
                     </div>
-                    <div>
+                    <div className="relative" ref={countyRef}>
                       <Label>County Assigned {formData.interested_in === 'exclusive' && <span className="text-orange-500">*</span>}</Label>
                       <Input
-                        placeholder="e.g. Orange County"
-                        value={formData.county_requested}
-                        onChange={(e) => setFormData({ ...formData, county_requested: e.target.value })}
+                        placeholder="Search county name…"
+                        value={countySearch}
+                        onChange={(e) => {
+                          setCountySearch(e.target.value);
+                          setFormData({ ...formData, county_requested: e.target.value });
+                          setShowCountySuggestions(true);
+                        }}
+                        onFocus={() => setShowCountySuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowCountySuggestions(false), 150)}
+                        autoComplete="off"
                       />
+                      {showCountySuggestions && countySearch.length > 1 && (() => {
+                        const q = countySearch.toLowerCase();
+                        const matches = existingCounties.filter(c => c.county.toLowerCase().includes(q));
+                        if (!matches.length) return null;
+                        return (
+                          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                            {matches.map((c, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 flex items-center justify-between gap-2"
+                                onMouseDown={() => {
+                                  setCountySearch(c.county);
+                                  setFormData({ ...formData, county_requested: c.county });
+                                  setShowCountySuggestions(false);
+                                }}
+                              >
+                                <span className="font-medium">{c.county}</span>
+                                <span className="text-xs text-red-500 flex items-center gap-1 shrink-0">
+                                  ⚠ Already assigned — {c.name} ({c.state})
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
