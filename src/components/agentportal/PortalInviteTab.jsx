@@ -141,7 +141,7 @@ export default function PortalInviteTab({ user }) {
             <h4 className="font-bold text-orange-900 mb-2 text-sm">Why Invite Operators?</h4>
             <ul className="space-y-2 text-xs text-orange-800 leading-relaxed">
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> They become your official referral partner on the platform</li>
-              <li className="flex gap-2"><span className="font-bold shrink-0">→</span> You earn 20% of their monthly subscription as a Territory Owner</li>
+              <li className="flex gap-2"><span className="font-bold shrink-0">→</span> You earn 20% of their monthly net profit as a Territory Owner</li>
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> Shared lead routing flows automatically between you</li>
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> Your profile appears in their consultation packets</li>
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> Track all shared activity from this portal</li>
