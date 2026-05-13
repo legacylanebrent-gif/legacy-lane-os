@@ -8,7 +8,7 @@
     },
     "city": {
       "type": "string",
-      "description": "City location"
+      "description": "City location (EstateSales.net region label)"
     },
     "state": {
       "type": "string",
@@ -20,7 +20,7 @@
     },
     "county": {
       "type": "string",
-      "description": "County"
+      "description": "County (resolved via geocoding)"
     },
     "phone": {
       "type": "string",
@@ -152,6 +152,46 @@
     "unsubscribe_status": {
       "type": "boolean",
       "default": false
+    },
+    "lat": {
+      "type": "number",
+      "description": "Latitude from geocoding"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Longitude from geocoding"
+    },
+    "geocoded_address": {
+      "type": "string",
+      "description": "Full formatted address returned by geocoder"
+    },
+    "geocoded_city": {
+      "type": "string",
+      "description": "City resolved from geocoding (not the EstateSales.net region label)"
+    },
+    "geocoded_county": {
+      "type": "string",
+      "description": "County resolved from geocoding (e.g. Middlesex County)"
+    },
+    "geocoded_zip": {
+      "type": "string",
+      "description": "ZIP code resolved from geocoding"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded",
+      "description": "Status of geocoding attempt"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last geocoding attempt"
     }
   },
   "required": [
