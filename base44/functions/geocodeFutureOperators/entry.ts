@@ -69,19 +69,23 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const batchSize = 20;
     const offset = body.offset || 0;
+    const stateFilter = body.state || null;
 
-    // Fetch a page of operators
-    const page = await base44.asServiceRole.entities.FutureEstateOperator.list(
+    // Build filter — fetch records needing geocoding
+    const filterQuery = stateFilter
+      ? { state: stateFilter, geocode_status: 'not_geocoded' }
+      : { geocode_status: 'not_geocoded' };
+
+    // Fetch batchSize+1 to know if there are more
+    const page = await base44.asServiceRole.entities.FutureEstateOperator.filter(
+      filterQuery,
       'created_date',
-      batchSize,
+      batchSize + 1,
       offset
     );
 
-    // Filter to only those needing geocoding (include 'failed' for retry)
-    const batch = page.filter(op =>
-      !op.geocode_status || op.geocode_status === 'not_geocoded' || op.geocode_status === 'failed'
-    );
-    const hasMore = page.length === batchSize;
+    const batch = page.slice(0, batchSize);
+    const hasMore = page.length > batchSize;
 
     if (batch.length === 0 && !hasMore) {
       return Response.json({ done: true, processed: 0, message: 'All operators already geocoded.' });

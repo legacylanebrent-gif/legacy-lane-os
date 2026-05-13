@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar, Package,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
-  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2
+  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2, Navigation
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,6 +47,9 @@ export default function AdminFutureOperators() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updateResults, setUpdateResults] = useState(null);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeProgress, setGeocodeProgress] = useState(null); // { done, failed, skipped, total, offset }
+  const [showGeocodeModal, setShowGeocodeModal] = useState(false);
   const [newOnlyFilter, setNewOnlyFilter] = useState(false);
   const [sortAlpha, setSortAlpha] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
@@ -269,6 +272,31 @@ export default function AdminFutureOperators() {
     });
   };
 
+  const handleGeocode = async () => {
+    setShowGeocodeModal(true);
+    setGeocoding(true);
+    setGeocodeProgress({ done: 0, failed: 0, skipped: 0, total: null, offset: 0 });
+
+    let offset = 0;
+    let totalGeocoded = 0;
+    let totalFailed = 0;
+    let totalSkipped = 0;
+
+    while (true) {
+      const res = await base44.functions.invoke('geocodeFutureOperators', { offset, state: stateFilter });
+      const data = res.data;
+      totalGeocoded += data.geocoded || 0;
+      totalFailed += data.failed || 0;
+      totalSkipped += data.skipped || 0;
+      setGeocodeProgress({ done: totalGeocoded, failed: totalFailed, skipped: totalSkipped, offset: data.nextOffset, hasMore: data.hasMore });
+      if (!data.hasMore) break;
+      offset = data.nextOffset;
+    }
+
+    setGeocoding(false);
+    await loadOperators();
+  };
+
   const handleUpdateState = () => {
     const fns = getStateFunctions(stateFilter);
     setSelectedScrapeStates(fns);
@@ -485,6 +513,16 @@ export default function AdminFutureOperators() {
                   ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deduplicating...</>
                   : <><Trash2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Remove Duplicates</span><span className="sm:hidden">Dedupe</span></>
                 }
+              </Button>
+
+              <Button
+                onClick={handleGeocode}
+                disabled={geocoding || batchRunning || deduplicating}
+                className="bg-cyan-600 hover:bg-cyan-700 whitespace-nowrap"
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Geocode {stateFilter}</span>
+                <span className="sm:hidden">Geocode</span>
               </Button>
 
               <Button 
@@ -1076,6 +1114,52 @@ export default function AdminFutureOperators() {
                   <Button variant="outline" onClick={() => setScrapeQueue([])}>Run Again</Button>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Geocode Modal */}
+      <Dialog open={showGeocodeModal} onOpenChange={(open) => { if (!geocoding) setShowGeocodeModal(open); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Geocoding {stateFilter} Operators</DialogTitle>
+            <DialogDescription>
+              Using OpenAI to resolve ZIP → city, county, and coordinates for each operator.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {geocoding && (
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-cyan-600 flex-shrink-0" />
+                <span className="text-sm text-slate-600">Processing batch at offset {geocodeProgress?.offset ?? 0}…</span>
+              </div>
+            )}
+            {geocodeProgress && (
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Geocoded:</span>
+                  <span className="font-semibold text-green-700">{geocodeProgress.done}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Failed:</span>
+                  <span className="font-semibold text-red-600">{geocodeProgress.failed}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Skipped:</span>
+                  <span className="font-semibold text-slate-500">{geocodeProgress.skipped}</span>
+                </div>
+              </div>
+            )}
+            {!geocoding && geocodeProgress && (
+              <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                <CheckCircle2 className="w-4 h-4" /> All done!
+              </div>
+            )}
+          </div>
+          {!geocoding && (
+            <div className="flex justify-end">
+              <Button onClick={() => setShowGeocodeModal(false)}>Close</Button>
             </div>
           )}
         </DialogContent>
