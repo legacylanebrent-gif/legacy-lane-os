@@ -31,6 +31,14 @@
     "county_requested": {
       "type": "string"
     },
+    "territory_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "All cities/municipalities within the assigned county territory"
+    },
     "avg_sale_price": {
       "type": "number"
     },

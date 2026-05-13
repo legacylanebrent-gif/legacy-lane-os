@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Users, Send, BarChart2, FileText, Map } from 'lucide-react';
+import { Users, Send, BarChart2, FileText, Map, MapPin } from 'lucide-react';
 import PortalInviteTab from '@/components/agentportal/PortalInviteTab';
 import PortalPartnershipsTab from '@/components/agentportal/PortalPartnershipsTab';
 import PortalAnalyticsTab from '@/components/agentportal/PortalAnalyticsTab';
 import PortalAgreementsTab from '@/components/agentportal/PortalAgreementsTab';
 import TerritoryMapView from '@/components/agentportal/TerritoryMapView';
+import TerritoryCitiesTab from '@/components/agentportal/TerritoryCitiesTab';
 
 export default function AgentOperatorPortal() {
   const [user, setUser] = useState(null);
@@ -47,6 +48,9 @@ export default function AgentOperatorPortal() {
             <TabsTrigger value="agreements" className="flex items-center gap-2 rounded-lg px-4 py-2.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <FileText className="w-4 h-4" /> Agreements & Rewards
             </TabsTrigger>
+            <TabsTrigger value="cities" className="flex items-center gap-2 rounded-lg px-4 py-2.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              <MapPin className="w-4 h-4" /> Territory Cities
+            </TabsTrigger>
             <TabsTrigger value="territory" className="flex items-center gap-2 rounded-lg px-4 py-2.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <Map className="w-4 h-4" /> Territory Map
             </TabsTrigger>
@@ -56,6 +60,7 @@ export default function AgentOperatorPortal() {
           <TabsContent value="partnerships"><PortalPartnershipsTab user={user} /></TabsContent>
           <TabsContent value="analytics"><PortalAnalyticsTab user={user} /></TabsContent>
           <TabsContent value="agreements"><PortalAgreementsTab user={user} /></TabsContent>
+          <TabsContent value="cities"><TerritoryCitiesTab user={user} /></TabsContent>
           <TabsContent value="territory"><TerritoryMapView user={user} /></TabsContent>
         </Tabs>
       </div>
