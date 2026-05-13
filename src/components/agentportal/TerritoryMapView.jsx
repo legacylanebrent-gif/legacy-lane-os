@@ -23,16 +23,18 @@ function loadMapsScript(key) {
 
 // Geocode a query and return bounds + center
 async function geocodeCounty(county, state, apiKey) {
-  const query = `${county}, ${state}, USA`;
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-  const res = await fetch(url);
-  const json = await res.json();
-  if (json.results && json.results.length > 0) {
-    const result = json.results[0];
-    const { lat, lng } = result.geometry.location;
-    const viewport = result.geometry.viewport;
-    const placeId = result.place_id;
-    return { lat, lng, viewport, placeId };
+  // Try with "County" suffix first, then fall back to plain name
+  const withCounty = county.toLowerCase().includes('county') ? county : `${county} County`;
+  const queries = [`${withCounty}, ${state}, USA`, `${county}, ${state}, USA`];
+  for (const query of queries) {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.results && json.results.length > 0) {
+      const result = json.results[0];
+      const { lat, lng } = result.geometry.location;
+      return { lat, lng, viewport: result.geometry.viewport, placeId: result.place_id };
+    }
   }
   return null;
 }
