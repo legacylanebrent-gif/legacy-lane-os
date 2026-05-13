@@ -9,8 +9,8 @@ const OPERATOR_PLANS = [
   { name: 'Enterprise', price: 197 },
 ];
 const RESELLER_PLAN_PRICE = 47; // Reseller Pro
-const HARD_COST_PCT = 0.25; // 25% hard costs
-const PROFIT_SHARE_PCT = 0.20; // 20% of net profit (75% of revenue)
+const EXPENSE_MARGIN = 0.35; // 35% expenses against subscription
+const PROFIT_SHARE_PCT = 0.20; // 20% of net profit (after 35% expenses)
 
 export default function TerritoryProfitShareCalculator() {
   const [totalOperators, setTotalOperators] = useState(7723);
@@ -28,20 +28,20 @@ export default function TerritoryProfitShareCalculator() {
   const operatorMonthly = numOperators * operatorPlan.price;
   const resellerMonthly = numResellers * RESELLER_PLAN_PRICE;
   const totalMonthly = operatorMonthly + resellerMonthly;
-  const netRevenue = totalMonthly * (1 - HARD_COST_PCT); // 75% after costs
-  const yourShare = netRevenue * PROFIT_SHARE_PCT;
+  const netProfit = totalMonthly * (1 - EXPENSE_MARGIN); // 65% after 35% expenses
+  const yourShare = netProfit * PROFIT_SHARE_PCT;
   const yourAnnual = yourShare * 12;
 
   const rows = [
     {
       label: `${numOperators} Estate Sale ${numOperators === 1 ? 'Company' : 'Companies'} (${operatorPlan.name})`,
       fee: `$${operatorMonthly.toLocaleString()}/mo`,
-      share: `$${Math.round(operatorMonthly * (1 - HARD_COST_PCT) * PROFIT_SHARE_PCT)}/mo`,
+      share: `$${Math.round(operatorMonthly * (1 - EXPENSE_MARGIN) * PROFIT_SHARE_PCT)}/mo`,
     },
     {
       label: `${numResellers} Reseller${numResellers === 1 ? '' : 's'} (Pro)`,
       fee: `$${resellerMonthly.toLocaleString()}/mo`,
-      share: `$${Math.round(resellerMonthly * (1 - HARD_COST_PCT) * PROFIT_SHARE_PCT)}/mo`,
+      share: `$${Math.round(resellerMonthly * (1 - EXPENSE_MARGIN) * PROFIT_SHARE_PCT)}/mo`,
     },
     {
       label: `Total (${numOperators + numResellers} active members)`,
@@ -59,7 +59,7 @@ export default function TerritoryProfitShareCalculator() {
           {totalOperators.toLocaleString()} potential operators in database
         </span>
       </div>
-      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to see your potential monthly profit share based on real platform subscription prices.</p>
+      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each operator's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
 
       {/* Sliders */}
       <div className="space-y-5 mb-8">
@@ -118,7 +118,7 @@ export default function TerritoryProfitShareCalculator() {
             <tr className="border-b border-slate-100">
               <th className="text-left text-slate-500 font-medium pb-3">What You Recruit</th>
               <th className="text-right text-slate-500 font-medium pb-3">Their Monthly Fees</th>
-              <th className="text-right text-slate-500 font-medium pb-3">Your 20% Profit Share</th>
+              <th className="text-right text-slate-500 font-medium pb-3">Your 20% of Net Profit</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -145,7 +145,8 @@ export default function TerritoryProfitShareCalculator() {
 
       <p className="text-slate-400 text-xs mt-4 text-center">
         Based on real platform subscription prices: Operator Growth $49/mo · Professional $129/mo · Enterprise $197/mo · Reseller Pro $47/mo.
-        Calculation: 25% hard costs deducted from gross revenue → 20% profit share applied to the remaining 75% net profit.
+        Calculation: 35% operator expense margin deducted from gross subscription → 20% profit share applied to the remaining 65% net profit.
+        Example: $129/mo operator × 65% × 20% = ~$16.77/mo to you.
         Actual amounts subject to final agreement terms.
       </p>
     </div>

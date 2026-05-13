@@ -28,7 +28,7 @@ const exclusiveFeatures = [
   'Stronger positioning with estate sale company partners',
   'Territory protection subject to performance standards',
   '20% referral fee still applies on closed platform-generated deals',
-  'Recruit estate sale companies & resellers — earn 20% of their monthly platform revenue',
+  'Recruit estate sale companies & resellers — earn 20% of their monthly platform profit',
   'Build a passive income stream from every operator you bring into your territory',
 ];
 
@@ -228,7 +228,7 @@ export default function AgentSignup() {
               Recruit Operators. Earn Passive Monthly Revenue.
             </h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
-              Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies and resellers in your territory and earn <strong className="text-slate-700">20% of their monthly platform subscription</strong> every single month they remain active.
+              Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies and resellers in your territory and earn <strong className="text-slate-700">20% of the net profit</strong> from their monthly subscription every single month they remain active.
             </p>
           </div>
 
@@ -251,8 +251,8 @@ export default function AgentSignup() {
               <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-emerald-600" />
               </div>
-              <h4 className="font-bold text-slate-900 mb-1">Earn 20% Monthly — Forever</h4>
-              <p className="text-slate-500 text-sm leading-relaxed">Every active member you recruit generates 20% of their monthly subscription back to you — recurring, passive income from your territory.</p>
+              <h4 className="font-bold text-slate-900 mb-1">Earn 20% of Net Profit — Every Month</h4>
+              <p className="text-slate-500 text-sm leading-relaxed">Every active member you recruit generates 20% of the net profit from their subscription (after a 35% expense margin) back to you — recurring, passive income from your territory.</p>
             </div>
           </div>
 
@@ -322,20 +322,20 @@ export default function AgentSignup() {
                     <p className="text-blue-900 text-sm font-bold">Territory Recruitment Revenue Share</p>
                   </div>
                   <p className="text-blue-700 text-xs leading-relaxed mb-2">
-                    As a Territory Owner, you can recruit <strong>estate sale companies</strong> and <strong>resellers</strong> in your territory to join the platform. For every company you bring in, you earn <strong>20% of their monthly platform subscription revenue</strong> — for as long as they remain active members.
+                    As a Territory Owner, you can recruit <strong>estate sale companies</strong> and <strong>resellers</strong> in your territory to join the platform. For every company you bring in, you earn <strong>20% of the net profit</strong> from their monthly subscription (after a 35% expense margin) — for as long as they remain active members.
                   </p>
                   <div className="flex gap-3 mt-3">
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
                       <p className="text-blue-900 font-bold text-sm">$129/mo operator</p>
-                      <p className="text-blue-500 text-xs">= $25.80/mo to you</p>
+                      <p className="text-blue-500 text-xs">= ~$16.77/mo to you</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
                       <p className="text-blue-900 font-bold text-sm">5 operators recruited</p>
-                      <p className="text-blue-500 text-xs">= ~$129/mo passive</p>
+                      <p className="text-blue-500 text-xs">= ~$83.85/mo passive</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
                       <p className="text-blue-900 font-bold text-sm">10 operators</p>
-                      <p className="text-blue-500 text-xs">= ~$258/mo passive</p>
+                      <p className="text-blue-500 text-xs">= ~$167.70/mo passive</p>
                     </div>
                   </div>
                 </div>
