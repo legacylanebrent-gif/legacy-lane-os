@@ -652,10 +652,13 @@ export default function AdminFutureOperators() {
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
-                      {operator.city && operator.state && (
+                      {(operator.geocoded_city || operator.city) && operator.state && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
-                          <span className="truncate">{operator.city}, {operator.state} {operator.zip_code}</span>
+                          <span className="truncate">
+                            {operator.geocoded_city || operator.city}, {operator.state} {operator.geocoded_zip || operator.zip_code}
+                            {operator.geocoded_county && <span className="text-slate-400 ml-1">· {operator.geocoded_county}</span>}
+                          </span>
                         </div>
                       )}
                       
