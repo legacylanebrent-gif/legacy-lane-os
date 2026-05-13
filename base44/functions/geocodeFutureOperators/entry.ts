@@ -5,22 +5,29 @@ const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
 // Use OpenAI to geocode a city/state/zip into lat, lng, city, county
 async function geocodeWithOpenAI(company_name, city, state, zip) {
-  const prompt = `You are a geocoding assistant. Given the following estate sale company location, return accurate geographic data.
+  const prompt = `You are a US geocoding assistant. Given a ZIP code, return the precise city, county, and coordinates for that ZIP code.
 
 Company: ${company_name}
-City label: ${city}
-State: ${state}
 ZIP: ${zip || 'unknown'}
+State: ${state}
+Region hint (may be inaccurate): ${city}
 
-Return a JSON object with these exact fields:
-- lat: latitude (number)
-- lng: longitude (number)  
-- geocoded_city: the actual city name (string)
-- geocoded_county: the full county name including "County" (e.g. "Orange County") (string)
-- geocoded_zip: the ZIP code (string, use provided one if available)
-- geocoded_address: a formatted address string like "City, ST ZIP"
+Rules:
+- The ZIP code is the most accurate piece of data — base geocoded_city and coordinates on the ZIP, not the region hint.
+- geocoded_city must be the actual USPS city name for that specific ZIP code.
+- geocoded_county must be the county that ZIP code falls in, with "County" suffix (e.g. "Orange County").
+- lat/lng must be the coordinates for the center of that ZIP code.
+- If no ZIP is provided, use the state and region hint as best guess.
 
-Use your knowledge of US geography. If the city label is a region like "Los Angeles Orange County", determine the most likely actual city based on the ZIP code if provided, or use the most central city in that region. Always return valid JSON only, no explanation.`;
+Return a JSON object with exactly these fields (no extras):
+- lat: number
+- lng: number
+- geocoded_city: string
+- geocoded_county: string
+- geocoded_zip: string
+- geocoded_address: string (format: "City, ST ZIP")
+
+Return valid JSON only, no explanation.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
