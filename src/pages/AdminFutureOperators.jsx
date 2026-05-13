@@ -50,6 +50,9 @@ export default function AdminFutureOperators() {
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeProgress, setGeocodeProgress] = useState(null); // { done, failed, skipped, total, offset }
   const [showGeocodeModal, setShowGeocodeModal] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState(null);
+  const [showBackfillModal, setShowBackfillModal] = useState(false);
   const [newOnlyFilter, setNewOnlyFilter] = useState(false);
   const [sortAlpha, setSortAlpha] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
@@ -297,6 +300,29 @@ export default function AdminFutureOperators() {
     await loadOperators();
   };
 
+  const handleBackfillCities = async () => {
+    setShowBackfillModal(true);
+    setBackfilling(true);
+    setBackfillProgress({ done: 0, failed: 0, skipped: 0, offset: 0 });
+
+    let offset = 0;
+    let totalDone = 0, totalFailed = 0, totalSkipped = 0;
+
+    while (true) {
+      const res = await base44.functions.invoke('backfillOperatorCities', { offset, state: stateFilter });
+      const data = res.data;
+      totalDone += data.geocoded || 0;
+      totalFailed += data.failed || 0;
+      totalSkipped += data.skipped || 0;
+      setBackfillProgress({ done: totalDone, failed: totalFailed, skipped: totalSkipped, offset: data.nextOffset });
+      if (!data.hasMore) break;
+      offset = data.nextOffset;
+    }
+
+    setBackfilling(false);
+    await loadOperators();
+  };
+
   const handleUpdateState = () => {
     const fns = getStateFunctions(stateFilter);
     setSelectedScrapeStates(fns);
@@ -516,8 +542,18 @@ export default function AdminFutureOperators() {
               </Button>
 
               <Button
+                onClick={handleBackfillCities}
+                disabled={backfilling || geocoding || batchRunning || deduplicating}
+                className="bg-violet-600 hover:bg-violet-700 whitespace-nowrap"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Resolve Cities {stateFilter}</span>
+                <span className="sm:hidden">Cities</span>
+              </Button>
+
+              <Button
                 onClick={handleGeocode}
-                disabled={geocoding || batchRunning || deduplicating}
+                disabled={geocoding || backfilling || batchRunning || deduplicating}
                 className="bg-cyan-600 hover:bg-cyan-700 whitespace-nowrap"
               >
                 <Navigation className="w-4 h-4 mr-2" />
@@ -1114,6 +1150,52 @@ export default function AdminFutureOperators() {
                   <Button variant="outline" onClick={() => setScrapeQueue([])}>Run Again</Button>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Backfill Cities Modal */}
+      <Dialog open={showBackfillModal} onOpenChange={(open) => { if (!backfilling) setShowBackfillModal(open); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Resolving Cities — {stateFilter}</DialogTitle>
+            <DialogDescription>
+              Extracts city + ZIP from source URL, then uses OpenAI to resolve the real city, county, and coordinates.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {backfilling && (
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-violet-600 flex-shrink-0" />
+                <span className="text-sm text-slate-600">Processing batch at offset {backfillProgress?.offset ?? 0}…</span>
+              </div>
+            )}
+            {backfillProgress && (
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Resolved:</span>
+                  <span className="font-semibold text-green-700">{backfillProgress.done}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Failed:</span>
+                  <span className="font-semibold text-red-600">{backfillProgress.failed}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Skipped:</span>
+                  <span className="font-semibold text-slate-500">{backfillProgress.skipped}</span>
+                </div>
+              </div>
+            )}
+            {!backfilling && backfillProgress && (
+              <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                <CheckCircle2 className="w-4 h-4" /> All done!
+              </div>
+            )}
+          </div>
+          {!backfilling && (
+            <div className="flex justify-end">
+              <Button onClick={() => setShowBackfillModal(false)}>Close</Button>
             </div>
           )}
         </DialogContent>
