@@ -71,12 +71,10 @@ Deno.serve(async (req) => {
     const offset = body.offset || 0;
     const stateFilter = body.state || null;
 
-    // Build filter — fetch records needing geocoding
-    const filterQuery = stateFilter
-      ? { state: stateFilter, geocode_status: 'not_geocoded' }
-      : { geocode_status: 'not_geocoded' };
+    // Fetch all operators for this state (or all), then filter client-side
+    // because some records have no geocode_status field at all (missing vs 'not_geocoded')
+    const filterQuery = stateFilter ? { state: stateFilter } : {};
 
-    // Fetch batchSize+1 to know if there are more
     const page = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       filterQuery,
       'created_date',
@@ -84,7 +82,11 @@ Deno.serve(async (req) => {
       offset
     );
 
-    const batch = page.slice(0, batchSize);
+    // Include records with no geocode_status OR explicitly 'not_geocoded' OR 'failed'
+    const needsGeocoding = (op) =>
+      !op.geocode_status || op.geocode_status === 'not_geocoded' || op.geocode_status === 'failed';
+
+    const batch = page.filter(needsGeocoding).slice(0, batchSize);
     const hasMore = page.length > batchSize;
 
     if (batch.length === 0 && !hasMore) {
