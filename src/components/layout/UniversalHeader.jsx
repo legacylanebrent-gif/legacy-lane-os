@@ -58,7 +58,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 max-h-[80vh] overflow-y-auto">
                     <DropdownMenuLabel>
                       <div>
                         <p className="font-semibold">{user?.full_name}</p>
