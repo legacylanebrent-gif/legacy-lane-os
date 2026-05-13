@@ -10,6 +10,16 @@ import { Separator } from '@/components/ui/separator';
 import VendorFields from './VendorFields';
 import VendorSubcategoryDropdown from './VendorSubcategoryDropdown';
 
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
+  'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
+  'Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi',
+  'Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico',
+  'New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania',
+  'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+];
+
 const ACCOUNT_TYPES = [
   { value: 'super_admin', label: 'Super Admin' },
   { value: 'platform_ops', label: 'Platform Ops' },
@@ -107,7 +117,15 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
       city: '',
       state: '',
       zip: ''
-    }
+    },
+    // Agent territory fields
+    license_state: '',
+    interested_in: '',
+    cities_requested: '',
+    county_requested: '',
+    avg_sale_price: '',
+    has_estate_sale_relationships: '',
+    why_should_be_considered: '',
   });
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -181,7 +199,14 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         default_commission_rate: editUser.default_commission_rate || '',
         service_areas: editUser.service_areas || [],
         specializations: editUser.specializations || [],
-        company_address: editUser.company_address || { street: '', city: '', state: '', zip: '' }
+        company_address: editUser.company_address || { street: '', city: '', state: '', zip: '' },
+        license_state: editUser.license_state || '',
+        interested_in: editUser.interested_in || '',
+        cities_requested: editUser.cities_requested || '',
+        county_requested: editUser.county_requested || '',
+        avg_sale_price: editUser.avg_sale_price || '',
+        has_estate_sale_relationships: editUser.has_estate_sale_relationships || '',
+        why_should_be_considered: editUser.why_should_be_considered || '',
       });
     }
   }, [editUser]);
@@ -340,6 +365,31 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
           divisions_access: [...new Set(divisions)],
           onboarding_completed: true
         });
+      }
+
+      // If role is real_estate_agent and territory fields provided, upsert an approved application
+      if (formData.primary_account_type === 'real_estate_agent' && formData.license_state) {
+        const targetEmail = formData.email || editUser?.email;
+        const existing = await base44.entities.AgentTerritoryApplication.filter({ email: targetEmail });
+        const appData = {
+          name: formData.full_name || editUser?.full_name || '',
+          email: targetEmail,
+          phone: formData.phone || editUser?.phone || '',
+          brokerage: formData.brokerage_name || '',
+          license_state: formData.license_state,
+          interested_in: formData.interested_in || 'preferred',
+          cities_requested: formData.cities_requested || '',
+          county_requested: formData.county_requested || '',
+          avg_sale_price: formData.avg_sale_price ? Number(formData.avg_sale_price) : null,
+          has_estate_sale_relationships: formData.has_estate_sale_relationships || '',
+          why_should_be_considered: formData.why_should_be_considered || '',
+          status: 'approved',
+        };
+        if (existing.length > 0) {
+          await base44.entities.AgentTerritoryApplication.update(existing[0].id, appData);
+        } else {
+          await base44.entities.AgentTerritoryApplication.create(appData);
+        }
       }
 
       onSuccess();
@@ -897,6 +947,102 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                   })}
                 />
               </div>
+            )}
+
+            {formData.primary_account_type === 'real_estate_agent' && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-blue-700 flex items-center gap-2">
+                    🏡 Territory Assignment
+                    <span className="text-xs font-normal text-slate-500">— creates/updates an approved agent application</span>
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>License State *</Label>
+                      <select
+                        className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                        value={formData.license_state}
+                        onChange={(e) => setFormData({ ...formData, license_state: e.target.value })}
+                      >
+                        <option value="">Select state</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label>Territory Type</Label>
+                      <select
+                        className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                        value={formData.interested_in}
+                        onChange={(e) => setFormData({ ...formData, interested_in: e.target.value })}
+                      >
+                        <option value="">Select type</option>
+                        <option value="preferred">Preferred Agent (City-Level)</option>
+                        <option value="exclusive">Exclusive Territory Owner (County-Level)</option>
+                        <option value="unsure">Exploring Options</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Cities Assigned {formData.interested_in === 'preferred' && <span className="text-orange-500">*</span>}</Label>
+                      <Input
+                        placeholder="e.g. Orlando, Kissimmee, Winter Park"
+                        value={formData.cities_requested}
+                        onChange={(e) => setFormData({ ...formData, cities_requested: e.target.value })}
+                      />
+                      <p className="text-xs text-slate-400 mt-1">Comma-separated city names</p>
+                    </div>
+                    <div>
+                      <Label>County Assigned {formData.interested_in === 'exclusive' && <span className="text-orange-500">*</span>}</Label>
+                      <Input
+                        placeholder="e.g. Orange County"
+                        value={formData.county_requested}
+                        onChange={(e) => setFormData({ ...formData, county_requested: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Avg Sale Price in Market</Label>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 375000"
+                        value={formData.avg_sale_price}
+                        onChange={(e) => setFormData({ ...formData, avg_sale_price: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Estate Sale Relationships</Label>
+                      <select
+                        className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                        value={formData.has_estate_sale_relationships}
+                        onChange={(e) => setFormData({ ...formData, has_estate_sale_relationships: e.target.value })}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes_active">Yes — Active relationships</option>
+                        <option value="yes_some">Yes — A few informal connections</option>
+                        <option value="no_open">No — But open to building them</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Admin Notes / Territory Notes</Label>
+                    <Textarea
+                      rows={2}
+                      placeholder="Why this agent was assigned this territory…"
+                      value={formData.why_should_be_considered}
+                      onChange={(e) => setFormData({ ...formData, why_should_be_considered: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             {['estate_sale_operator'].includes(formData.primary_account_type) && (
