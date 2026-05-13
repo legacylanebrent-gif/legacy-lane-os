@@ -215,11 +215,13 @@ export default function TerritoryCitiesTab({ user }) {
     setLoadingMatches(true);
     try {
       const citySet = new Set(cityList.map(c => c.toLowerCase().trim()));
+      const stateUpper = (state || '').toUpperCase().trim();
 
-      // Search active operators (FutureEstateOperator) — already in system
+      // FutureEstateOperator uses source_state as the full state name OR abbreviation
+      // Try filtering by state abbreviation field first, then fall back matching
       const [activeOps, futureLeads] = await Promise.all([
-        base44.entities.FutureEstateOperator.filter({ source_state: state }),
-        base44.entities.FutureOperatorLead.list(),
+        base44.entities.FutureEstateOperator.filter({ state: stateUpper }),
+        base44.entities.FutureOperatorLead.filter({ state: stateUpper }),
       ]);
 
       // Match active operators by city
@@ -227,14 +229,9 @@ export default function TerritoryCitiesTab({ user }) {
         .filter(op => op.city && citySet.has(op.city.toLowerCase().trim()))
         .map(op => ({ ...op, matchedCity: op.city }));
 
-      // Match future operator leads by city + state
-      const stateUpper = state?.toUpperCase();
+      // Match future operator leads by city
       const prospectFound = futureLeads
-        .filter(lead =>
-          lead.city &&
-          citySet.has(lead.city.toLowerCase().trim()) &&
-          (lead.state?.toUpperCase() === stateUpper || lead.source_state?.toUpperCase() === stateUpper)
-        )
+        .filter(lead => lead.city && citySet.has(lead.city.toLowerCase().trim()))
         .map(lead => ({ ...lead, matchedCity: lead.city }));
 
       setActiveMatches(activeFound);

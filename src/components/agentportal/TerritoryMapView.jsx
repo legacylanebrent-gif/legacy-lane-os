@@ -43,12 +43,14 @@ export default function TerritoryMapView({ user }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false); // controls when the map div is visible
   const [error, setError] = useState('');
   const [application, setApplication] = useState(null);
   const [countyInfo, setCountyInfo] = useState(null);
 
   const initMap = async () => {
     setLoading(true);
+    setMapReady(false);
     setError('');
     try {
       // Get agent's approved territory application
@@ -90,6 +92,13 @@ export default function TerritoryMapView({ user }) {
         return;
       }
       setCountyInfo({ county, state, lat: geo.lat, lng: geo.lng });
+
+      // Reveal the map div FIRST, then initialize — mapRef.current must exist
+      setLoading(false);
+      setMapReady(true);
+
+      // Wait one tick for the DOM to render the map div
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Build map centered on county
       const map = new window.google.maps.Map(mapRef.current, {
@@ -165,8 +174,8 @@ export default function TerritoryMapView({ user }) {
 
     } catch (e) {
       setError(e.message || 'Failed to load territory map.');
-    } finally {
       setLoading(false);
+      setMapReady(false);
     }
   };
 
@@ -238,19 +247,20 @@ export default function TerritoryMapView({ user }) {
         </div>
 
         <CardContent className="p-0 relative">
-          {loading ? (
+          {loading && (
             <div className="h-[480px] flex flex-col items-center justify-center gap-3 bg-slate-50">
               <Loader2 className="w-7 h-7 animate-spin text-orange-500" />
               <p className="text-sm text-slate-500">Loading territory map…</p>
             </div>
-          ) : error ? (
+          )}
+          {!loading && error && (
             <div className="h-[480px] flex flex-col items-center justify-center gap-3 bg-slate-50 px-8 text-center">
               <AlertCircle className="w-8 h-8 text-slate-400" />
               <p className="text-sm text-slate-500">{error}</p>
             </div>
-          ) : (
-            <div ref={mapRef} className="w-full h-[480px]" />
           )}
+          {/* Map div is always in DOM once mapReady, so ref is valid */}
+          <div ref={mapRef} className="w-full h-[480px]" style={{ display: mapReady ? 'block' : 'none' }} />
         </CardContent>
       </Card>
 
