@@ -72,8 +72,13 @@ export default function TerritoryCitiesTab({ user }) {
       setApplication(app);
 
       // If rich municipality data is already cached in DB, use it
-      if (app.territory_cities && app.territory_cities.length > 0) {
-        // territory_cities is a plain name array — reconstruct display objects
+      if (app.territory_municipalities && app.territory_municipalities.length > 0) {
+        // Full rich data available
+        setMunicipalities(app.territory_municipalities);
+        const nameList = app.territory_municipalities.map(m => m.name);
+        await loadOperatorMatches(nameList, app.license_state);
+      } else if (app.territory_cities && app.territory_cities.length > 0) {
+        // Legacy: plain names only — show them while we note type/status will be missing
         const saved = app.territory_cities.map(name => ({ name, type: '', incorporated: null, notes: '' }));
         setMunicipalities(saved);
         await loadOperatorMatches(app.territory_cities, app.license_state);
@@ -103,9 +108,12 @@ export default function TerritoryCitiesTab({ user }) {
       setMunicipalities(munis);
       setBreakdown(result.breakdown || {});
 
-      // Save plain name list to DB for future loads
-      await base44.entities.AgentTerritoryApplication.update(app.id, { territory_cities: nameList });
-      setApplication(prev => ({ ...prev, territory_cities: nameList }));
+      // Save both plain name list AND full rich data to DB
+      await base44.entities.AgentTerritoryApplication.update(app.id, {
+        territory_cities: nameList,
+        territory_municipalities: munis
+      });
+      setApplication(prev => ({ ...prev, territory_cities: nameList, territory_municipalities: munis }));
 
       await loadOperatorMatches(nameList, app.license_state);
     } catch (e) {
@@ -150,10 +158,10 @@ export default function TerritoryCitiesTab({ user }) {
     setBreakdown({});
     setActiveMatches([]);
     setProspectMatches([]);
-    // Clear cached list so it re-fetches from OpenAI
-    await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: [] });
-    setApplication(prev => ({ ...prev, territory_cities: [] }));
-    await fetchAndSaveCities({ ...application, territory_cities: [] });
+    // Clear cached data so it re-fetches from OpenAI
+    await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: [], territory_municipalities: [] });
+    setApplication(prev => ({ ...prev, territory_cities: [], territory_municipalities: [] }));
+    await fetchAndSaveCities({ ...application, territory_cities: [], territory_municipalities: [] });
   };
 
   const handleAddCity = async () => {
@@ -170,13 +178,16 @@ export default function TerritoryCitiesTab({ user }) {
         return;
       }
 
-      const updatedList = [...(application.territory_cities || []), trimmed].sort();
-      await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: updatedList });
-      setApplication(prev => ({ ...prev, territory_cities: updatedList }));
-
-      // Add to display list
       const newMuni = { name: trimmed, type: newCityType || 'Manually Added', incorporated: null, notes: 'Manually added' };
-      setMunicipalities(prev => [...prev, newMuni].sort((a, b) => a.name.localeCompare(b.name)));
+      const updatedList = [...(application.territory_cities || []), trimmed].sort();
+      const updatedMunis = [...(application.territory_municipalities || municipalities), newMuni].sort((a, b) => a.name.localeCompare(b.name));
+
+      await base44.entities.AgentTerritoryApplication.update(application.id, {
+        territory_cities: updatedList,
+        territory_municipalities: updatedMunis
+      });
+      setApplication(prev => ({ ...prev, territory_cities: updatedList, territory_municipalities: updatedMunis }));
+      setMunicipalities(updatedMunis);
 
       // Re-run operator matching with updated list
       await loadOperatorMatches(updatedList, application.license_state);
@@ -194,9 +205,13 @@ export default function TerritoryCitiesTab({ user }) {
   const handleRemoveCity = async (cityName) => {
     if (!application) return;
     const updatedList = (application.territory_cities || []).filter(c => c !== cityName);
-    await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: updatedList });
-    setApplication(prev => ({ ...prev, territory_cities: updatedList }));
-    setMunicipalities(prev => prev.filter(m => m.name !== cityName));
+    const updatedMunis = municipalities.filter(m => m.name !== cityName);
+    await base44.entities.AgentTerritoryApplication.update(application.id, {
+      territory_cities: updatedList,
+      territory_municipalities: updatedMunis
+    });
+    setApplication(prev => ({ ...prev, territory_cities: updatedList, territory_municipalities: updatedMunis }));
+    setMunicipalities(updatedMunis);
     await loadOperatorMatches(updatedList, application.license_state);
   };
 
@@ -298,7 +313,7 @@ export default function TerritoryCitiesTab({ user }) {
             {municipalities.length > 0 && (
               <Badge className="bg-orange-100 text-orange-700 border-orange-200 border text-xs">{municipalities.length}</Badge>
             )}
-            {application?.territory_cities?.length > 0 && (
+            {application?.territory_municipalities?.length > 0 && (
               <span className="text-xs text-slate-400 ml-1">· Loaded from saved data</span>
             )}
           </div>

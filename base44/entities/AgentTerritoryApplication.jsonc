@@ -37,7 +37,30 @@
         "type": "string"
       },
       "default": [],
-      "description": "All cities/municipalities within the assigned county territory"
+      "description": "Plain name list of all cities/municipalities within the assigned county territory"
+    },
+    "territory_municipalities": {
+      "type": "array",
+      "default": [],
+      "description": "Full rich municipality data including type, incorporated status, and notes",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "Borough, Township, City, CDP, Village, Town, etc."
+          },
+          "incorporated": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
     },
     "avg_sale_price": {
       "type": "number"
