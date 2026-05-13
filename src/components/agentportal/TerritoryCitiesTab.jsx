@@ -3,9 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, Search, RefreshCw, Building2, Users, Star } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Loader2, MapPin, RefreshCw, Building2, Users, Star, Plus, X, Check } from 'lucide-react';
 
-async function fetchCitiesInCounty(county, state) {
+async function fetchCitiesFromAPI(county, state) {
   const response = await base44.functions.invoke('getTerritoryMunicipalities', { county, state });
   const result = response.data;
   return {
@@ -44,13 +45,18 @@ export default function TerritoryCitiesTab({ user }) {
   const [application, setApplication] = useState(null);
   const [municipalities, setMunicipalities] = useState([]);
   const [breakdown, setBreakdown] = useState({});
-  const [cities, setCities] = useState([]); // plain name list for matching
   const [loadingCities, setLoadingCities] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [activeMatches, setActiveMatches] = useState([]);
   const [prospectMatches, setProspectMatches] = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [error, setError] = useState('');
+
+  // Add city state
+  const [showAddCity, setShowAddCity] = useState(false);
+  const [newCityName, setNewCityName] = useState('');
+  const [newCityType, setNewCityType] = useState('');
+  const [addingCity, setAddingCity] = useState(false);
 
   useEffect(() => {
     if (user) loadApplication();
@@ -65,15 +71,14 @@ export default function TerritoryCitiesTab({ user }) {
       if (!app) { setError('No territory application found.'); setLoadingData(false); return; }
       setApplication(app);
 
-      // If cities already saved, use them directly
+      // If rich municipality data is already cached in DB, use it
       if (app.territory_cities && app.territory_cities.length > 0) {
-        const saved = app.territory_cities;
-        setCities(saved);
-        // Reconstruct municipality objects from saved plain list if no rich data
-        setMunicipalities(saved.map(name => ({ name, type: '', incorporated: true, notes: '' })));
-        await loadOperatorMatches(saved, app.license_state);
+        // territory_cities is a plain name array — reconstruct display objects
+        const saved = app.territory_cities.map(name => ({ name, type: '', incorporated: null, notes: '' }));
+        setMunicipalities(saved);
+        await loadOperatorMatches(app.territory_cities, app.license_state);
       } else {
-        // Auto-fetch if not yet populated
+        // First time — fetch from OpenAI and cache
         await fetchAndSaveCities(app);
       }
     } catch (e) {
@@ -91,15 +96,14 @@ export default function TerritoryCitiesTab({ user }) {
     setLoadingCities(true);
     setError('');
     try {
-      const result = await fetchCitiesInCounty(app.county_requested, app.license_state);
+      const result = await fetchCitiesFromAPI(app.county_requested, app.license_state);
       const munis = (result.municipalities || []).sort((a, b) => a.name.localeCompare(b.name));
       const nameList = munis.map(m => m.name);
 
       setMunicipalities(munis);
       setBreakdown(result.breakdown || {});
-      setCities(nameList);
 
-      // Save plain name list to database
+      // Save plain name list to DB for future loads
       await base44.entities.AgentTerritoryApplication.update(app.id, { territory_cities: nameList });
       setApplication(prev => ({ ...prev, territory_cities: nameList }));
 
@@ -118,19 +122,15 @@ export default function TerritoryCitiesTab({ user }) {
       const citySet = new Set(cityList.map(c => c.toLowerCase().trim()));
       const stateUpper = (state || '').toUpperCase().trim();
 
-      // FutureEstateOperator uses source_state as the full state name OR abbreviation
-      // Try filtering by state abbreviation field first, then fall back matching
       const [activeOps, futureLeads] = await Promise.all([
         base44.entities.FutureEstateOperator.filter({ state: stateUpper }),
         base44.entities.FutureOperatorLead.filter({ state: stateUpper }),
       ]);
 
-      // Match active operators by city
       const activeFound = activeOps
         .filter(op => op.city && citySet.has(op.city.toLowerCase().trim()))
         .map(op => ({ ...op, matchedCity: op.city }));
 
-      // Match future operator leads by city
       const prospectFound = futureLeads
         .filter(lead => lead.city && citySet.has(lead.city.toLowerCase().trim()))
         .map(lead => ({ ...lead, matchedCity: lead.city }));
@@ -146,13 +146,67 @@ export default function TerritoryCitiesTab({ user }) {
 
   const handleRefresh = async () => {
     if (!application) return;
-    setCities([]);
     setMunicipalities([]);
     setBreakdown({});
     setActiveMatches([]);
     setProspectMatches([]);
-    await fetchAndSaveCities(application);
+    // Clear cached list so it re-fetches from OpenAI
+    await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: [] });
+    setApplication(prev => ({ ...prev, territory_cities: [] }));
+    await fetchAndSaveCities({ ...application, territory_cities: [] });
   };
+
+  const handleAddCity = async () => {
+    const trimmed = newCityName.trim();
+    if (!trimmed || !application) return;
+    setAddingCity(true);
+    try {
+      // Check not already in list
+      const existing = (application.territory_cities || []).map(c => c.toLowerCase());
+      if (existing.includes(trimmed.toLowerCase())) {
+        setNewCityName('');
+        setShowAddCity(false);
+        setAddingCity(false);
+        return;
+      }
+
+      const updatedList = [...(application.territory_cities || []), trimmed].sort();
+      await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: updatedList });
+      setApplication(prev => ({ ...prev, territory_cities: updatedList }));
+
+      // Add to display list
+      const newMuni = { name: trimmed, type: newCityType || 'Manually Added', incorporated: null, notes: 'Manually added' };
+      setMunicipalities(prev => [...prev, newMuni].sort((a, b) => a.name.localeCompare(b.name)));
+
+      // Re-run operator matching with updated list
+      await loadOperatorMatches(updatedList, application.license_state);
+
+      setNewCityName('');
+      setNewCityType('');
+      setShowAddCity(false);
+    } catch (e) {
+      setError(e.message || 'Failed to add city.');
+    } finally {
+      setAddingCity(false);
+    }
+  };
+
+  const handleRemoveCity = async (cityName) => {
+    if (!application) return;
+    const updatedList = (application.territory_cities || []).filter(c => c !== cityName);
+    await base44.entities.AgentTerritoryApplication.update(application.id, { territory_cities: updatedList });
+    setApplication(prev => ({ ...prev, territory_cities: updatedList }));
+    setMunicipalities(prev => prev.filter(m => m.name !== cityName));
+    await loadOperatorMatches(updatedList, application.license_state);
+  };
+
+  // Compute breakdown from municipalities if we loaded from cache
+  const displayBreakdown = Object.keys(breakdown).length > 0
+    ? breakdown
+    : municipalities.reduce((acc, m) => {
+        if (m.type && m.type !== 'Manually Added') acc[m.type] = (acc[m.type] || 0) + 1;
+        return acc;
+      }, {});
 
   if (loadingData) {
     return (
@@ -175,18 +229,65 @@ export default function TerritoryCitiesTab({ user }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-900">
             {application?.county_requested ? `${application.county_requested} County, ${application.license_state}` : 'Territory Cities'}
           </h2>
           <p className="text-sm text-slate-500 mt-0.5">All municipalities within your assigned county territory</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loadingCities} className="flex items-center gap-1.5 text-xs">
-          {loadingCities ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-          Refresh Cities
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAddCity(v => !v)}
+            className="flex items-center gap-1.5 text-xs border-orange-300 text-orange-700 hover:bg-orange-50"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add City
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loadingCities} className="flex items-center gap-1.5 text-xs">
+            {loadingCities ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            Re-fetch from AI
+          </Button>
+        </div>
       </div>
+
+      {/* Add City Inline Form */}
+      {showAddCity && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Add a City / Municipality Manually</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                placeholder="City or municipality name…"
+                value={newCityName}
+                onChange={e => setNewCityName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddCity()}
+                className="max-w-xs text-sm"
+              />
+              <Input
+                placeholder="Type (optional, e.g. Borough)"
+                value={newCityType}
+                onChange={e => setNewCityType(e.target.value)}
+                className="max-w-xs text-sm"
+              />
+              <Button
+                size="sm"
+                onClick={handleAddCity}
+                disabled={!newCityName.trim() || addingCity}
+                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center gap-1.5"
+              >
+                {addingCity ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                Save
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setShowAddCity(false); setNewCityName(''); setNewCityType(''); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* City list */}
       <Card className="border-slate-200">
@@ -194,8 +295,11 @@ export default function TerritoryCitiesTab({ user }) {
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-orange-500" />
             <span className="font-semibold text-slate-800 text-sm">Cities & Municipalities</span>
-            {cities.length > 0 && (
-              <Badge className="bg-orange-100 text-orange-700 border-orange-200 border text-xs">{cities.length}</Badge>
+            {municipalities.length > 0 && (
+              <Badge className="bg-orange-100 text-orange-700 border-orange-200 border text-xs">{municipalities.length}</Badge>
+            )}
+            {application?.territory_cities?.length > 0 && (
+              <span className="text-xs text-slate-400 ml-1">· Loaded from saved data</span>
             )}
           </div>
           {loadingCities && (
@@ -213,9 +317,9 @@ export default function TerritoryCitiesTab({ user }) {
           ) : municipalities.length > 0 ? (
             <>
               {/* Breakdown bar */}
-              {Object.keys(breakdown).length > 0 && (
+              {Object.keys(displayBreakdown).length > 0 && (
                 <div className="flex flex-wrap gap-2 px-4 pt-3 pb-2 border-b border-slate-100">
-                  {Object.entries(breakdown).map(([type, count]) => (
+                  {Object.entries(displayBreakdown).map(([type, count]) => (
                     <span key={type} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200">
                       <span className="font-semibold text-slate-800">{count}</span> {type}
                     </span>
@@ -231,15 +335,18 @@ export default function TerritoryCitiesTab({ user }) {
                       <th className="text-left px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
                       <th className="text-left px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                       <th className="text-left px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">Notes</th>
+                      <th className="px-4 py-2"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {municipalities.map((m, i) => (
-                      <tr key={m.name + i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                      <tr key={m.name + i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors group">
                         <td className="px-4 py-2 font-medium text-slate-800">{m.name}</td>
                         <td className="px-4 py-2">
                           {m.type ? (
-                            <span className="inline-block px-2 py-0.5 rounded text-xs bg-orange-50 text-orange-700 border border-orange-200">{m.type}</span>
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs border ${m.notes === 'Manually added' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                              {m.type}
+                            </span>
                           ) : '—'}
                         </td>
                         <td className="px-4 py-2">
@@ -250,6 +357,15 @@ export default function TerritoryCitiesTab({ user }) {
                           ) : '—'}
                         </td>
                         <td className="px-4 py-2 text-xs text-slate-400 italic">{m.notes || ''}</td>
+                        <td className="px-4 py-2 text-right">
+                          <button
+                            onClick={() => handleRemoveCity(m.name)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-red-500"
+                            title="Remove city"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -257,15 +373,14 @@ export default function TerritoryCitiesTab({ user }) {
               </div>
             </>
           ) : (
-            <p className="text-sm text-slate-400 text-center py-6 px-4">No municipalities loaded yet. Click "Refresh Cities" to fetch.</p>
+            <p className="text-sm text-slate-400 text-center py-6 px-4">No municipalities loaded yet. Click "Re-fetch from AI" to populate.</p>
           )}
         </CardContent>
       </Card>
 
       {/* Operator matches */}
-      {cities.length > 0 && (
+      {municipalities.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Active operators in territory */}
           <Card className="border-emerald-200">
             <div className="flex items-center justify-between px-5 py-3 border-b border-emerald-100 bg-emerald-50 rounded-t-lg">
               <div className="flex items-center gap-2">
@@ -288,7 +403,6 @@ export default function TerritoryCitiesTab({ user }) {
             </CardContent>
           </Card>
 
-          {/* Prospect / future operators */}
           <Card className="border-orange-200">
             <div className="flex items-center justify-between px-5 py-3 border-b border-orange-100 bg-orange-50 rounded-t-lg">
               <div className="flex items-center gap-2">
