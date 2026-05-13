@@ -964,7 +964,8 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                     <div>
                       <Label>License State *</Label>
                       <select
-                        className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                        className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background max-h-48 overflow-y-auto"
+                        size={1}
                         value={formData.license_state}
                         onChange={(e) => setFormData({ ...formData, license_state: e.target.value })}
                       >
@@ -1017,7 +1018,7 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                         const matches = existingCounties.filter(c => c.county.toLowerCase().includes(q));
                         if (!matches.length) return null;
                         return (
-                          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-y-auto overscroll-contain">
                             {matches.map((c, i) => (
                               <button
                                 key={i}
