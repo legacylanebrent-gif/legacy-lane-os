@@ -327,7 +327,7 @@ Deno.serve(async (req) => {
         if (details.scrape_status === 'detail_scraped') enriched++;
         else failed++;
         // Delay between detail page requests to avoid rate limiting
-        await new Promise(r => setTimeout(r, 700));
+        await new Promise(r => setTimeout(r, 1200));
       }
 
       return Response.json({

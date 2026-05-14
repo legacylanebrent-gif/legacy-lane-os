@@ -125,19 +125,19 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
-  // Invoke with automatic retry on 429 rate limit
-  const invokeWithRetry = async (fn, args, maxRetries = 3) => {
+  // Invoke with automatic retry on 429/403 rate limit
+  const invokeWithRetry = async (fn, args, maxRetries = 4) => {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await base44.functions.invoke(fn, args);
       } catch (e) {
-        const is429 = e.message?.includes('429') || e.message?.includes('Rate limit');
-        if (is429 && attempt < maxRetries) {
-          const delay = 8000 * (attempt + 1); // 8s, 16s, 24s
+        const isRateLimit = e.message?.includes('429') || e.message?.includes('403') || e.message?.includes('Rate limit') || e.message?.includes('rate limit');
+        if (isRateLimit && attempt < maxRetries) {
+          const delay = 15000 * (attempt + 1); // 15s, 30s, 45s, 60s
           await new Promise(r => setTimeout(r, delay));
         } else {
-          throw is429
-            ? new Error('Rate limit hit — the scraper was called too frequently. Please wait 30 seconds and try again.')
+          throw isRateLimit
+            ? new Error(`Rate limit hit — waited but still throttled. Please wait 1–2 minutes and try again.`)
             : e;
         }
       }
@@ -152,7 +152,7 @@ export default function AdminEstatesalesOrg() {
       const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
         state: selectedState.toLowerCase(),
         mode: 'detail',
-        detail_limit: 50,
+        detail_limit: 25,
       });
       setScrapeResult(res.data);
       await loadRecords();
@@ -341,7 +341,7 @@ export default function AdminEstatesalesOrg() {
             </Button>
             <Button onClick={handleEnrich} disabled={enriching || isRunning} variant="outline">
               {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-              {enriching ? 'Enriching...' : `Enrich 50 (${selectedState})`}
+              {enriching ? 'Enriching...' : `Enrich 25 (${selectedState})`}
             </Button>
             <div className="ml-auto flex gap-2">
               <Button onClick={handleScrapeAllStates} disabled={isRunning} className="bg-indigo-700 text-white">
