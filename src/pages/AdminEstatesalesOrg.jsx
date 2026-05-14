@@ -142,8 +142,8 @@ export default function AdminEstatesalesOrg() {
   // Scrape listings for ALL states
   const handleScrapeAllStates = async () => {
     stopRef.current = false;
-    setAllStatesScraping(true);
     setShowProgress(true);
+    setAllStatesScraping(true);
     setProgressLog([]);
     setBatchDone(false);
     addLog('Starting listing scrape for all states...', 'info');
@@ -187,8 +187,8 @@ export default function AdminEstatesalesOrg() {
   // Enrich details for ALL states, 50 at a time per state
   const handleEnrichAllStates = async () => {
     stopRef.current = false;
-    setAllStatesEnriching(true);
     setShowProgress(true);
+    setAllStatesEnriching(true);
     setProgressLog([]);
     setBatchDone(false);
     addLog('Starting detail enrichment for all states...', 'info');
@@ -320,9 +320,16 @@ export default function AdminEstatesalesOrg() {
             <div className={`mt-4 p-3 rounded-lg text-sm ${scrapeResult.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-800'}`}>
               {scrapeResult.error ? `Error: ${scrapeResult.error}` : (
                 <span>
-                  {scrapeResult.mode === 'listing'
-                    ? `✓ Scraped ${scrapeResult.cities_scraped} cities — ${scrapeResult.new_records} new records, ${scrapeResult.skipped} skipped`
-                    : `✓ Enriched ${scrapeResult.enriched} records — ${scrapeResult.failed} failed`}
+                  {scrapeResult.mode === 'listing' ? (
+                    <>
+                      ✓ Scraped {scrapeResult.cities_scraped} cities — {scrapeResult.new_records} new records
+                      {scrapeResult.skipped > 0 && (
+                        <span className="ml-2 text-slate-600">
+                          · <strong>{scrapeResult.skipped} skipped</strong> <span className="text-slate-500">(already in database)</span>
+                        </span>
+                      )}
+                    </>
+                  ) : `✓ Enriched ${scrapeResult.enriched} records — ${scrapeResult.failed} failed`}
                 </span>
               )}
             </div>
@@ -422,7 +429,7 @@ export default function AdminEstatesalesOrg() {
       )}
 
       {/* Global Progress Dialog */}
-      <Dialog open={showProgress} onOpenChange={v => { if (!isRunning) setShowProgress(v); }}>
+      <Dialog open={showProgress} onOpenChange={v => { if (v || !isRunning) setShowProgress(v); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
