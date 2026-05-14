@@ -74,7 +74,7 @@ export default function AdminEstatesalesOrg() {
 
   const loadGlobalCounts = async () => {
     try {
-      const res = await base44.functions.invoke('scrapeEstatesalesOrgState', { mode: 'counts' });
+      const res = await invokeWithRetry('scrapeEstatesalesOrgState', { mode: 'counts' });
       setGlobalCounts(res.data);
       return res.data;
     } catch (e) {
@@ -91,7 +91,7 @@ export default function AdminEstatesalesOrg() {
     setScraping(true);
     setScrapeResult(null);
     try {
-      const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+      const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
         state: selectedState.toLowerCase(),
         mode: 'listing',
       });
@@ -105,12 +105,31 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
+  // Invoke with automatic retry on 429 rate limit
+  const invokeWithRetry = async (fn, args, maxRetries = 3) => {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await base44.functions.invoke(fn, args);
+      } catch (e) {
+        const is429 = e.message?.includes('429') || e.message?.includes('Rate limit');
+        if (is429 && attempt < maxRetries) {
+          const delay = 8000 * (attempt + 1); // 8s, 16s, 24s
+          await new Promise(r => setTimeout(r, delay));
+        } else {
+          throw is429
+            ? new Error('Rate limit hit — the scraper was called too frequently. Please wait 30 seconds and try again.')
+            : e;
+        }
+      }
+    }
+  };
+
   // Single-state enrich (50 at a time)
   const handleEnrich = async () => {
     setEnriching(true);
     setScrapeResult(null);
     try {
-      const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+      const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
         state: selectedState.toLowerCase(),
         mode: 'detail',
         detail_limit: 50,
@@ -156,7 +175,7 @@ export default function AdminEstatesalesOrg() {
       setCurrentStateProcessing(state);
       addLog(`Scraping listings: ${state}...`);
       try {
-        const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+        const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
           state: state.toLowerCase(),
           mode: 'listing',
         });
@@ -206,7 +225,7 @@ export default function AdminEstatesalesOrg() {
       while (hasMore) {
         if (stopRef.current) break;
         try {
-          const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+          const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
             state: state.toLowerCase(),
             mode: 'detail',
             detail_limit: 50,
