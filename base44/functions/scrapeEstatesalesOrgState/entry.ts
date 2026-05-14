@@ -2,22 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const BASE_URL = 'https://estatesales.org';
 
-const STATE_CITIES_MAP = {
-  nj: ['atlantic-city', 'absecon', 'brigantine', 'linwood', 'ocean-city', 'margate-city', 'somers-point', 'egg-harbor-township',
-       'blackwood', 'haddon-township', 'mount-laurel', 'trenton', 'cherry-hill', 'collingswood', 'moorestown',
-       'haddonfield', 'vineland', 'glassboro', 'westville', 'williamstown', 'toms-river', 'spring-lake',
-       'new-brunswick', 'somerset', 'chesterfield', 'new-egypt', 'bordentown', 'flemington', 'princeton',
-       'morristown', 'parsippany', 'dover', 'hackettstown', 'newton', 'belleville', 'bloomfield', 'livingston',
-       'maplewood', 'millburn', 'montclair', 'nutley', 'south-orange', 'west-orange', 'caldwell',
-       'jersey-city', 'hoboken', 'bayonne', 'union-city', 'weehawken', 'englewood', 'hackensack',
-       'paramus', 'ridgewood', 'teaneck', 'fort-lee', 'bergenfield', 'fair-lawn', 'glen-rock',
-       'paterson', 'clifton', 'passaic', 'wayne', 'west-milford', 'lodi', 'garfield',
-       'elizabeth', 'linden', 'rahway', 'plainfield', 'scotch-plains', 'westfield', 'cranford',
-       'summit', 'short-hills', 'springfield', 'union', 'clark', 'woodbridge',
-       'perth-amboy', 'south-amboy', 'keyport', 'long-branch', 'asbury-park', 'red-bank',
-       'freehold', 'howell', 'jackson', 'lacey', 'brick', 'lakewood', 'point-pleasant',
-       'barnegat', 'forked-river', 'manahawkin', 'ship-bottom', 'wildwood', 'cape-may']
-};
+// No hardcoded city map needed — we extract dynamically from the state page
 
 async function fetchPage(url) {
   const resp = await fetch(url, {
@@ -227,10 +212,15 @@ Deno.serve(async (req) => {
       const stateHtml = await fetchPage(`${BASE_URL}/estate-sale-companies/${stateAbbr}`);
       let cityLinks = extractCityLinks(stateHtml, stateAbbr);
 
-      // Supplement with known cities if extraction yields few results
-      const knownCities = STATE_CITIES_MAP[stateAbbr] || [];
-      const allCities = [...new Set([...cityLinks, ...knownCities])];
-      const citiesToScrape = specificCities || allCities;
+      // If dynamic extraction found nothing, also try the /all page variant
+      if (cityLinks.length === 0) {
+        try {
+          const allPageHtml = await fetchPage(`${BASE_URL}/estate-sale-companies/${stateAbbr}/all`);
+          cityLinks = extractCityLinks(allPageHtml, stateAbbr);
+        } catch (e) { /* ignore */ }
+      }
+
+      const citiesToScrape = specificCities || cityLinks;
 
       let totalNew = 0;
       let totalSkipped = 0;

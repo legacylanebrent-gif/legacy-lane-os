@@ -27,7 +27,6 @@ export default function AdminEstatesalesOrg() {
   const [enriching, setEnriching] = useState(false);
   const [scrapeResult, setScrapeResult] = useState(null);
   const [selectedState, setSelectedState] = useState('NJ');
-  const [filterState, setFilterState] = useState('NJ');
   const [filterTier, setFilterTier] = useState('all');
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState({});
@@ -35,12 +34,12 @@ export default function AdminEstatesalesOrg() {
   useEffect(() => {
     loadRecords();
     loadCounts();
-  }, [filterState, filterTier]);
+  }, [selectedState, filterTier]);
 
   const loadRecords = async () => {
     setLoading(true);
     try {
-      const filter = { source_state: filterState };
+      const filter = { source_state: selectedState };
       if (filterTier !== 'all') filter.membership_tier = filterTier;
       const data = await base44.entities.EstatesalesOrgOperator.filter(filter, '-last_scraped_at', 100);
       setRecords(data);
@@ -53,7 +52,7 @@ export default function AdminEstatesalesOrg() {
 
   const loadCounts = async () => {
     try {
-      const all = await base44.entities.EstatesalesOrgOperator.filter({ source_state: filterState }, '-created_date', 500);
+      const all = await base44.entities.EstatesalesOrgOperator.filter({ source_state: selectedState }, '-created_date', 500);
       const c = { total: all.length, listing_only: 0, detail_scraped: 0, failed: 0 };
       all.forEach(r => { if (c[r.scrape_status] !== undefined) c[r.scrape_status]++; });
       setCounts(c);
@@ -83,7 +82,7 @@ export default function AdminEstatesalesOrg() {
     setScrapeResult(null);
     try {
       const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
-        state: filterState.toLowerCase(),
+        state: selectedState.toLowerCase(),
         mode: 'detail',
         detail_limit: 30,
       });
@@ -133,7 +132,7 @@ export default function AdminEstatesalesOrg() {
             </Button>
             <Button onClick={handleEnrich} disabled={enriching} variant="outline">
               {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-              {enriching ? 'Enriching Details...' : `Enrich Details (${filterState})`}
+              {enriching ? 'Enriching Details...' : `Enrich Details (${selectedState})`}
             </Button>
           </div>
 
@@ -153,14 +152,6 @@ export default function AdminEstatesalesOrg() {
 
       {/* Filter & Stats Row */}
       <div className="flex flex-wrap gap-4 items-center mb-4">
-        <Select value={filterState} onValueChange={setFilterState}>
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-          </SelectContent>
-        </Select>
         <Select value={filterTier} onValueChange={setFilterTier}>
           <SelectTrigger className="w-36">
             <SelectValue placeholder="All Tiers" />
