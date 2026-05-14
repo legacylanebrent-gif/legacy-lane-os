@@ -41,17 +41,21 @@ async function geocodeCounty(county, state, apiKey) {
   const withCounty = county.toLowerCase().includes('county') ? county : `${county} County`;
   const queries = [
     `${withCounty}, ${stateFull}, USA`,
-    `${county}, ${stateFull}, USA`,
-    `${withCounty}, ${state}, USA`,
+    `${county} County, ${stateFull}`,
+    `${county}, ${stateFull}`,
+    `${withCounty}, ${state}`,
   ];
   for (const query of queries) {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
     const res = await fetch(url);
     const json = await res.json();
-    if (json.results && json.results.length > 0) {
+    if (json.status === 'OK' && json.results?.length > 0) {
       const result = json.results[0];
       const { lat, lng } = result.geometry.location;
-      return { lat, lng, viewport: result.geometry.viewport, placeId: result.place_id };
+      return { lat, lng, viewport: result.geometry.viewport, formattedAddress: result.formatted_address };
+    }
+    if (json.status === 'REQUEST_DENIED') {
+      throw new Error(`Google Maps API denied: ${json.error_message || 'check API key restrictions'}`);
     }
   }
   return null;
@@ -93,10 +97,16 @@ export default function TerritoryMapView({ user }) {
       }
 
       // Get API key
-      const config = await base44.functions.invoke('getConfig', {});
-      const apiKey = config?.data?.GOOGLE_MAPS_API_KEY;
+      let apiKey;
+      try {
+        const config = await base44.functions.invoke('getConfig', {});
+        // config.data is the response body from the function
+        const cfg = config?.data || {};
+        apiKey = cfg.GOOGLE_MAPS_API_KEY || cfg.google_maps_api_key;
+      } catch(e) {}
+      // Fallback: if Maps script is already loaded, we don't need the key for geocoding separately
       if (!apiKey) {
-        setError('Google Maps API key not configured.');
+        setError('Google Maps API key not configured. Please check getConfig function.');
         setLoading(false);
         return;
       }
@@ -106,7 +116,8 @@ export default function TerritoryMapView({ user }) {
       // Geocode the county
       const geo = await geocodeCounty(county, state, apiKey);
       if (!geo) {
-        setError(`Could not locate "${county}, ${state}" on the map.`);
+        const stateFull = STATE_NAMES[state?.toUpperCase()] || state;
+        setError(`Could not locate "${county} County, ${stateFull}" on the map. The Geocoding API may need to be enabled for this key.`);
         setLoading(false);
         return;
       }
