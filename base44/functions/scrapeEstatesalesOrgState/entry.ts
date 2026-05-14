@@ -17,13 +17,14 @@ async function fetchPage(url) {
 }
 
 function extractCityLinks(html, stateAbbr) {
-  // Extract city slugs from the state page
+  // Extract city slugs from the state page — handles both relative and absolute URLs
   const cityLinks = [];
-  const regex = new RegExp(`href="\/estate-sale-companies\/${stateAbbr}\/([^"]+)"`, 'gi');
+  // Matches: href="/estate-sale-companies/al/city" OR href="https://estatesales.org/estate-sale-companies/al/city"
+  const regex = new RegExp(`href="(?:https?://estatesales\\.org)?/estate-sale-companies/${stateAbbr}/([^"#?]+)"`, 'gi');
   let match;
   while ((match = regex.exec(html)) !== null) {
-    const slug = match[1];
-    if (slug && !slug.includes('/') && slug !== stateAbbr) {
+    const slug = match[1].replace(/\/$/, ''); // strip trailing slash
+    if (slug && !slug.includes('/') && slug.toLowerCase() !== stateAbbr.toLowerCase()) {
       cityLinks.push(slug);
     }
   }
