@@ -173,18 +173,14 @@ export default function TerritoryMapView({ user }) {
       centerInfo.open(map, centerMarker);
       centerMarker.addListener('click', () => centerInfo.open(map, centerMarker));
 
-      // Load operators in this county
-      const [futureOps, liveOps] = await Promise.all([
-        base44.entities.FutureEstateOperator.filter({ geocode_status: 'geocoded', state }),
+      // Load operators in this county — filter by county directly to avoid 50-record cap
+      const countyNorm = county.toLowerCase().replace(/\s+county$/i, '').trim();
+      const countyWithSuffix = countyNorm.charAt(0).toUpperCase() + countyNorm.slice(1) + ' County';
+
+      const [inCounty, liveOps] = await Promise.all([
+        base44.entities.FutureEstateOperator.filter({ geocode_status: 'geocoded', state, geocoded_county: countyWithSuffix }, '-updated_date', 200),
         base44.entities.OperatorTerritoryProfile.filter({ territory_state: state }).catch(() => []),
       ]);
-
-      // Filter future operators to this county
-      const countyNorm = county.toLowerCase().replace(/\s+county$/i, '').trim();
-      const inCounty = futureOps.filter(op => {
-        const opCounty = (op.geocoded_county || op.county || '').toLowerCase().replace(/\s+county$/i, '').trim();
-        return opCounty === countyNorm;
-      });
 
       // Filter live operators to this county
       const liveInCounty = liveOps.filter(op => {
