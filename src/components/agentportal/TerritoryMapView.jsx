@@ -88,7 +88,10 @@ export default function TerritoryMapView({ user }) {
       setApplication(approved);
 
       const county = approved.county_requested;
-      const state = approved.license_state;
+      const stateRaw = approved.license_state;
+      // Normalize: if full state name (e.g. "New Jersey"), convert to abbreviation
+      const stateAbbrevMap = Object.fromEntries(Object.entries(STATE_NAMES).map(([abbr, full]) => [full.toLowerCase(), abbr]));
+      const state = stateAbbrevMap[stateRaw?.toLowerCase()] || stateRaw;
 
       if (!county || !state) {
         setError('Your application does not have a county or state assigned yet.');
@@ -174,13 +177,18 @@ export default function TerritoryMapView({ user }) {
       centerMarker.addListener('click', () => centerInfo.open(map, centerMarker));
 
       // Load operators in this county — filter by county directly to avoid 50-record cap
-      const countyNorm = county.toLowerCase().replace(/\s+county$/i, '').trim();
-      const countyWithSuffix = countyNorm.charAt(0).toUpperCase() + countyNorm.slice(1) + ' County';
+      // Normalize: strip existing "County" suffix then re-add with proper title case
+      const countyNorm = county.replace(/\s+county$/i, '').trim();
+      const countyWithSuffix = countyNorm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + ' County';
+
+      console.log('[TerritoryMap] Querying operators for county:', countyWithSuffix, 'state:', state);
 
       const [inCounty, liveOps] = await Promise.all([
         base44.entities.FutureEstateOperator.filter({ geocode_status: 'geocoded', state, geocoded_county: countyWithSuffix }, '-updated_date', 200),
         base44.entities.OperatorTerritoryProfile.filter({ territory_state: state }).catch(() => []),
       ]);
+
+      console.log('[TerritoryMap] Found', inCounty.length, 'future operators,', liveOps.length, 'live ops');
 
       // Filter live operators to this county
       const liveInCounty = liveOps.filter(op => {
