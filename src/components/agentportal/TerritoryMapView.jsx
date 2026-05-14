@@ -21,11 +21,29 @@ function loadMapsScript(key) {
   });
 }
 
+// US state abbreviation → full name map
+const STATE_NAMES = {
+  AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
+  CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
+  IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',
+  ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',
+  MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',
+  NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',
+  OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',
+  TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',
+  WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia'
+};
+
 // Geocode a query and return bounds + center
 async function geocodeCounty(county, state, apiKey) {
-  // Try with "County" suffix first, then fall back to plain name
+  // Resolve state abbreviation to full name for better geocoding
+  const stateFull = STATE_NAMES[state?.toUpperCase()] || state;
   const withCounty = county.toLowerCase().includes('county') ? county : `${county} County`;
-  const queries = [`${withCounty}, ${state}, USA`, `${county}, ${state}, USA`];
+  const queries = [
+    `${withCounty}, ${stateFull}, USA`,
+    `${county}, ${stateFull}, USA`,
+    `${withCounty}, ${state}, USA`,
+  ];
   for (const query of queries) {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
     const res = await fetch(url);
