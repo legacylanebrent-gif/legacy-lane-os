@@ -1,0 +1,156 @@
+{
+  "name": "EstatesalesOrgOperator",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Name of the estate sale company"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Numeric ID extracted from estatesales.org profile URL slug"
+    },
+    "profile_url": {
+      "type": "string",
+      "description": "Full URL to the company profile on estatesales.org"
+    },
+    "membership_tier": {
+      "type": "string",
+      "enum": [
+        "elite",
+        "platinum",
+        "basic",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Membership tier shown on the listing"
+    },
+    "base_city": {
+      "type": "string",
+      "description": "City the company is based out of"
+    },
+    "base_state": {
+      "type": "string",
+      "description": "State abbreviation the company is based in"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Company website URL"
+    },
+    "member_since": {
+      "type": "string",
+      "description": "Date joined estatesales.org (e.g. 'Jul 29, 2022')"
+    },
+    "years_in_business": {
+      "type": "number",
+      "description": "Years in business as listed on profile"
+    },
+    "sales_posted": {
+      "type": "number",
+      "description": "Total number of past sales posted"
+    },
+    "active_sales_count": {
+      "type": "number",
+      "description": "Number of currently active sales"
+    },
+    "bonded_insured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the company is listed as bonded and insured"
+    },
+    "award_winner": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the company has won an estatesales.org award"
+    },
+    "about_text": {
+      "type": "string",
+      "description": "Company bio / about section"
+    },
+    "services_offered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of services offered (e.g. In-person Estate Sales, Online Auctions)"
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Professional memberships and associations"
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Credentials and licenses listed"
+    },
+    "service_area_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "All cities/states the company serves"
+    },
+    "logo_image_url": {
+      "type": "string",
+      "description": "Company logo or photo URL from estatesales.org CDN"
+    },
+    "has_facebook": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a Facebook link is present on the profile"
+    },
+    "source_state": {
+      "type": "string",
+      "description": "State abbreviation this record was scraped under"
+    },
+    "scraped_city": {
+      "type": "string",
+      "description": "City page this company was found on"
+    },
+    "scrape_status": {
+      "type": "string",
+      "enum": [
+        "listing_only",
+        "detail_scraped",
+        "failed"
+      ],
+      "default": "listing_only",
+      "description": "Whether we have only listing data or full detail page data"
+    },
+    "last_scraped_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last scrape"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address if found during enrichment"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "found",
+        "failed"
+      ],
+      "default": "not_started"
+    }
+  },
+  "required": [
+    "company_name",
+    "source_state"
+  ]
+}
