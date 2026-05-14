@@ -28,7 +28,7 @@ export default function AgentOperatorPortal() {
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Operator Partnership Portal</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Estate Sale Company Partners</h1>
               <p className="text-slate-500 text-sm">Invite, connect, and manage your estate sale operator network</p>
             </div>
           </div>
