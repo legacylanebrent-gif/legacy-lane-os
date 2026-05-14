@@ -84,6 +84,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminAmazonProducts',    label: 'Amazon Products',     icon: Package,         group: 'Admin' },
   { page: 'AdminTransactions',      label: 'Transactions',        icon: DollarSign,      group: 'Admin' },
   { page: 'AdminFutureOperators',   label: 'Future Operators',    icon: Briefcase,       group: 'Admin' },
+  { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops', icon: Building2,       group: 'Admin' },
   { page: 'PlatformAnalytics',      label: 'Platform Analytics',  icon: BarChart3,       group: 'Admin' },
   { page: 'Revenue',                label: 'Revenue Projections', icon: DollarSign,      group: 'Admin' },
   { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',  icon: DollarSign,      group: 'Admin' },
