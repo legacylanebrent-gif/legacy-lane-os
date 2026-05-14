@@ -127,9 +127,11 @@ async function scrapeDetailPage(profileUrl) {
     // Award winner
     details.award_winner = /aw-w-winner/i.test(html);
 
-    // Website
-    const websiteMatch = html.match(/Visit Company Website[^"]*"([^"]+)"|href="(https?:\/\/(?!estatesales)[^"]+)"[^>]*>\s*(?:Visit Company Website)/i);
-    if (websiteMatch) details.website_url = websiteMatch[1] || websiteMatch[2];
+    // Website — look for "Visit Company Website" link
+    const websiteMatch = html.match(/href="(https?:\/\/(?!estatesales\.org)[^"]+)"[^>]*>[^<]*Visit Company Website/i)
+      || html.match(/Visit Company Website[^<]*<\/a>[\s\S]{0,30}href="(https?:\/\/(?!estatesales\.org)[^"]+)"/i)
+      || html.match(/<a[^>]+href="(https?:\/\/(?!estatesales\.org)[^"]+)"[^>]*>\s*Visit/i);
+    if (websiteMatch) details.website_url = websiteMatch[1];
 
     // Member since & tier
     const memberMatch = html.match(/(Elite|Platinum|Basic)\s+member\s+since\s+([A-Za-z]+\s+\d+,?\s+\d{4})/i);
