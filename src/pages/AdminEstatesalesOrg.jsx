@@ -102,7 +102,7 @@ export default function AdminEstatesalesOrg() {
           state: selectedState.toLowerCase(),
           mode: 'listing',
           batch_offset: offset,
-          batch_size: 10,
+          batch_size: 100,
         });
         const d = res.data;
         totalNew += d.new_records || 0;

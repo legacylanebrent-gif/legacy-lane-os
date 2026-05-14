@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
       }
 
       const allCities = specificCities || cityLinks;
-      const batchSize = body.batch_size || 10;
+      const batchSize = body.batch_size || 100;
       const batchOffset = body.batch_offset || 0;
       const citiesToScrape = allCities.slice(batchOffset, batchOffset + batchSize);
       const hasMore = batchOffset + batchSize < allCities.length;
