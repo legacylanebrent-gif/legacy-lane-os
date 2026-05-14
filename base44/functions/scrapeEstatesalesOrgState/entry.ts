@@ -63,12 +63,19 @@ function parseListingPage(html, stateAbbr, citySlug) {
     const salesMatch = context.match(/sales\s+posted.*?(\d[\d,]*)/i) || context.match(/(\d[\d,]*)\s+sales?\s+posted/i);
     const salesPosted = salesMatch ? parseInt(salesMatch[1].replace(/,/g, '')) : null;
 
-    // Extract base city
+    // Extract base city — try "based out of" pattern, fall back to city slug
     const cityMatch = context.match(/based\s+out\s+of\s+([^,<\n]+)/i);
-    const baseCity = cityMatch ? cityMatch[1].trim().replace(/\\n/g, '').trim() : '';
-    const baseCityParts = baseCity.split(',');
-    const cityName = baseCityParts[0].trim();
-    const cityState = baseCityParts[1] ? baseCityParts[1].trim() : stateAbbr.toUpperCase();
+    let cityName, cityState;
+    if (cityMatch) {
+      const baseCity = cityMatch[1].trim().replace(/\\n/g, '').trim();
+      const parts = baseCity.split(',');
+      cityName = parts[0].trim();
+      cityState = parts[1] ? parts[1].trim() : stateAbbr.toUpperCase();
+    } else {
+      // Convert city slug to readable name (e.g. "new-york-city" -> "New York City")
+      cityName = citySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      cityState = stateAbbr.toUpperCase();
+    }
 
     // Extract phone (basic tier)
     const phoneMatch = context.match(/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/);
@@ -179,6 +186,13 @@ async function scrapeDetailPage(profileUrl) {
     if (serviceAreaMatch) {
       const cityLinks = [...serviceAreaMatch[1].matchAll(/\/estate-sale-companies\/[a-z]{2}\/([^"]+)"/gi)];
       details.service_area_cities = cityLinks.map(m => m[1].replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+    }
+
+    // Base city — "Based out of City, ST" on profile page
+    const basedOutOfMatch = html.match(/[Bb]ased\s+out\s+of\s+([^,<\n]+),?\s*([A-Z]{2})?/);
+    if (basedOutOfMatch) {
+      details.base_city = basedOutOfMatch[1].replace(/<[^>]+>/g, '').trim();
+      if (basedOutOfMatch[2]) details.base_state = basedOutOfMatch[2];
     }
 
     // Sales counts
