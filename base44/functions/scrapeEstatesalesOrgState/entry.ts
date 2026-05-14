@@ -207,10 +207,29 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const stateAbbr = (body.state || 'nj').toLowerCase();
     const mode = body.mode || 'listing'; // 'listing' or 'detail'
-    const detailLimit = body.detail_limit || 20; // how many detail pages to scrape per run
+    const detailLimit = body.detail_limit || 50; // how many detail pages to scrape per run
     const specificCities = body.cities || null; // optional city slug array override
 
-    if (mode === 'listing') {
+    if (mode === 'counts') {
+      // Return scrape progress counts — optionally for a specific state or all states
+      const targetState = body.state ? stateAbbr.toUpperCase() : null;
+      const filter = targetState ? { source_state: targetState } : {};
+      const all = await base44.asServiceRole.entities.EstatesalesOrgOperator.filter(filter, '-created_date', 5000);
+      const total = all.length;
+      const detail_scraped = all.filter(r => r.scrape_status === 'detail_scraped').length;
+      const listing_only = all.filter(r => r.scrape_status === 'listing_only').length;
+      const failed = all.filter(r => r.scrape_status === 'failed').length;
+      // Per-state breakdown
+      const byState = {};
+      all.forEach(r => {
+        const s = r.source_state || 'unknown';
+        if (!byState[s]) byState[s] = { total: 0, detail_scraped: 0, listing_only: 0, failed: 0 };
+        byState[s].total++;
+        byState[s][r.scrape_status] = (byState[s][r.scrape_status] || 0) + 1;
+      });
+      return Response.json({ total, detail_scraped, listing_only, failed, byState });
+
+    } else if (mode === 'listing') {
       // Step 1: Get all city slugs from state page
       const stateHtml = await fetchPage(`${BASE_URL}/estate-sale-companies/${stateAbbr}`);
       let cityLinks = extractCityLinks(stateHtml, stateAbbr);
@@ -249,8 +268,8 @@ Deno.serve(async (req) => {
             totalNew++;
           }
 
-          // Small delay to be respectful
-          await new Promise(r => setTimeout(r, 300));
+          // Delay between city requests to avoid rate limiting
+          await new Promise(r => setTimeout(r, 600));
         } catch (e) {
           errors.push({ city: citySlug, error: e.message });
         }
@@ -282,7 +301,8 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.EstatesalesOrgOperator.update(record.id, details);
         if (details.scrape_status === 'detail_scraped') enriched++;
         else failed++;
-        await new Promise(r => setTimeout(r, 400));
+        // Delay between detail page requests to avoid rate limiting
+        await new Promise(r => setTimeout(r, 700));
       }
 
       return Response.json({

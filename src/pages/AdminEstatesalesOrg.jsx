@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Download, RefreshCw, Search, ExternalLink, Globe, Phone, Building2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, Download, RefreshCw, Search, ExternalLink, Building2, Globe2, PlayCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY',
@@ -30,6 +32,17 @@ export default function AdminEstatesalesOrg() {
   const [filterTier, setFilterTier] = useState('all');
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState({});
+
+  // Global progress dialog state
+  const [showProgress, setShowProgress] = useState(false);
+  const [globalCounts, setGlobalCounts] = useState(null);
+  const [progressLog, setProgressLog] = useState([]);
+  const [allStatesScraping, setAllStatesScraping] = useState(false);
+  const [allStatesEnriching, setAllStatesEnriching] = useState(false);
+  const [currentStateProcessing, setCurrentStateProcessing] = useState('');
+  const [batchDone, setBatchDone] = useState(false); // waiting for "Continue" click
+  const [pendingContinue, setPendingContinue] = useState(null); // resolve fn for next batch
+  const stopRef = useRef(false);
 
   useEffect(() => {
     loadRecords();
@@ -59,6 +72,21 @@ export default function AdminEstatesalesOrg() {
     } catch (e) {}
   };
 
+  const loadGlobalCounts = async () => {
+    try {
+      const res = await base44.functions.invoke('scrapeEstatesalesOrgState', { mode: 'counts' });
+      setGlobalCounts(res.data);
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const addLog = (msg, type = 'info') => {
+    setProgressLog(prev => [...prev.slice(-80), { msg, type, time: new Date().toLocaleTimeString() }]);
+  };
+
+  // Single-state scrape
   const handleScrape = async () => {
     setScraping(true);
     setScrapeResult(null);
@@ -77,6 +105,7 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
+  // Single-state enrich (50 at a time)
   const handleEnrich = async () => {
     setEnriching(true);
     setScrapeResult(null);
@@ -84,7 +113,7 @@ export default function AdminEstatesalesOrg() {
       const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
         state: selectedState.toLowerCase(),
         mode: 'detail',
-        detail_limit: 30,
+        detail_limit: 50,
       });
       setScrapeResult(res.data);
       await loadRecords();
@@ -96,6 +125,134 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
+  // Wait for user to click "Continue"
+  const waitForContinue = () => new Promise(resolve => {
+    setBatchDone(true);
+    setPendingContinue(() => resolve);
+  });
+
+  const handleContinueClick = () => {
+    setBatchDone(false);
+    if (pendingContinue) {
+      pendingContinue();
+      setPendingContinue(null);
+    }
+  };
+
+  // Scrape listings for ALL states
+  const handleScrapeAllStates = async () => {
+    stopRef.current = false;
+    setAllStatesScraping(true);
+    setShowProgress(true);
+    setProgressLog([]);
+    setBatchDone(false);
+    addLog('Starting listing scrape for all states...', 'info');
+
+    const gc = await loadGlobalCounts();
+    addLog(`Global total so far: ${gc?.total || 0} records`, 'info');
+
+    for (const state of US_STATES) {
+      if (stopRef.current) { addLog('Stopped by user.', 'warn'); break; }
+      setCurrentStateProcessing(state);
+      addLog(`Scraping listings: ${state}...`);
+      try {
+        const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+          state: state.toLowerCase(),
+          mode: 'listing',
+        });
+        const d = res.data;
+        addLog(`${state}: ${d.new_records} new, ${d.skipped} skipped (${d.cities_scraped} cities)`, 'success');
+        // Refresh global counts after each state
+        await loadGlobalCounts();
+      } catch (e) {
+        addLog(`${state}: ERROR — ${e.message}`, 'error');
+      }
+      // Pause every 5 states and wait for Continue
+      const idx = US_STATES.indexOf(state);
+      if ((idx + 1) % 5 === 0 && idx < US_STATES.length - 1) {
+        addLog(`Processed ${idx + 1} states. Click Continue to proceed.`, 'warn');
+        await waitForContinue();
+        if (stopRef.current) break;
+      }
+    }
+
+    addLog('All-states listing scrape complete!', 'success');
+    setCurrentStateProcessing('');
+    setAllStatesScraping(false);
+    await loadGlobalCounts();
+    await loadRecords();
+    await loadCounts();
+  };
+
+  // Enrich details for ALL states, 50 at a time per state
+  const handleEnrichAllStates = async () => {
+    stopRef.current = false;
+    setAllStatesEnriching(true);
+    setShowProgress(true);
+    setProgressLog([]);
+    setBatchDone(false);
+    addLog('Starting detail enrichment for all states...', 'info');
+
+    let totalEnriched = 0;
+    let batchCount = 0;
+
+    for (const state of US_STATES) {
+      if (stopRef.current) { addLog('Stopped by user.', 'warn'); break; }
+      setCurrentStateProcessing(state);
+
+      // Keep enriching this state until nothing left
+      let stateEnriched = 0;
+      let hasMore = true;
+      while (hasMore) {
+        if (stopRef.current) break;
+        try {
+          const res = await base44.functions.invoke('scrapeEstatesalesOrgState', {
+            state: state.toLowerCase(),
+            mode: 'detail',
+            detail_limit: 50,
+          });
+          const d = res.data;
+          stateEnriched += d.enriched || 0;
+          totalEnriched += d.enriched || 0;
+          batchCount++;
+          addLog(`${state}: enriched ${d.enriched}, failed ${d.failed}`, d.failed > 0 ? 'warn' : 'success');
+          await loadGlobalCounts();
+
+          // If less than 50 returned enriched, state is done
+          hasMore = (d.enriched + d.failed) >= 50 && d.enriched > 0;
+
+          if (hasMore) {
+            addLog(`${state}: more to go, continuing after pause...`, 'info');
+            await new Promise(r => setTimeout(r, 1500));
+          }
+
+          // Pause every 50 enriched total and wait for Continue
+          if (batchCount % 3 === 0) {
+            addLog(`Batch checkpoint: ${totalEnriched} enriched so far. Click Continue.`, 'warn');
+            await waitForContinue();
+            if (stopRef.current) break;
+          }
+        } catch (e) {
+          addLog(`${state}: ERROR — ${e.message}`, 'error');
+          hasMore = false;
+        }
+      }
+    }
+
+    addLog(`Enrichment complete! Total enriched: ${totalEnriched}`, 'success');
+    setCurrentStateProcessing('');
+    setAllStatesEnriching(false);
+    await loadGlobalCounts();
+    await loadRecords();
+    await loadCounts();
+  };
+
+  const handleStop = () => {
+    stopRef.current = true;
+    setBatchDone(false);
+    if (pendingContinue) { pendingContinue(); setPendingContinue(null); }
+  };
+
   const filtered = records.filter(r => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -104,19 +261,32 @@ export default function AdminEstatesalesOrg() {
            (r.phone || '').includes(q);
   });
 
+  const isRunning = allStatesScraping || allStatesEnriching;
+  const pctEnriched = globalCounts?.total > 0 ? Math.round((globalCounts.detail_scraped / globalCounts.total) * 100) : 0;
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">EstateSales.org Operator Scraper</h1>
-        <p className="text-slate-500 text-sm mt-1">Scrape and manage estate sale company data from estatesales.org</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">EstateSales.org Operator Scraper</h1>
+          <p className="text-slate-500 text-sm mt-1">Scrape and manage estate sale company data from estatesales.org</p>
+        </div>
+        <Button
+          onClick={() => { setShowProgress(true); loadGlobalCounts(); }}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Globe2 className="w-4 h-4" />
+          All-States Progress
+        </Button>
       </div>
 
-      {/* Controls */}
+      {/* Single-state Controls */}
       <Card className="mb-6">
         <CardContent className="pt-4">
           <div className="flex flex-wrap gap-4 items-end">
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">State to Scrape</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">State</label>
               <Select value={selectedState} onValueChange={setSelectedState}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -126,14 +296,24 @@ export default function AdminEstatesalesOrg() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleScrape} disabled={scraping} className="bg-slate-800 text-white">
+            <Button onClick={handleScrape} disabled={scraping || isRunning} className="bg-slate-800 text-white">
               {scraping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-              {scraping ? 'Scraping Listings...' : 'Scrape Listings'}
+              {scraping ? 'Scraping...' : 'Scrape Listings'}
             </Button>
-            <Button onClick={handleEnrich} disabled={enriching} variant="outline">
+            <Button onClick={handleEnrich} disabled={enriching || isRunning} variant="outline">
               {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-              {enriching ? 'Enriching Details...' : `Enrich Details (${selectedState})`}
+              {enriching ? 'Enriching...' : `Enrich 50 (${selectedState})`}
             </Button>
+            <div className="ml-auto flex gap-2">
+              <Button onClick={handleScrapeAllStates} disabled={isRunning} className="bg-indigo-700 text-white">
+                {allStatesScraping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Globe2 className="w-4 h-4 mr-2" />}
+                Scrape All States
+              </Button>
+              <Button onClick={handleEnrichAllStates} disabled={isRunning} className="bg-emerald-700 text-white">
+                {allStatesEnriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                Enrich All States
+              </Button>
+            </div>
           </div>
 
           {scrapeResult && (
@@ -207,30 +387,20 @@ export default function AdminEstatesalesOrg() {
                     {r.bonded_insured && <span className="text-xs text-green-600">✓ Bonded & Insured</span>}
                     {r.award_winner && <span className="text-xs text-yellow-600 ml-2">🏆 Award Winner</span>}
                   </td>
-                  <td className="p-3 text-slate-600 text-sm">
-                    {r.base_city}, {r.base_state}
-                  </td>
-                  <td className="p-3 text-slate-600 text-sm">
-                    {r.phone || '—'}
-                  </td>
+                  <td className="p-3 text-slate-600 text-sm">{r.base_city}, {r.base_state}</td>
+                  <td className="p-3 text-slate-600 text-sm">{r.phone || '—'}</td>
                   <td className="p-3">
                     {r.website_url ? (
-                      <a href={r.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
-                        Visit
-                      </a>
+                      <a href={r.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">Visit</a>
                     ) : '—'}
                   </td>
-                  <td className="p-3 text-slate-600 text-sm">
-                    {r.email || '—'}
-                  </td>
+                  <td className="p-3 text-slate-600 text-sm">{r.email || '—'}</td>
                   <td className="p-3">
                     <Badge className={`text-xs ${TIER_COLORS[r.membership_tier] || TIER_COLORS.unknown}`}>
                       {r.membership_tier || 'unknown'}
                     </Badge>
                   </td>
-                  <td className="p-3 text-slate-600 text-sm">
-                    {r.years_in_business ? `${r.years_in_business}y` : '—'}
-                  </td>
+                  <td className="p-3 text-slate-600 text-sm">{r.years_in_business ? `${r.years_in_business}y` : '—'}</td>
                   <td className="p-3">
                     <a href={r.profile_url} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-4 h-4 text-slate-400 hover:text-slate-700" />
@@ -239,8 +409,8 @@ export default function AdminEstatesalesOrg() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-               <tr>
-                 <td colSpan={8} className="p-12 text-center text-slate-400">
+                <tr>
+                  <td colSpan={8} className="p-12 text-center text-slate-400">
                     <Building2 className="w-10 h-10 mx-auto mb-2 opacity-30" />
                     No records found. Run a scrape to get started.
                   </td>
@@ -250,6 +420,104 @@ export default function AdminEstatesalesOrg() {
           </table>
         </div>
       )}
+
+      {/* Global Progress Dialog */}
+      <Dialog open={showProgress} onOpenChange={v => { if (!isRunning) setShowProgress(v); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe2 className="w-5 h-5" />
+              All-States Scrape Progress
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Global stats */}
+          {globalCounts && (
+            <div className="grid grid-cols-3 gap-3 mb-2">
+              <div className="bg-slate-50 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-slate-800">{globalCounts.total.toLocaleString()}</div>
+                <div className="text-xs text-slate-500 mt-1">Total Scraped</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-green-700">{globalCounts.detail_scraped.toLocaleString()}</div>
+                <div className="text-xs text-slate-500 mt-1">Fully Enriched</div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-orange-600">{globalCounts.listing_only.toLocaleString()}</div>
+                <div className="text-xs text-slate-500 mt-1">Needs Enrichment</div>
+              </div>
+            </div>
+          )}
+
+          {globalCounts && (
+            <div className="mb-3">
+              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                <span>Enrichment progress</span>
+                <span>{pctEnriched}%</span>
+              </div>
+              <Progress value={pctEnriched} className="h-2" />
+            </div>
+          )}
+
+          {/* Per-state breakdown (compact) */}
+          {globalCounts?.byState && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {US_STATES.map(s => {
+                const sd = globalCounts.byState[s];
+                if (!sd) return <span key={s} className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">{s}</span>;
+                const allEnriched = sd.listing_only === 0 && sd.total > 0;
+                return (
+                  <span key={s} className={`text-xs px-1.5 py-0.5 rounded font-medium ${allEnriched ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                    {s} {sd.total}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Current activity */}
+          {isRunning && currentStateProcessing && (
+            <div className="flex items-center gap-2 text-sm text-indigo-700 bg-indigo-50 rounded px-3 py-2 mb-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Processing: <strong>{currentStateProcessing}</strong>
+            </div>
+          )}
+
+          {/* Log */}
+          <div className="flex-1 overflow-y-auto bg-slate-950 rounded-lg p-3 font-mono text-xs min-h-32 max-h-56">
+            {progressLog.length === 0 && <span className="text-slate-500">Waiting to start...</span>}
+            {progressLog.map((l, i) => (
+              <div key={i} className={`leading-5 ${l.type === 'error' ? 'text-red-400' : l.type === 'warn' ? 'text-yellow-400' : l.type === 'success' ? 'text-green-400' : 'text-slate-400'}`}>
+                <span className="text-slate-600">{l.time} </span>{l.msg}
+              </div>
+            ))}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-3 pt-3 border-t mt-2">
+            {!isRunning && (
+              <Button onClick={loadGlobalCounts} variant="outline" size="sm">
+                <RefreshCw className="w-3 h-3 mr-1" /> Refresh Counts
+              </Button>
+            )}
+            {batchDone && (
+              <Button onClick={handleContinueClick} className="bg-indigo-700 text-white" size="sm">
+                <PlayCircle className="w-4 h-4 mr-1" /> Continue Next Batch
+              </Button>
+            )}
+            {isRunning && (
+              <Button onClick={handleStop} variant="destructive" size="sm">
+                Stop
+              </Button>
+            )}
+            {!isRunning && (
+              <Button onClick={() => setShowProgress(false)} variant="outline" size="sm" className="ml-auto">
+                Close
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
