@@ -6,6 +6,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, MapPin, RefreshCw, Building2, Users, Star, Plus, X, Check } from 'lucide-react';
 
+const STATE_ABBREV = {
+  'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO',
+  'Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID',
+  'Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA',
+  'Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS',
+  'Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ',
+  'New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK',
+  'Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',
+  'Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA',
+  'West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','District of Columbia':'DC'
+};
+
+function normalizeState(s) {
+  if (!s) return '';
+  const upper = s.trim().toUpperCase();
+  if (upper.length === 2) return upper; // already abbreviation
+  return STATE_ABBREV[s.trim()] || upper;
+}
+
 async function fetchCitiesFromAPI(county, state) {
   const response = await base44.functions.invoke('getTerritoryMunicipalities', { county, state });
   const result = response.data;
@@ -76,12 +95,12 @@ export default function TerritoryCitiesTab({ user }) {
         // Full rich data available
         setMunicipalities(app.territory_municipalities);
         const nameList = app.territory_municipalities.map(m => m.name);
-        await loadOperatorMatches(nameList, app.license_state);
+        await loadOperatorMatches(nameList, app.license_state, app.county_requested);
       } else if (app.territory_cities && app.territory_cities.length > 0) {
         // Legacy: plain names only — show them while we note type/status will be missing
         const saved = app.territory_cities.map(name => ({ name, type: '', incorporated: null, notes: '' }));
         setMunicipalities(saved);
-        await loadOperatorMatches(app.territory_cities, app.license_state);
+        await loadOperatorMatches(app.territory_cities, app.license_state, app.county_requested);
       } else {
         // First time — fetch from OpenAI and cache
         await fetchAndSaveCities(app);
@@ -115,7 +134,7 @@ export default function TerritoryCitiesTab({ user }) {
       });
       setApplication(prev => ({ ...prev, territory_cities: nameList, territory_municipalities: munis }));
 
-      await loadOperatorMatches(nameList, app.license_state);
+      await loadOperatorMatches(nameList, app.license_state, app.county_requested);
     } catch (e) {
       setError(e.message || 'Failed to fetch cities.');
     } finally {
@@ -123,21 +142,31 @@ export default function TerritoryCitiesTab({ user }) {
     }
   };
 
-  const loadOperatorMatches = async (cityList, state) => {
+  const loadOperatorMatches = async (cityList, state, county) => {
     if (!cityList || cityList.length === 0) return;
     setLoadingMatches(true);
     try {
       const citySet = new Set(cityList.map(c => c.toLowerCase().trim()));
-      const stateUpper = (state || '').toUpperCase().trim();
+      const stateAbbr = normalizeState(state);
 
-      const [activeOps, futureLeads] = await Promise.all([
-        base44.entities.FutureEstateOperator.filter({ state: stateUpper }),
-        base44.entities.FutureOperatorLead.filter({ state: stateUpper }),
+      // Build geocoded_county filter value
+      const countyRaw = county || application?.county_requested || '';
+      const countyNorm = countyRaw.replace(/\s+county$/i, '').trim();
+      const countyWithSuffix = countyNorm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + ' County';
+
+      // Fetch FutureEstateOperators for this county (geocoded) + FutureOperatorLeads by state
+      const [countyOps, futureLeads] = await Promise.all([
+        base44.entities.FutureEstateOperator.filter({ state: stateAbbr, geocode_status: 'geocoded', geocoded_county: countyWithSuffix }, '-updated_date', 200),
+        base44.entities.FutureOperatorLead.filter({ state: stateAbbr }, '-updated_date', 200).catch(() => []),
       ]);
 
-      const activeFound = activeOps
-        .filter(op => op.city && citySet.has(op.city.toLowerCase().trim()))
-        .map(op => ({ ...op, matchedCity: op.city }));
+      // Match against territory city list using geocoded_city field
+      const activeFound = countyOps.map(op => {
+        const gcCity = (op.geocoded_city || '').toLowerCase().trim();
+        const rawCity = (op.city || '').toLowerCase().trim();
+        const matched = citySet.has(gcCity) ? op.geocoded_city : citySet.has(rawCity) ? op.city : null;
+        return matched ? { ...op, matchedCity: matched } : null;
+      }).filter(Boolean);
 
       const prospectFound = futureLeads
         .filter(lead => lead.city && citySet.has(lead.city.toLowerCase().trim()))
@@ -190,7 +219,7 @@ export default function TerritoryCitiesTab({ user }) {
       setMunicipalities(updatedMunis);
 
       // Re-run operator matching with updated list
-      await loadOperatorMatches(updatedList, application.license_state);
+      await loadOperatorMatches(updatedList, application.license_state, application.county_requested);
 
       setNewCityName('');
       setNewCityType('');
@@ -212,7 +241,7 @@ export default function TerritoryCitiesTab({ user }) {
     });
     setApplication(prev => ({ ...prev, territory_cities: updatedList, territory_municipalities: updatedMunis }));
     setMunicipalities(updatedMunis);
-    await loadOperatorMatches(updatedList, application.license_state);
+    await loadOperatorMatches(updatedList, application.license_state, application.county_requested);
   };
 
   // Compute breakdown from municipalities if we loaded from cache
