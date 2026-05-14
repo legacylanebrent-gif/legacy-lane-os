@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +43,7 @@ export default function AdminEstatesalesOrg() {
   const [batchDone, setBatchDone] = useState(false); // waiting for "Continue" click
   const [pendingContinue, setPendingContinue] = useState(null); // resolve fn for next batch
   const stopRef = useRef(false);
+  const logEndRef = useRef(null);
 
   useEffect(() => {
     loadRecords();
@@ -82,9 +83,10 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
-  const addLog = (msg, type = 'info') => {
+  const addLog = useCallback((msg, type = 'info') => {
     setProgressLog(prev => [...prev.slice(-80), { msg, type, time: new Date().toLocaleTimeString() }]);
-  };
+    setTimeout(() => logEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }, []);
 
   // Single-state scrape
   const handleScrape = async () => {
@@ -448,79 +450,82 @@ export default function AdminEstatesalesOrg() {
       )}
 
       {/* Global Progress Dialog */}
-      <Dialog open={showProgress} onOpenChange={v => { if (v || !isRunning) setShowProgress(v); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
+      <Dialog open={showProgress} onOpenChange={v => { if (!isRunning) setShowProgress(v); }}>
+        <DialogContent className="max-w-2xl w-full" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Globe2 className="w-5 h-5" />
               All-States Scrape Progress
             </DialogTitle>
           </DialogHeader>
 
-          {/* Global stats */}
-          {globalCounts && (
-            <div className="grid grid-cols-3 gap-3 mb-2">
-              <div className="bg-slate-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-slate-800">{globalCounts.total.toLocaleString()}</div>
-                <div className="text-xs text-slate-500 mt-1">Total Scraped</div>
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3 min-h-0">
+            {/* Global stats */}
+            {globalCounts && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-slate-800">{globalCounts.total.toLocaleString()}</div>
+                  <div className="text-xs text-slate-500 mt-1">Total Scraped</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-green-700">{globalCounts.detail_scraped.toLocaleString()}</div>
+                  <div className="text-xs text-slate-500 mt-1">Fully Enriched</div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-orange-600">{globalCounts.listing_only.toLocaleString()}</div>
+                  <div className="text-xs text-slate-500 mt-1">Needs Enrichment</div>
+                </div>
               </div>
-              <div className="bg-green-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-green-700">{globalCounts.detail_scraped.toLocaleString()}</div>
-                <div className="text-xs text-slate-500 mt-1">Fully Enriched</div>
-              </div>
-              <div className="bg-orange-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-orange-600">{globalCounts.listing_only.toLocaleString()}</div>
-                <div className="text-xs text-slate-500 mt-1">Needs Enrichment</div>
-              </div>
-            </div>
-          )}
+            )}
 
-          {globalCounts && (
-            <div className="mb-3">
-              <div className="flex justify-between text-xs text-slate-500 mb-1">
-                <span>Enrichment progress</span>
-                <span>{pctEnriched}%</span>
+            {globalCounts && (
+              <div>
+                <div className="flex justify-between text-xs text-slate-500 mb-1">
+                  <span>Enrichment progress</span>
+                  <span>{pctEnriched}%</span>
+                </div>
+                <Progress value={pctEnriched} className="h-2" />
               </div>
-              <Progress value={pctEnriched} className="h-2" />
-            </div>
-          )}
+            )}
 
-          {/* Per-state breakdown (compact) */}
-          {globalCounts?.byState && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {US_STATES.map(s => {
-                const sd = globalCounts.byState[s];
-                if (!sd) return <span key={s} className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">{s}</span>;
-                const allEnriched = sd.listing_only === 0 && sd.total > 0;
-                return (
-                  <span key={s} className={`text-xs px-1.5 py-0.5 rounded font-medium ${allEnriched ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                    {s} {sd.total}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Current activity */}
-          {isRunning && currentStateProcessing && (
-            <div className="flex items-center gap-2 text-sm text-indigo-700 bg-indigo-50 rounded px-3 py-2 mb-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Processing: <strong>{currentStateProcessing}</strong>
-            </div>
-          )}
-
-          {/* Log */}
-          <div className="flex-1 overflow-y-auto bg-slate-950 rounded-lg p-3 font-mono text-xs min-h-32 max-h-56">
-            {progressLog.length === 0 && <span className="text-slate-500">Waiting to start...</span>}
-            {progressLog.map((l, i) => (
-              <div key={i} className={`leading-5 ${l.type === 'error' ? 'text-red-400' : l.type === 'warn' ? 'text-yellow-400' : l.type === 'success' ? 'text-green-400' : 'text-slate-400'}`}>
-                <span className="text-slate-600">{l.time} </span>{l.msg}
+            {/* Per-state breakdown (compact) */}
+            {globalCounts?.byState && (
+              <div className="flex flex-wrap gap-1">
+                {US_STATES.map(s => {
+                  const sd = globalCounts.byState[s];
+                  if (!sd) return <span key={s} className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">{s}</span>;
+                  const allEnriched = sd.listing_only === 0 && sd.total > 0;
+                  return (
+                    <span key={s} className={`text-xs px-1.5 py-0.5 rounded font-medium ${allEnriched ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {s} {sd.total}
+                    </span>
+                  );
+                })}
               </div>
-            ))}
+            )}
+
+            {/* Current activity */}
+            {isRunning && currentStateProcessing && (
+              <div className="flex items-center gap-2 text-sm text-indigo-700 bg-indigo-50 rounded px-3 py-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing: <strong>{currentStateProcessing}</strong>
+              </div>
+            )}
+
+            {/* Log */}
+            <div className="bg-slate-950 rounded-lg p-3 font-mono text-xs overflow-y-auto" style={{ height: '200px' }}>
+              {progressLog.length === 0 && <span className="text-slate-500">Waiting to start...</span>}
+              {progressLog.map((l, i) => (
+                <div key={i} className={`leading-5 ${l.type === 'error' ? 'text-red-400' : l.type === 'warn' ? 'text-yellow-400' : l.type === 'success' ? 'text-green-400' : 'text-slate-400'}`}>
+                  <span className="text-slate-600">{l.time} </span>{l.msg}
+                </div>
+              ))}
+              <div ref={logEndRef} />
+            </div>
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-3 pt-3 border-t mt-2">
+          <div className="flex gap-3 pt-3 border-t mt-2 flex-shrink-0">
             {!isRunning && (
               <Button onClick={loadGlobalCounts} variant="outline" size="sm">
                 <RefreshCw className="w-3 h-3 mr-1" /> Refresh Counts
