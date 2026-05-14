@@ -258,6 +258,12 @@ Deno.serve(async (req) => {
 
       const citiesToScrape = specificCities || cityLinks;
 
+      // Pre-fetch all existing company_ids for this state in one query to avoid per-record DB calls
+      const existingRecords = await base44.asServiceRole.entities.EstatesalesOrgOperator.filter(
+        { source_state: stateAbbr.toUpperCase() }, '-created_date', 5000
+      );
+      const existingIds = new Set(existingRecords.map(r => r.company_id).filter(Boolean));
+
       let totalNew = 0;
       let totalSkipped = 0;
       const errors = [];
@@ -270,15 +276,12 @@ Deno.serve(async (req) => {
 
           for (const company of companies) {
             if (!company.company_id) continue;
-            // Check for existing record by company_id
-            const existing = await base44.asServiceRole.entities.EstatesalesOrgOperator.filter(
-              { company_id: company.company_id }, '-created_date', 1
-            );
-            if (existing.length > 0) {
+            if (existingIds.has(company.company_id)) {
               totalSkipped++;
               continue;
             }
             await base44.asServiceRole.entities.EstatesalesOrgOperator.create(company);
+            existingIds.add(company.company_id); // prevent duplicate within same run
             totalNew++;
           }
 
