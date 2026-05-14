@@ -88,22 +88,40 @@ export default function AdminEstatesalesOrg() {
     setTimeout(() => logEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   }, []);
 
-  // Single-state scrape
+  // Single-state scrape — batched 10 cities at a time with Continue prompt
   const handleScrape = async () => {
     setScraping(true);
     setScrapeResult(null);
+    let offset = 0;
+    let totalNew = 0;
+    let totalSkipped = 0;
+    let totalCities = 0;
     try {
-      const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
-        state: selectedState.toLowerCase(),
-        mode: 'listing',
-      });
-      setScrapeResult(res.data);
-      await loadRecords();
-      await loadCounts();
+      while (true) {
+        const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
+          state: selectedState.toLowerCase(),
+          mode: 'listing',
+          batch_offset: offset,
+          batch_size: 10,
+        });
+        const d = res.data;
+        totalNew += d.new_records || 0;
+        totalSkipped += d.skipped || 0;
+        totalCities = d.total_cities || totalCities;
+        setScrapeResult({ mode: 'listing', cities_scraped: offset + (d.cities_scraped || 0), total_cities: totalCities, new_records: totalNew, skipped: totalSkipped, has_more: d.has_more });
+        await loadRecords();
+        await loadCounts();
+        if (!d.has_more) break;
+        offset = d.next_offset;
+        // Wait for user to click Continue
+        await waitForContinue();
+        if (stopRef.current) break;
+      }
     } catch (e) {
       setScrapeResult({ error: e.message });
     } finally {
       setScraping(false);
+      setBatchDone(false);
     }
   };
 
@@ -340,18 +358,26 @@ export default function AdminEstatesalesOrg() {
           {scrapeResult && (
             <div className={`mt-4 p-3 rounded-lg text-sm ${scrapeResult.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-800'}`}>
               {scrapeResult.error ? `Error: ${scrapeResult.error}` : (
-                <span>
-                  {scrapeResult.mode === 'listing' ? (
-                    <>
-                      ✓ Scraped {scrapeResult.cities_scraped} cities — {scrapeResult.new_records} new records
-                      {scrapeResult.skipped > 0 && (
-                        <span className="ml-2 text-slate-600">
-                          · <strong>{scrapeResult.skipped} skipped</strong> <span className="text-slate-500">(already in database)</span>
-                        </span>
-                      )}
-                    </>
-                  ) : `✓ Enriched ${scrapeResult.enriched} records — ${scrapeResult.failed} failed`}
-                </span>
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <span>
+                    {scrapeResult.mode === 'listing' ? (
+                      <>
+                        ✓ Scraped {scrapeResult.cities_scraped}{scrapeResult.total_cities ? `/${scrapeResult.total_cities}` : ''} cities — {scrapeResult.new_records} new records
+                        {scrapeResult.skipped > 0 && (
+                          <span className="ml-2 text-slate-600">
+                            · <strong>{scrapeResult.skipped} skipped</strong> <span className="text-slate-500">(already in database)</span>
+                          </span>
+                        )}
+                        {scrapeResult.has_more && <span className="ml-2 text-orange-600 font-medium"> · More cities remaining</span>}
+                      </>
+                    ) : `✓ Enriched ${scrapeResult.enriched} records — ${scrapeResult.failed} failed`}
+                  </span>
+                  {scrapeResult.has_more && batchDone && (
+                    <Button onClick={handleContinueClick} size="sm" className="bg-indigo-700 text-white flex-shrink-0">
+                      <PlayCircle className="w-3 h-3 mr-1" /> Continue Next Batch
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           )}

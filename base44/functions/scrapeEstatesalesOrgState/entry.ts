@@ -256,7 +256,11 @@ Deno.serve(async (req) => {
         } catch (e) { /* ignore */ }
       }
 
-      const citiesToScrape = specificCities || cityLinks;
+      const allCities = specificCities || cityLinks;
+      const batchSize = body.batch_size || 10;
+      const batchOffset = body.batch_offset || 0;
+      const citiesToScrape = allCities.slice(batchOffset, batchOffset + batchSize);
+      const hasMore = batchOffset + batchSize < allCities.length;
 
       // Pre-fetch all existing company_ids for this state in one query to avoid per-record DB calls
       const existingRecords = await base44.asServiceRole.entities.EstatesalesOrgOperator.filter(
@@ -296,6 +300,10 @@ Deno.serve(async (req) => {
         mode: 'listing',
         state: stateAbbr.toUpperCase(),
         cities_scraped: citiesToScrape.length,
+        total_cities: allCities.length,
+        batch_offset: batchOffset,
+        next_offset: batchOffset + batchSize,
+        has_more: hasMore,
         new_records: totalNew,
         skipped: totalSkipped,
         errors: errors.slice(0, 10),
