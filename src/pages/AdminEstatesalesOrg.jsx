@@ -190,11 +190,12 @@ export default function AdminEstatesalesOrg() {
             <thead className="bg-slate-50 border-b">
               <tr>
                 <th className="text-left p-3 font-medium text-slate-600">Company</th>
-                <th className="text-left p-3 font-medium text-slate-600">Location</th>
+                <th className="text-left p-3 font-medium text-slate-600">City</th>
+                <th className="text-left p-3 font-medium text-slate-600">Phone</th>
+                <th className="text-left p-3 font-medium text-slate-600">Website</th>
+                <th className="text-left p-3 font-medium text-slate-600">Email</th>
                 <th className="text-left p-3 font-medium text-slate-600">Tier</th>
-                <th className="text-left p-3 font-medium text-slate-600">Contact</th>
-                <th className="text-left p-3 font-medium text-slate-600">Stats</th>
-                <th className="text-left p-3 font-medium text-slate-600">Status</th>
+                <th className="text-left p-3 font-medium text-slate-600">Exp</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
@@ -206,33 +207,29 @@ export default function AdminEstatesalesOrg() {
                     {r.bonded_insured && <span className="text-xs text-green-600">✓ Bonded & Insured</span>}
                     {r.award_winner && <span className="text-xs text-yellow-600 ml-2">🏆 Award Winner</span>}
                   </td>
-                  <td className="p-3 text-slate-600">
-                    <div>{r.base_city}, {r.base_state}</div>
-                    {r.scraped_city && <div className="text-xs text-slate-400">via {r.scraped_city}</div>}
+                  <td className="p-3 text-slate-600 text-sm">
+                    {r.base_city}, {r.base_state}
+                  </td>
+                  <td className="p-3 text-slate-600 text-sm">
+                    {r.phone || '—'}
+                  </td>
+                  <td className="p-3">
+                    {r.website_url ? (
+                      <a href={r.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                        Visit
+                      </a>
+                    ) : '—'}
+                  </td>
+                  <td className="p-3 text-slate-600 text-sm">
+                    {r.email || '—'}
                   </td>
                   <td className="p-3">
                     <Badge className={`text-xs ${TIER_COLORS[r.membership_tier] || TIER_COLORS.unknown}`}>
                       {r.membership_tier || 'unknown'}
                     </Badge>
                   </td>
-                  <td className="p-3 text-slate-600">
-                    {r.phone && <div className="flex items-center gap-1"><Phone className="w-3 h-3" />{r.phone}</div>}
-                    {r.website_url && (
-                      <a href={r.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline text-xs">
-                        <Globe className="w-3 h-3" />Website
-                      </a>
-                    )}
-                    {r.email && <div className="text-xs text-slate-500">{r.email}</div>}
-                  </td>
-                  <td className="p-3 text-slate-600 text-xs">
-                    {r.years_in_business && <div>{r.years_in_business}y exp</div>}
-                    {r.sales_posted && <div>{r.sales_posted.toLocaleString()} past sales</div>}
-                    {r.member_since && <div>Since {r.member_since}</div>}
-                  </td>
-                  <td className="p-3">
-                    <Badge variant="outline" className={`text-xs ${r.scrape_status === 'detail_scraped' ? 'border-green-300 text-green-700' : r.scrape_status === 'failed' ? 'border-red-300 text-red-600' : 'border-orange-300 text-orange-600'}`}>
-                      {r.scrape_status === 'detail_scraped' ? 'Enriched' : r.scrape_status === 'failed' ? 'Failed' : 'Listing Only'}
-                    </Badge>
+                  <td className="p-3 text-slate-600 text-sm">
+                    {r.years_in_business ? `${r.years_in_business}y` : '—'}
                   </td>
                   <td className="p-3">
                     <a href={r.profile_url} target="_blank" rel="noopener noreferrer">
@@ -242,8 +239,8 @@ export default function AdminEstatesalesOrg() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="p-12 text-center text-slate-400">
+               <tr>
+                 <td colSpan={8} className="p-12 text-center text-slate-400">
                     <Building2 className="w-10 h-10 mx-auto mb-2 opacity-30" />
                     No records found. Run a scrape to get started.
                   </td>
