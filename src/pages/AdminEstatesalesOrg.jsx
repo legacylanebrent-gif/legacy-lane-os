@@ -39,6 +39,8 @@ export default function AdminEstatesalesOrg() {
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState({});
   const [filterEnrichment, setFilterEnrichment] = useState('all');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(50);
 
   // Global progress dialog state
   const [showProgress, setShowProgress] = useState(false);
@@ -53,9 +55,10 @@ export default function AdminEstatesalesOrg() {
   const logEndRef = useRef(null);
 
   useEffect(() => {
+    setCurrentPage(0);
     loadRecords();
     loadCounts();
-  }, [selectedState, filterTier]);
+  }, [selectedState, filterTier, filterEnrichment]);
 
   useEffect(() => {
     loadGlobalCounts();
@@ -64,9 +67,11 @@ export default function AdminEstatesalesOrg() {
   const loadRecords = async () => {
     setLoading(true);
     try {
-      const filter = { source_state: selectedState };
+      const filter = {};
+      if (selectedState !== 'ALL') filter.source_state = selectedState;
       if (filterTier !== 'all') filter.membership_tier = filterTier;
-      const data = await base44.entities.EstatesalesOrgOperator.filter(filter, '-last_scraped_at', 100);
+      const skip = currentPage * pageSize;
+      const data = await base44.entities.EstatesalesOrgOperator.filter(filter, '-last_scraped_at', pageSize, skip);
       setRecords(data);
     } catch (e) {
       console.error(e);
@@ -77,7 +82,8 @@ export default function AdminEstatesalesOrg() {
 
   const loadCounts = async () => {
     try {
-      const all = await base44.entities.EstatesalesOrgOperator.filter({ source_state: selectedState }, '-created_date', 500);
+      const filter = selectedState !== 'ALL' ? { source_state: selectedState } : {};
+      const all = await base44.entities.EstatesalesOrgOperator.filter(filter, '-created_date', 500);
       const c = { total: all.length, listing_only: 0, detail_scraped: 0, failed: 0 };
       all.forEach(r => { if (c[r.scrape_status] !== undefined) c[r.scrape_status]++; });
       setCounts(c);
@@ -351,6 +357,7 @@ export default function AdminEstatesalesOrg() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="ALL">ALL States</SelectItem>
                   {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -437,7 +444,7 @@ export default function AdminEstatesalesOrg() {
           />
         </div>
         <div className="flex gap-3 text-sm text-slate-600 ml-auto">
-          <span className="font-medium">{counts.total || 0} total ({selectedState})</span>
+          <span className="font-medium">{counts.total || 0} total ({selectedState === 'ALL' ? 'all' : selectedState})</span>
           <span className="text-orange-600">{counts.listing_only || 0} listing-only</span>
           <span className="text-green-600">{counts.detail_scraped || 0} enriched</span>
           {globalCounts && (
@@ -449,6 +456,21 @@ export default function AdminEstatesalesOrg() {
           )}
         </div>
       </div>
+
+      {/* Pagination */}
+      {selectedState === 'ALL' && (
+        <div className="flex justify-between items-center mb-4 text-sm text-slate-600">
+          <span>Page {currentPage + 1}</span>
+          <div className="flex gap-2">
+            <Button onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0} variant="outline" size="sm">
+              Previous
+            </Button>
+            <Button onClick={() => setCurrentPage(p => p + 1)} disabled={records.length < pageSize} variant="outline" size="sm">
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       {loading ? (
