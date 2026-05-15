@@ -22,6 +22,12 @@ const TIER_COLORS = {
   unknown: 'bg-gray-100 text-gray-500',
 };
 
+const decodeHTMLEntities = (str) => {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = str || '';
+  return textarea.value;
+};
+
 export default function AdminEstatesalesOrg() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -437,7 +443,7 @@ export default function AdminEstatesalesOrg() {
               {filtered.map((r, i) => (
                 <tr key={r.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/30'}`}>
                   <td className="p-3">
-                    <div className="font-medium text-slate-800">{r.company_name}</div>
+                    <div className="font-medium text-slate-800">{decodeHTMLEntities(r.company_name)}</div>
                     {r.bonded_insured && <span className="text-xs text-green-600">✓ Bonded & Insured</span>}
                     {r.award_winner && <span className="text-xs text-yellow-600 ml-2">🏆 Award Winner</span>}
                   </td>
