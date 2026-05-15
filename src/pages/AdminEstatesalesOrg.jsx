@@ -112,6 +112,7 @@ export default function AdminEstatesalesOrg() {
 
   // Single-state scrape — batched 10 cities at a time with Continue prompt
   const handleScrape = async () => {
+    if (selectedState === 'ALL') return; // use Scrape All States button instead
     setScraping(true);
     setScrapeResult(null);
     let offset = 0;
@@ -166,8 +167,34 @@ export default function AdminEstatesalesOrg() {
     }
   };
 
-  // Single-state enrich (50 at a time)
+  // Single-state enrich (25 at a time) — loops through all states if ALL is selected
   const handleEnrich = async () => {
+    if (selectedState === 'ALL') {
+      // Enrich the first state that has unenriched records
+      setEnriching(true);
+      setScrapeResult(null);
+      try {
+        for (const state of US_STATES) {
+          const res = await invokeWithRetry('scrapeEstatesalesOrgState', {
+            state: state.toLowerCase(),
+            mode: 'detail',
+            detail_limit: 25,
+          });
+          const d = res.data;
+          if ((d.enriched || 0) > 0 || (d.failed || 0) > 0) {
+            setScrapeResult(d);
+            await loadRecords();
+            await loadCounts();
+            break;
+          }
+        }
+      } catch (e) {
+        setScrapeResult({ error: e.message });
+      } finally {
+        setEnriching(false);
+      }
+      return;
+    }
     setEnriching(true);
     setScrapeResult(null);
     try {
@@ -358,7 +385,7 @@ export default function AdminEstatesalesOrg() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleScrape} disabled={scraping || isRunning} className="bg-slate-800 text-white">
+            <Button onClick={handleScrape} disabled={scraping || isRunning || selectedState === 'ALL'} className="bg-slate-800 text-white" title={selectedState === 'ALL' ? 'Select a specific state to scrape' : ''}>
               {scraping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
               {scraping ? 'Scraping...' : 'Scrape Listings'}
             </Button>
