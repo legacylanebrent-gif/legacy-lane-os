@@ -38,6 +38,7 @@ export default function AdminEstatesalesOrg() {
   const [filterTier, setFilterTier] = useState('all');
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState({});
+  const [filterEnrichment, setFilterEnrichment] = useState('all');
 
   // Global progress dialog state
   const [showProgress, setShowProgress] = useState(false);
@@ -303,11 +304,20 @@ export default function AdminEstatesalesOrg() {
   };
 
   const filtered = records.filter(r => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (r.company_name || '').toLowerCase().includes(q) ||
-           (r.base_city || '').toLowerCase().includes(q) ||
-           (r.phone || '').includes(q);
+    // Search filter
+    if (search) {
+      const q = search.toLowerCase();
+      const matchesSearch = (r.company_name || '').toLowerCase().includes(q) ||
+                            (r.base_city || '').toLowerCase().includes(q) ||
+                            (r.phone || '').includes(q);
+      if (!matchesSearch) return false;
+    }
+    
+    // Enrichment filter
+    if (filterEnrichment === 'not_enriched' && r.scrape_status === 'detail_scraped') return false;
+    if (filterEnrichment === 'enriched' && r.scrape_status !== 'detail_scraped') return false;
+    
+    return true;
   });
 
   const isRunning = allStatesScraping || allStatesEnriching;
@@ -405,6 +415,16 @@ export default function AdminEstatesalesOrg() {
             <SelectItem value="elite">Elite</SelectItem>
             <SelectItem value="platinum">Platinum</SelectItem>
             <SelectItem value="basic">Basic</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterEnrichment} onValueChange={setFilterEnrichment}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="not_enriched">Not Enriched</SelectItem>
+            <SelectItem value="enriched">Enriched Only</SelectItem>
           </SelectContent>
         </Select>
         <div className="relative flex-1 min-w-48">
