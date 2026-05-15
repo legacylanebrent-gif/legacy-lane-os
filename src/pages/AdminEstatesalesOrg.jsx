@@ -56,9 +56,12 @@ export default function AdminEstatesalesOrg() {
 
   useEffect(() => {
     setCurrentPage(0);
+  }, [selectedState, filterTier, filterEnrichment]);
+
+  useEffect(() => {
     loadRecords();
     loadCounts();
-  }, [selectedState, filterTier, filterEnrichment]);
+  }, [selectedState, filterTier, filterEnrichment, currentPage]);
 
   useEffect(() => {
     loadGlobalCounts();
@@ -70,6 +73,8 @@ export default function AdminEstatesalesOrg() {
       const filter = {};
       if (selectedState !== 'ALL') filter.source_state = selectedState;
       if (filterTier !== 'all') filter.membership_tier = filterTier;
+      if (filterEnrichment === 'not_enriched') filter.scrape_status = 'listing_only';
+      if (filterEnrichment === 'enriched') filter.scrape_status = 'detail_scraped';
       const skip = currentPage * pageSize;
       const data = await base44.entities.EstatesalesOrgOperator.filter(filter, '-last_scraped_at', pageSize, skip);
       setRecords(data);
@@ -310,20 +315,11 @@ export default function AdminEstatesalesOrg() {
   };
 
   const filtered = records.filter(r => {
-    // Search filter
-    if (search) {
-      const q = search.toLowerCase();
-      const matchesSearch = (r.company_name || '').toLowerCase().includes(q) ||
-                            (r.base_city || '').toLowerCase().includes(q) ||
-                            (r.phone || '').includes(q);
-      if (!matchesSearch) return false;
-    }
-    
-    // Enrichment filter
-    if (filterEnrichment === 'not_enriched' && r.scrape_status === 'detail_scraped') return false;
-    if (filterEnrichment === 'enriched' && r.scrape_status !== 'detail_scraped') return false;
-    
-    return true;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (r.company_name || '').toLowerCase().includes(q) ||
+           (r.base_city || '').toLowerCase().includes(q) ||
+           (r.phone || '').includes(q);
   });
 
   const isRunning = allStatesScraping || allStatesEnriching;
