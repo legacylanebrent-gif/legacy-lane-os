@@ -56,6 +56,10 @@ export default function AdminEstatesalesOrg() {
     loadCounts();
   }, [selectedState, filterTier]);
 
+  useEffect(() => {
+    loadGlobalCounts();
+  }, []);
+
   const loadRecords = async () => {
     setLoading(true);
     try {
@@ -413,9 +417,16 @@ export default function AdminEstatesalesOrg() {
           />
         </div>
         <div className="flex gap-3 text-sm text-slate-600 ml-auto">
-          <span className="font-medium">{counts.total || 0} total</span>
+          <span className="font-medium">{counts.total || 0} total ({selectedState})</span>
           <span className="text-orange-600">{counts.listing_only || 0} listing-only</span>
           <span className="text-green-600">{counts.detail_scraped || 0} enriched</span>
+          {globalCounts && (
+            <>
+              <span className="text-slate-300 mx-1">|</span>
+              <span className="font-semibold text-slate-700">{globalCounts.total?.toLocaleString() || 0} all territories</span>
+              <span className="text-green-700">{globalCounts.detail_scraped?.toLocaleString() || 0} enriched total</span>
+            </>
+          )}
         </div>
       </div>
 
