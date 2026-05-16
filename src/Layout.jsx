@@ -10,7 +10,7 @@ import AICoachButton from '@/components/coach/AICoachButton';
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import { useOperatorOnboarding } from '@/hooks/useOperatorOnboarding';
 
-const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page);
+const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page); // includes FutOperLeads
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 
 // Pages that render without any chrome (public-facing)
