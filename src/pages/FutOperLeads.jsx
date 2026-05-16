@@ -387,7 +387,7 @@ export default function FutOperLeads() {
   const handleProcessBatch = async (currentOffset) => {
     setBuildRunning(true);
     try {
-      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 50, state: stateFilter });
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 5, state: stateFilter });
       const d = res.data;
       setBuildProcess(prev => ({
         offset: d.next_offset,
@@ -404,7 +404,13 @@ export default function FutOperLeads() {
         setBuildLeadCount(countRes.data);
       }
     } catch (e) {
-      alert('Process error: ' + e.message);
+      // On timeout/504, just advance the offset and let user retry
+      setBuildProcess(prev => ({
+        ...prev,
+        offset: currentOffset + 5,
+        failed: (prev?.failed || 0) + 1,
+        hasMore: true,
+      }));
     } finally {
       setBuildRunning(false);
     }
@@ -799,7 +805,7 @@ export default function FutOperLeads() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-indigo-600" />Build Clean Lead List — {stateFilter}</DialogTitle>
-            <DialogDescription>Deduplicates {stateFilter} records from both source tables, then enriches email and geocodes each record in batches of 50.</DialogDescription>
+            <DialogDescription>Deduplicates {stateFilter} records from both source tables, then enriches email and geocodes each record in batches of 5.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
 
@@ -876,7 +882,7 @@ export default function FutOperLeads() {
                     >
                       {buildRunning
                         ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing…</>
-                        : <><SkipForward className="w-4 h-4 mr-2" />Continue (next 50)</>}
+                        : <><SkipForward className="w-4 h-4 mr-2" />Continue (next 5)</>}
                     </Button>
                   </div>
                 ) : (
