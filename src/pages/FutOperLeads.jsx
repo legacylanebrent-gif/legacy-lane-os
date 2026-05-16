@@ -806,24 +806,11 @@ export default function FutOperLeads() {
 
             {/* Phase: idle (not started) */}
             {!buildPhase && !buildDedup && (
-              <div className="space-y-3">
-                <div className="text-sm text-slate-600 bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-1">
-                  <p className="font-medium text-indigo-800">What this does:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-indigo-700">
-                    <li>Reads all records from EstateSales.net + EstateSales.org</li>
-                    <li>Deduplicates by phone (or company + state)</li>
-                    <li>Writes unique records into the Clean Lead List</li>
-                    <li>Skips records already in the list</li>
-                    <li>Then lets you process batches of 50: enrich email → geocode</li>
-                    <li>Already-complete records are auto-skipped</li>
-                  </ol>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowBuildModal(false)}>Cancel</Button>
-                  <Button onClick={handleRunDedup} className="bg-indigo-600 hover:bg-indigo-700">
-                    <Play className="w-4 h-4 mr-2" />Start Dedup + Build
-                  </Button>
-                </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowBuildModal(false)}>Cancel</Button>
+                <Button onClick={handleRunDedup} className="bg-indigo-600 hover:bg-indigo-700">
+                  <Play className="w-4 h-4 mr-2" />Start Dedup + Build
+                </Button>
               </div>
             )}
 
