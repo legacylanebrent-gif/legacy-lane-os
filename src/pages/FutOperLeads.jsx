@@ -124,7 +124,7 @@ export default function FutOperLeads() {
   const loadOperators = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.FutureEstateOperator.filter(
+      const data = await base44.entities.FutureOperatorLead.filter(
         { state: stateFilter }, '-created_date', 1000
       );
       setOperators(data);
@@ -183,7 +183,7 @@ export default function FutOperLeads() {
         ? editForm.alternate_emails_text.split(',').map(e => e.trim()).filter(Boolean)
         : [];
       delete saveData.alternate_emails_text;
-      await base44.entities.FutureEstateOperator.update(editingOperator.id, saveData);
+      await base44.entities.FutureOperatorLead.update(editingOperator.id, saveData);
       setOperators(prev => prev.map(op => op.id === editingOperator.id ? { ...op, ...saveData } : op));
       setEditingOperator(null);
     } catch (e) {
@@ -197,7 +197,7 @@ export default function FutOperLeads() {
   const handleFindEmail = async (opId) => {
     setEnrichingIds(prev => new Set([...prev, opId]));
     try {
-      await base44.functions.invoke('enrichCompanyEmail', { company_id: opId });
+      await base44.functions.invoke('enrichCompanyEmail', { company_id: opId, entity: 'FutureOperatorLead' });
       await loadOperators();
     } catch (e) {
       alert('Error: ' + e.message);
