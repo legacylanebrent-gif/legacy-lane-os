@@ -10,7 +10,7 @@ import {
   Search, Phone, Globe, MapPin, Calendar,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
   Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2, Navigation,
-  Merge, RefreshCw, Building2
+  Merge, RefreshCw, Building2, Zap, Play, SkipForward
 } from 'lucide-react';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -74,6 +74,14 @@ export default function FutOperLeads() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillProgress, setBackfillProgress] = useState(null);
   const [showBackfillModal, setShowBackfillModal] = useState(false);
+
+  // Build Clean List modal
+  const [showBuildModal, setShowBuildModal] = useState(false);
+  const [buildPhase, setBuildPhase] = useState(null); // null | 'dedup' | 'process'
+  const [buildDedup, setBuildDedup] = useState(null);
+  const [buildProcess, setBuildProcess] = useState(null); // { offset, total, done, enriched, geocoded, skipped, failed, hasMore }
+  const [buildRunning, setBuildRunning] = useState(false);
+  const [buildLeadCount, setBuildLeadCount] = useState(null);
 
   // Scrape (net) modal
   const [showScrapeModal, setShowScrapeModal] = useState(false);
@@ -314,7 +322,67 @@ export default function FutOperLeads() {
     }
   };
 
-  const isBusy = batchRunning || deduplicating || geocoding || backfilling || scrapeRunning;
+  // ── Build Clean List ──
+  const handleOpenBuildModal = async () => {
+    setShowBuildModal(true);
+    setBuildPhase(null);
+    setBuildDedup(null);
+    setBuildProcess(null);
+    setBuildRunning(false);
+    // Load current count
+    try {
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+      setBuildLeadCount(res.data);
+    } catch (e) {}
+  };
+
+  const handleRunDedup = async () => {
+    setBuildPhase('dedup');
+    setBuildRunning(true);
+    setBuildDedup(null);
+    try {
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'dedup' });
+      setBuildDedup(res.data);
+      // After dedup, refresh count
+      const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+      setBuildLeadCount(countRes.data);
+      // Auto-advance to process phase
+      setBuildPhase('process');
+      setBuildProcess({ offset: 0, total: countRes.data.pending || 0, done: 0, enriched: 0, geocoded: 0, skipped: 0, failed: 0, hasMore: (countRes.data.pending || 0) > 0 });
+    } catch (e) {
+      alert('Dedup error: ' + e.message);
+    } finally {
+      setBuildRunning(false);
+    }
+  };
+
+  const handleProcessBatch = async (currentOffset) => {
+    setBuildRunning(true);
+    try {
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 50 });
+      const d = res.data;
+      setBuildProcess(prev => ({
+        offset: d.next_offset,
+        total: d.total_pending,
+        done: (prev?.done || 0) + d.batch_size,
+        enriched: (prev?.enriched || 0) + (d.enriched || 0),
+        geocoded: (prev?.geocoded || 0) + (d.geocoded || 0),
+        skipped: (prev?.skipped || 0) + (d.skipped || 0),
+        failed: (prev?.failed || 0) + (d.failed || 0),
+        hasMore: d.has_more,
+      }));
+      if (!d.has_more) {
+        const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+        setBuildLeadCount(countRes.data);
+      }
+    } catch (e) {
+      alert('Process error: ' + e.message);
+    } finally {
+      setBuildRunning(false);
+    }
+  };
+
+  const isBusy = batchRunning || deduplicating || geocoding || backfilling || scrapeRunning || buildRunning;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -394,6 +462,9 @@ export default function FutOperLeads() {
 
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2 ml-auto self-end">
+              <Button onClick={handleOpenBuildModal} disabled={isBusy} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
+                <Zap className="w-4 h-4 mr-1" />Build Clean List
+              </Button>
               <Button onClick={handleBatchFindEmails} disabled={isBusy} className="bg-green-600 hover:bg-green-700 text-white text-sm">
                 {batchRunning
                   ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />{batchProgress?.done}/{batchProgress?.total}</>
@@ -709,6 +780,120 @@ export default function FutOperLeads() {
             {!geocoding && geocodeProgress && <div className="flex items-center gap-2 text-green-700 font-semibold text-sm"><CheckCircle2 className="w-4 h-4" />Done!</div>}
           </div>
           {!geocoding && <div className="flex justify-end"><Button onClick={() => setShowGeocodeModal(false)}>Close</Button></div>}
+        </DialogContent>
+      </Dialog>
+
+      {/* Build Clean List Modal */}
+      <Dialog open={showBuildModal} onOpenChange={(open) => { if (!buildRunning) setShowBuildModal(open); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-indigo-600" />Build Clean Lead List</DialogTitle>
+            <DialogDescription>Deduplicates both source tables into one clean list, then enriches email and geocodes each record in batches of 50.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+
+            {/* Current table status */}
+            {buildLeadCount && (
+              <div className="bg-slate-50 border rounded-lg p-3 text-sm grid grid-cols-3 gap-2 text-center">
+                <div><div className="text-xl font-bold text-slate-800">{(buildLeadCount.total || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Total Leads</div></div>
+                <div><div className="text-xl font-bold text-amber-600">{(buildLeadCount.pending || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Pending</div></div>
+                <div><div className="text-xl font-bold text-green-600">{(buildLeadCount.complete || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Complete</div></div>
+              </div>
+            )}
+
+            {/* Phase: idle (not started) */}
+            {!buildPhase && !buildDedup && (
+              <div className="space-y-3">
+                <div className="text-sm text-slate-600 bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-1">
+                  <p className="font-medium text-indigo-800">What this does:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-indigo-700">
+                    <li>Reads all records from EstateSales.net + EstateSales.org</li>
+                    <li>Deduplicates by phone (or company + state)</li>
+                    <li>Writes unique records into the Clean Lead List</li>
+                    <li>Skips records already in the list</li>
+                    <li>Then lets you process batches of 50: enrich email → geocode</li>
+                    <li>Already-complete records are auto-skipped</li>
+                  </ol>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowBuildModal(false)}>Cancel</Button>
+                  <Button onClick={handleRunDedup} className="bg-indigo-600 hover:bg-indigo-700">
+                    <Play className="w-4 h-4 mr-2" />Start Dedup + Build
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Phase: dedup running */}
+            {buildPhase === 'dedup' && buildRunning && (
+              <div className="flex items-center gap-3 py-4">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                <div>
+                  <p className="font-medium text-slate-700">Deduplicating both source tables…</p>
+                  <p className="text-xs text-slate-500">This may take 1–2 minutes depending on dataset size.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Phase: process */}
+            {buildPhase === 'process' && buildProcess && (
+              <div className="space-y-4">
+                {buildDedup && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
+                    <p className="font-medium text-green-800 mb-1">✓ Dedup Complete</p>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                      <div><div className="font-bold text-green-700">{(buildDedup.new_inserted || 0).toLocaleString()}</div><div className="text-slate-500">New added</div></div>
+                      <div><div className="font-bold text-slate-600">{(buildDedup.skipped_existing || 0).toLocaleString()}</div><div className="text-slate-500">Already existed</div></div>
+                      <div><div className="font-bold text-slate-800">{(buildDedup.total_in_table || 0).toLocaleString()}</div><div className="text-slate-500">Total in list</div></div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-slate-50 border rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between font-medium text-slate-700">
+                    <span>Progress</span>
+                    <span>{buildProcess.done.toLocaleString()} / {buildProcess.total.toLocaleString()} processed</span>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-2.5">
+                    <div
+                      className="bg-indigo-500 h-2.5 rounded-full transition-all"
+                      style={{ width: `${buildProcess.total > 0 ? Math.min(100, (buildProcess.done / buildProcess.total) * 100) : 0}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 gap-1 text-center text-xs pt-1">
+                    <div><div className="font-bold text-green-700">{buildProcess.enriched}</div><div className="text-slate-500">Emails found</div></div>
+                    <div><div className="font-bold text-cyan-700">{buildProcess.geocoded}</div><div className="text-slate-500">Geocoded</div></div>
+                    <div><div className="font-bold text-slate-500">{buildProcess.skipped}</div><div className="text-slate-500">Skipped</div></div>
+                    <div><div className="font-bold text-red-500">{buildProcess.failed}</div><div className="text-slate-500">Failed</div></div>
+                  </div>
+                </div>
+
+                {buildProcess.hasMore ? (
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowBuildModal(false)}>Close (resume later)</Button>
+                    <Button
+                      onClick={() => handleProcessBatch(buildProcess.offset)}
+                      disabled={buildRunning}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {buildRunning
+                        ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing…</>
+                        : <><SkipForward className="w-4 h-4 mr-2" />Continue (next 50)</>}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                      <CheckCircle2 className="w-5 h-5" />All pending records processed!
+                    </div>
+                    <div className="flex justify-end">
+                      <Button onClick={() => setShowBuildModal(false)}>Close</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

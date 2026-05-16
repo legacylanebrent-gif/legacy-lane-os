@@ -23,11 +23,74 @@
     "state": {
       "type": "string"
     },
+    "zip_code": {
+      "type": "string"
+    },
     "county": {
       "type": "string"
     },
-    "source": {
+    "facebook": {
       "type": "string"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "description": "estatesales_net | estatesales_org"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the record in the source entity"
+    },
+    "dedup_key": {
+      "type": "string",
+      "description": "Normalized phone or company+state used for dedup"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "geocoded_city": {
+      "type": "string"
+    },
+    "geocoded_county": {
+      "type": "string"
+    },
+    "geocoded_zip": {
+      "type": "string"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "searching",
+        "found",
+        "failed"
+      ],
+      "default": "not_started"
+    },
+    "process_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "complete",
+        "skipped"
+      ],
+      "default": "pending",
+      "description": "Whether this record has been fully enriched + geocoded"
     },
     "lead_stage": {
       "type": "string",
@@ -49,14 +112,6 @@
     },
     "notes": {
       "type": "string"
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "updated_at": {
-      "type": "string",
-      "format": "date-time"
     }
   },
   "required": []
