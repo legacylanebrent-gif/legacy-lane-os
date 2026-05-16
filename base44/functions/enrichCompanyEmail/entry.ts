@@ -23,11 +23,11 @@ function extractEmails(html) {
   const decoded = html.replace(/&#64;/g, '@').replace(/%40/g, '@').replace(/\[at\]/gi, '@').replace(/\s*\(at\)\s*/gi, '@');
   const found = decoded.match(EMAIL_REGEX) || [];
   // Filter obvious false-positives
+  const BLOCKED_DOMAINS = ['example.com','sentry.io','wix.com','squarespace.com','instagram.com','facebook.com','twitter.com','tiktok.com','linkedin.com','youtube.com','google.com','gmail.com','yahoo.com','hotmail.com','outlook.com','apple.com','amazonaws.com','cloudflare.com','godaddy.com','shopify.com','wordpress.com','weebly.com','webflow.io'];
   return [...new Set(found)].filter(e =>
     !e.endsWith('.png') && !e.endsWith('.jpg') && !e.endsWith('.gif') &&
-    !e.includes('example.com') && !e.includes('sentry.io') &&
-    !e.includes('wix.com') && !e.includes('squarespace.com') &&
-    !e.includes('@2x') && e.length < 100
+    !e.includes('@2x') && e.length < 100 &&
+    !BLOCKED_DOMAINS.some(d => e.endsWith('@' + d) || e.includes('@' + d + '.'))
   );
 }
 
@@ -119,6 +119,7 @@ Deno.serve(async (req) => {
     if (user?.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const { company_id, entity = 'FutureEstateOperator' } = await req.json();
+    const isLead = entity === 'FutureOperatorLead';
     if (!company_id) return Response.json({ error: 'company_id required' }, { status: 400 });
 
     // Support both FutureEstateOperator and FutureOperatorLead as target entity
@@ -142,10 +143,11 @@ Deno.serve(async (req) => {
     let foundEmails = [];
     let emailSourceUrl = '';
     let emailSourceType = '';
-    let websiteUrl = company.website_url || company.website || '';
+    let websiteUrl = isLead ? (company.website || company.website_url || '') : (company.website_url || company.website || '');
 
-    // ── Step 1: Crawl official website (skip Facebook URLs) ──────────────────
-    const isFacebookWebsite = websiteUrl && websiteUrl.includes('facebook.com');
+    // ── Step 1: Crawl official website (skip social media URLs) ─────────────
+    const SOCIAL_DOMAINS = ['facebook.com','instagram.com','twitter.com','tiktok.com','linkedin.com','youtube.com','t.co'];
+    const isFacebookWebsite = websiteUrl && SOCIAL_DOMAINS.some(d => websiteUrl.includes(d));
     if (websiteUrl && !isFacebookWebsite) {
       const domain = extractDomain(websiteUrl);
       const normalizedBase = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
@@ -269,12 +271,13 @@ Deno.serve(async (req) => {
     }
 
     if (foundEmails.length === 0) {
-      await targetEntity.update(company_id, {
-        enrichment_status: 'failed',
-        enrichment_notes: 'No email found after website crawl, web search, and pattern generation.',
-        email_last_checked: new Date().toISOString(),
-        website_url: websiteUrl || company.website_url || ''
-      });
+      const failPayload = { enrichment_status: 'failed' };
+      if (!isLead) {
+        failPayload.enrichment_notes = 'No email found after website crawl, web search, and pattern generation.';
+        failPayload.email_last_checked = new Date().toISOString();
+        failPayload.website_url = websiteUrl || company.website_url || '';
+      }
+      await targetEntity.update(company_id, failPayload);
       return Response.json({ success: false, message: 'No email found' });
     }
 
@@ -301,20 +304,31 @@ Deno.serve(async (req) => {
     // Boost score for official website
     if (emailSourceType === 'official_website') bestScore = Math.min(100, bestScore + 20);
 
-    const enrichmentStatus = bestScore >= 75 ? 'verified' : bestScore >= 40 ? 'found' : 'needs_manual_review';
+    // FutureOperatorLead only supports: not_started | searching | found | failed
+    const enrichmentStatus = isLead
+      ? (bestScore >= 40 ? 'found' : 'failed')
+      : (bestScore >= 75 ? 'verified' : bestScore >= 40 ? 'found' : 'needs_manual_review');
 
-    await targetEntity.update(company_id, {
+    const updatePayload = {
       email: bestEmail,
-      alternate_emails: alternates.slice(0, 5),
-      email_source_url: emailSourceUrl,
-      email_source_type: emailSourceType,
-      email_confidence_score: bestScore,
-      email_verified_status: bestVerifiedStatus,
-      email_last_checked: new Date().toISOString(),
       enrichment_status: enrichmentStatus,
-      enrichment_notes: `Found via ${emailSourceType}. Confidence: ${bestScore}.`,
-      website_url: websiteUrl || company.website_url || ''
-    });
+    };
+
+    if (!isLead) {
+      // FutureEstateOperator has all these extra fields
+      Object.assign(updatePayload, {
+        alternate_emails: alternates.slice(0, 5),
+        email_source_url: emailSourceUrl,
+        email_source_type: emailSourceType,
+        email_confidence_score: bestScore,
+        email_verified_status: bestVerifiedStatus,
+        email_last_checked: new Date().toISOString(),
+        enrichment_notes: `Found via ${emailSourceType}. Confidence: ${bestScore}.`,
+        website_url: websiteUrl || company.website_url || '',
+      });
+    }
+
+    await targetEntity.update(company_id, updatePayload);
 
     return Response.json({ success: true, email: bestEmail, score: bestScore, status: bestVerifiedStatus, enrichment_status: enrichmentStatus });
   } catch (error) {
