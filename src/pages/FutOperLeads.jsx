@@ -329,9 +329,9 @@ export default function FutOperLeads() {
     setBuildDedup(null);
     setBuildProcess(null);
     setBuildRunning(false);
-    // Load current count
+    // Load current count for this state
     try {
-      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'count', state: stateFilter });
       setBuildLeadCount(res.data);
     } catch (e) {}
   };
@@ -341,10 +341,10 @@ export default function FutOperLeads() {
     setBuildRunning(true);
     setBuildDedup(null);
     try {
-      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'dedup' });
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'dedup', state: stateFilter });
       setBuildDedup(res.data);
-      // After dedup, refresh count
-      const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+      // After dedup, refresh count for this state
+      const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count', state: stateFilter });
       setBuildLeadCount(countRes.data);
       // Auto-advance to process phase
       setBuildPhase('process');
@@ -359,7 +359,7 @@ export default function FutOperLeads() {
   const handleProcessBatch = async (currentOffset) => {
     setBuildRunning(true);
     try {
-      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 50 });
+      const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 50, state: stateFilter });
       const d = res.data;
       setBuildProcess(prev => ({
         offset: d.next_offset,
@@ -372,7 +372,7 @@ export default function FutOperLeads() {
         hasMore: d.has_more,
       }));
       if (!d.has_more) {
-        const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count' });
+        const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count', state: stateFilter });
         setBuildLeadCount(countRes.data);
       }
     } catch (e) {
@@ -770,8 +770,8 @@ export default function FutOperLeads() {
       <Dialog open={showBuildModal} onOpenChange={(open) => { if (!buildRunning) setShowBuildModal(open); }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-indigo-600" />Build Clean Lead List</DialogTitle>
-            <DialogDescription>Deduplicates both source tables into one clean list, then enriches email and geocodes each record in batches of 50.</DialogDescription>
+            <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-indigo-600" />Build Clean Lead List — {stateFilter}</DialogTitle>
+            <DialogDescription>Deduplicates {stateFilter} records from both source tables, then enriches email and geocodes each record in batches of 50.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
 

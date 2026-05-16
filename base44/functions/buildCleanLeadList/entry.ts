@@ -83,11 +83,11 @@ Deno.serve(async (req) => {
     if (user?.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
-    const { action, offset = 0, batch_size = 50 } = body;
+    const { action, offset = 0, batch_size = 50, state } = body;
 
     // ── ACTION: dedup ──
-    // Reads all records from both source tables, identifies unique ones by dedup key,
-    // and upserts them into FutureOperatorLead.
+    // Reads records from both source tables (optionally filtered by state),
+    // identifies unique ones by dedup key, and upserts them into FutureOperatorLead.
     if (action === 'dedup') {
       const pageSize = 1000;
       const seenKeys = new Set();
@@ -96,18 +96,23 @@ Deno.serve(async (req) => {
       // Load existing dedup keys from FutureOperatorLead so we don't re-insert
       const existingLeads = [];
       let skip = 0;
+      const existingFilter = state ? { state } : {};
       while (true) {
-        const batch = await base44.asServiceRole.entities.FutureOperatorLead.list('-created_date', pageSize, skip);
+        const batch = state
+          ? await base44.asServiceRole.entities.FutureOperatorLead.filter(existingFilter, '-created_date', pageSize, skip)
+          : await base44.asServiceRole.entities.FutureOperatorLead.list('-created_date', pageSize, skip);
         existingLeads.push(...batch);
         if (batch.length < pageSize) break;
         skip += pageSize;
       }
       const existingKeys = new Set(existingLeads.map(l => l.dedup_key).filter(Boolean));
 
-      // Load FutureEstateOperator
+      // Load FutureEstateOperator (filtered by state if provided)
       skip = 0;
       while (true) {
-        const batch = await base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', pageSize, skip);
+        const batch = state
+          ? await base44.asServiceRole.entities.FutureEstateOperator.filter({ state }, '-created_date', pageSize, skip)
+          : await base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', pageSize, skip);
         for (const rec of batch) {
           const key = dedupKey(rec, 'state');
           if (seenKeys.has(key)) continue;
@@ -138,10 +143,12 @@ Deno.serve(async (req) => {
         skip += pageSize;
       }
 
-      // Load EstatesalesOrgOperator
+      // Load EstatesalesOrgOperator (filtered by base_state if state provided)
       skip = 0;
       while (true) {
-        const batch = await base44.asServiceRole.entities.EstatesalesOrgOperator.list('-created_date', pageSize, skip);
+        const batch = state
+          ? await base44.asServiceRole.entities.EstatesalesOrgOperator.filter({ base_state: state }, '-created_date', pageSize, skip)
+          : await base44.asServiceRole.entities.EstatesalesOrgOperator.list('-created_date', pageSize, skip);
         for (const rec of batch) {
           const key = dedupKey(rec, 'base_state');
           if (seenKeys.has(key)) continue;
@@ -203,13 +210,14 @@ Deno.serve(async (req) => {
     // Fetches the next `batch_size` pending records from FutureOperatorLead,
     // enriches email (if missing) and geocodes (if not geocoded), marks complete.
     if (action === 'process_batch') {
-      // Get pending records paginated by offset
+      // Get pending records paginated by offset (optionally filtered by state)
       let allPending = [];
       let skip = 0;
       const pageSize = 1000;
+      const pendingFilter = state ? { process_status: 'pending', state } : { process_status: 'pending' };
       while (true) {
         const batch = await base44.asServiceRole.entities.FutureOperatorLead.filter(
-          { process_status: 'pending' }, '-created_date', pageSize, skip
+          pendingFilter, '-created_date', pageSize, skip
         );
         allPending.push(...batch);
         if (batch.length < pageSize) break;
@@ -291,7 +299,9 @@ Deno.serve(async (req) => {
       let skip = 0;
       const pageSize = 1000;
       while (true) {
-        const batch = await base44.asServiceRole.entities.FutureOperatorLead.list('-created_date', pageSize, skip);
+        const batch = state
+          ? await base44.asServiceRole.entities.FutureOperatorLead.filter({ state }, '-created_date', pageSize, skip)
+          : await base44.asServiceRole.entities.FutureOperatorLead.list('-created_date', pageSize, skip);
         total += batch.length;
         pending += batch.filter(r => r.process_status === 'pending').length;
         complete += batch.filter(r => r.process_status === 'complete').length;
