@@ -145,10 +145,12 @@ Deno.serve(async (req) => {
     let emailSourceType = '';
     let websiteUrl = isLead ? (company.website || company.website_url || '') : (company.website_url || company.website || '');
 
-    // ── Step 1: Crawl official website (skip social media URLs) ─────────────
+    // ── Step 1: Crawl official website (skip social media URLs — can't extract emails from them) ──
     const SOCIAL_DOMAINS = ['facebook.com','instagram.com','twitter.com','tiktok.com','linkedin.com','youtube.com','t.co'];
-    const isFacebookWebsite = websiteUrl && SOCIAL_DOMAINS.some(d => websiteUrl.includes(d));
-    if (websiteUrl && !isFacebookWebsite) {
+    const isSocialWebsite = websiteUrl && SOCIAL_DOMAINS.some(d => websiteUrl.includes(d));
+    // Note: we still KEEP the websiteUrl value — some companies use social profiles as their only website.
+    // We just skip crawling it since social pages block scrapers and won't contain extractable emails.
+    if (websiteUrl && !isSocialWebsite) {
       const domain = extractDomain(websiteUrl);
       const normalizedBase = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
 
@@ -258,9 +260,9 @@ Deno.serve(async (req) => {
       } catch (e) { /* non-blocking */ }
     }
 
-    // ── Step 4: Guess patterns from domain ───────────────────────────────────
+    // ── Step 4: Guess patterns from domain (only for real websites, not social profiles) ──
     let guessedPatterns = [];
-    if (foundEmails.length === 0 && websiteUrl) {
+    if (foundEmails.length === 0 && websiteUrl && !isSocialWebsite) {
       const domain = extractDomain(websiteUrl);
       if (domain) {
         guessedPatterns = guessPatterns(domain, company.company_name);
