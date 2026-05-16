@@ -119,8 +119,8 @@ export default function FutOperLeads() {
   const loadStateCount = async () => {
     setStateCount(null);
     try {
-      const res = await base44.functions.invoke('getFutureOperatorCount', { state: stateFilter });
-      setStateCount(res.data.total || 0);
+      const leads = await base44.entities.FutureOperatorLead.filter({ state: stateFilter }, null, 1000);
+      setStateCount(leads.length);
     } catch (e) {}
   };
 
