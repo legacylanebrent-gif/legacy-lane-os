@@ -124,6 +124,14 @@ export default function FutOperLeads() {
     } catch (e) {}
   };
 
+  const isJunkEmail = (email) => {
+    if (!email) return false;
+    const lower = email.toLowerCase();
+    return lower.endsWith('@estatesales.net') || lower.endsWith('@estatesales.org');
+  };
+
+  const cleanEmail = (record) => isJunkEmail(record.email) ? { ...record, email: '' } : record;
+
   const loadOperators = async () => {
     setLoading(true);
     try {
@@ -140,13 +148,13 @@ export default function FutOperLeads() {
         const orgUnmerged = orgData.filter(r => !cleanSourceIds.has(r.id)).map(r => ({
           ...r, state: r.base_state, city: r.base_city, source: 'estatesales_org', _raw_source: 'org',
         }));
-        setOperators([...cleanData, ...netUnmerged, ...orgUnmerged]);
+        setOperators([...cleanData.map(cleanEmail), ...netUnmerged.map(cleanEmail), ...orgUnmerged.map(cleanEmail)]);
       } else {
         // No clean list yet — show all raw sources combined
         const orgNormalized = orgData.map(r => ({
           ...r, state: r.base_state, city: r.base_city, source: 'estatesales_org', _raw_source: 'org',
         }));
-        setOperators([...netData, ...orgNormalized]);
+        setOperators([...netData.map(cleanEmail), ...orgNormalized.map(cleanEmail)]);
       }
     } catch (e) {
       console.error(e);
