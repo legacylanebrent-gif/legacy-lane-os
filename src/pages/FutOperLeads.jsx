@@ -124,10 +124,29 @@ export default function FutOperLeads() {
   const loadOperators = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.FutureOperatorLead.filter(
+      // Try clean list first; fall back to raw sources if empty
+      const cleanData = await base44.entities.FutureOperatorLead.filter(
         { state: stateFilter }, '-created_date', 1000
       );
-      setOperators(data);
+      if (cleanData.length > 0) {
+        setOperators(cleanData);
+      } else {
+        // Raw sources: FutureEstateOperator (net) + EstatesalesOrgOperator (org)
+        const [netData, orgData] = await Promise.all([
+          base44.entities.FutureEstateOperator.filter({ state: stateFilter }, '-created_date', 1000),
+          base44.entities.EstatesalesOrgOperator.filter({ base_state: stateFilter }, '-created_date', 1000),
+        ]);
+        // Normalize org records to match the display schema
+        const orgNormalized = orgData.map(r => ({
+          ...r,
+          state: r.base_state,
+          city: r.base_city,
+          website_url: r.website_url,
+          source: 'estatesales_org',
+          _raw_source: 'org',
+        }));
+        setOperators([...netData, ...orgNormalized]);
+      }
     } catch (e) {
       console.error(e);
     } finally {
