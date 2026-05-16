@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
             email: rec.email || '',
             phone: rec.phone || '',
             website: rec.website_url || '',
-            city: rec.base_city || '',
+            city: rec.base_city || rec.scraped_city || '',
             state: rec.base_state || '',
             zip_code: '',
             county: '',
