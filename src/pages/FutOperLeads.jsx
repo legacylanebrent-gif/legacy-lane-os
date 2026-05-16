@@ -374,9 +374,13 @@ export default function FutOperLeads() {
       // After dedup, refresh count for this state
       const countRes = await base44.functions.invoke('buildCleanLeadList', { action: 'count', state: stateFilter });
       setBuildLeadCount(countRes.data);
-      // Auto-advance to process phase
+      // Auto-advance to process phase and kick off auto-run
+      const pendingCount = countRes.data.pending || 0;
       setBuildPhase('process');
-      setBuildProcess({ offset: 0, total: countRes.data.pending || 0, done: 0, enriched: 0, geocoded: 0, skipped: 0, failed: 0, hasMore: (countRes.data.pending || 0) > 0 });
+      setBuildProcess({ offset: 0, total: pendingCount, done: 0, enriched: 0, geocoded: 0, skipped: 0, failed: 0, hasMore: pendingCount > 0 });
+      if (pendingCount > 0) {
+        setTimeout(() => handleProcessBatch(0, true), 500);
+      }
     } catch (e) {
       alert('Dedup error: ' + e.message);
     } finally {
@@ -384,11 +388,20 @@ export default function FutOperLeads() {
     }
   };
 
-  const handleProcessBatch = async (currentOffset) => {
+  const buildAutoRunRef = useRef(false);
+
+  const handleProcessBatch = async (currentOffset, autoRun = false) => {
+    if (autoRun) buildAutoRunRef.current = true;
     setBuildRunning(true);
+
+    let hasMore = false;
+    let nextOffset = currentOffset + 5;
+
     try {
       const res = await base44.functions.invoke('buildCleanLeadList', { action: 'process_batch', offset: currentOffset, batch_size: 5, state: stateFilter });
       const d = res.data;
+      hasMore = d.has_more;
+      nextOffset = d.next_offset;
       setBuildProcess(prev => ({
         offset: d.next_offset,
         total: d.total_pending,
@@ -404,16 +417,29 @@ export default function FutOperLeads() {
         setBuildLeadCount(countRes.data);
       }
     } catch (e) {
-      // On timeout/504, just advance the offset and let user retry
+      // On timeout/504, advance offset and keep going if auto-running
+      hasMore = true;
       setBuildProcess(prev => ({
         ...prev,
-        offset: currentOffset + 5,
+        offset: nextOffset,
         failed: (prev?.failed || 0) + 1,
         hasMore: true,
       }));
     } finally {
       setBuildRunning(false);
     }
+
+    // Auto-continue: small delay then fire next batch
+    if (buildAutoRunRef.current && hasMore) {
+      await new Promise(r => setTimeout(r, 1500));
+      if (buildAutoRunRef.current) {
+        handleProcessBatch(nextOffset, true);
+      }
+    }
+  };
+
+  const handleStopAutoRun = () => {
+    buildAutoRunRef.current = false;
   };
 
   const isBusy = batchRunning || deduplicating || geocoding || backfilling || scrapeRunning || buildRunning;
@@ -873,17 +899,23 @@ export default function FutOperLeads() {
                 </div>
 
                 {buildProcess.hasMore ? (
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setShowBuildModal(false)}>Close (resume later)</Button>
-                    <Button
-                      onClick={() => handleProcessBatch(buildProcess.offset)}
-                      disabled={buildRunning}
-                      className="bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      {buildRunning
-                        ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing…</>
-                        : <><SkipForward className="w-4 h-4 mr-2" />Continue (next 5)</>}
-                    </Button>
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    <Button variant="outline" onClick={() => { handleStopAutoRun(); setShowBuildModal(false); }}>Close (resume later)</Button>
+                    {buildRunning ? (
+                      <Button onClick={handleStopAutoRun} variant="outline" className="border-red-400 text-red-600 hover:bg-red-50">
+                        <X className="w-4 h-4 mr-1" />Stop Auto-Run
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="outline" onClick={() => handleProcessBatch(buildProcess.offset, false)} className="border-indigo-400 text-indigo-700">
+                          <SkipForward className="w-4 h-4 mr-1" />Next 5
+                        </Button>
+                        <Button onClick={() => handleProcessBatch(buildProcess.offset, true)} className="bg-indigo-600 hover:bg-indigo-700">
+                          <Play className="w-4 h-4 mr-1" />Auto-Run All
+                        </Button>
+                      </>
+                    )}
+                    {buildRunning && <Button disabled className="bg-indigo-400"><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing…</Button>}
                   </div>
                 ) : (
                   <div className="space-y-2">
