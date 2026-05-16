@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain
+  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -83,8 +83,9 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminCampaigns',         label: 'Campaigns',           icon: Zap,             group: 'Admin' },
   { page: 'AdminAmazonProducts',    label: 'Amazon Products',     icon: Package,         group: 'Admin' },
   { page: 'AdminTransactions',      label: 'Transactions',        icon: DollarSign,      group: 'Admin' },
-  { page: 'AdminFutureOperators',   label: 'Future Operators',    icon: Briefcase,       group: 'Admin' },
+  { page: 'AdminFutureOperators',   label: 'EstateSaleNet Operators', icon: Briefcase,   group: 'Admin' },
   { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops', icon: Building2,       group: 'Admin' },
+  { page: 'FutOperLeads',           label: 'Fut Oper Leads',      icon: Merge,           group: 'Admin' },
   { page: 'PlatformAnalytics',      label: 'Platform Analytics',  icon: BarChart3,       group: 'Admin' },
   { page: 'Revenue',                label: 'Revenue Projections', icon: DollarSign,      group: 'Admin' },
   { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',  icon: DollarSign,      group: 'Admin' },
