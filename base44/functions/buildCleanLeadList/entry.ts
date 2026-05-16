@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const GOOGLE_MAPS_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
-const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY');
 
 // Normalize a phone number to digits only
 function normalizePhone(phone) {
@@ -43,37 +42,14 @@ async function geocodeRecord(record) {
   };
 }
 
-async function enrichEmail(base44ServiceRole, leadId, record) {
-  // Try to find email by calling the existing enrichCompanyEmail logic inline
-  // We look for email in website or use a simple search pattern
-  if (!record.website && !record.company_name) return null;
-
-  // Use OpenAI to guess/search for email
-  if (!OPENAI_KEY) return null;
-  const prompt = `Find the contact email address for this estate sale company:
-Company: ${record.company_name}
-City: ${record.city || record.geocoded_city}, ${record.state}
-Website: ${record.website || 'unknown'}
-Phone: ${record.phone || 'unknown'}
-
-Return ONLY a valid email address string, or the word "none" if you cannot find one. No explanation.`;
-
-  const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 50,
-      temperature: 0,
-    }),
-  });
-  const aiData = await aiRes.json();
-  const raw = (aiData.choices?.[0]?.message?.content || '').trim().toLowerCase();
-  if (raw && raw !== 'none' && raw.includes('@') && raw.includes('.')) {
-    return raw;
+// Calls the real enrichCompanyEmail function via SDK (supports FutureOperatorLead entity)
+async function enrichEmailViaFunction(base44, leadId) {
+  try {
+    const res = await base44.functions.invoke('enrichCompanyEmail', { company_id: leadId, entity: 'FutureOperatorLead' });
+    return res?.data?.email || null;
+  } catch (e) {
+    return null;
   }
-  return null;
 }
 
 Deno.serve(async (req) => {
@@ -237,19 +213,17 @@ Deno.serve(async (req) => {
 
         const updates = {};
 
-        // Enrich email if missing
+        // Enrich email if missing — delegates to the full enrichCompanyEmail function
         if (!lead.email) {
           try {
-            const email = await enrichEmail(base44.asServiceRole, lead.id, lead);
+            const email = await enrichEmailViaFunction(base44, lead.id);
             if (email) {
               updates.email = email;
-              updates.enrichment_status = 'found';
               results.enriched++;
-            } else {
-              updates.enrichment_status = 'failed';
+              // enrichment_status is already set by enrichCompanyEmail on the lead record
             }
+            // No need to set enrichment_status here — enrichCompanyEmail handles it
           } catch (e) {
-            updates.enrichment_status = 'failed';
             results.errors.push(`${lead.company_name}: email - ${e.message}`);
           }
         }

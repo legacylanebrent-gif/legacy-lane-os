@@ -118,10 +118,14 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (user?.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
-    const { company_id } = await req.json();
+    const { company_id, entity = 'FutureEstateOperator' } = await req.json();
     if (!company_id) return Response.json({ error: 'company_id required' }, { status: 400 });
 
-    const company = await base44.asServiceRole.entities.FutureEstateOperator.get(company_id);
+    // Support both FutureEstateOperator and FutureOperatorLead as target entity
+    const targetEntity = base44.asServiceRole.entities[entity];
+    if (!targetEntity) return Response.json({ error: `Unknown entity: ${entity}` }, { status: 400 });
+
+    const company = await targetEntity.get(company_id);
     if (!company) return Response.json({ error: 'Company not found' }, { status: 404 });
 
     if (company.do_not_contact || company.unsubscribe_status) {
@@ -129,7 +133,7 @@ Deno.serve(async (req) => {
     }
 
     // Mark as searching
-    await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, { enrichment_status: 'searching' });
+    await targetEntity.update(company_id, { enrichment_status: 'searching' });
 
     const verifyApiKey = Deno.env.get('EMAIL_VERIFY_API_KEY') || '';
     const verifyProvider = Deno.env.get('EMAIL_VERIFY_PROVIDER') || 'none'; // zerobounce | hunter | neverbounce
@@ -265,7 +269,7 @@ Deno.serve(async (req) => {
     }
 
     if (foundEmails.length === 0) {
-      await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, {
+      await targetEntity.update(company_id, {
         enrichment_status: 'failed',
         enrichment_notes: 'No email found after website crawl, web search, and pattern generation.',
         email_last_checked: new Date().toISOString(),
@@ -299,7 +303,7 @@ Deno.serve(async (req) => {
 
     const enrichmentStatus = bestScore >= 75 ? 'verified' : bestScore >= 40 ? 'found' : 'needs_manual_review';
 
-    await base44.asServiceRole.entities.FutureEstateOperator.update(company_id, {
+    await targetEntity.update(company_id, {
       email: bestEmail,
       alternate_emails: alternates.slice(0, 5),
       email_source_url: emailSourceUrl,
