@@ -52,6 +52,7 @@ export default function FutOperLeads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [enrichmentFilter, setEnrichmentFilter] = useState('all'); // all | has_email | no_email | geocoded | not_geocoded
   const [totalCount, setTotalCount] = useState(0);
+  const [orgCount, setOrgCount] = useState(0);
   const [stateCount, setStateCount] = useState(null);
 
   // Per-row email enrichment
@@ -95,8 +96,12 @@ export default function FutOperLeads() {
 
   const loadTotalCount = async () => {
     try {
-      const res = await base44.functions.invoke('getFutureOperatorCount', {});
-      setTotalCount(res.data.total || 0);
+      const [futRes, orgRes] = await Promise.all([
+        base44.functions.invoke('getFutureOperatorCount', {}),
+        base44.functions.invoke('getFutureOperatorCount', { entity: 'org' }).catch(() => null),
+      ]);
+      setTotalCount(futRes.data.total || 0);
+      if (orgRes?.data?.total) setOrgCount(orgRes.data.total);
     } catch (e) {}
   };
 
@@ -321,8 +326,16 @@ export default function FutOperLeads() {
         </div>
         <div className="flex gap-4 text-right">
           <div>
-            <div className="text-2xl font-bold text-slate-900">{totalCount > 0 ? totalCount.toLocaleString() : '...'}</div>
-            <div className="text-xs text-slate-500">Total Records</div>
+            <div className="text-2xl font-bold text-slate-900">{(totalCount + orgCount) > 0 ? (totalCount + orgCount).toLocaleString() : '...'}</div>
+            <div className="text-xs text-slate-500">Combined Total</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-slate-600">{totalCount > 0 ? totalCount.toLocaleString() : '...'}</div>
+            <div className="text-xs text-slate-500">EstateSales.net</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-slate-600">{orgCount > 0 ? orgCount.toLocaleString() : '...'}</div>
+            <div className="text-xs text-slate-500">EstateSales.org</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-orange-600">{stateCount !== null ? stateCount.toLocaleString() : '...'}</div>
