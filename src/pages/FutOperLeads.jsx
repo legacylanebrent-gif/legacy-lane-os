@@ -53,6 +53,7 @@ export default function FutOperLeads() {
   const [enrichmentFilter, setEnrichmentFilter] = useState('all'); // all | has_email | no_email | geocoded | not_geocoded
   const [totalCount, setTotalCount] = useState(0);
   const [orgCount, setOrgCount] = useState(0);
+  const [leadCount, setLeadCount] = useState(0);
   const [stateCount, setStateCount] = useState(null);
 
   // Per-row email enrichment
@@ -104,12 +105,14 @@ export default function FutOperLeads() {
 
   const loadTotalCount = async () => {
     try {
-      const [futRes, orgRes] = await Promise.all([
+      const [futRes, orgRes, leadRes] = await Promise.all([
         base44.functions.invoke('getFutureOperatorCount', {}),
         base44.functions.invoke('getFutureOperatorCount', { entity: 'org' }).catch(() => null),
+        base44.functions.invoke('buildCleanLeadList', { action: 'count' }).catch(() => null),
       ]);
       setTotalCount(futRes.data.total || 0);
       if (orgRes?.data?.total) setOrgCount(orgRes.data.total);
+      if (leadRes?.data?.total) setLeadCount(leadRes.data.total);
     } catch (e) {}
   };
 
@@ -411,8 +414,8 @@ export default function FutOperLeads() {
         </div>
         <div className="flex gap-4 text-right">
           <div>
-            <div className="text-2xl font-bold text-slate-900">{(totalCount + orgCount) > 0 ? (totalCount + orgCount).toLocaleString() : '...'}</div>
-            <div className="text-xs text-slate-500">Combined Total</div>
+            <div className="text-2xl font-bold text-indigo-700">{leadCount > 0 ? leadCount.toLocaleString() : '...'}</div>
+            <div className="text-xs text-slate-500">Clean Leads</div>
           </div>
           <div>
             <div className="text-lg font-bold text-slate-600">{totalCount > 0 ? totalCount.toLocaleString() : '...'}</div>
@@ -784,7 +787,7 @@ export default function FutOperLeads() {
       </Dialog>
 
       {/* Build Clean List Modal */}
-      <Dialog open={showBuildModal} onOpenChange={(open) => { if (!buildRunning) setShowBuildModal(open); }}>
+      <Dialog open={showBuildModal} onOpenChange={(open) => { if (!buildRunning) { setShowBuildModal(open); if (!open) { loadOperators(); loadStateCount(); loadTotalCount(); } } }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-indigo-600" />Build Clean Lead List — {stateFilter}</DialogTitle>
@@ -887,7 +890,7 @@ export default function FutOperLeads() {
                       <CheckCircle2 className="w-5 h-5" />All pending records processed!
                     </div>
                     <div className="flex justify-end">
-                      <Button onClick={() => setShowBuildModal(false)}>Close</Button>
+                      <Button onClick={() => { setShowBuildModal(false); loadOperators(); loadStateCount(); loadTotalCount(); }}>Close</Button>
                     </div>
                   </div>
                 )}
