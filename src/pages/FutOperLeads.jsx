@@ -465,23 +465,6 @@ export default function FutOperLeads() {
               <Button onClick={handleOpenBuildModal} disabled={isBusy} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
                 <Zap className="w-4 h-4 mr-1" />Build Clean List
               </Button>
-              <Button onClick={handleBatchFindEmails} disabled={isBusy} className="bg-green-600 hover:bg-green-700 text-white text-sm">
-                {batchRunning
-                  ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />{batchProgress?.done}/{batchProgress?.total}</>
-                  : <><Mail className="w-4 h-4 mr-1" />Batch Emails</>}
-              </Button>
-              <Button onClick={handleDeduplicate} disabled={isBusy} variant="outline" className="border-red-400 text-red-700 text-sm">
-                {deduplicating ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" />Deduping...</> : <><Trash2 className="w-4 h-4 mr-1" />Dedupe</>}
-              </Button>
-              <Button onClick={handleBackfillCities} disabled={isBusy} className="bg-violet-600 hover:bg-violet-700 text-white text-sm">
-                <MapPin className="w-4 h-4 mr-1" />Resolve Cities
-              </Button>
-              <Button onClick={handleGeocode} disabled={isBusy} className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm">
-                <Navigation className="w-4 h-4 mr-1" />Geocode
-              </Button>
-              <Button onClick={handleOpenScrape} disabled={isBusy} className="bg-orange-600 hover:bg-orange-700 text-white text-sm">
-                <Download className="w-4 h-4 mr-1" />Scrape Net
-              </Button>
             </div>
           </div>
         </CardHeader>
