@@ -234,29 +234,56 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── Step 3: Web search snippets only (no page crawls to avoid timeout) ────
+    // ── Step 3: Web search snippets — multiple strategies for no-website companies ────
     if (foundEmails.length === 0 && serpApiKey) {
-      const query = `"${company.company_name}" ${company.city} ${company.state} estate sales email contact`;
-      const searchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=5`;
-      try {
-        const html = await fetchPage(searchUrl, 8000);
-        if (html) {
-          const data = JSON.parse(html);
-          // Extract emails from snippets only — no secondary page fetches
-          const snippetText = [
-            ...(data.organic_results || []).map(r => (r.snippet || '') + ' ' + (r.title || '')),
-            JSON.stringify(data.knowledge_graph || {}),
-            JSON.stringify(data.answer_box || {}),
-          ].join(' ');
-          const snippetEmails = extractEmails(snippetText);
-          if (snippetEmails.length > 0) {
-            foundEmails = [...new Set([...foundEmails, ...snippetEmails])].slice(0, 5);
-            if (!emailSourceUrl) emailSourceUrl = searchUrl;
-            if (!emailSourceType) emailSourceType = 'google_search';
-            await logStep(base44, company_id, company.company_name, 'web_search', searchUrl, `Found ${snippetEmails.length} email(s) in snippets`, snippetEmails[0], '', 0, '');
+      const companyName = company.company_name;
+      const city = company.city || '';
+      const state = company.state || '';
+      const phone = company.phone || '';
+
+      // Build up to 3 search queries, most specific first
+      const searchQueries = [
+        // Primary: name + location + estate sales email
+        `"${companyName}" ${city} ${state} estate sales email contact`,
+        // Secondary: phone number lookup (great for phone-only companies)
+        phone ? `"${phone}" estate sales email` : null,
+        // Tertiary: broader name-only search across the web
+        `"${companyName}" estate sales contact email`,
+      ].filter(Boolean);
+
+      for (const query of searchQueries) {
+        if (foundEmails.length > 0) break;
+        const searchUrl = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=5`;
+        try {
+          const html = await fetchPage(searchUrl, 8000);
+          if (html) {
+            const data = JSON.parse(html);
+            const snippetText = [
+              ...(data.organic_results || []).map(r => (r.snippet || '') + ' ' + (r.title || '') + ' ' + (r.link || '')),
+              JSON.stringify(data.knowledge_graph || {}),
+              JSON.stringify(data.answer_box || {}),
+            ].join(' ');
+            const snippetEmails = extractEmails(snippetText);
+
+            // Also try fetching the top organic result page directly if it has a promising URL
+            if (snippetEmails.length === 0 && data.organic_results?.length > 0) {
+              const topLink = data.organic_results[0].link;
+              if (topLink && !topLink.includes('facebook.com') && !topLink.includes('yelp.com')) {
+                const pageHtml = await fetchPage(topLink, 6000);
+                const pageEmails = extractEmails(pageHtml);
+                if (pageEmails.length > 0) snippetEmails.push(...pageEmails);
+              }
+            }
+
+            if (snippetEmails.length > 0) {
+              foundEmails = [...new Set([...foundEmails, ...snippetEmails])].slice(0, 5);
+              if (!emailSourceUrl) emailSourceUrl = searchUrl;
+              if (!emailSourceType) emailSourceType = 'google_search';
+              await logStep(base44, company_id, company.company_name, 'web_search', searchUrl, `Found ${snippetEmails.length} email(s) in snippets`, snippetEmails[0], '', 0, '');
+            }
           }
-        }
-      } catch (e) { /* non-blocking */ }
+        } catch (e) { /* non-blocking */ }
+      }
     }
 
     // ── Step 4: Guess email patterns from domain (skip social profiles — no meaningful domain) ──
