@@ -10,8 +10,10 @@ import {
   Search, Phone, Globe, MapPin, Calendar,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
   Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2, Navigation,
-  Merge, RefreshCw, Building2, Zap, Play, SkipForward
+  Merge, RefreshCw, Building2, Zap, Play, SkipForward, MessageSquare
 } from 'lucide-react';
+import OutreachModal from '@/components/outreach/OutreachModal';
+import OutreachSequencePanel from '@/components/outreach/OutreachSequencePanel';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -83,6 +85,13 @@ export default function FutOperLeads() {
   const [buildProcess, setBuildProcess] = useState(null); // { offset, total, done, enriched, geocoded, skipped, failed, hasMore }
   const [buildRunning, setBuildRunning] = useState(false);
   const [buildLeadCount, setBuildLeadCount] = useState(null);
+
+  // Outreach modals
+  const [showOutreachModal, setShowOutreachModal] = useState(false);
+  const [showSequencePanel, setShowSequencePanel] = useState(false);
+
+  // Row selection
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
   // Scrape (net) modal
   const [showScrapeModal, setShowScrapeModal] = useState(false);
@@ -444,6 +453,26 @@ export default function FutOperLeads() {
 
   const isBusy = batchRunning || deduplicating || geocoding || backfilling || scrapeRunning || buildRunning;
 
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredOperators.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredOperators.map(op => op.id)));
+    }
+  };
+
+  const toggleSelect = (id) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const selectedLeads = filteredOperators.filter(op => selectedIds.has(op.id));
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -522,6 +551,19 @@ export default function FutOperLeads() {
 
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2 ml-auto self-end">
+              <Button onClick={() => setShowSequencePanel(true)} variant="outline" className="text-sm border-violet-300 text-violet-700">
+                <MessageSquare className="w-4 h-4 mr-1" />Outreach ({filteredOperators.length > 0 ? 'Track' : 'View'})
+              </Button>
+              {selectedIds.size > 0 && (
+                <Button
+                  onClick={() => setShowOutreachModal(true)}
+                  disabled={selectedLeads.filter(l => l.email && !l.do_not_contact).length === 0}
+                  className="bg-violet-600 hover:bg-violet-700 text-white text-sm"
+                >
+                  <Mail className="w-4 h-4 mr-1" />
+                  Send to {selectedIds.size}
+                </Button>
+              )}
               <Button onClick={handleOpenBuildModal} disabled={isBusy} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
                 <Zap className="w-4 h-4 mr-1" />Build Clean List
               </Button>
@@ -539,6 +581,14 @@ export default function FutOperLeads() {
               <table className="w-full text-sm min-w-[900px]">
                 <thead className="bg-slate-50 border-b">
                   <tr>
+                    <th className="p-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === filteredOperators.length && filteredOperators.length > 0}
+                        onChange={toggleSelectAll}
+                        className="rounded cursor-pointer"
+                      />
+                    </th>
                     <th className="text-left p-3 font-medium text-slate-600">Company</th>
                     <th className="text-left p-3 font-medium text-slate-600">Location</th>
                     <th className="text-left p-3 font-medium text-slate-600">Phone</th>
@@ -553,6 +603,14 @@ export default function FutOperLeads() {
                 <tbody>
                   {filteredOperators.map((op, i) => (
                     <tr key={op.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/40'}`}>
+                      <td className="p-3 w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(op.id)}
+                          onChange={() => toggleSelect(op.id)}
+                          className="rounded cursor-pointer"
+                        />
+                      </td>
                       <td className="p-3">
                         <div className="font-medium text-slate-800 max-w-48">{decodeHtml(op.company_name)}</div>
                         {op.package_type && (
@@ -954,6 +1012,20 @@ export default function FutOperLeads() {
           {!backfilling && <div className="flex justify-end"><Button onClick={() => setShowBackfillModal(false)}>Close</Button></div>}
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
+
+      {/* Outreach Modal */}
+      <OutreachModal
+        open={showOutreachModal}
+        onClose={() => setShowOutreachModal(false)}
+        selectedLeads={selectedLeads}
+      />
+
+      {/* Outreach Sequence Panel */}
+      <OutreachSequencePanel
+        open={showSequencePanel}
+        onClose={() => setShowSequencePanel(false)}
+        stateFilter={stateFilter}
+      />
+      </div>
+      );
+      }
