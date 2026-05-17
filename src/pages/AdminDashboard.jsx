@@ -118,20 +118,21 @@ export default function AdminDashboard() {
     try {
       const [
         futLeads, futOps, orgOps, outreach, campaigns, agentRuns,
-        users, tickets, sequences
+        users, tickets, leadCountRes
       ] = await Promise.all([
-        base44.entities.FutureOperatorLead.list(null, 1000).catch(() => []),
-        base44.entities.FutureEstateOperator.list(null, 500).catch(() => []),
-        base44.entities.EstatesalesOrgOperator.list(null, 500).catch(() => []),
-        base44.entities.OutreachSequence.list('-created_date', 500).catch(() => []),
+        base44.entities.FutureOperatorLead.list(null, 10000).catch(() => []),
+        base44.entities.FutureEstateOperator.list(null, 10000).catch(() => []),
+        base44.entities.EstatesalesOrgOperator.list(null, 10000).catch(() => []),
+        base44.entities.OutreachSequence.list('-created_date', 2000).catch(() => []),
         base44.entities.FacebookAdCampaignDraft.list('-created_at', 100).catch(() => []),
         base44.entities.AutonomousAgentRun.list('-created_at', 100).catch(() => []),
-        base44.entities.User.list('-created_date', 500).catch(() => []),
+        base44.entities.User.list('-created_date', 2000).catch(() => []),
         base44.entities.Ticket.list('-created_date', 100).catch(() => []),
-        base44.entities.OutreachSequence.filter({ sequence_status: 'replied' }, null, 200).catch(() => []),
+        base44.functions.invoke('getFutureOperatorCount', {}).catch(() => ({ data: { total: 0 } })),
       ]);
 
       const leads = futLeads;
+      const trueTotal = leadCountRes?.data?.total || leads.length;
       const leadsWithEmail = leads.filter(l => l.email);
       const leadsFailed = leads.filter(l => l.enrichment_status === 'failed');
       const leadsGeocoded = leads.filter(l => l.geocode_status === 'geocoded');
@@ -150,11 +151,11 @@ export default function AdminDashboard() {
 
       setStats({
         // Leads pipeline
-        totalLeads: leads.length,
+        totalLeads: trueTotal,
         leadsWithEmail: leadsWithEmail.length,
         leadsFailed: leadsFailed.length,
         leadsGeocoded: leadsGeocoded.length,
-        emailCoverageRate: pct(leadsWithEmail.length, leads.length),
+        emailCoverageRate: pct(leadsWithEmail.length, trueTotal),
 
         // Outreach
         outreachTotal: outreach.length,
@@ -252,7 +253,7 @@ export default function AdminDashboard() {
             <GoalBar label="📬 Outreach Sequences Sent" current={stats.outreachTotal || 0} target={1000} color="bg-violet-500" />
             <GoalBar label="💬 Replies Received" current={stats.outreachReplied || 0} target={200} color="bg-green-500" />
             <GoalBar label="🚀 Meta Campaigns Launched" current={stats.campaignLive || 0} target={10} color="bg-blue-500" />
-            <GoalBar label="🗄️ Total Lead Database" current={stats.totalLeads || 0} target={20000} color="bg-cyan-500" />
+            <GoalBar label="🗄️ Total Lead Database" current={stats.totalLeads || 0} target={10000} color="bg-cyan-500" />
             <GoalBar label="✅ Bookings / Conversions" current={stats.outreachBooked || 0} target={50} color="bg-emerald-500" />
           </div>
         </div>
