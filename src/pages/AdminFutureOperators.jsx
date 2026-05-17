@@ -54,6 +54,9 @@ export default function AdminFutureOperators() {
   const [njBatchState, setNjBatchState] = useState(null);
   // { allCompanies, nextOffset, totalCompanies, totalInserted, totalUpdated, running }
 
+  // Batch email enrichment
+  const [batchEnrichRunning, setBatchEnrichRunning] = useState(false);
+  const [batchEnrichProgress, setBatchEnrichProgress] = useState(null);
 
   const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
 
@@ -300,6 +303,23 @@ export default function AdminFutureOperators() {
     setScrapeRunning(false);
   };
 
+  // Batch Find Emails for current state
+  const handleBatchFindEmails = async () => {
+    const targets = filteredOperators.filter(op => !op.email && !op.do_not_contact);
+    if (targets.length === 0) return alert('All visible companies already have emails.');
+    if (!confirm(`Run email finder on ${targets.length} companies? This may take a while.`)) return;
+    setBatchEnrichRunning(true);
+    setBatchEnrichProgress({ done: 0, total: targets.length });
+    for (let i = 0; i < targets.length; i++) {
+      try { await base44.functions.invoke('enrichCompanyEmail', { company_id: targets[i].id, entity: 'FutureEstateOperator' }); } catch (e) {}
+      setBatchEnrichProgress({ done: i + 1, total: targets.length });
+      if (i % 10 === 0) await loadOperators(); // Refresh UI every 10 records
+    }
+    setBatchEnrichRunning(false);
+    setBatchEnrichProgress(null);
+    await loadOperators();
+  };
+
   const closeImportModal = () => {
     setShowImportModal(false);
     setImportStatus('idle');
@@ -418,6 +438,22 @@ export default function AdminFutureOperators() {
                 <span className="hidden sm:inline">Scrape States</span>
                 <span className="sm:hidden">Scrape</span>
               </Button>
+              
+              <Button
+                onClick={handleBatchFindEmails}
+                disabled={batchEnrichRunning || filteredOperators.filter(op => !op.email && !op.do_not_contact).length === 0}
+                className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Find Emails ({filteredOperators.filter(op => !op.email && !op.do_not_contact).length})</span>
+                <span className="sm:hidden">Find Emails</span>
+              </Button>
+
+              {batchEnrichRunning && (
+                <Badge className="bg-blue-100 text-blue-700 self-end">
+                  {batchEnrichProgress?.done}/{batchEnrichProgress?.total} processed
+                </Badge>
+              )}
               
               {packageFilter !== 'all' && (
                 <Button 
