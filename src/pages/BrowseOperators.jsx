@@ -225,6 +225,37 @@ export default function BrowseOperators() {
         </div>
       </section>
 
+      {/* State Directory Links */}
+      <section className="py-10 px-4 bg-white border-t border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2 text-center">📍 Browse by State</h2>
+          <p className="text-slate-500 text-center mb-6 text-sm">Click a state to jump to its company listings</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {US_STATES.filter(s => grouped[s.code]).sort((a, b) => a.name.localeCompare(b.name)).map(s => {
+              const stateTotal = Object.values(grouped[s.code] || {}).reduce((sum, arr) => sum + arr.length, 0);
+              return (
+                <a
+                  key={s.code}
+                  href={`#state-${s.code}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setExpandedStates(prev => ({ ...prev, [s.code]: true }));
+                    setTimeout(() => document.getElementById(`state-${s.code}`)?.scrollIntoView({ behavior: 'smooth' }), 50);
+                  }}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 transition-colors group"
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 group-hover:text-cyan-700">{s.code}</span>
+                    <p className="text-xs text-slate-500 leading-tight">{s.name}</p>
+                  </div>
+                  <span className="text-xs font-semibold text-orange-600">{stateTotal}</span>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* State / City Breakdown */}
       <section className="py-10 px-4">
         <div className="max-w-7xl mx-auto">
