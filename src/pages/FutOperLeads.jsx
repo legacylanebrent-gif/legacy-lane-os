@@ -697,7 +697,16 @@ export default function FutOperLeads() {
                             onClick={async () => {
                               if (!confirm(`Delete ${decodeHtml(op.company_name)}?`)) return;
                               try {
-                                await base44.entities.FutureOperatorLead.delete(op.id);
+                                const rawSource = op._raw_source || op.source;
+                                if (rawSource === 'org') {
+                                  await base44.entities.EstatesalesOrgOperator.delete(op.id);
+                                } else if (op.lead_stage || op.process_status !== undefined) {
+                                  // It's a FutureOperatorLead
+                                  await base44.entities.FutureOperatorLead.delete(op.id);
+                                } else {
+                                  // Raw FutureEstateOperator
+                                  await base44.entities.FutureEstateOperator.delete(op.id);
+                                }
                                 setOperators(prev => prev.filter(o => o.id !== op.id));
                               } catch (e) {
                                 alert('Error: ' + e.message);
