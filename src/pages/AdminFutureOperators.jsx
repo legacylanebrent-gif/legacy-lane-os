@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Search, Phone, Globe, MapPin, Calendar, Package,
+  Search, Phone, Globe, MapPin, Calendar,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
-  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2, Navigation
+  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,21 +38,9 @@ export default function AdminFutureOperators() {
   const [importResults, setImportResults] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
   const [stateCount, setStateCount] = useState(null);
-  const [enrichingIds, setEnrichingIds] = useState(new Set());
-  const [deduplicating, setDeduplicating] = useState(false);
-  const [batchRunning, setBatchRunning] = useState(false);
-  const [batchProgress, setBatchProgress] = useState(null); // { done, total }
   const [editingOperator, setEditingOperator] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [updateResults, setUpdateResults] = useState(null);
-  const [geocoding, setGeocoding] = useState(false);
-  const [geocodeProgress, setGeocodeProgress] = useState(null); // { done, failed, skipped, total, offset }
-  const [showGeocodeModal, setShowGeocodeModal] = useState(false);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillProgress, setBackfillProgress] = useState(null);
-  const [showBackfillModal, setShowBackfillModal] = useState(false);
   const [newOnlyFilter, setNewOnlyFilter] = useState(false);
   const [sortAlpha, setSortAlpha] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
@@ -110,56 +98,7 @@ export default function AdminFutureOperators() {
     }
   };
 
-  const handleFindEmail = async (operatorId) => {
-    setEnrichingIds(prev => new Set([...prev, operatorId]));
-    try {
-      await base44.functions.invoke('enrichCompanyEmail', { company_id: operatorId });
-      await loadOperators();
-    } catch (e) {
-      alert('Error finding email: ' + e.message);
-    } finally {
-      setEnrichingIds(prev => { const n = new Set(prev); n.delete(operatorId); return n; });
-    }
-  };
 
-  const handleDeduplicate = async () => {
-    if (!confirm(`This will scan ${stateFilter} records and delete duplicates based on phone number, keeping the most complete record. Continue?`)) return;
-    setDeduplicating(true);
-    try {
-      const res = await base44.functions.invoke('deduplicateFutureOperators', { state: stateFilter });
-      const { total_scanned, duplicates_deleted, remaining } = res.data;
-      alert(`Done! Scanned ${total_scanned.toLocaleString()} ${stateFilter} records, deleted ${duplicates_deleted.toLocaleString()} duplicates. ${remaining.toLocaleString()} remain.`);
-      await loadTotalCount();
-      await loadStateCount();
-      await loadOperators();
-    } catch (e) {
-      alert('Error: ' + e.message);
-    } finally {
-      setDeduplicating(false);
-    }
-  };
-
-  const handleBatchFindEmails = async () => {
-    const targets = filteredOperators.filter(op => !op.email && !op.do_not_contact);
-    if (targets.length === 0) return alert('All visible companies already have emails or are marked do-not-contact.');
-    if (!confirm(`Run email finder on ${targets.length} companies in ${stateFilter}? This may take a while.`)) return;
-
-    setBatchRunning(true);
-    setBatchProgress({ done: 0, total: targets.length });
-
-    for (let i = 0; i < targets.length; i++) {
-      try {
-        await base44.functions.invoke('enrichCompanyEmail', { company_id: targets[i].id });
-      } catch (e) {
-        // continue on individual errors
-      }
-      setBatchProgress({ done: i + 1, total: targets.length });
-    }
-
-    setBatchRunning(false);
-    setBatchProgress(null);
-    await loadOperators();
-  };
 
   useEffect(() => {
     loadOperators();
@@ -273,54 +212,6 @@ export default function AdminFutureOperators() {
       const body = fn.replace(/^scrape/, '').replace(/Operators.*$/, '');
       return body.toUpperCase() === state.toUpperCase() || body.toUpperCase().startsWith(state.toUpperCase());
     });
-  };
-
-  const handleGeocode = async () => {
-    setShowGeocodeModal(true);
-    setGeocoding(true);
-    setGeocodeProgress({ done: 0, failed: 0, skipped: 0, total: null, offset: 0 });
-
-    let offset = 0;
-    let totalGeocoded = 0;
-    let totalFailed = 0;
-    let totalSkipped = 0;
-
-    while (true) {
-      const res = await base44.functions.invoke('geocodeFutureOperators', { offset, state: stateFilter });
-      const data = res.data;
-      totalGeocoded += data.geocoded || 0;
-      totalFailed += data.failed || 0;
-      totalSkipped += data.skipped || 0;
-      setGeocodeProgress({ done: totalGeocoded, failed: totalFailed, skipped: totalSkipped, offset: data.nextOffset, hasMore: data.hasMore });
-      if (!data.hasMore) break;
-      offset = data.nextOffset;
-    }
-
-    setGeocoding(false);
-    await loadOperators();
-  };
-
-  const handleBackfillCities = async () => {
-    setShowBackfillModal(true);
-    setBackfilling(true);
-    setBackfillProgress({ done: 0, failed: 0, skipped: 0, offset: 0 });
-
-    let offset = 0;
-    let totalDone = 0, totalFailed = 0, totalSkipped = 0;
-
-    while (true) {
-      const res = await base44.functions.invoke('backfillOperatorCities', { offset, state: stateFilter });
-      const data = res.data;
-      totalDone += data.geocoded || 0;
-      totalFailed += data.failed || 0;
-      totalSkipped += data.skipped || 0;
-      setBackfillProgress({ done: totalDone, failed: totalFailed, skipped: totalSkipped, offset: data.nextOffset });
-      if (!data.hasMore) break;
-      offset = data.nextOffset;
-    }
-
-    setBackfilling(false);
-    await loadOperators();
   };
 
   const handleUpdateState = () => {
@@ -518,52 +409,9 @@ export default function AdminFutureOperators() {
                 </button>
               </div>
               
-              <Button
-                onClick={handleBatchFindEmails}
-                disabled={batchRunning || updating}
-                className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
-              >
-                {batchRunning
-                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{batchProgress?.done}/{batchProgress?.total}</>
-                  : <><Mail className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Batch Find Emails ({stateFilter})</span><span className="sm:hidden">Batch Emails</span></>
-                }
-              </Button>
-
-              <Button
-                onClick={handleDeduplicate}
-                disabled={deduplicating || updating || batchRunning}
-                variant="outline"
-                className="border-red-400 text-red-700 hover:bg-red-50 whitespace-nowrap"
-              >
-                {deduplicating
-                  ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deduplicating...</>
-                  : <><Trash2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Remove Duplicates</span><span className="sm:hidden">Dedupe</span></>
-                }
-              </Button>
-
-              <Button
-                onClick={handleBackfillCities}
-                disabled={backfilling || geocoding || batchRunning || deduplicating}
-                className="bg-violet-600 hover:bg-violet-700 whitespace-nowrap"
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Resolve Cities {stateFilter}</span>
-                <span className="sm:hidden">Cities</span>
-              </Button>
-
-              <Button
-                onClick={handleGeocode}
-                disabled={geocoding || backfilling || batchRunning || deduplicating}
-                className="bg-cyan-600 hover:bg-cyan-700 whitespace-nowrap"
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Geocode {stateFilter}</span>
-                <span className="sm:hidden">Geocode</span>
-              </Button>
-
               <Button 
                 onClick={handleUpdateState}
-                disabled={batchRunning || deduplicating || scrapeRunning}
+                disabled={scrapeRunning}
                 className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -626,20 +474,7 @@ export default function AdminFutureOperators() {
                           <Pencil className="w-3 h-3 sm:mr-1" />
                           <span className="hidden sm:inline">Edit</span>
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleFindEmail(operator.id)}
-                          disabled={enrichingIds.has(operator.id) || operator.do_not_contact}
-                          className="border-orange-400 text-orange-700 hover:bg-orange-50"
-                        >
-                          {enrichingIds.has(operator.id)
-                            ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Finding...</>
-                            : operator.email
-                              ? <><CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />Re-check</>
-                              : <><Mail className="w-3 h-3 mr-1" />Find Email</>
-                          }
-                        </Button>
+
                         {operator.source_url && (
                           <Button variant="outline" size="sm" asChild className="flex-shrink-0">
                             <a href={operator.source_url} target="_blank" rel="noopener noreferrer">
@@ -1153,98 +988,6 @@ export default function AdminFutureOperators() {
                   <Button variant="outline" onClick={() => setScrapeQueue([])}>Run Again</Button>
                 </div>
               )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Backfill Cities Modal */}
-      <Dialog open={showBackfillModal} onOpenChange={(open) => { if (!backfilling) setShowBackfillModal(open); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Resolving Cities — {stateFilter}</DialogTitle>
-            <DialogDescription>
-              Extracts city + ZIP from source URL, then uses OpenAI to resolve the real city, county, and coordinates.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            {backfilling && (
-              <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-violet-600 flex-shrink-0" />
-                <span className="text-sm text-slate-600">Processing batch at offset {backfillProgress?.offset ?? 0}…</span>
-              </div>
-            )}
-            {backfillProgress && (
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Resolved:</span>
-                  <span className="font-semibold text-green-700">{backfillProgress.done}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Failed:</span>
-                  <span className="font-semibold text-red-600">{backfillProgress.failed}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Skipped:</span>
-                  <span className="font-semibold text-slate-500">{backfillProgress.skipped}</span>
-                </div>
-              </div>
-            )}
-            {!backfilling && backfillProgress && (
-              <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
-                <CheckCircle2 className="w-4 h-4" /> All done!
-              </div>
-            )}
-          </div>
-          {!backfilling && (
-            <div className="flex justify-end">
-              <Button onClick={() => setShowBackfillModal(false)}>Close</Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Geocode Modal */}
-      <Dialog open={showGeocodeModal} onOpenChange={(open) => { if (!geocoding) setShowGeocodeModal(open); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Geocoding {stateFilter} Operators</DialogTitle>
-            <DialogDescription>
-              Using OpenAI to resolve ZIP → city, county, and coordinates for each operator.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            {geocoding && (
-              <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-cyan-600 flex-shrink-0" />
-                <span className="text-sm text-slate-600">Processing batch at offset {geocodeProgress?.offset ?? 0}…</span>
-              </div>
-            )}
-            {geocodeProgress && (
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Geocoded:</span>
-                  <span className="font-semibold text-green-700">{geocodeProgress.done}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Failed:</span>
-                  <span className="font-semibold text-red-600">{geocodeProgress.failed}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Skipped:</span>
-                  <span className="font-semibold text-slate-500">{geocodeProgress.skipped}</span>
-                </div>
-              </div>
-            )}
-            {!geocoding && geocodeProgress && (
-              <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
-                <CheckCircle2 className="w-4 h-4" /> All done!
-              </div>
-            )}
-          </div>
-          {!geocoding && (
-            <div className="flex justify-end">
-              <Button onClick={() => setShowGeocodeModal(false)}>Close</Button>
             </div>
           )}
         </DialogContent>
