@@ -157,7 +157,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('AdminUsers')} className="cursor-pointer font-medium text-orange-600">
+                          <Link to="/AdminDashboard" className="cursor-pointer font-medium text-orange-600">
                             <Settings className="w-4 h-4 mr-2" /> Admin Dashboard
                           </Link>
                         </DropdownMenuItem>
