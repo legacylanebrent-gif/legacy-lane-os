@@ -225,145 +225,142 @@ export default function BrowseOperators() {
         </div>
       </section>
 
-      {/* State Directory Links */}
-      <section className="py-10 px-4 bg-white border-t border-slate-100">
+      {/* State Cards Grid */}
+      <section className="py-12 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2 text-center">📍 Browse by State</h2>
-          <p className="text-slate-500 text-center mb-6 text-sm">Click a state to jump to its company listings</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {US_STATES.filter(s => grouped[s.code]).sort((a, b) => a.name.localeCompare(b.name)).map(s => {
-              const stateTotal = Object.values(grouped[s.code] || {}).reduce((sum, arr) => sum + arr.length, 0);
-              return (
-                <a
-                  key={s.code}
-                  href={`#state-${s.code}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setExpandedStates(prev => ({ ...prev, [s.code]: true }));
-                    setTimeout(() => document.getElementById(`state-${s.code}`)?.scrollIntoView({ behavior: 'smooth' }), 50);
-                  }}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 hover:border-cyan-400 hover:bg-cyan-50 transition-colors group"
-                >
-                  <div>
-                    <span className="text-xs font-bold text-slate-700 group-hover:text-cyan-700">{s.code}</span>
-                    <p className="text-xs text-slate-500 leading-tight">{s.name}</p>
-                  </div>
-                  <span className="text-xs font-semibold text-orange-600">{stateTotal}</span>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+          <h2 className="text-3xl font-serif font-bold text-slate-900 mb-2 text-center">📍 Browse by State</h2>
+          <p className="text-slate-500 text-center mb-8 text-sm">Select a state to explore estate sale companies in that area</p>
 
-      {/* State / City Breakdown */}
-      <section className="py-10 px-4">
-        <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-lg animate-pulse">Loading companies...</div>
           ) : sortedStates.length === 0 ? (
             <div className="text-center py-20 text-slate-400">No companies found.</div>
           ) : (
-            <div className="space-y-4">
-              {sortedStates.map(stateCode => {
-                const cities = grouped[stateCode];
-                const sortedCities = Object.keys(cities).sort();
-                const stateTotal = sortedCities.reduce((s, c) => s + cities[c].length, 0);
-                const stateName = US_STATES.find(s => s.code === stateCode)?.name || stateCode;
-                const isExpanded = !!expandedStates[stateCode];
-
-                return (
-                  <div key={stateCode} id={`state-${stateCode}`} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    {/* State Header */}
+            <div className="space-y-3">
+              {/* State Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-6">
+                {US_STATES.sort((a, b) => a.name.localeCompare(b.name)).map(s => {
+                  const stateData = grouped[s.code];
+                  if (!stateData) return null;
+                  const stateTotal = Object.values(stateData).reduce((sum, arr) => sum + arr.length, 0);
+                  const cityCount = Object.keys(stateData).length;
+                  const isExpanded = !!expandedStates[s.code];
+                  return (
                     <button
-                      onClick={() => toggleState(stateCode)}
-                      className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors"
+                      key={s.code}
+                      id={`state-${s.code}`}
+                      onClick={() => toggleState(s.code)}
+                      className={`text-left rounded-xl border-2 p-4 transition-all hover:shadow-md ${
+                        isExpanded
+                          ? 'border-cyan-500 bg-cyan-50 shadow-md'
+                          : 'border-slate-200 bg-white hover:border-cyan-300 hover:bg-cyan-50/50'
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{stateCode}</span>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-semibold text-slate-900 text-lg">{stateName}</p>
-                          <p className="text-sm text-slate-500">{sortedCities.length} cities · {stateTotal} companies</p>
-                        </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-lg font-bold ${isExpanded ? 'text-cyan-700' : 'text-slate-800'}`}>{s.code}</span>
+                        {isExpanded ? <ChevronDown className="w-4 h-4 text-cyan-500" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="text-sm">{stateTotal}</Badge>
-                        {isExpanded ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
+                      <p className="text-xs text-slate-600 font-medium leading-tight mb-2">{s.name}</p>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-lg font-bold text-orange-600">{stateTotal}</span>
+                        <span className="text-xs text-slate-400">{cityCount} {cityCount === 1 ? 'city' : 'cities'}</span>
                       </div>
                     </button>
+                  );
+                })}
+              </div>
 
-                    {/* Cities & Companies */}
-                    {isExpanded && (
-                      <div className="border-t border-slate-100 px-6 py-4 space-y-6">
-                        {sortedCities.map(city => (
-                          <div key={city}>
-                            <div className="flex items-center gap-2 mb-3">
-                              <MapPin className="w-4 h-4 text-orange-500" />
-                              <h4 className="font-semibold text-slate-700">{stripHtml(city)}</h4>
-                              <Badge variant="outline" className="text-xs">{cities[city].length}</Badge>
-                            </div>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                              {cities[city].map(op => (
-                                <Card key={op.id} className="hover:shadow-md transition-shadow border-slate-200">
-                                  <CardContent className="p-4">
-                                    <h5 className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{stripHtml(op.company_name)}</h5>
-                                    <p className="text-xs text-slate-500 mb-2">{stripHtml(op.city)}, {stripHtml(op.state)}</p>
-                                    <div className="space-y-1">
-                                      {op.phone && (
-                                        <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
-                                          <Phone className="w-3 h-3" /> {stripHtml(op.phone)}
-                                        </a>
-                                      )}
-                                      {op.website_url && (
-                                        <a href={stripHtml(op.website_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-600 hover:underline">
-                                          <Globe className="w-3 h-3" /> Website
-                                        </a>
-                                      )}
-                                      {op.member_since && (
-                                        <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>
-                                      )}
-                                    </div>
-                                    {op.package_type ? (
-                                      <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{stripHtml(op.package_type)}</Badge>
-                                    ) : (
+              {/* Expanded State Content */}
+              {sortedStates.filter(sc => expandedStates[sc]).map(stateCode => {
+                const cities = grouped[stateCode];
+                const sortedCities = Object.keys(cities).sort();
+                const stateName = US_STATES.find(s => s.code === stateCode)?.name || stateCode;
+                const stateTotal = sortedCities.reduce((s, c) => s + cities[c].length, 0);
+
+                return (
+                  <div key={stateCode} className="bg-white rounded-2xl shadow-lg border border-cyan-200 overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 px-6 py-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold">{stateCode}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-white font-bold text-xl">{stateName}</h3>
+                          <p className="text-cyan-100 text-sm">{sortedCities.length} cities · {stateTotal} companies</p>
+                        </div>
+                      </div>
+                      <button onClick={() => toggleState(stateCode)} className="text-white/70 hover:text-white transition-colors">
+                        <ChevronDown className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="px-6 py-5 space-y-6">
+                      {sortedCities.map(city => (
+                        <div key={city}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <MapPin className="w-4 h-4 text-orange-500" />
+                            <h4 className="font-semibold text-slate-700">{stripHtml(city)}</h4>
+                            <Badge variant="outline" className="text-xs">{cities[city].length}</Badge>
+                          </div>
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                            {cities[city].map(op => (
+                              <Card key={op.id} className="hover:shadow-md transition-shadow border-slate-200">
+                                <CardContent className="p-4">
+                                  <h5 className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{stripHtml(op.company_name)}</h5>
+                                  <p className="text-xs text-slate-500 mb-2">{stripHtml(op.city)}, {stripHtml(op.state)}</p>
+                                  <div className="space-y-1">
+                                    {op.phone && (
+                                      <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
+                                        <Phone className="w-3 h-3" /> {stripHtml(op.phone)}
+                                      </a>
+                                    )}
+                                    {op.website_url && (
+                                      <a href={stripHtml(op.website_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-600 hover:underline">
+                                        <Globe className="w-3 h-3" /> Website
+                                      </a>
+                                    )}
+                                    {op.member_since && (
+                                      <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>
+                                    )}
+                                  </div>
+                                  {op.package_type ? (
+                                    <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{stripHtml(op.package_type)}</Badge>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7"
+                                      onClick={() => setClaimingOperator(op)}
+                                    >
+                                      Claim My Company
+                                    </Button>
+                                  )}
+                                  {isAuthenticated && (
+                                    <div className="mt-2 grid grid-cols-2 gap-1.5">
                                       <Button
                                         size="sm"
-                                        className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7"
-                                        onClick={() => setClaimingOperator(op)}
+                                        variant="outline"
+                                        className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
+                                        onClick={() => handleReferByText(op)}
                                       >
-                                        Claim My Company
+                                        {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
                                       </Button>
-                                    )}
-                                    {isAuthenticated && (
-                                      <div className="mt-2 grid grid-cols-2 gap-1.5">
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
-                                          onClick={() => handleReferByText(op)}
-                                        >
-                                          {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
-                                          onClick={() => setEmailReferOperator(op)}
-                                        >
-                                          ✉️ Refer by Email
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
+                                        onClick={() => setEmailReferOperator(op)}
+                                      >
+                                        ✉️ Refer by Email
+                                      </Button>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })}
