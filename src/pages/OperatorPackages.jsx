@@ -220,11 +220,16 @@ export default function OperatorPackages() {
                 )}
 
                 <CardHeader className="text-center pb-4">
-                  <Badge className={`${getTierColor(pkgData.tier_level)} w-fit mx-auto mb-4`}>
-                    {pkgData.tier_level}
-                  </Badge>
-                  <CardTitle className="text-3xl mb-2">{pkgData.package_name}</CardTitle>
-                  <p className="text-slate-600 text-sm">{pkgData.description}</p>
+                <Badge className={`${getTierColor(pkgData.tier_level)} w-fit mx-auto mb-4`}>
+                 {pkgData.tier_level}
+                </Badge>
+                <CardTitle className="text-3xl mb-2">{pkgData.package_name}</CardTitle>
+                {pkgData.package_name === 'Elite' && (
+                 <Badge className="bg-purple-600 text-white text-xs px-2 py-1 mb-3 w-fit mx-auto">
+                   ⭐ Featured on Company Finder
+                 </Badge>
+                )}
+                <p className="text-slate-600 text-sm">{pkgData.description}</p>
                 </CardHeader>
 
                 <CardContent>
