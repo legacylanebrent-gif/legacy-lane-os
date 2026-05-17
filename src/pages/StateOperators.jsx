@@ -140,6 +140,8 @@ export default function StateOperators() {
   const [emailReferOperator, setEmailReferOperator] = useState(null);
   const [textSentId, setTextSentId] = useState(null);
   const [zipCoords, setZipCoords] = useState(null);
+  const [radiusMiles, setRadiusMiles] = useState(25);
+  const [zipGeocoding, setZipGeocoding] = useState(false);
 
   useEffect(() => {
     if (!stateCode) return;
@@ -150,9 +152,24 @@ export default function StateOperators() {
     loadStateOperators();
   }, [stateCode]);
 
-  // Resolve ZIP to coords using prefix lookup
+  // Resolve ZIP to coords via backend geocoding (Google Maps)
   useEffect(() => {
-    if (zipFilter.length >= 3) {
+    if (zipFilter.length === 5) {
+      setZipGeocoding(true);
+      base44.functions.invoke('geocodeZip', { zip: zipFilter })
+        .then(res => {
+          const data = res.data;
+          if (data?.lat && data?.lng) {
+            setZipCoords([data.lat, data.lng]);
+          } else {
+            setZipCoords(zipToApproxCoords(zipFilter));
+          }
+        })
+        .catch(() => {
+          setZipCoords(zipToApproxCoords(zipFilter));
+        })
+        .finally(() => setZipGeocoding(false));
+    } else if (zipFilter.length >= 3) {
       setZipCoords(zipToApproxCoords(zipFilter));
     } else {
       setZipCoords(null);
@@ -217,6 +234,15 @@ export default function StateOperators() {
       );
     }
 
+    // Radius filter when ZIP is resolved
+    if (zipCoords) {
+      list = list.filter(op => {
+        const coords = opCoords(op);
+        if (!coords) return false; // exclude operators without coordinates when filtering by radius
+        return haversine(zipCoords, coords) <= radiusMiles;
+      });
+    }
+
     list = [...list].sort((a, b) => {
       const tierDiff = tierRank(b) - tierRank(a);
 
@@ -226,7 +252,6 @@ export default function StateOperators() {
         const distA = coordsA ? haversine(zipCoords, coordsA) : 9999;
         const distB = coordsB ? haversine(zipCoords, coordsB) : 9999;
 
-        // Primary: tier (elite first), secondary: distance
         if (Math.abs(tierDiff) > 1) return tierDiff;
         return distA - distB;
       }
@@ -235,7 +260,7 @@ export default function StateOperators() {
     });
 
     return list;
-  }, [operators, searchQuery, zipCoords]);
+  }, [operators, searchQuery, zipCoords, radiusMiles]);
 
   const eliteOperators = useMemo(() => displayedOperators.filter(isElite), [displayedOperators]);
   const regularOperators = useMemo(() => displayedOperators.filter(op => !isElite(op)), [displayedOperators]);
@@ -394,10 +419,26 @@ export default function StateOperators() {
                   maxLength={5}
                 />
               </div>
+              {zipCoords && (
+                <select
+                  value={radiusMiles}
+                  onChange={e => setRadiusMiles(Number(e.target.value))}
+                  className="h-11 px-3 rounded-md border border-slate-300 bg-white text-sm shadow text-slate-700"
+                >
+                  <option value={10}>Within 10 miles</option>
+                  <option value={25}>Within 25 miles</option>
+                  <option value={50}>Within 50 miles</option>
+                  <option value={100}>Within 100 miles</option>
+                </select>
+              )}
             </div>
             {zipFilter.length >= 3 && (
               <p className="text-cyan-600 text-xs mt-2 max-w-7xl mx-auto">
-                📍 {zipCoords ? `Sorting by distance from ZIP ${zipFilter}` : `Locating ZIP ${zipFilter}...`} + membership tier
+                {zipGeocoding
+                  ? `📍 Locating ZIP ${zipFilter}...`
+                  : zipCoords
+                  ? `📍 Showing ${displayedOperators.length} companies within ${radiusMiles} miles of ZIP ${zipFilter}`
+                  : `📍 Locating ZIP ${zipFilter}...`}
               </p>
             )}
           </section>
