@@ -6,7 +6,8 @@ import AdminAIOutputPanel from '@/components/adminai/AdminAIOutputPanel';
 import AdminAIReportHistory from '@/components/adminai/AdminAIReportHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo, Share2, Megaphone } from 'lucide-react';
+import { Shield, Brain, History, AlertTriangle, Settings, Cpu, ListTodo, Share2, Megaphone, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import AgentChainIndicator from '@/components/adminai/AgentChainIndicator';
 import AdminAISettingsPanel from '@/components/adminai/AdminAISettingsPanel';
 import AutonomousRunComposer from '@/components/autonomous/AutonomousRunComposer';
@@ -251,9 +252,16 @@ export default function AdminAIOperator() {
               <p className="text-xs text-slate-500 mt-0.5">Command the AI to analyze, plan, draft, and execute administrative growth workflows across Legacy Lane OS.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Shield className="w-3.5 h-3.5 text-amber-500" />
-            <span>{user.full_name || user.email}</span>
+          <div className="flex items-center gap-3">
+            <Link to="/AutonomousRunsDashboard">
+              <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
+                <Cpu className="w-3.5 h-3.5" />Runs Dashboard<ExternalLink className="w-3 h-3" />
+              </button>
+            </Link>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Shield className="w-3.5 h-3.5 text-amber-500" />
+              <span>{user.full_name || user.email}</span>
+            </div>
           </div>
         </div>
       </div>

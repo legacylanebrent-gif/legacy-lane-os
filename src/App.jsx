@@ -75,6 +75,7 @@ import AdminAgentApplications from './pages/AdminAgentApplications';
 import AgentDashboard from './pages/AgentDashboard';
 import AdminEstatesalesOrg from './pages/AdminEstatesalesOrg';
 import FutOperLeads from './pages/FutOperLeads';
+import AutonomousRunsDashboard from './pages/AutonomousRunsDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -193,6 +194,7 @@ const AuthenticatedApp = () => {
       <Route path="/AgentDashboard" element={<LayoutWrapper currentPageName="AgentDashboard"><AgentDashboard /></LayoutWrapper>} />
       <Route path="/AdminEstatesalesOrg" element={<LayoutWrapper currentPageName="AdminEstatesalesOrg"><AdminEstatesalesOrg /></LayoutWrapper>} />
       <Route path="/FutOperLeads" element={<LayoutWrapper currentPageName="FutOperLeads"><FutOperLeads /></LayoutWrapper>} />
+      <Route path="/AutonomousRunsDashboard" element={<LayoutWrapper currentPageName="AutonomousRunsDashboard"><AutonomousRunsDashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
