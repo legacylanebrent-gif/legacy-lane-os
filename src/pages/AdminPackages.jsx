@@ -77,10 +77,9 @@ export default function AdminPackages() {
       return accountType === selectedAccountType;
     })
     .sort((a, b) => {
-      const tierOrder = { basic: 1, pro: 2, premium: 3 };
-      const tierA = a.data?.tier_level || a.tier_level;
-      const tierB = b.data?.tier_level || b.tier_level;
-      return tierOrder[tierA] - tierOrder[tierB];
+      const priceA = a.data?.monthly_price || a.monthly_price || 0;
+      const priceB = b.data?.monthly_price || b.monthly_price || 0;
+      return priceA - priceB;
     });
   
   console.log('Filtered packages:', filteredPackages.length, 'for account type:', selectedAccountType);
