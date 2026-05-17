@@ -282,47 +282,17 @@ export default function StateOperators() {
           <button onClick={() => navigate('/BrowseOperators')} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm">
             <ArrowLeft className="w-4 h-4" /> All States
           </button>
-          <div className="flex items-start justify-between gap-6 flex-wrap">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">{stateCode}</span>
-                </div>
-                <div>
-                  <h1 className="text-4xl font-serif font-bold text-white">{stateName}</h1>
-                  <p className="text-slate-400 text-sm">
-                    {loading ? 'Loading...' : `${operators.length.toLocaleString()} estate sale companies`}
-                  </p>
-                </div>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">{stateCode}</span>
             </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 flex-1 max-w-xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Search company or city..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 h-11 bg-white/95 border-0 shadow-lg"
-                />
-              </div>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Your ZIP code"
-                  value={zipFilter}
-                  onChange={e => setZipFilter(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                  className="pl-9 h-11 w-40 bg-white/95 border-0 shadow-lg"
-                  maxLength={5}
-                />
-              </div>
+            <div>
+              <h1 className="text-4xl font-serif font-bold text-white">{stateName}</h1>
+              <p className="text-slate-400 text-sm">
+                {loading ? 'Loading...' : `${operators.length.toLocaleString()} estate sale companies`}
+              </p>
             </div>
           </div>
-          {zipFilter.length >= 3 && (
-            <p className="text-cyan-300 text-xs mt-3 ml-1">📍 Sorting by proximity to ZIP {zipFilter} + membership tier</p>
-          )}
         </div>
       </section>
 
@@ -356,6 +326,32 @@ export default function StateOperators() {
                     ))}
                   </MapContainer>
                 </div>
+
+                {/* Filters - moved below map */}
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      placeholder="Search company or city..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="pl-9 h-11 bg-white border shadow"
+                    />
+                  </div>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      placeholder="Your ZIP code"
+                      value={zipFilter}
+                      onChange={e => setZipFilter(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      className="pl-9 h-11 w-40 bg-white border shadow"
+                      maxLength={5}
+                    />
+                  </div>
+                </div>
+                {zipFilter.length >= 3 && (
+                  <p className="text-cyan-600 text-xs mt-2">📍 Sorting by proximity to ZIP {zipFilter} + membership tier</p>
+                )}
               </div>
             </section>
           )}
