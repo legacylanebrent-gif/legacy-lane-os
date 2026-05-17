@@ -317,7 +317,7 @@ export default function OperatorPackages() {
         {/* Trust Section */}
         <div className="mt-16 text-center">
           <p className="text-slate-600 mb-4">
-            All plans include 24/7 support and a 30-day money-back guarantee
+            Top 3 plans include 24/7 AI support, tickets and a 30-day money-back guarantee
           </p>
           <p className="text-sm text-slate-500">
             Need help choosing? <a href="#" className="text-orange-600 hover:underline">Contact our team</a>
