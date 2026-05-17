@@ -1,0 +1,97 @@
+{
+  "name": "OutreachSequence",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "FutureOperatorLead ID"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "sequence_status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "email_1_sent",
+        "email_2_sent",
+        "email_3_sent",
+        "replied",
+        "booked",
+        "not_interested",
+        "unsubscribed",
+        "failed"
+      ],
+      "default": "queued",
+      "description": "Current status in the outreach sequence"
+    },
+    "gmail_thread_id": {
+      "type": "string",
+      "description": "Gmail thread ID for reply tracking"
+    },
+    "gmail_message_id": {
+      "type": "string",
+      "description": "Gmail Message-ID header for threading"
+    },
+    "email_1_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "email_2_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "email_3_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_reply_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_reply_snippet": {
+      "type": "string"
+    },
+    "email_1_subject": {
+      "type": "string"
+    },
+    "email_1_body": {
+      "type": "string"
+    },
+    "email_2_subject": {
+      "type": "string"
+    },
+    "email_2_body": {
+      "type": "string"
+    },
+    "email_3_subject": {
+      "type": "string"
+    },
+    "email_3_body": {
+      "type": "string"
+    },
+    "admin_notes": {
+      "type": "string"
+    },
+    "sequence_template": {
+      "type": "string",
+      "description": "Which template was used for this sequence"
+    }
+  },
+  "required": [
+    "lead_id",
+    "contact_email"
+  ]
+}
