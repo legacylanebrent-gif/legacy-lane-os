@@ -117,22 +117,23 @@ export default function AdminDashboard() {
     setRefreshing(true);
     try {
       const [
-        futLeads, futOps, orgOps, outreach, campaigns, agentRuns,
-        users, tickets, leadCountRes
+        futLeads, outreach, campaigns, agentRuns,
+        users, tickets, netCountRes, orgCountRes
       ] = await Promise.all([
         base44.entities.FutureOperatorLead.list(null, 10000).catch(() => []),
-        base44.entities.FutureEstateOperator.list(null, 10000).catch(() => []),
-        base44.entities.EstatesalesOrgOperator.list(null, 10000).catch(() => []),
         base44.entities.OutreachSequence.list('-created_date', 2000).catch(() => []),
         base44.entities.FacebookAdCampaignDraft.list('-created_at', 100).catch(() => []),
         base44.entities.AutonomousAgentRun.list('-created_at', 100).catch(() => []),
         base44.entities.User.list('-created_date', 2000).catch(() => []),
         base44.entities.Ticket.list('-created_date', 100).catch(() => []),
         base44.functions.invoke('getFutureOperatorCount', {}).catch(() => ({ data: { total: 0 } })),
+        base44.functions.invoke('getFutureOperatorCount', { entity: 'org' }).catch(() => ({ data: { total: 0 } })),
       ]);
 
       const leads = futLeads;
-      const trueTotal = leadCountRes?.data?.total || leads.length;
+      const netTotal = netCountRes?.data?.total || 0;
+      const orgTotal = orgCountRes?.data?.total || 0;
+      const trueTotal = netTotal + orgTotal;
       const leadsWithEmail = leads.filter(l => l.email);
       const leadsFailed = leads.filter(l => l.enrichment_status === 'failed');
       const leadsGeocoded = leads.filter(l => l.geocode_status === 'geocoded');
@@ -179,8 +180,8 @@ export default function AdminDashboard() {
         openTickets: openTickets.length,
 
         // Data sources
-        futOpsTotal: futOps.length,
-        orgOpsTotal: orgOps.length,
+        netOpsTotal: netTotal,
+        orgOpsTotal: orgTotal,
       });
     } catch (_) {}
     setRefreshing(false);
@@ -262,7 +263,7 @@ export default function AdminDashboard() {
         <div>
           <SectionHeader icon={BarChart3} label="Lead Pipeline Overview" color="text-slate-500" href="/FutOperLeads" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Total Leads in DB" value={fmt(stats.totalLeads)} sub={`${stats.futOpsTotal?.toLocaleString()} net + ${stats.orgOpsTotal?.toLocaleString()} org`} icon={Merge} color="text-indigo-600 bg-indigo-50" href="/FutOperLeads" />
+            <StatCard label="Total Leads in DB" value={fmt(stats.totalLeads)} sub={`${fmt(stats.netOpsTotal)} EstateSales.net + ${fmt(stats.orgOpsTotal)} .org`} icon={Merge} color="text-indigo-600 bg-indigo-50" href="/FutOperLeads" />
             <StatCard label="Emails Found" value={fmt(stats.leadsWithEmail)} sub={`${stats.emailCoverageRate} coverage rate`} icon={Mail} color="text-green-600 bg-green-50" href="/FutOperLeads" trend={8} />
             <StatCard label="Geocoded Records" value={fmt(stats.leadsGeocoded)} sub="with lat/lng data" icon={MapPin} color="text-cyan-600 bg-cyan-50" href="/FutOperLeads" />
             <StatCard label="Enrichment Failures" value={fmt(stats.leadsFailed)} sub="need re-processing" icon={AlertTriangle} color="text-red-500 bg-red-50" href="/FutOperLeads" />
@@ -357,7 +358,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Registered Users" value={fmt(stats.totalUsers)} icon={Users} color="text-slate-600 bg-slate-100" href="/AdminUsers" />
             <StatCard label="Open Support Tickets" value={fmt(stats.openTickets)} icon={MessageSquare} color="text-red-500 bg-red-50" href="/AdminTickets" />
-            <StatCard label="EstateSales.net Ops" value={fmt(stats.futOpsTotal)} icon={Building2} color="text-indigo-600 bg-indigo-50" href="/AdminFutureOperators" />
+            <StatCard label="EstateSales.net Ops" value={fmt(stats.netOpsTotal)} icon={Building2} color="text-indigo-600 bg-indigo-50" href="/AdminFutureOperators" />
             <StatCard label="EstateSales.org Ops" value={fmt(stats.orgOpsTotal)} icon={Building2} color="text-teal-600 bg-teal-50" href="/AdminEstatesalesOrg" />
           </div>
         </div>
