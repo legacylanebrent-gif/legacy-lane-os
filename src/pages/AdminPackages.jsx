@@ -160,9 +160,9 @@ export default function AdminPackages() {
                     )}
                     <CardHeader>
                       <div className="flex items-start justify-between mb-3">
-                        <Badge className={getTierColor(pkgData.tier_level)}>
-                          {pkgData.tier_level}
-                        </Badge>
+                         <Badge className={getTierColor(pkgData.tier_level)}>
+                           {pkgData.package_name === 'Elite' ? 'premium w/ team support' : pkgData.tier_level}
+                         </Badge>
                         {!pkgData.is_active && (
                           <Badge variant="outline" className="text-red-600 border-red-300">
                             Inactive
