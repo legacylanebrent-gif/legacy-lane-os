@@ -170,6 +170,12 @@ export default function AdminPackages() {
                         )}
                       </div>
                       <CardTitle className="text-2xl">{pkgData.package_name}</CardTitle>
+                      {pkgData.package_name === 'Elite' && (
+                       <div className="mt-2 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-md px-3 py-2">
+                         <span className="text-xs font-semibold text-blue-700">📉 Off-Season Downgrade:</span>
+                         <span className="text-xs text-blue-600">Pause billing without losing team support</span>
+                       </div>
+                      )}
                       <p className="text-sm text-slate-600 mt-2">{pkgData.description}</p>
                     </CardHeader>
                     <CardContent className="space-y-4">
