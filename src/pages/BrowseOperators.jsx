@@ -84,24 +84,55 @@ export default function BrowseOperators() {
     loadOperators();
   }, []);
 
+  const isJunkEmail = (email) => {
+    if (!email) return false;
+    const lower = email.toLowerCase();
+    return lower.endsWith('@estatesales.net') || lower.endsWith('@estatesales.org');
+  };
+  const cleanEmail = (record) => isJunkEmail(record.email) ? { ...record, email: '' } : record;
+
   const loadOperators = async () => {
     try {
       const BATCH_SIZE = 500;
-      // Fetch first batch to start, then load remaining in parallel
-      const first = await base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, 0);
-      const total = 8000; // slightly above known count to be safe
+      const MAX_RECORDS = 12000;
       const offsets = [];
-      for (let offset = BATCH_SIZE; offset < total; offset += BATCH_SIZE) {
+      for (let offset = 0; offset < MAX_RECORDS; offset += BATCH_SIZE) {
         offsets.push(offset);
       }
-      const rest = await Promise.all(
-        offsets.map(offset => base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, offset))
-      );
-      const all = [
-        ...(first || []),
-        ...rest.flatMap(b => b || [])
-      ];
-      setOperators(all);
+
+      // Fetch all three sources in parallel
+      const [netBatches, orgBatches, cleanBatches] = await Promise.all([
+        Promise.all(offsets.map(o => base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
+        Promise.all(offsets.slice(0, 4).map(o => base44.entities.EstatesalesOrgOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
+        Promise.all(offsets.slice(0, 4).map(o => base44.entities.FutureOperatorLead.list('-created_date', BATCH_SIZE, o).catch(() => []))),
+      ]);
+
+      const netData = netBatches.flat().filter(Boolean);
+      const orgData = orgBatches.flat().filter(Boolean).map(r => ({
+        ...r, state: r.base_state, city: r.base_city, source: 'estatesales_org',
+      }));
+      const cleanData = cleanBatches.flat().filter(Boolean);
+
+      // Mirror FutOperLeads merge logic: prefer clean list, append unmerged raw records
+      let combined;
+      if (cleanData.length > 0) {
+        const cleanSourceIds = new Set(cleanData.map(r => r.source_id).filter(Boolean));
+        const netUnmerged = netData.filter(r => !cleanSourceIds.has(r.id));
+        const orgUnmerged = orgData.filter(r => !cleanSourceIds.has(r.id));
+        combined = [...cleanData, ...netUnmerged, ...orgUnmerged];
+      } else {
+        combined = [...netData, ...orgData];
+      }
+
+      // Deduplicate by id
+      const seen = new Set();
+      const deduped = combined.filter(r => {
+        if (seen.has(r.id)) return false;
+        seen.add(r.id);
+        return true;
+      });
+
+      setOperators(deduped.map(cleanEmail));
     } catch (e) {
       console.error(e);
     } finally {
