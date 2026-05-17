@@ -225,8 +225,8 @@ export default function StateOperators() {
   const displayedOperators = useMemo(() => {
     let list = operators;
 
-    // Text search
-    if (searchQuery.trim()) {
+    // Text search (skip if it looks like a ZIP code)
+    if (searchQuery.trim() && !/^\d{3,5}$/.test(searchQuery.trim())) {
       const q = searchQuery.toLowerCase();
       list = list.filter(op =>
         op.company_name?.toLowerCase().includes(q) ||
@@ -403,9 +403,18 @@ export default function StateOperators() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search company or city..."
+                  placeholder="Search by company name or city..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={e => {
+                    const val = e.target.value;
+                    // If user types a ZIP code here, auto-move it to the ZIP filter
+                    if (/^\d{3,5}$/.test(val.trim())) {
+                      setZipFilter(val.replace(/\D/g, '').slice(0, 5));
+                      setSearchQuery('');
+                    } else {
+                      setSearchQuery(val);
+                    }
+                  }}
                   className="pl-9 h-11 bg-white border shadow"
                 />
               </div>
