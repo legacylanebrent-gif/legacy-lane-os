@@ -86,10 +86,21 @@ export default function BrowseOperators() {
 
   const loadOperators = async () => {
     try {
-      // Load in batches to get all operators
-      const batch1 = await base44.entities.FutureEstateOperator.list('-created_date', 500);
-      const batch2 = await base44.entities.FutureEstateOperator.list('-created_date', 500, 500);
-      const all = [...(batch1 || []), ...(batch2 || [])];
+      const BATCH_SIZE = 500;
+      // Fetch first batch to start, then load remaining in parallel
+      const first = await base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, 0);
+      const total = 8000; // slightly above known count to be safe
+      const offsets = [];
+      for (let offset = BATCH_SIZE; offset < total; offset += BATCH_SIZE) {
+        offsets.push(offset);
+      }
+      const rest = await Promise.all(
+        offsets.map(offset => base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, offset))
+      );
+      const all = [
+        ...(first || []),
+        ...rest.flatMap(b => b || [])
+      ];
       setOperators(all);
     } catch (e) {
       console.error(e);
