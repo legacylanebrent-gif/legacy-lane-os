@@ -369,6 +369,35 @@ export default function AdminEstatesalesOrg() {
         </Button>
       </div>
 
+      {/* Per-State Enrichment Overview */}
+      {globalCounts?.byState && (
+        <div className="mb-6 p-4 bg-white border rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-slate-700">Enrichment Status by State</h2>
+            <div className="flex gap-3 text-xs text-slate-500">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-green-100 border border-green-300 inline-block" />All enriched</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-100 border border-orange-300 inline-block" />Partial</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gray-100 border border-gray-200 inline-block" />No data</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {US_STATES.map(s => {
+              const sd = globalCounts.byState[s];
+              if (!sd || sd.total === 0) return (
+                <button key={s} onClick={() => setSelectedState(s)} className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-400 hover:bg-gray-200 transition-colors">{s}</button>
+              );
+              const allEnriched = sd.listing_only === 0;
+              return (
+                <button key={s} onClick={() => setSelectedState(s)} title={`${sd.total} total · ${sd.detail_scraped} enriched · ${sd.listing_only} remaining`}
+                  className={`text-xs px-2 py-1 rounded font-medium transition-colors ${allEnriched ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'} ${selectedState === s ? 'ring-2 ring-offset-1 ring-slate-400' : ''}`}>
+                  {s} <span className="opacity-70">{sd.detail_scraped}/{sd.total}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Single-state Controls */}
       <Card className="mb-6">
         <CardContent className="pt-4">
