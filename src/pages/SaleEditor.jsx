@@ -18,6 +18,7 @@ import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorMod
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
+import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -46,6 +47,9 @@ export default function SaleEditor() {
   const [featuredLocally, setFeaturedLocally] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [selectedPricingImage, setSelectedPricingImage] = useState(null);
+  const [showPublishFeeModal, setShowPublishFeeModal] = useState(false);
+  const [pendingPublish, setPendingPublish] = useState(false);
+  const [originalStatus, setOriginalStatus] = useState('draft');
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -152,6 +156,7 @@ export default function SaleEditor() {
       const saleData = sales[0];
       if (!saleData) throw new Error('Sale not found');
 
+      setOriginalStatus(saleData.status || 'draft');
       setFormData({
         title: saleData.title || '',
         description: saleData.description || '',
@@ -260,9 +265,37 @@ export default function SaleEditor() {
     }
   };
 
-  const handleSave = async (publish = false) => {
+  const handleSave = async (publish = false, skipFeeCheck = false) => {
     if (!formData.title.trim()) { alert('Please enter a sale title'); return; }
     if (!formData.property_address.city.trim()) { alert('Please enter a city'); return; }
+
+    // Check if Starter user is trying to publish (draft → active/upcoming)
+    const isPublishing = ['upcoming', 'active'].includes(formData.status) && originalStatus === 'draft';
+    if (isPublishing && !skipFeeCheck) {
+      try {
+        const user = await base44.auth.me();
+        const packages = await base44.entities.SubscriptionPackage.filter({
+          account_type: 'estate_sale_operator',
+          tier_level: 'basic',
+          is_active: true
+        });
+        const starterPkg = packages[0];
+        if (starterPkg && user.subscription_package_id === starterPkg.id) {
+          setPendingPublish(publish);
+          setShowPublishFeeModal(true);
+          return;
+        }
+        // Also check by subscription_tier field if it exists
+        if (user.subscription_tier === 'basic' || user.subscription_tier === 'starter') {
+          setPendingPublish(publish);
+          setShowPublishFeeModal(true);
+          return;
+        }
+      } catch (e) {
+        // If check fails, proceed normally
+      }
+    }
+
     setSaving(true);
     try {
       const user = await base44.auth.me();
@@ -573,6 +606,16 @@ export default function SaleEditor() {
           onClose={() => setSelectedPricingImage(null)}
           photoPricing={photoPricing}
           imageUrl={selectedPricingImage}
+        />
+
+        <StarterPublishFeeModal
+          open={showPublishFeeModal}
+          onClose={() => setShowPublishFeeModal(false)}
+          saleName={formData.title}
+          onFeePaid={() => {
+            setShowPublishFeeModal(false);
+            handleSave(pendingPublish, true);
+          }}
         />
         </>
 
