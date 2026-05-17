@@ -400,7 +400,7 @@ export default function StateOperators() {
           {/* Filters - always shown below map */}
           <section className="py-6 px-4 bg-white border-b border-slate-200">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
+              <div className="relative w-56">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   placeholder="Search by company name or city..."
@@ -418,13 +418,13 @@ export default function StateOperators() {
                   className="pl-9 h-11 bg-white border shadow"
                 />
               </div>
-              <div className="relative">
+              <div className="relative flex-1">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Your ZIP code"
+                  placeholder="Search by Zip"
                   value={zipFilter}
                   onChange={e => setZipFilter(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                  className="pl-9 h-11 w-44 bg-white border shadow"
+                  className="pl-9 h-11 bg-white border shadow"
                   maxLength={5}
                 />
               </div>
