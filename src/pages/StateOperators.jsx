@@ -400,7 +400,7 @@ export default function StateOperators() {
           {/* Filters - always shown below map */}
           <section className="py-6 px-4 bg-white border-b border-slate-200">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3">
-              <div className="relative w-56">
+              <div className="relative flex-[3]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   placeholder="Search by company name or city..."
