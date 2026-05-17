@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge
+  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -24,6 +24,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
   { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Main' },
+  { page: 'AdminDashboard',         label: 'Admin Dashboard',     icon: BarChart2,       group: 'Admin' },
   { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
 
   { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
