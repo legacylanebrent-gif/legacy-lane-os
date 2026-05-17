@@ -36,13 +36,47 @@ const STATE_CENTERS = {
   WY: [43.1, -107.6],
 };
 
-// ZIP code prefix → approximate [lat, lng] for common US ZIP prefixes
-// Used as a rough proximity sort (not geocoding)
+// ZIP code → approximate [lat, lng] for common NJ/US ZIP prefixes (3-digit prefix level)
 const ZIP_PREFIX_COORDS = {
-  '0': [43.0, -71.5], '1': [42.5, -74.0], '2': [38.9, -77.0], '3': [33.5, -84.0],
-  '4': [41.5, -82.0], '5': [44.0, -93.0], '6': [41.8, -72.7], '7': [35.5, -97.5],
-  '8': [39.7, -104.9], '9': [37.8, -122.4],
+  // NJ
+  '070': [40.74, -74.17], '071': [40.80, -74.12], '072': [40.73, -74.23], '073': [40.72, -74.07],
+  '074': [40.92, -74.18], '075': [41.00, -74.30], '076': [40.97, -74.06], '077': [40.63, -74.15],
+  '078': [40.87, -74.55], '079': [41.03, -74.75], '080': [39.95, -74.19], '081': [39.75, -75.12],
+  '082': [39.49, -74.56], '083': [39.37, -74.44], '084': [39.38, -74.43], '085': [40.22, -74.77],
+  '086': [40.22, -74.76], '087': [40.22, -74.76], '088': [40.51, -74.41], '089': [40.51, -74.41],
+  // NY
+  '100': [40.71, -74.00], '101': [40.71, -74.00], '102': [40.71, -74.00], '103': [40.63, -74.08],
+  '104': [40.88, -73.87], '105': [41.03, -73.76], '106': [40.93, -73.82], '107': [40.93, -73.82],
+  '108': [41.04, -73.76], '109': [41.04, -73.76], '110': [40.70, -73.79], '111': [40.72, -73.84],
+  '112': [40.65, -73.95], '113': [40.74, -73.83], '114': [40.73, -73.72], '115': [40.73, -73.62],
+  '116': [40.73, -73.72], '117': [40.76, -73.60], '118': [40.82, -73.43], '119': [40.87, -73.27],
+  // CA
+  '900': [34.05, -118.25], '901': [34.05, -118.25], '902': [33.95, -118.39], '903': [33.84, -118.34],
+  '904': [33.95, -118.13], '905': [33.90, -118.20], '906': [33.77, -118.19], '907': [33.92, -118.08],
+  '908': [33.87, -118.09], '910': [34.14, -117.93], '911': [34.11, -117.98],
+  // TX
+  '750': [32.79, -96.80], '751': [32.79, -96.80], '752': [32.79, -96.80], '753': [32.79, -96.80],
+  '760': [32.75, -97.33], '761': [32.75, -97.33], '770': [29.76, -95.37], '771': [29.76, -95.37],
+  // FL
+  '320': [30.33, -81.66], '321': [28.39, -81.56], '322': [30.33, -81.66], '323': [30.44, -84.28],
+  '324': [30.44, -84.28], '325': [29.65, -82.33], '326': [29.65, -82.33], '327': [28.54, -81.38],
+  '328': [28.54, -81.38], '329': [28.06, -80.60], '330': [25.77, -80.19], '331': [25.77, -80.19],
+  '332': [25.77, -80.19], '333': [26.12, -80.14], '334': [26.72, -80.05], '335': [27.97, -82.47],
+  // Generic 1-digit fallback by first digit
 };
+
+function zipToApproxCoords(zip) {
+  if (!zip || zip.length < 3) return null;
+  const prefix3 = zip.slice(0, 3);
+  if (ZIP_PREFIX_COORDS[prefix3]) return ZIP_PREFIX_COORDS[prefix3];
+  // fallback by first digit
+  const fallback = {
+    '0': [41.5, -74.0], '1': [42.5, -74.0], '2': [38.9, -77.0], '3': [33.5, -84.0],
+    '4': [41.5, -82.0], '5': [44.0, -93.0], '6': [41.8, -72.7], '7': [35.5, -97.5],
+    '8': [39.7, -104.9], '9': [37.8, -122.4],
+  };
+  return fallback[zip[0]] || null;
+}
 
 function stripHtml(str) {
   if (!str) return str;
@@ -79,10 +113,7 @@ function opCoords(op) {
   return null;
 }
 
-function zipToApproxCoords(zip) {
-  if (!zip || zip.length < 1) return null;
-  return ZIP_PREFIX_COORDS[zip[0]] || null;
-}
+
 
 function isJunkEmail(email) {
   if (!email) return false;
@@ -108,6 +139,7 @@ export default function StateOperators() {
   const [claimingOperator, setClaimingOperator] = useState(null);
   const [emailReferOperator, setEmailReferOperator] = useState(null);
   const [textSentId, setTextSentId] = useState(null);
+  const [zipCoords, setZipCoords] = useState(null);
 
   useEffect(() => {
     if (!stateCode) return;
@@ -117,6 +149,15 @@ export default function StateOperators() {
     });
     loadStateOperators();
   }, [stateCode]);
+
+  // Resolve ZIP to coords using prefix lookup
+  useEffect(() => {
+    if (zipFilter.length >= 3) {
+      setZipCoords(zipToApproxCoords(zipFilter));
+    } else {
+      setZipCoords(null);
+    }
+  }, [zipFilter]);
 
   const loadStateOperators = async () => {
     setLoading(true);
@@ -176,9 +217,6 @@ export default function StateOperators() {
       );
     }
 
-    // Sort by: ZIP proximity (if zip entered) + tier rank
-    const zipCoords = zipFilter.length >= 3 ? zipToApproxCoords(zipFilter) : null;
-
     list = [...list].sort((a, b) => {
       const tierDiff = tierRank(b) - tierRank(a);
 
@@ -197,7 +235,7 @@ export default function StateOperators() {
     });
 
     return list;
-  }, [operators, searchQuery, zipFilter]);
+  }, [operators, searchQuery, zipCoords]);
 
   const eliteOperators = useMemo(() => displayedOperators.filter(isElite), [displayedOperators]);
   const regularOperators = useMemo(() => displayedOperators.filter(op => !isElite(op)), [displayedOperators]);
@@ -224,6 +262,9 @@ export default function StateOperators() {
           <MapPin className="w-3 h-3" />
           {stripHtml(op.geocoded_city || op.city)}, {stripHtml(op.state)}
           {op.geocoded_zip || op.zip_code ? ` ${op.geocoded_zip || op.zip_code}` : ''}
+          {zipCoords && op.lat && op.lng ? (
+            <span className="ml-1 text-cyan-600 font-medium">· {Math.round(haversine(zipCoords, [op.lat, op.lng]))} mi</span>
+          ) : null}
         </p>
         <div className="space-y-1">
           {op.phone && (
@@ -327,34 +368,39 @@ export default function StateOperators() {
                   </MapContainer>
                 </div>
 
-                {/* Filters - moved below map */}
-                <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      placeholder="Search company or city..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="pl-9 h-11 bg-white border shadow"
-                    />
-                  </div>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      placeholder="Your ZIP code"
-                      value={zipFilter}
-                      onChange={e => setZipFilter(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                      className="pl-9 h-11 w-40 bg-white border shadow"
-                      maxLength={5}
-                    />
-                  </div>
-                </div>
-                {zipFilter.length >= 3 && (
-                  <p className="text-cyan-600 text-xs mt-2">📍 Sorting by proximity to ZIP {zipFilter} + membership tier</p>
-                )}
               </div>
             </section>
           )}
+
+          {/* Filters - always shown below map */}
+          <section className="py-6 px-4 bg-white border-b border-slate-200">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search company or city..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-9 h-11 bg-white border shadow"
+                />
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Your ZIP code"
+                  value={zipFilter}
+                  onChange={e => setZipFilter(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  className="pl-9 h-11 w-44 bg-white border shadow"
+                  maxLength={5}
+                />
+              </div>
+            </div>
+            {zipFilter.length >= 3 && (
+              <p className="text-cyan-600 text-xs mt-2 max-w-7xl mx-auto">
+                📍 {zipCoords ? `Sorting by distance from ZIP ${zipFilter}` : `Locating ZIP ${zipFilter}...`} + membership tier
+              </p>
+            )}
+          </section>
 
           {/* Featured / Elite Section */}
           {eliteOperators.length > 0 && (
