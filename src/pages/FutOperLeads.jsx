@@ -690,6 +690,22 @@ export default function FutOperLeads() {
                           <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={() => openEdit(op)}>
                             <Pencil className="w-3 h-3" />
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-xs px-2 border-red-300 text-red-600 hover:bg-red-50"
+                            onClick={async () => {
+                              if (!confirm(`Delete ${decodeHtml(op.company_name)}?`)) return;
+                              try {
+                                await base44.entities.FutureOperatorLead.delete(op.id);
+                                setOperators(prev => prev.filter(o => o.id !== op.id));
+                              } catch (e) {
+                                alert('Error: ' + e.message);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                           {op.source_url && (
                             <a href={op.source_url} target="_blank" rel="noopener noreferrer">
                               <Button size="sm" variant="outline" className="h-6 text-xs px-2">
