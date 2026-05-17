@@ -1,26 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
-import { ReferByEmailModal, logReferral } from '@/components/operators/ReferOperatorModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Search, MapPin, Building2, Phone, Globe, ChevronDown, ChevronRight, Mail, MessageSquare } from 'lucide-react';
+import { Search, Building2, ChevronRight } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
 import SharedFooter from '@/components/layout/SharedFooter';
-
-// Strip HTML tags from a string
-function stripHtml(str) {
-  if (!str) return str;
-  return str.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
-}
 
 // Fix Leaflet default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -30,7 +20,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// State center coords for map markers (approximate)
 const STATE_CENTERS = {
   AL: [32.8, -86.8], AK: [64.2, -153.4], AZ: [34.3, -111.1], AR: [34.8, -92.2], CA: [36.8, -119.4],
   CO: [39.0, -105.5], CT: [41.6, -72.7], DE: [39.0, -75.5], DC: [38.9, -77.0], FL: [27.8, -81.6],
@@ -45,43 +34,25 @@ const STATE_CENTERS = {
   WY: [43.1, -107.6],
 };
 
+function stripHtml(str) {
+  if (!str) return str;
+  return str.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+}
+
 export default function BrowseOperators() {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [operators, setOperators] = useState([]);
+  const [stateCounts, setStateCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedState, setSelectedState] = useState(null);
-  const [expandedStates, setExpandedStates] = useState({});
-  const [claimingOperator, setClaimingOperator] = useState(null);
-  const [emailReferOperator, setEmailReferOperator] = useState(null);
-  const [textSentId, setTextSentId] = useState(null); // tracks which op had text referral sent
-
-  const handleReferByText = async (op) => {
-    if (!currentUser) {
-      base44.auth.redirectToLogin(window.location.href);
-      return;
-    }
-    const referralCode = currentUser.id.slice(-8).toUpperCase();
-    const referralLink = `${window.location.origin}/OperatorPackages?ref=${referralCode}`;
-    const smsBody = `Hi ${op.company_name}! I think you'd love EstateSalen.com — it helps estate sale companies grow with digital listings, marketing tools & a national buyer network. Sign up here: ${referralLink}`;
-
-    // Log the referral + award points
-    await logReferral({ currentUser, operator: op, contactEmail: op.email || '' });
-    setTextSentId(op.id);
-    setTimeout(() => setTextSentId(null), 3000);
-
-    // Open SMS app with pre-filled message (phone if available, otherwise blank)
-    const phone = op.phone ? op.phone.replace(/\D/g, '') : '';
-    window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
-  };
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
       setIsAuthenticated(authed);
       if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
     });
-    loadOperators();
+    loadStateCounts();
   }, []);
 
   const isJunkEmail = (email) => {
@@ -91,16 +62,13 @@ export default function BrowseOperators() {
   };
   const cleanEmail = (record) => isJunkEmail(record.email) ? { ...record, email: '' } : record;
 
-  const loadOperators = async () => {
+  const loadStateCounts = async () => {
     try {
       const BATCH_SIZE = 500;
       const MAX_RECORDS = 12000;
       const offsets = [];
-      for (let offset = 0; offset < MAX_RECORDS; offset += BATCH_SIZE) {
-        offsets.push(offset);
-      }
+      for (let offset = 0; offset < MAX_RECORDS; offset += BATCH_SIZE) offsets.push(offset);
 
-      // Fetch all three sources in parallel
       const [netBatches, orgBatches, cleanBatches] = await Promise.all([
         Promise.all(offsets.map(o => base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
         Promise.all(offsets.slice(0, 4).map(o => base44.entities.EstatesalesOrgOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
@@ -108,31 +76,28 @@ export default function BrowseOperators() {
       ]);
 
       const netData = netBatches.flat().filter(Boolean);
-      const orgData = orgBatches.flat().filter(Boolean).map(r => ({
-        ...r, state: r.base_state, city: r.base_city, source: 'estatesales_org',
-      }));
+      const orgData = orgBatches.flat().filter(Boolean).map(r => ({ ...r, state: r.base_state, city: r.base_city }));
       const cleanData = cleanBatches.flat().filter(Boolean);
 
-      // Mirror FutOperLeads merge logic: prefer clean list, append unmerged raw records
       let combined;
       if (cleanData.length > 0) {
         const cleanSourceIds = new Set(cleanData.map(r => r.source_id).filter(Boolean));
-        const netUnmerged = netData.filter(r => !cleanSourceIds.has(r.id));
-        const orgUnmerged = orgData.filter(r => !cleanSourceIds.has(r.id));
-        combined = [...cleanData, ...netUnmerged, ...orgUnmerged];
+        combined = [...cleanData, ...netData.filter(r => !cleanSourceIds.has(r.id)), ...orgData.filter(r => !cleanSourceIds.has(r.id))];
       } else {
         combined = [...netData, ...orgData];
       }
 
-      // Deduplicate by id
       const seen = new Set();
-      const deduped = combined.filter(r => {
-        if (seen.has(r.id)) return false;
-        seen.add(r.id);
-        return true;
-      });
+      const deduped = combined.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
+      const all = deduped.map(cleanEmail);
 
-      setOperators(deduped.map(cleanEmail));
+      // Build per-state counts
+      const counts = {};
+      all.forEach(op => {
+        const state = stripHtml(op.state);
+        if (state && state.length === 2) counts[state] = (counts[state] || 0) + 1;
+      });
+      setStateCounts(counts);
     } catch (e) {
       console.error(e);
     } finally {
@@ -140,122 +105,69 @@ export default function BrowseOperators() {
     }
   };
 
-  // Group operators by state → city
-  const grouped = useMemo(() => {
-    const filtered = operators.filter(op => {
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        op.company_name?.toLowerCase().includes(q) ||
-        op.city?.toLowerCase().includes(q) ||
-        op.state?.toLowerCase().includes(q)
-      );
-    });
+  const totalCount = Object.values(stateCounts).reduce((s, c) => s + c, 0);
 
-    const result = {};
-    filtered.forEach(op => {
-      const state = stripHtml(op.state) || 'Unknown';
-      const city = stripHtml(op.city) || 'Unknown';
-      if (!result[state]) result[state] = {};
-      if (!result[state][city]) result[state][city] = [];
-      result[state][city].push(op);
-    });
-    return result;
-  }, [operators, searchQuery]);
+  const filteredStates = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return US_STATES.filter(s => stateCounts[s.code]);
+    return US_STATES.filter(s =>
+      stateCounts[s.code] && (s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q))
+    );
+  }, [stateCounts, searchQuery]);
 
-  const sortedStates = Object.keys(grouped).sort();
-
-  // Map markers: one per state showing count
-  const stateMarkers = useMemo(() => {
-    return sortedStates.map(stateCode => {
-      const center = STATE_CENTERS[stateCode];
+  const stateMarkers = useMemo(() =>
+    Object.keys(stateCounts).map(code => {
+      const center = STATE_CENTERS[code];
       if (!center) return null;
-      const count = Object.values(grouped[stateCode] || {}).reduce((s, arr) => s + arr.length, 0);
-      return { stateCode, center, count };
-    }).filter(Boolean);
-  }, [grouped, sortedStates]);
+      return { code, center, count: stateCounts[code] };
+    }).filter(Boolean),
+  [stateCounts]);
 
-  const toggleState = (stateCode) => {
-    setExpandedStates(prev => ({ ...prev, [stateCode]: !prev[stateCode] }));
-  };
-
-  const totalCount = operators.length;
-  const filteredCount = Object.values(grouped).reduce((s, cities) =>
-    s + Object.values(cities).reduce((cs, ops) => cs + ops.length, 0), 0);
+  const goToState = (code) => navigate(`/StateOperators?state=${code}`);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
-      <ClaimCompanyModal
-        operator={claimingOperator}
-        open={!!claimingOperator}
-        onClose={() => setClaimingOperator(null)}
-      />
-      <ReferByEmailModal
-        operator={emailReferOperator}
-        open={!!emailReferOperator}
-        onClose={() => setEmailReferOperator(null)}
-        currentUser={currentUser}
-      />
-
       {/* Hero */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-14 px-4">
+        <div className="max-w-5xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Building2 className="w-10 h-10 text-orange-400" />
             <h1 className="text-4xl sm:text-5xl font-serif font-bold text-white">Browse Estate Sale Companies</h1>
           </div>
           <p className="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
-            Discover {totalCount.toLocaleString()}+ estate sale companies across all 50 states
+            {loading ? 'Loading...' : `Discover ${totalCount.toLocaleString()}+ estate sale companies across all 50 states`}
           </p>
-
-          {/* Search */}
           <div className="max-w-xl mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input
-              placeholder="Search by company name, city, or state..."
+              placeholder="Search by state name..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-base bg-white/95 border-0 shadow-xl"
             />
           </div>
-          {searchQuery && (
-            <p className="text-slate-400 text-sm mt-3">Showing {filteredCount} of {totalCount} companies</p>
-          )}
         </div>
       </section>
 
-      {/* Interactive Map */}
+      {/* National Map */}
       <section className="py-8 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-2xl font-serif font-bold text-slate-900 mb-4 text-center">🗺️ Companies by State</h2>
           <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200">
-            <MapContainer
-              center={[39.8, -98.6]}
-              zoom={4}
-              style={{ height: '450px', width: '100%' }}
-              className="z-0"
-            >
+            <MapContainer center={[39.8, -98.6]} zoom={4} style={{ height: '420px', width: '100%' }} className="z-0">
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               />
-              {stateMarkers.map(({ stateCode, center, count }) => (
-                <Marker key={stateCode} position={center}>
+              {stateMarkers.map(({ code, center, count }) => (
+                <Marker key={code} position={center}>
                   <Popup>
-                    <div className="text-sm font-semibold">
-                      <p className="text-base font-bold text-slate-900">
-                        {US_STATES.find(s => s.code === stateCode)?.name || stateCode}
-                      </p>
-                      <p className="text-orange-600">{count} {count === 1 ? 'company' : 'companies'}</p>
-                      <button
-                        onClick={() => {
-                          setSelectedState(stateCode);
-                          document.getElementById(`state-${stateCode}`)?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="mt-2 text-cyan-600 hover:underline"
-                      >
+                    <div className="text-sm">
+                      <p className="font-bold text-slate-900 text-base">{US_STATES.find(s => s.code === code)?.name || code}</p>
+                      <p className="text-orange-600 mb-2">{count} {count === 1 ? 'company' : 'companies'}</p>
+                      <button onClick={() => goToState(code)} className="text-cyan-600 hover:underline font-medium">
                         View companies →
                       </button>
                     </div>
@@ -267,143 +179,32 @@ export default function BrowseOperators() {
         </div>
       </section>
 
-      {/* State Cards Grid */}
+      {/* State Grid */}
       <section className="py-12 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-serif font-bold text-slate-900 mb-2 text-center">📍 Browse by State</h2>
-          <p className="text-slate-500 text-center mb-8 text-sm">Select a state to explore estate sale companies in that area</p>
+          <h2 className="text-3xl font-serif font-bold text-slate-900 mb-2 text-center">📍 Select a State</h2>
+          <p className="text-slate-500 text-center mb-8 text-sm">Click any state to explore companies, view a map, and filter by ZIP code</p>
 
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-lg animate-pulse">Loading companies...</div>
-          ) : sortedStates.length === 0 ? (
-            <div className="text-center py-20 text-slate-400">No companies found.</div>
           ) : (
-            <div className="space-y-3">
-              {/* State Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-6">
-                {US_STATES.sort((a, b) => a.name.localeCompare(b.name)).map(s => {
-                  const stateData = grouped[s.code];
-                  if (!stateData) return null;
-                  const stateTotal = Object.values(stateData).reduce((sum, arr) => sum + arr.length, 0);
-                  const cityCount = Object.keys(stateData).length;
-                  const isExpanded = !!expandedStates[s.code];
-                  return (
-                    <button
-                      key={s.code}
-                      id={`state-${s.code}`}
-                      onClick={() => toggleState(s.code)}
-                      className={`text-left rounded-xl border-2 p-4 transition-all hover:shadow-md ${
-                        isExpanded
-                          ? 'border-cyan-500 bg-cyan-50 shadow-md'
-                          : 'border-slate-200 bg-white hover:border-cyan-300 hover:bg-cyan-50/50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`text-lg font-bold ${isExpanded ? 'text-cyan-700' : 'text-slate-800'}`}>{s.code}</span>
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-cyan-500" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                      </div>
-                      <p className="text-xs text-slate-600 font-medium leading-tight mb-2">{s.name}</p>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-lg font-bold text-orange-600">{stateTotal}</span>
-                        <span className="text-xs text-slate-400">{cityCount} {cityCount === 1 ? 'city' : 'cities'}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Expanded State Content */}
-              {sortedStates.filter(sc => expandedStates[sc]).map(stateCode => {
-                const cities = grouped[stateCode];
-                const sortedCities = Object.keys(cities).sort();
-                const stateName = US_STATES.find(s => s.code === stateCode)?.name || stateCode;
-                const stateTotal = sortedCities.reduce((s, c) => s + cities[c].length, 0);
-
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {filteredStates.sort((a, b) => a.name.localeCompare(b.name)).map(s => {
+                const count = stateCounts[s.code] || 0;
                 return (
-                  <div key={stateCode} className="bg-white rounded-2xl shadow-lg border border-cyan-200 overflow-hidden">
-                    <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 px-6 py-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold">{stateCode}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-white font-bold text-xl">{stateName}</h3>
-                          <p className="text-cyan-100 text-sm">{sortedCities.length} cities · {stateTotal} companies</p>
-                        </div>
-                      </div>
-                      <button onClick={() => toggleState(stateCode)} className="text-white/70 hover:text-white transition-colors">
-                        <ChevronDown className="w-5 h-5" />
-                      </button>
+                  <button
+                    key={s.code}
+                    onClick={() => goToState(s.code)}
+                    className="text-left rounded-xl border-2 border-slate-200 bg-white p-4 transition-all hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-md group"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-lg font-bold text-slate-800 group-hover:text-cyan-700">{s.code}</span>
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-cyan-500" />
                     </div>
-
-                    <div className="px-6 py-5 space-y-6">
-                      {sortedCities.map(city => (
-                        <div key={city}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <MapPin className="w-4 h-4 text-orange-500" />
-                            <h4 className="font-semibold text-slate-700">{stripHtml(city)}</h4>
-                            <Badge variant="outline" className="text-xs">{cities[city].length}</Badge>
-                          </div>
-                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                            {cities[city].map(op => (
-                              <Card key={op.id} className="hover:shadow-md transition-shadow border-slate-200">
-                                <CardContent className="p-4">
-                                  <h5 className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{stripHtml(op.company_name)}</h5>
-                                  <p className="text-xs text-slate-500 mb-2">{stripHtml(op.city)}, {stripHtml(op.state)}</p>
-                                  <div className="space-y-1">
-                                    {op.phone && (
-                                      <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
-                                        <Phone className="w-3 h-3" /> {stripHtml(op.phone)}
-                                      </a>
-                                    )}
-                                    {op.website_url && (
-                                      <a href={stripHtml(op.website_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-600 hover:underline">
-                                        <Globe className="w-3 h-3" /> Website
-                                      </a>
-                                    )}
-                                    {op.member_since && (
-                                      <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>
-                                    )}
-                                  </div>
-                                  {op.package_type ? (
-                                    <Badge className="mt-2 text-xs bg-orange-100 text-orange-700 border-orange-200">{stripHtml(op.package_type)}</Badge>
-                                  ) : (
-                                    <Button
-                                      size="sm"
-                                      className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7"
-                                      onClick={() => setClaimingOperator(op)}
-                                    >
-                                      Claim My Company
-                                    </Button>
-                                  )}
-                                  {isAuthenticated && (
-                                    <div className="mt-2 grid grid-cols-2 gap-1.5">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-xs border-green-300 text-green-700 hover:bg-green-50 h-7 gap-1"
-                                        onClick={() => handleReferByText(op)}
-                                      >
-                                        {textSentId === op.id ? '✅ Sent!' : '💬 Refer by Text'}
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-xs border-orange-300 text-orange-700 hover:bg-orange-50 h-7 gap-1"
-                                        onClick={() => setEmailReferOperator(op)}
-                                      >
-                                        ✉️ Refer by Email
-                                      </Button>
-                                    </div>
-                                  )}
-                                </CardContent>
-                              </Card>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                    <p className="text-xs text-slate-500 font-medium leading-tight mb-2">{s.name}</p>
+                    <span className="text-xl font-bold text-orange-600">{count.toLocaleString()}</span>
+                    <p className="text-xs text-slate-400">companies</p>
+                  </button>
                 );
               })}
             </div>
@@ -415,10 +216,8 @@ export default function BrowseOperators() {
       <section className="py-12 px-4 bg-slate-800 text-center">
         <h3 className="text-2xl font-serif font-bold text-white mb-3">Want to list your company?</h3>
         <p className="text-slate-400 mb-6">Join thousands of estate sale professionals on EstateSalen.com</p>
-        <Link to={createPageUrl('OperatorPackages')}>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 h-11 text-base">
-            Get Started
-          </Button>
+        <Link to="/OperatorPackages">
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 h-11 text-base">Get Started</Button>
         </Link>
       </section>
 
