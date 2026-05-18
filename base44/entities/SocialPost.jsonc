@@ -1,0 +1,127 @@
+{
+  "name": "SocialPost",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "post_type": {
+      "type": "string",
+      "enum": [
+        "tease",
+        "sneak_peek",
+        "early_line",
+        "final_tease",
+        "address_reveal",
+        "sale_day",
+        "day_2",
+        "final_hours",
+        "results",
+        "seller_lead"
+      ],
+      "default": "tease"
+    },
+    "phase": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "headline_options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "caption": {
+      "type": "string"
+    },
+    "image_prompt": {
+      "type": "string"
+    },
+    "generated_image_url": {
+      "type": "string"
+    },
+    "selected_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "address_allowed": {
+      "type": "boolean",
+      "default": false
+    },
+    "address_locked_message": {
+      "type": "string",
+      "default": "Address released 24 hours before doors open."
+    },
+    "scheduled_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "facebook",
+        "instagram"
+      ]
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "needs_review",
+        "approved",
+        "rejected",
+        "published"
+      ],
+      "default": "needs_review"
+    },
+    "publish_status": {
+      "type": "string",
+      "enum": [
+        "not_published",
+        "scheduled",
+        "published",
+        "failed"
+      ],
+      "default": "not_published"
+    },
+    "platform_post_ids": {
+      "type": "object"
+    },
+    "engagement_metrics": {
+      "type": "object"
+    },
+    "cta": {
+      "type": "string"
+    },
+    "audience_target": {
+      "type": "string"
+    },
+    "psychological_trigger": {
+      "type": "string"
+    },
+    "suggested_image_style": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "operator_id",
+    "sale_id",
+    "post_type"
+  ]
+}

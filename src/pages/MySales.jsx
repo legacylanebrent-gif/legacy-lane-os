@@ -12,8 +12,9 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles
       } from 'lucide-react';
+import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,8 @@ export default function MySales() {
   const [buyoutSale, setBuyoutSale] = useState(null);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [expensesSale, setExpensesSale] = useState(null);
+  const [showSocialModal, setShowSocialModal] = useState(false);
+  const [socialSale, setSocialSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -177,6 +180,16 @@ export default function MySales() {
           setExpensesSale(null);
         }}
         sale={expensesSale}
+        user={user}
+      />
+
+      <SocialCampaignModal
+        open={showSocialModal}
+        onClose={() => {
+          setShowSocialModal(false);
+          setSocialSale(null);
+        }}
+        sale={socialSale}
         user={user}
       />
 
@@ -483,6 +496,18 @@ export default function MySales() {
                             <Users className="w-3 h-3 mr-1" />
                             Early Sign In
                           </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSocialSale(sale);
+                            setShowSocialModal(true);
+                          }}
+                          className="w-full border-purple-500 text-black hover:bg-purple-50"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Social Media Posts
                         </Button>
                         </div>
                     </div>

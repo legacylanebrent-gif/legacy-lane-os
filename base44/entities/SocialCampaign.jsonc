@@ -1,0 +1,73 @@
+{
+  "name": "SocialCampaign",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "campaign_name": {
+      "type": "string"
+    },
+    "campaign_type": {
+      "type": "string",
+      "default": "estate_sale_promotion"
+    },
+    "address_visibility_rule": {
+      "type": "string",
+      "default": "hidden_until_24hr"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "generated",
+        "partially_approved",
+        "approved",
+        "scheduled",
+        "published",
+        "failed"
+      ],
+      "default": "draft"
+    },
+    "generated_by": {
+      "type": "string",
+      "enum": [
+        "operator",
+        "admin",
+        "ai_agent"
+      ],
+      "default": "ai_agent"
+    },
+    "sale_start_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "address_reveal_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "channels_selected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "facebook",
+        "instagram"
+      ]
+    },
+    "campaign_summary": {
+      "type": "string"
+    },
+    "performance_summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "operator_id",
+    "sale_id"
+  ]
+}
