@@ -4,8 +4,8 @@ import { Calculator, Loader2, ChevronDown } from 'lucide-react';
 
 // 1 platform-generated estate sale lead/month per operator = 12/yr
 const PLATFORM_LEADS_PER_OPERATOR_PER_YEAR = 12;
-// 20% of those estate sales result in a real estate listing
-const LEAD_TO_LISTING_PCT = 0.20;
+// 10% of those estate sales result in a real estate listing
+const LEAD_TO_LISTING_PCT = 0.10;
 // 20% referral fee paid to EstateSalen on the agent's commission
 const REFERRAL_FEE_PCT = 0.20;
 
@@ -230,7 +230,7 @@ export default function TerritoryROICalc() {
             <span className="font-bold text-slate-900 text-sm">{result.platformLeadsPerYear}</span>
           </div>
           <div className="bg-orange-100 border border-orange-300 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-orange-800 text-xs font-medium">Est. listing conversions <span className="text-orange-600 font-normal">(20%)</span></span>
+            <span className="text-orange-800 text-xs font-medium">Est. listing conversions <span className="text-orange-600 font-normal">(10%)</span></span>
             <span className="font-bold text-orange-900 text-sm">{result.estimatedListings} / yr</span>
           </div>
 
@@ -249,7 +249,7 @@ export default function TerritoryROICalc() {
             <span className="font-bold text-emerald-700 text-base">${result.netGCI.toLocaleString()}</span>
           </div>
           <p className="text-orange-500 text-xs leading-relaxed pt-1">
-            {operatorCount} operators × 1 platform lead/mo × 20% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
+            {operatorCount} operators × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
           </p>
         </div>
       )}
