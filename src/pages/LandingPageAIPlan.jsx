@@ -3,12 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, Sparkles, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const PLAN_ITEMS = [
   'Where your current sale process is leaking the most time',
   'Which part of your workflow should be fixed first',
-  'How Legacy Lane OS can help reduce setup friction',
+  'How EstateSalen can help reduce setup friction',
   'What your next sale could look like with a better system',
   'Recommended next steps based on your answers',
 ];
@@ -64,9 +65,9 @@ function generatePlan(answers) {
       'Step 5: Track what slowed the sale down so the next sale becomes easier, not harder.',
     ],
     legacyLaneRecommendation:
-      'Legacy Lane OS is designed to turn this plan into a working system by combining AI-assisted pricing, inventory organization, sale setup workflows, team task management, marketing support, and done-for-you guidance.',
+      'EstateSalen is designed to turn this plan into a working system by combining AI-assisted pricing, inventory organization, sale setup workflows, team task management, marketing support, and done-for-you guidance.',
     ctaMessage:
-      'The best next step is to map Legacy Lane OS to your next actual estate sale and show exactly where it can save time and improve control.',
+      'The best next step is to map EstateSalen to your next actual estate sale and show exactly where it can save time and improve control.',
   };
 }
 
@@ -100,9 +101,9 @@ function IntakeScreen({ onComplete }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-serif font-bold text-slate-900">Confirm Your Sale Details</h2>
-        <p className="text-slate-500 mt-1 text-sm">Answer these final questions so Legacy Lane OS can generate a more specific improvement plan.</p>
-      </div>
+         <h2 className="text-2xl font-serif font-bold text-slate-900">Confirm Your Sale Details</h2>
+         <p className="text-slate-500 mt-1 text-sm">Answer these final questions so EstateSalen can generate a more specific improvement plan.</p>
+       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <SelectField id="salesPerMonth" label="How many estate sales do you run per month?" options={SALES_PER_MONTH} required />
         <SelectField id="biggestPain" label="What is your biggest current challenge?" options={BIGGEST_PAIN} required />
@@ -216,12 +217,12 @@ function ResultScreen({ plan, onRetake }) {
         </div>
       </div>
 
-      {/* Legacy Lane Recommendation */}
-      <div className="bg-slate-900 text-white rounded-xl p-4 space-y-2">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Legacy Lane OS Recommendation</p>
-        <p className="text-sm text-slate-200 leading-relaxed">{plan.legacyLaneRecommendation}</p>
-        <p className="text-sm text-orange-300 leading-relaxed">{plan.ctaMessage}</p>
-      </div>
+      {/* EstateSalen Recommendation */}
+       <div className="bg-slate-900 text-white rounded-xl p-4 space-y-2">
+         <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">EstateSalen Recommendation</p>
+         <p className="text-sm text-slate-200 leading-relaxed">{plan.legacyLaneRecommendation}</p>
+         <p className="text-sm text-orange-300 leading-relaxed">{plan.ctaMessage}</p>
+       </div>
 
       {/* CTAs */}
       <div className="space-y-3 pt-2">
@@ -229,7 +230,7 @@ function ResultScreen({ plan, onRetake }) {
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 rounded-xl text-base"
           onClick={() => window.location.href = '/LandingPageOfferClose'}
         >
-          Book My Legacy Lane OS Demo
+          Book My EstateSalen Demo
         </Button>
         <Button
           variant="outline"
@@ -299,6 +300,13 @@ export default function LandingPageAIPlan() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -309,7 +317,7 @@ export default function LandingPageAIPlan() {
             You Took the Quiz. Now Let's Turn Your Results Into a Plan.
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Legacy Lane OS can generate a personalized next-sale improvement plan based on your setup time, pricing process, team workflow, marketing exposure, and biggest bottlenecks.
+            EstateSalen can generate a personalized next-sale improvement plan based on your setup time, pricing process, team workflow, marketing exposure, and biggest bottlenecks.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
@@ -350,7 +358,7 @@ export default function LandingPageAIPlan() {
           <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-3">
             <h3 className="text-xl font-bold">Takes Less Than 2 Minutes</h3>
             <p className="text-slate-300 text-sm leading-relaxed">
-              Answer a few questions about your process and we will generate a 5-step next-sale improvement plan with a diagnosis, a first fix, and a Legacy Lane OS recommendation specific to your company.
+              Answer a few questions about your process and we will generate a 5-step next-sale improvement plan with a diagnosis, a first fix, and an EstateSalen recommendation specific to your company.
             </p>
           </div>
         </div>
