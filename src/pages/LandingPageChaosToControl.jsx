@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const BEFORE_ITEMS = [
@@ -283,12 +284,12 @@ function ResultScreen({ score, onRetake }) {
 
       <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Recommendation</p>
-        <p className="text-sm text-slate-700 leading-relaxed">Legacy Lane OS helps transform estate sales from chaotic, manual processes into organized, repeatable, system-driven operations.</p>
+        <p className="text-sm text-slate-700 leading-relaxed">EstateSalen helps transform estate sales from chaotic, manual processes into organized, repeatable, system-driven operations.</p>
       </div>
 
       <div className="space-y-3 pt-2">
         <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 rounded-xl text-base">
-          See How Legacy Lane OS Creates Control
+          See How EstateSalen Creates Control
         </Button>
         <Button
           variant="outline"
@@ -336,6 +337,13 @@ export default function LandingPageChaosToControl() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
@@ -408,10 +416,10 @@ export default function LandingPageChaosToControl() {
             </p>
           </div>
           <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-3">
-            <h3 className="text-xl font-bold">Legacy Lane OS Turns Chaos Into Control</h3>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Legacy Lane OS is a done-for-you, AI-assisted operating system that helps estate sale companies reduce setup time, organize inventory, support pricing decisions, streamline team workflows, and improve marketing without adding complexity.
-            </p>
+            <h3 className="text-xl font-bold">EstateSalen Turns Chaos Into Control</h3>
+             <p className="text-slate-300 text-sm leading-relaxed">
+               EstateSalen is a done-for-you, AI-assisted operating system that helps estate sale companies reduce setup time, organize inventory, support pricing decisions, streamline team workflows, and improve marketing without adding complexity.
+             </p>
           </div>
         </div>
       </section>
