@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight, TrendingUp, Users, Repeat, BarChart3, Megaphone, Star, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const STUCK_PROBLEMS = [
@@ -115,7 +116,7 @@ function getResult(score) {
     levelBg: 'bg-red-50 border-red-200',
     scaleRisk: 'Your business may be relying too heavily on you, memory, manual decisions, and sale-by-sale problem solving.',
     primaryBottleneck: 'Your biggest bottleneck is likely the lack of a repeatable operating system.',
-    recommendation: 'Legacy Lane OS can help create structure around setup, pricing, team tasks, inventory, and marketing so your business is not dependent on starting over every sale.',
+    recommendation: 'EstateSalen can help create structure around setup, pricing, team tasks, inventory, and marketing so your business is not dependent on starting over every sale.',
     nextStep: 'Start by systemizing your next sale from intake through sale day.',
   };
   if (score <= 24) return {
@@ -124,7 +125,7 @@ function getResult(score) {
     levelBg: 'bg-orange-50 border-orange-200',
     scaleRisk: 'You have some structure in place, but your growth may still be slowed by inconsistent workflows, manual setup, and owner involvement.',
     primaryBottleneck: 'Your biggest bottleneck is likely inconsistency across pricing, setup, team coordination, or marketing.',
-    recommendation: 'Legacy Lane OS can help connect your current process into a more repeatable, AI-assisted operating system.',
+    recommendation: 'EstateSalen can help connect your current process into a more repeatable, AI-assisted operating system.',
     nextStep: 'Identify which part of your sale process is still causing the most drag.',
   };
   return {
@@ -133,7 +134,7 @@ function getResult(score) {
     levelBg: 'bg-green-50 border-green-200',
     scaleRisk: 'You are already operating with more structure than many estate sale companies, but optimization may still increase profitability and reduce workload.',
     primaryBottleneck: 'Your opportunity is likely in optimization, automation, better item exposure, and reducing remaining manual tasks.',
-    recommendation: 'Legacy Lane OS can help you tighten your systems, improve consistency, and support higher sale volume without adding chaos.',
+    recommendation: 'EstateSalen can help you tighten your systems, improve consistency, and support higher sale volume without adding chaos.',
     nextStep: 'Look for the remaining 3–10 hours per sale that can be reduced through AI-assisted workflows.',
   };
 }
@@ -325,7 +326,7 @@ function ResultScreen({ scaleScore, onRetake }) {
 
       <div className="space-y-3 pt-2">
         <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 rounded-xl text-base">
-          Book a Legacy Lane OS Demo
+          Book an EstateSalen Demo
         </Button>
         <Button
           variant="outline"
@@ -378,6 +379,13 @@ export default function LandingPageScaleReady() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
@@ -461,10 +469,10 @@ export default function LandingPageScaleReady() {
             </p>
           </div>
           <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm space-y-3">
-            <h3 className="text-xl font-bold">Legacy Lane OS Helps Close That Gap</h3>
-            <p className="text-slate-300 leading-relaxed text-sm">
-              Legacy Lane OS gives estate sale companies a done-for-you, AI-assisted operating system designed to reduce setup time, improve pricing support, create better marketing exposure, organize teams, and help owners stop rebuilding every sale from scratch.
-            </p>
+            <h3 className="text-xl font-bold">EstateSalen Helps Close That Gap</h3>
+             <p className="text-slate-300 leading-relaxed text-sm">
+               EstateSalen gives estate sale companies a done-for-you, AI-assisted operating system designed to reduce setup time, improve pricing support, create better marketing exposure, organize teams, and help owners stop rebuilding every sale from scratch.
+             </p>
           </div>
         </div>
       </section>
