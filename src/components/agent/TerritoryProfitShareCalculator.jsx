@@ -4,9 +4,10 @@ import { TrendingUp } from 'lucide-react';
 
 // Real subscription prices from the database
 const OPERATOR_PLANS = [
-  { name: 'Growth', price: 49 },
+  { name: 'Starter', price: 49 },
   { name: 'Professional', price: 129 },
-  { name: 'Enterprise', price: 197 },
+  { name: 'Growth', price: 197 },
+  { name: 'Elite', price: 277 },
 ];
 const RESELLER_PLAN_PRICE = 47; // Reseller Pro
 const EXPENSE_MARGIN = 0.35; // 35% expenses against subscription
@@ -144,7 +145,7 @@ export default function TerritoryProfitShareCalculator() {
       </div>
 
       <p className="text-slate-400 text-xs mt-4 text-center">
-        Based on real platform subscription prices: Operator Growth $49/mo · Professional $129/mo · Enterprise $197/mo · Reseller Pro $47/mo.
+        Based on real platform subscription prices: Operator Starter $49/mo · Professional $129/mo · Growth $197/mo · Elite $277/mo · Reseller Pro $47/mo.
         Calculation: 35% operator expense margin deducted from gross subscription → 20% profit share applied to the remaining 65% net profit.
         Example: $129/mo operator × 65% × 20% = ~$16.77/mo to you.
         Actual amounts subject to final agreement terms.

@@ -329,16 +329,16 @@ export default function AgentSignup() {
                   </p>
                   <div className="flex gap-3 mt-3">
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">$129/mo operator</p>
+                      <p className="text-blue-900 font-bold text-sm">Professional $129/mo</p>
                       <p className="text-blue-500 text-xs">= ~$16.77/mo to you</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">5 operators recruited</p>
-                      <p className="text-blue-500 text-xs">= ~$83.85/mo passive</p>
+                      <p className="text-blue-900 font-bold text-sm">Growth $197/mo</p>
+                      <p className="text-blue-500 text-xs">= ~$25.61/mo to you</p>
                     </div>
                     <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">10 operators</p>
-                      <p className="text-blue-500 text-xs">= ~$167.70/mo passive</p>
+                      <p className="text-blue-900 font-bold text-sm">Elite $277/mo</p>
+                      <p className="text-blue-500 text-xs">= ~$36.01/mo to you</p>
                     </div>
                   </div>
                 </div>
