@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const FOR_ITEMS = [
@@ -90,7 +91,7 @@ function getFitResult(total) {
     fitLevel: 'Not Quite Ready Yet',
     levelColor: 'text-yellow-600',
     levelBg: 'bg-yellow-50 border-yellow-200',
-    fitReason: 'Your responses suggest Legacy Lane OS may not be urgent for your company right now, unless you are preparing for growth or want to reduce manual work.',
+    fitReason: 'Your responses suggest EstateSalen may not be urgent for your company right now, unless you are preparing for growth or want to reduce manual work.',
     bestNextStep: 'Start with the Time & Profit Calculator to see whether hidden setup or pricing leaks exist.',
     recommendation: 'You may benefit from education first before moving into a full operating system.',
   };
@@ -98,16 +99,16 @@ function getFitResult(total) {
     fitLevel: 'Possible Fit',
     levelColor: 'text-orange-600',
     levelBg: 'bg-orange-50 border-orange-200',
-    fitReason: 'You have signs of setup, pricing, marketing, or team workflow friction that Legacy Lane OS may help improve.',
-    bestNextStep: 'Book a short demo to see whether the system matches your current workflow.',
-    recommendation: 'Legacy Lane OS may help you reduce manual work and bring more structure to each sale.',
+    fitReason: 'You have signs of setup, pricing, marketing, or team workflow friction that EstateSalen may help improve.',
+     bestNextStep: 'Book a short demo to see whether the system matches your current workflow.',
+     recommendation: 'EstateSalen may help you reduce manual work and bring more structure to each sale.',
   };
   return {
     fitLevel: 'Strong Fit',
     levelColor: 'text-green-600',
     levelBg: 'bg-green-50 border-green-200',
-    fitReason: 'Your company appears to have the exact needs Legacy Lane OS was built for: saving time, improving pricing support, organizing teams, strengthening marketing, and preparing for growth.',
-    bestNextStep: 'Book a demo and map Legacy Lane OS to your next actual estate sale.',
+    fitReason: 'Your company appears to have the exact needs EstateSalen was built for: saving time, improving pricing support, organizing teams, strengthening marketing, and preparing for growth.',
+     bestNextStep: 'Book a demo and map EstateSalen to your next actual estate sale.',
     recommendation: 'You are likely a strong candidate for the guided onboarding path.',
   };
 }
@@ -140,8 +141,8 @@ function FitQuizScreen({ onComplete }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-serif font-bold text-slate-900">Legacy Lane OS Fit Finder</h2>
-        <p className="text-slate-500 mt-1 text-sm">Answer a few questions to see whether Legacy Lane OS is the right next step for your estate sale company.</p>
+        <h2 className="text-2xl font-serif font-bold text-slate-900">EstateSalen Fit Finder</h2>
+         <p className="text-slate-500 mt-1 text-sm">Answer a few questions to see whether EstateSalen is the right next step for your estate sale company.</p>
       </div>
 
       <div className="space-y-1">
@@ -226,7 +227,7 @@ function LeadCaptureScreen({ fitScore, onSubmit }) {
       </div>
       <div>
         <h2 className="text-2xl font-serif font-bold text-slate-900">See Your Fit Result</h2>
-        <p className="text-slate-500 mt-1 text-sm">Enter your information to see whether Legacy Lane OS is a strong fit for your company.</p>
+        <p className="text-slate-500 mt-1 text-sm">Enter your information to see whether EstateSalen is a strong fit for your company.</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -260,7 +261,7 @@ function ResultScreen({ result, onRetake }) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-1">
-        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Your Legacy Lane OS Fit Result</p>
+        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Your EstateSalen Fit Result</p>
         <h2 className="text-2xl font-serif font-bold text-slate-900">Here Is Where You Stand</h2>
       </div>
 
@@ -343,6 +344,13 @@ export default function LandingPageFitFinder() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -353,7 +361,7 @@ export default function LandingPageFitFinder() {
             Not Every Estate Sale Company Needs More Software. Some Need a Better Operating System.
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Legacy Lane OS is built for estate sale companies that want to save time, reduce setup chaos, improve pricing support, organize teams, and run more repeatable sales.
+            EstateSalen is built for estate sale companies that want to save time, reduce setup chaos, improve pricing support, organize teams, and run more repeatable sales.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
@@ -418,7 +426,7 @@ export default function LandingPageFitFinder() {
       {/* Final CTA */}
       <section className="py-20 px-6 bg-slate-900 text-white text-center">
         <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold">Find Out If Legacy Lane OS Fits Your Business</h2>
+          <h2 className="text-3xl font-serif font-bold">Find Out If EstateSalen Fits Your Business</h2>
           <p className="text-slate-300 text-lg">Take the quick quiz and see whether your company is a strong fit, a possible fit, or not quite ready yet.</p>
           <Button
             onClick={() => setStep('fitQuiz')}
