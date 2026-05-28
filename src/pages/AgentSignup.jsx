@@ -27,7 +27,7 @@ const exclusiveFeatures = [
   'Priority or exclusive access to territory-generated leads',
   'Stronger positioning with estate sale company partners',
   'Territory protection subject to performance standards',
-  '20% referral fee still applies on closed platform-generated deals',
+  '20% Referral Fee to Owners of EstateSalen* still applies on closed platform-generated deals',
   'Recruit estate sale companies & resellers — earn 20% of their monthly platform profit ... not only do you earn listings, you also earn residual income on the territory you build in recruiting',
   'Build a passive income stream from every operator you bring into your territory',
   'Receive priority access to Own a Territory on our sister platform Houszu for FSBO, Investor, Buyers and Home Seller leads and listings service',
@@ -484,14 +484,54 @@ export default function AgentSignup() {
         </div>
       </section>
 
-      {/* ── LEGAL DISCLAIMER ─────────────────────────────────────────── */}
-      <section className="py-10 px-4 bg-slate-950">
+      {/* ── REFERRAL FEE LEGAL DISCLOSURE ───────────────────────────── */}
+      <section className="py-16 px-4 bg-slate-950 border-t border-slate-800">
         <div className="max-w-4xl mx-auto">
-          <div className="flex gap-3 items-start">
-            <AlertTriangle className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" />
-            <p className="text-slate-500 text-xs leading-relaxed">
-              <strong className="text-slate-400">Legal & Compliance Notice:</strong> EstateSalen.com is not acting as a real estate broker and does not directly receive real estate commissions. Referral compensation must be handled through the agent's brokerage and in compliance with all applicable state real estate laws, brokerage policies, referral agreements, and RESPA-related requirements. Final referral agreement language will be provided separately by legal counsel. This page is for informational and application purposes only and does not constitute a binding agreement.
-            </p>
+          <div className="flex gap-3 items-start mb-8">
+            <ShieldCheck className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
+            <h3 className="text-slate-300 text-sm font-bold uppercase tracking-widest">Real Estate Referral Fee — Legal Disclosure</h3>
+          </div>
+
+          <div className="space-y-6 text-slate-400 text-sm leading-relaxed">
+
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
+              <p className="text-slate-300 font-semibold mb-2">Brokerage of Record for All Real Estate Referrals</p>
+              <p>
+                All real estate referral fees generated through EstateSalen.com — including but not limited to platform-generated leads, estate sale company introductions, territory-based referrals, and any Houszu-connected leads or services — are processed exclusively through the licensed real estate brokerage of record: <strong className="text-slate-200">Keller Williams Realty</strong>, under the supervision and license of <strong className="text-slate-200">Brent Cramp, Realtor® Salesperson</strong>.
+              </p>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
+              <p className="text-slate-300 font-semibold mb-2">How Real Estate Referral Fees Work</p>
+              <p className="mb-3">
+                A real estate referral fee is a compensation paid by one licensed real estate professional to another in exchange for introducing or directing a client who subsequently enters into a real estate transaction (purchase, sale, or lease). Under applicable federal and state real estate law — including the Real Estate Settlement Procedures Act (RESPA) and applicable state licensing statutes — referral fees may only be paid between licensed real estate brokers and/or salespersons operating within their respective brokerage relationships.
+              </p>
+              <p>
+                EstateSalen.com does not receive, collect, or disburse real estate referral fees directly. All referral compensation flows through and is administered by the licensed brokerage — <strong className="text-slate-200">Keller Williams Realty / Brent Cramp, Realtor® Salesperson</strong> — in compliance with the applicable state's real estate commission rules and the brokerage's internal policies.
+              </p>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
+              <p className="text-slate-300 font-semibold mb-2">Receiving Agent Requirements</p>
+              <p>
+                Any real estate agent who wishes to receive referrals through EstateSalen.com must: (1) hold a current, active real estate salesperson or broker license in the state where the referred transaction takes place; (2) be affiliated with and operating under a licensed real estate brokerage in that state; and (3) execute a separate Referral Fee Agreement with the brokerage of record prior to any referral being formally transmitted. Referral compensation is contingent solely upon a successful closing and is paid directly to the receiving agent's brokerage, not to the individual agent.
+              </p>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
+              <p className="text-slate-300 font-semibold mb-2">* EstateSalen Referral Fee Note</p>
+              <p>
+                Where referral fees are described as payable to "Owners of EstateSalen," this refers to compensation distributed through the licensed brokerage entity and processed in accordance with applicable state and federal law. No unlicensed individual or entity receives any portion of a referral fee. All disbursements are subject to brokerage approval, written agreement, and compliance with RESPA, state real estate commission rules, and Keller Williams Realty brokerage policy.
+              </p>
+            </div>
+
+            <div className="flex gap-3 items-start pt-2">
+              <AlertTriangle className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+              <p className="text-slate-500 text-xs leading-relaxed">
+                <strong className="text-slate-400">General Disclaimer:</strong> This page is for informational and application purposes only and does not constitute a binding legal agreement. Final referral agreement language will be provided separately prior to any referral being transmitted. EstateSalen.com reserves the right to modify program terms at any time. Territory access is not guaranteed and is subject to availability, performance standards, and brokerage approval. All real estate activity is subject to applicable state law, NAR Code of Ethics, and the policies of the agent's affiliated brokerage.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
