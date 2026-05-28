@@ -59,8 +59,7 @@ export default function LandingPageSaleLeak() {
       {/* Header with Logo */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src="https://estatesalen.com/logo.png" alt="EstateSalen" className="h-8 w-auto" />
-          <span className="text-white font-bold text-lg">EstateSalen</span>
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
         </Link>
       </div>
 
