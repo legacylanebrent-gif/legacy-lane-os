@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SaleLeakQuizModal from '@/components/landing/SaleLeakQuizModal';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, Clock, DollarSign, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const BEFORE_AFTER = [
   { before: 'Setup feels chaotic', after: 'Setup is faster' },
@@ -55,6 +56,14 @@ export default function LandingPageSaleLeak() {
     <div className="min-h-screen bg-white font-sans">
       <SaleLeakQuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <img src="https://estatesalen.com/logo.png" alt="EstateSalen" className="h-8 w-auto" />
+          <span className="text-white font-bold text-lg">EstateSalen</span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -79,7 +88,7 @@ export default function LandingPageSaleLeak() {
                 </li>
               ))}
             </ul>
-            <p className="text-slate-400 text-sm pt-2">Legacy Lane OS helps estate sale companies cut 3–10 hours off setup, reduce unnecessary manual work, and use AI-assisted tools to price, organize, market, and manage sales more efficiently.</p>
+            <p className="text-slate-400 text-sm pt-2">EstateSalen helps estate sale companies cut 3–10 hours off setup, reduce unnecessary manual work, and use AI-assisted tools to price, organize, market, and manage sales more efficiently.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -93,7 +102,7 @@ export default function LandingPageSaleLeak() {
               variant="outline"
               className="border-white/40 text-white bg-white/10 hover:bg-white/20 text-lg font-semibold px-10 py-6 rounded-xl"
             >
-              See How Legacy Lane OS Works
+              See How EstateSalen Works
             </Button>
           </div>
         </div>
@@ -165,8 +174,8 @@ export default function LandingPageSaleLeak() {
       {/* Section 3: The Solution */}
       <section className="py-16 px-6 bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto space-y-8">
-          <h2 className="text-3xl font-serif font-bold">The Legacy Lane OS Solution</h2>
-          <p className="text-slate-300 text-lg">Legacy Lane OS helps estate sale companies run cleaner, faster, more profitable sales.</p>
+          <h2 className="text-3xl font-serif font-bold">The EstateSalen Solution</h2>
+          <p className="text-slate-300 text-lg">EstateSalen helps estate sale companies run cleaner, faster, more profitable sales.</p>
           <p className="text-slate-400">It combines:</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {SOLUTION_FEATURES.map(f => (
@@ -183,10 +192,10 @@ export default function LandingPageSaleLeak() {
       {/* Section 4: Before / After */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto space-y-8">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">Before & After Legacy Lane OS</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Before & After EstateSalen</h2>
+            <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <p className="font-bold text-slate-700 text-lg mb-3">Before Legacy Lane OS</p>
+             <p className="font-bold text-slate-700 text-lg mb-3">Before EstateSalen</p>
               {BEFORE_AFTER.map(item => (
                 <div key={item.before} className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-lg px-4 py-3 text-sm text-slate-700">
                   <span className="text-red-400 font-bold text-base">✕</span>
@@ -195,7 +204,7 @@ export default function LandingPageSaleLeak() {
               ))}
             </div>
             <div className="space-y-3">
-              <p className="font-bold text-slate-700 text-lg mb-3">After Legacy Lane OS</p>
+              <p className="font-bold text-slate-700 text-lg mb-3">After EstateSalen</p>
               {BEFORE_AFTER.map(item => (
                 <div key={item.after} className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-slate-700">
                   <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -212,7 +221,7 @@ export default function LandingPageSaleLeak() {
         <div className="max-w-4xl mx-auto space-y-8 text-center">
           <h2 className="text-3xl font-serif font-bold text-slate-900">Spend Less Time and Profit More from Every Sale</h2>
           <p className="text-slate-600 max-w-2xl mx-auto text-lg">
-            Legacy Lane OS is built for estate sale companies that want to save time, reduce manual work, and increase sale-day performance without hiring more people or piecing together disconnected tools.
+            EstateSalen is built for estate sale companies that want to save time, reduce manual work, and increase sale-day performance without hiring more people or piecing together disconnected tools.
           </p>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 max-w-3xl mx-auto">
             {SAVE_FEATURES.map(f => (
