@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Calculator, Loader2, ChevronDown } from 'lucide-react';
 
-const AVG_SALES_PER_OPERATOR = 12;
+// 1 platform-generated estate sale lead/month per operator = 12/yr
+const PLATFORM_LEADS_PER_OPERATOR_PER_YEAR = 12;
+// 20% of those estate sales result in a real estate listing
 const LEAD_TO_LISTING_PCT = 0.20;
-const DEFAULT_COMMISSION_PCT = 3;
-const REFERRAL_FEE_PCT = 0.25;
+// 20% referral fee paid to EstateSalen on the agent's commission
+const REFERRAL_FEE_PCT = 0.20;
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -22,11 +24,12 @@ export default function TerritoryROICalc() {
   const [operatorCount, setOperatorCount] = useState(null);
   const [avgSalePrice, setAvgSalePrice] = useState('');
   const [priceLoading, setPriceLoading] = useState(false);
+  const [commissionPct, setCommissionPct] = useState('');
   const [result, setResult] = useState(null);
 
   // When state changes, load available counties from our operator DB
   useEffect(() => {
-    if (!state) { setCounties([]); setCounty(''); setOperatorCount(null); setAvgSalePrice(''); setResult(null); return; }
+    if (!state) { setCounties([]); setCounty(''); setOperatorCount(null); setAvgSalePrice(''); setCommissionPct(''); setResult(null); return; }
 
     const load = async () => {
       setCountiesLoading(true);
@@ -87,16 +90,21 @@ export default function TerritoryROICalc() {
     lookupPrice();
   }, [county]);
 
-  const canCalc = county && avgSalePrice && !priceLoading && operatorCount !== null;
+  const canCalc = county && avgSalePrice && commissionPct && !priceLoading && operatorCount !== null;
 
   const calculate = () => {
-    const annualEstateSales = operatorCount * AVG_SALES_PER_OPERATOR;
-    const estimatedListings = Math.round(annualEstateSales * LEAD_TO_LISTING_PCT);
+    // Step 1: platform generates 1 lead/month per operator = 12 estate sales/yr per operator
+    const platformLeadsPerYear = operatorCount * PLATFORM_LEADS_PER_OPERATOR_PER_YEAR;
+    // Step 2: 20% of those estate sales result in a listing
+    const estimatedListings = Math.round(platformLeadsPerYear * LEAD_TO_LISTING_PCT);
+    // Step 3: GCI = listings × avg home price × agent commission %
     const price = parseInt(avgSalePrice) || 350000;
-    const grossGCI = Math.round(estimatedListings * price * (DEFAULT_COMMISSION_PCT / 100));
+    const agentCommission = (parseFloat(commissionPct) || 3) / 100;
+    const grossGCI = Math.round(estimatedListings * price * agentCommission);
+    // Step 4: 20% referral fee paid to EstateSalen on that GCI
     const referralFee = Math.round(grossGCI * REFERRAL_FEE_PCT);
     const netGCI = grossGCI - referralFee;
-    setResult({ annualEstateSales, estimatedListings, grossGCI, referralFee, netGCI });
+    setResult({ platformLeadsPerYear, estimatedListings, grossGCI, referralFee, netGCI, commissionPct: parseFloat(commissionPct) });
   };
 
   return (
@@ -183,6 +191,27 @@ export default function TerritoryROICalc() {
           </div>
         )}
 
+        {/* Agent commission % - manual input */}
+        {county && (
+          <div>
+            <label className="text-orange-700 text-xs font-medium block mb-1">Your Local Avg. RE Commission %</label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0.5"
+                max="10"
+                step="0.25"
+                className="w-full border border-orange-200 bg-white rounded-lg px-2.5 pr-8 py-1.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                placeholder="e.g. 2.5"
+                value={commissionPct}
+                onChange={e => { setCommissionPct(e.target.value); setResult(null); }}
+              />
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+            </div>
+            <p className="text-orange-500 text-xs mt-0.5">Agent's side of the commission only.</p>
+          </div>
+        )}
+
         <button
           onClick={calculate}
           disabled={!canCalc}
@@ -194,28 +223,33 @@ export default function TerritoryROICalc() {
 
       {result && (
         <div className="border-t border-orange-200 pt-3 space-y-2">
+          {/* Funnel breakdown */}
+          <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1">Opportunity Funnel</p>
           <div className="bg-white border border-orange-100 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">Est. Estate Sales / Year</span>
-            <span className="font-bold text-slate-900 text-sm">{result.annualEstateSales.toLocaleString()}</span>
+            <span className="text-slate-600 text-xs">Platform leads generated / yr <span className="text-slate-400">(1/mo per operator)</span></span>
+            <span className="font-bold text-slate-900 text-sm">{result.platformLeadsPerYear}</span>
           </div>
           <div className="bg-orange-100 border border-orange-300 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-orange-800 text-xs font-medium">Est. Listings (20% conversion)</span>
+            <span className="text-orange-800 text-xs font-medium">Est. listing conversions <span className="text-orange-600 font-normal">(20%)</span></span>
             <span className="font-bold text-orange-900 text-sm">{result.estimatedListings} / yr</span>
           </div>
+
+          {/* GCI breakdown */}
+          <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1 pt-2">Revenue Breakdown</p>
           <div className="bg-white border border-orange-100 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">Gross GCI @ 3% commission</span>
+            <span className="text-slate-600 text-xs">Gross GCI <span className="text-slate-400">@ {result.commissionPct}% commission</span></span>
             <span className="font-bold text-green-700 text-sm">${result.grossGCI.toLocaleString()}</span>
           </div>
           <div className="bg-white border border-orange-100 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">25% Referral Fee (platform deals)</span>
-            <span className="font-bold text-orange-600 text-sm">-${result.referralFee.toLocaleString()}</span>
+            <span className="text-slate-600 text-xs">20% Referral Fee to EstateSalen</span>
+            <span className="font-bold text-orange-600 text-sm">−${result.referralFee.toLocaleString()}</span>
           </div>
           <div className="bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-2.5 flex justify-between items-center">
-            <span className="text-emerald-800 text-xs font-bold">Est. Net GCI</span>
-            <span className="font-bold text-emerald-700 text-base">${result.netGCI.toLocaleString()}/yr</span>
+            <span className="text-emerald-800 text-xs font-bold">Est. Net GCI / Year</span>
+            <span className="font-bold text-emerald-700 text-base">${result.netGCI.toLocaleString()}</span>
           </div>
           <p className="text-orange-500 text-xs leading-relaxed pt-1">
-            Based on {operatorCount} operators × {AVG_SALES_PER_OPERATOR} sales/yr × 20% listing conversion. Estimates only.
+            {operatorCount} operators × 1 platform lead/mo × 20% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
           </p>
         </div>
       )}
