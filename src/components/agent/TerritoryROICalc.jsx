@@ -103,7 +103,10 @@ export default function TerritoryROICalc() {
     // Step 4: 20% referral fee paid to EstateSalen on that GCI
     const referralFee = Math.round(grossGCI * REFERRAL_FEE_PCT);
     const netGCI = grossGCI - referralFee;
-    setResult({ platformLeadsPerYear, estimatedListings, grossGCI, referralFee, netGCI, commissionPct: parseFloat(commissionPct) });
+    // Territory buy-in: 5% of Net GCI lump sum, or 7% spread over 12 months
+    const buyInLumpSum = Math.round(netGCI * 0.05);
+    const buyInMonthly = Math.round((netGCI * 0.07) / 12);
+    setResult({ platformLeadsPerYear, estimatedListings, grossGCI, referralFee, netGCI, commissionPct: parseFloat(commissionPct), buyInLumpSum, buyInMonthly });
   };
 
   return (
@@ -245,6 +248,17 @@ export default function TerritoryROICalc() {
           <p className="text-orange-500 text-xs leading-relaxed pt-1">
             {operatorCount} operators × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
           </p>
+
+          {/* Territory Buy-In */}
+          <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1 pt-2">Territory Buy-In</p>
+          <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
+            <span className="text-slate-600 text-xs">One-time lump sum <span className="text-slate-400">(5% of Net GCI)</span></span>
+            <span className="font-bold text-slate-900 text-sm">${result.buyInLumpSum.toLocaleString()}</span>
+          </div>
+          <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
+            <span className="text-slate-600 text-xs">Monthly payments <span className="text-slate-400">(7% over 12 mo.)</span></span>
+            <span className="font-bold text-slate-900 text-sm">${result.buyInMonthly.toLocaleString()}/mo</span>
+          </div>
         </div>
       )}
 
