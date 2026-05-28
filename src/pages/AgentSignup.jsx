@@ -8,7 +8,6 @@ import {
   Building2, Home, ArrowRight, TrendingUp, Users, Award, Lock, ChevronRight, ShieldCheck
 } from 'lucide-react';
 import SharedFooter from '@/components/layout/SharedFooter';
-import TerritoryCalculator from '@/components/agent/TerritoryCalculator';
 import TerritoryProfitShareCalculator from '@/components/agent/TerritoryProfitShareCalculator';
 import AgentApplicationForm from '@/components/agent/AgentApplicationForm';
 import TerritoryROICalc from '@/components/agent/TerritoryROICalc';
@@ -340,9 +339,6 @@ export default function AgentSignup() {
           </div>
         </div>
       </section>
-
-      {/* ── TERRITORY CALCULATOR ─────────────────────────────────────── */}
-      <TerritoryCalculator />
 
       {/* ── WHAT AGENTS RECEIVE ──────────────────────────────────────── */}
       <section className="py-20 px-4 bg-white">
