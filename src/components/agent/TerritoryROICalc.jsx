@@ -64,7 +64,7 @@ export default function TerritoryROICalc() {
           }
         });
         const sorted = Object.entries(countyMap)
-          .sort((a, b) => b[1] - a[1])
+          .sort((a, b) => a[0].localeCompare(b[0]))
           .map(([name, count]) => ({ name, count }));
         setCounties(sorted);
       } catch {
