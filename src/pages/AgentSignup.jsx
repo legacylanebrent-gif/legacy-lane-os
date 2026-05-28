@@ -327,7 +327,7 @@ export default function AgentSignup() {
                   <div>
                     <p className="text-emerald-800 text-sm font-bold">Territory Owner Guarantee</p>
                     <p className="text-emerald-700 text-xs mt-0.5 leading-relaxed">
-                      Earn at least <span className="font-bold">5× your annual investment</span> in GCI from platform leads — or your next year's fees are <span className="font-bold">free</span>.
+                      Recover your investment from platform leads within 12 months or your referral % changes to <span className="font-bold">15% for the next year</span>.
                     </p>
                   </div>
                 </div>
