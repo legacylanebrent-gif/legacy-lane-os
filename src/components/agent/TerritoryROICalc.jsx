@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Calculator, Loader2, ChevronDown } from 'lucide-react';
+import { Calculator, ChevronDown } from 'lucide-react';
+
+// Median home sale price by state (2024 estimates, US Census / NAR data)
+const STATE_MEDIAN_PRICES = {
+  AL: 220000, AK: 335000, AZ: 425000, AR: 195000, CA: 785000, CO: 545000,
+  CT: 375000, DE: 355000, FL: 410000, GA: 325000, HI: 840000, ID: 415000,
+  IL: 285000, IN: 255000, IA: 215000, KS: 235000, KY: 230000, LA: 215000,
+  ME: 380000, MD: 440000, MA: 595000, MI: 255000, MN: 335000, MS: 185000,
+  MO: 255000, MT: 440000, NE: 265000, NV: 430000, NH: 465000, NJ: 530000,
+  NM: 305000, NY: 475000, NC: 335000, ND: 255000, OH: 235000, OK: 215000,
+  OR: 480000, PA: 285000, RI: 445000, SC: 315000, SD: 295000, TN: 335000,
+  TX: 335000, UT: 500000, VT: 390000, VA: 410000, WA: 590000, WV: 165000,
+  WI: 295000, WY: 375000
+};
 
 // 1 platform-generated estate sale lead/month per operator = 12/yr
 const PLATFORM_LEADS_PER_OPERATOR_PER_YEAR = 12;
@@ -23,13 +36,15 @@ export default function TerritoryROICalc() {
   const [county, setCounty] = useState('');
   const [operatorCount, setOperatorCount] = useState(null);
   const [avgSalePrice, setAvgSalePrice] = useState('');
-  const [priceLoading, setPriceLoading] = useState(false);
   const [commissionPct, setCommissionPct] = useState('');
   const [result, setResult] = useState(null);
 
   // When state changes, load available counties from our operator DB
   useEffect(() => {
     if (!state) { setCounties([]); setCounty(''); setOperatorCount(null); setAvgSalePrice(''); setCommissionPct(''); setResult(null); return; }
+    // Pre-fill state median immediately on state selection
+    const stateMedian = STATE_MEDIAN_PRICES[state];
+    if (stateMedian) setAvgSalePrice(String(stateMedian));
 
     const load = async () => {
       setCountiesLoading(true);
@@ -61,7 +76,7 @@ export default function TerritoryROICalc() {
     load();
   }, [state]);
 
-  // When county changes, set operator count and auto-lookup avg home price
+  // When county changes, set operator count and pre-fill state median price
   useEffect(() => {
     if (!county || !state) { setOperatorCount(null); setAvgSalePrice(''); setResult(null); return; }
 
@@ -69,28 +84,12 @@ export default function TerritoryROICalc() {
     setOperatorCount(selected?.count || 0);
     setResult(null);
 
-    // AI lookup for avg home sale price
-    const lookupPrice = async () => {
-      setPriceLoading(true);
-      setAvgSalePrice('');
-      try {
-        const res = await base44.integrations.Core.InvokeLLM({
-          prompt: `What is the current median home sale price in ${county}, ${state}? Use recent real estate data. Return only a single integer representing the median price in US dollars, no commas, no text, no symbols.`,
-          response_json_schema: { type: 'object', properties: { median_price: { type: 'number' } } },
-          add_context_from_internet: true,
-          model: 'gemini_3_flash'
-        });
-        if (res?.median_price) setAvgSalePrice(String(Math.round(res.median_price)));
-      } catch {
-        // leave blank for manual entry
-      } finally {
-        setPriceLoading(false);
-      }
-    };
-    lookupPrice();
-  }, [county]);
+    // Instant lookup from static state median table
+    const stateMedian = STATE_MEDIAN_PRICES[state];
+    if (stateMedian) setAvgSalePrice(String(stateMedian));
+  }, [county, state]);
 
-  const canCalc = county && avgSalePrice && commissionPct && !priceLoading && operatorCount !== null;
+  const canCalc = county && avgSalePrice && commissionPct && operatorCount !== null;
 
   const calculate = () => {
     // Step 1: platform generates 1 lead/month per operator = 12 estate sales/yr per operator
@@ -158,27 +157,22 @@ export default function TerritoryROICalc() {
           </div>
         )}
 
-        {/* Avg home price - auto-populated */}
+        {/* Avg home price - pre-filled from state median table */}
         {county && (
           <div>
-            <label className="text-orange-700 text-xs font-medium block mb-1">
-              Avg. Home Sale Price
-              {priceLoading && <span className="ml-1 text-orange-400 font-normal italic">looking up...</span>}
-            </label>
+            <label className="text-orange-700 text-xs font-medium block mb-1">Avg. Home Sale Price</label>
             <div className="relative">
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
               <input
                 type="number"
                 className="w-full border border-orange-200 bg-white rounded-lg pl-6 pr-2.5 py-1.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-                placeholder={priceLoading ? 'Fetching...' : 'e.g. 425000'}
+                placeholder="e.g. 425000"
                 value={avgSalePrice}
                 onChange={e => { setAvgSalePrice(e.target.value); setResult(null); }}
-                disabled={priceLoading}
               />
-              {priceLoading && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-orange-400 animate-spin" />}
             </div>
-            {avgSalePrice && !priceLoading && (
-              <p className="text-orange-500 text-xs mt-0.5">AI-estimated — adjust if needed.</p>
+            {avgSalePrice && (
+              <p className="text-orange-500 text-xs mt-0.5">State median pre-filled — adjust for your local market.</p>
             )}
           </div>
         )}
