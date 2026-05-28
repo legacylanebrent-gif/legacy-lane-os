@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Calendar, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const VALUE_ITEMS = [
@@ -130,12 +131,12 @@ function ConfirmationScreen({ offerType }) {
       </div>
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 text-left">
         <p className="text-sm text-slate-700 leading-relaxed">
-          We've received your information. Based on your responses, we'll help guide you through how Legacy Lane OS can improve your next estate sale.
+          We've received your information. Based on your responses, we'll help guide you through how EstateSalen can improve your next estate sale.
         </p>
         <p className="text-sm text-slate-700 leading-relaxed">
           {offerType === 'demo'
           ? "You'll receive scheduling options shortly for your guided demo."
-          : "We'll guide you through onboarding to get your first sale set up in Legacy Lane OS."}
+          : "We'll guide you through onboarding to get your first sale set up in EstateSalen."}
         </p>
       </div>
       <Button
@@ -174,11 +175,18 @@ export default function LandingPageOfferClose() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold px-4 py-1.5 rounded-full">
-            Legacy Lane OS
+            EstateSalen
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight">
             What If Your Next Estate Sale Was Faster, More Organized, and More Profitable?
@@ -209,7 +217,7 @@ export default function LandingPageOfferClose() {
           {[
             { title: "You've Seen the Problem", body: "Most estate sale companies lose time through setup inefficiencies, pay more for helper labor than necessary, and miss value through rushed pricing and limited item exposure." },
             { title: "You've Seen What Better Looks Like", body: "A system-driven sale is faster, more organized, easier to manage, and produces more consistent results." },
-            { title: "Now Here's the Next Step", body: "Run your next estate sale using Legacy Lane OS and experience the difference for yourself." },
+            { title: "Now Here's the Next Step", body: "Run your next estate sale using EstateSalen and experience the difference for yourself." },
           ].map(item => (
             <div key={item.title} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-3">
               <h3 className="text-lg font-bold text-slate-900">{item.title}</h3>
@@ -222,7 +230,7 @@ export default function LandingPageOfferClose() {
       {/* Value Stack */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-4xl mx-auto space-y-8">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">What You Get With Legacy Lane OS</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">What You Get With EstateSalen</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {VALUE_ITEMS.map(item => (
               <div key={item} className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700">
@@ -254,8 +262,8 @@ export default function LandingPageOfferClose() {
         <div className="max-w-3xl mx-auto bg-slate-900 text-white rounded-3xl p-8 text-center space-y-4">
           <h2 className="text-2xl font-serif font-bold">No Risk — Just a Better Way to Operate</h2>
           <p className="text-slate-300 leading-relaxed">
-            If you don't feel more organized, more efficient, and more in control using Legacy Lane OS on your next sale, we'll continue working with you until you do.
-          </p>
+             If you don't feel more organized, more efficient, and more in control using EstateSalen on your next sale, we'll continue working with you until you do.
+           </p>
         </div>
       </section>
 
