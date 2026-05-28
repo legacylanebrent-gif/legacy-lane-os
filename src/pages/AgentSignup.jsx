@@ -225,7 +225,7 @@ export default function AgentSignup() {
           <div className="text-center mb-10">
             <Badge className="bg-blue-100 text-blue-800 mb-4 px-4 py-1.5">Territory Owner Perk</Badge>
             <h2 className="text-3xl font-serif font-bold text-slate-900 mb-3">
-              Recruit Operators. Earn Passive Monthly Revenue.
+             Recruit Company Owners. Earn Passive Monthly Revenue.
             </h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
               Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies and resellers in your territory and earn <strong className="text-slate-700">20% of the net profit</strong> from their monthly subscription every single month they remain active.
