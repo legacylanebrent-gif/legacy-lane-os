@@ -17,7 +17,7 @@ const preferredFeatures = [
   'Small monthly territory participation fee',
   'Receive qualified seller & referral opportunities',
   'Build relationships with local estate sale companies',
-  '20% referral fee only when a platform-generated deal closes',
+  '25% referral fee only when a platform-generated deal closes',
   'Great starting option for agents testing a market',
 ];
 
