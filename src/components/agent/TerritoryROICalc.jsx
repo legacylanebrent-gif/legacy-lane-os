@@ -252,13 +252,16 @@ export default function TerritoryROICalc() {
           {/* Territory Buy-In */}
           <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1 pt-2">Territory Buy-In</p>
           <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">One-time lump sum <span className="text-slate-400">(5% of Net GCI)</span></span>
+            <span className="text-slate-600 text-xs">One-time investment <span className="text-slate-400">(5% of Net GCI)</span></span>
             <span className="font-bold text-slate-900 text-sm">${result.buyInLumpSum.toLocaleString()}</span>
           </div>
           <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
             <span className="text-slate-600 text-xs">Monthly payments <span className="text-slate-400">(7% over 12 mo.)</span></span>
             <span className="font-bold text-slate-900 text-sm">${result.buyInMonthly.toLocaleString()}/mo</span>
           </div>
+          <p className="text-slate-700 text-xs leading-relaxed pt-2">
+            <strong>Owning a territory is an equity investment that can be sold at a later date. ROI will be based on a combination of revenue earned + future projected income.</strong>
+          </p>
         </div>
       )}
 
