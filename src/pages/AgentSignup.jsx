@@ -11,6 +11,7 @@ import SharedFooter from '@/components/layout/SharedFooter';
 import TerritoryCalculator from '@/components/agent/TerritoryCalculator';
 import TerritoryProfitShareCalculator from '@/components/agent/TerritoryProfitShareCalculator';
 import AgentApplicationForm from '@/components/agent/AgentApplicationForm';
+import TerritoryROICalc from '@/components/agent/TerritoryROICalc';
 
 const preferredFeatures = [
   'Choose one city or multiple cities',
@@ -318,19 +319,7 @@ export default function AgentSignup() {
                   ))}
                 </ul>
 
-                {/* Investment pricing range explanation */}
-                <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
-                  <TrendingUp className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-orange-800 text-sm font-bold">Territory Buy-In Investment</p>
-                    <p className="text-orange-700 text-xs mt-0.5 leading-relaxed mb-2">
-                      <strong>$3,800</strong> as a one-time investment, or spread out over <strong>12 months</strong> at <strong>$5,320</strong> total (monthly payments available).
-                    </p>
-                    <p className="text-orange-700 text-xs leading-relaxed">
-                      <strong>Note:</strong> On your first referral deal closing, full payment of any remaining balance is due.
-                    </p>
-                  </div>
-                </div>
+                <TerritoryROICalc />
 
                 {/* Guarantee banner */}
                 <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
