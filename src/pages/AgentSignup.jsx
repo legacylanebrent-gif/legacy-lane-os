@@ -318,31 +318,6 @@ export default function AgentSignup() {
                   ))}
                 </ul>
 
-                {/* Revenue share banner */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4 mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-blue-600 shrink-0" />
-                    <p className="text-blue-900 text-sm font-bold">Territory Recruitment Revenue Share</p>
-                  </div>
-                  <p className="text-blue-700 text-xs leading-relaxed mb-2">
-                    As a Territory Owner, you can recruit <strong>estate sale companies</strong> and <strong>resellers</strong> in your territory to join the platform. For every company you bring in, you earn <strong>20% of the net profit</strong> from their monthly subscription (after a 35% expense margin) — for as long as they remain active members.
-                  </p>
-                  <div className="flex gap-3 mt-3">
-                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">Professional $129/mo</p>
-                      <p className="text-blue-500 text-xs">= ~$16.77/mo to you</p>
-                    </div>
-                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">Growth $197/mo</p>
-                      <p className="text-blue-500 text-xs">= ~$25.61/mo to you</p>
-                    </div>
-                    <div className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-center">
-                      <p className="text-blue-900 font-bold text-sm">Elite $277/mo</p>
-                      <p className="text-blue-500 text-xs">= ~$36.01/mo to you</p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Investment pricing range explanation */}
                 <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 flex gap-3 items-start mb-6">
                   <TrendingUp className="w-5 h-5 text-orange-600 mt-0.5 shrink-0" />
