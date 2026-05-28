@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, BarChart3, Clock, DollarSign, Eye, Percent, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const LEVERS = [
   {
@@ -262,7 +263,7 @@ function ResultPanel({ scorecardScore, profitScore, onRetake }) {
 
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
         <p className="text-sm text-slate-700 leading-relaxed">
-          Your current system is creating unnecessary time loss, labor cost, and pricing inefficiencies. Legacy Lane OS helps streamline setup, improve pricing, and reduce manual workload.
+          Your current system is creating unnecessary time loss, labor cost, and pricing inefficiencies. EstateSalen helps streamline setup, improve pricing, and reduce manual workload.
         </p>
         <div className="space-y-2">
           {['Save 3–10 hours per sale setup', 'Reduce helper labor with structured workflows', 'Improve pricing confidence with AI-assisted tools', 'Market items more effectively to maximize value'].map(item => (
@@ -275,7 +276,7 @@ function ResultPanel({ scorecardScore, profitScore, onRetake }) {
       </div>
 
       <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 rounded-xl text-base">
-        See How Legacy Lane OS Works
+        See How EstateSalen Works
       </Button>
       <button onClick={onRetake} className="w-full text-sm text-slate-400 hover:text-slate-600 text-center">
         Retake the Quiz
@@ -347,6 +348,13 @@ export default function LandingPageProfitLevers() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
