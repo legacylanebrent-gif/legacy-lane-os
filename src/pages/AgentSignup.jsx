@@ -30,6 +30,7 @@ const exclusiveFeatures = [
   '20% referral fee still applies on closed platform-generated deals',
   'Recruit estate sale companies & resellers — earn 20% of their monthly platform profit ... not only do you earn listings, you also earn residual income on the territory you build in recruiting',
   'Build a passive income stream from every operator you bring into your territory',
+  'Receive priority to Territories on our sister platform Houszu for FSBO, Investor and Home Seller leads and services',
 ];
 
 const benefits = [
