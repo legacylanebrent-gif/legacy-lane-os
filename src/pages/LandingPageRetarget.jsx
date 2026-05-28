@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Calendar, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const FIXES = [
@@ -117,13 +118,13 @@ function FormScreen({ selectedPath, onSubmit }) {
       <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 ${isDemo ? 'bg-cyan-50 border-cyan-200 text-cyan-800' : 'bg-orange-50 border-orange-200 text-orange-800'}`}>
         {isDemo ? <Calendar className="w-5 h-5 flex-shrink-0" /> : <Zap className="w-5 h-5 flex-shrink-0" />}
         <span className="text-sm font-semibold">
-          {isDemo ? "Booking a Demo — we'll send scheduling options shortly." : "We'll map Legacy Lane OS to your next actual sale."}
+          {isDemo ? "Booking a Demo — we'll send scheduling options shortly." : "We'll map EstateSalen to your next actual sale."}
         </span>
       </div>
 
       <div>
-        <h2 className="text-2xl font-serif font-bold text-slate-900">Map Legacy Lane OS to My Next Sale</h2>
-        <p className="text-slate-500 mt-1 text-sm">Tell us a little about your next sale and we'll show where Legacy Lane OS can help first.</p>
+        <h2 className="text-2xl font-serif font-bold text-slate-900">Map EstateSalen to My Next Sale</h2>
+        <p className="text-slate-500 mt-1 text-sm">Tell us a little about your next sale and we'll show where EstateSalen can help first.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -167,10 +168,10 @@ function ConfirmationScreen() {
         <h2 className="text-2xl font-serif font-bold text-slate-900">Your Next Sale Map Request Is In</h2>
       </div>
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 text-left space-y-2">
-        <p className="text-sm text-slate-700 leading-relaxed">
-          We received your request. The next step is to review your current bottleneck and show how Legacy Lane OS can help your next sale run with more structure, less chaos, and better control.
-        </p>
-      </div>
+         <p className="text-sm text-slate-700 leading-relaxed">
+           We received your request. The next step is to review your current bottleneck and show how EstateSalen can help your next sale run with more structure, less chaos, and better control.
+         </p>
+       </div>
       <div className="space-y-3 pt-2">
         <p className="text-sm font-semibold text-slate-700">Want to schedule now?</p>
         <Button
@@ -219,6 +220,13 @@ export default function LandingPageRetarget() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -226,17 +234,17 @@ export default function LandingPageRetarget() {
             You Saw Your Results. Now Fix the Leak.
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight">
-            Your Estate Sale Process Already Showed You Where It's Leaking.
+           Your Estate Sale Process Already Showed You Where It's Leaking.
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Now the question is simple: will your next sale run the same way — or will you use a system built to reduce setup time, improve pricing, organize your team, and create better sale-day control?
+           Now the question is simple: will your next sale run the same way — or will you use a system built to reduce setup time, improve pricing, organize your team, and create better sale-day control?
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
               onClick={() => goToForm('general')}
               className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-orange-500/30"
             >
-              Map Legacy Lane OS to My Next Sale
+              Map EstateSalen to My Next Sale
             </Button>
             <Button
               variant="outline"
@@ -284,8 +292,8 @@ export default function LandingPageRetarget() {
 
       {/* What Gets Fixed */}
       <section id="fixes" className="py-16 px-6 bg-slate-50">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">What Legacy Lane OS Helps Fix First</h2>
+       <div className="max-w-4xl mx-auto space-y-6">
+         <h2 className="text-3xl font-serif font-bold text-slate-900">What EstateSalen Helps Fix First</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FIXES.map(fix => (
               <div key={fix.title} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-2">
@@ -303,10 +311,10 @@ export default function LandingPageRetarget() {
       {/* Best time to fix */}
       <section className="py-12 px-6 bg-white">
         <div className="max-w-3xl mx-auto bg-slate-900 text-white rounded-2xl p-6 space-y-2">
-          <h3 className="text-xl font-bold">This Is the Best Time to Fix It</h3>
-          <p className="text-slate-300 text-sm leading-relaxed">
-            The best time to improve your estate sale process is before the next sale starts. Once setup begins, the same old habits take over. Legacy Lane OS helps you prepare with a system before the pressure hits.
-          </p>
+         <h3 className="text-xl font-bold">This Is the Best Time to Fix It</h3>
+         <p className="text-slate-300 text-sm leading-relaxed">
+           The best time to improve your estate sale process is before the next sale starts. Once setup begins, the same old habits take over. EstateSalen helps you prepare with a system before the pressure hits.
+         </p>
         </div>
       </section>
 
@@ -328,8 +336,8 @@ export default function LandingPageRetarget() {
             </div>
             <div className="space-y-3">
               <p className="font-bold text-slate-700 text-lg mb-3 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-500" /> Legacy Lane OS Way
-              </p>
+                  <CheckCircle className="w-5 h-5 text-green-500" /> EstateSalen Way
+                </p>
               {SYSTEM_WAY.map(item => (
                 <div key={item} className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-slate-700">
                   <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -346,7 +354,7 @@ export default function LandingPageRetarget() {
         <div className="max-w-3xl mx-auto space-y-3">
           <h2 className="text-2xl font-serif font-bold text-slate-900">You Don't Need to Change Everything at Once</h2>
           <p className="text-slate-600 leading-relaxed">
-            Start with your next sale. We'll help identify the highest-impact area first — setup, pricing, team workflow, marketing, or inventory — and show how Legacy Lane OS can support that process.
+           Start with your next sale. We'll help identify the highest-impact area first — setup, pricing, team workflow, marketing, or inventory — and show how EstateSalen can support that process.
           </p>
         </div>
       </section>
@@ -380,7 +388,7 @@ export default function LandingPageRetarget() {
       <section className="py-20 px-6 bg-slate-900 text-white text-center">
         <div className="max-w-3xl mx-auto space-y-6">
           <h2 className="text-3xl font-serif font-bold">Let's Map This to Your Next Actual Sale</h2>
-          <p className="text-slate-300 text-lg">Book a short demo or request a setup call and we'll walk through where Legacy Lane OS fits into your current process.</p>
+          <p className="text-slate-300 text-lg">Book a short demo or request a setup call and we'll walk through where EstateSalen fits into your current process.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
             <Button
               onClick={() => goToForm('demo')}

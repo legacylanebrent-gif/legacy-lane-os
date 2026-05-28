@@ -101,9 +101,9 @@ function IntakeScreen({ onComplete }) {
   return (
     <div className="space-y-6">
       <div>
-         <h2 className="text-2xl font-serif font-bold text-slate-900">Confirm Your Sale Details</h2>
-         <p className="text-slate-500 mt-1 text-sm">Answer these final questions so EstateSalen can generate a more specific improvement plan.</p>
-       </div>
+        <h2 className="text-2xl font-serif font-bold text-slate-900">Confirm Your Sale Details</h2>
+        <p className="text-slate-500 mt-1 text-sm">Answer these final questions so EstateSalen can generate a more specific improvement plan.</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <SelectField id="salesPerMonth" label="How many estate sales do you run per month?" options={SALES_PER_MONTH} required />
         <SelectField id="biggestPain" label="What is your biggest current challenge?" options={BIGGEST_PAIN} required />
@@ -218,11 +218,11 @@ function ResultScreen({ plan, onRetake }) {
       </div>
 
       {/* EstateSalen Recommendation */}
-       <div className="bg-slate-900 text-white rounded-xl p-4 space-y-2">
-         <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">EstateSalen Recommendation</p>
-         <p className="text-sm text-slate-200 leading-relaxed">{plan.legacyLaneRecommendation}</p>
-         <p className="text-sm text-orange-300 leading-relaxed">{plan.ctaMessage}</p>
-       </div>
+      <div className="bg-slate-900 text-white rounded-xl p-4 space-y-2">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">EstateSalen Recommendation</p>
+        <p className="text-sm text-slate-200 leading-relaxed">{plan.legacyLaneRecommendation}</p>
+        <p className="text-sm text-orange-300 leading-relaxed">{plan.ctaMessage}</p>
+      </div>
 
       {/* CTAs */}
       <div className="space-y-3 pt-2">
