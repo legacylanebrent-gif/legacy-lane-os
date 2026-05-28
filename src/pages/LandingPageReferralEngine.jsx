@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, ArrowRight, DollarSign } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const OPPORTUNITIES = [
@@ -265,7 +266,7 @@ function ResultScreen({ result, onRetake }) {
         </div>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Recommendation</p>
-          <p className="text-sm text-slate-700 leading-relaxed">Legacy Lane OS can help structure, track, and scale this opportunity into a repeatable revenue stream.</p>
+          <p className="text-sm text-slate-700 leading-relaxed">EstateSalen can help structure, track, and scale this opportunity into a repeatable revenue stream.</p>
         </div>
       </div>
 
@@ -274,7 +275,7 @@ function ResultScreen({ result, onRetake }) {
           className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-5 rounded-xl text-base"
           onClick={() => window.location.href = '/LandingPageOfferClose'}
         >
-          Learn How Legacy Lane OS Enables This
+          Learn How EstateSalen Enables This
         </Button>
         <button onClick={onRetake} className="w-full text-sm text-slate-400 hover:text-slate-600 text-center">
           Retake the Assessment
@@ -323,6 +324,13 @@ export default function LandingPageReferralEngine() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -333,7 +341,7 @@ export default function LandingPageReferralEngine() {
             Turn Your Estate Sales Into a Second Revenue Stream
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Every estate sale client is connected to a real estate transaction. Legacy Lane OS helps you structure, track, and monetize those referrals through an exclusive agent partnership.
+            Every estate sale client is connected to a real estate transaction. EstateSalen helps you structure, track, and monetize those referrals through an exclusive agent partnership.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
@@ -406,7 +414,7 @@ export default function LandingPageReferralEngine() {
             </p>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900">Built Into Legacy Lane OS</h3>
+            <h3 className="text-xl font-bold text-slate-900">Built Into EstateSalen</h3>
             <div className="space-y-2">
               {BUILT_IN_ITEMS.map(item => (
                 <div key={item} className="flex items-center gap-2 text-sm text-slate-700">
