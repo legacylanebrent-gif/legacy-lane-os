@@ -36,7 +36,7 @@ const benefits = [
   { icon: Home, title: 'Estate-Sale Seller Opportunities', desc: 'Access to families making real estate decisions alongside personal property decisions.' },
   { icon: Users, title: 'Referral Relationships With Operators', desc: 'Build trusted relationships with estate sale companies already inside these homes.' },
   { icon: MapPin, title: 'Territory-Based Positioning', desc: "You're the preferred or exclusive agent in the cities you choose to protect." },
-  { icon: TrendingUp, title: 'Lead Routing From the Platform', desc: 'Opportunities routed directly from EstateSalen.com and Legacy Lane OS partners.' },
+  { icon: TrendingUp, title: 'Lead Routing From the Platform', desc: 'Opportunities routed directly from EstateSalen.com.' },
   { icon: Star, title: 'Priority Visibility in Selected Markets', desc: 'Be the agent estate sale operators think of first when a real estate need arises.' },
   { icon: Award, title: 'Life-Transition Niche Authority', desc: 'Build a reputation serving probate, downsizing, senior moves, inherited homes, and more.' },
 ];
@@ -61,7 +61,7 @@ export default function AgentSignup() {
         <div className="absolute inset-0 opacity-5" style={{backgroundImage:'repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%)',backgroundSize:'20px 20px'}} />
         <div className="relative max-w-6xl mx-auto px-4 py-24 md:py-32 text-center">
           <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/40 text-orange-400 px-4 py-2 rounded-full text-sm font-semibold mb-8">
-            <MapPin className="w-4 h-4" /> EstateSalen.com · Powered by Legacy Lane OS
+            <MapPin className="w-4 h-4" /> EstateSalen.com
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight">
             Own the Estate Sale<br />Referral Lane in<br />
@@ -71,7 +71,7 @@ export default function AgentSignup() {
             Become the preferred real estate agent for estate-sale-driven seller opportunities in your city, county, or territory.
           </p>
           <p className="text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Estate sales often happen during major life transitions: probate, downsizing, relocation, divorce, senior moves, inherited homes, and family cleanouts. These are moments where real estate decisions are often close behind. EstateSalen.com, powered by Legacy Lane OS, helps connect those opportunities with qualified local agents who are ready to serve.
+            Estate sales often happen during major life transitions: probate, downsizing, relocation, divorce, senior moves, inherited homes, and family cleanouts. These are moments where real estate decisions are often close behind. EstateSalen.com helps connect those opportunities with qualified local agents who are ready to serve.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button onClick={scrollToForm} className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-6 text-lg rounded-xl flex items-center gap-2">
@@ -105,7 +105,7 @@ export default function AgentSignup() {
           </p>
           <div className="bg-white border-l-4 border-orange-500 rounded-xl p-8 text-left shadow-sm mb-6">
             <p className="text-slate-700 text-lg leading-relaxed">
-              <strong className="text-slate-900">Legacy Lane OS</strong> gives estate sale companies a way to refer real estate opportunities to trusted agents — while giving agents access to a relationship-driven lead source that most competitors never see. This is not a cold internet lead. This is a warm introduction from a company already inside the home.
+              <strong className="text-slate-900">EstateSalen</strong> gives estate sale companies a way to refer real estate opportunities to trusted agents — while giving agents access to a relationship-driven lead source that most competitors never see. This is not a cold internet lead. This is a warm introduction from a company already inside the home.
             </p>
           </div>
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-left shadow-sm mb-6">
@@ -150,7 +150,7 @@ export default function AgentSignup() {
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Platform Generates the Lead</h3>
                   <p className="text-slate-600 leading-relaxed">
-                    EstateSalen.com and Legacy Lane OS run paid advertising, SEO campaigns, and outreach that bring in homeowners dealing with probate, downsizing, inherited homes, senior moves, and other life transitions. These are real families who need real help — and they reach out to us first.
+                    EstateSalen.com runs paid advertising, SEO campaigns, and outreach that bring in homeowners dealing with probate, downsizing, inherited homes, senior moves, and other life transitions. These are real families who need real help — and they reach out to us first.
                   </p>
                 </div>
               </div>
@@ -213,7 +213,7 @@ export default function AgentSignup() {
           {/* Summary banner */}
           <div className="mt-14 bg-slate-900 rounded-2xl p-8 text-center">
             <p className="text-slate-300 text-lg leading-relaxed max-w-3xl mx-auto">
-              This is what makes the Legacy Lane OS partnership different from any other lead source. It's not about volume. It's about being <span className="text-orange-400 font-bold">the trusted agent already endorsed inside the home</span> — before anyone else even knows the opportunity exists.
+              This is what makes the EstateSalen partnership different from any other lead source. It's not about volume. It's about being <span className="text-orange-400 font-bold">the trusted agent already endorsed inside the home</span> — before anyone else even knows the opportunity exists.
             </p>
           </div>
         </div>
@@ -383,7 +383,7 @@ export default function AgentSignup() {
           <div className="text-center mb-14">
             <Badge className="bg-green-100 text-green-800 mb-4 px-4 py-1.5">Agent Benefits</Badge>
             <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">
-              What You Get as a Legacy Lane Preferred Agent
+             What You Get as an EstateSalen Preferred Agent
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -410,7 +410,7 @@ export default function AgentSignup() {
             This Is Not Another Internet Lead Program
           </h2>
           <p className="text-xl text-slate-300 leading-relaxed mb-8">
-            Most lead platforms sell the same inquiry to multiple agents. Legacy Lane OS is different. We are building a relationship-based referral network around estate sale companies, life-event sellers, and local real estate professionals.
+            Most lead platforms sell the same inquiry to multiple agents. EstateSalen is different. We are building a relationship-based referral network around estate sale companies, life-event sellers, and local real estate professionals.
           </p>
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-left">
             <p className="text-slate-200 text-lg leading-relaxed">
@@ -473,7 +473,7 @@ export default function AgentSignup() {
                 <strong className="text-white">Houszu</strong> is the real estate agent growth platform built to help agents convert more opportunities, build marketing funnels, create AI-powered listing assets, manage campaigns, and grow their local authority.
               </p>
               <p className="text-slate-400 leading-relaxed mb-8">
-                If Legacy Lane OS helps you access estate-sale-driven opportunities, Houszu helps you convert, market, and scale them.
+              If EstateSalen helps you access estate-sale-driven opportunities, Houszu helps you convert, market, and scale them.
               </p>
               <a href="https://houszu.com" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg rounded-xl flex items-center gap-2">
@@ -526,7 +526,7 @@ export default function AgentSignup() {
           <div className="flex gap-3 items-start">
             <AlertTriangle className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" />
             <p className="text-slate-500 text-xs leading-relaxed">
-              <strong className="text-slate-400">Legal & Compliance Notice:</strong> EstateSalen.com and Legacy Lane OS are not acting as real estate brokers and do not directly receive real estate commissions. Referral compensation must be handled through the agent's brokerage and in compliance with all applicable state real estate laws, brokerage policies, referral agreements, and RESPA-related requirements. Final referral agreement language will be provided separately by legal counsel. This page is for informational and application purposes only and does not constitute a binding agreement.
+              <strong className="text-slate-400">Legal & Compliance Notice:</strong> EstateSalen.com is not acting as a real estate broker and does not directly receive real estate commissions. Referral compensation must be handled through the agent's brokerage and in compliance with all applicable state real estate laws, brokerage policies, referral agreements, and RESPA-related requirements. Final referral agreement language will be provided separately by legal counsel. This page is for informational and application purposes only and does not constitute a binding agreement.
             </p>
           </div>
         </div>
