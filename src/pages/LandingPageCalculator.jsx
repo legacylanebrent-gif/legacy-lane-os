@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, Clock, DollarSign, BarChart3, Megaphone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const LEAK_CATEGORIES = [
@@ -128,14 +129,14 @@ function calculateResults(answers) {
   if (setupHours > 6) estimatedTimeSaved = '6–10 hours';
 
   let leakCategory = 'Low Leak';
-  let recommendation = 'You have some systems working, but Legacy Lane OS may still help reduce repetitive work and improve sale preparation.';
+  let recommendation = 'You have some systems working, but EstateSalen may still help reduce repetitive work and improve sale preparation.';
   if (cappedLeak >= 500 && cappedLeak < 1250) {
     leakCategory = 'Moderate Leak';
-    recommendation = 'Your process is likely costing you through a mix of setup time, helper labor, pricing inefficiency, and missed item exposure. Legacy Lane OS can help streamline these areas.';
+    recommendation = 'Your process is likely costing you through a mix of setup time, helper labor, pricing inefficiency, and missed item exposure. EstateSalen can help streamline these areas.';
   }
   if (cappedLeak >= 1250) {
     leakCategory = 'High Leak';
-    recommendation = 'Your current process may be creating significant time and profit loss each sale. Legacy Lane OS can help reduce manual setup, improve pricing support, and strengthen item-level marketing exposure.';
+    recommendation = 'Your current process may be creating significant time and profit loss each sale. EstateSalen can help reduce manual setup, improve pricing support, and strengthen item-level marketing exposure.';
   }
 
   const leakSources = [
@@ -354,7 +355,7 @@ function ResultScreen({ results, onRetake }) {
 
       <div className="space-y-3 pt-2">
         <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 rounded-xl text-base">
-          Book a Legacy Lane OS Demo
+          Book an EstateSalen Demo
         </Button>
         <Button
           variant="outline"
@@ -404,6 +405,13 @@ export default function LandingPageCalculator() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      {/* Header with Logo */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-4 flex items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span className="text-orange-400 font-serif font-bold text-2xl tracking-tight">Estate<span className="text-white">Salen</span></span>
+        </Link>
+      </div>
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
@@ -464,10 +472,10 @@ export default function LandingPageCalculator() {
             </p>
           </div>
           <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-3">
-            <h3 className="text-xl font-bold">Legacy Lane OS Helps Reduce the Leak</h3>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Legacy Lane OS is a done-for-you, AI-assisted operating system designed to help estate sale companies save 3–10 hours per sale, reduce manual setup work, improve pricing support, create stronger item descriptions, and increase marketing exposure.
-            </p>
+            <h3 className="text-xl font-bold">EstateSalen Helps Reduce the Leak</h3>
+             <p className="text-slate-300 text-sm leading-relaxed">
+               EstateSalen is a done-for-you, AI-assisted operating system designed to help estate sale companies save 3–10 hours per sale, reduce manual setup work, improve pricing support, create stronger item descriptions, and increase marketing exposure.
+             </p>
           </div>
         </div>
       </section>
