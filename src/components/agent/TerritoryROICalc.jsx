@@ -106,7 +106,10 @@ export default function TerritoryROICalc() {
     // Territory buy-in: 5% of Net GCI lump sum, or 7% spread over 12 months
     const buyInLumpSum = Math.round(netGCI * 0.05);
     const buyInMonthly = Math.round((netGCI * 0.07) / 12);
-    setResult({ platformLeadsPerYear, estimatedListings, grossGCI, referralFee, netGCI, commissionPct: parseFloat(commissionPct), buyInLumpSum, buyInMonthly });
+    // How many listings to recover the lump-sum investment
+    const gciPerListing = price * agentCommission * (1 - REFERRAL_FEE_PCT);
+    const listingsToRecover = gciPerListing > 0 ? Math.ceil(buyInLumpSum / gciPerListing) : 0;
+    setResult({ platformLeadsPerYear, estimatedListings, grossGCI, referralFee, netGCI, commissionPct: parseFloat(commissionPct), buyInLumpSum, buyInMonthly, listingsToRecover });
   };
 
   return (
@@ -251,6 +254,10 @@ export default function TerritoryROICalc() {
 
           {/* Territory Buy-In */}
           <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1 pt-2">Territory Buy-In</p>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
+            <span className="text-slate-600 text-xs">Listings needed to recover investment</span>
+            <span className="font-bold text-orange-700 text-sm">{result.listingsToRecover} closing{result.listingsToRecover !== 1 ? 's' : ''}</span>
+          </div>
           <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
             <span className="text-slate-600 text-xs">One-time investment <span className="text-slate-400">(5% of Net GCI)</span></span>
             <span className="font-bold text-slate-900 text-sm">${result.buyInLumpSum.toLocaleString()}</span>
