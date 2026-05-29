@@ -1,0 +1,58 @@
+{
+  "name": "ScrapedSaleTerritory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Territory display name, e.g. 'Monmouth County NJ'"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation"
+    },
+    "counties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "County names covered"
+    },
+    "zip_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "ZIP codes covered"
+    },
+    "search_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "EstateSales.net search URLs to scrape for this territory"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_scraped_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_scrape_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of sales found in last scrape run"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "state"
+  ]
+}

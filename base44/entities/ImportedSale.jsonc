@@ -1,0 +1,145 @@
+{
+  "name": "ImportedSale",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "enum": [
+        "estatesales_net",
+        "estatesales_org",
+        "manual"
+      ],
+      "default": "estatesales_net",
+      "description": "Where this sale was scraped from"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Full URL to the sale listing on the source site"
+    },
+    "source_sale_id": {
+      "type": "string",
+      "description": "Unique ID from the source site (used for dedup)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Sale title as listed on source"
+    },
+    "operator_name_raw": {
+      "type": "string",
+      "description": "Company name exactly as it appears on the source listing"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Matched ScrapedSaleOperator ID"
+    },
+    "platform_operator_user_id": {
+      "type": "string",
+      "description": "EstateSalen platform User ID if operator is subscribed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "imported",
+        "matched",
+        "claimed",
+        "published",
+        "ignored"
+      ],
+      "default": "imported",
+      "description": "imported=raw, matched=linked to operator, claimed=operator verified, published=shown on platform, ignored=skip"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "address_partial": {
+      "type": "string",
+      "description": "City/State/ZIP only \u2014 full address hidden until revealed by source"
+    },
+    "address_full": {
+      "type": "string",
+      "description": "Full street address if available"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sale_times": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Per-day time schedules"
+    },
+    "image_urls_limited": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Up to 3 preview images scraped from the listing"
+    },
+    "image_count_source": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total image count as reported by source site"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Item categories listed in the sale"
+    },
+    "description_snippet": {
+      "type": "string",
+      "description": "Short description or first 500 chars from source"
+    },
+    "territory_id": {
+      "type": "string",
+      "description": "ScrapedSaleTerritory ID this sale belongs to"
+    },
+    "last_seen_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this sale was confirmed still active in a scrape"
+    },
+    "scrape_run_id": {
+      "type": "string",
+      "description": "Identifier for the scrape batch that found this sale"
+    }
+  },
+  "required": [
+    "source",
+    "source_url",
+    "source_sale_id"
+  ]
+}
