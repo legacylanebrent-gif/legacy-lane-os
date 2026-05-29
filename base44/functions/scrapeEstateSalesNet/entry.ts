@@ -11,158 +11,155 @@ function normalizeName(name = '') {
     .replace(/llc|inc|co|company|estate|sales|services|the/g, '');
 }
 
-function extractSaleId(url) {
-  const match = url.match(/\/(\d+)(?:$|\?)/);
-  return match ? match[1] : url;
-}
-
 async function fetchHtml(url) {
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'EstateSalenBot/1.0 contact: support@estatesalen.com',
-      'Accept': 'text/html'
+      'User-Agent': 'Mozilla/5.0 (compatible; EstateSalenBot/1.0; +https://estatesalen.com)',
+      'Accept': 'text/html,application/xhtml+xml',
+      'Accept-Language': 'en-US,en;q=0.9'
     }
   });
   if (!res.ok) throw new Error(`Fetch failed ${res.status}: ${url}`);
   return await res.text();
 }
 
-// ─── Listing Page Parser ────────────────────────────────────────────────────
-// Extracts sale links from a search/listing page.
-// Matches any state path pattern: /STATE/City/12345
+// ─── Listing Page Parser ─────────────────────────────────────────────────────
+// Extracts sale detail URLs from an Angular-rendered ZIP listing page.
+// The page embeds href links to individual sales in the static HTML shell.
 
-function parseSaleCards(html, baseUrl = 'https://www.estatesales.net') {
-  const sales = [];
-
-  // Pattern 1: absolute URLs in href (e.g. https://www.estatesales.net/NJ/Somerset/08873/4924266)
-  const absRegex = /href="(https?:\/\/www\.estatesales\.net\/[A-Z]{2}\/[^"\/]+\/\d{4,5}\/(\d{5,10})[^"]*)"/gi;
-  let match;
-  while ((match = absRegex.exec(html)) !== null) {
-    const href = match[1].split('?')[0]; // strip query params
-    const saleId = match[2];
-    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
-  }
-
-  // Pattern 2: relative URLs /STATE/City/ZIP/SaleID
-  const relRegex = /href="(\/[A-Z]{2}\/[^"\/]+\/\d{4,5}\/(\d{5,10})[^"]*)"/gi;
-  while ((match = relRegex.exec(html)) !== null) {
-    const href = (baseUrl + match[1]).split('?')[0];
-    const saleId = match[2];
-    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
-  }
-
-  // Pattern 3: relative URLs /STATE/City/SaleID (no ZIP — older pattern)
-  const relNoZipRegex = /href="(\/[A-Z]{2}\/[^"\/]+\/(\d{6,10})[^"]*)"/gi;
-  while ((match = relNoZipRegex.exec(html)) !== null) {
-    const href = (baseUrl + match[1]).split('?')[0];
-    const saleId = match[2];
-    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
-  }
-
-  // Dedup by source_sale_id, keeping first occurrence
+function parseSaleCards(html) {
   const seen = new Map();
-  for (const s of sales) {
-    if (!seen.has(s.source_sale_id)) seen.set(s.source_sale_id, s);
+
+  // Match: /STATE/City/ZIP/SaleID or /STATE/City/SaleID (absolute or relative)
+  const regex = /href="(?:https?:\/\/www\.estatesales\.net)?(\/[A-Z]{2}\/[^"?\/]+\/(?:\d{4,5}\/)?(\d{5,10}))(?:\?[^"]*)?"/gi;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const path = match[1];
+    const saleId = match[2];
+    // Filter out non-sale links (company profiles, search pages, etc.)
+    if (/\/companies\/|\/search\/|\/sign-up|\/contact|\/print/.test(path)) continue;
+    const fullUrl = `https://www.estatesales.net${path}`;
+    if (!seen.has(saleId)) {
+      seen.set(saleId, { source_url: fullUrl, source_sale_id: saleId });
+    }
   }
+
   return [...seen.values()];
 }
 
-// ─── Detail Page Parser ─────────────────────────────────────────────────────
+// ─── Detail Page Parser ──────────────────────────────────────────────────────
+// Parses a server-rendered Angular sale detail page.
+// Key patterns confirmed from live HTML:
+//   - Title:   <h1 ... class="sale-title">TITLE</h1>
+//   - Company: <h3 ...>COMPANY NAME</h3>  (first h3 after sale-title section)
+//   - Address: href="https://maps.google.com/maps?q=STREET+,+CITY,+STATE,+ZIP"
+//   - Pictures: ?picture=XXXXXX links — count them for image count
+//   - Thumbnail: first cloudfront image src
 
 function parseDetailPage(html) {
-  const clean = html.replace(/\s+/g, ' ');
+  // ── Title ──────────────────────────────────────────────────────────────────
+  const titleMatch = html.match(/class="sale-title"[^>]*>([^<]{3,200})<\/h1>/i) ||
+    html.match(/<h1[^>]*>([^<]{3,200})<\/h1>/i);
+  const title = titleMatch?.[1]?.trim() || null;
 
-  // Company name — multiple patterns tried in order
+  // ── Company name ──────────────────────────────────────────────────────────
+  // Structure: <h3 ...>PC'S Pine Cone and Sons</h3>  (first h3 on the page, inside operator card)
   const companyMatch =
-    // "Listed by CompanyName\n" (newline-terminated in rendered text)
-    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+([^\n<]{3,80})(?:\n|Last modified|<\/|\.)/i) ||
-    // Angular-rendered: span/div containing company name after "Listed by"
-    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+<[^>]+>([^<]{3,80})<\//i) ||
-    // Fallback: plain text "Listed by X" before period or tag
-    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+([^<.]{3,80})(?:[.<])/i) ||
-    clean.match(/class="[^"]*company[^"]*"[^>]*>([^<]{3,80})</i);
+    html.match(/class="[^"]*company[^"]*"[^>]*>([^<]{3,100})<\/[a-z]+>/i) ||
+    html.match(/<h3[^>]*>\s*([^<]{3,100})\s*<\/h3>/i);
+  const operator_name_raw = companyMatch?.[1]?.trim() || null;
 
-  // Picture count
-  const pictureMatch = clean.match(/(\d+)\s*(?:Pictures?|Photos?|Images?)/i);
+  // ── Address via Google Maps href ───────────────────────────────────────────
+  // href="https://maps.google.com/maps?q=2278+Edgewood+Terrace+,+Scotch+Plains,+NJ,+07076"
+  const mapsMatch = html.match(/maps\.google\.com\/maps\?q=([^"&]+)/i);
+  let address_full = null, city = null, state = null, zip = null, address_partial = null;
+  if (mapsMatch) {
+    const decoded = decodeURIComponent(mapsMatch[1].replace(/\+/g, ' ')).replace(/\s*,\s*/g, ', ').trim();
+    address_full = decoded;
+    // Parse: "2278 Edgewood Terrace , Scotch Plains, NJ, 07076"
+    const parts = decoded.split(',').map(p => p.trim());
+    if (parts.length >= 3) {
+      city = parts[parts.length - 3] || null;
+      const stateZip = (parts[parts.length - 2] || '') + ' ' + (parts[parts.length - 1] || '');
+      const stateMatch = stateZip.match(/([A-Z]{2})/);
+      const zipMatch = stateZip.match(/(\d{5})/);
+      state = stateMatch?.[1] || null;
+      zip = zipMatch?.[1] || null;
+    }
+    address_partial = [city, state, zip].filter(Boolean).join(', ');
+  }
 
-  // Dates: look for structured date spans or human-readable ranges
-  const dateMatch =
-    clean.match(/<time[^>]*datetime="([^"]+)"[^>]*>/i) ||
-    clean.match(/([A-Z][a-z]{2,8}\s+\d{1,2}(?:\s*[-–]\s*\d{1,2})?,?\s*202[5-9])/);
+  // ── Picture count & thumbnail ──────────────────────────────────────────────
+  // Pictures are linked as ?picture=XXXXXX — count unique picture IDs
+  const pictureIds = new Set();
+  const picRegex = /\?picture=(\d+)/g;
+  let picMatch;
+  while ((picMatch = picRegex.exec(html)) !== null) {
+    pictureIds.add(picMatch[1]);
+  }
+  const image_count_source = pictureIds.size;
 
-  // Address: street-level if revealed
-  const addrMatch =
-    clean.match(/\d{2,5}\s+[A-Za-z][^,<]{3,40},\s*[A-Za-z][^,<]{2,25},\s*[A-Z]{2}\s*\d{5}/) ||
-    clean.match(/"streetAddress"\s*:\s*"([^"]{5,100})"/i);
-
-  // City/State/ZIP
-  const locMatch =
-    clean.match(/"addressLocality"\s*:\s*"([^"]+)"[\s\S]{0,80}"addressRegion"\s*:\s*"([A-Z]{2})"/i) ||
-    clean.match(/([A-Za-z][A-Za-z\s]{1,25}),\s*([A-Z]{2})\s*(\d{5})/);
-
-  // Images — skip logos/icons, max 5
+  // Thumbnail: first cloudfront image (not logo/icon/placeholder)
   const imageUrls = [];
   const imgRegex = /<img[^>]+src="([^"]+)"/gi;
   let imgMatch;
   while ((imgMatch = imgRegex.exec(html)) !== null && imageUrls.length < MAX_IMAGES_PER_SALE) {
     const src = imgMatch[1];
-    if (/logo|icon|avatar|placeholder/i.test(src)) continue;
-    if (!src.match(/\.(jpg|jpeg|png|webp)|cloudfront|images?\./i)) continue;
-    imageUrls.push(src.startsWith('http') ? src : `https://www.estatesales.net${src}`);
+    if (/logo|icon|avatar|placeholder|greyscale|svg/i.test(src)) continue;
+    if (!src.match(/cloudfront|estatesales\.net.*\.(jpg|jpeg|png|webp)/i)) continue;
+    imageUrls.push(src);
   }
 
-  // Sale times from JSON-LD or text
+  // ── Sale dates & times ─────────────────────────────────────────────────────
+  // Pattern in HTML: <h6 ...>May 29</h6><span ...>8am to 3pm</span>
   const saleTimes = [];
-  const timeMatches = [...html.matchAll(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM))\s*[-–to]+\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM))/gi)];
-  const todayStr = new Date().toISOString().split('T')[0];
-
-  // Collect upcoming ISO dates from the page for sale_times mapping
-  const isoDateMatches = [...html.matchAll(/(\d{4}-\d{2}-\d{2})/g)]
-    .map(m => m[1])
-    .filter(d => d >= todayStr)
-    .sort();
-
-  timeMatches.forEach((tm, i) => {
+  const dateBlockRegex = /<h6[^>]*>([A-Za-z]+ \d{1,2})<\/h6>[\s\S]{0,200}?<span[^>]*>(\d{1,2}(?::\d{2})?(?:am|pm))\s+to\s+(\d{1,2}(?::\d{2})?(?:am|pm))/gi;
+  let dbMatch;
+  const currentYear = new Date().getFullYear();
+  while ((dbMatch = dateBlockRegex.exec(html)) !== null) {
+    const dateStr = dbMatch[1]; // "May 29"
+    const parsed = new Date(`${dateStr}, ${currentYear}`);
+    const isoDate = !isNaN(parsed) ? parsed.toISOString().split('T')[0] : null;
     saleTimes.push({
-      date: isoDateMatches[i] || null,
-      start_time: tm[1].toUpperCase().trim(),
-      end_time: tm[2].toUpperCase().trim()
+      date: isoDate,
+      start_time: dbMatch[2].toUpperCase(),
+      end_time: dbMatch[3].toUpperCase()
     });
-  });
-
-  // Parse start/end dates
-  let start_date = isoDateMatches[0] || null;
-  let end_date = isoDateMatches[isoDateMatches.length - 1] || null;
-
-  if (!start_date && dateMatch) {
-    const parsed = new Date(dateMatch[1]);
-    if (!isNaN(parsed)) {
-      start_date = parsed.toISOString().split('T')[0];
-      end_date = start_date;
-    }
   }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const futureDates = saleTimes.map(s => s.date).filter(d => d && d >= todayStr).sort();
+  const start_date = futureDates[0] || null;
+  const end_date = futureDates[futureDates.length - 1] || null;
+
+  // ── Description snippet ────────────────────────────────────────────────────
+  const descMatch = html.match(/Description &amp; Details[\s\S]{0,100}?<\/h4>([\s\S]{20,1000}?)(?:View More|<\/section|<app-)/i);
+  const description_snippet = descMatch
+    ? descMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500)
+    : null;
 
   return {
-    operator_name_raw: companyMatch?.[1]?.trim() || null,
-    image_count_source: pictureMatch ? parseInt(pictureMatch[1]) : imageUrls.length,
+    title,
+    operator_name_raw,
+    address_full,
+    address_partial,
+    city,
+    state,
+    zip,
+    image_count_source,
     image_urls_limited: imageUrls,
     sale_times: saleTimes,
     start_date,
     end_date,
-    city: locMatch?.[1]?.trim() || null,
-    state: locMatch?.[2] || null,
-    zip: locMatch?.[3] || null,
-    address_full: addrMatch ? (addrMatch[1] || addrMatch[0])?.trim() : null,
-    address_partial: [locMatch?.[1], locMatch?.[2], locMatch?.[3]].filter(Boolean).join(', ')
+    description_snippet
   };
 }
 
-// ─── Operator Matching ───────────────────────────────────────────────────────
+// ─── Operator Matching ────────────────────────────────────────────────────────
 
 async function matchOperator(operatorNameRaw, allOperators) {
   if (!operatorNameRaw) return null;
   const normalized = normalizeName(operatorNameRaw);
-
   return allOperators.find(op => {
     const names = [op.company_name, ...(op.aliases || [])];
     return names.some(name => normalizeName(name) === normalized);
@@ -204,13 +201,13 @@ async function upsertScrapedOperator(base44, operatorNameRaw, territoryId, allOp
   return newOp;
 }
 
-// ─── Notifications ───────────────────────────────────────────────────────────
+// ─── Notifications ────────────────────────────────────────────────────────────
 
 async function notifyOperator(base44, email, operatorName, sale) {
   await base44.asServiceRole.integrations.Core.SendEmail({
     to: email,
     subject: `We found your estate sale listing — claim it on EstateSalen`,
-    body: `Hi ${operatorName},\n\nWe found your upcoming estate sale:\n\n"${sale.title}"\n${sale.address_partial || sale.city + ', ' + sale.state}\nStarts: ${sale.start_date}\n\nClaim and complete your listing on EstateSalen.com to reach more buyers and access our full marketing toolkit.\n\nView source listing: ${sale.source_url}\nClaim on EstateSalen: https://estatesalen.com\n\nThe EstateSalen Team`
+    body: `Hi ${operatorName},\n\nWe found your upcoming estate sale:\n\n"${sale.title}"\n${sale.address_partial || ''}\nStarts: ${sale.start_date}\n\nClaim and complete your listing on EstateSalen.com to reach more buyers and access our full marketing toolkit.\n\nView source listing: ${sale.source_url}\nClaim on EstateSalen: https://estatesalen.com\n\nThe EstateSalen Team`
   });
 }
 
@@ -229,7 +226,7 @@ async function notifyAdminDigest(base44, adminEmail, territory, newSales) {
   });
 }
 
-// ─── Main Handler ────────────────────────────────────────────────────────────
+// ─── Main Handler ─────────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
   try {
@@ -246,7 +243,6 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { territory_id } = body;
 
-    // Load territories
     const territories = territory_id
       ? await base44.asServiceRole.entities.ScrapedSaleTerritory.filter({ id: territory_id, is_active: true })
       : await base44.asServiceRole.entities.ScrapedSaleTerritory.filter({ is_active: true });
@@ -258,7 +254,6 @@ Deno.serve(async (req) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const runId = `run_${Date.now()}`;
 
-    // Pre-load for matching
     const allOperators = await base44.asServiceRole.entities.ScrapedSaleOperator.list('-created_date', 1000);
     const platformUsers = await base44.asServiceRole.entities.User.list('-created_date', 1000);
     const adminUsers = platformUsers.filter(u => u.role === 'admin');
@@ -276,122 +271,127 @@ Deno.serve(async (req) => {
       const errors = [];
       const newUnmatchedSales = [];
 
+      // Collect all unique sale URLs across all search_urls for this territory
+      const allSaleCards = new Map();
+
       for (const searchUrl of territory.search_urls) {
         try {
           console.log(`[${territory.name}] Fetching listing: ${searchUrl}`);
           const listingHtml = await fetchHtml(searchUrl);
-          const saleCards = parseSaleCards(listingHtml);
-          console.log(`[${territory.name}] Found ${saleCards.length} cards`);
-
-          for (const card of saleCards) {
-            try {
-              // Always fetch detail page for full data
-              console.log(`  Detail: ${card.source_url}`);
-              const detailHtml = await fetchHtml(card.source_url);
-              const detail = parseDetailPage(detailHtml);
-
-              // Skip past sales
-              if (detail.start_date && detail.start_date < todayStr) continue;
-              if (detail.end_date && detail.end_date < todayStr) continue;
-
-              // Match operator
-              const matchedOp = await matchOperator(detail.operator_name_raw, allOperators);
-              const platformUser = findPlatformUser(detail.operator_name_raw, platformUsers);
-
-              const operatorId = matchedOp?.id || null;
-              const platformUserId = matchedOp?.platform_user_id || platformUser?.id || null;
-              const isMatched = !!(operatorId || platformUserId);
-
-              // Dedup check
-              const existing = await base44.asServiceRole.entities.ImportedSale.filter({
-                source: 'estatesales_net',
-                source_sale_id: card.source_sale_id
-              });
-
-              const payload = {
-                source: 'estatesales_net',
-                source_url: card.source_url,
-                source_sale_id: card.source_sale_id,
-                title: card.title,
-                operator_name_raw: detail.operator_name_raw,
-                operator_id: operatorId,
-                platform_operator_user_id: platformUserId,
-                status: isMatched ? 'matched' : 'imported',
-                city: detail.city,
-                state: detail.state || territory.state,
-                zip: detail.zip,
-                address_partial: detail.address_partial,
-                address_full: detail.address_full || null,
-                start_date: detail.start_date,
-                end_date: detail.end_date,
-                sale_times: detail.sale_times,
-                image_count_source: detail.image_count_source,
-                image_urls_limited: detail.image_urls_limited,
-                territory_id: territory.id,
-                last_seen_at: new Date().toISOString(),
-                scrape_run_id: runId
-              };
-
-              const isNew = !existing?.length;
-
-              if (isNew) {
-                await base44.asServiceRole.entities.ImportedSale.create(payload);
-
-                // Upsert scraped operator record
-                if (detail.operator_name_raw) {
-                  await upsertScrapedOperator(base44, detail.operator_name_raw, territory.id, allOperators);
-                }
-
-                // Notifications — only on new sales
-                if (isMatched) {
-                  const opEmail = matchedOp?.email ||
-                    platformUsers.find(u => u.id === platformUserId)?.email || null;
-                  const opName = matchedOp?.company_name ||
-                    platformUsers.find(u => u.id === platformUserId)?.full_name ||
-                    detail.operator_name_raw;
-                  if (opEmail) {
-                    await notifyOperator(base44, opEmail, opName, { ...payload });
-                  }
-                } else {
-                  newUnmatchedSales.push({ ...payload });
-                }
-              } else {
-                // Update existing — refresh images, dates, status
-                const prev = existing[0];
-                await base44.asServiceRole.entities.ImportedSale.update(prev.id, {
-                  last_seen_at: new Date().toISOString(),
-                  scrape_run_id: runId,
-                  operator_id: operatorId || prev.operator_id,
-                  platform_operator_user_id: platformUserId || prev.platform_operator_user_id,
-                  status: prev.status === 'imported' && isMatched ? 'matched' : prev.status,
-                  image_urls_limited: detail.image_urls_limited.length
-                    ? detail.image_urls_limited : prev.image_urls_limited,
-                  image_count_source: detail.image_count_source || prev.image_count_source,
-                  address_full: detail.address_full || prev.address_full,
-                  sale_times: detail.sale_times.length ? detail.sale_times : prev.sale_times
-                });
-              }
-
-              results.push({ ...payload, is_new: isNew });
-
-            } catch (cardErr) {
-              errors.push(`Card ${card.source_sale_id}: ${cardErr.message}`);
-              console.error(cardErr);
+          const cards = parseSaleCards(listingHtml);
+          console.log(`[${territory.name}] Found ${cards.length} sale links from ${searchUrl}`);
+          for (const card of cards) {
+            if (!allSaleCards.has(card.source_sale_id)) {
+              allSaleCards.set(card.source_sale_id, card);
             }
           }
-
         } catch (urlErr) {
           errors.push(`${searchUrl}: ${urlErr.message}`);
           console.error(urlErr);
         }
       }
 
-      // Send one digest email per territory (not per sale)
+      console.log(`[${territory.name}] Total unique sales to process: ${allSaleCards.size}`);
+
+      for (const card of allSaleCards.values()) {
+        try {
+          console.log(`  Detail: ${card.source_url}`);
+          const detailHtml = await fetchHtml(card.source_url);
+          const detail = parseDetailPage(detailHtml);
+
+          // Skip past sales
+          if (detail.start_date && detail.start_date < todayStr) continue;
+          if (detail.end_date && detail.end_date < todayStr) continue;
+
+          const matchedOp = await matchOperator(detail.operator_name_raw, allOperators);
+          const platformUser = findPlatformUser(detail.operator_name_raw, platformUsers);
+
+          const operatorId = matchedOp?.id || null;
+          const platformUserId = matchedOp?.platform_user_id || platformUser?.id || null;
+          const isMatched = !!(operatorId || platformUserId);
+
+          const existing = await base44.asServiceRole.entities.ImportedSale.filter({
+            source: 'estatesales_net',
+            source_sale_id: card.source_sale_id
+          });
+
+          const payload = {
+            source: 'estatesales_net',
+            source_url: card.source_url,
+            source_sale_id: card.source_sale_id,
+            title: detail.title || card.source_sale_id,
+            operator_name_raw: detail.operator_name_raw,
+            operator_id: operatorId,
+            platform_operator_user_id: platformUserId,
+            status: isMatched ? 'matched' : 'imported',
+            city: detail.city,
+            state: detail.state || territory.state,
+            zip: detail.zip,
+            address_partial: detail.address_partial,
+            address_full: detail.address_full || null,
+            description_snippet: detail.description_snippet || null,
+            start_date: detail.start_date,
+            end_date: detail.end_date,
+            sale_times: detail.sale_times,
+            image_count_source: detail.image_count_source,
+            image_urls_limited: detail.image_urls_limited,
+            territory_id: territory.id,
+            last_seen_at: new Date().toISOString(),
+            scrape_run_id: runId
+          };
+
+          const isNew = !existing?.length;
+
+          if (isNew) {
+            await base44.asServiceRole.entities.ImportedSale.create(payload);
+
+            if (detail.operator_name_raw) {
+              await upsertScrapedOperator(base44, detail.operator_name_raw, territory.id, allOperators);
+            }
+
+            if (isMatched) {
+              const opEmail = matchedOp?.email ||
+                platformUsers.find(u => u.id === platformUserId)?.email || null;
+              const opName = matchedOp?.company_name ||
+                platformUsers.find(u => u.id === platformUserId)?.full_name ||
+                detail.operator_name_raw;
+              if (opEmail) {
+                await notifyOperator(base44, opEmail, opName, payload);
+              }
+            } else {
+              newUnmatchedSales.push(payload);
+            }
+          } else {
+            const prev = existing[0];
+            await base44.asServiceRole.entities.ImportedSale.update(prev.id, {
+              last_seen_at: new Date().toISOString(),
+              scrape_run_id: runId,
+              title: detail.title || prev.title,
+              operator_name_raw: detail.operator_name_raw || prev.operator_name_raw,
+              operator_id: operatorId || prev.operator_id,
+              platform_operator_user_id: platformUserId || prev.platform_operator_user_id,
+              status: prev.status === 'imported' && isMatched ? 'matched' : prev.status,
+              image_urls_limited: detail.image_urls_limited.length ? detail.image_urls_limited : prev.image_urls_limited,
+              image_count_source: detail.image_count_source || prev.image_count_source,
+              address_full: detail.address_full || prev.address_full,
+              description_snippet: detail.description_snippet || prev.description_snippet,
+              sale_times: detail.sale_times.length ? detail.sale_times : prev.sale_times
+            });
+          }
+
+          results.push({ ...payload, is_new: isNew });
+
+        } catch (cardErr) {
+          errors.push(`Card ${card.source_sale_id}: ${cardErr.message}`);
+          console.error(cardErr);
+        }
+      }
+
+      // One digest email per territory
       if (adminEmail && newUnmatchedSales.length) {
         await notifyAdminDigest(base44, adminEmail, territory, newUnmatchedSales);
       }
 
-      // Update territory stats
       await base44.asServiceRole.entities.ScrapedSaleTerritory.update(territory.id, {
         last_scraped_at: new Date().toISOString(),
         last_scrape_count: results.length
