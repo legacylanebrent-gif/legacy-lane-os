@@ -13,11 +13,19 @@ import {
 import { format } from 'date-fns';
 
 const STATUS_BADGE = {
-  imported:  'bg-slate-100 text-slate-700',
-  matched:   'bg-blue-100 text-blue-800',
+  imported:  'bg-amber-100 text-amber-700',
+  matched:   'bg-amber-100 text-amber-700',
   claimed:   'bg-purple-100 text-purple-800',
   published: 'bg-green-100 text-green-800',
   ignored:   'bg-red-100 text-red-700'
+};
+
+const STATUS_LABEL = {
+  imported:  'Imported from public listing — operator verification pending',
+  matched:   'Imported from public listing — operator verification pending',
+  claimed:   'Claimed by operator',
+  published: 'Published on platform',
+  ignored:   'Ignored'
 };
 
 export default function ImportedSalesDashboard() {
@@ -204,7 +212,7 @@ export default function ImportedSalesDashboard() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <Badge className={STATUS_BADGE[sale.status] || 'bg-slate-100 text-slate-700'}>
-                              {sale.status}
+                              {STATUS_LABEL[sale.status] || sale.status}
                             </Badge>
                             {sale.platform_operator_user_id && (
                               <Badge className="bg-emerald-100 text-emerald-700">
@@ -346,7 +354,7 @@ export default function ImportedSalesDashboard() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <Badge className={STATUS_BADGE[selectedSale.status]}>{selectedSale.status}</Badge>
+                <Badge className={STATUS_BADGE[selectedSale.status]}>{STATUS_LABEL[selectedSale.status] || selectedSale.status}</Badge>
                 {selectedSale.platform_operator_user_id && <Badge className="bg-emerald-100 text-emerald-700">Platform User</Badge>}
               </div>
 
