@@ -96,6 +96,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'BizInABox',              label: 'Biz in a Box',        icon: Briefcase,       group: 'Admin' },
   { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
   { page: 'AdminAIOperator',        label: 'Admin AI Operator',   icon: Brain,           group: 'Admin' },
+  { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
