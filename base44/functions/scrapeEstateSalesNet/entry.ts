@@ -214,11 +214,18 @@ async function notifyOperator(base44, email, operatorName, sale) {
   });
 }
 
-async function notifyAdmin(base44, adminEmail, territory, sale) {
+async function notifyAdminDigest(base44, adminEmail, territory, newSales) {
+  if (!newSales.length) return;
+  const unmatchedCount = newSales.filter(s => !s.operator_id && !s.platform_operator_user_id).length;
+  const matchedCount = newSales.length - unmatchedCount;
+  const lines = newSales.slice(0, 10).map(s =>
+    `• ${s.operator_name_raw || 'Unknown'} — ${s.address_partial || s.city || ''} (${s.start_date || 'unknown date'}) ${s.source_url}`
+  ).join('\n');
+  const more = newSales.length > 10 ? `\n...and ${newSales.length - 10} more` : '';
   await base44.asServiceRole.integrations.Core.SendEmail({
     to: adminEmail,
-    subject: `New unmatched operator in ${territory.name}`,
-    body: `A new estate sale was scraped in the ${territory.name} territory with an unrecognized operator:\n\nCompany: ${sale.operator_name_raw || 'Unknown'}\nSale: ${sale.title}\nLocation: ${sale.address_partial}\nStart: ${sale.start_date}\nSource: ${sale.source_url}\n\nReview in dashboard:\nhttps://estatesalen.com/ImportedSalesDashboard`
+    subject: `[EstateSalen] ${newSales.length} new sales scraped in ${territory.name}`,
+    body: `Scrape run complete for territory: ${territory.name}\n\nTotal new: ${newSales.length} | Matched: ${matchedCount} | Unmatched: ${unmatchedCount}\n\nFirst ${Math.min(newSales.length, 10)} new listings:\n${lines}${more}\n\nReview in dashboard:\nhttps://estatesalen.com/ImportedSalesDashboard`
   });
 }
 
@@ -267,6 +274,7 @@ Deno.serve(async (req) => {
 
       const results = [];
       const errors = [];
+      const newUnmatchedSales = [];
 
       for (const searchUrl of territory.search_urls) {
         try {
@@ -344,8 +352,8 @@ Deno.serve(async (req) => {
                   if (opEmail) {
                     await notifyOperator(base44, opEmail, opName, { ...payload });
                   }
-                } else if (adminEmail) {
-                  await notifyAdmin(base44, adminEmail, territory, { ...payload });
+                } else {
+                  newUnmatchedSales.push({ ...payload });
                 }
               } else {
                 // Update existing — refresh images, dates, status
@@ -376,6 +384,11 @@ Deno.serve(async (req) => {
           errors.push(`${searchUrl}: ${urlErr.message}`);
           console.error(urlErr);
         }
+      }
+
+      // Send one digest email per territory (not per sale)
+      if (adminEmail && newUnmatchedSales.length) {
+        await notifyAdminDigest(base44, adminEmail, territory, newUnmatchedSales);
       }
 
       // Update territory stats
