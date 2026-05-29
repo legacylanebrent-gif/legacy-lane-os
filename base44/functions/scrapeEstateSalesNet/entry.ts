@@ -58,8 +58,8 @@ function parseSaleCards(html) {
 
 function parseDetailPage(html) {
   // ── Title ──────────────────────────────────────────────────────────────────
-  const titleMatch = html.match(/class="sale-title"[^>]*>([^<]{3,200})<\/h1>/i) ||
-    html.match(/<h1[^>]*>([^<]{3,200})<\/h1>/i);
+  const titleMatch = html.match(/<h1[^>]*class="sale-title"[^>]*>([^<]{3,200})<\/h1>/i) ||
+    html.match(/class="sale-title"[^>]*>([^<]{3,200})<\/h1>/i);
   const title = titleMatch?.[1]?.trim() || null;
 
   // ── Company name ──────────────────────────────────────────────────────────
