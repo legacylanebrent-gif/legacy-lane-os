@@ -79,6 +79,7 @@ import AutonomousRunsDashboard from './pages/AutonomousRunsDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import StateOperators from './pages/StateOperators';
 import NationalCoverageGrid from './pages/NationalCoverageGrid';
+import TerritoryFBManager from './pages/TerritoryFBManager';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -201,6 +202,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminDashboard" element={<LayoutWrapper currentPageName="AdminDashboard"><AdminDashboard /></LayoutWrapper>} />
       <Route path="/StateOperators" element={<StateOperators />} />
       <Route path="/NationalCoverageGrid" element={<LayoutWrapper currentPageName="NationalCoverageGrid"><NationalCoverageGrid /></LayoutWrapper>} />
+      <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

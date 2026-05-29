@@ -1,0 +1,81 @@
+{
+  "name": "TerritoryFBPage",
+  "type": "object",
+  "properties": {
+    "territory_name": {
+      "type": "string",
+      "description": "Display name, e.g. 'EstateSalen Monmouth County'"
+    },
+    "county": {
+      "type": "string",
+      "description": "County name, e.g. 'Monmouth County'"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation, e.g. 'NJ'"
+    },
+    "fb_page_name": {
+      "type": "string",
+      "description": "Exact Facebook Page name, e.g. 'EstateSalen Monmouth County NJ'"
+    },
+    "fb_page_id": {
+      "type": "string",
+      "description": "Facebook Page ID (numeric)"
+    },
+    "fb_page_url": {
+      "type": "string",
+      "description": "Full Facebook Page URL"
+    },
+    "fb_page_access_token": {
+      "type": "string",
+      "description": "Page access token for posting via Graph API"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this page is active and should receive auto-posts"
+    },
+    "zip_codes_covered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "ZIP codes this territory page covers for sale matching"
+    },
+    "cities_covered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Cities/towns this territory covers"
+    },
+    "post_time": {
+      "type": "string",
+      "default": "09:00",
+      "description": "Preferred time of day to post (HH:MM)"
+    },
+    "days_before_sale": {
+      "type": "integer",
+      "default": 2,
+      "description": "How many days before a sale starts to generate and post"
+    },
+    "total_posts_sent": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_post_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "territory_name",
+    "county",
+    "state"
+  ]
+}

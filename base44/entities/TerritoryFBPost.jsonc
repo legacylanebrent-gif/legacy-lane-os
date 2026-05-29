@@ -1,0 +1,102 @@
+{
+  "name": "TerritoryFBPost",
+  "type": "object",
+  "properties": {
+    "territory_fb_page_id": {
+      "type": "string",
+      "description": "TerritoryFBPage record ID"
+    },
+    "territory_name": {
+      "type": "string"
+    },
+    "post_type": {
+      "type": "string",
+      "enum": [
+        "individual_sale",
+        "combined_digest"
+      ],
+      "description": "individual_sale = one post per sale, combined_digest = all sales in territory that day"
+    },
+    "estate_sale_id": {
+      "type": "string",
+      "description": "Linked EstateSale ID (for individual_sale posts)"
+    },
+    "estate_sale_title": {
+      "type": "string"
+    },
+    "sale_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sale_city": {
+      "type": "string"
+    },
+    "sale_state": {
+      "type": "string"
+    },
+    "sales_included": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of EstateSale IDs included in a combined digest post"
+    },
+    "ai_caption": {
+      "type": "string",
+      "description": "AI-generated Facebook post caption"
+    },
+    "ai_image_url": {
+      "type": "string",
+      "description": "AI-generated image URL for this post"
+    },
+    "estate_sale_link": {
+      "type": "string",
+      "description": "Deep link back to EstateSalen.com sale detail page"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending_review"
+    },
+    "publish_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "posted",
+        "failed"
+      ],
+      "default": "draft"
+    },
+    "scheduled_for": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this post is scheduled to go live"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fb_post_id": {
+      "type": "string",
+      "description": "Facebook post ID after publishing"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "generation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this post was generated"
+    }
+  },
+  "required": [
+    "territory_fb_page_id",
+    "post_type"
+  ]
+}
