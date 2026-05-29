@@ -34,28 +34,37 @@ async function fetchHtml(url) {
 function parseSaleCards(html, baseUrl = 'https://www.estatesales.net') {
   const sales = [];
 
-  // Match sale links: /XX/City-Name/12345 (any 2-letter state)
-  const linkRegex = /<a[^>]+href="(\/[A-Z]{2}\/[^"]*\/(\d{5,10})[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+  // Pattern 1: absolute URLs in href (e.g. https://www.estatesales.net/NJ/Somerset/08873/4924266)
+  const absRegex = /href="(https?:\/\/www\.estatesales\.net\/[A-Z]{2}\/[^"\/]+\/\d{4,5}\/(\d{5,10})[^"]*)"/gi;
   let match;
-
-  while ((match = linkRegex.exec(html)) !== null) {
-    const href = baseUrl + match[1];
+  while ((match = absRegex.exec(html)) !== null) {
+    const href = match[1].split('?')[0]; // strip query params
     const saleId = match[2];
-    const rawTitle = match[3].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-
-    if (!rawTitle || rawTitle.length < 5) continue;
-
-    sales.push({
-      source_url: href,
-      source_sale_id: saleId,
-      title: rawTitle
-    });
+    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
   }
 
-  // Dedup by source_sale_id
-  return Array.from(
-    new Map(sales.map(s => [s.source_sale_id, s])).values()
-  );
+  // Pattern 2: relative URLs /STATE/City/ZIP/SaleID
+  const relRegex = /href="(\/[A-Z]{2}\/[^"\/]+\/\d{4,5}\/(\d{5,10})[^"]*)"/gi;
+  while ((match = relRegex.exec(html)) !== null) {
+    const href = (baseUrl + match[1]).split('?')[0];
+    const saleId = match[2];
+    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
+  }
+
+  // Pattern 3: relative URLs /STATE/City/SaleID (no ZIP — older pattern)
+  const relNoZipRegex = /href="(\/[A-Z]{2}\/[^"\/]+\/(\d{6,10})[^"]*)"/gi;
+  while ((match = relNoZipRegex.exec(html)) !== null) {
+    const href = (baseUrl + match[1]).split('?')[0];
+    const saleId = match[2];
+    sales.push({ source_url: href, source_sale_id: saleId, title: '' });
+  }
+
+  // Dedup by source_sale_id, keeping first occurrence
+  const seen = new Map();
+  for (const s of sales) {
+    if (!seen.has(s.source_sale_id)) seen.set(s.source_sale_id, s);
+  }
+  return [...seen.values()];
 }
 
 // ─── Detail Page Parser ─────────────────────────────────────────────────────
@@ -63,9 +72,14 @@ function parseSaleCards(html, baseUrl = 'https://www.estatesales.net') {
 function parseDetailPage(html) {
   const clean = html.replace(/\s+/g, ' ');
 
-  // Company name: "Listed by CompanyName" or "Conducted by CompanyName"
+  // Company name — multiple patterns tried in order
   const companyMatch =
-    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+([^<]{3,80})(?:Last modified|<\/|\.)/i) ||
+    // "Listed by CompanyName\n" (newline-terminated in rendered text)
+    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+([^\n<]{3,80})(?:\n|Last modified|<\/|\.)/i) ||
+    // Angular-rendered: span/div containing company name after "Listed by"
+    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+<[^>]+>([^<]{3,80})<\//i) ||
+    // Fallback: plain text "Listed by X" before period or tag
+    clean.match(/(?:Listed|Conducted|Presented)\s+by\s+([^<.]{3,80})(?:[.<])/i) ||
     clean.match(/class="[^"]*company[^"]*"[^>]*>([^<]{3,80})</i);
 
   // Picture count
