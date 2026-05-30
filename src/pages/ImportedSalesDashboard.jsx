@@ -233,7 +233,7 @@ export default function ImportedSalesDashboard() {
                           <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
-                              {sale.address_partial || [sale.city, sale.state, sale.zip].filter(Boolean).join(', ')}
+                              {sale.address_full || sale.address_partial || [sale.city, sale.state, sale.zip].filter(Boolean).join(', ')}
                             </span>
                             {sale.start_date && (
                               <span className="flex items-center gap-1">
