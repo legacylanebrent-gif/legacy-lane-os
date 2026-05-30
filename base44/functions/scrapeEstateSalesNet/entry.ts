@@ -30,8 +30,9 @@ async function fetchHtml(url) {
 function parseSaleCards(html) {
   const seen = new Map();
 
-  // Match: /STATE/City/ZIP/SaleID or /STATE/City/SaleID (absolute or relative)
-  const regex = /href="(?:https?:\/\/www\.estatesales\.net)?(\/[A-Z]{2}\/[^"?\/]+\/(?:\d{4,5}\/)?(\d{5,10}))(?:\?[^"]*)?"/gi;
+  // Match: /STATE/City/ZIP/SaleID — sale IDs are always 6+ digits, ZIPs are exactly 5
+  // We require the path to end with a 6-10 digit sale ID (optionally preceded by a ZIP/)
+  const regex = /href="(?:https?:\/\/www\.estatesales\.net)?(\/[A-Z]{2}\/[^"?\/]+\/(?:\d{4,5}\/)?(\d{6,10}))(?:\?[^"]*)?"/gi;
   let match;
   while ((match = regex.exec(html)) !== null) {
     const path = match[1];
@@ -86,8 +87,17 @@ function parseDetailPage(html) {
       state = stateMatch?.[1] || null;
       zip = zipMatch?.[1] || null;
     }
-    address_partial = [city, state, zip].filter(Boolean).join(', ');
+  } else {
+    // Fallback: parse city/state/zip from the "address hidden" text on the detail page
+    // e.g. <strong>Blackwood, NJ 08012 </strong>
+    const cityStateZipMatch = html.match(/<strong[^>]*>\s*([A-Za-z\s\-]+),\s*([A-Z]{2})\s+(\d{5})\s*<\/strong>/i);
+    if (cityStateZipMatch) {
+      city = cityStateZipMatch[1].trim();
+      state = cityStateZipMatch[2];
+      zip = cityStateZipMatch[3];
+    }
   }
+  address_partial = [city, state, zip].filter(Boolean).join(', ');
 
   // ── Picture count & thumbnail ──────────────────────────────────────────────
   // Pictures are linked as ?picture=XXXXXX — count unique picture IDs
