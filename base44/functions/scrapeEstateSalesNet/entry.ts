@@ -31,17 +31,31 @@ function parseSaleCards(html) {
   const seen = new Map();
 
   // Match: /STATE/City/ZIP/SaleID — sale IDs are always 6+ digits, ZIPs are exactly 5
-  // We require the path to end with a 6-10 digit sale ID (optionally preceded by a ZIP/)
   const regex = /href="(?:https?:\/\/www\.estatesales\.net)?(\/[A-Z]{2}\/[^"?\/]+\/(?:\d{4,5}\/)?(\d{6,10}))(?:\?[^"]*)?"/gi;
   let match;
   while ((match = regex.exec(html)) !== null) {
     const path = match[1];
     const saleId = match[2];
-    // Filter out non-sale links (company profiles, search pages, etc.)
     if (/\/companies\/|\/search\/|\/sign-up|\/contact|\/print/.test(path)) continue;
     const fullUrl = `https://www.estatesales.net${path}`;
     if (!seen.has(saleId)) {
       seen.set(saleId, { source_url: fullUrl, source_sale_id: saleId });
+    }
+  }
+
+  // Extract thumbnail images from listing cards — keyed by sale ID
+  // Pattern: picturescdn.estatesales.net/{saleId}/1-1/{uuid}.jpg
+  const imgRegex = /src="(https?:\/\/picturescdn\.estatesales\.net\/(\d{6,10})\/[^"]+\.(?:jpg|jpeg|png|webp))"/gi;
+  let imgMatch;
+  while ((imgMatch = imgRegex.exec(html)) !== null) {
+    const imgUrl = imgMatch[1];
+    const imgSaleId = imgMatch[2];
+    if (seen.has(imgSaleId)) {
+      const card = seen.get(imgSaleId);
+      if (!card.image_urls_limited) card.image_urls_limited = [];
+      if (card.image_urls_limited.length < 5 && !card.image_urls_limited.includes(imgUrl)) {
+        card.image_urls_limited.push(imgUrl);
+      }
     }
   }
 
@@ -109,15 +123,13 @@ function parseDetailPage(html) {
   }
   const image_count_source = pictureIds.size;
 
-  // Thumbnail: first cloudfront image (not logo/icon/placeholder)
+  // Thumbnail: grab from picturescdn (served in SSR for upcoming sales)
   const imageUrls = [];
-  const imgRegex = /<img[^>]+src="([^"]+)"/gi;
+  const imgRegex = /src="(https?:\/\/picturescdn\.estatesales\.net\/[^"]+\.(?:jpg|jpeg|png|webp))"/gi;
   let imgMatch;
   while ((imgMatch = imgRegex.exec(html)) !== null && imageUrls.length < MAX_IMAGES_PER_SALE) {
     const src = imgMatch[1];
-    if (/logo|icon|avatar|placeholder|greyscale|svg/i.test(src)) continue;
-    if (!src.match(/cloudfront|estatesales\.net.*\.(jpg|jpeg|png|webp)/i)) continue;
-    imageUrls.push(src);
+    if (!imageUrls.includes(src)) imageUrls.push(src);
   }
 
   // ── Sale dates & times ─────────────────────────────────────────────────────
@@ -325,6 +337,12 @@ Deno.serve(async (req) => {
             source_sale_id: card.source_sale_id
           });
 
+          // Merge images: listing-page thumbnails + detail-page images, deduplicated
+          const mergedImages = [...new Set([
+            ...(card.image_urls_limited || []),
+            ...detail.image_urls_limited
+          ])].slice(0, MAX_IMAGES_PER_SALE);
+
           const payload = {
             source: 'estatesales_net',
             source_url: card.source_url,
@@ -344,7 +362,7 @@ Deno.serve(async (req) => {
             end_date: detail.end_date,
             sale_times: detail.sale_times,
             image_count_source: detail.image_count_source,
-            image_urls_limited: detail.image_urls_limited,
+            image_urls_limited: mergedImages,
             territory_id: territory.id,
             last_seen_at: new Date().toISOString(),
             scrape_run_id: runId
@@ -381,7 +399,7 @@ Deno.serve(async (req) => {
               operator_id: operatorId || prev.operator_id,
               platform_operator_user_id: platformUserId || prev.platform_operator_user_id,
               status: prev.status === 'imported' && isMatched ? 'matched' : prev.status,
-              image_urls_limited: detail.image_urls_limited.length ? detail.image_urls_limited : prev.image_urls_limited,
+              image_urls_limited: mergedImages.length ? mergedImages : prev.image_urls_limited,
               image_count_source: detail.image_count_source || prev.image_count_source,
               address_full: detail.address_full || prev.address_full,
               address_partial: detail.address_partial || prev.address_partial,
