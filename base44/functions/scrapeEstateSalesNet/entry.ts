@@ -384,6 +384,10 @@ Deno.serve(async (req) => {
               image_urls_limited: detail.image_urls_limited.length ? detail.image_urls_limited : prev.image_urls_limited,
               image_count_source: detail.image_count_source || prev.image_count_source,
               address_full: detail.address_full || prev.address_full,
+              address_partial: detail.address_partial || prev.address_partial,
+              city: detail.city || prev.city,
+              state: detail.state || prev.state,
+              zip: detail.zip || prev.zip,
               description_snippet: detail.description_snippet || prev.description_snippet,
               sale_times: detail.sale_times.length ? detail.sale_times : prev.sale_times
             });
