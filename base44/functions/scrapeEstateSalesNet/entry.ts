@@ -123,13 +123,20 @@ function parseDetailPage(html) {
   }
   const image_count_source = pictureIds.size;
 
-  // Thumbnail: grab from picturescdn (served in SSR for upcoming sales)
+  // Thumbnail: grab from picturescdn (served in SSR for some sales)
   const imageUrls = [];
   const imgRegex = /src="(https?:\/\/picturescdn\.estatesales\.net\/[^"]+\.(?:jpg|jpeg|png|webp))"/gi;
   let imgMatch;
   while ((imgMatch = imgRegex.exec(html)) !== null && imageUrls.length < MAX_IMAGES_PER_SALE) {
     const src = imgMatch[1];
     if (!imageUrls.includes(src)) imageUrls.push(src);
+  }
+  // Also extract picture IDs from ?picture= links to build CDN URLs
+  const picIdRegex = /[?&]picture=(\d+)/g;
+  let picIdMatch;
+  const picIds = [];
+  while ((picIdMatch = picIdRegex.exec(html)) !== null) {
+    if (!picIds.includes(picIdMatch[1])) picIds.push(picIdMatch[1]);
   }
 
   // ── Sale dates & times ─────────────────────────────────────────────────────
@@ -318,8 +325,18 @@ Deno.serve(async (req) => {
       for (const card of allSaleCards.values()) {
         try {
           console.log(`  Detail: ${card.source_url}`);
-          const detailHtml = await fetchHtml(card.source_url);
+          const [detailHtml, picApiResult] = await Promise.all([
+            fetchHtml(card.source_url),
+            fetch(`https://www.estatesales.net/api/sale-pictures/${card.source_sale_id}`, {
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; EstateSalenBot/1.0)' }
+            }).then(r => r.ok ? r.json() : null).catch(() => null)
+          ]);
           const detail = parseDetailPage(detailHtml);
+
+          // Inject API-sourced image URL if available and not already in list
+          if (picApiResult?.url && !detail.image_urls_limited.includes(picApiResult.url)) {
+            detail.image_urls_limited.unshift(picApiResult.url);
+          }
 
           // Skip past sales
           if (detail.start_date && detail.start_date < todayStr) continue;
