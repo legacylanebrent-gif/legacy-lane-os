@@ -106,7 +106,10 @@ export default function LandingPageOneDay() {
 
       {/* Section 1: The Story */}
       <section className="py-16 px-6 bg-white">
-        <div className="max-w-3xl mx-auto space-y-5 text-slate-700 text-lg leading-relaxed">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Story text */}
+            <div className="space-y-5 text-slate-700 text-lg leading-relaxed">
           <h2 className="text-3xl font-serif font-bold text-slate-900">The Story Behind EstateSalen.com</h2>
           <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
           <p>Not because the sales weren't profitable.</p>
@@ -145,6 +148,17 @@ export default function LandingPageOneDay() {
             <p className="text-slate-900 font-bold text-xl">That's how EstateSalen.com was born.</p>
             <p className="text-slate-600">Today the platform helps save approximately <strong className="text-orange-600">8–10+ hours per sale</strong> while helping owners stay organized, market more effectively, and create additional revenue opportunities.</p>
           </div>
+            </div>{/* end left column */}
+
+            {/* Right: Founder photo */}
+            <div className="flex justify-center lg:sticky lg:top-8">
+              <img
+                src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/2e562cb02_616832457_2334872967012314_7243935763789800949_n.jpg"
+                alt="EstateSalen Founder"
+                className="rounded-2xl shadow-xl max-w-xs w-full h-auto"
+              />
+            </div>
+          </div>{/* end grid */}
         </div>
       </section>
 
@@ -724,46 +738,32 @@ export default function LandingPageOneDay() {
         </div>
       </section>
 
-      {/* The Story Behind EstateSalen.com */}
+      {/* The Bottom Line */}
       <section className="py-16 px-6 bg-slate-900 text-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column - Text */}
-            <div className="space-y-6">
-              <h2 className="text-3xl font-serif font-bold">The Story Behind EstateSalen.com</h2>
-              <div className="space-y-4 text-slate-300 leading-relaxed">
-                <p>EstateSalen.com wasn't built by software developers trying to understand the estate sale business.</p>
-                <p>It was built by an estate sale company owner trying to solve his own problems.</p>
-                <p>The goal was never to build software. The goal was simple: <span className="text-white font-bold">get one full day of my life back every week.</span></p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
-                {[
-                  "Stay Organized",
-                  "Save Time",
-                  "Market More Consistently",
-                  "Improve Sell-Through",
-                  "Create Better Client Experiences",
-                  "Generate Additional Revenue Opportunities",
-                  "Reclaim One Full Day Per Week",
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
-                    <span className="text-slate-200">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-slate-400 pt-2">Without becoming marketers. Without becoming accountants. Without becoming software experts. Without becoming tech wizards. <span className="text-white">Just by using better systems.</span></p>
-            </div>
-
-            {/* Right Column - Photo */}
-            <div className="flex justify-center">
-              <img 
-                src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/2e562cb02_616832457_2334872967012314_7243935763789800949_n.jpg" 
-                alt="EstateSalen Founder"
-                className="rounded-2xl shadow-2xl max-w-full h-auto"
-              />
-            </div>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <h2 className="text-3xl font-serif font-bold">The Bottom Line</h2>
+          <div className="space-y-4 text-slate-300 leading-relaxed">
+            <p>EstateSalen.com wasn't built by software developers trying to understand the estate sale business.</p>
+            <p>It was built by an estate sale company owner trying to solve his own problems.</p>
+            <p>The goal was never to build software. The goal was simple: <span className="text-white font-bold">get one full day of my life back every week.</span></p>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+            {[
+              "Stay Organized",
+              "Save Time",
+              "Market More Consistently",
+              "Improve Sell-Through",
+              "Create Better Client Experiences",
+              "Generate Additional Revenue Opportunities",
+              "Reclaim One Full Day Per Week",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <span className="text-slate-200">{item}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-slate-400 pt-2">Without becoming marketers. Without becoming accountants. Without becoming software experts. Without becoming tech wizards. <span className="text-white">Just by using better systems.</span></p>
         </div>
       </section>
 
