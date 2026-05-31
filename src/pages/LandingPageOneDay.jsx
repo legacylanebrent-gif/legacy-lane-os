@@ -600,6 +600,84 @@ export default function LandingPageOneDay() {
         </div>
       </section>
 
+      {/* AI Agent Bonus Section */}
+      <section className="py-16 px-6 bg-slate-900 text-white">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-3xl">🤖</div>
+            <div>
+              <div className="inline-block bg-orange-500/20 border border-orange-500/40 text-orange-300 text-xs font-bold px-3 py-1 rounded-full mb-2">Special Bonus</div>
+              <h2 className="text-3xl font-serif font-bold">Your 24/7 AI Business Advisor</h2>
+            </div>
+          </div>
+
+          <p className="text-slate-300 text-lg leading-relaxed">Most business owners don't have a coach, consultant, or advisor available around the clock. With EstateSalen.com, you do.</p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              {
+                icon: '🕐',
+                title: 'Available 24 Hours a Day, 7 Days a Week',
+                desc: 'Whether it\'s 6am before a setup day or 11pm after a long sale, your AI advisor is there when you need it — no appointments, no waiting, no scheduling required.'
+              },
+              {
+                icon: '📋',
+                title: 'Build Your Sale From Scratch',
+                desc: 'Tell the AI about your upcoming sale and it will help you build a complete action plan — tasks, timelines, marketing ideas, pricing strategies, and staff assignments.'
+              },
+              {
+                icon: '💡',
+                title: 'Business Strategy & Consulting',
+                desc: 'Ask questions you\'d normally save for a $300/hour consultant. How should I price my commission? How do I handle a difficult client? How can I grow my buyer list faster?'
+              },
+              {
+                icon: '✍️',
+                title: 'Write Anything. Instantly.',
+                desc: 'Emails to clients. Proposals. Social posts. Item descriptions. Sale announcements. Contracts. Marketing copy. The AI drafts it and you approve it — in seconds, not hours.'
+              },
+              {
+                icon: '📊',
+                title: 'Analyze Your Business Performance',
+                desc: 'Ask the AI to review your sale data, identify patterns, highlight what\'s working, and suggest where you can improve sell-through, marketing, or operations.'
+              },
+              {
+                icon: '🎯',
+                title: 'Personalized to Your Business',
+                desc: 'The AI learns your company name, commission structure, service area, and preferences — so every response is tailored to your specific business, not generic advice.'
+              },
+              {
+                icon: '📦',
+                title: 'Item Research & Pricing Support',
+                desc: 'Stuck on an item? Describe it to the AI and get instant research, comparable sales data, pricing suggestions, and a ready-to-use description — all in one message.'
+              },
+              {
+                icon: '🚀',
+                title: 'Sale Launch Checklists On Demand',
+                desc: 'Ask the AI to generate a complete pre-sale checklist for any upcoming event. Every task, every deadline, every responsibility — organized and ready to assign.'
+              },
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-xl px-5 py-5 space-y-2 hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{item.icon}</span>
+                  <h4 className="font-bold text-white text-sm">{item.title}</h4>
+                </div>
+                <p className="text-slate-400 text-sm leading-relaxed pl-9">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl px-8 py-8 space-y-4">
+            <p className="text-white font-bold text-xl font-serif">"It's like having a business partner who never sleeps."</p>
+            <p className="text-slate-300 leading-relaxed">Most estate sale company owners are running their business alone — making every decision, solving every problem, writing every email, and figuring out every challenge by themselves. The EstateSalen AI advisor changes that. It won't replace your judgment. But it will make sure you're never stuck, never alone, and never starting from a blank page again.</p>
+            <div className="flex flex-wrap gap-3 pt-2">
+              {['Ask anything. Anytime.', 'No extra charge.', 'Included with your plan.'].map((tag, i) => (
+                <span key={i} className="bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold px-4 py-1.5 rounded-full">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bonus Revenue Section */}
       <section className="py-16 px-6 bg-orange-50 border-y border-orange-100">
         <div className="max-w-4xl mx-auto space-y-6">
