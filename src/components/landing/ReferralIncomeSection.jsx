@@ -153,7 +153,7 @@ export default function ReferralIncomeSection() {
             {[
               { step: '01', icon: '🤝', title: 'You Run The Sale', desc: 'You help the family through their estate sale as you normally would. You build trust and relationship throughout the process.' },
               { step: '02', icon: '🔗', title: 'EstateSalen Connects You', desc: 'The platform matches you with a trusted, vetted real estate professional in your area who specializes in these exact transitions.' },
-              { step: '03', icon: '💵', title: 'You Earn The Referral Fee', desc: 'When the home sells, you receive a referral fee — for an introduction you were already positioned to make.' },
+              { step: '03', icon: '💵', title: 'You Earn A Commission Portion', desc: 'When the home sells, you receive a portion of the commission via EstateSalen — Money is either direct deposited to you or you can use it to offset your subscriptions and services.' },
             ].map((item) => (
               <div key={item.step} className="relative bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
                 <div className="absolute -top-3 left-5 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full">Step {item.step}</div>
