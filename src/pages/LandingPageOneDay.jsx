@@ -458,7 +458,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="11"
               title="Build Social Media Posts"
-              problem="Most estate sale company owners are not professional marketers — and shouldn't have to be."
+              problem="We are not professional marketers — and shouldn't have to be."
               solution={[
                 'The AI generates Facebook Posts, Instagram Posts, Featured Item Promotions, Countdown Posts, Opening Day Campaigns, Discount Day Campaigns, Liquidation Posts, Final Day Marketing.',
                 'Connect your social media accounts directly to the platform.',
@@ -472,7 +472,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="12"
               title="Send Marketing Emails"
-              problem="Most estate sale companies build buyer lists but rarely use them consistently."
+              problem="We build buyer lists but rarely use them consistently."
               solution={[
                 "The AI creates the email content for you.",
                 "The AI also helps schedule the campaign.",
@@ -515,7 +515,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="15"
               title="Promote Additional Sale Days"
-              problem="Most estate sale company owners market heavily before the sale and then stop — but Day 2 and Day 3 require entirely different messaging."
+              problem="We market heavily before the sale and then stop — but Day 2 and Day 3 require entirely different messaging."
               solution={[
                 "The AI can automatically generate: 25% Off Day Promotions, 50% Off Day Promotions, Final Day Promotions, Liquidation Campaigns, Last Chance Alerts, Everything Must Go Messaging.",
                 "Social media and email campaigns can be regenerated and published in minutes."
@@ -625,7 +625,7 @@ export default function LandingPageOneDay() {
             </div>
           </div>
 
-          <p className="text-slate-300 text-lg leading-relaxed">Most estate sale company owners don't have a coach, consultant, or advisor available around the clock. With EstateSalen.com, you do.</p>
+          <p className="text-slate-300 text-lg leading-relaxed">We don't have a coach, consultant, or advisor available around the clock. With EstateSalen.com, you do.</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
             {[
@@ -682,7 +682,7 @@ export default function LandingPageOneDay() {
 
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl px-8 py-8 space-y-4">
             <p className="text-white font-bold text-xl font-serif">"It's like having a business partner who never sleeps."</p>
-            <p className="text-slate-300 leading-relaxed">Most estate sale company owners are running their business solo — making every decision, solving every problem, writing every email, and figuring out every challenge by themselves. The EstateSalen AI advisor changes that. It won't replace your judgment. But it will make sure you're never stuck, never alone, and never starting from a blank page again.</p>
+            <p className="text-slate-300 leading-relaxed">We are running their business solo — making every decision, solving every problem, writing every email, and figuring out every challenge by themselves. The EstateSalen AI advisor changes that. It won't replace your judgment. But it will make sure you're never stuck, never alone, and never starting from a blank page again.</p>
             <div className="flex flex-wrap gap-3 pt-2">
               {['Ask anything. Anytime.', 'No extra charge.', 'Included with your plan.'].map((tag, i) => (
                 <span key={i} className="bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold px-4 py-1.5 rounded-full">{tag}</span>
