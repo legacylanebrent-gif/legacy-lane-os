@@ -435,7 +435,8 @@ export default function LandingPageOneDay() {
               problem="This is one of the largest, if not the largest, time drains — researching values, pricing items, writing descriptions, creating marketing copy, then repeating hundreds of times. I used to spend at least 5-6 hours doing this. Now I'm amazed at how quickly the process goes — and can be shifted to staff as well."
               solution={[
                 'The AI assistant helps identify items, research values, suggest pricing, generate descriptions, and create marketing highlights.',
-                'You remain in control — the platform simply removes repetitive work.'
+                'You remain in control — the platform simply removes repetitive work.',
+                'You have complete veto control over the final price, this just makes the process go way faster and smoother.'
               ]}
               timeSaved="2–3 hours"
               bonus="Smart QR Pricing: Generate printable price tags with QR codes. Customers scan to view description, details, photos, and price. Automate pricing changes as the sale progresses (Day 1 = Full Price, Day 2 = 25% Off, Final = 50% Off, Last Hours = Liquidation). No replacing hundreds of tags. No confusion. Dramatically improves final-day sell-through."
