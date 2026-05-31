@@ -464,7 +464,7 @@ export default function LandingPageOneDay() {
                 'Connect your social media accounts directly to the platform.',
                 'The AI writes the content, the platform publishes the content.',
                 'With a few clicks, your sale is promoted across multiple social channels automatically.',
-                'Many estate sale company owners find they promote sales 3x more consistently because the work is already done.'
+                'Promote sales in 3x more places with far more consistency because the work is already done.'
               ]}
               timeSaved="2 hours"
             />
