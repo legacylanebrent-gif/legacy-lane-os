@@ -88,7 +88,7 @@ export default function LandingPageOneDay() {
             How I Got One Full Day Per Week Back
           </h1>
           <p className="text-xl text-slate-300 font-medium max-w-2xl mx-auto">
-            And Why Other Estate Sale Company Owners Are Asking To Use My System
+            And Why Other Estate Sale Company Owners Wanted Access to What I Created
           </p>
           <p className="text-lg text-orange-400 font-semibold">
             Save 8–10+ Hours Per Sale. Stay Organized. Market More Consistently. Grow Without Working More.
