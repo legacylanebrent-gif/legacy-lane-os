@@ -423,7 +423,8 @@ export default function LandingPageOneDay() {
               solution={[
                 'Photos remain attached to the sale record.',
                 'Can be reused for descriptions, marketing, social posts, featured items, and email campaigns.',
-                'Everything organized in one place.'
+                'Everything organized in one place.',
+                'You and your staff can all take photos and they post to the sale record without having to email, text, or try to compile from multiple sources.'
               ]}
               timeSaved="30–60 minutes"
             />
