@@ -81,6 +81,7 @@ import StateOperators from './pages/StateOperators';
 import NationalCoverageGrid from './pages/NationalCoverageGrid';
 import TerritoryFBManager from './pages/TerritoryFBManager';
 import ImportedSalesDashboard from './pages/ImportedSalesDashboard';
+import LandingPageOneDay from './pages/LandingPageOneDay';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -205,6 +206,7 @@ const AuthenticatedApp = () => {
       <Route path="/NationalCoverageGrid" element={<LayoutWrapper currentPageName="NationalCoverageGrid"><NationalCoverageGrid /></LayoutWrapper>} />
       <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />
       <Route path="/ImportedSalesDashboard" element={<LayoutWrapper currentPageName="ImportedSalesDashboard"><ImportedSalesDashboard /></LayoutWrapper>} />
+      <Route path="/LandingPageOneDay" element={<LandingPageOneDay />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
