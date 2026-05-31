@@ -162,7 +162,7 @@ export default function LandingPageOneDay() {
       <section className="py-16 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto space-y-6">
           <h2 className="text-3xl font-serif font-bold text-slate-900">EstateSalen.com Was Built For Estate Sale Company Owners, Not Tech People</h2>
-          <p className="text-lg text-slate-600">Let's be honest. We estate sale company owners didn't get into this business because we love all the business sides of things.</p>
+          <p className="text-lg text-slate-600">Let's be honest. We didn't get into this business because we love all the business sides of things.</p>
           <p className="text-slate-600">You got into this business because you enjoy helping families, organizing sales, pricing merchandise, and creating successful events.</p>
           <p className="text-slate-600">The problem is that every year there seems to be another app, another social media platform, another marketing system, and another piece of technology you're expected to learn.</p>
           <p className="text-slate-700 font-medium">I felt exactly the same way. That's why EstateSalen.com was built around a simple rule:</p>
