@@ -706,11 +706,19 @@ export default function LandingPageOneDay() {
               ["Owner Payouts", "30–60 minutes"],
               ["Cleanout Coordination", "30 minutes"],
               ["Final Follow-Up", "15–30 minutes"],
-            ].map(([label, time], i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                <span className="text-slate-700 font-medium">{label}</span>
-                <span className="text-orange-600 font-bold text-sm">{time}</span>
-              </div>
+            ].map(([label, time], i, arr) => (
+              <React.Fragment key={i}>
+                <div className="flex items-center justify-between py-2 border-b border-slate-100">
+                  <span className="text-slate-700 font-medium">{label}</span>
+                  <span className="text-orange-600 font-bold text-sm">{time}</span>
+                </div>
+                {i === arr.length - 1 && (
+                  <div className="flex items-center justify-between py-3 border-t-2 border-slate-300 mt-2 font-bold">
+                    <span className="text-slate-900">Total Hours Per Sale</span>
+                    <span className="text-orange-700 text-lg">14–23 hours</span>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>
