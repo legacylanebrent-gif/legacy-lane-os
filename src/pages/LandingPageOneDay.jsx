@@ -333,7 +333,7 @@ export default function LandingPageOneDay() {
               title="A New Lead Comes In"
               problem="Leads come from everywhere — phone calls, texts, Facebook messages, emails, website inquiries, referrals. The information gets scattered quickly."
               solution={[
-                'Estate sale opportunities are delivered directly to you through EstateSalen.com — completely free.',
+                'Estate sale leads are delivered directly to you through EstateSalen.com. We generate 100\'s of leads per year in your local area via multiple channels of paid lead sources and advertising. — completely free.',
                 'All lead information is organized automatically in a single CRM.',
                 'No more sticky notes, notebooks, or lost pieces of paper.',
                 'Everything is accessible from your computer, phone, or tablet.'
