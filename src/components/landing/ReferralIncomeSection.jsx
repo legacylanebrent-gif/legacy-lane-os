@@ -185,6 +185,29 @@ export default function ReferralIncomeSection() {
               ))}
             </div>
           </div>
+
+          <div className="bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-500/30 rounded-2xl p-6 space-y-4">
+            <div className="space-y-2">
+              <p className="text-white font-bold text-lg">What Could You Do With {fmt(annualIncome)}/Year?</p>
+              <p className="text-slate-300 text-sm leading-relaxed">That's real money hitting your account — money you're already leaving on the table. Here's what successful operators are doing with their referral income:</p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3 pt-2">
+              {[
+                '📈 Increase marketing & advertising spend',
+                '💼 Hire additional staff members',
+                '🛠️ Upgrade software and tools',
+                '✈️ Take business trips and industry conferences',
+                '🎯 Expand into new territories',
+                '💪 Build cash reserves for the slow season',
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="text-lg flex-shrink-0 mt-0.5">{item.split(' ')[0]}</div>
+                  <span className="text-slate-300 text-sm">{item.split(' ').slice(1).join(' ')}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-emerald-300 text-xs pt-2 font-semibold">Or simply keep it as extra profit — bonus income for work you're already doing.</p>
+          </div>
         </div>
       </div>
     </section>
