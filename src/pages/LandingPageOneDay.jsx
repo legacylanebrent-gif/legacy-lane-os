@@ -110,7 +110,7 @@ export default function LandingPageOneDay() {
               <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
               <p>Sales were profitable.</p>
               <p>I enjoyed helping families.</p>
-              <p className="font-semibold text-slate-900">Because every sale seemed to create hundreds of small tasks that consumed my time. I needed to figure out how to rescue 8-10 hours a week so I could have a day off for mental health, my daughter, and all the errands that need dedicated time.</p>
+              <p className="font-semibold text-slate-900">But every sale seemed to create hundreds of small tasks that consumed my time and left me without a break. I needed to figure out how to rescue 8-10 hours a week so I could have a day off for mental health, my daughter, and all the errands that need dedicated time.</p>
             </div>
             <div className="flex-shrink-0">
               <img
