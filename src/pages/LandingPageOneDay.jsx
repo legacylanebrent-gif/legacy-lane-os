@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import StageCard from '@/components/landing/StageCard';
 
 const SALE_FLOW = [
   'A new lead comes in.',
@@ -299,6 +300,173 @@ export default function LandingPageOneDay() {
                 <p className="text-slate-500 text-sm">{item.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stage-by-Stage Section */}
+      <section className="py-16 px-6 bg-slate-50">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-serif font-bold text-slate-900">Stage-by-Stage: How I Save 8–10+ Hours Per Sale</h2>
+            <p className="text-slate-500 text-lg">Here's exactly where the time savings happen at each phase of an estate sale.</p>
+          </div>
+
+          <div className="space-y-3">
+            <StageCard
+              number="1"
+              title="A New Lead Comes In"
+              problem="Leads come from everywhere — phone calls, texts, Facebook messages, emails, website inquiries, referrals. The information gets scattered quickly."
+              solution={[
+                'Estate sale opportunities are delivered directly to you through EstateSalen.com — completely free.',
+                'All lead information is organized automatically in a single CRM.',
+                'No more sticky notes, notebooks, or lost pieces of paper.',
+                'Everything is accessible from your computer, phone, or tablet.'
+              ]}
+              timeSaved="30–60 minutes"
+              bonus="A CRM is simply an online place to store and manage all your clients, customers, prospects, notes, appointments, and communications — everything in one place."
+            />
+
+            <StageCard
+              number="2"
+              title="Schedule The Appointment"
+              problem="Appointment details often end up scattered across texts, notebooks, calendars, and memory."
+              solution={[
+                'Appointment details remain attached to the lead record.',
+                'Addresses, dates, times, client information, and notes all stay organized from the beginning.',
+                'Everything accessible in one place.'
+              ]}
+              timeSaved="10–15 minutes"
+            />
+
+            <StageCard
+              number="3"
+              title="Meet With The Family"
+              problem="Important information comes quickly — family dynamics, property access, valuable items, cleanout concerns, timeline requirements, special requests."
+              solution={[
+                'Store notes, photos, concerns, next steps, and important details directly within the sale record.',
+                'Nothing gets forgotten later.',
+                'Everything stays attached to the client for reference.'
+              ]}
+              timeSaved="15–30 minutes"
+            />
+
+            <StageCard
+              number="4"
+              title="Create The Proposal"
+              problem="Every proposal requires the same information to be entered repeatedly."
+              solution={[
+                'Because information has already been collected in earlier stages, proposal creation becomes much faster and more accurate.',
+                'Client information, property information, sale details, commission structure, timeline — everything is already there.'
+              ]}
+              timeSaved="20–30 minutes"
+            />
+
+            <StageCard
+              number="5"
+              title="Sign The Contract"
+              problem="Contracts become an administrative task — information needs to be re-entered, documents created, signatures collected, files stored."
+              solution={[
+                'EstateSalen.com includes a library of estate sale contract templates that automatically populate using information already collected.',
+                'Contracts can be printed and signed in person, sent electronically for eSignature, or stored directly in the CRM.',
+                'If signed in person, simply scan or photograph and upload to the client record.'
+              ]}
+              timeSaved="10–15 minutes"
+            />
+
+            <StageCard
+              number="6"
+              title="Coordinate Staff"
+              problem="Staff coordination gets managed through texts, phone calls, memory, and sticky notes. Difficult to manage labor costs, time cards, responsibilities, and accountability."
+              solution={[
+                'Every sale includes Automated Team Task Assignments.',
+                'Instead of simply assigning a person, the platform creates task checklists: Setup Tasks, Pricing Tasks, Room Assignments, Sign Placement, Checkout Duties, Breakdown Tasks, Cleanout Responsibilities.',
+                'Each staff member receives their checklist and marks items complete as they work.',
+                'Completed tasks are automatically reported back to you.',
+                'Includes generic task templates and custom task creation for specific sales.'
+              ]}
+              timeSaved="1–2 hours"
+              bonus="The biggest benefit isn't just time savings — it's peace of mind."
+            />
+
+            <StageCard
+              number="7"
+              title="Order Supplies"
+              problem="Signs, tags, labels, receipt paper, tape, markers — something always seems to run out at the wrong time."
+              solution={[
+                'Track supplies as part of the sale preparation process.',
+                'Assign ordering responsibilities to staff.',
+                'Never run out of critical supplies again.'
+              ]}
+              timeSaved="15–30 minutes"
+            />
+
+            <StageCard
+              number="8"
+              title="Take Photos"
+              problem="Photos quickly become disorganized and difficult to find later."
+              solution={[
+                'Photos remain attached to the sale record.',
+                'Can be reused for descriptions, marketing, social posts, featured items, and email campaigns.',
+                'Everything organized in one place.'
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="9"
+              title="Research Values, Price Items & Write Descriptions"
+              problem="This is one of the largest time drains — researching values, pricing items, writing descriptions, creating marketing copy, then repeating hundreds of times."
+              solution={[
+                'The AI assistant helps identify items, research values, suggest pricing, generate descriptions, and create marketing highlights.',
+                'You remain in control — the platform simply removes repetitive work.'
+              ]}
+              timeSaved="2–3 hours"
+              bonus="Smart QR Pricing: Generate printable price tags with QR codes. Customers scan to view description, details, photos, and price. Automate pricing changes as the sale progresses (Day 1 = Full Price, Day 2 = 25% Off, Final = 50% Off, Last Hours = Liquidation). No replacing hundreds of tags. No confusion. Dramatically improves final-day sell-through."
+            />
+
+            <StageCard
+              number="10"
+              title="Create Signs"
+              problem="Every sale requires lots of signs, and most owners create the same signs repeatedly."
+              solution={[
+                'EstateSalen.com includes a gallery of pre-built estate sale sign templates.',
+                'Your company logo automatically appears on every sign.',
+                'Includes Directional Signs, Street Signs, Checkout Signs, Pickup Instructions, Sale Policies, Discount Day Signs, Liquidation Signs, Sold Item Signs.',
+                'Simply select, print, and go — or assign to a team member as an automated task.'
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="11"
+              title="Build Social Media Posts"
+              problem="Most estate sale company owners are not marketers — and shouldn't have to be."
+              solution={[
+                'The AI generates Facebook Posts, Instagram Posts, Featured Item Promotions, Countdown Posts, Opening Day Campaigns, Discount Day Campaigns, Liquidation Posts, Final Day Marketing.',
+                'Connect your social media accounts directly to the platform.',
+                'The AI writes the content, the platform publishes the content.',
+                'With a few clicks, your sale is promoted across multiple social channels automatically.',
+                'Many owners find they promote sales 3x more consistently because the work is already done.'
+              ]}
+              timeSaved="2 hours"
+            />
+
+            <StageCard
+              number="12"
+              title="Send Marketing Emails"
+              problem="Most estate sale companies build buyer lists but rarely use them consistently."
+              solution={[
+                "The AI creates the email content for you.",
+                "The AI also helps schedule the campaign.",
+                "With a click, the campaign is pushed directly into your connected email marketing provider and scheduled to launch automatically.",
+                "No copying, pasting, or rebuilding campaigns.",
+                "The CRM automatically updates your email marketing system with new and existing customers.",
+                "Track Open Rates, Click Rates, Campaign Performance, and Buyer Engagement.",
+                "If you've never used email marketing before, this makes it much easier to test the waters."
+              ]}
+              timeSaved="1–2 hours"
+            />
           </div>
         </div>
       </section>
