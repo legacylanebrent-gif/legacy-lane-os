@@ -129,7 +129,7 @@ export default function LandingPageOneDay() {
               'A staff member would text.',
               'A buyer would ask a question.',
               'A realtor would want an update.',
-              'A vendor would need directions.',
+              'All items need accurate pricing and descriptions.',
               'A sign needed to be printed.',
               'A social media post needed to be written.',
               'A payout needed to be calculated.',
