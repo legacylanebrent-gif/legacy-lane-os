@@ -12,11 +12,10 @@ const SITUATIONS = [
 export default function ReferralIncomeSection() {
   const [salesPerYear, setSalesPerYear] = useState(40);
   const [avgHomePrice, setAvgHomePrice] = useState(350000);
-  const [referralPct, setReferralPct] = useState(25);
-  const [conversionPct, setConversionPct] = useState(30);
+    const [conversionPct, setConversionPct] = useState(30);
 
   const agentCommission = avgHomePrice * 0.025; // ~2.5% buyer/seller side
-  const referralFee = agentCommission * (referralPct / 100);
+  const referralFee = agentCommission * 0.25 * 0.30; // 25% referral fee, operator gets 30%
   const leadsPerYear = Math.round(salesPerYear * (conversionPct / 100));
   const annualIncome = Math.round(referralFee * leadsPerYear);
   const fiveYearIncome = annualIncome * 5;
@@ -120,18 +119,6 @@ export default function ReferralIncomeSection() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-white font-semibold text-sm">Your Referral Fee (% of Agent Commission)</label>
-                  <span className="text-emerald-200 font-bold text-lg">{referralPct}%</span>
-                </div>
-                <input type="range" min={10} max={35} step={5} value={referralPct}
-                  onChange={e => setReferralPct(+e.target.value)}
-                  className="w-full accent-white h-2 rounded-full cursor-pointer" />
-                <div className="flex justify-between text-xs text-emerald-200">
-                  <span>10%</span><span>35%</span>
-                </div>
-              </div>
             </div>
 
             {/* Results */}
