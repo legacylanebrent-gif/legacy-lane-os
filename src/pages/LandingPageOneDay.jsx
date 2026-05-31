@@ -432,7 +432,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="9"
               title="Research Values, Price Items & Write Descriptions"
-              problem="This is one of the largest time drains — researching values, pricing items, writing descriptions, creating marketing copy, then repeating hundreds of times."
+              problem="This is one of the largest, if not the largest, time drains — researching values, pricing items, writing descriptions, creating marketing copy, then repeating hundreds of times. I used to spend at least 5-6 hours doing this. Now I'm amazed at how quickly the process goes — and can be shifted to staff as well."
               solution={[
                 'The AI assistant helps identify items, research values, suggest pricing, generate descriptions, and create marketing highlights.',
                 'You remain in control — the platform simply removes repetitive work.'
