@@ -109,7 +109,7 @@ export default function ReferralIncomeSection() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-white font-semibold text-sm">% of Clients Who Sell Their Home</label>
+                  <label className="text-white font-semibold text-sm">% of Clients Who Sell Their Home After the Sale</label>
                   <span className="text-emerald-200 font-bold text-lg">{conversionPct}%</span>
                 </div>
                 <input type="range" min={10} max={80} step={5} value={conversionPct}
