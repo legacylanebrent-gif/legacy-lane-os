@@ -93,14 +93,7 @@ export default function LandingPageOneDay() {
           <p className="text-lg text-orange-400 font-semibold">
             Save 8–10+ Hours Per Sale. Stay Organized. Market More Consistently. Grow Without Working More.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button
-              asChild
-              className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-orange-500/30"
-            >
-              <Link to="/OperatorPackages">See How It Works</Link>
-            </Button>
-          </div>
+
         </div>
       </section>
 
