@@ -4,6 +4,7 @@ import { CheckCircle, ChevronRight, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StageCard from '@/components/landing/StageCard';
 import ConsultationModal from '@/components/landing/ConsultationModal';
+import ReferralIncomeSection from '@/components/landing/ReferralIncomeSection';
 
 const SALE_FLOW = [
   'A new lead comes in.',
@@ -679,17 +680,7 @@ export default function LandingPageOneDay() {
       </section>
 
       {/* Bonus Revenue Section */}
-      <section className="py-16 px-6 bg-orange-50 border-y border-orange-100">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="inline-block bg-orange-100 text-orange-700 font-bold text-sm px-4 py-2 rounded-full">Bonus Revenue Opportunity</div>
-          <h2 className="text-3xl font-serif font-bold text-slate-900">Real Estate Referral Income</h2>
-          <div className="space-y-3 text-slate-600 leading-relaxed">
-            <p>Many estate sales eventually lead to a home sale — Probate, Downsizing, Senior Transition, Inheritance, Divorce, Relocation. These situations often create a real estate transaction shortly after the sale.</p>
-            <p>EstateSalen.com helps connect estate sale company owners with trusted real estate professionals who can assist those families. The result is the opportunity to participate in referral income from relationships you're already helping create.</p>
-            <p className="font-semibold text-slate-800">Most owners never realize how many real estate opportunities pass through their business each year. EstateSalen helps make sure those opportunities don't get missed.</p>
-          </div>
-        </div>
-      </section>
+      <ReferralIncomeSection />
 
       {/* Time Savings Summary */}
       <section className="py-16 px-6 bg-white">
