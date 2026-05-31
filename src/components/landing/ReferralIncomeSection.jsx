@@ -27,7 +27,7 @@ export default function ReferralIncomeSection() {
     <section className="relative overflow-hidden">
       {/* Top attention banner */}
       <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 py-4 px-6 text-center">
-        <p className="text-white font-bold text-lg tracking-wide">💰 BONUS REVENUE OPPORTUNITY — Most Operators Miss This Completely</p>
+        <p className="text-white font-bold text-lg tracking-wide">💰 BONUS INCOME OPPORTUNITY — Put $1,000's more in your pocket per year without increasing your effort</p>
       </div>
 
       {/* Hero intro */}
