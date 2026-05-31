@@ -107,14 +107,19 @@ export default function LandingPageOneDay() {
       {/* Section 1: The Story */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
+          {/* Full width title and intro */}
+          <div className="space-y-5 text-slate-700 text-lg leading-relaxed mb-8">
+            <h2 className="text-3xl font-serif font-bold text-slate-900">The Story Behind EstateSalen.com</h2>
+            <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
+            <p>Not because the sales weren't profitable.</p>
+            <p>Not because I didn't enjoy helping families.</p>
+            <p className="font-semibold text-slate-900">Because every sale seemed to create hundreds of small tasks that consumed my time.</p>
+          </div>
+
+          {/* Two column layout for rest of content and photo */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left: Story text */}
+            {/* Left: Remaining story text */}
             <div className="space-y-5 text-slate-700 text-lg leading-relaxed">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">The Story Behind EstateSalen.com</h2>
-          <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
-          <p>Not because the sales weren't profitable.</p>
-          <p>Not because I didn't enjoy helping families.</p>
-          <p className="font-semibold text-slate-900">Because every sale seemed to create hundreds of small tasks that consumed my time.</p>
 
           <div className="grid sm:grid-cols-2 gap-3 my-6">
             {[
