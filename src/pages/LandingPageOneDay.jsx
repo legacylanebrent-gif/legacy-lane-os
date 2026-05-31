@@ -185,7 +185,7 @@ export default function LandingPageOneDay() {
               </div>
             ))}
           </div>
-          <p className="text-center text-xl font-serif font-bold text-slate-900">You simply need better systems.</p>
+          <p className="text-center text-xl font-serif font-bold text-slate-900">You simply need a button to press that does all the work for you.</p>
         </div>
       </section>
 
