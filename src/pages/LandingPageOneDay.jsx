@@ -765,12 +765,6 @@ export default function LandingPageOneDay() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
             <Button
-              onClick={() => setShowConsultation(true)}
-              className="bg-white text-orange-600 hover:bg-orange-50 text-xl font-bold px-10 py-7 rounded-xl shadow-xl"
-            >
-              Schedule My Consultation
-            </Button>
-            <Button
               asChild
               className="bg-orange-700 hover:bg-orange-800 text-white text-xl font-bold px-10 py-7 rounded-xl shadow-xl border border-orange-400"
             >
