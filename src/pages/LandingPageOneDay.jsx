@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StageCard from '@/components/landing/StageCard';
+import ConsultationModal from '@/components/landing/ConsultationModal';
 
 const SALE_FLOW = [
   'A new lead comes in.',
@@ -64,6 +65,8 @@ const SMALL_TASKS = [
 ];
 
 export default function LandingPageOneDay() {
+  const [showConsultation, setShowConsultation] = useState(false);
+
   return (
     <div className="min-h-screen bg-white font-sans">
 
@@ -683,14 +686,24 @@ export default function LandingPageOneDay() {
             <p className="font-bold text-lg">Reclaim One Full Day Every Week</p>
             <p className="font-bold text-lg">Grow Without Working More</p>
           </div>
-          <Button
-            asChild
-            className="bg-white text-orange-600 hover:bg-orange-50 text-xl font-bold px-12 py-7 rounded-xl shadow-xl mt-4"
-          >
-            <Link to="/OperatorPackages">Schedule My Walkthrough</Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+            <Button
+              onClick={() => setShowConsultation(true)}
+              className="bg-white text-orange-600 hover:bg-orange-50 text-xl font-bold px-10 py-7 rounded-xl shadow-xl"
+            >
+              Schedule My Consultation
+            </Button>
+            <Button
+              asChild
+              className="bg-orange-700 hover:bg-orange-800 text-white text-xl font-bold px-10 py-7 rounded-xl shadow-xl border border-orange-400"
+            >
+              <Link to="/OperatorPackages">View Pricing &amp; Packages</Link>
+            </Button>
+          </div>
         </div>
       </section>
+
+      <ConsultationModal open={showConsultation} onClose={() => setShowConsultation(false)} />
 
     </div>
   );
