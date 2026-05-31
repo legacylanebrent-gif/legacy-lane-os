@@ -264,7 +264,7 @@ export default function LandingPageOneDay() {
       <section className="py-16 px-6 bg-orange-50">
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="space-y-2">
-            <h2 className="text-3xl font-serif font-bold text-slate-900">What If You Could Get One Full Day Back?</h2>
+            <h2 className="text-3xl font-serif font-bold text-slate-900">What If You Could Get One Full Day Back Per Week?</h2>
             <p className="text-slate-500 text-lg">What if...</p>
           </div>
 
