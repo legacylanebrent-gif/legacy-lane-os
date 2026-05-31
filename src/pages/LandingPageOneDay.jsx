@@ -106,22 +106,30 @@ export default function LandingPageOneDay() {
 
       {/* Section 1: The Story */}
       <section className="py-16 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          {/* Full width title and intro */}
-          <div className="space-y-5 text-slate-700 text-lg leading-relaxed mb-8">
-            <h2 className="text-3xl font-serif font-bold text-slate-900">The Story Behind EstateSalen.com</h2>
-            <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
-            <p>Not because the sales weren't profitable.</p>
-            <p>Not because I didn't enjoy helping families.</p>
-            <p className="font-semibold text-slate-900">Because every sale seemed to create hundreds of small tasks that consumed my time.</p>
+        <div className="max-w-5xl mx-auto space-y-8 text-slate-700 text-lg leading-relaxed">
+
+          {/* Full-width title */}
+          <h2 className="text-3xl font-serif font-bold text-slate-900">The Story Behind EstateSalen.com</h2>
+
+          {/* Two-column: intro text left, photo right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-start">
+            <div className="space-y-5">
+              <p>As an estate sale company owner for nearly 10 years, I found myself working 7 days a week.</p>
+              <p>Not because the sales weren't profitable.</p>
+              <p>Not because I didn't enjoy helping families.</p>
+              <p className="font-semibold text-slate-900">Because every sale seemed to create hundreds of small tasks that consumed my time.</p>
+            </div>
+            <div className="flex-shrink-0">
+              <img
+                src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/2e562cb02_616832457_2334872967012314_7243935763789800949_n.jpg"
+                alt="EstateSalen Founder"
+                className="rounded-2xl shadow-xl w-56 h-auto"
+              />
+            </div>
           </div>
 
-          {/* Two column layout for rest of content and photo */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left: Remaining story text */}
-            <div className="space-y-5 text-slate-700 text-lg leading-relaxed">
-
-          <div className="grid sm:grid-cols-2 gap-3 my-6">
+          {/* Full-width rest of story */}
+          <div className="grid sm:grid-cols-2 gap-3">
             {[
               'A client would call.',
               'A staff member would text.',
@@ -153,17 +161,6 @@ export default function LandingPageOneDay() {
             <p className="text-slate-900 font-bold text-xl">That's how EstateSalen.com was born.</p>
             <p className="text-slate-600">Today the platform helps save approximately <strong className="text-orange-600">8–10+ hours per sale</strong> while helping owners stay organized, market more effectively, and create additional revenue opportunities.</p>
           </div>
-            </div>{/* end left column */}
-
-            {/* Right: Founder photo */}
-            <div className="flex justify-center lg:sticky lg:top-8">
-              <img
-                src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/2e562cb02_616832457_2334872967012314_7243935763789800949_n.jpg"
-                alt="EstateSalen Founder"
-                className="rounded-2xl shadow-xl max-w-xs w-full h-auto"
-              />
-            </div>
-          </div>{/* end grid */}
         </div>
       </section>
 
