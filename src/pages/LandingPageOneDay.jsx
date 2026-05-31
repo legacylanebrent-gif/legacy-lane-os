@@ -280,6 +280,7 @@ export default function LandingPageOneDay() {
           <div className="bg-slate-900 text-white rounded-2xl px-8 py-8 space-y-4 text-center">
             <p className="text-xl font-serif font-bold">That's exactly what I set out to create.</p>
             <p className="text-slate-300">And the result is a system that helps save approximately <strong className="text-orange-400">8–10+ hours every sale</strong> without requiring you to become a technology expert.</p>
+            <p className="text-slate-300 pt-4">Yes ... there is a price for the platform ... but there's also a way you can have it ALL for FREE by tapping into one income source you never knew was available to you. Keep reading the page and pay close attention to the <strong className="text-green-400">GREEN Section on Referral Income</strong>.</p>
             <Button
               asChild
               className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold px-10 py-6 rounded-xl shadow-lg shadow-orange-500/30 mt-2"
