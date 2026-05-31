@@ -467,21 +467,227 @@ export default function LandingPageOneDay() {
               ]}
               timeSaved="1–2 hours"
             />
+            <StageCard
+              number="13"
+              title="Answer Customer Questions"
+              problem={`Every sale generates the same questions — "Is it still available?", "What are the dimensions?", "Will you take an offer?", "Do you deliver?", "Can I buy it before the sale?" Answering the same questions repeatedly consumes valuable time.`}
+              solution={[
+                "Customer communications stay attached to the sale and item records.",
+                "Staff members can access information quickly.",
+                "QR-enabled item pages can answer many customer questions before they even ask.",
+                "Customers get faster answers. Staff spend less time repeating information."
+              ]}
+              timeSaved="30 minutes"
+            />
+
+            <StageCard
+              number="14"
+              title="Actual Start of Sale & Checkouts"
+              problem="Once the doors open, everything moves quickly — staff questions, customer questions, checkout lines, offers, discount requests, large item pickups. Without a system, information gets lost, mistakes happen, and checkout becomes chaotic."
+              solution={[
+                "The sale dashboard keeps everything organized — Customer Purchases, Item Offers, Staff Activity, Daily Sales Totals, Discounts, Transactions, Payment Methods, Large Item Pickups.",
+                "EstateSalen includes one of the first checkout (POS) systems built specifically for estate sale companies.",
+                "All items become searchable during checkout via QR Code Scanning, Item Search, Description Search, and Category Search.",
+                "Supports Single Item, Multi-Item, Bundled Purchases, Custom Discounts, and auto-updating Discount Day / Final Day Pricing.",
+                "Every transaction is automatically logged and connected to the sale."
+              ]}
+              timeSaved="1–2 hours"
+              bonus="End-To-End Financial Tracking: Every checkout compiles into Owner Settlement Reports, Internal Reporting, Accounting Records, and Tax Preparation — automatically, because it was captured throughout the process. Faster Checkout. Fewer Errors. Better Records. More Professional Owner Reports."
+            />
+
+            <StageCard
+              number="15"
+              title="Promote Additional Sale Days"
+              problem="Most owners market heavily before the sale and then stop — but Day 2 and Day 3 require entirely different messaging."
+              solution={[
+                "The AI can automatically generate: 25% Off Day Promotions, 50% Off Day Promotions, Final Day Promotions, Liquidation Campaigns, Last Chance Alerts, Everything Must Go Messaging.",
+                "Social media and email campaigns can be regenerated and published in minutes."
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="16"
+              title="Coordinate Deliveries, Movers, Donations & Vendors"
+              problem="After purchases are made, somebody still has to coordinate deliveries, movers, donation pickups, junk removal, and cleanout companies. The communication never stops."
+              solution={[
+                "Vendor information stays attached to the sale.",
+                "Appointments, notes, tasks, and follow-up requirements remain organized and easy to find."
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="17"
+              title="Prepare Reports"
+              problem="After the sale comes the paperwork — and most owners wait until the sale is over before they begin creating reports."
+              solution={[
+                "Because every transaction, expense, task, customer, and communication has already been captured, reporting becomes dramatically easier.",
+                "Generate Owner Reports, Staff Reports, Sales Reports, Item Reports, and Activity Reports."
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="18"
+              title="Calculate and Enter All Expenses"
+              problem="Receipts pile up. Expenses get forgotten. Advertising costs get missed. Labor expenses get estimated. Mistakes become expensive."
+              solution={[
+                "Track expenses as they occur.",
+                "Attach them directly to the sale.",
+                "Store receipts digitally.",
+                "Keep everything organized throughout the process."
+              ]}
+              timeSaved="30 minutes"
+            />
+
+            <StageCard
+              number="19"
+              title="Pay Staff"
+              problem="Calculating payroll after every sale can become tedious — hours, tasks, setup days, sale days, and breakdown days all need to be verified."
+              solution={[
+                "Because staff assignments and task completion are already tracked inside the platform, payroll becomes easier to verify and calculate."
+              ]}
+              timeSaved="15–30 minutes"
+            />
+
+            <StageCard
+              number="20"
+              title="Calculate and Deliver Payouts"
+              problem="This is one of the most important moments in the entire client relationship. Mistakes create distrust. Confusing reports create questions."
+              solution={[
+                "EstateSalen organizes Gross Sales, Expenses, Commission Calculations, Net Proceeds, Owner Statements, and Payment History.",
+                "Create professional reports that help owners clearly understand the results of their sale."
+              ]}
+              timeSaved="30–60 minutes"
+            />
+
+            <StageCard
+              number="21"
+              title="Coordinate Cleanout & Other Vendors"
+              problem="The sale may be over, but the work isn't. There may still be donations, cleanouts, removals, and service providers to coordinate."
+              solution={[
+                "Vendor follow-ups stay attached to the sale until every remaining task has been completed."
+              ]}
+              timeSaved="30 minutes"
+            />
+
+            <StageCard
+              number="22"
+              title="Break Down Tables and Move to the Next Sale"
+              problem="Most software companies stop talking once the sale ends. Real estate sale owners know better — tables need to be packed, supplies organized, equipment moved, and the next sale is already waiting."
+              solution={[
+                "Assign breakdown responsibilities to staff.",
+                "Track completion.",
+                "Make sure nothing gets forgotten before moving to the next location."
+              ]}
+              timeSaved="15–30 minutes"
+            />
+
+            <StageCard
+              number="23"
+              title="Final Follow Up With the Client"
+              problem="Many owners move immediately to the next sale and forget the importance of the final touch — where referrals, reviews, testimonials, and future opportunities are created."
+              solution={[
+                "The platform helps track final follow-ups and reminders so every client receives a professional closing experience."
+              ]}
+              timeSaved="15–30 minutes"
+            />
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 px-6 bg-slate-900 text-white text-center">
+      {/* Bonus Revenue Section */}
+      <section className="py-16 px-6 bg-orange-50 border-y border-orange-100">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="inline-block bg-orange-100 text-orange-700 font-bold text-sm px-4 py-2 rounded-full">Bonus Revenue Opportunity</div>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Real Estate Referral Income</h2>
+          <div className="space-y-3 text-slate-600 leading-relaxed">
+            <p>Many estate sales eventually lead to a home sale — Probate, Downsizing, Senior Transition, Inheritance, Divorce, Relocation. These situations often create a real estate transaction shortly after the sale.</p>
+            <p>EstateSalen.com helps connect estate sale company owners with trusted real estate professionals who can assist those families. The result is the opportunity to participate in referral income from relationships you're already helping create.</p>
+            <p className="font-semibold text-slate-800">Most owners never realize how many real estate opportunities pass through their business each year. EstateSalen helps make sure those opportunities don't get missed.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Time Savings Summary */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Where the 8–10+ Hours Actually Come From</h2>
+          <div className="grid gap-2">
+            {[
+              ["Lead Intake & CRM", "30–60 minutes"],
+              ["Appointments & Consultation", "30–45 minutes"],
+              ["Proposal & Contracts", "30–45 minutes"],
+              ["Staff Coordination", "1–2 hours"],
+              ["Photos & Organization", "30–60 minutes"],
+              ["Pricing & Descriptions", "2–3 hours"],
+              ["Sign Creation", "30–60 minutes"],
+              ["Social Media Marketing", "2 hours"],
+              ["Email Marketing", "1–2 hours"],
+              ["Customer Questions", "30 minutes"],
+              ["Sale Day & POS", "1–2 hours"],
+              ["Additional Sale Promotions", "30–60 minutes"],
+              ["Vendor Coordination", "30–60 minutes"],
+              ["Reporting", "30–60 minutes"],
+              ["Expenses & Payroll", "45–60 minutes"],
+              ["Owner Payouts", "30–60 minutes"],
+              ["Cleanout Coordination", "30 minutes"],
+              ["Final Follow-Up", "15–30 minutes"],
+            ].map(([label, time], i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span className="text-slate-700 font-medium">{label}</span>
+                <span className="text-orange-600 font-bold text-sm">{time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The Bottom Line */}
+      <section className="py-16 px-6 bg-slate-900 text-white">
         <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold">Ready To Get Your Day Back?</h2>
-          <p className="text-slate-300 text-lg">EstateSalen.com was built by an estate sale company owner who was tired of working every day of the week. It was built for owners exactly like you.</p>
-          <p className="text-slate-400">See the platform, explore the features, and decide if it's the right fit for your company.</p>
+          <h2 className="text-3xl font-serif font-bold">The Bottom Line</h2>
+          <div className="space-y-4 text-slate-300 leading-relaxed">
+            <p>EstateSalen.com wasn't built by software developers trying to understand the estate sale business.</p>
+            <p>It was built by an estate sale company owner trying to solve his own problems.</p>
+            <p>The goal was never to build software. The goal was simple: <span className="text-white font-bold">get one full day of my life back every week.</span></p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+            {[
+              "Stay Organized",
+              "Save Time",
+              "Market More Consistently",
+              "Improve Sell-Through",
+              "Create Better Client Experiences",
+              "Generate Additional Revenue Opportunities",
+              "Reclaim One Full Day Per Week",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                <span className="text-slate-200">{item}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-slate-400 pt-2">Without becoming marketers. Without becoming accountants. Without becoming software experts. Without becoming tech wizards. <span className="text-white">Just by using better systems.</span></p>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 px-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white text-center">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <h2 className="text-4xl font-serif font-bold">Ready To See How It Works?</h2>
+          <p className="text-orange-100 text-xl">Schedule a quick walkthrough and I'll show you exactly how EstateSalen.com can help simplify your next sale.</p>
+          <div className="space-y-2 pt-2">
+            <p className="font-bold text-lg">Save 8–10+ Hours Per Sale</p>
+            <p className="font-bold text-lg">Reclaim One Full Day Every Week</p>
+            <p className="font-bold text-lg">Grow Without Working More</p>
+          </div>
           <Button
             asChild
-            className="bg-orange-500 hover:bg-orange-600 text-white text-xl font-bold px-12 py-7 rounded-xl shadow-xl shadow-orange-500/30 mt-4"
+            className="bg-white text-orange-600 hover:bg-orange-50 text-xl font-bold px-12 py-7 rounded-xl shadow-xl mt-4"
           >
-            <Link to="/OperatorPackages">See How EstateSalen Works</Link>
+            <Link to="/OperatorPackages">Schedule My Walkthrough</Link>
           </Button>
         </div>
       </section>
