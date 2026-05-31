@@ -88,7 +88,7 @@ export default function LandingPageOneDay() {
             How I Got One Full Day Per Week Back
           </h1>
           <p className="text-xl text-slate-300 font-medium max-w-2xl mx-auto">
-            And Why Other Estate Sale Company Owners Started Asking To Use My System
+            And Why Other Estate Sale Company Owners Are Asking To Use My System
           </p>
           <p className="text-lg text-orange-400 font-semibold">
             Save 8–10+ Hours Per Sale. Stay Organized. Market More Consistently. Grow Without Working More.
@@ -432,7 +432,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="10"
               title="Create Signs"
-              problem="Every sale requires lots of signs, and most owners create the same signs repeatedly."
+              problem="Every sale requires lots of signs, and most estate sale company owners create the same signs repeatedly."
               solution={[
                 'EstateSalen.com includes a gallery of pre-built estate sale sign templates.',
                 'Your company logo automatically appears on every sign.',
@@ -445,13 +445,13 @@ export default function LandingPageOneDay() {
             <StageCard
               number="11"
               title="Build Social Media Posts"
-              problem="Most estate sale company owners are not marketers — and shouldn't have to be."
+              problem="Most estate sale company owners are not professional marketers — and shouldn't have to be."
               solution={[
                 'The AI generates Facebook Posts, Instagram Posts, Featured Item Promotions, Countdown Posts, Opening Day Campaigns, Discount Day Campaigns, Liquidation Posts, Final Day Marketing.',
                 'Connect your social media accounts directly to the platform.',
                 'The AI writes the content, the platform publishes the content.',
                 'With a few clicks, your sale is promoted across multiple social channels automatically.',
-                'Many owners find they promote sales 3x more consistently because the work is already done.'
+                'Many estate sale company owners find they promote sales 3x more consistently because the work is already done.'
               ]}
               timeSaved="2 hours"
             />
@@ -487,7 +487,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="14"
               title="Actual Start of Sale & Checkouts"
-              problem="Once the doors open, everything moves quickly — staff questions, customer questions, checkout lines, offers, discount requests, large item pickups. Without a system, information gets lost, mistakes happen, and checkout becomes chaotic."
+              problem="Once the doors open, everything moves quickly — staff questions, customer questions, checkout lines, offers, discount requests, large item pickups. Without a proper system, information gets lost, mistakes happen, and checkout becomes chaotic."
               solution={[
                 "The sale dashboard keeps everything organized — Customer Purchases, Item Offers, Staff Activity, Daily Sales Totals, Discounts, Transactions, Payment Methods, Large Item Pickups.",
                 "EstateSalen includes one of the first checkout (POS) systems built specifically for estate sale companies.",
@@ -502,7 +502,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="15"
               title="Promote Additional Sale Days"
-              problem="Most owners market heavily before the sale and then stop — but Day 2 and Day 3 require entirely different messaging."
+              problem="Most estate sale company owners market heavily before the sale and then stop — but Day 2 and Day 3 require entirely different messaging."
               solution={[
                 "The AI can automatically generate: 25% Off Day Promotions, 50% Off Day Promotions, Final Day Promotions, Liquidation Campaigns, Last Chance Alerts, Everything Must Go Messaging.",
                 "Social media and email campaigns can be regenerated and published in minutes."
@@ -579,7 +579,7 @@ export default function LandingPageOneDay() {
             <StageCard
               number="22"
               title="Break Down Tables and Move to the Next Sale"
-              problem="Most software companies stop talking once the sale ends. Real estate sale owners know better — tables need to be packed, supplies organized, equipment moved, and the next sale is already waiting."
+              problem="Most software companies stop talking once the sale ends. Estate sale company owners know better — tables need to be packed, supplies organized, equipment moved, and the next sale is already waiting."
               solution={[
                 "Assign breakdown responsibilities to staff.",
                 "Track completion.",
@@ -612,7 +612,7 @@ export default function LandingPageOneDay() {
             </div>
           </div>
 
-          <p className="text-slate-300 text-lg leading-relaxed">Most business owners don't have a coach, consultant, or advisor available around the clock. With EstateSalen.com, you do.</p>
+          <p className="text-slate-300 text-lg leading-relaxed">Most estate sale company owners don't have a coach, consultant, or advisor available around the clock. With EstateSalen.com, you do.</p>
 
           <div className="grid sm:grid-cols-2 gap-4">
             {[
@@ -669,7 +669,7 @@ export default function LandingPageOneDay() {
 
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl px-8 py-8 space-y-4">
             <p className="text-white font-bold text-xl font-serif">"It's like having a business partner who never sleeps."</p>
-            <p className="text-slate-300 leading-relaxed">Most estate sale company owners are running their business alone — making every decision, solving every problem, writing every email, and figuring out every challenge by themselves. The EstateSalen AI advisor changes that. It won't replace your judgment. But it will make sure you're never stuck, never alone, and never starting from a blank page again.</p>
+            <p className="text-slate-300 leading-relaxed">Most estate sale company owners are running their business solo — making every decision, solving every problem, writing every email, and figuring out every challenge by themselves. The EstateSalen AI advisor changes that. It won't replace your judgment. But it will make sure you're never stuck, never alone, and never starting from a blank page again.</p>
             <div className="flex flex-wrap gap-3 pt-2">
               {['Ask anything. Anytime.', 'No extra charge.', 'Included with your plan.'].map((tag, i) => (
                 <span key={i} className="bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold px-4 py-1.5 rounded-full">{tag}</span>
