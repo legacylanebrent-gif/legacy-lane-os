@@ -540,7 +540,7 @@ export default function LandingPageOneDay() {
               problem="After the sale comes the paperwork — and most owners wait until the sale is over before they begin creating reports."
               solution={[
                 "Because every transaction, expense, task, customer, and communication has already been captured, reporting becomes dramatically easier.",
-                "Generate Owner Reports, Staff Reports, Sales Reports, Item Reports, and Activity Reports."
+                "Generate Owner Reports, Staff Reports, Sales Reports, Item Reports, and Marketing Activity and Social Media Reports."
               ]}
               timeSaved="30–60 minutes"
             />
