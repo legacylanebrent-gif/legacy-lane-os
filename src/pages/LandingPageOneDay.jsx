@@ -150,7 +150,7 @@ export default function LandingPageOneDay() {
           <p>I wanted one full day off every week — and needed to find a way to keep profitability high while growing my marketing presence and improving organization.</p>
           <p className="font-semibold text-slate-900">So I built a tool for myself.</p>
           <p>Not because I wanted to start a software company. Because I wanted to stop working every day of the week.</p>
-          <p>A few months later, after showing it to several local estate sale company owners who got together for an informal dinner, they all wanted to use it too. What surprised me most wasn't that they liked the tool — it was that they were dealing with many of the <em>exact same frustrations</em> I was.</p>
+          <p>A few months later, after showing it to several local estate sale company owners who got together for an informal dinner, they all wanted to use it too. What surprised me most wasn't that they liked the tool — it was that they were dealing with many of the <strong><em>exact same frustrations</em></strong> I was.</p>
           <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 space-y-3">
             <p className="text-slate-900 font-bold text-xl">That's how EstateSalen.com was born.</p>
             <p className="text-slate-600">Today the platform helps save approximately <strong className="text-orange-600">8–10+ hours per sale</strong> while helping owners stay organized, market more effectively, and create additional revenue opportunities.</p>
