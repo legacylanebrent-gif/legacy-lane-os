@@ -142,7 +142,7 @@ export default function LandingPageOneDay() {
           </div>
 
           <p>None of these tasks were difficult.</p>
-          <p className="font-semibold text-slate-900">But together they stole hours from every sale.</p>
+          <p className="font-semibold text-slate-900">But together they, and so many other tasks, stole hours from every sale.</p>
           <p>I didn't need more business. I didn't need another employee.</p>
           <p className="text-2xl font-serif font-bold text-slate-900 border-l-4 border-orange-500 pl-5 py-2">
             I needed more time.
