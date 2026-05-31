@@ -60,7 +60,7 @@ export default function ReferralIncomeSection() {
             ))}
           </div>
           <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-6 py-5 text-center space-y-2">
-            <p className="text-emerald-300 font-bold text-lg">The family you're helping pack up today is often the same family that will list the home next month.</p>
+            <p className="text-emerald-300 font-bold text-lg">The family you're helping with a sale is often the same family that will list the home next month.</p>
             <p className="text-slate-400 text-sm">EstateSalen connects you with trusted real estate professionals so when that moment comes, you're the one who made the introduction — and you participate in the income.</p>
           </div>
         </div>
