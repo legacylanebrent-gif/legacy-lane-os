@@ -122,7 +122,7 @@ export default function LandingPageOneDay() {
           </div>
 
           {/* Full-width rest of story */}
-          <p className="font-semibold text-slate-900">Here's what tied up my time and knew where a well built tool could solve my time off dilemma</p>
+          <p className="font-serif text-orange-600">Here's what tied up my time and knew where a well built tool could solve my time off dilemma</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {[
               'A client would call.',
