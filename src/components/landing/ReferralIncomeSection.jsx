@@ -193,10 +193,10 @@ export default function ReferralIncomeSection() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3 pt-2">
               {[
+                '✈️ Take a vacation — real time off',
                 '📈 Increase marketing & advertising spend',
                 '💼 Hire additional staff members',
                 '🛠️ Upgrade software and tools',
-                '✈️ Take business trips and industry conferences',
                 '🎯 Expand into new territories',
                 '💪 Build cash reserves for the slow season',
               ].map((item, i) => (
