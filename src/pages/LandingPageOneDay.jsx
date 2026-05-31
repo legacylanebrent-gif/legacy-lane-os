@@ -239,7 +239,7 @@ export default function LandingPageOneDay() {
       <section className="py-16 px-6 bg-slate-900 text-white">
         <div className="max-w-3xl mx-auto space-y-8">
           <h2 className="text-3xl font-serif font-bold">The Problem Isn't One Big Task</h2>
-          <p className="text-slate-300 text-lg">The problem is not that any one task is difficult. The problem is that every sale creates dozens of small tasks.</p>
+          <p className="text-slate-300 text-lg">The problem is not that any one task is difficult. The problem is that every sale creates dozens of endless, time-consuming tasks.</p>
 
           <div className="space-y-3">
             {SMALL_TASKS.map((item, i) => (
