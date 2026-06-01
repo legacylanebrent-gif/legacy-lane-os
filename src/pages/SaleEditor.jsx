@@ -946,6 +946,13 @@ export default function SaleEditor() {
                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                   setSerpSearching({});
                                   setSerpBatchRunning(false);
+                                  // Save partial progress before stopping
+                                  setFormData(prev => {
+                                    if (saleId) {
+                                      base44.entities.EstateSale.update(saleId, { images: prev.images });
+                                    }
+                                    return prev;
+                                  });
                                   alert(`SerpAPI credits exhausted after ${processed} image(s).\n\nTop up at serpapi.com then click "Resume from image ${i + 1}" to continue.`);
                                   return;
                                 }
@@ -987,6 +994,14 @@ export default function SaleEditor() {
                           }
                           setSerpBatchRunning(false);
                           setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
+                          // Force save after batch completes so ai_first_search_price is persisted
+                          // (auto-save has a stale closure and may not capture batch updates)
+                          setFormData(prev => {
+                            if (saleId) {
+                              base44.entities.EstateSale.update(saleId, { images: prev.images });
+                            }
+                            return prev;
+                          });
                         };
                         return (
                           <div className="flex flex-col gap-2">
