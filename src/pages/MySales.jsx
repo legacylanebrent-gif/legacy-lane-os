@@ -349,180 +349,204 @@ export default function MySales() {
                           ))}
                         </div>
                       )}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleEdit(sale)}
-                          className="w-full border-blue-500 text-black hover:bg-blue-50"
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                           variant="outline" 
-                           size="sm" 
-                           asChild
-                           className="w-full border-green-500 text-black hover:bg-green-50"
-                         >
-                           <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
-                             <DollarSign className="w-3 h-3 mr-1" />
-                             POS
-                           </Link>
-                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-purple-500 text-black hover:bg-purple-50"
-                        >
-                          <Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}>
-                            <Package className="w-3 h-3 mr-1" />
-                            Inventory
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-cyan-500 text-black hover:bg-cyan-50"
-                        >
-                          <Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}>
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            Attendance
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-amber-500 text-black hover:bg-amber-50"
-                        >
-                          <Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}>
-                            <FileText className="w-3 h-3 mr-1" />
-                            Tasks
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-indigo-500 text-black hover:bg-indigo-50"
-                        >
-                          <Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}>
-                            <BarChart3 className="w-3 h-3 mr-1" />
-                            Statistics
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-red-500 text-black hover:bg-red-50"
-                        >
-                          <Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}>
-                            <Megaphone className="w-3 h-3 mr-1" />
-                            Signs
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-slate-500 text-black hover:bg-slate-50"
-                        >
-                          <Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}>
-                            <Download className="w-3 h-3 mr-1" />
-                            Export
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={async () => {
-                            const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id });
-                            if (events.length > 0) {
-                              window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id;
-                            } else {
-                              setSelectedSale(sale);
-                              setShowVIPModal(true);
-                            }
-                          }}
-                          className="w-full border-yellow-500 text-black hover:bg-yellow-50"
-                        >
-                          <Star className="w-3 h-3 mr-1" />
-                          VIP Event
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => {
-                            setBuyoutSale(sale);
-                            setShowBuyoutModal(true);
-                          }}
-                          className="w-full border-orange-600 text-black hover:bg-orange-50"
-                        >
-                          <Briefcase className="w-3 h-3 mr-1" />
-                          Buyout
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => {
-                            setExpensesSale(sale);
-                            setShowExpensesModal(true);
-                          }}
-                          className="w-full border-emerald-600 text-black hover:bg-emerald-50"
-                        >
-                          <Receipt className="w-3 h-3 mr-1" />
-                          Expenses/Mileage
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-pink-500 text-black hover:bg-pink-50"
-                        >
-                          <Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}>
-                            <Megaphone className="w-3 h-3 mr-1" />
-                            Marketing
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-blue-600 text-black hover:bg-blue-50"
-                        >
-                          <Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}>
-                            <FileText className="w-3 h-3 mr-1" />
-                            Contracts
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          asChild
-                          className="w-full border-indigo-500 text-black hover:bg-indigo-50"
-                        >
-                          <Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}>
-                            <Users className="w-3 h-3 mr-1" />
-                            Early Sign In
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSocialSale(sale);
-                            setShowSocialModal(true);
-                          }}
-                          className="w-full border-purple-500 text-black hover:bg-purple-50"
-                        >
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Social Media Posts
-                        </Button>
-                        </div>
+                      {(() => {
+                          const isCompleted = getSaleDisplayStatus(sale) === 'completed';
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                              {/* Always shown */}
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => handleEdit(sale)}
+                                  className="w-full border-blue-500 text-black hover:bg-blue-50"
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </Button>
+                              )}
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  className="w-full border-green-500 text-black hover:bg-green-50"
+                                >
+                                  <Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}>
+                                    <DollarSign className="w-3 h-3 mr-1" />
+                                    POS
+                                  </Link>
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="w-full border-purple-500 text-black hover:bg-purple-50"
+                              >
+                                <Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}>
+                                  <Package className="w-3 h-3 mr-1" />
+                                  Inventory
+                                </Link>
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="w-full border-cyan-500 text-black hover:bg-cyan-50"
+                              >
+                                <Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}>
+                                  <TrendingUp className="w-3 h-3 mr-1" />
+                                  Attendance
+                                </Link>
+                              </Button>
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  className="w-full border-amber-500 text-black hover:bg-amber-50"
+                                >
+                                  <Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}>
+                                    <FileText className="w-3 h-3 mr-1" />
+                                    Tasks
+                                  </Link>
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="w-full border-indigo-500 text-black hover:bg-indigo-50"
+                              >
+                                <Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}>
+                                  <BarChart3 className="w-3 h-3 mr-1" />
+                                  Statistics
+                                </Link>
+                              </Button>
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  className="w-full border-red-500 text-black hover:bg-red-50"
+                                >
+                                  <Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}>
+                                    <Megaphone className="w-3 h-3 mr-1" />
+                                    Signs
+                                  </Link>
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="w-full border-slate-500 text-black hover:bg-slate-50"
+                              >
+                                <Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}>
+                                  <Download className="w-3 h-3 mr-1" />
+                                  Export
+                                </Link>
+                              </Button>
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={async () => {
+                                    const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id });
+                                    if (events.length > 0) {
+                                      window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id;
+                                    } else {
+                                      setSelectedSale(sale);
+                                      setShowVIPModal(true);
+                                    }
+                                  }}
+                                  className="w-full border-yellow-500 text-black hover:bg-yellow-50"
+                                >
+                                  <Star className="w-3 h-3 mr-1" />
+                                  VIP Event
+                                </Button>
+                              )}
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setBuyoutSale(sale);
+                                    setShowBuyoutModal(true);
+                                  }}
+                                  className="w-full border-orange-600 text-black hover:bg-orange-50"
+                                >
+                                  <Briefcase className="w-3 h-3 mr-1" />
+                                  Buyout
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                  setExpensesSale(sale);
+                                  setShowExpensesModal(true);
+                                }}
+                                className="w-full border-emerald-600 text-black hover:bg-emerald-50"
+                              >
+                                <Receipt className="w-3 h-3 mr-1" />
+                                Expenses/Mileage
+                              </Button>
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  className="w-full border-pink-500 text-black hover:bg-pink-50"
+                                >
+                                  <Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}>
+                                    <Megaphone className="w-3 h-3 mr-1" />
+                                    Marketing
+                                  </Link>
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="w-full border-blue-600 text-black hover:bg-blue-50"
+                              >
+                                <Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}>
+                                  <FileText className="w-3 h-3 mr-1" />
+                                  Contracts
+                                </Link>
+                              </Button>
+                              {!isCompleted && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  asChild
+                                  className="w-full border-indigo-500 text-black hover:bg-indigo-50"
+                                >
+                                  <Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}>
+                                    <Users className="w-3 h-3 mr-1" />
+                                    Early Sign In
+                                  </Link>
+                                </Button>
+                              )}
+                              {!isCompleted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSocialSale(sale);
+                                    setShowSocialModal(true);
+                                  }}
+                                  className="w-full border-purple-500 text-black hover:bg-purple-50"
+                                >
+                                  <Sparkles className="w-3 h-3 mr-1" />
+                                  Social Media Posts
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        })()}
                     </div>
                   </CardContent>
                 </Card>
