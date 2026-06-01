@@ -112,20 +112,21 @@ export default function MySales() {
       sale.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sale.property_address?.city?.toLowerCase().includes(searchQuery.toLowerCase());
     
+    const displayStatus = getSaleDisplayStatus(sale);
     const matchesTab = 
       activeTab === 'all' ||
-      (activeTab === 'draft' && sale.status === 'draft') ||
-      (activeTab === 'active' && (sale.status === 'upcoming' || sale.status === 'active')) ||
-      (activeTab === 'completed' && sale.status === 'completed');
+      (activeTab === 'draft' && displayStatus === 'draft') ||
+      (activeTab === 'active' && (displayStatus === 'upcoming' || displayStatus === 'active')) ||
+      (activeTab === 'completed' && displayStatus === 'completed');
     
     return matchesSearch && matchesTab;
   });
 
   const stats = {
     total: sales.length,
-    draft: sales.filter(s => s.status === 'draft').length,
-    active: sales.filter(s => s.status === 'upcoming' || s.status === 'active').length,
-    completed: sales.filter(s => s.status === 'completed').length,
+    draft: sales.filter(s => getSaleDisplayStatus(s) === 'draft').length,
+    active: sales.filter(s => ['upcoming', 'active'].includes(getSaleDisplayStatus(s))).length,
+    completed: sales.filter(s => getSaleDisplayStatus(s) === 'completed').length,
     totalRevenue: sales.reduce((sum, s) => sum + (s.actual_revenue || 0), 0),
     totalViews: sales.reduce((sum, s) => sum + (s.views || 0), 0)
   };
