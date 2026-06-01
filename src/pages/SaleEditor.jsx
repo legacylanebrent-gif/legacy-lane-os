@@ -1149,13 +1149,47 @@ export default function SaleEditor() {
                                      )}
                                      {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
                                        <div className="border-t border-purple-200 pt-1 space-y-1">
-                                         <p className="text-purple-500 font-medium">Source Prices:</p>
-                                         {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => (
-                                           <div key={mi} className="flex justify-between items-center gap-1 min-w-0">
-                                             <a href={match.link} target="_blank" rel="noopener noreferrer" className="text-purple-700 hover:underline truncate flex-1 min-w-0 max-w-[60%]">{match.source || match.title}</a>
-                                             <span className="font-bold text-green-700 flex-shrink-0 text-right">{typeof match.price === 'object' ? (match.price?.extracted_value ? `$${match.price.extracted_value}` : JSON.stringify(match.price)) : match.price}</span>
-                                           </div>
-                                         ))}
+                                         <p className="text-purple-500 font-medium">👆 Tap a price to use it:</p>
+                                         {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => {
+                                           const rawPrice = match.price;
+                                           const numericPrice = typeof rawPrice === 'object'
+                                             ? (rawPrice?.extracted_value || null)
+                                             : parseFloat(String(rawPrice).replace(/[^0-9.]/g, ''));
+                                           const displayPrice = typeof rawPrice === 'object'
+                                             ? (rawPrice?.extracted_value ? `$${rawPrice.extracted_value}` : JSON.stringify(rawPrice))
+                                             : rawPrice;
+                                           const isSelected = image.price === numericPrice;
+                                           return (
+                                             <button
+                                               key={mi}
+                                               type="button"
+                                               onClick={() => {
+                                                 if (!numericPrice) return;
+                                                 const updated = [...formData.images];
+                                                 updated[index] = { ...updated[index], price: numericPrice };
+                                                 setFormData(prev => ({ ...prev, images: updated }));
+                                               }}
+                                               className={`w-full flex justify-between items-center gap-1 min-w-0 px-2 py-1 rounded transition-colors text-left ${
+                                                 isSelected
+                                                   ? 'bg-green-200 border border-green-500 text-green-900'
+                                                   : 'hover:bg-purple-100 border border-transparent'
+                                               }`}
+                                             >
+                                               <a
+                                                 href={match.link}
+                                                 target="_blank"
+                                                 rel="noopener noreferrer"
+                                                 onClick={e => e.stopPropagation()}
+                                                 className="text-purple-700 hover:underline truncate flex-1 min-w-0 max-w-[60%]"
+                                               >
+                                                 {match.source || match.title}
+                                               </a>
+                                               <span className={`font-bold flex-shrink-0 text-right ${isSelected ? 'text-green-800' : 'text-green-700'}`}>
+                                                 {isSelected ? '✓ ' : ''}{displayPrice}
+                                               </span>
+                                             </button>
+                                           );
+                                         })}
                                        </div>
                                      )}
                                   </div>
