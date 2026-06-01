@@ -98,6 +98,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminAIOperator',        label: 'Admin AI Operator',   icon: Brain,           group: 'Admin' },
   { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
   { page: 'PlatformExpenses',       label: 'Platform Expenses',       icon: DollarSign,      group: 'Admin' },
+  { page: 'PlatformAds',            label: 'Platform Ads',             icon: Megaphone,       group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },

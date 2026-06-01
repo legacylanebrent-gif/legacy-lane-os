@@ -83,6 +83,7 @@ import TerritoryFBManager from './pages/TerritoryFBManager';
 import ImportedSalesDashboard from './pages/ImportedSalesDashboard';
 import LandingPageOneDay from './pages/LandingPageOneDay';
 import PlatformExpenses from './pages/PlatformExpenses';
+import PlatformAds from './pages/PlatformAds';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -209,6 +210,7 @@ const AuthenticatedApp = () => {
       <Route path="/ImportedSalesDashboard" element={<LayoutWrapper currentPageName="ImportedSalesDashboard"><ImportedSalesDashboard /></LayoutWrapper>} />
       <Route path="/LandingPageOneDay" element={<LandingPageOneDay />} />
       <Route path="/PlatformExpenses" element={<LayoutWrapper currentPageName="PlatformExpenses"><PlatformExpenses /></LayoutWrapper>} />
+      <Route path="/PlatformAds" element={<LayoutWrapper currentPageName="PlatformAds"><PlatformAds /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
