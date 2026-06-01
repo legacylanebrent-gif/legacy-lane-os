@@ -160,12 +160,13 @@ export default function EstateSaleOperatorDashboard({ user }) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md hover:border-orange-300 transition-all" onClick={() => navigate('/MySales')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Total Sales</p>
                 <p className="text-3xl font-bold text-slate-900">{stats.totalSales}</p>
+                <p className="text-xs text-orange-500 mt-1">View all →</p>
               </div>
               <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <Home className="w-6 h-6 text-orange-600" />
@@ -174,12 +175,13 @@ export default function EstateSaleOperatorDashboard({ user }) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md hover:border-green-300 transition-all" onClick={() => navigate('/MySales?status=active')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Active Sales</p>
                 <p className="text-3xl font-bold text-green-600">{stats.activeSales}</p>
+                <p className="text-xs text-green-500 mt-1">View active →</p>
               </div>
               <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-green-600" />
@@ -188,12 +190,13 @@ export default function EstateSaleOperatorDashboard({ user }) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md hover:border-blue-300 transition-all" onClick={() => navigate('/MySales?status=upcoming')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Upcoming Sales</p>
                 <p className="text-3xl font-bold text-blue-600">{stats.upcomingSales}</p>
+                <p className="text-xs text-blue-500 mt-1">View upcoming →</p>
               </div>
               <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-blue-600" />

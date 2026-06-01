@@ -39,7 +39,15 @@ export default function MySales() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    if (status === 'active') return 'active';
+    if (status === 'upcoming') return 'active'; // upcoming is under "active" tab
+    if (status === 'completed') return 'completed';
+    if (status === 'draft') return 'draft';
+    return 'all';
+  });
   const [showVIPModal, setShowVIPModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [showBuyoutModal, setShowBuyoutModal] = useState(false);
