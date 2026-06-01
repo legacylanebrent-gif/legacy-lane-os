@@ -861,7 +861,7 @@ export default function SaleEditor() {
                 ) : (
                   <div className="space-y-4">
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
+                    <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
                       if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
                       if (!window.confirm(`Batch deep search pricing for ${toProcess.length} items. This may take a few minutes. Continue?`)) return;
