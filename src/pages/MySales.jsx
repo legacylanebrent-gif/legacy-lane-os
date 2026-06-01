@@ -26,11 +26,15 @@ import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 const formatTo12Hour = (time) => {
   if (!time) return '';
+  // If already has AM/PM, return cleaned up version
+  if (/am|pm/i.test(time)) {
+    return time.replace(/\s*(am|pm)/i, (m) => ' ' + m.trim().toLowerCase());
+  }
   const [hours, minutes] = time.split(':');
   const hour = parseInt(hours);
   const ampm = hour >= 12 ? 'pm' : 'am';
   const displayHour = hour % 12 || 12;
-  return `${displayHour}:${minutes}${ampm}`;
+  return `${displayHour}:${minutes} ${ampm}`;
 };
 
 export default function MySales() {
