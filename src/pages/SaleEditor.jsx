@@ -1086,7 +1086,7 @@ export default function SaleEditor() {
                                 id={`ai-first-${index}`}
                                 type="number"
                                 placeholder="First search price"
-                                value={image.ai_first_search_price || ''}
+                                value={image.ai_first_search_price || serpResults[image.url]?.price_range?.avg || ''}
                                 onChange={(e) => {
                                   const updated = [...formData.images];
                                   updated[index].ai_first_search_price = e.target.value ? parseFloat(e.target.value) : null;
