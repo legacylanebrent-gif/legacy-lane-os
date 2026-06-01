@@ -12,9 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Eye, Heart, MessageSquare, MoreVertical, Calendar, MapPin, Edit, Trash } from 'lucide-react';
 import { format } from 'date-fns';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 export default function OperatorSalesTable({ sales, onEdit, onDelete }) {
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (sale) => {
+    const status = getSaleDisplayStatus(sale);
     const variants = {
       draft: 'bg-slate-200 text-slate-700',
       upcoming: 'bg-blue-100 text-blue-700',
@@ -39,7 +41,7 @@ export default function OperatorSalesTable({ sales, onEdit, onDelete }) {
                   >
                     {sale.title}
                   </Link>
-                  {getStatusBadge(sale.status)}
+                  {getStatusBadge(sale)}
                   <Button
                     size="sm"
                     variant="outline"
