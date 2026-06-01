@@ -1081,34 +1081,29 @@ export default function SaleEditor() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor={`ai-first-${index}`} className="text-xs">AI First Search Price</Label>
+                              <Label className="text-xs text-purple-700">AI Suggested Price</Label>
+                              <div className="text-sm px-3 py-2 bg-purple-50 border border-purple-200 rounded-md text-purple-800 font-medium">
+                                {image.ai_first_search_price || serpResults[image.url]?.price_range?.avg
+                                  ? `$${image.ai_first_search_price || serpResults[image.url]?.price_range?.avg}`
+                                  : <span className="text-purple-400 font-normal">Not yet searched</span>}
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor={`listing-price-${index}`} className="text-xs font-semibold text-slate-800">Listing Price <span className="text-slate-500 font-normal">(displayed online, QR codes & inventory)</span></Label>
                               <Input
-                                id={`ai-first-${index}`}
+                                id={`listing-price-${index}`}
                                 type="number"
-                                placeholder="First search price"
-                                value={image.ai_first_search_price || serpResults[image.url]?.price_range?.avg || ''}
+                                placeholder="Set the price for this item"
+                                value={image.price || ''}
                                 onChange={(e) => {
                                   const updated = [...formData.images];
-                                  updated[index].ai_first_search_price = e.target.value ? parseFloat(e.target.value) : null;
+                                  updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
                                   setFormData({ ...formData, images: updated });
                                 }}
-                                className="text-sm"
+                                className="text-sm font-medium"
                               />
                             </div>
                             <div>
-                              <Label htmlFor={`ai-deep-${index}`} className="text-xs">AI Deep Search Price</Label>
-                              <Input
-                                id={`ai-deep-${index}`}
-                                type="number"
-                                placeholder="Deep search price"
-                                value={image.ai_deep_search_price || ''}
-                                onChange={(e) => {
-                                  const updated = [...formData.images];
-                                  updated[index].ai_deep_search_price = e.target.value ? parseFloat(e.target.value) : null;
-                                  setFormData({ ...formData, images: updated });
-                                }}
-                                className="text-sm"
-                              />
                               {regeneratingPrice[index] && (
                                 <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
                                   <div className="w-4 h-4 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
@@ -1149,12 +1144,7 @@ export default function SaleEditor() {
                                      )}
                                      {image.price > 0 && (
                                        <div className="flex items-center gap-2 bg-green-100 border border-green-400 rounded px-2 py-1">
-                                         <span className="text-green-800 font-semibold text-sm">✓ Selected Price: ${image.price}</span>
-                                         <button type="button" onClick={() => {
-                                           const updated = [...formData.images];
-                                           updated[index] = { ...updated[index], price: null };
-                                           setFormData(prev => ({ ...prev, images: updated }));
-                                         }} className="ml-auto text-green-600 hover:text-red-600 text-xs">clear</button>
+                                         <span className="text-green-800 font-semibold text-sm">✓ Sets Listing Price to: ${image.price}</span>
                                        </div>
                                      )}
                                      {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
@@ -1210,9 +1200,7 @@ export default function SaleEditor() {
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
                                   {regeneratingDesc[index] ? 'Generating...' : 'Regenerate Description'}
                                 </Button>
-                                <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleRegeneratePrice(index)} disabled={regeneratingPrice[index]}>
-                                  {regeneratingPrice[index] ? 'Searching...' : 'Regenerate Deep Search Price'}
-                                </Button>
+
                               </div>
                             </div>
                           </div>
