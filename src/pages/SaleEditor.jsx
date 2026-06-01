@@ -1147,6 +1147,16 @@ export default function SaleEditor() {
                                          <span>High: ${serpResults[image.url].price_range.max}</span>
                                        </div>
                                      )}
+                                     {image.price > 0 && (
+                                       <div className="flex items-center gap-2 bg-green-100 border border-green-400 rounded px-2 py-1">
+                                         <span className="text-green-800 font-semibold text-sm">✓ Selected Price: ${image.price}</span>
+                                         <button type="button" onClick={() => {
+                                           const updated = [...formData.images];
+                                           updated[index] = { ...updated[index], price: null };
+                                           setFormData(prev => ({ ...prev, images: updated }));
+                                         }} className="ml-auto text-green-600 hover:text-red-600 text-xs">clear</button>
+                                       </div>
+                                     )}
                                      {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
                                        <div className="border-t border-purple-200 pt-1 space-y-1">
                                          <p className="text-purple-500 font-medium">👆 Tap a price to use it:</p>
