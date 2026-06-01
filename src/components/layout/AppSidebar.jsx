@@ -97,6 +97,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
   { page: 'AdminAIOperator',        label: 'Admin AI Operator',   icon: Brain,           group: 'Admin' },
   { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
+  { page: 'PlatformExpenses',       label: 'Platform Expenses',       icon: DollarSign,      group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
