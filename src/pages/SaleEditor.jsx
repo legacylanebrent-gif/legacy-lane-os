@@ -50,6 +50,8 @@ export default function SaleEditor() {
   const [showPublishFeeModal, setShowPublishFeeModal] = useState(false);
   const [pendingPublish, setPendingPublish] = useState(false);
   const [originalStatus, setOriginalStatus] = useState('draft');
+  const [serpBatchRunning, setSerpBatchRunning] = useState(false);
+  const [serpBatchProgress, setSerpBatchProgress] = useState({ current: 0, total: 0, stoppedAt: null });
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -919,68 +921,88 @@ export default function SaleEditor() {
                       <Sparkles className="w-4 h-4 mr-2" />
                       Batch Deep Search Price
                     </Button>
-                    <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" onClick={async () => {
-                        if (!saleId) { alert('Save the sale first'); return; }
-                        const toProcess = formData.images.filter(img => !img.name || !img.description);
-                        if (toProcess.length === 0) { alert('All images have already been batch searched.'); return; }
-                        if (!window.confirm(`${toProcess.length} new image(s) will be searched. Continue?`)) return;
-                        let creditsDepleted = false;
-                        for (let i = 0; i < formData.images.length; i++) {
-                          const img = formData.images[i];
-                          if (img.name && img.description) continue;
-                          if (creditsDepleted) break;
-                          setSerpSearching(prev => ({ ...prev, [i]: true }));
-                          try {
-                            const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
-                            const data = res.data;
-                            if (data.error) {
-                              console.warn(`SerpAPI skipped image ${i + 1}: ${data.error}`);
-                              setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
-                              // Detect credit exhaustion and stop the batch
-                              if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
-                                creditsDepleted = true;
-                                alert(`SerpAPI credits have been exhausted. Processed ${i} of ${formData.images.length} images.\n\nPlease top up your SerpAPI account at serpapi.com and try again.`);
-                                setSerpSearching({});
-                                break;
-                              }
-                            } else {
-                              setSerpResults(prev => ({ ...prev, [img.url]: data }));
-                              setFormData(prev => {
-                                const updated = [...prev.images];
-                                const item = { ...updated[i] };
-                                if (data.item_title && !item.name) {
-                                  const t = cleanTitle(data.item_title);
-                                  item.name = t;
-                                  setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
+                    {(() => {
+                        const unprocessed = formData.images.filter(img => !img.name || !img.description);
+                        const resumeIndex = serpBatchProgress.stoppedAt;
+                        const runBatch = async (startFromIndex = 0) => {
+                          if (!saleId) { alert('Save the sale first'); return; }
+                          const remaining = formData.images.slice(startFromIndex).filter(img => !img.name || !img.description);
+                          if (remaining.length === 0) { alert('All images have already been processed.'); return; }
+                          if (!window.confirm(`${remaining.length} image(s) will be searched. Continue?`)) return;
+                          setSerpBatchRunning(true);
+                          setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
+                          let processed = 0;
+                          for (let i = startFromIndex; i < formData.images.length; i++) {
+                            const img = formData.images[i];
+                            if (img.name && img.description) continue;
+                            setSerpSearching(prev => ({ ...prev, [i]: true }));
+                            try {
+                              const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
+                              const data = res.data;
+                              if (data.error) {
+                                console.warn(`SerpAPI skipped image ${i + 1}: ${data.error}`);
+                                setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
+                                if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
+                                  setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
+                                  setSerpSearching({});
+                                  setSerpBatchRunning(false);
+                                  alert(`SerpAPI credits exhausted after ${processed} image(s).\n\nTop up at serpapi.com then click "Resume from image ${i + 1}" to continue.`);
+                                  return;
                                 }
-                                if (!item.description) {
-                                  const withPrices = (data.matches || []).filter(m => m.price && m.title);
-                                  const sources = withPrices.slice(0, 3);
-                                  const knownTitle = cleanTitle(data.item_title);
-                                  let desc = '';
-                                  if (knownTitle) desc += `${knownTitle}.`;
-                                  if (sources.length > 0) desc += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
-                                  if (data.price_range?.min && data.price_range?.max) desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
-                                  if (desc.trim()) {
-                                    item.description = desc.trim();
-                                    setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
+                              } else {
+                                setSerpResults(prev => ({ ...prev, [img.url]: data }));
+                                setFormData(prev => {
+                                  const updated = [...prev.images];
+                                  const item = { ...updated[i] };
+                                  if (data.item_title && !item.name) {
+                                    const t = cleanTitle(data.item_title);
+                                    item.name = t;
+                                    setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
                                   }
-                                }
-                                if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
-                                updated[i] = item;
-                                return { ...prev, images: updated };
-                              });
+                                  if (!item.description) {
+                                    const withPrices = (data.matches || []).filter(m => m.price && m.title);
+                                    const sources = withPrices.slice(0, 3);
+                                    const knownTitle = cleanTitle(data.item_title);
+                                    let desc = '';
+                                    if (knownTitle) desc += `${knownTitle}.`;
+                                    if (sources.length > 0) desc += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
+                                    if (data.price_range?.min && data.price_range?.max) desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
+                                    if (desc.trim()) {
+                                      item.description = desc.trim();
+                                      setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
+                                    }
+                                  }
+                                  if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
+                                  updated[i] = item;
+                                  return { ...prev, images: updated };
+                                });
+                                processed++;
+                                setSerpBatchProgress(prev => ({ ...prev, current: processed }));
+                              }
+                            } catch (e) {
+                              console.warn(`SerpAPI skipped image ${i + 1}:`, e.message);
                             }
-                          } catch (e) { 
-                            console.warn(`SerpAPI skipped image ${i + 1}:`, e.message);
+                            setSerpSearching(prev => ({ ...prev, [i]: false }));
+                            await new Promise(r => setTimeout(r, 1000));
                           }
-                          setSerpSearching(prev => ({ ...prev, [i]: false }));
-                          await new Promise(r => setTimeout(r, 1000));
-                        }
-                      }}>
-                        <Scan className="w-4 h-4 mr-2" />
-                        AI Pricing & Description Generation
-                      </Button>
+                          setSerpBatchRunning(false);
+                          setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
+                        };
+                        return (
+                          <div className="flex flex-col gap-2">
+                            <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(0)}>
+                              <Scan className="w-4 h-4 mr-2" />
+                              {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `AI Pricing & Description Generation${unprocessed.length > 0 ? ` (${unprocessed.length} remaining)` : ''}`}
+                            </Button>
+                            {resumeIndex !== null && resumeIndex !== undefined && (
+                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
+                                <Scan className="w-4 h-4 mr-2" />
+                                Resume from image {resumeIndex + 1}
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
                         if (!window.confirm('Regenerate descriptions for all items that have a title?')) return;
                         for (let i = 0; i < formData.images.length; i++) {
