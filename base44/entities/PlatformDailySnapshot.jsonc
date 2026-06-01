@@ -1,0 +1,107 @@
+{
+  "name": "PlatformDailySnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The date this snapshot covers"
+    },
+    "total_expenses": {
+      "type": "number",
+      "default": 0,
+      "description": "Total platform expenses for the day in USD"
+    },
+    "total_revenue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total estimated revenue for the day in USD"
+    },
+    "net": {
+      "type": "number",
+      "default": 0,
+      "description": "Net (revenue - expenses)"
+    },
+    "expense_breakdown": {
+      "type": "object",
+      "description": "Itemized expense breakdown by service",
+      "properties": {
+        "serpapi": {
+          "type": "number"
+        },
+        "google_maps": {
+          "type": "number"
+        },
+        "base44_platform": {
+          "type": "number"
+        },
+        "openai": {
+          "type": "number"
+        },
+        "meta_ads": {
+          "type": "number"
+        },
+        "email_service": {
+          "type": "number"
+        },
+        "other": {
+          "type": "number"
+        }
+      }
+    },
+    "revenue_breakdown": {
+      "type": "object",
+      "description": "Itemized revenue breakdown by stream",
+      "properties": {
+        "subscriptions": {
+          "type": "number"
+        },
+        "marketplace": {
+          "type": "number"
+        },
+        "referrals": {
+          "type": "number"
+        },
+        "features": {
+          "type": "number"
+        },
+        "other": {
+          "type": "number"
+        }
+      }
+    },
+    "api_call_counts": {
+      "type": "object",
+      "description": "Number of API calls made per service",
+      "properties": {
+        "serpapi_calls": {
+          "type": "number"
+        },
+        "google_maps_calls": {
+          "type": "number"
+        },
+        "openai_tokens": {
+          "type": "number"
+        },
+        "enrichment_calls": {
+          "type": "number"
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Any notes or anomalies for this day"
+    },
+    "generated_by": {
+      "type": "string",
+      "enum": [
+        "automation",
+        "manual"
+      ],
+      "default": "automation"
+    }
+  },
+  "required": [
+    "snapshot_date"
+  ]
+}

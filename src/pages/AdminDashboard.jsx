@@ -382,6 +382,7 @@ export default function AdminDashboard() {
             <QuickLinkCard icon={Zap} label="Automations" sub="Manage scheduled automations" href="/AdminAutomations" color="bg-yellow-100 text-yellow-600" />
             <QuickLinkCard icon={MessageSquare} label="Support Tickets" sub="Open support tickets" href="/AdminTickets" color="bg-red-100 text-red-600" badge={stats.openTickets} />
             <QuickLinkCard icon={Shield} label="Page Permissions" sub="Role-based access control" href="/AdminPageAccess" color="bg-slate-100 text-slate-700" />
+            <QuickLinkCard icon={DollarSign} label="Platform Expenses" sub="Daily cost vs revenue tracker" href="/PlatformExpenses" color="bg-red-100 text-red-600" />
           </div>
         </div>
 

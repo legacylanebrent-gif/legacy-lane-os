@@ -1,0 +1,65 @@
+{
+  "name": "PlatformExpenseConfig",
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Display name of the service"
+    },
+    "service_key": {
+      "type": "string",
+      "description": "Internal key identifier (e.g. serpapi, google_maps)"
+    },
+    "billing_model": {
+      "type": "string",
+      "enum": [
+        "per_call",
+        "monthly_flat",
+        "per_token",
+        "per_gb",
+        "manual"
+      ],
+      "default": "per_call"
+    },
+    "monthly_flat_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Fixed monthly cost (for flat billing models)"
+    },
+    "cost_per_unit": {
+      "type": "number",
+      "default": 0,
+      "description": "Cost per API call / token / unit"
+    },
+    "free_tier_units_per_month": {
+      "type": "number",
+      "default": 0,
+      "description": "Free tier calls/units per month before billing starts"
+    },
+    "estimated_daily_units": {
+      "type": "number",
+      "default": 0,
+      "description": "Estimated number of calls/units per day"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    },
+    "last_actual_monthly_cost": {
+      "type": "number",
+      "description": "Last known actual monthly bill for this service"
+    },
+    "billing_url": {
+      "type": "string",
+      "description": "URL to the billing dashboard for this service"
+    }
+  },
+  "required": [
+    "service_name",
+    "service_key",
+    "billing_model"
+  ]
+}

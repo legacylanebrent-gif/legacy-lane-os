@@ -82,6 +82,7 @@ import NationalCoverageGrid from './pages/NationalCoverageGrid';
 import TerritoryFBManager from './pages/TerritoryFBManager';
 import ImportedSalesDashboard from './pages/ImportedSalesDashboard';
 import LandingPageOneDay from './pages/LandingPageOneDay';
+import PlatformExpenses from './pages/PlatformExpenses';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -207,6 +208,7 @@ const AuthenticatedApp = () => {
       <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />
       <Route path="/ImportedSalesDashboard" element={<LayoutWrapper currentPageName="ImportedSalesDashboard"><ImportedSalesDashboard /></LayoutWrapper>} />
       <Route path="/LandingPageOneDay" element={<LandingPageOneDay />} />
+      <Route path="/PlatformExpenses" element={<LayoutWrapper currentPageName="PlatformExpenses"><PlatformExpenses /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
