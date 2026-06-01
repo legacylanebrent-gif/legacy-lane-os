@@ -23,7 +23,12 @@ Deno.serve(async (req) => {
     const serpData = await serpResponse.json();
 
     if (serpData.error) {
-      return Response.json({ error: serpData.error }, { status: 400 });
+      const isCredits = /run out|credits|quota|limit|payment/i.test(serpData.error);
+      return Response.json({ 
+        error: isCredits 
+          ? `SerpAPI credits exhausted: ${serpData.error}` 
+          : serpData.error 
+      }, { status: 400 });
     }
 
     // Extract visual matches with pricing

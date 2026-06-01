@@ -456,6 +456,9 @@ export default function SaleEditor() {
     } catch (e) {
       console.error('SerpAI Search error:', e.message);
       setSerpResults(prev => ({ ...prev, [image.url]: { error: e.message } }));
+      if (/run out|credits|quota|limit|payment|account/i.test(e.message)) {
+        alert('SerpAPI credits have been exhausted. Please top up your SerpAPI account at serpapi.com and try again.');
+      }
     } finally {
       setSerpSearching(prev => ({ ...prev, [index]: false }));
     }
@@ -921,9 +924,11 @@ export default function SaleEditor() {
                         const toProcess = formData.images.filter(img => !img.name || !img.description);
                         if (toProcess.length === 0) { alert('All images have already been batch searched.'); return; }
                         if (!window.confirm(`${toProcess.length} new image(s) will be searched. Continue?`)) return;
+                        let creditsDepleted = false;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
                           if (img.name && img.description) continue;
+                          if (creditsDepleted) break;
                           setSerpSearching(prev => ({ ...prev, [i]: true }));
                           try {
                             const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
@@ -931,6 +936,13 @@ export default function SaleEditor() {
                             if (data.error) {
                               console.warn(`SerpAPI skipped image ${i + 1}: ${data.error}`);
                               setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
+                              // Detect credit exhaustion and stop the batch
+                              if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
+                                creditsDepleted = true;
+                                alert(`SerpAPI credits have been exhausted. Processed ${i} of ${formData.images.length} images.\n\nPlease top up your SerpAPI account at serpapi.com and try again.`);
+                                setSerpSearching({});
+                                break;
+                              }
                             } else {
                               setSerpResults(prev => ({ ...prev, [img.url]: data }));
                               setFormData(prev => {
