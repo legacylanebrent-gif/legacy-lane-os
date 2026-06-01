@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, RefreshCw,
   Plus, Pencil, Check, X, ExternalLink, BarChart3, Zap, Brain,
-  Globe, Mail, Search, MapPin, Server, Activity
+  Globe, Mail, Search, MapPin, Server, Activity, Download
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 
@@ -46,7 +46,7 @@ const DEFAULT_CONFIGS = [
 const fmt = (n) => `$${(n ?? 0).toFixed(2)}`;
 const fmtK = (n) => n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : fmt(n);
 
-function ServiceRow({ config, onSave, onDelete }) {
+function ServiceRow({ config, onSave, onDelete, onSyncMeta }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...config });
   const Icon = SERVICE_ICONS[config.service_key] || Zap;
@@ -151,6 +151,11 @@ function ServiceRow({ config, onSave, onDelete }) {
             <ExternalLink className="w-4 h-4" />
           </a>
         )}
+        {config.service_key === 'meta_ads' && onSyncMeta && (
+          <Button size="sm" variant="outline" onClick={onSyncMeta} className="gap-1 text-xs border-cyan-400 text-cyan-700 hover:bg-cyan-50">
+            <Download className="w-3 h-3" />Sync
+          </Button>
+        )}
         <Button size="icon" variant="ghost" onClick={() => setEditing(true)} className="w-8 h-8 text-slate-400 hover:text-slate-600">
           <Pencil className="w-3.5 h-3.5" />
         </Button>
@@ -168,6 +173,7 @@ export default function PlatformExpenses() {
   const [configs, setConfigs] = useState([]);
   const [snapshots, setSnapshots] = useState([]);
   const [running, setRunning] = useState(false);
+  const [syncingMeta, setSyncingMeta] = useState(false);
   const [tab, setTab] = useState('overview');
   const [addingNew, setAddingNew] = useState(false);
   const [newConfig, setNewConfig] = useState({ service_name: '', service_key: '', billing_model: 'monthly_flat', monthly_flat_cost: 0, cost_per_unit: 0, estimated_daily_units: 0, free_tier_units_per_month: 0, is_active: true });
@@ -214,6 +220,22 @@ export default function PlatformExpenses() {
   const deleteConfig = async (id) => {
     await base44.entities.PlatformExpenseConfig.delete(id);
     setConfigs(prev => prev.filter(c => c.id !== id));
+  };
+
+  const syncMetaSpend = async () => {
+    setSyncingMeta(true);
+    try {
+      const res = await base44.functions.invoke('syncMetaAdSpend', {});
+      const { spend_this_month, projected_monthly } = res.data;
+      // Update the meta_ads config with the projected monthly cost
+      const metaCfg = configs.find(c => c.service_key === 'meta_ads');
+      if (metaCfg) {
+        await saveConfig({ ...metaCfg, last_actual_monthly_cost: projected_monthly, notes: `Month-to-date: $${spend_this_month} · Projected: $${projected_monthly}/mo (auto-synced)` });
+      }
+    } catch (e) {
+      alert('Meta sync failed: ' + e.message);
+    }
+    setSyncingMeta(false);
   };
 
   const runAnalysis = async () => {
@@ -458,7 +480,7 @@ export default function PlatformExpenses() {
 
             <div className="space-y-2">
               {configs.map(cfg => (
-                <ServiceRow key={cfg.id} config={cfg} onSave={saveConfig} onDelete={deleteConfig} />
+                <ServiceRow key={cfg.id} config={cfg} onSave={saveConfig} onDelete={deleteConfig} onSyncMeta={cfg.service_key === 'meta_ads' ? syncMetaSpend : null} />
               ))}
             </div>
 
