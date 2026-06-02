@@ -468,7 +468,7 @@ export default function SaleEditor() {
       console.error('SerpAI Search error:', e.message);
       setSerpResults(prev => ({ ...prev, [image.url]: { error: e.message } }));
       if (/run out|credits|quota|limit|payment|account/i.test(e.message)) {
-        alert('SerpAPI credits have been exhausted. Please top up your SerpAPI account at serpapi.com and try again.');
+        alert('AI search credits have been exhausted. Please contact support to continue.');
       }
     } finally {
       setSerpSearching(prev => ({ ...prev, [index]: false }));
@@ -751,7 +751,7 @@ Be practical and realistic for an estate sale context.`,
               <ul className="space-y-2 text-sm text-slate-700">
                 <li className="flex items-start gap-2">
                   <span className="text-teal-500 mt-0.5 flex-shrink-0">✓</span>
-                  <span><strong>Single item photos</strong> — flagged as ready for SerpAI search (Step 3)</span>
+                  <span><strong>Single item photos</strong> — flagged as ready for Deep Search (Step 3)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-orange-500 mt-0.5 flex-shrink-0">⊛</span>
@@ -792,7 +792,7 @@ Be practical and realistic for an estate sale context.`,
                 <h2 className="text-lg font-bold text-slate-900">Deep Search for Pricing & Descriptions</h2>
               </div>
               <p className="text-slate-600 text-sm leading-relaxed">
-                Each eligible photo will be sent through <strong>SerpAPI + Google Lens</strong> to find matching items across the web. For each match we'll pull:
+                Each eligible photo will be sent through an <strong>AI-powered image search</strong> to find matching items across the web. For each match we'll pull:
               </p>
               <ul className="space-y-2 text-sm text-slate-700">
                 <li className="flex items-start gap-2">
@@ -1181,7 +1181,7 @@ Be practical and realistic for an estate sale context.`,
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
                          const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
-                         const msg = `${remaining.length} image(s) will be searched via SerpAPI.${flaggedCount > 0 ? `\n\n${flaggedCount} multi-item image(s) will be skipped — use "Multi-Item AI Assess" on those.` : ''}\n\nContinue?`;
+                         const msg = `${remaining.length} image(s) will be processed via AI image search.${flaggedCount > 0 ? `\n\n${flaggedCount} multi-item image(s) will be skipped — use "Multi-Item AI Assess" on those.` : ''}\n\nContinue?`;
                          if (!window.confirm(msg)) return;
                           setSerpBatchRunning(true);
                           setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
@@ -1196,7 +1196,7 @@ Be practical and realistic for an estate sale context.`,
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
                               const data = res.data;
                               if (data.error) {
-                                console.warn(`SerpAPI skipped image ${i + 1}: ${data.error}`);
+                                console.warn(`AI search skipped image ${i + 1}: ${data.error}`);
                                 setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
                                 if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
@@ -1209,7 +1209,7 @@ Be practical and realistic for an estate sale context.`,
                                     }
                                     return prev;
                                   });
-                                  alert(`SerpAPI credits exhausted after ${processed} image(s).\n\nTop up at serpapi.com then click "Resume from image ${i + 1}" to continue.`);
+                                  alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
                                   return;
                                 }
                               } else {
@@ -1243,7 +1243,7 @@ Be practical and realistic for an estate sale context.`,
                                 setSerpBatchProgress(prev => ({ ...prev, current: processed }));
                               }
                             } catch (e) {
-                              console.warn(`SerpAPI skipped image ${i + 1}:`, e.message);
+                             console.warn(`AI search skipped image ${i + 1}:`, e.message);
                             }
                             setSerpSearching(prev => ({ ...prev, [i]: false }));
                             await new Promise(r => setTimeout(r, 1000));
@@ -1322,7 +1322,7 @@ Be practical and realistic for an estate sale context.`,
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
-                                  title="Flagged as multi-item — click to unflag and allow SerpAPI"
+                                  title="Flagged as multi-item — click to unflag and allow AI search"
                                   onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: false }))}
                                   className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-700"
                                 >
@@ -1438,7 +1438,7 @@ Be practical and realistic for an estate sale context.`,
                                 {!(image.name && image.description) && !image.skip_item && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
-                                  {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
+                                  {serpSearching[index] ? 'Searching...' : 'AI Search'}
                                 </Button>
                                 )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
