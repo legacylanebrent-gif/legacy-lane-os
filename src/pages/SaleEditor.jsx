@@ -1168,7 +1168,7 @@ Be practical and realistic for an estate sale context.`,
                            <div className="flex flex-col gap-2">
                              <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 w-full font-semibold" onClick={() => setShowSkipGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
-                               Flag Photos to Skip
+                               Flag Photos to Skip Search
                              </Button>
                              <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={handleQuickScan}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
