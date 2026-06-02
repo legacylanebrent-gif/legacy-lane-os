@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
@@ -52,6 +52,8 @@ export default function SaleEditor() {
   const [originalStatus, setOriginalStatus] = useState('draft');
   const [serpBatchRunning, setSerpBatchRunning] = useState(false);
   const [serpBatchProgress, setSerpBatchProgress] = useState({ current: 0, total: 0, stoppedAt: null });
+  const [multiItemAssessing, setMultiItemAssessing] = useState({});
+  const [multiItemResults, setMultiItemResults] = useState({});
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -463,6 +465,65 @@ export default function SaleEditor() {
       }
     } finally {
       setSerpSearching(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleMultiItemAssess = async (index) => {
+    const image = formData.images[index];
+    if (!image.url) return;
+    setMultiItemAssessing(prev => ({ ...prev, [index]: true }));
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an estate sale pricing expert. Look at this photo carefully. This image likely contains MULTIPLE different items (e.g., books on a shelf, mugs on a table, baking pans in a cabinet, tools, etc.).
+
+Identify every distinct item or group of similar items you can see. For each, provide:
+- A short label (e.g. "Set of 6 mugs", "Vintage cookbooks (lot of 12)", "Cast iron skillet")
+- An estimated estate sale price (what a buyer would reasonably pay at an estate sale — not retail)
+- Any notable features
+
+Then suggest a single "Lot Price" if selling everything in the photo together.
+
+Be practical and realistic for an estate sale context.`,
+        file_urls: [image.url],
+        response_json_schema: {
+          type: "object",
+          properties: {
+            scene_summary: { type: "string" },
+            items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  label: { type: "string" },
+                  estate_sale_price: { type: "number" },
+                  notes: { type: "string" }
+                }
+              }
+            },
+            lot_price: { type: "number" },
+            lot_price_rationale: { type: "string" }
+          }
+        }
+      });
+      setMultiItemResults(prev => ({ ...prev, [index]: response }));
+      // Auto-fill name and description if empty
+      if (response.scene_summary) {
+        setFormData(prev => {
+          const updated = [...prev.images];
+          if (!updated[index].name) updated[index].name = response.scene_summary;
+          if (!updated[index].description) {
+            const itemList = (response.items || []).map(it => `${it.label} (~$${it.estate_sale_price})`).join(', ');
+            updated[index].description = itemList || response.scene_summary;
+            setPhotoDescriptions(pd => ({ ...pd, [image.url]: updated[index].description }));
+            setPhotoTitles(pt => ({ ...pt, [image.url]: updated[index].name }));
+          }
+          return { ...prev, images: updated };
+        });
+      }
+    } catch (e) {
+      console.error('Multi-item assess error:', e);
+    } finally {
+      setMultiItemAssessing(prev => ({ ...prev, [index]: false }));
     }
   };
 
@@ -1192,6 +1253,57 @@ export default function SaleEditor() {
                                          })}
                                        </div>
                                      )}
+                                  </div>
+                                )}
+                                <Button type="button" variant="outline" size="sm" className="w-full text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
+                                  <Brain className="w-3 h-3 mr-1" />
+                                  {multiItemAssessing[index] ? 'Analyzing...' : 'Multi-Item AI Assess'}
+                                </Button>
+                                {multiItemResults[index] && (
+                                  <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg text-xs space-y-2">
+                                    <p className="font-semibold text-teal-800">{multiItemResults[index].scene_summary}</p>
+                                    <div className="space-y-1">
+                                      {(multiItemResults[index].items || []).map((item, ii) => (
+                                        <div key={ii} className="flex justify-between items-start gap-2">
+                                          <span className="text-teal-700 flex-1">{item.label}{item.notes ? ` — ${item.notes}` : ''}</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const updated = [...formData.images];
+                                              updated[index] = { ...updated[index], price: item.estate_sale_price };
+                                              setFormData(prev => ({ ...prev, images: updated }));
+                                            }}
+                                            className={`font-bold flex-shrink-0 px-2 py-0.5 rounded border transition-colors ${
+                                              image.price === item.estate_sale_price
+                                                ? 'bg-green-200 border-green-500 text-green-900'
+                                                : 'border-teal-400 text-teal-800 hover:bg-teal-100'
+                                            }`}
+                                          >
+                                            {image.price === item.estate_sale_price ? '✓ ' : ''}${item.estate_sale_price}
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {multiItemResults[index].lot_price && (
+                                      <div className="border-t border-teal-300 pt-2 flex justify-between items-center">
+                                        <span className="font-semibold text-teal-800">Lot Price (all together)</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const updated = [...formData.images];
+                                            updated[index] = { ...updated[index], price: multiItemResults[index].lot_price };
+                                            setFormData(prev => ({ ...prev, images: updated }));
+                                          }}
+                                          className={`font-bold px-2 py-0.5 rounded border transition-colors ${
+                                            image.price === multiItemResults[index].lot_price
+                                              ? 'bg-green-200 border-green-500 text-green-900'
+                                              : 'border-teal-400 text-teal-800 hover:bg-teal-100'
+                                          }`}
+                                        >
+                                          {image.price === multiItemResults[index].lot_price ? '✓ ' : ''}${multiItemResults[index].lot_price}
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
