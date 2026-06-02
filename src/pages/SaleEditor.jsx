@@ -33,7 +33,7 @@ export default function SaleEditor() {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
-  const [dateForm, setDateForm] = useState({ start_date: '', start_time: '', end_time: '' });
+  const [dateForm, setDateForm] = useState({ start_date: '', start_time: '09:00', end_time: '14:00' });
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
   const [photoTab, setPhotoTab] = useState('thumbnails');
   const [photoTitles, setPhotoTitles] = useState({});
