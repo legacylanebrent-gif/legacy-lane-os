@@ -1394,7 +1394,7 @@ Be practical and realistic for an estate sale context.`,
                                 {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
                             </button>
                           </div>
-                          <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
+                          {step1Completed && <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
                               <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
                               <Textarea
@@ -1599,12 +1599,12 @@ Be practical and realistic for an estate sale context.`,
                                 </Button>
 
                               </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                    {!step1Completed && formData.images.length > 0 && (
+                              </div>
+                              </div>}
+                              </div>
+                              </Card>
+                              ))}
+                              {!step1Completed && formData.images.length > 0 && (
                       <div className="pt-4 border-t border-slate-200">
                         <Button
                           className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 text-sm"
