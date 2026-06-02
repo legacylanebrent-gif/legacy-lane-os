@@ -1370,11 +1370,16 @@ Be practical and realistic for an estate sale context.`,
                                   setPhotoTitles(prev => ({ ...prev, [image.url]: restoredName }));
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: restoredDesc }));
                                 }
-                                setFormData(prev => ({ ...prev, images: updated }));
-                              }}
-                              className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
-                            >
-                              {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
+                                setFormData(prev => {
+                                  if (saleIdRef.current) {
+                                    base44.entities.EstateSale.update(saleIdRef.current, { images: updated });
+                                  }
+                                  return { ...prev, images: updated };
+                                });
+                                }}
+                                className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
+                                >
+                                {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
                             </button>
                           </div>
                           <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
