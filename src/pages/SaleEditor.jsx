@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
@@ -44,6 +44,7 @@ export default function SaleEditor() {
   const [serpResults, setSerpResults] = useState({});
   const [regeneratingPrice, setRegeneratingPrice] = useState({});
   const [generatingTags, setGeneratingTags] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
   const [featuredNationally, setFeaturedNationally] = useState(false);
   const [featuredLocally, setFeaturedLocally] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
@@ -938,13 +939,63 @@ Be practical and realistic for an estate sale context.`,
                 </div>
               </div>
               <div>
-                <Label>Description</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Description</Label>
+                  {(() => {
+                    const itemsWithData = formData.images.filter(img => img.name && img.description);
+                    const isEnabled = itemsWithData.length > 0;
+                    return (
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!isEnabled || generatingDesc}
+                        onClick={async () => {
+                          const items = formData.images.filter(img => img.name && img.description);
+                          const city = formData.property_address?.city || '';
+                          const state = formData.property_address?.state || '';
+                          setGeneratingDesc(true);
+                          try {
+                            const itemList = items.map(img => `- ${img.name}: ${img.description}`).join('\n');
+                            const response = await base44.integrations.Core.InvokeLLM({
+                              prompt: `You are an expert estate sale copywriter and SEO specialist. Write a compelling, SEO-rich sale description for an estate sale in ${city}${state ? ', ' + state : ''}.
+
+The sale includes the following items:
+${itemList}
+
+Requirements:
+- Start with a strong hook mentioning the location (${city}${state ? ', ' + state : ''})
+- Naturally weave in key item names and categories for SEO
+- Keep it concise and easy to read (3–5 sentences max)
+- Highlight the most noteworthy/valuable items
+- Sound warm and inviting to estate sale shoppers
+- Do NOT use bullet points — write as flowing prose
+- This description will be prominently indexed by search engines, so make it count
+
+Return ONLY the description text, no extra commentary.`
+                            });
+                            setFormData(prev => ({ ...prev, description: response.trim() }));
+                          } catch (e) {
+                            alert('Failed to generate description: ' + e.message);
+                          }
+                          setGeneratingDesc(false);
+                        }}
+                        className={`gap-1.5 text-xs h-7 px-3 ${isEnabled ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}
+                      >
+                        <Wand2 className="w-3 h-3" />
+                        {generatingDesc ? 'Generating...' : 'AI Autogenerate Sale Description'}
+                      </Button>
+                    );
+                  })()}
+                </div>
                 <Textarea
                   placeholder="Describe the estate sale..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="min-h-[120px] lg:min-h-[72px]"
                 />
+                {formData.images.filter(img => img.name && img.description).length === 0 && (
+                  <p className="text-xs text-slate-400 mt-1">Add titles & descriptions to your photos to unlock AI description generation.</p>
+                )}
               </div>
             </div>
           </CardContent>
