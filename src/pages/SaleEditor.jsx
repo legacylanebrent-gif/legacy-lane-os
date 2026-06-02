@@ -474,7 +474,7 @@ export default function SaleEditor() {
   const handleQuickScan = async () => {
     const toScan = formData.images
       .map((img, i) => ({ img, i }))
-      .filter(({ img, i }) => !img.name && !img.description && multiItemFlags[i] === undefined);
+      .filter(({ img, i }) => !img.name && !img.description && !img.skip_item && multiItemFlags[i] === undefined);
 
     if (toScan.length === 0) {
       alert('All images have already been scanned or processed.');
@@ -1050,6 +1050,7 @@ Be practical and realistic for an estate sale context.`,
                             const img = formData.images[i];
                             if (img.name && img.description) continue;
                             if (multiItemFlags[i]) continue; // skip multi-item flagged images
+                            if (img.skip_item) continue; // skip close-up/duplicate images
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
@@ -1192,6 +1193,11 @@ Be practical and realistic for an estate sale context.`,
                                 1x
                               </button>
                             )}
+                            {image.skip_item && (
+                              <div className="absolute bottom-1 left-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight">
+                                SKIP
+                              </div>
+                            )}
                           </div>
                           <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
@@ -1271,12 +1277,29 @@ Be practical and realistic for an estate sale context.`,
                                  </button>
                               )}
                               <div className="mt-3 flex flex-col gap-2 w-full max-w-full overflow-hidden">
-                                {!(image.name && image.description) && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className={`w-full text-xs ${image.skip_item ? 'bg-red-50 border-red-400 text-red-700 hover:bg-white' : 'border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
+                                  onClick={() => {
+                                    const updated = [...formData.images];
+                                    updated[index] = { ...updated[index], skip_item: !image.skip_item, name: image.skip_item ? image.name : '', description: image.skip_item ? image.description : '' };
+                                    setFormData(prev => ({ ...prev, images: updated }));
+                                    if (!image.skip_item) {
+                                      setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
+                                      setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                    }
+                                  }}
+                                >
+                                  {image.skip_item ? '↩ Unskip Item' : '⊘ Skip Item (close-up/duplicate)'}
+                                </Button>
+                                {!(image.name && image.description) && !image.skip_item && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
                                   {serpSearching[index] ? 'Searching...' : 'SerpAI Search'}
                                 </Button>
-                              )}
+                                )}
                                 {serpResults[image.url] && !serpResults[image.url].error && (
                                    <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 w-full overflow-hidden break-words">
                                      <p className="font-semibold text-purple-800 break-words">{serpResults[image.url].item_title}</p>
