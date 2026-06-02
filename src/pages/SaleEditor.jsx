@@ -54,6 +54,9 @@ export default function SaleEditor() {
   const [serpBatchProgress, setSerpBatchProgress] = useState({ current: 0, total: 0, stoppedAt: null });
   const [multiItemAssessing, setMultiItemAssessing] = useState({});
   const [multiItemResults, setMultiItemResults] = useState({});
+  const [multiItemFlags, setMultiItemFlags] = useState({});
+  const [quickScanning, setQuickScanning] = useState(false);
+  const [quickScanProgress, setQuickScanProgress] = useState({ current: 0, total: 0 });
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -466,6 +469,51 @@ export default function SaleEditor() {
     } finally {
       setSerpSearching(prev => ({ ...prev, [index]: false }));
     }
+  };
+
+  const handleQuickScan = async () => {
+    const toScan = formData.images
+      .map((img, i) => ({ img, i }))
+      .filter(({ img, i }) => !img.name && !img.description && multiItemFlags[i] === undefined);
+
+    if (toScan.length === 0) {
+      alert('All images have already been scanned or processed.');
+      return;
+    }
+
+    setQuickScanning(true);
+    setQuickScanProgress({ current: 0, total: toScan.length });
+
+    // Run all scans in parallel (batches of 5 to avoid overwhelming)
+    const BATCH = 5;
+    let done = 0;
+    for (let b = 0; b < toScan.length; b += BATCH) {
+      const chunk = toScan.slice(b, b + BATCH);
+      await Promise.all(chunk.map(async ({ img, i }) => {
+        try {
+          const res = await base44.integrations.Core.InvokeLLM({
+            prompt: `Look at this photo. Answer only: is this a photo of MULTIPLE different items (like a shelf of books, a table of mugs, a cabinet of pans, a pile of tools, boxes of misc items, etc)? Or is it a SINGLE identifiable item?\n\nReply with JSON only.`,
+            file_urls: [img.url],
+            response_json_schema: {
+              type: "object",
+              properties: {
+                is_multi_item: { type: "boolean" },
+                reason: { type: "string" }
+              }
+            }
+          });
+          setMultiItemFlags(prev => ({ ...prev, [i]: res.is_multi_item === true }));
+        } catch (e) {
+          console.warn(`Quick scan failed for image ${i}:`, e.message);
+          setMultiItemFlags(prev => ({ ...prev, [i]: false }));
+        }
+        done++;
+        setQuickScanProgress({ current: done, total: toScan.length });
+      }));
+    }
+
+    setQuickScanning(false);
+    setQuickScanProgress({ current: 0, total: 0 });
   };
 
   const handleMultiItemAssess = async (index) => {
@@ -986,16 +1034,22 @@ Be practical and realistic for an estate sale context.`,
                         const unprocessed = formData.images.filter(img => !img.name || !img.description);
                         const resumeIndex = serpBatchProgress.stoppedAt;
                         const runBatch = async (startFromIndex = 0) => {
-                          if (!saleId) { alert('Save the sale first'); return; }
-                          const remaining = formData.images.slice(startFromIndex).filter(img => !img.name || !img.description);
-                          if (remaining.length === 0) { alert('All images have already been processed.'); return; }
-                          if (!window.confirm(`${remaining.length} image(s) will be searched. Continue?`)) return;
+                         if (!saleId) { alert('Save the sale first'); return; }
+                         const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
+                           const absIdx = startFromIndex + relIdx;
+                           return (!img.name || !img.description) && !multiItemFlags[absIdx];
+                         });
+                         if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
+                         const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
+                         const msg = `${remaining.length} image(s) will be searched via SerpAPI.${flaggedCount > 0 ? `\n\n${flaggedCount} multi-item image(s) will be skipped — use "Multi-Item AI Assess" on those.` : ''}\n\nContinue?`;
+                         if (!window.confirm(msg)) return;
                           setSerpBatchRunning(true);
                           setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
                           let processed = 0;
                           for (let i = startFromIndex; i < formData.images.length; i++) {
                             const img = formData.images[i];
                             if (img.name && img.description) continue;
+                            if (multiItemFlags[i]) continue; // skip multi-item flagged images
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
@@ -1064,12 +1118,20 @@ Be practical and realistic for an estate sale context.`,
                             return prev;
                           });
                         };
+                        const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
+                        const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
                         return (
-                          <div className="flex flex-col gap-2">
-                            <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(0)}>
-                              <Scan className="w-4 h-4 mr-2" />
-                              {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `AI Pricing & Description Generation${unprocessed.length > 0 ? ` (${unprocessed.length} remaining)` : ''}`}
-                            </Button>
+                           <div className="flex flex-col gap-2">
+                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={handleQuickScan}>
+                               <Brain className="w-4 h-4 mr-2" />
+                               {quickScanning
+                                 ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
+                                 : `Quick AI Scan${unscanned > 0 ? ` (${unscanned} to scan)` : ' All'}${multiItemCount > 0 ? ` · ${multiItemCount} multi-item flagged` : ''}`}
+                             </Button>
+                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning || quickScanning} onClick={() => runBatch(0)}>
+                               <Scan className="w-4 h-4 mr-2" />
+                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `SerpAI Batch${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
+                             </Button>
                             {resumeIndex !== null && resumeIndex !== undefined && (
                               <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
                                 <Scan className="w-4 h-4 mr-2" />
@@ -1108,7 +1170,29 @@ Be practical and realistic for an estate sale context.`,
                     {formData.images.map((image, index) => (
                        <Card key={index} className="p-4 overflow-hidden">
                          <div className="flex flex-col lg:flex-row gap-4 w-full min-w-0">
-                          <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg flex-shrink-0" />
+                          <div className="relative flex-shrink-0">
+                            <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" />
+                            {multiItemFlags[index] === true && (
+                              <button
+                                type="button"
+                                title="Flagged as multi-item — click to unflag and allow SerpAPI"
+                                onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: false }))}
+                                className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-700"
+                              >
+                                MULTI
+                              </button>
+                            )}
+                            {multiItemFlags[index] === false && (
+                              <button
+                                type="button"
+                                title="Flagged as single item — click to mark as multi-item"
+                                onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: true }))}
+                                className="absolute top-1 left-1 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-600"
+                              >
+                                1x
+                              </button>
+                            )}
+                          </div>
                           <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
                               <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
