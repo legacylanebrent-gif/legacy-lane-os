@@ -1595,6 +1595,16 @@ Be practical and realistic for an estate sale context.`,
                         </div>
                       </Card>
                     ))}
+                    {!step1Completed && formData.images.length > 0 && (
+                      <div className="pt-4 border-t border-slate-200">
+                        <Button
+                          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 text-sm"
+                          onClick={() => { setStep1Completed(true); setShowQuickScanGuideModal(true); }}
+                        >
+                          <span className="mr-2">✓</span> Done Hiding Images — Start Step 2
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </TabsContent>
