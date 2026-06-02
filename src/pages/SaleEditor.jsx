@@ -1171,33 +1171,46 @@ Be practical and realistic for an estate sale context.`,
                     {formData.images.map((image, index) => (
                        <Card key={index} className="p-4 overflow-hidden">
                          <div className="flex flex-col lg:flex-row gap-4 w-full min-w-0">
-                          <div className="relative flex-shrink-0">
-                            <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" />
-                            {multiItemFlags[index] === true && (
-                              <button
-                                type="button"
-                                title="Flagged as multi-item — click to unflag and allow SerpAPI"
-                                onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: false }))}
-                                className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-700"
-                              >
-                                MULTI
-                              </button>
-                            )}
-                            {multiItemFlags[index] === false && (
-                              <button
-                                type="button"
-                                title="Flagged as single item — click to mark as multi-item"
-                                onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: true }))}
-                                className="absolute top-1 left-1 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-600"
-                              >
-                                1x
-                              </button>
-                            )}
-                            {image.skip_item && (
-                              <div className="absolute bottom-1 left-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight">
-                                SKIP
-                              </div>
-                            )}
+                          <div className="flex-shrink-0 flex flex-col gap-1">
+                            <div className="relative">
+                              <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" />
+                              {multiItemFlags[index] === true && (
+                                <button
+                                  type="button"
+                                  title="Flagged as multi-item — click to unflag and allow SerpAPI"
+                                  onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: false }))}
+                                  className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-700"
+                                >
+                                  MULTI
+                                </button>
+                              )}
+                              {multiItemFlags[index] === false && (
+                                <button
+                                  type="button"
+                                  title="Flagged as single item — click to mark as multi-item"
+                                  onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: true }))}
+                                  className="absolute top-1 left-1 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-600"
+                                >
+                                  1x
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.images];
+                                const isSkipped = image.skip_item;
+                                updated[index] = { ...updated[index], skip_item: !isSkipped, name: isSkipped ? image.name : '', description: isSkipped ? image.description : '' };
+                                setFormData(prev => ({ ...prev, images: updated }));
+                                if (!isSkipped) {
+                                  setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
+                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                }
+                              }}
+                              className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
+                            >
+                              {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
+                            </button>
                           </div>
                           <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
@@ -1231,22 +1244,6 @@ Be practical and realistic for an estate sale context.`,
                                 className="text-sm min-h-[120px] lg:min-h-[72px] w-full max-w-full"
                               />
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = [...formData.images];
-                                const isSkipped = image.skip_item;
-                                updated[index] = { ...updated[index], skip_item: !isSkipped, name: isSkipped ? image.name : '', description: isSkipped ? image.description : '' };
-                                setFormData(prev => ({ ...prev, images: updated }));
-                                if (!isSkipped) {
-                                  setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
-                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
-                                }
-                              }}
-                              className={`w-full py-1.5 px-3 rounded-md border text-xs font-medium transition-colors ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
-                            >
-                              {image.skip_item ? '↩ Search This Item' : '⊘ Don\'t Search Item'}
-                            </button>
                             <div>
                               <Label className="text-xs text-purple-700">AI Suggested Price</Label>
                               <div className="text-sm px-3 py-2 bg-purple-50 border border-purple-200 rounded-md text-purple-800 font-medium">
