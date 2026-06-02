@@ -9,11 +9,22 @@ const US_STATES = [
   'VT','VA','WA','WV','WI','WY'
 ];
 
-function urlEntry(loc, priority = '0.5', changefreq = 'weekly') {
+function escapeXml(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function urlEntry(loc, priority = '0.5', changefreq = 'weekly', images = []) {
+  const imageXml = images.slice(0, 10).map(img => `    <image:image>
+      <image:loc>${escapeXml(img.url)}</image:loc>
+      <image:title>${escapeXml(img.title)}</image:title>
+      <image:caption>${escapeXml(img.caption)}</image:caption>
+    </image:image>`).join('\n');
+
   return `  <url>
     <loc>${loc}</loc>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
+${imageXml}
   </url>`;
 }
 
@@ -44,19 +55,40 @@ Deno.serve(async (req) => {
       entries.push(urlEntry(`${BASE_URL}/StateCities?state=${state}`, '0.8', 'weekly'));
     }
 
-    // Active / upcoming sale pages — highest SEO value
+    // Active / upcoming sale pages with full image data — highest SEO value
     for (const sale of sales) {
-      entries.push(urlEntry(`${BASE_URL}/EstateSaleDetail?id=${sale.id}`, '0.9', 'daily'));
+      const city = sale.property_address?.city || '';
+      const state = sale.property_address?.state || '';
+      const location = city && state ? `${city}, ${state}` : '';
+
+      const images = (sale.images || [])
+        .filter(img => {
+          const url = typeof img === 'string' ? img : img?.url;
+          return url && url.startsWith('http');
+        })
+        .map(img => {
+          const url = typeof img === 'string' ? img : img?.url;
+          const name = typeof img === 'object' ? (img.name || '') : '';
+          const desc = typeof img === 'object' ? (img.description || '') : '';
+          return {
+            url,
+            title: name || `${sale.title}${location ? ` — ${location}` : ''} estate sale item`,
+            caption: desc || `Estate sale item from ${sale.title}${location ? ` in ${location}` : ''}. ${(sale.categories || []).slice(0, 3).join(', ')}.`
+          };
+        });
+
+      entries.push(urlEntry(`${BASE_URL}/EstateSaleDetail?id=${sale.id}`, '0.9', 'daily', images));
     }
 
-    // Operator profile pages via BrowseOperators state filter
+    // State finder pages
     const statesWithOperators = [...new Set(operators.map(op => op.state).filter(Boolean))];
     for (const state of statesWithOperators) {
       entries.push(urlEntry(`${BASE_URL}/EstateSaleFinder?state=${state}`, '0.7', 'weekly'));
     }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${entries.join('\n')}
 </urlset>`;
 

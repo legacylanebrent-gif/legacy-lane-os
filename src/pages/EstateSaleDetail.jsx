@@ -341,13 +341,32 @@ export default function EstateSaleDetail() {
     ? `${saleCategories ? `${saleCategories} available. ` : ''}Estate sale${saleLocation ? ` in ${saleLocation}` : ''}${saleDates ? `. Dates: ${saleDates}` : ''}. Find treasures and unique items on EstateSalen.com.`
     : 'Find estate sale details, dates, photos, and items on EstateSalen.com.';
 
+  // Build per-image ImageObject structured data for Google Images indexing
+  const imageObjects = (sale?.images || [])
+    .filter(img => {
+      const url = typeof img === 'string' ? img : img?.url;
+      return !!url;
+    })
+    .map(img => {
+      const url = typeof img === 'string' ? img : img?.url;
+      const name = typeof img === 'object' ? (img.name || '') : '';
+      const desc = typeof img === 'object' ? (img.description || '') : '';
+      return {
+        '@type': 'ImageObject',
+        contentUrl: url,
+        name: name || `${sale.title}${saleLocation ? ` — ${saleLocation}` : ''} estate sale item`,
+        description: desc || `Estate sale item from ${sale.title}${saleLocation ? ` in ${saleLocation}` : ''}. ${(sale.categories || []).slice(0, 3).join(', ')}.`,
+        representativeOfPage: false,
+      };
+    });
+
   // JSON-LD Event schema for sale pages — Google rich results
   const jsonLd = sale ? {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: sale.title,
     description: sale.description || seoDesc,
-    image: firstImageUrl || undefined,
+    image: imageObjects.length > 0 ? imageObjects : (firstImageUrl || undefined),
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
@@ -478,7 +497,7 @@ export default function EstateSaleDetail() {
                     >
                       <img
                         src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
-                        alt={sale.title}
+                        alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                         className="w-full h-full object-cover"
                       />
                       {currentUser && (
@@ -533,7 +552,7 @@ export default function EstateSaleDetail() {
                             >
                               <img
                                 src={typeof image === 'string' ? image : image?.url}
-                                alt={`View ${index + 1}`}
+                                alt={typeof image === 'object' && image?.name ? `${image.name} — ${sale.title}${saleLocation ? ` in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''} — photo ${index + 1}`}
                                 className="w-full h-full object-cover hover:scale-105 transition-transform"
                                 loading="lazy"
                               />
@@ -566,7 +585,7 @@ export default function EstateSaleDetail() {
                   <div className="relative flex items-center justify-center bg-black h-[70vh] sm:min-h-[85vh] group">
                     <img
                       src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
-                      alt={sale.title}
+                      alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                       className="max-h-[70vh] sm:max-h-[85vh] max-w-full object-contain"
                     />
                     {currentUser && (
