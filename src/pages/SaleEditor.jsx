@@ -58,6 +58,7 @@ export default function SaleEditor() {
   const [quickScanning, setQuickScanning] = useState(false);
   const [quickScanProgress, setQuickScanProgress] = useState({ current: 0, total: 0 });
   const [showSkipGuideModal, setShowSkipGuideModal] = useState(false);
+  const [step1Completed, setStep1Completed] = useState(false);
   const [showQuickScanGuideModal, setShowQuickScanGuideModal] = useState(false);
   const [showDeepSearchGuideModal, setShowDeepSearchGuideModal] = useState(false);
   const autoSaveTimer = useRef(null);
@@ -864,11 +865,11 @@ Be practical and realistic for an estate sale context.`,
                 💡 Skipped photos are excluded from Steps 2 & 3, saving API credits and keeping results clean.
               </p>
               <button
-                onClick={() => setShowSkipGuideModal(false)}
+                onClick={() => { setShowSkipGuideModal(false); setStep1Completed(true); }}
                 className="w-full py-2.5 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors"
-              >
+                >
                 Got it — I'll scroll through and flag them
-              </button>
+                </button>
             </div>
           </div>
         )}
@@ -1268,6 +1269,7 @@ Be practical and realistic for an estate sale context.`,
                                <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
                                Flag Photos to Skip Search
                              </Button>
+                             {step1Completed && (<>
                              <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
                                {quickScanning
@@ -1284,10 +1286,11 @@ Be practical and realistic for an estate sale context.`,
                                 Resume from image {resumeIndex + 1}
                               </Button>
                             )}
+                            </>)}
                           </div>
                         );
                       })()}
-                      <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
+                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
                         if (!window.confirm('Step 4: Regenerate descriptions for all items that have a title?')) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
@@ -1311,7 +1314,7 @@ Be practical and realistic for an estate sale context.`,
                       }}>
                         <span className="mr-2 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">4</span>
                         Regenerate Item Descriptions
-                      </Button>
+                        </Button>}
                     </div>
                     {formData.images.map((image, index) => (
                        <Card key={index} className="p-4 overflow-hidden">
