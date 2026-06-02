@@ -93,6 +93,45 @@
       "type": "integer",
       "default": 0,
       "description": "Number of people watching this item"
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "SEO optimized page title for this item"
+    },
+    "seo_description": {
+      "type": "string",
+      "description": "SEO meta description for this item"
+    },
+    "seo_slug": {
+      "type": "string",
+      "description": "URL slug for SEO"
+    },
+    "seo_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO keywords for this item"
+    },
+    "ai_summary": {
+      "type": "string",
+      "description": "AI-generated item summary for SEO"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data for this item"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
     }
   },
   "required": [

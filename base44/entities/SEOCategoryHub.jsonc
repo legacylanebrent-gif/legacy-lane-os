@@ -1,0 +1,84 @@
+{
+  "name": "SEOCategoryHub",
+  "type": "object",
+  "properties": {
+    "category_name": {
+      "type": "string",
+      "description": "Category name (e.g. Antique Furniture, Fine Jewelry, Mid-Century Art)"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug (e.g. antique-furniture, fine-jewelry)"
+    },
+    "category_intro": {
+      "type": "string",
+      "description": "AI-generated introductory content for this category"
+    },
+    "buying_guide": {
+      "type": "string",
+      "description": "AI-generated buying guide for this category"
+    },
+    "selling_guide": {
+      "type": "string",
+      "description": "AI-generated selling guide for this category"
+    },
+    "related_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Notable brands commonly found in this category"
+    },
+    "total_items_found": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total items in this category across all sales"
+    },
+    "total_items_sold": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total items sold in this category"
+    },
+    "average_sold_price": {
+      "type": "number",
+      "description": "Average sold price for items in this category"
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "SEO page title for this category hub"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "Meta description for search engines"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data for this category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    }
+  },
+  "required": [
+    "category_name",
+    "slug"
+  ]
+}

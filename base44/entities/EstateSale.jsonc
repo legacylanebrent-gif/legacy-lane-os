@@ -236,6 +236,46 @@
       "type": "boolean",
       "default": true,
       "description": "Whether early sign-in list is allowed for this sale"
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "SEO optimized page title"
+    },
+    "seo_description": {
+      "type": "string",
+      "description": "SEO meta description"
+    },
+    "seo_slug": {
+      "type": "string",
+      "description": "URL slug for SEO"
+    },
+    "seo_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO keywords"
+    },
+    "ai_summary": {
+      "type": "string",
+      "description": "AI-generated summary of the sale"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data schema"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted",
+      "description": "Google indexing status"
     }
   },
   "required": [

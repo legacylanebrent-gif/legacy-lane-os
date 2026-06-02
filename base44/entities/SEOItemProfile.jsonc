@@ -1,0 +1,102 @@
+{
+  "name": "SEOItemProfile",
+  "type": "object",
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "description": "Linked item ID (from EstateSale images or MarketplaceItem)"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Linked EstateSale ID"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Linked operator/company user ID"
+    },
+    "brand_name": {
+      "type": "string",
+      "description": "Identified brand name"
+    },
+    "category_name": {
+      "type": "string",
+      "description": "Primary category (e.g. Furniture, Jewelry, Art)"
+    },
+    "style": {
+      "type": "string",
+      "description": "Style descriptor (e.g. Mid-Century Modern, Victorian, Art Deco)"
+    },
+    "estimated_age": {
+      "type": "string",
+      "description": "Estimated age or era (e.g. 1950s, circa 1920)"
+    },
+    "condition_summary": {
+      "type": "string",
+      "description": "Condition description (e.g. Excellent, Good, Fair)"
+    },
+    "value_low": {
+      "type": "number",
+      "description": "Low end of estimated value range"
+    },
+    "value_high": {
+      "type": "number",
+      "description": "High end of estimated value range"
+    },
+    "sold_price": {
+      "type": "number",
+      "description": "Actual sold price if known"
+    },
+    "sold_status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "sold",
+        "unknown"
+      ],
+      "default": "available",
+      "description": "Whether the item has been sold"
+    },
+    "ai_description": {
+      "type": "string",
+      "description": "AI-generated SEO-rich item description"
+    },
+    "historical_context": {
+      "type": "string",
+      "description": "Historical or collector context for the item"
+    },
+    "search_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO keywords associated with this item"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Primary image URL for this item"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "Item name/title"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug for this item's SEO page"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    }
+  },
+  "required": [
+    "sale_id"
+  ]
+}

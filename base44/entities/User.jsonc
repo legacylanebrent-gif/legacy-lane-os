@@ -210,6 +210,45 @@
     "onboarding_answers": {
       "type": "object",
       "description": "Raw answers from onboarding questionnaire"
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "SEO page title for company/operator profile"
+    },
+    "seo_description": {
+      "type": "string",
+      "description": "SEO meta description for company/operator profile"
+    },
+    "seo_slug": {
+      "type": "string",
+      "description": "URL slug for SEO (e.g. john-doe-estate-sales-nj)"
+    },
+    "seo_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO keywords for this company/operator"
+    },
+    "ai_summary": {
+      "type": "string",
+      "description": "AI-generated summary of this company/operator"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data for this company"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
     }
   },
   "required": []

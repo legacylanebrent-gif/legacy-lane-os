@@ -1,0 +1,86 @@
+{
+  "name": "SEOReport",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "weekly_national",
+        "state",
+        "county",
+        "city",
+        "brand",
+        "category"
+      ],
+      "description": "Type of SEO report"
+    },
+    "report_period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of the report period"
+    },
+    "report_period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of the report period"
+    },
+    "title": {
+      "type": "string",
+      "description": "Report title (SEO optimized)"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug for this report"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short summary / meta description"
+    },
+    "full_report": {
+      "type": "string",
+      "description": "Full report content (HTML or markdown)"
+    },
+    "data_json": {
+      "type": "object",
+      "description": "Structured data behind the report (stats, tables, etc.)"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data for this report"
+    },
+    "geo_scope": {
+      "type": "string",
+      "description": "Geographic scope label (e.g. 'New Jersey', 'Monmouth County', 'National')"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the report was published"
+    }
+  },
+  "required": [
+    "report_type",
+    "slug",
+    "title"
+  ]
+}

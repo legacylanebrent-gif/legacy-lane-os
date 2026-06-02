@@ -1,0 +1,118 @@
+{
+  "name": "SEOCityHub",
+  "type": "object",
+  "properties": {
+    "city": {
+      "type": "string",
+      "description": "City name"
+    },
+    "county": {
+      "type": "string",
+      "description": "County name"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug (e.g. estate-sales-red-bank-nj)"
+    },
+    "local_intro": {
+      "type": "string",
+      "description": "AI-generated local intro about estate sales in this city"
+    },
+    "estate_sale_guide": {
+      "type": "string",
+      "description": "AI-generated guide to attending estate sales in this city/area"
+    },
+    "featured_companies_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "company_id": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "profile_url": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Featured estate sale companies in this city"
+    },
+    "recent_sales_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sale_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Recent estate sales in this city"
+    },
+    "popular_categories_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Most popular item categories found in sales in this city"
+    },
+    "total_sales_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total estate sales recorded in this city"
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "SEO page title for this city hub"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "Meta description for search engines"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "JSON-LD structured data for this city"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    }
+  },
+  "required": [
+    "city",
+    "state",
+    "slug"
+  ]
+}

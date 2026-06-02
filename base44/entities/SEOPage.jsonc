@@ -1,0 +1,105 @@
+{
+  "name": "SEOPage",
+  "type": "object",
+  "properties": {
+    "page_type": {
+      "type": "string",
+      "enum": [
+        "sale",
+        "item",
+        "brand",
+        "category",
+        "company",
+        "city",
+        "county",
+        "state",
+        "blog",
+        "report"
+      ],
+      "description": "Type of SEO page"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the linked entity (sale, item, company, etc.)"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-safe slug for this page"
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title (SEO optimized)"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "Meta description for search engines"
+    },
+    "h1": {
+      "type": "string",
+      "description": "Primary H1 heading"
+    },
+    "intro_content": {
+      "type": "string",
+      "description": "Introductory paragraph content"
+    },
+    "main_content": {
+      "type": "string",
+      "description": "Main body content (HTML or markdown)"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "FAQ entries for FAQ schema markup"
+    },
+    "schema_json": {
+      "type": "object",
+      "description": "Structured data / JSON-LD schema"
+    },
+    "canonical_url": {
+      "type": "string",
+      "description": "Canonical URL for this page"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Publication status"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted",
+      "description": "Google indexing status"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the page was published"
+    }
+  },
+  "required": [
+    "page_type",
+    "slug"
+  ]
+}
