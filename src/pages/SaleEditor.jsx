@@ -1231,6 +1231,22 @@ Be practical and realistic for an estate sale context.`,
                                 className="text-sm min-h-[120px] lg:min-h-[72px] w-full max-w-full"
                               />
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.images];
+                                const isSkipped = image.skip_item;
+                                updated[index] = { ...updated[index], skip_item: !isSkipped, name: isSkipped ? image.name : '', description: isSkipped ? image.description : '' };
+                                setFormData(prev => ({ ...prev, images: updated }));
+                                if (!isSkipped) {
+                                  setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
+                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                }
+                              }}
+                              className={`w-full py-1.5 px-3 rounded-md border text-xs font-medium transition-colors ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
+                            >
+                              {image.skip_item ? '↩ Unskip Item' : '⊘ Skip Item — close-up or duplicate'}
+                            </button>
                             <div>
                               <Label className="text-xs text-purple-700">AI Suggested Price</Label>
                               <div className="text-sm px-3 py-2 bg-purple-50 border border-purple-200 rounded-md text-purple-800 font-medium">
@@ -1277,23 +1293,6 @@ Be practical and realistic for an estate sale context.`,
                                  </button>
                               )}
                               <div className="mt-3 flex flex-col gap-2 w-full max-w-full overflow-hidden">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className={`w-full text-xs ${image.skip_item ? 'bg-red-50 border-red-400 text-red-700 hover:bg-white' : 'border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
-                                  onClick={() => {
-                                    const updated = [...formData.images];
-                                    updated[index] = { ...updated[index], skip_item: !image.skip_item, name: image.skip_item ? image.name : '', description: image.skip_item ? image.description : '' };
-                                    setFormData(prev => ({ ...prev, images: updated }));
-                                    if (!image.skip_item) {
-                                      setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
-                                      setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
-                                    }
-                                  }}
-                                >
-                                  {image.skip_item ? '↩ Unskip Item' : '⊘ Skip Item (close-up/duplicate)'}
-                                </Button>
                                 {!(image.name && image.description) && !image.skip_item && (
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
                                   <Scan className="w-3 h-3 mr-1" />
