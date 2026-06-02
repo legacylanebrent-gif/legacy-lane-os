@@ -1042,7 +1042,7 @@ Be practical and realistic for an estate sale context.`,
                               <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                 {(provided) => (
                                   <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                    <img src={image.url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                                    <img src={image.url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                     <button
                                       onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
                                       className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1287,7 +1287,7 @@ Be practical and realistic for an estate sale context.`,
                          <div className="flex flex-col lg:flex-row gap-4 w-full min-w-0">
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" />
+                              <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
