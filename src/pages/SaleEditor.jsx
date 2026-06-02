@@ -58,6 +58,7 @@ export default function SaleEditor() {
   const [quickScanning, setQuickScanning] = useState(false);
   const [quickScanProgress, setQuickScanProgress] = useState({ current: 0, total: 0 });
   const [showSkipGuideModal, setShowSkipGuideModal] = useState(false);
+  const [showQuickScanGuideModal, setShowQuickScanGuideModal] = useState(false);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -734,6 +735,52 @@ Be practical and realistic for an estate sale context.`,
           }}
         />
 
+        {/* Step 2 Quick AI Scan Guide Modal */}
+        {showQuickScanGuideModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                <h2 className="text-lg font-bold text-slate-900">Quick AI Scan</h2>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                The AI will look at each photo and determine whether it contains a <strong>single identifiable item</strong> or <strong>multiple different items</strong>.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-teal-500 mt-0.5 flex-shrink-0">✓</span>
+                  <span><strong>Single item photos</strong> — flagged as ready for SerpAI search (Step 3)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">⊛</span>
+                  <span><strong>Multi-item photos</strong> — flagged as MULTI so Step 3 skips them (use "Multi-Item AI Assess" on those instead)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">⊘</span>
+                  <span><strong>Already skipped photos</strong> — ignored entirely</span>
+                </li>
+              </ul>
+              <p className="text-xs text-slate-500 bg-teal-50 border border-teal-200 rounded-lg p-3">
+                💡 This scan runs all photos in parallel and typically completes in under a minute. Only unscanned photos without a name or description are included.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowQuickScanGuideModal(false)}
+                  className="flex-1 py-2.5 border border-slate-300 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { setShowQuickScanGuideModal(false); handleQuickScan(); }}
+                  className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+                >
+                  Start Quick Scan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Step 1 Skip Guide Modal */}
         {showSkipGuideModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -1170,7 +1217,7 @@ Be practical and realistic for an estate sale context.`,
                                <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
                                Flag Photos to Skip Search
                              </Button>
-                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={handleQuickScan}>
+                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
                                {quickScanning
                                  ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
