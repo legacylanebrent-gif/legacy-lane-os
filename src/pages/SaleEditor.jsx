@@ -218,6 +218,15 @@ export default function SaleEditor() {
         };
       });
       setSerpResults(serpMap);
+
+      // Auto-complete step 1 if they've previously flagged any images or done AI searches
+      const images = saleData.images || [];
+      const hasSkipped = images.some(img => img.skip_item === true || img.skip_item === false);
+      const hasSerpResults = serpData.length > 0;
+      const hasProcessed = images.some(img => img.name || img.description || img.ai_first_search_price);
+      if (hasSkipped || hasSerpResults || hasProcessed) {
+        setStep1Completed(true);
+      }
     } catch (error) {
       console.error('Error loading sale:', error);
       alert('Error loading sale: ' + error.message);
