@@ -1345,12 +1345,32 @@ Be practical and realistic for an estate sale context.`,
                               onClick={() => {
                                 const updated = [...formData.images];
                                 const isSkipped = image.skip_item;
-                                updated[index] = { ...updated[index], skip_item: !isSkipped, name: isSkipped ? image.name : '', description: isSkipped ? image.description : '' };
-                                setFormData(prev => ({ ...prev, images: updated }));
                                 if (!isSkipped) {
+                                  // Toggling ON (skipping): save current name/description into skip_saved_*, then clear
+                                  updated[index] = {
+                                    ...updated[index],
+                                    skip_item: true,
+                                    skip_saved_name: image.name || '',
+                                    skip_saved_description: image.description || '',
+                                    name: '',
+                                    description: ''
+                                  };
                                   setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                } else {
+                                  // Toggling OFF (restoring): bring back saved values
+                                  const restoredName = image.skip_saved_name || '';
+                                  const restoredDesc = image.skip_saved_description || '';
+                                  updated[index] = {
+                                    ...updated[index],
+                                    skip_item: false,
+                                    name: restoredName,
+                                    description: restoredDesc
+                                  };
+                                  setPhotoTitles(prev => ({ ...prev, [image.url]: restoredName }));
+                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: restoredDesc }));
                                 }
+                                setFormData(prev => ({ ...prev, images: updated }));
                               }}
                               className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
                             >
