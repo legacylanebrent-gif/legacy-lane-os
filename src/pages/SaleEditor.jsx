@@ -59,9 +59,11 @@ export default function SaleEditor() {
   const [quickScanProgress, setQuickScanProgress] = useState({ current: 0, total: 0 });
   const [showSkipGuideModal, setShowSkipGuideModal] = useState(false);
   const [showQuickScanGuideModal, setShowQuickScanGuideModal] = useState(false);
+  const [showDeepSearchGuideModal, setShowDeepSearchGuideModal] = useState(false);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
+  const runBatchRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -781,6 +783,54 @@ Be practical and realistic for an estate sale context.`,
           </div>
         )}
 
+        {/* Step 3 Deep Search Guide Modal */}
+        {showDeepSearchGuideModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                <h2 className="text-lg font-bold text-slate-900">Deep Search for Pricing & Descriptions</h2>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Each eligible photo will be sent through <strong>SerpAPI + Google Lens</strong> to find matching items across the web. For each match we'll pull:
+              </p>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-500 mt-0.5 flex-shrink-0">🔍</span>
+                  <span><strong>Item title</strong> — auto-filled into the Name field if blank</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-500 mt-0.5 flex-shrink-0">📝</span>
+                  <span><strong>Description</strong> — built from real listing sources &amp; price ranges found online</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-500 mt-0.5 flex-shrink-0">💵</span>
+                  <span><strong>AI Suggested Price</strong> — average market value across matched listings</span>
+                </li>
+              </ul>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 space-y-1 text-xs text-slate-600">
+                <p>⊘ <strong>Skipped photos</strong> (flagged in Step 1) are excluded.</p>
+                <p>⊛ <strong>Multi-item photos</strong> (flagged in Step 2) are skipped — use "Multi-Item AI Assess" on those.</p>
+                <p>✓ Only photos <strong>without a name or description</strong> are processed to avoid overwriting your work.</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeepSearchGuideModal(false)}
+                  className="flex-1 py-2.5 border border-slate-300 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { setShowDeepSearchGuideModal(false); runBatchRef.current && runBatchRef.current(0); }}
+                  className="flex-1 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Start Deep Search
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Step 1 Skip Guide Modal */}
         {showSkipGuideModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -1211,6 +1261,7 @@ Be practical and realistic for an estate sale context.`,
                         };
                         const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
+                        runBatchRef.current = runBatch;
                         return (
                            <div className="flex flex-col gap-2">
                              <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 w-full font-semibold" onClick={() => setShowSkipGuideModal(true)}>
@@ -1223,9 +1274,9 @@ Be practical and realistic for an estate sale context.`,
                                  ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
                                  : `Quick AI Scan${unscanned > 0 ? ` (${unscanned} to scan)` : ' All'}${multiItemCount > 0 ? ` · ${multiItemCount} multi-item flagged` : ''}`}
                              </Button>
-                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning || quickScanning} onClick={() => runBatch(0)}>
+                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
-                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `SerpAI Batch${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
+                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `Deep Search for Pricing & Descriptions${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
                              </Button>
                             {resumeIndex !== null && resumeIndex !== undefined && (
                               <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
