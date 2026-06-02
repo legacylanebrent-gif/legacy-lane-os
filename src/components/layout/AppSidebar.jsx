@@ -99,6 +99,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
   { page: 'PlatformExpenses',       label: 'Platform Expenses',       icon: DollarSign,      group: 'Admin' },
   { page: 'PlatformAds',            label: 'Platform Ads',             icon: Megaphone,       group: 'Admin' },
+  { page: 'PlatformSEODashboard',   label: 'SEO Dashboard',            icon: TrendingUp,      group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },

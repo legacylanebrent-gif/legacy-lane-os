@@ -84,6 +84,7 @@ import ImportedSalesDashboard from './pages/ImportedSalesDashboard';
 import LandingPageOneDay from './pages/LandingPageOneDay';
 import PlatformExpenses from './pages/PlatformExpenses';
 import PlatformAds from './pages/PlatformAds';
+import PlatformSEODashboard from './pages/PlatformSEODashboard.jsx';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -211,6 +212,7 @@ const AuthenticatedApp = () => {
       <Route path="/LandingPageOneDay" element={<LandingPageOneDay />} />
       <Route path="/PlatformExpenses" element={<LayoutWrapper currentPageName="PlatformExpenses"><PlatformExpenses /></LayoutWrapper>} />
       <Route path="/PlatformAds" element={<LayoutWrapper currentPageName="PlatformAds"><PlatformAds /></LayoutWrapper>} />
+      <Route path="/PlatformSEODashboard" element={<LayoutWrapper currentPageName="PlatformSEODashboard"><PlatformSEODashboard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

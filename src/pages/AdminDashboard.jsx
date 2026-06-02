@@ -383,6 +383,7 @@ export default function AdminDashboard() {
             <QuickLinkCard icon={MessageSquare} label="Support Tickets" sub="Open support tickets" href="/AdminTickets" color="bg-red-100 text-red-600" badge={stats.openTickets} />
             <QuickLinkCard icon={Shield} label="Page Permissions" sub="Role-based access control" href="/AdminPageAccess" color="bg-slate-100 text-slate-700" />
             <QuickLinkCard icon={DollarSign} label="Platform Expenses" sub="Daily cost vs revenue tracker" href="/PlatformExpenses" color="bg-red-100 text-red-600" />
+            <QuickLinkCard icon={TrendingUp} label="SEO Dashboard" sub="Google Search Console metrics" href="/PlatformSEODashboard" color="bg-cyan-100 text-cyan-600" />
           </div>
         </div>
 
