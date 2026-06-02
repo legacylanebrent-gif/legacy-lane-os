@@ -57,6 +57,7 @@ export default function SaleEditor() {
   const [multiItemFlags, setMultiItemFlags] = useState({});
   const [quickScanning, setQuickScanning] = useState(false);
   const [quickScanProgress, setQuickScanProgress] = useState({ current: 0, total: 0 });
+  const [showSkipGuideModal, setShowSkipGuideModal] = useState(false);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -732,6 +733,48 @@ Be practical and realistic for an estate sale context.`,
             handleSave(pendingPublish, true);
           }}
         />
+
+        {/* Step 1 Skip Guide Modal */}
+        {showSkipGuideModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                <h2 className="text-lg font-bold text-slate-900">Flag Photos to Skip</h2>
+              </div>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Before running any AI searches, scroll through your photos and press <strong className="text-red-600">⊘ Don't Search</strong> on any image that:
+              </p>
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                  <span><strong>Close-up or detail shot</strong> — zoomed in on a pattern, mark, or label (not the full item)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                  <span><strong>Duplicate photo</strong> — same item photographed from a different angle</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                  <span><strong>Multi-item scene</strong> — a shelf, table, or pile of many different things that can't be identified as one item</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                  <span><strong>Non-searchable image</strong> — blurry, room overview, or anything unlikely to return a useful price</span>
+                </li>
+              </ul>
+              <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+                💡 Skipped photos are excluded from Steps 2 & 3, saving API credits and keeping results clean.
+              </p>
+              <button
+                onClick={() => setShowSkipGuideModal(false)}
+                className="w-full py-2.5 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors"
+              >
+                Got it — I'll scroll through and flag them
+              </button>
+            </div>
+          </div>
+        )}
         </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
@@ -1123,14 +1166,18 @@ Be practical and realistic for an estate sale context.`,
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
                         return (
                            <div className="flex flex-col gap-2">
+                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 w-full font-semibold" onClick={() => setShowSkipGuideModal(true)}>
+                               <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
+                               Flag Photos to Skip
+                             </Button>
                              <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={handleQuickScan}>
-                               <Brain className="w-4 h-4 mr-2" />
+                               <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
                                {quickScanning
                                  ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
                                  : `Quick AI Scan${unscanned > 0 ? ` (${unscanned} to scan)` : ' All'}${multiItemCount > 0 ? ` · ${multiItemCount} multi-item flagged` : ''}`}
                              </Button>
                              <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning || quickScanning} onClick={() => runBatch(0)}>
-                               <Scan className="w-4 h-4 mr-2" />
+                               <span className="mr-2 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
                                {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `SerpAI Batch${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
                              </Button>
                             {resumeIndex !== null && resumeIndex !== undefined && (
@@ -1143,7 +1190,7 @@ Be practical and realistic for an estate sale context.`,
                         );
                       })()}
                       <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
-                        if (!window.confirm('Regenerate descriptions for all items that have a title?')) return;
+                        if (!window.confirm('Step 4: Regenerate descriptions for all items that have a title?')) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
                           if (!img.name) continue;
@@ -1164,7 +1211,7 @@ Be practical and realistic for an estate sale context.`,
                           await new Promise(r => setTimeout(r, 500));
                         }
                       }}>
-                        <Sparkles className="w-4 h-4 mr-2" />
+                        <span className="mr-2 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">4</span>
                         Regenerate Item Descriptions
                       </Button>
                     </div>
