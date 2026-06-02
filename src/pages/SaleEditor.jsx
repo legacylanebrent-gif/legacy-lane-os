@@ -19,6 +19,7 @@ import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
+import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -953,56 +954,12 @@ Be practical and realistic for an estate sale context.`,
         <Card>
           <CardContent className="pt-6 space-y-4">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Location</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label>Street Address</Label>
-                <Input
-                  placeholder="123 Main Street"
-                  value={formData.property_address.street}
-                  onChange={(e) => {
-                    const newAddress = { ...formData.property_address, street: e.target.value };
-                    setFormData({ ...formData, property_address: newAddress });
-                    geocodeAddress(newAddress);
-                  }}
-                />
-              </div>
-              <div>
-                <Label>City *</Label>
-                <Input
-                  placeholder="Austin"
-                  value={formData.property_address.city}
-                  onChange={(e) => {
-                    const newAddress = { ...formData.property_address, city: e.target.value };
-                    setFormData({ ...formData, property_address: newAddress });
-                    geocodeAddress(newAddress);
-                  }}
-                />
-              </div>
-              <div>
-                <Label>State</Label>
-                <Input
-                  placeholder="TX"
-                  value={formData.property_address.state}
-                  onChange={(e) => {
-                    const newAddress = { ...formData.property_address, state: e.target.value };
-                    setFormData({ ...formData, property_address: newAddress });
-                    geocodeAddress(newAddress);
-                  }}
-                />
-              </div>
-              <div className="col-span-2">
-                <Label>ZIP Code</Label>
-                <Input
-                  placeholder="78701"
-                  value={formData.property_address.zip}
-                  onChange={(e) => {
-                    const newAddress = { ...formData.property_address, zip: e.target.value };
-                    setFormData({ ...formData, property_address: newAddress });
-                    geocodeAddress(newAddress);
-                  }}
-                />
-              </div>
-            </div>
+            <ZipAddressEntry
+              address={formData.property_address}
+              location={formData.location}
+              onChange={(newAddress) => setFormData(prev => ({ ...prev, property_address: newAddress }))}
+              onLocationChange={(loc) => setFormData(prev => ({ ...prev, location: loc }))}
+            />
           </CardContent>
         </Card>
 
