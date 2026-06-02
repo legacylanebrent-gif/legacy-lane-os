@@ -1245,7 +1245,7 @@ Be practical and realistic for an estate sale context.`,
                               }}
                               className={`w-full py-1.5 px-3 rounded-md border text-xs font-medium transition-colors ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
                             >
-                              {image.skip_item ? '↩ Unskip Item' : '⊘ Skip Item — close-up or duplicate'}
+                              {image.skip_item ? '↩ Search This Item' : '⊘ Don\'t Search Item'}
                             </button>
                             <div>
                               <Label className="text-xs text-purple-700">AI Suggested Price</Label>
