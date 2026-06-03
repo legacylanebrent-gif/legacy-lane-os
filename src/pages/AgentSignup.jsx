@@ -146,7 +146,7 @@ export default function AgentSignup() {
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Platform Generates the Lead</h3>
                   <p className="text-slate-600 leading-relaxed">
-                    EstateSalen.com runs paid advertising, SEO campaigns, and outreach that bring in homeowners dealing with probate, downsizing, inherited homes, senior moves, and other life transitions. These are real families who need real help — and they reach out to us first.
+                    EstateSalen.com runs paid advertising, SEO campaigns, and outreach that bring in homeowners and executors dealing with probate, downsizing, inherited homes, senior moves, and other life transitions. These are real families who need real help — and they reach out to us first.
                   </p>
                 </div>
               </div>
