@@ -224,6 +224,9 @@ export default function AgentSignup() {
              Recruit Company Owners. Earn Passive Monthly Revenue.
             </h2>
             <p className="text-slate-500 max-w-2xl mx-auto mb-4">
+              There are two ways to gain partnership and leads. One, pay a small monthly fee per city and it will be your claimed city locking out other agents. Or second, own an entire territory with no monthly fee but a one time investment which locks out all agents across the entire territory.
+            </p>
+            <p className="text-slate-500 max-w-2xl mx-auto mb-4">
               EstateSalen.com works on Territories (Counties) across the US. Furthermore, in densely populated areas, counties are also broken down into micro-territories (cities, townships, etc.). You have the special opportunity to control an entire territory as well as its micro-territories. Lock out all other agents as an investment in your future business growth via leads control.
             </p>
             <p className="text-slate-500 max-w-2xl mx-auto">
