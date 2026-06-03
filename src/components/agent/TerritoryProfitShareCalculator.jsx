@@ -57,7 +57,7 @@ export default function TerritoryProfitShareCalculator() {
       <div className="flex items-center justify-between mb-1">
         <h4 className="font-bold text-slate-900 text-lg">Territory Profit Share Calculator</h4>
         <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
-          {totalOperators.toLocaleString()} potential operators in database
+          {totalOperators.toLocaleString()} potential estate sale companies in database
         </span>
       </div>
       <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each operator's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
