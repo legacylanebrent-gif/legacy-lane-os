@@ -198,7 +198,7 @@ export default function AgentSignup() {
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">You're Already the Agent Before They Even Call You</h3>
                   <p className="text-slate-600 leading-relaxed">
-                    By the time the homeowner is ready to think about selling the property, they've already seen your name, your face, and your value — introduced and endorsed by the company they just hired to help them. <strong className="text-slate-800">You didn't cold-call. You didn't compete with five other agents. You were already in the room.</strong>
+                    By the time the homeowner is ready to think about selling the property, they've already seen your name, your face, and your value — introduced and endorsed by the company they just hired to help them. <strong className="text-slate-800">You didn't cold-call. You didn't compete with five other agents. You were already in the room.</strong> While you're not guaranteed the listing, you're guaranteed to be in the conversation without a cold call or any other ignored attempt at a new listing appointment.
                   </p>
                 </div>
               </div>
