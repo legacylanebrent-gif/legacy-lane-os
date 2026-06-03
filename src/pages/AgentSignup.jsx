@@ -183,7 +183,7 @@ export default function AgentSignup() {
                       <ul className="space-y-1.5 text-sm text-slate-600">
                         <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> Your name, photo, credentials, and contact info</li>
                         <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> Your experience with life-transition real estate (probate, downsizing, inherited homes)</li>
-                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> The value of working with a real estate agent and an estate sale company <em>together as a team</em></li>
+                        <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> The value of working with a real estate agent and an estate sale company</li>
                         <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> How the two services complement each other — personal property first, real property second — creating a seamless transition for the family</li>
                         <li className="flex items-start gap-2"><Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" /> A warm endorsement from the estate sale company presenting you as their trusted agent partner</li>
                       </ul>
