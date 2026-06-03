@@ -34,7 +34,7 @@ const exclusiveFeatures = [
 ];
 
 const benefits = [
-  { icon: Home, title: 'Estate-Sale Seller Opportunities', desc: 'Access to families making real estate decisions alongside personal property decisions.' },
+  { icon: Home, title: 'Estate-Sale Seller Opportunities', desc: 'Warm access to families making real estate decisions alongside personal property decisions.' },
   { icon: Users, title: 'Referral Relationships With Operators', desc: 'Build trusted relationships with estate sale companies already inside these homes.' },
   { icon: MapPin, title: 'Territory-Based Positioning', desc: "You're the preferred or exclusive agent in the cities you choose to protect." },
   { icon: TrendingUp, title: 'Lead Routing From the Platform', desc: 'Opportunities routed directly from EstateSalen.com.' },
