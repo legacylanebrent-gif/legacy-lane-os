@@ -77,6 +77,12 @@ export default function ComprehensiveRevenue() {
   const [adNewPerCityPerMonth, setAdNewPerCityPerMonth] = useState(() => loadValue('adNewPerCityPerMonth', 1));
 
   useEffect(() => {
+    // Clear old cached vendor price if it exists (was 79, now 19)
+    const cachedVendorPrice = localStorage.getItem('comprehensive_revenue_vendorSubPrice');
+    if (cachedVendorPrice === '79') {
+      localStorage.setItem('comprehensive_revenue_vendorSubPrice', '19');
+      setVendorSubPrice(19);
+    }
     loadOperators();
     loadCities();
   }, []);
