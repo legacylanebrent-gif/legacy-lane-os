@@ -719,9 +719,6 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
                   <div className="text-sm text-slate-700">
-                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
-                  </div>
-                  <div className="text-sm text-slate-700">
                     <strong>Total Micro-Territories (Cities):</strong> {totalCities.toLocaleString()} — each city is a potential monthly-plan slot for one agent
                   </div>
                   <div className="text-sm text-slate-700">
