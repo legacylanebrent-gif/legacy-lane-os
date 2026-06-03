@@ -280,11 +280,7 @@ export default function TerritoryROICalc() {
         </div>
       )}
 
-      {!result && !county && (
-        <p className="text-orange-600 text-xs leading-relaxed">
-          <strong>$3,800</strong> one-time buy-in, or <strong>$5,320</strong> over 12 months. Full balance due on your first referral closing.
-        </p>
-      )}
+
     </div>
   );
 }
