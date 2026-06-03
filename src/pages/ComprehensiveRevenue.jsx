@@ -19,6 +19,7 @@ const PACKAGE_PRICES = {
 
 export default function ComprehensiveRevenue() {
   const [operators, setOperators] = useState([]);
+  const [totalCities, setTotalCities] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -76,6 +77,7 @@ export default function ComprehensiveRevenue() {
 
   useEffect(() => {
     loadOperators();
+    loadCities();
   }, []);
 
   // Auto-save to localStorage whenever values change
@@ -86,7 +88,8 @@ export default function ComprehensiveRevenue() {
       annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featureGrowth,
       adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth,
-      websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1
+      websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1,
+      agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth
     };
     
     Object.entries(values).forEach(([key, value]) => {
@@ -96,7 +99,6 @@ export default function ComprehensiveRevenue() {
     agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth,
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
-    agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth,
     annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth,
@@ -132,6 +134,17 @@ export default function ComprehensiveRevenue() {
       console.error('Error loading operators:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCities = async () => {
+    try {
+      const res = await base44.functions.invoke('fetchHousioTerritories', { action: 'list' });
+      if (res.data?.total_cities) {
+        setTotalCities(res.data.total_cities);
+      }
+    } catch (error) {
+      console.error('Error loading cities:', error);
     }
   };
 
@@ -229,9 +242,7 @@ export default function ComprehensiveRevenue() {
     return acc;
   }, {});
 
-  // Calculate unique cities from operators
-  const uniqueCities = new Set(operators.map(op => `${op.city}, ${op.state}`).filter(Boolean));
-  const totalCities = uniqueCities.size;
+
 
   const currentOperatorMonthlyRevenue = operators.reduce((sum, op) => {
     const packageType = op.package_type === 'Unknown' ? 'Basic' : op.package_type;
