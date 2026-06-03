@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { housioTerritories } from '@/lib/housioTerritoriesClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,15 +42,16 @@ export default function AdminTerritoryDashboard() {
 
   const loadData = async () => {
     setLoading(true);
-    const res = await base44.functions.invoke('getHouszuTerritories', {});
-    setData(res.data);
+    const res = await housioTerritories.list();
+    // res.territories is the array from the new API
+    setData(res);
     setLoading(false);
   };
 
-  const masterTerritories = data?.master_territories || [];
-  const microTerritories = data?.micro_territories || [];
-  const agentApps = data?.agent_applications || [];
-  const operatorProfiles = data?.operator_profiles || [];
+  const masterTerritories = data?.territories || [];
+  const microTerritories = [];
+  const agentApps = [];
+  const operatorProfiles = [];
 
   const q = search.toLowerCase();
   const filteredMaster = masterTerritories.filter(t => !q || JSON.stringify(t).toLowerCase().includes(q));
@@ -157,10 +158,13 @@ export default function AdminTerritoryDashboard() {
                               <MapPin className="w-4 h-4 text-purple-600" />
                             </div>
                             <div>
-                              <h3 className="font-bold text-slate-900">{t.county} County, {t.state}</h3>
+                              <h3 className="font-bold text-slate-900">{t.name}, {t.state}</h3>
                               <div className="flex flex-wrap gap-2 mt-1.5">
-                                <Badge className="bg-purple-50 text-purple-700">{t.agents?.length || 0} agent{t.agents?.length !== 1 ? 's' : ''}</Badge>
-                                <Badge className="bg-blue-50 text-blue-700">{t.total_micro_territories} micro-territories</Badge>
+                                <Badge className="bg-purple-50 text-purple-700">{t.total_agent_count || 0} agents</Badge>
+                                <Badge className={`text-xs ${statusBadge(t.status)}`}>{t.status}</Badge>
+                                {t.avg_listing_price > 0 && (
+                                  <Badge className="bg-slate-100 text-slate-600">Avg ${t.avg_listing_price?.toLocaleString()}</Badge>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -170,35 +174,32 @@ export default function AdminTerritoryDashboard() {
                         </div>
 
                         {isExpanded && (
-                          <div className="mt-4 pt-4 border-t border-slate-100 space-y-4">
-                            {t.agents?.map((agent, ai) => (
-                              <div key={ai} className="bg-slate-50 rounded-xl p-4">
-                                <div className="flex flex-wrap items-center gap-2 mb-2">
-                                  <Badge className={statusBadge(agent.status)}>{agent.status}</Badge>
-                                  {agent.interested_in && (
-                                    <Badge className={agent.interested_in === 'exclusive' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}>
-                                      {agent.interested_in}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="font-semibold text-slate-900">{agent.name}</p>
-                                <p className="text-xs text-slate-500">{agent.brokerage} · {agent.email}</p>
-                                {agent.territory_cities?.length > 0 && (
-                                  <div className="mt-3">
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-                                      Micro-Territories ({agent.territory_cities.length} cities)
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {agent.territory_cities.map((city, ci) => (
-                                        <span key={ci} className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
-                                          {city}
-                                        </span>
-                                      ))}
-                                    </div>
+                          <div className="mt-4 pt-4 border-t border-slate-100">
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              {t.coverage_counties?.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Counties</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {t.coverage_counties.map((c, i) => (
+                                      <span key={i} className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">{c.name || c}</span>
+                                    ))}
                                   </div>
-                                )}
-                              </div>
-                            ))}
+                                </div>
+                              )}
+                              {t.coverage_cities?.length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Cities</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {t.coverage_cities.slice(0, 10).map((c, i) => (
+                                      <span key={i} className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">{c}</span>
+                                    ))}
+                                    {t.coverage_cities.length > 10 && <span className="text-xs text-slate-400">+{t.coverage_cities.length - 10} more</span>}
+                                  </div>
+                                </div>
+                              )}
+                              <div><p className="text-xs text-slate-500">Active Listings: <span className="font-medium text-slate-700">{t.active_listings || 0}</span></p></div>
+                              <div><p className="text-xs text-slate-500">Territory ID: <span className="font-medium text-slate-700">{t.territory_id}</span></p></div>
+                            </div>
                           </div>
                         )}
                       </CardContent>
