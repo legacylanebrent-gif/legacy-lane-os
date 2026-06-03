@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { housioTerritories } from '@/lib/housioTerritoriesClient';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2 } from 'lucide-react';
 
 const PAGE_SIZE = 50;
 
@@ -24,46 +25,24 @@ const STATUS_COLORS = {
 const statusClass = (s) => STATUS_COLORS[s?.toLowerCase()] || 'bg-slate-100 text-slate-600';
 
 export default function AdminTerritoryDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [territories, setTerritories] = useState([]);
-  const [microTerritories, setMicroTerritories] = useState([]);
-  const [rawData, setRawData] = useState(null);
   const [showDebug, setShowDebug] = useState(false);
-
-  // Filters
   const [search, setSearch] = useState('');
   const [filterState, setFilterState] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Pagination
   const [page, setPage] = useState(1);
 
-  useEffect(() => { loadData(); }, []);
+  const { data: response, isLoading, refetch } = useQuery({
+    queryKey: ['housioTerritories'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('fetchHousioTerritories', { action: 'list' });
+      return res.data;
+    },
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    const [masterRes, microRes] = await Promise.all([
-      housioTerritories.list(),
-      housioTerritories.microList()
-    ]);
-    setRawData({ master: masterRes, micro: microRes });
-    setTerritories(masterRes?.territories || []);
-    setMicroTerritories(microRes?.micro_territories || []);
-    setPage(1);
-    setLoading(false);
-  };
-
-  // Build micro-territory count map by territory_id
-  const microCountMap = useMemo(() => {
-    const map = {};
-    microTerritories.forEach(m => {
-      const tid = m.territory_id;
-      if (tid) {
-        map[tid] = (map[tid] || 0) + 1;
-      }
-    });
-    return map;
-  }, [microTerritories]);
+  const territories = response?.territories || [];
+  const totalCities = response?.total_cities || 0;
+  const totalActive = response?.total_active || 0;
+  const rawData = response;
 
   // Derived filter options
   const stateOptions = useMemo(() => {
@@ -94,7 +73,7 @@ export default function AdminTerritoryDashboard() {
   // Reset to page 1 when filters change
   useEffect(() => { setPage(1); }, [search, filterState, filterStatus]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -121,7 +100,7 @@ export default function AdminTerritoryDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={loadData} variant="outline" size="sm">
+            <Button onClick={() => refetch()} variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-1" /> Refresh
             </Button>
             <Button onClick={() => setShowDebug(!showDebug)} variant="ghost" size="sm">
@@ -130,21 +109,43 @@ export default function AdminTerritoryDashboard() {
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          {[
-            { label: 'Total', value: territories.length, color: 'text-purple-600' },
-            { label: 'Filtered', value: filtered.length, color: 'text-blue-600' },
-            { label: 'States', value: stateOptions.length, color: 'text-green-600' },
-            { label: 'Page', value: `${currentPage} / ${totalPages}`, color: 'text-slate-600' },
-          ].map((s, i) => (
-            <Card key={i} className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Summary cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-5 flex items-start justify-between">
+              <div>
+                <p className="text-orange-600 text-sm font-medium">Total Territories</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{territories.length.toLocaleString()}</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-6 h-6 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-5 flex items-start justify-between">
+              <div>
+                <p className="text-purple-600 text-sm font-medium">Micro Territory Cities</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{totalCities.toLocaleString()}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-6 h-6 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-5 flex items-start justify-between">
+              <div>
+                <p className="text-teal-600 text-sm font-medium">Active</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{totalActive.toLocaleString()}</p>
+              </div>
+              <div className="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-6 h-6 text-teal-500" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Debug panel */}
@@ -211,7 +212,7 @@ export default function AdminTerritoryDashboard() {
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">State</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Territory ID</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Micro-Territories</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Cities</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Agents</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Active Listings</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Avg Price</th>
@@ -239,7 +240,7 @@ export default function AdminTerritoryDashboard() {
                           <Badge className={`text-xs ${statusClass(t.status)}`}>{t.status}</Badge>
                         ) : <span className="text-slate-300">—</span>}
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{t.micro_territory_count ?? '—'}</td>
+                      <td className="px-4 py-3 text-slate-700 font-semibold">{t.cities_count ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">{t.total_agent_count ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">{t.active_listings ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">

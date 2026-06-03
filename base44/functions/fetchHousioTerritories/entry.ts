@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     
-    // If this is a 'list' action, enrich territories with micro-territory counts
+    // If this is a 'list' action, enrich territories with city counts from micro-territories
     if (action === 'list' && data?.territories) {
       // Fetch all micro-territories
       const microRes = await fetch(TERRITORIES_API_URL, {
@@ -77,30 +77,32 @@ Deno.serve(async (req) => {
       const microData = await microRes.json();
       const microTerritories = microData?.micro_territories || [];
       
-      // Count micro-territories per master territory (match by master territory's id field)
-      const counts = {};
+      // Count cities per master territory
+      const cityCounts = {};
+      let totalCities = 0;
       microTerritories.forEach(mt => {
-        // mt.territory_id contains the master territory's _id
         const tid = mt.territory_id;
+        const cityCount = mt.cities?.length || 0;
         if (tid) {
-          counts[tid] = (counts[tid] || 0) + 1;
+          cityCounts[tid] = (cityCounts[tid] || 0) + cityCount;
+          totalCities += cityCount;
         }
       });
       
-      // Add counts to each master territory - match by id field
-      data.territories = data.territories.map(t => {
-        const count = counts[t.id] || 0;
-        return {
-          ...t,
-          micro_territory_count: count
-        };
-      });
+      // Add city counts to each master territory
+      data.territories = data.territories.map(t => ({
+        ...t,
+        cities_count: cityCounts[t.id] || 0
+      }));
       
-      // Log for debugging
-      console.log('[fetchHousioTerritories] Enriched with micro counts. Sample:', {
+      // Add summary stats
+      data.total_cities = totalCities;
+      data.total_active = data.territories.filter(t => t.status === 'ACTIVE').length;
+      
+      console.log('[fetchHousioTerritories] Enriched with city counts:', {
         total_territories: data.territories.length,
-        total_micro: microTerritories.length,
-        monmouth_count: counts['6976a8de08500d4c62e26237'] || 0
+        total_cities: totalCities,
+        total_active: data.total_active
       });
     }
     
