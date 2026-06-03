@@ -62,6 +62,35 @@ Deno.serve(async (req) => {
     });
 
     const data = await response.json();
+    
+    // If this is a 'list' action, enrich territories with micro-territory counts
+    if (action === 'list' && data?.territories) {
+      // Fetch all micro-territories
+      const microRes = await fetch(`${TERRITORIES_API_URL}?action=micro_list`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({ action: 'micro_list' }),
+      });
+      const microData = await microRes.json();
+      const microTerritories = microData?.micro_territories || [];
+      
+      // Count micro-territories per master territory
+      const counts = {};
+      microTerritories.forEach(mt => {
+        const tid = mt.territory_id;
+        counts[tid] = (counts[tid] || 0) + 1;
+      });
+      
+      // Add counts to each master territory
+      data.territories = data.territories.map(t => ({
+        ...t,
+        micro_territory_count: counts[t.territory_id] || counts[t.id] || 0
+      }));
+    }
+    
     return Response.json(data);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

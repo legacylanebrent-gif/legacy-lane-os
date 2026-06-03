@@ -26,6 +26,7 @@ const statusClass = (s) => STATUS_COLORS[s?.toLowerCase()] || 'bg-slate-100 text
 export default function AdminTerritoryDashboard() {
   const [loading, setLoading] = useState(true);
   const [territories, setTerritories] = useState([]);
+  const [microTerritories, setMicroTerritories] = useState([]);
   const [rawData, setRawData] = useState(null);
   const [showDebug, setShowDebug] = useState(false);
 
@@ -41,12 +42,28 @@ export default function AdminTerritoryDashboard() {
 
   const loadData = async () => {
     setLoading(true);
-    const res = await housioTerritories.list();
-    setRawData(res);
-    setTerritories(res?.territories || []);
+    const [masterRes, microRes] = await Promise.all([
+      housioTerritories.list(),
+      housioTerritories.microList()
+    ]);
+    setRawData({ master: masterRes, micro: microRes });
+    setTerritories(masterRes?.territories || []);
+    setMicroTerritories(microRes?.micro_territories || []);
     setPage(1);
     setLoading(false);
   };
+
+  // Build micro-territory count map by territory_id
+  const microCountMap = useMemo(() => {
+    const map = {};
+    microTerritories.forEach(m => {
+      const tid = m.territory_id;
+      if (tid) {
+        map[tid] = (map[tid] || 0) + 1;
+      }
+    });
+    return map;
+  }, [microTerritories]);
 
   // Derived filter options
   const stateOptions = useMemo(() => {
@@ -194,6 +211,7 @@ export default function AdminTerritoryDashboard() {
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">State</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Territory ID</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Micro-Territories</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Agents</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Active Listings</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Avg Price</th>
@@ -221,6 +239,7 @@ export default function AdminTerritoryDashboard() {
                           <Badge className={`text-xs ${statusClass(t.status)}`}>{t.status}</Badge>
                         ) : <span className="text-slate-300">—</span>}
                       </td>
+                      <td className="px-4 py-3 text-slate-700">{t.micro_territory_count ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">{t.total_agent_count ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">{t.active_listings ?? '—'}</td>
                       <td className="px-4 py-3 text-slate-700">
