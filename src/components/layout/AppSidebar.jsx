@@ -101,6 +101,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'PlatformAds',            label: 'Platform Ads',             icon: Megaphone,       group: 'Admin' },
   { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',      icon: TrendingUp,      group: 'Admin' },
   { page: 'AdminTerritoryDashboard', label: 'Territory Dashboard',     icon: MapPin,          group: 'Admin' },
+  { page: 'ActualRevenue',          label: 'Actual Revenue',          icon: DollarSign,      group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
