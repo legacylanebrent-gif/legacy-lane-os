@@ -38,7 +38,7 @@ const benefits = [
   { icon: Users, title: 'Referral Relationships With Operators', desc: 'Build trusted relationships with estate sale companies already inside these homes.' },
   { icon: MapPin, title: 'Territory-Based Positioning', desc: "You're the preferred or exclusive agent in the cities you choose to protect." },
   { icon: TrendingUp, title: 'Lead Routing From the Platform', desc: 'Opportunities routed directly from EstateSalen.com.' },
-  { icon: Star, title: 'Priority Visibility in Selected Markets', desc: 'Be the agent estate sale operators think of first when a real estate need arises.' },
+  { icon: Star, title: 'Priority Visibility in Selected Markets', desc: 'Be the agent estate sale operators call first when a real estate need arises.' },
   { icon: Award, title: 'Life-Transition Niche Authority', desc: 'Build a reputation serving probate, downsizing, senior moves, inherited homes, and more.' },
 ];
 
