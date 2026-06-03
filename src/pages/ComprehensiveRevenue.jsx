@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone, Globe } from 'lucide-react';
+import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone, Globe, HomeIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
@@ -40,6 +40,14 @@ export default function ComprehensiveRevenue() {
   const [avgItemsPostedPerSale, setAvgItemsPostedPerSale] = useState(() => loadValue('avgItemsPostedPerSale', 50));
   const [marketplaceGrowth, setMarketplaceGrowth] = useState(() => loadValue('marketplaceGrowth', 5));
   
+  // RE Agent Inputs
+  const [agentMonthlyFee, setAgentMonthlyFee] = useState(() => loadValue('agentMonthlyFee', 27));
+  const [agentMonthlyPct, setAgentMonthlyPct] = useState(() => loadValue('agentMonthlyPct', 30)); // % of micro-territories with a monthly agent
+  const [agentTerritoryBuyInAvg, setAgentTerritoryBuyInAvg] = useState(() => loadValue('agentTerritoryBuyInAvg', 5000));
+  const [agentTerritoryBuyInPerMonth, setAgentTerritoryBuyInPerMonth] = useState(() => loadValue('agentTerritoryBuyInPerMonth', 5)); // new territory buy-ins per month
+  const [agentMonthlyChurn, setAgentMonthlyChurn] = useState(() => loadValue('agentMonthlyChurn', 3));
+  const [agentGrowth, setAgentGrowth] = useState(() => loadValue('agentGrowth', 3));
+
   // Referral Inputs
   const [annualReferralConv, setAnnualReferralConv] = useState(() => loadValue('annualReferralConv', 3));
   const [refAvgPropertyValue, setRefAvgPropertyValue] = useState(() => loadValue('refAvgPropertyValue', 350000));
@@ -85,8 +93,10 @@ export default function ComprehensiveRevenue() {
       localStorage.setItem(`comprehensive_revenue_${key}`, JSON.stringify(value));
     });
   }, [
+    agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth,
     vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
+    agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth,
     annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featureGrowth,
     adBasicPrice, adProPrice, adPremiumPrice, adNewPerMonth, adChurnRate, adGrowth, adNewPerCityPerMonth,
@@ -250,6 +260,18 @@ export default function ComprehensiveRevenue() {
   const marketplaceMonthlyItems = totalOperators * (avgAnnualSalesPerOperator / 12) * avgItemsPostedPerSale;
   const marketplaceProjections = calculateProjections(marketplaceMonthlyItems * itemPostFee, marketplaceGrowth, 120);
   
+  // RE Agent calc
+  // Monthly plan: totalCities (micro-territories) × agentMonthlyPct% × $27/mo, with churn model
+  const agentMonthlyActiveSubs = totalCities * (agentMonthlyPct / 100);
+  const agentMonthlySubData = calculateSimpleSubRevenue(agentMonthlyFee, agentMonthlyActiveSubs * (agentMonthlyChurn / 100), agentMonthlyChurn, 120);
+  // Simpler: flat monthly revenue from active subs growing at agentGrowth %
+  const agentMonthlySubRevenue = agentMonthlyActiveSubs * agentMonthlyFee;
+  const agentMonthlyProjections = calculateProjections(agentMonthlySubRevenue, agentGrowth, 120);
+  // Territory buy-in: flat N new buy-ins/month × avg buy-in price (one-time)
+  const agentBuyInMonthlyRevenue = agentTerritoryBuyInPerMonth * agentTerritoryBuyInAvg;
+  const agentBuyInProjections = calculateProjections(agentBuyInMonthlyRevenue, agentGrowth, 120);
+  const agentTotalProjections = agentMonthlyProjections.map((v, i) => v + agentBuyInProjections[i]);
+
   // Referral calc: totalOperators × annualReferralConv ÷ 12 × avgPropValue × 2% × 25% × platformIncomePercent%
   const referralIncomePerConversion = refAvgPropertyValue * 0.02 * 0.25 * (platformIncomePercent / 100);
   const referralMonthlyRevenue = totalOperators * (annualReferralConv / 12) * referralIncomePerConversion;
@@ -288,7 +310,7 @@ export default function ComprehensiveRevenue() {
 
   const totalProjections = operatorProjections.map((_, i) => 
     operatorProjections[i] + vendorSubProjections[i] +
-    marketplaceProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i] +
+    marketplaceProjections[i] + agentTotalProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i] +
     websiteTotalProjections[i]
   );
 
@@ -297,6 +319,7 @@ export default function ComprehensiveRevenue() {
     'Future Operators': Math.round(operatorProjections[i]),
     'Vendor Subs': Math.round(vendorSubProjections[i]),
     Marketplace: Math.round(marketplaceProjections[i]),
+    'RE Agents': Math.round(agentTotalProjections[i]),
     Referrals: Math.round(referralProjections[i]),
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
@@ -313,6 +336,7 @@ export default function ComprehensiveRevenue() {
     { name: 'Future Operators', value: getYearProjection(operatorProjections, 3) },
     { name: 'Vendor Subs', value: getYearProjection(vendorSubProjections, 3) },
     { name: 'Marketplace', value: getYearProjection(marketplaceProjections, 3) },
+    { name: 'RE Agents', value: getYearProjection(agentTotalProjections, 3) },
     { name: 'Referrals', value: getYearProjection(referralProjections, 3) },
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
@@ -395,6 +419,7 @@ export default function ComprehensiveRevenue() {
                 <Area type="monotone" dataKey="Future Operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
+                <Area type="monotone" dataKey="RE Agents" stackId="1" stroke="#f43f5e" fill="#f43f5e" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
@@ -455,7 +480,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 Operators
@@ -468,6 +493,10 @@ export default function ComprehensiveRevenue() {
               <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
                 <ShoppingBag className="w-4 h-4 mr-1" />
                 Marketplace
+              </TabsTrigger>
+              <TabsTrigger value="reAgents" className="whitespace-nowrap flex-shrink-0">
+                <HomeIcon className="w-4 h-4 mr-1" />
+                RE Agents
               </TabsTrigger>
               <TabsTrigger value="referrals" className="whitespace-nowrap flex-shrink-0">
                 <Award className="w-4 h-4 mr-1" />
@@ -662,6 +691,92 @@ export default function ComprehensiveRevenue() {
                       ${(getYearProjection(marketplaceProjections, 10) / 1000000).toFixed(2)}M
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* RE Agents Tab */}
+          <TabsContent value="reAgents">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HomeIcon className="w-5 h-5 text-rose-600" />
+                  RE Agent Income Stream Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
+                  <div className="text-sm text-slate-700">
+                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Total Micro-Territories (Cities):</strong> {totalCities.toLocaleString()} — each city is a potential monthly-plan slot for one agent
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Monthly Plan Revenue:</strong> {totalCities.toLocaleString()} micro-territories × {agentMonthlyPct}% occupied × ${agentMonthlyFee}/mo = <strong>${agentMonthlySubRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</strong>
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Territory Buy-In Revenue:</strong> {agentTerritoryBuyInPerMonth} new buy-ins/month × avg ${agentTerritoryBuyInAvg.toLocaleString()} = <strong>${agentBuyInMonthlyRevenue.toLocaleString()}/mo</strong>
+                  </div>
+                  <div className="text-xs text-slate-500 italic mt-1">
+                    Note: Buy-in amounts vary by territory size and operator count. The avg reflects a blended lump-sum or 12-month split equivalent.
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Monthly Fee per City ($)</Label>
+                    <Input type="number" value={agentMonthlyFee} onChange={(e) => setAgentMonthlyFee(Number(e.target.value))} />
+                    <p className="text-xs text-slate-400 mt-1">$27/mo per city (preferred agent plan)</p>
+                  </div>
+                  <div>
+                    <Label>% of Micro-Territories Occupied</Label>
+                    <Input type="number" value={agentMonthlyPct} onChange={(e) => setAgentMonthlyPct(Number(e.target.value))} />
+                    <p className="text-xs text-slate-400 mt-1">Assumes 1 agent per micro-territory (city)</p>
+                  </div>
+                  <div>
+                    <Label>Monthly Churn Rate (%)</Label>
+                    <Input type="number" value={agentMonthlyChurn} onChange={(e) => setAgentMonthlyChurn(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Avg Territory Buy-In ($)</Label>
+                    <Input type="number" value={agentTerritoryBuyInAvg} onChange={(e) => setAgentTerritoryBuyInAvg(Number(e.target.value))} />
+                    <p className="text-xs text-slate-400 mt-1">Blended avg (lump-sum or 12-mo split)</p>
+                  </div>
+                  <div>
+                    <Label>New Territory Buy-Ins / Month</Label>
+                    <Input type="number" value={agentTerritoryBuyInPerMonth} onChange={(e) => setAgentTerritoryBuyInPerMonth(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={agentGrowth} onChange={(e) => setAgentGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                {/* Split breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="p-5 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200 rounded-xl">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-rose-700 mb-1">Monthly Subscription Revenue</div>
+                    <div className="text-3xl font-bold text-rose-600 mb-1">${(getYearProjection(agentMonthlyProjections, 1) / 1000).toFixed(0)}K <span className="text-base font-normal text-rose-400">Year 1</span></div>
+                    <div className="text-sm text-slate-600">${(getYearProjection(agentMonthlyProjections, 3) / 1000000).toFixed(2)}M over 3 years</div>
+                  </div>
+                  <div className="p-5 bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-orange-700 mb-1">Territory Buy-In Revenue</div>
+                    <div className="text-3xl font-bold text-orange-600 mb-1">${(getYearProjection(agentBuyInProjections, 1) / 1000).toFixed(0)}K <span className="text-base font-normal text-orange-400">Year 1</span></div>
+                    <div className="text-sm text-slate-600">${(getYearProjection(agentBuyInProjections, 3) / 1000000).toFixed(2)}M over 3 years</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[1, 3, 5, 10].map((yr, i) => (
+                    <div key={yr} className={`p-4 rounded-lg border ${['bg-green-50 border-green-200','bg-cyan-50 border-cyan-200','bg-purple-50 border-purple-200','bg-orange-50 border-orange-200'][i]}`}>
+                      <div className="text-sm text-slate-600 mb-1">{yr}-Year Total</div>
+                      <div className={`text-2xl font-bold ${['text-green-600','text-cyan-600','text-purple-600','text-orange-600'][i]}`}>
+                        ${(getYearProjection(agentTotalProjections, yr) / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
