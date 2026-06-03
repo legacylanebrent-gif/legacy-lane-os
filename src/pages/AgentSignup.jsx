@@ -230,7 +230,7 @@ export default function AgentSignup() {
               EstateSalen.com works on Territories (Counties) across the US. Furthermore, in densely populated areas, counties are also broken down into micro-territories (cities, townships, etc.). You have the special opportunity to control an entire territory as well as its micro-territories. Lock out all other agents as an investment in your future business growth via leads control.
             </p>
             <p className="text-slate-500 max-w-2xl mx-auto">
-              <strong className="text-slate-700">As a Special Bonus,</strong> Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies and resellers in your territory and earn <strong className="text-slate-700">20% of the net profit</strong> from their monthly subscription every single month they remain active.
+              <strong className="text-slate-700">As a Special Bonus,</strong> Territory Owners don't just receive referrals — they help build the network. Recruit estate sale companies (we supply you the leads, contact info and weekly sale locations) and resellers in your territory and earn <strong className="text-slate-700">20% of the net profit</strong> from their monthly subscription every single month they remain active.
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export default function AgentSignup() {
                 <Building2 className="w-6 h-6 text-blue-600" />
               </div>
               <h4 className="font-bold text-slate-900 mb-1">Recruit Estate Sale Companies</h4>
-              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner. (we generate the leads and send them weekly)</p>
+              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner.</p>
             </div>
             <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
