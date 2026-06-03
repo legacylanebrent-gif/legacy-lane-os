@@ -31,7 +31,7 @@ export default function ComprehensiveRevenue() {
   };
 
   // Vendor Subscription Inputs
-  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 79));
+  const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 19));
   const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
   const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 2));
