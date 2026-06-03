@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Check, CreditCard, Package, Trash2 } from 'lucide-react';
+import { Plus, Edit, Check, CreditCard, Package, Trash2, Lock, Star } from 'lucide-react';
 import PackageModal from '@/components/admin/PackageModal';
 
 export default function AdminPackages() {
@@ -23,6 +23,11 @@ export default function AdminPackages() {
     { value: 'biz_in_a_box', label: 'Biz in a Box' },
     { value: 'reseller', label: 'Reseller' }
   ];
+
+  const getAccountTypeLabel = (value) => {
+    const found = accountTypes.find(t => t.value === value);
+    return found ? found.label : value;
+  };
 
   useEffect(() => {
     loadPackages();
@@ -137,6 +142,40 @@ export default function AdminPackages() {
                 Add Package
               </Button>
             </div>
+
+            {selectedAccountType === 'real_estate_agent' && (
+              <div className="mb-6 p-6 bg-gradient-to-br from-blue-50 to-orange-50 border border-blue-200 rounded-xl">
+                <h3 className="text-lg font-bold text-slate-900 mb-3">Real Estate Agent Participation Models</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="w-5 h-5 text-blue-600" />
+                      <span className="font-bold text-blue-800">Preferred Agent (City-Level Access)</span>
+                    </div>
+                    <ul className="text-sm text-slate-700 space-y-1">
+                      <li>• $27/month per city (micro-territory)</li>
+                      <li>• Discount for multiple cities</li>
+                      <li>• Receive qualified seller & referral opportunities</li>
+                      <li>• 25% referral fee when deal closes</li>
+                      <li>• Great for testing a market</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="w-5 h-5 text-orange-600" />
+                      <span className="font-bold text-orange-800">Exclusive Territory Owner</span>
+                    </div>
+                    <ul className="text-sm text-slate-700 space-y-1">
+                      <li>• One-time territory buy-in (no monthly fee)</li>
+                      <li>• Exclusive access to territory-generated leads</li>
+                      <li>• 20% referral fee to EstateSalen on closed deals</li>
+                      <li>• Recruit operators & resellers: earn 20% of net profit</li>
+                      <li>• Build passive income from territory subscriptions</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPackages.length === 0 ? (
