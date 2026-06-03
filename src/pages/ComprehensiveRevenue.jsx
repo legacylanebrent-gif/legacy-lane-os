@@ -462,32 +462,51 @@ export default function ComprehensiveRevenue() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Revenue Mix */}
-          <Card>
-            <CardHeader>
-              <CardTitle>3-Year Revenue Mix</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+           <Card>
+             <CardHeader>
+               <CardTitle>3-Year Revenue Mix</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <ResponsiveContainer width="100%" height={300}>
+                 <PieChart>
+                   <Pie
+                     data={pieData}
+                     cx="50%"
+                     cy="50%"
+                     labelLine={false}
+                     label={({ name, value, percent }) => {
+                       const percentage = isNaN(percent) ? 0 : percent * 100;
+                       return `${name}: ${percentage.toFixed(1)}%`;
+                     }}
+                     outerRadius={80}
+                     fill="#8884d8"
+                     dataKey="value"
+                   >
+                     {pieData.map((entry, index) => (
+                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                     ))}
+                   </Pie>
+                   <Tooltip formatter={(value) => {
+                     const total = pieData.reduce((sum, item) => sum + item.value, 0);
+                     const percent = ((value / total) * 100).toFixed(1);
+                     return [`$${(value / 1000000).toFixed(2)}M (${percent}%)`, 'Value'];
+                   }} />
+                 </PieChart>
+               </ResponsiveContainer>
+               <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                 {pieData.map((entry, idx) => {
+                   const total = pieData.reduce((sum, item) => sum + item.value, 0);
+                   const percent = ((entry.value / total) * 100).toFixed(1);
+                   return (
+                     <div key={entry.name} className="flex items-center gap-2">
+                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                       <span className="text-slate-600">{entry.name}: {percent}%</span>
+                     </div>
+                   );
+                 })}
+               </div>
+             </CardContent>
+           </Card>
 
           {/* Future Operators by State */}
           <Card>
