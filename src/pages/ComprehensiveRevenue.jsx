@@ -405,19 +405,8 @@ export default function ComprehensiveRevenue() {
           <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">States Covered</span>
+                <span className="text-sm font-medium opacity-90">Total Territories</span>
                 <MapPin className="w-5 h-5 opacity-75" />
-              </div>
-              <div className="text-3xl font-bold mb-1">{Object.keys(stateCounts).length}</div>
-              <div className="text-xs opacity-75">Nationwide reach</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-cyan-600 to-teal-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">Cities</span>
-                <Globe className="w-5 h-5 opacity-75" />
               </div>
               <div className="text-3xl font-bold mb-1">{totalCities.toLocaleString()}</div>
               <div className="text-xs opacity-75">Micro-territories</div>
