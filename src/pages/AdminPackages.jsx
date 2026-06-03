@@ -79,6 +79,16 @@ export default function AdminPackages() {
   const filteredPackages = packages
     .filter(pkg => {
       const accountType = pkg.data?.account_type || pkg.account_type;
+      const pkgName = pkg.data?.package_name || pkg.package_name || '';
+      
+      // For Real Estate Agents, only show packages that match the new structure
+      if (selectedAccountType === 'real_estate_agent') {
+        return accountType === selectedAccountType && 
+               (pkgName.toLowerCase().includes('preferred') || 
+                pkgName.toLowerCase().includes('territory') ||
+                pkgName.toLowerCase().includes('exclusive'));
+      }
+      
       return accountType === selectedAccountType;
     })
     .sort((a, b) => {
@@ -181,10 +191,14 @@ export default function AdminPackages() {
               {filteredPackages.length === 0 ? (
                 <div className="col-span-3 text-center py-12 border-2 border-dashed border-slate-300 rounded-lg">
                   <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <p className="text-slate-600 mb-4">No packages created yet</p>
+                  <p className="text-slate-600 mb-4">
+                    {selectedAccountType === 'real_estate_agent' 
+                      ? 'Create packages for "Preferred Agent" and "Exclusive Territory Owner" models'
+                      : 'No packages created yet'}
+                  </p>
                   <Button onClick={() => handleAdd(type.value)} variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
-                    Create First Package
+                    {selectedAccountType === 'real_estate_agent' ? 'Create New Package' : 'Create First Package'}
                   </Button>
                 </div>
               ) : (
