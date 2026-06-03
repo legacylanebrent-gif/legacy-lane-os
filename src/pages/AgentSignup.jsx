@@ -157,7 +157,7 @@ export default function AgentSignup() {
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Is Routed to the Local Estate Sale Company</h3>
                   <p className="text-slate-600 leading-relaxed">
-                    The qualified lead is sent directly to your partnered estate sale company in that territory. Their team follows up and books an <strong className="text-slate-800">in-person consultation appointment</strong> at the home — their core service. This is not a cold call. This is a scheduled, professional consultation with a family that asked for help.
+                    The qualified lead is sent directly to your partnered estate sale company in that territory. Their team follows up and books an <strong className="text-slate-800">in-person consultation appointment</strong> at the home — their core service. This is not a cold call. This is a scheduled, professional consultation with a person that asked for help.
                   </p>
                 </div>
               </div>
