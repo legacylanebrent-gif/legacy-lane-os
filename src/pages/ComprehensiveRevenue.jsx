@@ -303,8 +303,8 @@ export default function ComprehensiveRevenue() {
   const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
   const featureProjections = calculateProjections(totalFeatureRevenuePerMonth, featureGrowth, 120);
   
-  // Calculate advertising: 1 advertiser per package per city per month
-  const adRevenuePerMonth = totalCities * (adBasicPrice + adProPrice + adPremiumPrice);
+  // Calculate advertising: 1 advertiser per package per Master Territory per month
+  const adRevenuePerMonth = totalTerritories * (adBasicPrice + adProPrice + adPremiumPrice);
   const adProjections = calculateProjections(adRevenuePerMonth, adGrowth, 120);
 
   // Website projections: 10 new/month flat in Y1, then 5% monthly growth after month 12
@@ -978,16 +978,16 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="text-sm text-slate-700 mb-2">
-                    <strong>Cities Identified:</strong> {totalCities.toLocaleString()} cities from Future Operators data
+                    <strong>Master Territories:</strong> {totalTerritories.toLocaleString()} territories from Housio API
                   </div>
                   <div className="text-sm text-slate-700 mb-2">
-                    <strong>Assumption:</strong> 1 advertiser per package type per city per month
+                    <strong>Assumption:</strong> 1 advertiser per package type per territory per month
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Total Advertisers/Month:</strong> {totalCities.toLocaleString()} cities × 3 packages = {(totalCities * 3).toLocaleString()} advertisers/month
+                    <strong>Total Advertisers/Month:</strong> {totalTerritories.toLocaleString()} territories × 3 packages = {(totalTerritories * 3).toLocaleString()} advertisers/month
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Monthly Revenue:</strong> {totalCities.toLocaleString()} × (${adBasicPrice} + ${adProPrice} + ${adPremiumPrice}) = ${adRevenuePerMonth.toLocaleString()}
+                    <strong>Monthly Revenue:</strong> {totalTerritories.toLocaleString()} × (${adBasicPrice} + ${adProPrice} + ${adPremiumPrice}) = ${adRevenuePerMonth.toLocaleString()}
                   </div>
                 </div>
 
