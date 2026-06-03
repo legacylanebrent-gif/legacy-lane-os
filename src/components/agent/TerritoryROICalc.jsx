@@ -254,8 +254,11 @@ export default function TerritoryROICalc() {
 
           {/* Territory Buy-In */}
           <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1 pt-2">Territory Buy-In</p>
+          <p className="text-slate-500 text-xs leading-relaxed pb-1">
+            Pay the one-time investment fee in full, or split it into 12 equal monthly payments — your choice.
+          </p>
           <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">Listings needed to recover investment</span>
+            <span className="text-slate-600 text-xs">Closings needed to recover investment</span>
             <span className="font-bold text-orange-700 text-sm">{result.listingsToRecover} closing{result.listingsToRecover !== 1 ? 's' : ''}</span>
           </div>
           <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
@@ -263,12 +266,17 @@ export default function TerritoryROICalc() {
             <span className="font-bold text-slate-900 text-sm">${result.buyInLumpSum.toLocaleString()}</span>
           </div>
           <div className="bg-white border border-orange-200 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">Monthly payments <span className="text-slate-400">(7% over 12 mo.)</span></span>
+            <span className="text-slate-600 text-xs">Split into 12 equal monthly payments <span className="text-slate-400">(7% over 12 mo.)</span></span>
             <span className="font-bold text-slate-900 text-sm">${result.buyInMonthly.toLocaleString()}/mo</span>
           </div>
           <p className="text-slate-700 text-xs leading-relaxed pt-2">
             <strong>Owning a territory is an equity investment that can be sold at a later date. ROI will be based on a combination of revenue earned + future projected income.</strong>
           </p>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mt-2">
+            <p className="text-amber-800 text-xs leading-relaxed">
+              <strong>Important:</strong> This program generates leads and appointments — not guaranteed listings. Whether a homeowner chooses to list their home, and with whom, is entirely up to the seller and agent. No listing outcomes are guaranteed.
+            </p>
+          </div>
         </div>
       )}
 
