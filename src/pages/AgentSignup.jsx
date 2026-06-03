@@ -24,7 +24,7 @@ const preferredFeatures = [
 const exclusiveFeatures = [
   'Buy into a city, group of cities, or territory',
   'No monthly participation fee',
-  'Priority or exclusive access to territory-generated leads',
+  'Exclusive access to territory-generated leads',
   'Stronger positioning with estate sale company partners',
   'Territory protection subject to performance standards',
   '20% Referral Fee to Owners of EstateSalen* still applies on closed platform-generated deals',
