@@ -20,6 +20,7 @@ const PACKAGE_PRICES = {
 export default function ComprehensiveRevenue() {
   const [operators, setOperators] = useState([]);
   const [totalCities, setTotalCities] = useState(0);
+  const [totalTerritories, setTotalTerritories] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -140,6 +141,9 @@ export default function ComprehensiveRevenue() {
   const loadCities = async () => {
     try {
       const res = await base44.functions.invoke('fetchHousioTerritories', { action: 'list' });
+      if (res.data?.total_territories) {
+        setTotalTerritories(res.data.total_territories);
+      }
       if (res.data?.total_cities) {
         setTotalCities(res.data.total_cities);
       }
@@ -408,8 +412,8 @@ export default function ComprehensiveRevenue() {
                 <span className="text-sm font-medium opacity-90">Total Territories</span>
                 <MapPin className="w-5 h-5 opacity-75" />
               </div>
-              <div className="text-3xl font-bold mb-1">{totalCities.toLocaleString()}</div>
-              <div className="text-xs opacity-75">Micro-territories</div>
+              <div className="text-3xl font-bold mb-1">{totalTerritories.toLocaleString()}</div>
+              <div className="text-xs opacity-75">Master territories</div>
             </CardContent>
           </Card>
 
