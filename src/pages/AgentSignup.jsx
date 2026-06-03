@@ -14,7 +14,7 @@ import TerritoryROICalc from '@/components/agent/TerritoryROICalc';
 
 const preferredFeatures = [
   'Choose one city or multiple cities',
-  'Small monthly city or micro-territory participation fee of $27 / month',
+  'Small monthly per city or micro-territory participation fee of $27 / month (discount for multiple cities)',
   'Receive qualified seller & referral opportunities',
   'Build relationships with local estate sale companies',
   '25% referral fee only when a platform-generated or estate sale company lead deal closes',
