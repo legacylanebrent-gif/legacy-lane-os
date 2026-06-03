@@ -240,7 +240,7 @@ export default function AgentSignup() {
                 <Building2 className="w-6 h-6 text-blue-600" />
               </div>
               <h4 className="font-bold text-slate-900 mb-1">Recruit Estate Sale Companies</h4>
-              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner.</p>
+              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner. (we generate the leads and send them weekly)</p>
             </div>
             <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
