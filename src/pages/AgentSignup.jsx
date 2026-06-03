@@ -111,7 +111,7 @@ export default function AgentSignup() {
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-8 text-left shadow-sm">
             <p className="text-slate-700 text-lg leading-relaxed mb-4">
-              All referrals flow through a real estate brokerage as per normal. The estate sale company also receives a portion in <strong className="text-slate-900">marketing credits</strong> to be applied toward future leads and services on EstateSalen.com.
+              All referrals flow through a real estate brokerage as per normal. The estate sale company also receives a portion in <strong className="text-slate-900">marketing credits via EstateSalen</strong> to be applied toward future leads and services on EstateSalen.com.
             </p>
             <p className="text-slate-600 leading-relaxed">
               Because of this, there is a strong mutual incentive for the estate sale company to remain loyal to their agent partner — creating a self-reinforcing relationship that benefits everyone involved.
