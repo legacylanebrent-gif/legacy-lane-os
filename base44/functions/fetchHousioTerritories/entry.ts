@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     // If this is a 'list' action, enrich territories with micro-territory counts
     if (action === 'list' && data?.territories) {
       // Fetch all micro-territories
-      const microRes = await fetch(`${TERRITORIES_API_URL}?action=micro_list`, {
+      const microRes = await fetch(TERRITORIES_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,18 +77,31 @@ Deno.serve(async (req) => {
       const microData = await microRes.json();
       const microTerritories = microData?.micro_territories || [];
       
-      // Count micro-territories per master territory
+      // Count micro-territories per master territory (match by master territory's id field)
       const counts = {};
       microTerritories.forEach(mt => {
+        // mt.territory_id contains the master territory's _id
         const tid = mt.territory_id;
-        counts[tid] = (counts[tid] || 0) + 1;
+        if (tid) {
+          counts[tid] = (counts[tid] || 0) + 1;
+        }
       });
       
-      // Add counts to each master territory
-      data.territories = data.territories.map(t => ({
-        ...t,
-        micro_territory_count: counts[t.territory_id] || counts[t.id] || 0
-      }));
+      // Add counts to each master territory - match by id field
+      data.territories = data.territories.map(t => {
+        const count = counts[t.id] || 0;
+        return {
+          ...t,
+          micro_territory_count: count
+        };
+      });
+      
+      // Log for debugging
+      console.log('[fetchHousioTerritories] Enriched with micro counts. Sample:', {
+        total_territories: data.territories.length,
+        total_micro: microTerritories.length,
+        monmouth_count: counts['6976a8de08500d4c62e26237'] || 0
+      });
     }
     
     return Response.json(data);
