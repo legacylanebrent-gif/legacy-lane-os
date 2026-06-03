@@ -17,7 +17,6 @@ export default function AdminPackages() {
   const accountTypes = [
     { value: 'estate_sale_operator', label: 'Estate Sale Operator' },
     { value: 'real_estate_agent', label: 'Real Estate Agent' },
-    { value: 'investor', label: 'Investor' },
     { value: 'vendor', label: 'Vendor' },
     { value: 'consignor', label: 'Consignor' },
     { value: 'biz_in_a_box', label: 'Biz in a Box' },
