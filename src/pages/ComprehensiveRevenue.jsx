@@ -368,7 +368,7 @@ export default function ComprehensiveRevenue() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
@@ -407,6 +407,17 @@ export default function ComprehensiveRevenue() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium opacity-90">Total Territories</span>
                 <MapPin className="w-5 h-5 opacity-75" />
+              </div>
+              <div className="text-3xl font-bold mb-1">{totalCities.toLocaleString()}</div>
+              <div className="text-xs opacity-75">Micro-territories</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-cyan-600 to-teal-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium opacity-90">Cities</span>
+                <Globe className="w-5 h-5 opacity-75" />
               </div>
               <div className="text-3xl font-bold mb-1">{totalCities.toLocaleString()}</div>
               <div className="text-xs opacity-75">Micro-territories</div>
