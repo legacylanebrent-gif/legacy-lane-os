@@ -72,6 +72,7 @@ import BrowseOperators from './pages/BrowseOperators';
 import HowToUse from './pages/HowToUse';
 import AgentOperatorPortal from './pages/AgentOperatorPortal';
 import AdminAgentApplications from './pages/AdminAgentApplications';
+import AdminTerritoryDashboard from './pages/AdminTerritoryDashboard';
 import AgentDashboard from './pages/AgentDashboard';
 import AdminEstatesalesOrg from './pages/AdminEstatesalesOrg';
 import FutOperLeads from './pages/FutOperLeads';
@@ -200,6 +201,7 @@ const AuthenticatedApp = () => {
       <Route path="/HowToUse" element={<LayoutWrapper currentPageName="HowToUse"><HowToUse /></LayoutWrapper>} />
       <Route path="/AgentOperatorPortal" element={<LayoutWrapper currentPageName="AgentOperatorPortal"><AgentOperatorPortal /></LayoutWrapper>} />
       <Route path="/AdminAgentApplications" element={<LayoutWrapper currentPageName="AdminAgentApplications"><AdminAgentApplications /></LayoutWrapper>} />
+      <Route path="/AdminTerritoryDashboard" element={<LayoutWrapper currentPageName="AdminTerritoryDashboard"><AdminTerritoryDashboard /></LayoutWrapper>} />
       <Route path="/AgentDashboard" element={<LayoutWrapper currentPageName="AgentDashboard"><AgentDashboard /></LayoutWrapper>} />
       <Route path="/AdminEstatesalesOrg" element={<LayoutWrapper currentPageName="AdminEstatesalesOrg"><AdminEstatesalesOrg /></LayoutWrapper>} />
       <Route path="/FutOperLeads" element={<LayoutWrapper currentPageName="FutOperLeads"><FutOperLeads /></LayoutWrapper>} />
