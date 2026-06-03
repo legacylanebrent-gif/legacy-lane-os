@@ -34,7 +34,7 @@ export default function ComprehensiveRevenue() {
   const [vendorSubPrice, setVendorSubPrice] = useState(() => loadValue('vendorSubPrice', 19));
   const [vendorNewPerMonth, setVendorNewPerMonth] = useState(() => loadValue('vendorNewPerMonth', 15));
   const [vendorChurnRate, setVendorChurnRate] = useState(() => loadValue('vendorChurnRate', 4));
-  const [vendorNewPerCityPerMonth, setVendorNewPerCityPerMonth] = useState(() => loadValue('vendorNewPerCityPerMonth', 2));
+  const [vendorNewPerTerritoryPerMonth, setVendorNewPerTerritoryPerMonth] = useState(() => loadValue('vendorNewPerTerritoryPerMonth', 2));
 
   // Marketplace Item Post Fee Inputs
   const [itemPostFee] = useState(3); // Fixed at $3 per item
@@ -90,7 +90,7 @@ export default function ComprehensiveRevenue() {
   // Auto-save to localStorage whenever values change
   useEffect(() => {
     const values = {
-      vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
+      vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerTerritoryPerMonth,
       avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
       annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
       nationalFeaturePrice, localFeaturePrice, featureGrowth,
@@ -104,7 +104,7 @@ export default function ComprehensiveRevenue() {
     });
   }, [
     agentMonthlyFee, agentMonthlyPct, agentTerritoryBuyInAvg, agentTerritoryBuyInPerMonth, agentMonthlyChurn, agentGrowth,
-    vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerCityPerMonth,
+    vendorSubPrice, vendorNewPerMonth, vendorChurnRate, vendorNewPerTerritoryPerMonth,
     avgAnnualSalesPerOperator, avgItemsPostedPerSale, marketplaceGrowth,
     annualReferralConv, refAvgPropertyValue, platformIncomePercent, referralGrowth,
     nationalFeaturePrice, localFeaturePrice, featureGrowth,
@@ -277,8 +277,8 @@ export default function ComprehensiveRevenue() {
 
   // Derived calculations (all after loading is complete)
   const totalOperators = operators.length;
-  // Use operator-based calculation for vendors: each operator refers up to N vendors
-  const calculatedVendorNewPerMonth = totalOperators * vendorNewPerCityPerMonth;
+  // Use territory-based calculation for vendors: each master territory gets N new vendors/month
+  const calculatedVendorNewPerMonth = totalTerritories * vendorNewPerTerritoryPerMonth;
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
@@ -621,10 +621,10 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="text-sm text-slate-700 mb-2">
-                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                    <strong>Total Master Territories:</strong> {totalTerritories.toLocaleString()} territories
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Total Vendors per Month:</strong> {totalOperators.toLocaleString()} operators × {vendorNewPerCityPerMonth} vendors/operator = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
+                    <strong>Total Vendors per Month:</strong> {totalTerritories.toLocaleString()} territories × {vendorNewPerTerritoryPerMonth} vendors/territory = {calculatedVendorNewPerMonth.toLocaleString()} vendors/month
                   </div>
                 </div>
 
@@ -634,8 +634,8 @@ export default function ComprehensiveRevenue() {
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Avg Vendors Per Operator</Label>
-                    <Input type="number" value={vendorNewPerCityPerMonth} onChange={(e) => setVendorNewPerCityPerMonth(Number(e.target.value))} />
+                    <Label>Avg Vendors Per Territory</Label>
+                    <Input type="number" value={vendorNewPerTerritoryPerMonth} onChange={(e) => setVendorNewPerTerritoryPerMonth(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Total Vendors per Month</Label>
