@@ -141,11 +141,16 @@ export default function ComprehensiveRevenue() {
   const loadCities = async () => {
     try {
       const res = await base44.functions.invoke('fetchHousioTerritories', { action: 'list' });
-      if (res.data?.total_territories) {
-        setTotalTerritories(res.data.total_territories);
+      console.log('Housio territories response:', res.data);
+      if (res.data?.territories?.length) {
+        setTotalTerritories(res.data.territories.length);
+      } else if (res.data?.total) {
+        setTotalTerritories(res.data.total);
       }
       if (res.data?.total_cities) {
         setTotalCities(res.data.total_cities);
+      } else if (res.data?.city_count) {
+        setTotalCities(res.data.city_count);
       }
     } catch (error) {
       console.error('Error loading cities:', error);
