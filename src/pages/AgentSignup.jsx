@@ -106,7 +106,7 @@ export default function AgentSignup() {
           </div>
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-left shadow-sm mb-6">
             <p className="text-slate-700 text-lg leading-relaxed">
-              We spend <strong className="text-slate-900">thousands of dollars per month</strong> generating leads for estate sale companies — because we know they are often the first company in line to resolve the clutter and organization side of a home that will inevitably be listed on the market. Becoming an agent partner or territory owner gives you exclusive access to one of the most valuable referral pipelines in residential real estate.
+              We spend <strong className="text-slate-900">thousands of dollars per month</strong> generating estate and moving sale leads for estate sale companies — because we know they are often the first company in line to resolve the clutter and organization side of a home that will inevitably be listed on the market. Becoming an agent partner or territory owner gives you exclusive access to one of the most valuable referral pipelines in residential real estate.
             </p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-8 text-left shadow-sm">
