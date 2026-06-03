@@ -96,7 +96,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'BizInABox',              label: 'Biz in a Box',        icon: Briefcase,       group: 'Admin' },
   { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
   { page: 'AdminAIOperator',        label: 'Admin AI Operator',   icon: Brain,           group: 'Admin' },
-  { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
+  { page: 'ImportedSalesDashboard', label: 'Territories & Scraper', icon: MapPin,           group: 'Admin' },
   { page: 'PlatformExpenses',       label: 'Platform Expenses',       icon: DollarSign,      group: 'Admin' },
   { page: 'PlatformAds',            label: 'Platform Ads',             icon: Megaphone,       group: 'Admin' },
   { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',      icon: TrendingUp,      group: 'Admin' },
