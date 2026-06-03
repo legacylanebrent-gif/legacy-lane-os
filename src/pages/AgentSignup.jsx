@@ -72,7 +72,7 @@ export default function AgentSignup() {
             Become the preferred real estate agent for estate-sale-driven seller opportunities in your city, county, or territory.
           </p>
           <p className="text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Estate sales often happen during major life transitions: probate, downsizing, relocation, divorce, senior moves, inherited homes, and family cleanouts. These are moments where real estate decisions are often close behind. EstateSalen.com helps connect those opportunities with qualified local agents who are ready to serve.
+            Estate sales often happen during major life transitions: probate, downsizing, relocation, divorce, senior moves, inherited homes, and family cleanouts. These are moments where real estate decisions are often close behind. EstateSalen.com helps connect estate sale companies with qualified local agents who are ready to list the home before or after the estate sale.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button onClick={scrollToForm} className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-6 text-lg rounded-xl flex items-center gap-2">
