@@ -100,26 +100,27 @@
     },
     "limits": {
       "type": "object",
+      "description": "Usage limits for this package tier",
       "properties": {
         "listings": {
           "type": "string",
-          "description": "Number of listings allowed"
+          "description": "Active Sales Allowed (e.g. '3' or 'Unlimited')"
         },
         "photos": {
           "type": "string",
-          "description": "Photos per listing"
+          "description": "Photos Per Listing (e.g. '50' or 'Unlimited')"
         },
         "leads": {
           "type": "string",
-          "description": "Monthly leads"
+          "description": "Monthly Leads (e.g. '10' or 'Unlimited')"
         },
         "campaigns": {
           "type": "string",
-          "description": "Marketing campaigns"
+          "description": "Marketing Campaigns (e.g. '2' or 'Unlimited')"
         },
         "storage": {
           "type": "string",
-          "description": "Storage capacity"
+          "description": "Storage Capacity (e.g. '10 GB' or 'Unlimited')"
         }
       }
     },

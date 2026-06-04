@@ -300,14 +300,22 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
 
               <div className="space-y-3 border-t pt-4">
                 <Label className="text-base font-semibold">Package Limits</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {['listings', 'photos', 'leads', 'campaigns', 'storage'].map(lim => (
-                    <Input
-                      key={lim}
-                      placeholder={`${lim.charAt(0).toUpperCase() + lim.slice(1)} limit (e.g., Unlimited)`}
-                      value={formData.limits[lim]}
-                      onChange={e => setFormData({ ...formData, limits: { ...formData.limits, [lim]: e.target.value } })}
-                    />
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { key: 'listings',  label: 'Active Sales Allowed',     placeholder: 'e.g., 3 or Unlimited' },
+                    { key: 'photos',    label: 'Photos Per Listing',        placeholder: 'e.g., 50 or Unlimited' },
+                    { key: 'leads',     label: 'Monthly Leads',             placeholder: 'e.g., 10 or Unlimited' },
+                    { key: 'campaigns', label: 'Marketing Campaigns',       placeholder: 'e.g., 2 or Unlimited' },
+                    { key: 'storage',   label: 'Storage Capacity',          placeholder: 'e.g., 10 GB or Unlimited' },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key}>
+                      <Label className="text-xs text-slate-500 mb-1 block">{label}</Label>
+                      <Input
+                        placeholder={placeholder}
+                        value={formData.limits[key]}
+                        onChange={e => setFormData({ ...formData, limits: { ...formData.limits, [key]: e.target.value } })}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
