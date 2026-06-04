@@ -56,12 +56,14 @@ export function getSaleDisplayStatus(sale) {
       const msUntilStart = soonest - now;
       const hoursUntilStart = msUntilStart / (1000 * 60 * 60);
 
-      // "Starts Today": after midnight on the start date but before start time
+      // "Starts Today": same calendar date as the start
       const soonestMidnight = new Date(soonest.getFullYear(), soonest.getMonth(), soonest.getDate(), 0, 0, 0);
       if (now >= soonestMidnight && hoursUntilStart >= 0) return 'starts_today';
 
-      // "Starts Tomorrow": within 24 hours of start (but before midnight of that day)
-      if (hoursUntilStart <= 24) return 'starts_tomorrow';
+      // "Starts Tomorrow": start is on the next calendar day from today
+      const tomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      const dayAfterTomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 0, 0, 0);
+      if (soonest >= tomorrowMidnight && soonest < dayAfterTomorrowMidnight) return 'starts_tomorrow';
 
       return 'upcoming';
     }
