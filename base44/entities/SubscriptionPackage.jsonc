@@ -17,14 +17,15 @@
     },
     "package_name": {
       "type": "string",
-      "description": "Package tier name"
+      "description": "Package tier name (Starter, Growth, Professional, Elite)"
     },
     "tier_level": {
       "type": "string",
       "enum": [
-        "basic",
-        "pro",
-        "premium"
+        "starter",
+        "growth",
+        "professional",
+        "elite"
       ],
       "description": "Tier level"
     },
@@ -78,7 +79,23 @@
       "items": {
         "type": "string"
       },
-      "description": "List of features included",
+      "description": "Legacy free-text feature list",
+      "default": []
+    },
+    "allowed_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Structured feature keys granted by this package",
+      "default": []
+    },
+    "allowed_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Page route names accessible to this package",
       "default": []
     },
     "limits": {

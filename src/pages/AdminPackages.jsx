@@ -68,9 +68,14 @@ export default function AdminPackages() {
 
   const getTierColor = (tier) => {
     const colors = {
+      starter: 'bg-slate-100 text-slate-700',
+      growth: 'bg-purple-100 text-purple-700',
+      professional: 'bg-blue-100 text-blue-700',
+      elite: 'bg-orange-100 text-orange-800',
+      // legacy
       basic: 'bg-slate-100 text-slate-700',
       pro: 'bg-blue-100 text-blue-700',
-      premium: 'bg-orange-100 text-orange-700'
+      premium: 'bg-orange-100 text-orange-700',
     };
     return colors[tier] || 'bg-slate-100 text-slate-700';
   };
@@ -213,7 +218,7 @@ export default function AdminPackages() {
                     <CardHeader>
                       <div className="flex items-start justify-between mb-3">
                          <Badge className={getTierColor(pkgData.tier_level)}>
-                           {pkgData.package_name === 'Elite' ? 'premium w/ team support' : pkgData.tier_level}
+                           {pkgData.tier_level || pkgData.package_name}
                          </Badge>
                         {!pkgData.is_active && (
                           <Badge variant="outline" className="text-red-600 border-red-300">
@@ -312,16 +317,22 @@ export default function AdminPackages() {
                         </div>
                       )}
 
-                      {pkgData.features && pkgData.features.length > 0 && (
-                        <div className="space-y-2 border-t pt-4">
-                          <p className="text-sm font-semibold text-slate-700">Features:</p>
-                          {pkgData.features.map((feature, idx) => (
-                            <div key={idx} className="text-sm text-slate-600 flex items-start gap-2">
-                              <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span>{feature}</span>
-                            </div>
-                          ))}
-                        </div>
+                      {(pkgData.allowed_features?.length > 0 || pkgData.features?.length > 0) && (
+                       <div className="space-y-2 border-t pt-4">
+                         {pkgData.allowed_features?.length > 0 ? (
+                           <div className="flex items-center gap-2 text-sm">
+                             <Check className="w-4 h-4 text-green-600" />
+                             <span className="font-semibold text-slate-700">{pkgData.allowed_features.length} features & pages configured</span>
+                           </div>
+                         ) : (
+                           pkgData.features?.map((feature, idx) => (
+                             <div key={idx} className="text-sm text-slate-600 flex items-start gap-2">
+                               <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                               <span>{feature}</span>
+                             </div>
+                           ))
+                         )}
+                       </div>
                       )}
 
                       <div className="flex flex-col gap-2">
