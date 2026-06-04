@@ -87,6 +87,7 @@ import PlatformExpenses from './pages/PlatformExpenses';
 import PlatformAds from './pages/PlatformAds';
 import PlatformSEODashboard from './pages/PlatformSEODashboard.jsx';
 import ActualRevenue from './pages/ActualRevenue';
+import MySalesGuide from './pages/MySalesGuide';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -217,6 +218,7 @@ const AuthenticatedApp = () => {
       <Route path="/PlatformAds" element={<LayoutWrapper currentPageName="PlatformAds"><PlatformAds /></LayoutWrapper>} />
       <Route path="/PlatformSEODashboard" element={<LayoutWrapper currentPageName="PlatformSEODashboard"><PlatformSEODashboard /></LayoutWrapper>} />
       <Route path="/ActualRevenue" element={<LayoutWrapper currentPageName="ActualRevenue"><ActualRevenue /></LayoutWrapper>} />
+      <Route path="/MySalesGuide" element={<LayoutWrapper currentPageName="MySalesGuide"><MySalesGuide /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

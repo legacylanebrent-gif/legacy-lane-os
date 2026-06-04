@@ -12,7 +12,7 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import {
@@ -166,6 +166,14 @@ export default function MySales() {
           <p className="text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(createPageUrl('MySalesGuide'))}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            How to Use
+          </Button>
           <Button 
             onClick={() => navigate(createPageUrl('SaleEditor'))}
             className="bg-orange-600 hover:bg-orange-700"
