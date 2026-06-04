@@ -58,34 +58,56 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
   const [activeTab, setActiveTab] = useState('pricing');
 
   useEffect(() => {
+    if (!open) return;
     if (pkg) {
+      // Unwrap .data if the SDK returns a nested structure
+      const p = pkg.data ? { id: pkg.id, ...pkg.data } : pkg;
       setFormData({
-        account_type: pkg.account_type || 'estate_sale_operator',
-        package_name: pkg.package_name || '',
-        tier_level: pkg.tier_level || 'starter',
-        pricing_model: pkg.pricing_model || 'subscription',
-        monthly_price: pkg.monthly_price || '',
-        annual_price: pkg.annual_price || '',
-        per_item_price: pkg.per_item_price || '',
-        platform_fee_percentage: pkg.platform_fee_percentage || '',
-        biz_in_a_box_setup_fee: pkg.biz_in_a_box_setup_fee || '',
-        biz_in_a_box_monthly_year1: pkg.biz_in_a_box_monthly_year1 || '',
-        biz_in_a_box_revenue_share: pkg.biz_in_a_box_revenue_share || '',
-        description: pkg.description || '',
-        allowed_features: pkg.allowed_features || [],
-        allowed_pages: pkg.allowed_pages || [],
-        limits: pkg.limits || { listings: '', photos: '', leads: '', campaigns: '', storage: '' },
-        is_active: pkg.is_active !== false,
-        featured: pkg.featured || false,
+        account_type: p.account_type || 'estate_sale_operator',
+        package_name: p.package_name || '',
+        tier_level: p.tier_level || 'starter',
+        pricing_model: p.pricing_model || 'subscription',
+        monthly_price: p.monthly_price ?? '',
+        annual_price: p.annual_price ?? '',
+        per_item_price: p.per_item_price ?? '',
+        platform_fee_percentage: p.platform_fee_percentage ?? '',
+        biz_in_a_box_setup_fee: p.biz_in_a_box_setup_fee ?? '',
+        biz_in_a_box_monthly_year1: p.biz_in_a_box_monthly_year1 ?? '',
+        biz_in_a_box_revenue_share: p.biz_in_a_box_revenue_share ?? '',
+        description: p.description || '',
+        allowed_features: p.allowed_features || [],
+        allowed_pages: p.allowed_pages || [],
+        limits: p.limits || { listings: '', photos: '', leads: '', campaigns: '', storage: '' },
+        is_active: p.is_active !== false,
+        featured: p.featured || false,
       });
     } else {
-      setFormData(prev => ({ ...prev, allowed_features: [...STARTER_DEFAULT_FEATURES] }));
+      setFormData({
+        account_type: 'estate_sale_operator',
+        package_name: '',
+        tier_level: 'starter',
+        pricing_model: 'subscription',
+        monthly_price: '',
+        annual_price: '',
+        per_item_price: '',
+        platform_fee_percentage: '',
+        biz_in_a_box_setup_fee: '',
+        biz_in_a_box_monthly_year1: '',
+        biz_in_a_box_revenue_share: '',
+        description: '',
+        allowed_features: [...STARTER_DEFAULT_FEATURES],
+        allowed_pages: [],
+        limits: { listings: '', photos: '', leads: '', campaigns: '', storage: '' },
+        is_active: true,
+        featured: false,
+      });
     }
     // Expand all categories by default
     const expanded = {};
     FEATURE_CATEGORIES.forEach(c => { expanded[c] = true; });
     setExpandedCategories(expanded);
-  }, [pkg]);
+    setActiveTab('pricing');
+  }, [open, pkg]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
