@@ -334,7 +334,7 @@ export default function MySales() {
                         {sale.sale_dates.map((saleDate, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-slate-600">
                             <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <span>{format(new Date(saleDate.date), 'MMM d')}</span>
+                            <span>{format(new Date(saleDate.date + 'T00:00:00'), 'MMM d')}</span>
                             {(saleDate.start_time || saleDate.end_time) && (
                               <span className="text-slate-500 text-xs">{formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}</span>
                             )}
@@ -419,8 +419,8 @@ export default function MySales() {
                                   )}
                                   {sale.sale_dates && sale.sale_dates.length > 0 && (
                                     <p className="text-xs text-slate-400 mt-0.5">
-                                      {format(new Date(sale.sale_dates[0].date), 'MMM d')}
-                                      {sale.sale_dates.length > 1 && ` – ${format(new Date(sale.sale_dates[sale.sale_dates.length - 1].date), 'MMM d, yyyy')}`}
+                                      {format(new Date(sale.sale_dates[0].date + 'T00:00:00'), 'MMM d')}
+                                      {sale.sale_dates.length > 1 && ` – ${format(new Date(sale.sale_dates[sale.sale_dates.length - 1].date + 'T00:00:00'), 'MMM d, yyyy')}`}
                                     </p>
                                   )}
                                 </div>
