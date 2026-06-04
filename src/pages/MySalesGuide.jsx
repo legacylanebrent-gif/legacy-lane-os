@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Plus, Edit, DollarSign, Package, TrendingUp, FileText, BarChart3,
   Megaphone, Download, Star, Briefcase, Receipt, Sparkles, Users,
-  Eye, ChevronRight, CheckCircle2, Lock, ArrowRight, Zap, Globe,
+  Eye, ChevronRight, CheckCircle2, Lock, ArrowRight, ArrowLeft, Zap, Globe,
   ClipboardList, Camera, Calendar, MapPin, BookOpen, Crown
 } from 'lucide-react';
 
@@ -252,6 +252,17 @@ export default function MySalesGuide() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 lg:p-10 space-y-14 pb-24">
+
+      {/* ── Back link ── */}
+      <div className="pt-2">
+        <button
+          onClick={() => navigate('/MySales')}
+          className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 text-sm font-medium transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to My Sales
+        </button>
+      </div>
 
       {/* ── Hero ── */}
       <div className="text-center space-y-4 pt-6">
