@@ -89,11 +89,21 @@ export default function MySales() {
     const colors = {
       draft: 'bg-slate-100 text-slate-700',
       upcoming: 'bg-blue-100 text-blue-700',
+      starts_tomorrow: 'bg-amber-100 text-amber-700',
+      starts_today: 'bg-orange-100 text-orange-700',
       active: 'bg-green-100 text-green-700',
       completed: 'bg-purple-100 text-purple-700',
       archived: 'bg-red-100 text-red-700'
     };
     return colors[status] || 'bg-slate-100 text-slate-700';
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      starts_tomorrow: 'Starts Tomorrow',
+      starts_today: 'Starts Today',
+    };
+    return labels[status] || status;
   };
 
   const handleEdit = (sale) => {
@@ -121,7 +131,7 @@ export default function MySales() {
     const matchesTab = 
       activeTab === 'all' ||
       (activeTab === 'draft' && displayStatus === 'draft') ||
-      (activeTab === 'active' && (displayStatus === 'upcoming' || displayStatus === 'active')) ||
+      (activeTab === 'active' && ['upcoming', 'starts_tomorrow', 'starts_today', 'active'].includes(displayStatus)) ||
       (activeTab === 'completed' && displayStatus === 'completed');
     
     return matchesSearch && matchesTab;
@@ -130,7 +140,7 @@ export default function MySales() {
   const stats = {
     total: sales.length,
     draft: sales.filter(s => getSaleDisplayStatus(s) === 'draft').length,
-    active: sales.filter(s => ['upcoming', 'active'].includes(getSaleDisplayStatus(s))).length,
+    active: sales.filter(s => ['upcoming', 'starts_tomorrow', 'starts_today', 'active'].includes(getSaleDisplayStatus(s))).length,
     completed: sales.filter(s => getSaleDisplayStatus(s) === 'completed').length,
     totalRevenue: sales.reduce((sum, s) => sum + (s.actual_revenue || 0), 0),
     totalViews: sales.reduce((sum, s) => sum + (s.views || 0), 0)
@@ -287,7 +297,7 @@ export default function MySales() {
                       alt={sale.title}
                       className="w-full h-full object-cover"
                     />
-                    {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-xs ${getStatusColor(ds)}`}>{ds}</Badge>; })()}
+                    {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-xs ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
                   </div>
                 )}
                 <CardContent className="p-5 flex-1">

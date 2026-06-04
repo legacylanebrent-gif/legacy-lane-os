@@ -41,8 +41,30 @@ export function getSaleDisplayStatus(sale) {
     // If any sale is currently happening
     if (activeSales.length > 0) return 'active';
 
-    // If any future sale exists
-    if (upcomingSales.length > 0) return 'upcoming';
+    // Check upcoming sales for "starts today" / "starts tomorrow" / "upcoming"
+    if (upcomingSales.length > 0) {
+      // Find the soonest upcoming start
+      const soonest = upcomingSales.reduce((earliest, saleDate) => {
+        const [year, month, day] = saleDate.date.split('-');
+        const start = new Date(parseInt(year), parseInt(month) - 1, parseInt(day),
+          parseInt(saleDate.start_time?.split(':')[0] || 0),
+          parseInt(saleDate.start_time?.split(':')[1] || 0)
+        );
+        return (!earliest || start < earliest) ? start : earliest;
+      }, null);
+
+      const msUntilStart = soonest - now;
+      const hoursUntilStart = msUntilStart / (1000 * 60 * 60);
+
+      // "Starts Today": after midnight on the start date but before start time
+      const soonestMidnight = new Date(soonest.getFullYear(), soonest.getMonth(), soonest.getDate(), 0, 0, 0);
+      if (now >= soonestMidnight && hoursUntilStart >= 0) return 'starts_today';
+
+      // "Starts Tomorrow": within 24 hours of start (but before midnight of that day)
+      if (hoursUntilStart <= 24) return 'starts_tomorrow';
+
+      return 'upcoming';
+    }
 
     // If all sales have passed
     if (pastSales.length === sale.sale_dates.length) return 'completed';
