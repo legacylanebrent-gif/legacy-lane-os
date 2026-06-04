@@ -96,9 +96,10 @@ export default function AdminPackages() {
       return accountType === selectedAccountType;
     })
     .sort((a, b) => {
-      const priceA = a.data?.monthly_price || a.monthly_price || 0;
-      const priceB = b.data?.monthly_price || b.monthly_price || 0;
-      return priceA - priceB;
+      const tierOrder = { starter: 0, growth: 1, professional: 2, elite: 3 };
+      const tierA = tierOrder[a.data?.tier_level || a.tier_level] ?? 99;
+      const tierB = tierOrder[b.data?.tier_level || b.tier_level] ?? 99;
+      return tierA - tierB;
     });
   
   console.log('Filtered packages:', filteredPackages.length, 'for account type:', selectedAccountType);
