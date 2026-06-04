@@ -45,7 +45,9 @@ export default function AdminPackages() {
   };
 
   const handleEdit = (pkg) => {
-    setEditingPackage(pkg);
+    // Flatten pkg.data into the top-level object so the modal can read fields directly
+    const flat = pkg.data ? { id: pkg.id, ...pkg.data } : pkg;
+    setEditingPackage(flat);
     setShowModal(true);
   };
 
