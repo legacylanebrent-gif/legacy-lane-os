@@ -236,11 +236,9 @@ export default function SaleEditor() {
       const hasSkipped = images.some(img => img.skip_item === true || img.skip_item === false);
       const hasSerpResults = serpData.length > 0;
       const hasProcessed = images.some(img => img.name || img.description || img.ai_first_search_price);
-      // Also complete if all images already have serp_search_status (set by SalePhotoReviewStep)
-      const allReviewed = images.length > 0 && images.every(img =>
-        img.serp_search_status === "search_allowed" || img.serp_search_status === "do_not_search"
-      );
-      if (hasSkipped || hasSerpResults || hasProcessed || allReviewed) {
+      // Also complete if images have been explicitly saved via SalePhotoReviewStep (any has skip_updated_at)
+      const hasBeenReviewed = images.some(img => img.skip_updated_at);
+      if (hasSkipped || hasSerpResults || hasProcessed || hasBeenReviewed) {
         setStep1Completed(true);
       }
     } catch (error) {
@@ -1231,7 +1229,7 @@ Return ONLY the description text, no extra commentary.`
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
                          const absIdx = startFromIndex + relIdx;
                          return (!img.name || !img.description) && !multiItemFlags[absIdx] &&
-                           img.serp_search_status === "search_allowed" && img.skip_serp_search !== true;
+                           img.skip_serp_search !== true && img.serp_search_status === "search_allowed";
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
                          const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
@@ -1244,7 +1242,8 @@ Return ONLY the description text, no extra commentary.`
                             const img = formData.images[i];
                             if (img.name && img.description) continue;
                             if (multiItemFlags[i]) continue;
-                            if (img.skip_serp_search === true || img.serp_search_status !== "search_allowed") continue;
+                            // Safety check: never search images marked as do_not_search
+                            if (img.skip_serp_search === true || img.serp_search_status === "do_not_search" || img.serp_search_status !== "search_allowed") continue;
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });

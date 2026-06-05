@@ -3,9 +3,12 @@ import { base44 } from "@/api/base44Client";
 
 export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
   const [photos, setPhotos] = useState([]);
-  const [savingIndexes, setSavingIndexes] = useState(new Set());
+  const [checkedSkipUrls, setCheckedSkipUrls] = useState(new Set());
+  const [originalSkipUrls, setOriginalSkipUrls] = useState(new Set());
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (saleId) loadPhotos();
@@ -23,108 +26,115 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
       const sale = sales[0];
       if (!sale) return;
 
-      // Default new images to search_allowed so user only needs to mark exceptions
       const images = (sale.images || []).map(img => ({
         ...img,
-        serp_search_status: img.serp_search_status || "search_allowed",
-        skip_serp_search: img.skip_serp_search || false,
+        skip_serp_search: img.skip_serp_search === true,
+        serp_search_status: img.skip_serp_search === true ? "do_not_search" : (img.serp_search_status || "search_allowed"),
       }));
 
-      // If any needed patching, write back to DB immediately
-      const needsPatch = (sale.images || []).some(img => !img.serp_search_status);
-      if (needsPatch) {
-        await base44.entities.EstateSale.update(saleId, { images });
-      }
+      const existingSkipUrls = new Set(
+        images.filter(img => img.skip_serp_search === true).map(img => img.url)
+      );
 
       setPhotos(images);
+      setCheckedSkipUrls(existingSkipUrls);
+      setOriginalSkipUrls(existingSkipUrls);
+      setSaved(existingSkipUrls.size > 0 || images.length > 0);
+    } catch (err) {
+      console.error("Error loading sale photos:", err);
+      alert("Could not load sale photos.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateDecision(index, decision) {
-    const isSkip = decision === "do_not_search";
-    const nextStatus = isSkip ? "do_not_search" : "search_allowed";
-    const now = new Date().toISOString();
-    const byUser = currentUser?.email || currentUser?.id || "unknown";
-
-    // Build the updated array from current photos ref synchronously
-    const updatedPhotos = photos.map((p, i) => i !== index ? p : {
-      ...p,
-      serp_search_status: nextStatus,
-      skip_serp_search: isSkip,
-      skip_updated_at: now,
-      skip_updated_by: byUser,
+  function toggleSkip(url) {
+    setSaved(false);
+    setCheckedSkipUrls(prev => {
+      const next = new Set(prev);
+      if (next.has(url)) next.delete(url);
+      else next.add(url);
+      return next;
     });
+  }
 
-    // Optimistic local update
-    setPhotos(updatedPhotos);
-    setSavingIndexes(prev => new Set(prev).add(index));
-
+  async function saveSelections() {
+    setSaving(true);
     try {
-      // Persist to DB — if user navigates away and back, loadPhotos() will restore this
-      await base44.entities.EstateSale.update(saleId, { images: updatedPhotos });
-    } catch (err) {
-      console.error("Failed to save decision:", err);
-      alert("This choice did not save. Please try again.");
-      await loadPhotos();
-    } finally {
-      setSavingIndexes(prev => {
-        const next = new Set(prev);
-        next.delete(index);
-        return next;
+      const now = new Date().toISOString();
+      const userLabel = currentUser?.email || currentUser?.id || "unknown";
+
+      const updatedImages = photos.map(img => {
+        const shouldSkip = checkedSkipUrls.has(img.url);
+        return {
+          ...img,
+          skip_serp_search: shouldSkip,
+          serp_search_status: shouldSkip ? "do_not_search" : "search_allowed",
+          skip_updated_at: now,
+          skip_updated_by: userLabel,
+        };
       });
+
+      await base44.entities.EstateSale.update(saleId, { images: updatedImages });
+
+      setPhotos(updatedImages);
+      setOriginalSkipUrls(new Set(checkedSkipUrls));
+      setSaved(true);
+    } catch (err) {
+      console.error("Error saving Step 1 selections:", err);
+      alert("Selections did not save. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
-  const reviewedCount = photos.filter(p =>
-    p.serp_search_status === "search_allowed" || p.serp_search_status === "do_not_search"
-  ).length;
+  const hasUnsavedChanges =
+    checkedSkipUrls.size !== originalSkipUrls.size ||
+    [...checkedSkipUrls].some(url => !originalSkipUrls.has(url));
 
-  const allReviewed = photos.length > 0 && photos.every(p =>
-    p.serp_search_status === "search_allowed" || p.serp_search_status === "do_not_search"
-  );
+  const searchCount = photos.length - checkedSkipUrls.size;
+  const skipCount = checkedSkipUrls.size;
 
-  function statusLabel(photo) {
-    if (photo.serp_search_status === "do_not_search") return "Don't Search";
-    if (photo.serp_search_status === "search_allowed") return "Will Search";
-    return "Pending Review";
-  }
-
-  function statusClass(photo) {
-    if (photo.serp_search_status === "do_not_search") return "bg-red-100 text-red-700 border-red-200";
-    if (photo.serp_search_status === "search_allowed") return "bg-green-100 text-green-700 border-green-200";
-    return "bg-yellow-100 text-yellow-700 border-yellow-200";
-  }
-
-  if (loading) return <div className="p-6 text-slate-500">Loading photo review...</div>;
+  if (loading) return <div className="p-6 text-slate-500">Loading images...</div>;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
-        <h2 className="text-xl font-bold text-slate-900">Step 1: Choose Which Photos Should Use AI Search</h2>
-        <p className="text-sm text-slate-600">
-          Review every uploaded photo before running AI image search. Mark generic, cluttered, duplicate, or unnecessary images as <strong>Don't Search</strong>. <span className="text-green-700 font-medium">Your choices save instantly</span> — you can leave and come back without losing your work.
-        </p>
-        <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-3">
-          <span className="text-sm text-slate-700">
-            <strong>{reviewedCount}</strong> of <strong>{photos.length}</strong> photos reviewed
-          </span>
-          {allReviewed
-            ? <span className="text-sm text-green-700 font-semibold">✓ Step 1 complete</span>
-            : <span className="text-sm text-red-600 font-medium">Complete Step 1 before continuing</span>
-          }
+      <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Step 1: Choose Images Not to Search</h2>
+          <p className="text-sm text-slate-600 mt-1">
+            All images default to <strong>Search Yes</strong>. Check only the images that should be skipped.
+            Click <strong>Save Step 1 Selections</strong> before continuing to Step 2.
+          </p>
         </div>
-
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="text-xs text-green-700 font-medium">Will Search</div>
+            <div className="text-2xl font-bold text-green-800">{searchCount}</div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="text-xs text-red-700 font-medium">Do Not Search</div>
+            <div className="text-2xl font-bold text-red-800">{skipCount}</div>
+          </div>
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <div className="text-xs text-slate-600 font-medium">Total Images</div>
+            <div className="text-2xl font-bold text-slate-800">{photos.length}</div>
+          </div>
+        </div>
       </div>
 
       {/* Photo Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {photos.map((photo, index) => {
-          const saving = savingIndexes.has(index);
+          const isChecked = checkedSkipUrls.has(photo.url);
           return (
-            <div key={index} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div
+              key={photo.url || index}
+              className={`bg-white border rounded-xl overflow-hidden shadow-sm transition-all ${
+                isChecked ? "border-red-400 ring-2 ring-red-100" : "border-slate-200"
+              }`}
+            >
               <div className="aspect-square bg-slate-100">
                 <img
                   src={photo.url}
@@ -133,59 +143,63 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
                   loading="lazy"
                 />
               </div>
-              <div className="p-2 space-y-2">
-                <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 inline-block ${statusClass(photo)}`}>
-                  {statusLabel(photo)}
-                </span>
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => updateDecision(index, "search_allowed")}
-                  className={`w-full text-xs rounded-lg px-2 py-1.5 font-medium border transition-colors ${
-                    photo.serp_search_status === "search_allowed"
-                      ? "bg-green-600 text-white border-green-600"
-                      : "bg-white text-green-700 border-green-300 hover:bg-green-50"
-                  }`}
-                >
-                  {saving ? "Saving..." : "✓ Search This"}
-                </button>
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => updateDecision(index, "do_not_search")}
-                  className={`w-full text-xs rounded-lg px-2 py-1.5 font-medium border transition-colors ${
-                    photo.serp_search_status === "do_not_search"
-                      ? "bg-red-600 text-white border-red-600"
-                      : "bg-white text-red-700 border-red-300 hover:bg-red-50"
-                  }`}
-                >
-                  {saving ? "Saving..." : "⊘ Don't Search"}
-                </button>
-              </div>
+              <label className="flex items-start gap-2 p-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => toggleSkip(photo.url)}
+                  className="mt-0.5 accent-red-600"
+                />
+                <div>
+                  <div className="text-xs font-semibold text-slate-800">Do Not Search</div>
+                  <div className="text-[10px] text-slate-500">
+                    {isChecked ? "Will be skipped" : "Default: Search Yes"}
+                  </div>
+                </div>
+              </label>
             </div>
           );
         })}
       </div>
 
-      {/* Continue Button */}
-      <div className="flex flex-col items-end gap-2 pt-4 border-t border-slate-200">
-        {!allReviewed && (
-          <p className="text-xs text-red-600">
-            Step 1 must be completed before AI item lookup can begin. Please choose <strong>Search This Image</strong> or <strong>Don't Search</strong> for every photo.
-          </p>
-        )}
-        <button
-          type="button"
-          disabled={!allReviewed}
-          onClick={() => onStepComplete && onStepComplete()}
-          className={`px-6 py-3 rounded-lg font-semibold text-sm transition-colors ${
-            allReviewed
-              ? "bg-slate-900 text-white hover:bg-slate-700"
-              : "bg-slate-200 text-slate-400 cursor-not-allowed"
-          }`}
-        >
-          Continue to Step 2 →
-        </button>
+      {/* Sticky Footer */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row gap-3 justify-between items-center sticky bottom-2 shadow-md">
+        <div className="text-sm">
+          {hasUnsavedChanges && (
+            <span className="text-red-600 font-medium">⚠ Unsaved changes — save before continuing.</span>
+          )}
+          {!hasUnsavedChanges && saved && (
+            <span className="text-green-700 font-medium">✓ Step 1 selections saved.</span>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={saveSelections}
+            disabled={saving}
+            className="px-5 py-2.5 rounded-lg bg-slate-900 text-white font-semibold text-sm disabled:bg-slate-300 hover:bg-slate-700 transition-colors"
+          >
+            {saving ? "Saving..." : "Save Step 1 Selections"}
+          </button>
+          <button
+            type="button"
+            disabled={hasUnsavedChanges || saving || !saved}
+            onClick={() => {
+              if (hasUnsavedChanges) {
+                alert("Please save Step 1 selections before continuing.");
+                return;
+              }
+              onStepComplete && onStepComplete();
+            }}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
+              !hasUnsavedChanges && saved && !saving
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+            }`}
+          >
+            Continue to Step 2 →
+          </button>
+        </div>
       </div>
     </div>
   );
