@@ -67,6 +67,7 @@ export default function SaleEditor() {
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
   const runBatchRef = useRef(null);
+  const formDataRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -88,6 +89,11 @@ export default function SaleEditor() {
     saleIdRef.current = saleId;
   }, [saleId]);
 
+  // Keep formDataRef in sync so auto-save always writes the latest state
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
   // Reset stuck saving state when user returns from another tab (e.g. Google Lens)
   useEffect(() => {
     const handleVisibility = () => {
@@ -108,23 +114,24 @@ export default function SaleEditor() {
     autoSaveTimer.current = setTimeout(async () => {
       setAutoSaving(true);
       try {
+        const latest = formDataRef.current;
         const user = await base44.auth.me();
         const saveData = {
-          title: formData.title,
-          description: formData.description,
-          sale_type: formData.sale_type,
-          status: formData.status,
+          title: latest.title,
+          description: latest.description,
+          sale_type: latest.sale_type,
+          status: latest.status,
           property_address: {
-            ...formData.property_address,
-            formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+            ...latest.property_address,
+            formatted_address: `${latest.property_address.street}, ${latest.property_address.city}, ${latest.property_address.state} ${latest.property_address.zip}`
           },
-          location: formData.location,
-          sale_dates: formData.sale_dates,
-          images: formData.images.map(img => ({ ...img })),
-          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
-          categories: formData.categories,
-          special_notes: formData.special_notes,
-          payment_methods: formData.payment_methods,
+          location: latest.location,
+          sale_dates: latest.sale_dates,
+          images: latest.images.map(img => ({ ...img })),
+          commission_rate: latest.commission_rate ? parseFloat(latest.commission_rate) : null,
+          categories: latest.categories,
+          special_notes: latest.special_notes,
+          payment_methods: latest.payment_methods,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -1392,10 +1399,11 @@ Return ONLY the description text, no extra commentary.`
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: restoredDesc }));
                                 }
                                 setFormData(prev => {
+                                  const newImages = prev.images.map((img, i) => i === index ? updated[index] : img);
                                   if (saleIdRef.current) {
-                                    base44.entities.EstateSale.update(saleIdRef.current, { images: updated });
+                                    base44.entities.EstateSale.update(saleIdRef.current, { images: newImages });
                                   }
-                                  return { ...prev, images: updated };
+                                  return { ...prev, images: newImages };
                                 });
                                 }}
                                 className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
