@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, DollarSign } from 'lucide-react';
+import { ArrowLeft, DollarSign, QrCode, X, Check, AlertCircle } from 'lucide-react';
 import TransactionForm from '@/components/worksheet/TransactionForm';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function Worksheet() {
   const navigate = useNavigate();
@@ -37,6 +38,13 @@ export default function Worksheet() {
   const [searchingPhotos, setSearchingPhotos] = useState(false);
   const [photoSuggestions, setPhotoSuggestions] = useState([]);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  // Cart scanner state
+  const [showCartScanner, setShowCartScanner] = useState(false);
+  const [cartScanMessage, setCartScanMessage] = useState(null);
+  const [cartScanning, setCartScanning] = useState(false);
+  const scannerRef = useRef(null);
+  const qrScannerRef = useRef(null);
 
   useEffect(() => {
     loadData();
@@ -199,7 +207,65 @@ export default function Worksheet() {
   };
 
   const handleScanCart = () => {
-    alert('Cart scanning not yet implemented');
+    setShowCartScanner(true);
+    setCartScanMessage(null);
+    setTimeout(() => {
+      if (scannerRef.current) {
+        const scanner = new Html5QrcodeScanner('worksheet-qr-scanner', { fps: 10, qrbox: 250 }, false);
+        const onScanSuccess = async (decodedText) => {
+          scanner.clear();
+          qrScannerRef.current = null;
+          setCartScanning(true);
+          try {
+            let userId = decodedText;
+            if (decodedText.startsWith('cart:')) userId = decodedText.replace('cart:', '');
+            else if (decodedText.includes('userId=')) {
+              const url = new URL(decodedText, window.location.origin);
+              userId = url.searchParams.get('userId');
+            }
+            if (!userId) throw new Error('Invalid cart QR code');
+
+            const carts = await base44.entities.Cart.filter({ user_id: userId });
+            if (carts.length === 0) throw new Error('No cart found for this customer');
+
+            const cart = carts[0];
+            const params = new URLSearchParams(window.location.search);
+            const saleId = params.get('saleId');
+
+            // Bulk-create a transaction for each item in the cart
+            for (const item of cart.items || []) {
+              await base44.entities.Transaction.create({
+                sale_id: saleId,
+                item_name: item.item_title || item.name || 'Cart Item',
+                quantity: item.quantity || 1,
+                total: (item.price || 0) * (item.quantity || 1),
+                payment_method: paymentMethod,
+                notes: 'Imported from customer cart QR scan',
+              });
+            }
+
+            // Clear the cart after import
+            await base44.entities.Cart.delete(cart.id);
+
+            setCartScanMessage({ type: 'success', text: `${cart.items?.length || 0} items imported from cart!` });
+            const transData = await base44.entities.Transaction.filter({ sale_id: saleId }, '-created_date');
+            setTransactions(transData);
+          } catch (error) {
+            setCartScanMessage({ type: 'error', text: error.message });
+          } finally {
+            setCartScanning(false);
+          }
+        };
+        scanner.render(onScanSuccess, () => {});
+        qrScannerRef.current = scanner;
+      }
+    }, 100);
+  };
+
+  const closeCartScanner = () => {
+    if (qrScannerRef.current) { qrScannerRef.current.clear(); qrScannerRef.current = null; }
+    setShowCartScanner(false);
+    setCartScanMessage(null);
   };
 
   const currentTotal = parseFloat(price) * quantity || 0;
@@ -219,6 +285,40 @@ export default function Worksheet() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+
+      {/* Cart Scanner Modal */}
+      {showCartScanner && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <QrCode className="w-6 h-6 text-orange-600" />
+                Scan Customer Cart
+              </h2>
+              <Button variant="ghost" size="icon" onClick={closeCartScanner}><X className="w-5 h-5" /></Button>
+            </div>
+            <p className="text-sm text-slate-600">Ask the customer to show their cart QR code. All items will be added to this worksheet automatically.</p>
+            {cartScanMessage && (
+              <div className={`flex items-center gap-2 p-3 rounded-lg text-white text-sm ${cartScanMessage.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+                {cartScanMessage.type === 'success' ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {cartScanMessage.text}
+              </div>
+            )}
+            {cartScanning ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin w-8 h-8 border-4 border-slate-200 border-t-orange-600 rounded-full"></div>
+                <span className="ml-3 text-slate-600">Importing cart items...</span>
+              </div>
+            ) : !cartScanMessage?.type === 'success' && (
+              <div id="worksheet-qr-scanner" ref={scannerRef} className="w-full rounded-lg overflow-hidden bg-slate-100 min-h-[300px]" />
+            )}
+            {cartScanMessage?.type === 'success' && (
+              <Button onClick={closeCartScanner} className="w-full bg-green-600 hover:bg-green-700">Done</Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Button variant="ghost" size="sm" onClick={() => navigate(createPageUrl('MySales'))}>
