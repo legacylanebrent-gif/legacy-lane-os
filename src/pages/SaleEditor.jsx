@@ -1372,30 +1372,25 @@ Return ONLY the description text, no extra commentary.`
                             <button
                               type="button"
                               onClick={() => {
-                                const isSkipped = image.skip_item;
-                                if (!isSkipped) {
-                                  setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
-                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
-                                } else {
-                                  const restoredName = image.skip_saved_name || '';
-                                  const restoredDesc = image.skip_saved_description || '';
-                                  setPhotoTitles(prev => ({ ...prev, [image.url]: restoredName }));
-                                  setPhotoDescriptions(prev => ({ ...prev, [image.url]: restoredDesc }));
-                                }
-                                setFormData(prev => {
-                                  const newImages = prev.images.map((img, i) => {
-                                    if (i !== index) return img;
-                                    if (!img.skip_item) {
-                                      return { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '' };
-                                    } else {
-                                      return { ...img, skip_item: false, name: img.skip_saved_name || '', description: img.skip_saved_description || '' };
-                                    }
-                                  });
-                                  if (saleIdRef.current) {
-                                    base44.entities.EstateSale.update(saleIdRef.current, { images: newImages });
+                                const currentImages = formDataRef.current?.images || formData.images;
+                                const currentImg = currentImages[index];
+                                const newImages = currentImages.map((img, i) => {
+                                  if (i !== index) return img;
+                                  if (!img.skip_item) {
+                                    return { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '' };
+                                  } else {
+                                    return { ...img, skip_item: false, name: img.skip_saved_name || '', description: img.skip_saved_description || '' };
                                   }
-                                  return { ...prev, images: newImages };
                                 });
+                                const updatedImg = newImages[index];
+                                setPhotoTitles(prev => ({ ...prev, [image.url]: updatedImg.name || '' }));
+                                setPhotoDescriptions(prev => ({ ...prev, [image.url]: updatedImg.description || '' }));
+                                setFormData(prev => ({ ...prev, images: newImages }));
+                                if (saleIdRef.current) {
+                                  base44.entities.EstateSale.update(saleIdRef.current, { images: newImages })
+                                    .then(() => console.log('Skip saved for image', index, 'skip_item=', newImages[index].skip_item))
+                                    .catch(e => console.error('Skip save failed:', e));
+                                }
                                 }}
                                 className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
                                 >
