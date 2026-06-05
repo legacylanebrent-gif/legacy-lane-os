@@ -600,7 +600,7 @@ Be practical and realistic for an estate sale context.`,
   };
 
   const handleToggleSkip = async (index) => {
-    const currentSaleId = saleId;
+    const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
     const images = formData.images;
     const img = images[index];
     const newImg = img.skip_item
