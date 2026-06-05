@@ -190,6 +190,7 @@ export default function SaleEditor() {
         sale_dates: saleData.sale_dates || [],
         images: (saleData.images || []).map(img => {
           const imageObj = typeof img === 'string' ? { url: img, name: '', description: '' } : img;
+          // Preserve serp_search_status so saves don't wipe out SalePhotoReviewStep decisions
           return imageObj;
         }),
         categories: saleData.categories || [],
@@ -230,12 +231,16 @@ export default function SaleEditor() {
       });
       setSerpResults(serpMap);
 
-      // Auto-complete step 1 if they've previously flagged any images or done AI searches
+      // Auto-complete step 1 if they've previously reviewed photos or done AI searches
       const images = saleData.images || [];
       const hasSkipped = images.some(img => img.skip_item === true || img.skip_item === false);
       const hasSerpResults = serpData.length > 0;
       const hasProcessed = images.some(img => img.name || img.description || img.ai_first_search_price);
-      if (hasSkipped || hasSerpResults || hasProcessed) {
+      // Also complete if all images already have serp_search_status (set by SalePhotoReviewStep)
+      const allReviewed = images.length > 0 && images.every(img =>
+        img.serp_search_status === "search_allowed" || img.serp_search_status === "do_not_search"
+      );
+      if (hasSkipped || hasSerpResults || hasProcessed || allReviewed) {
         setStep1Completed(true);
       }
     } catch (error) {
@@ -342,8 +347,10 @@ export default function SaleEditor() {
         },
         location: formData.location,
         sale_dates: formData.sale_dates,
-        images: formData.images.map(img => ({ ...img })),
-          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+        // NOTE: images are NOT included here — they are saved directly on each mutation
+        // (upload, toggle skip, serp search, batch). Including them here would overwrite
+        // serp_search_status fields written by SalePhotoReviewStep.
+        commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
           categories: formData.categories,
           special_notes: formData.special_notes,
           payment_methods: formData.payment_methods,
