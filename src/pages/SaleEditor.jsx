@@ -1372,8 +1372,7 @@ Return ONLY the description text, no extra commentary.`
                             <button
                               type="button"
                               onClick={() => {
-                                const currentImages = formDataRef.current?.images || formData.images;
-                                const currentImg = currentImages[index];
+                                const currentImages = formData.images;
                                 const newImages = currentImages.map((img, i) => {
                                   if (i !== index) return img;
                                   if (!img.skip_item) {
@@ -1386,10 +1385,14 @@ Return ONLY the description text, no extra commentary.`
                                 setPhotoTitles(prev => ({ ...prev, [image.url]: updatedImg.name || '' }));
                                 setPhotoDescriptions(prev => ({ ...prev, [image.url]: updatedImg.description || '' }));
                                 setFormData(prev => ({ ...prev, images: newImages }));
-                                if (saleIdRef.current) {
-                                  base44.entities.EstateSale.update(saleIdRef.current, { images: newImages })
-                                    .then(() => console.log('Skip saved for image', index, 'skip_item=', newImages[index].skip_item))
-                                    .catch(e => console.error('Skip save failed:', e));
+                                const idToSave = saleId || saleIdRef.current;
+                                console.log('Skip toggle: saleId=', idToSave, 'index=', index, 'skip_item=', newImages[index].skip_item);
+                                if (idToSave) {
+                                  base44.entities.EstateSale.update(idToSave, { images: newImages })
+                                    .then(() => console.log('Skip SAVED successfully for image', index))
+                                    .catch(e => console.error('Skip save FAILED:', e));
+                                } else {
+                                  console.warn('No saleId available — skip not persisted');
                                 }
                                 }}
                                 className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
