@@ -106,6 +106,7 @@ export default function SaleEditor() {
   }, []);
 
   // Auto-save: debounce 3s after any formData change (skip initial load)
+  // NOTE: images are intentionally excluded — they are saved directly on each mutation
   useEffect(() => {
     if (isInitialLoad.current) return;
     if (!formData.title.trim() || !formData.property_address.city.trim()) return;
@@ -127,7 +128,6 @@ export default function SaleEditor() {
           },
           location: latest.location,
           sale_dates: latest.sale_dates,
-          images: latest.images.map(img => ({ ...img })),
           commission_rate: latest.commission_rate ? parseFloat(latest.commission_rate) : null,
           categories: latest.categories,
           special_notes: latest.special_notes,
@@ -142,7 +142,8 @@ export default function SaleEditor() {
           const newSale = await base44.entities.EstateSale.create({
             ...saveData,
             operator_id: user.id,
-            operator_name: user.full_name
+            operator_name: user.full_name,
+            images: latest.images.map(img => ({ ...img })),
           });
           setSaleId(newSale.id);
         }
@@ -341,14 +342,14 @@ export default function SaleEditor() {
         location: formData.location,
         sale_dates: formData.sale_dates,
         images: formData.images.map(img => ({ ...img })),
-        commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
-        categories: formData.categories,
-        special_notes: formData.special_notes,
-        payment_methods: formData.payment_methods,
-        national_featured: featuredNationally,
-        local_featured: featuredLocally,
-        operator_id: saleId ? undefined : user.id,
-        operator_name: saleId ? undefined : user.full_name
+          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+          categories: formData.categories,
+          special_notes: formData.special_notes,
+          payment_methods: formData.payment_methods,
+          national_featured: featuredNationally,
+          local_featured: featuredLocally,
+          operator_id: saleId ? undefined : user.id,
+          operator_name: saleId ? undefined : user.full_name,
       };
       if (saleId) {
         await base44.entities.EstateSale.update(saleId, saveData);
