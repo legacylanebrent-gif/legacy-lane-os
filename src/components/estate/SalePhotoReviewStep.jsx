@@ -23,10 +23,10 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
       const sale = sales[0];
       if (!sale) return;
 
-      // Patch any images that don't have serp_search_status yet
+      // Default new images to search_allowed so user only needs to mark exceptions
       const images = (sale.images || []).map(img => ({
         ...img,
-        serp_search_status: img.serp_search_status || "pending_review",
+        serp_search_status: img.serp_search_status || "search_allowed",
         skip_serp_search: img.skip_serp_search || false,
       }));
 
