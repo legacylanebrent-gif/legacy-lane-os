@@ -48,23 +48,21 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
     const now = new Date().toISOString();
     const byUser = currentUser?.email || currentUser?.id || "unknown";
 
-    // Update local state immediately and capture the updated array synchronously
-    let updatedPhotos;
-    setPhotos(prev => {
-      updatedPhotos = prev.map((p, i) => i !== index ? p : {
-        ...p,
-        serp_search_status: nextStatus,
-        skip_serp_search: isSkip,
-        skip_updated_at: now,
-        skip_updated_by: byUser,
-      });
-      return updatedPhotos;
+    // Build the updated array from current photos ref synchronously
+    const updatedPhotos = photos.map((p, i) => i !== index ? p : {
+      ...p,
+      serp_search_status: nextStatus,
+      skip_serp_search: isSkip,
+      skip_updated_at: now,
+      skip_updated_by: byUser,
     });
 
+    // Optimistic local update
+    setPhotos(updatedPhotos);
     setSavingIndexes(prev => new Set(prev).add(index));
 
     try {
-      // Write the already-updated local state directly — no re-fetch needed
+      // Persist to DB — if user navigates away and back, loadPhotos() will restore this
       await base44.entities.EstateSale.update(saleId, { images: updatedPhotos });
     } catch (err) {
       console.error("Failed to save decision:", err);
