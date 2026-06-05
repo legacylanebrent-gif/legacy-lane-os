@@ -1339,7 +1339,7 @@ Return ONLY the description text, no extra commentary.`
                          <div className={`w-full min-w-0 ${step1Completed ? "flex flex-col lg:flex-row gap-4" : "flex flex-col gap-2"}`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={`${image.url}?w=200&h=200&fit=cover`} alt={`Photo ${index + 1}`} className={step1Completed ? "w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" : "w-full h-28 object-cover rounded-lg"} loading="lazy" decoding="async" />
+                              <img src={`${image.url}?w=200&h=200&fit=cover`} alt={`Photo ${index + 1}`} className={step1Completed ? "w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" : "w-full aspect-square object-cover rounded-lg"} loading="lazy" decoding="async" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
