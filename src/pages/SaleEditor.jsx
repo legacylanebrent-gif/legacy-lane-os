@@ -20,6 +20,7 @@ import SaleClientPermissionsModal from '@/components/estate/SaleClientPermission
 import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
+import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -1221,8 +1222,9 @@ Return ONLY the description text, no extra commentary.`
                         const runBatch = async (startFromIndex = 0) => {
                          if (!saleId) { alert('Save the sale first'); return; }
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
-                           const absIdx = startFromIndex + relIdx;
-                           return (!img.name || !img.description) && !multiItemFlags[absIdx];
+                         const absIdx = startFromIndex + relIdx;
+                         return (!img.name || !img.description) && !multiItemFlags[absIdx] &&
+                           img.serp_search_status === "search_allowed" && img.skip_serp_search !== true;
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
                          const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
@@ -1234,8 +1236,8 @@ Return ONLY the description text, no extra commentary.`
                           for (let i = startFromIndex; i < formData.images.length; i++) {
                             const img = formData.images[i];
                             if (img.name && img.description) continue;
-                            if (multiItemFlags[i]) continue; // skip multi-item flagged images
-                            if (img.skip_item) continue; // skip close-up/duplicate images
+                            if (multiItemFlags[i]) continue;
+                            if (img.skip_serp_search === true || img.serp_search_status !== "search_allowed") continue;
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
@@ -1360,13 +1362,28 @@ Return ONLY the description text, no extra commentary.`
                         Regenerate Item Descriptions
                         </Button>}
                     </div>
-                    <div className={!step1Completed ? "grid grid-cols-3 gap-3" : "space-y-4"}>
+                    {!step1Completed && saleId ? (
+                      <SalePhotoReviewStep
+                        saleId={saleId}
+                        onStepComplete={() => {
+                          setStep1Completed(true);
+                          // Reload formData images so serp batch has updated statuses
+                          base44.entities.EstateSale.filter({ id: saleId }).then(res => {
+                            if (res[0]) setFormData(prev => ({ ...prev, images: res[0].images || [] }));
+                          });
+                        }}
+                      />
+                    ) : !step1Completed && !saleId ? (
+                      <p className="text-slate-500 text-sm py-4">Save the sale first to begin Step 1 photo review.</p>
+                    ) : null}
+
+                    <div className={step1Completed ? "space-y-4" : "hidden"}>
                     {formData.images.map((image, index) => (
                        <Card key={index} className="p-4 overflow-hidden">
-                         <div className={`w-full min-w-0 ${step1Completed ? "flex flex-col lg:flex-row gap-4" : "flex flex-col gap-2"}`}>
+                         <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={image.url} alt={`Photo ${index + 1}`} className={step1Completed ? "w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" : "w-full aspect-square object-cover rounded-lg"} loading="lazy" decoding="async" />
+                              <img src={image.url} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
@@ -1607,16 +1624,7 @@ Return ONLY the description text, no extra commentary.`
                               </Card>
                               ))}
                     </div>
-                              {!step1Completed && formData.images.length > 0 && (
-                      <div className="pt-4 border-t border-slate-200">
-                        <Button
-                          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 text-sm"
-                          onClick={() => { setStep1Completed(true); setShowQuickScanGuideModal(true); }}
-                        >
-                          <span className="mr-2">✓</span> Done Hiding Images — Start Step 2
-                        </Button>
-                      </div>
-                    )}
+
                   </div>
                 )}
               </TabsContent>
