@@ -46,6 +46,11 @@ export default function Worksheet() {
   const scannerRef = useRef(null);
   const qrScannerRef = useRef(null);
 
+  // Item QR scanner state
+  const [showItemScanner, setShowItemScanner] = useState(false);
+  const itemScannerRef = useRef(null);
+  const itemQrScannerRef = useRef(null);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -268,6 +273,36 @@ export default function Worksheet() {
     setCartScanMessage(null);
   };
 
+  const handleScanItem = () => {
+    setShowItemScanner(true);
+    setTimeout(() => {
+      if (itemScannerRef.current) {
+        const scanner = new Html5QrcodeScanner('worksheet-item-scanner', { fps: 10, qrbox: 250 }, false);
+        const onScanSuccess = (decodedText) => {
+          scanner.clear();
+          itemQrScannerRef.current = null;
+          // Try to parse JSON payload from item QR (e.g. {"name":"Vase","price":25})
+          try {
+            const data = JSON.parse(decodedText);
+            if (data.name) setItemName(data.name);
+            if (data.price) setPrice(data.price.toString());
+          } catch {
+            // Plain text — use as item name
+            setItemName(decodedText);
+          }
+          setShowItemScanner(false);
+        };
+        scanner.render(onScanSuccess, () => {});
+        itemQrScannerRef.current = scanner;
+      }
+    }, 100);
+  };
+
+  const closeItemScanner = () => {
+    if (itemQrScannerRef.current) { itemQrScannerRef.current.clear(); itemQrScannerRef.current = null; }
+    setShowItemScanner(false);
+  };
+
   const currentTotal = parseFloat(price) * quantity || 0;
 
   if (loading) {
@@ -315,6 +350,23 @@ export default function Worksheet() {
             {cartScanMessage?.type === 'success' && (
               <Button onClick={closeCartScanner} className="w-full bg-green-600 hover:bg-green-700">Done</Button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Item QR Scanner Modal */}
+      {showItemScanner && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <QrCode className="w-6 h-6 text-slate-700" />
+                Scan Item
+              </h2>
+              <Button variant="ghost" size="icon" onClick={closeItemScanner}><X className="w-5 h-5" /></Button>
+            </div>
+            <p className="text-sm text-slate-600">Point the camera at an item QR code or barcode to auto-fill the name and price.</p>
+            <div id="worksheet-item-scanner" ref={itemScannerRef} className="w-full rounded-lg overflow-hidden bg-slate-100 min-h-[300px]" />
           </div>
         </div>
       )}
@@ -399,6 +451,7 @@ export default function Worksheet() {
             setSelectedPhoto={setSelectedPhoto}
             selectPhotoItem={selectPhotoItem}
             onScanCart={handleScanCart}
+            onScanItem={handleScanItem}
           />
 
           {transactions.length > 0 && (

@@ -28,6 +28,7 @@ export default function TransactionForm({
   selectedPhoto, setSelectedPhoto,
   selectPhotoItem,
   onScanCart,
+  onScanItem,
 }) {
   return (
     <Card className="bg-white shadow-md">
@@ -247,7 +248,14 @@ export default function TransactionForm({
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Item <span className="text-red-500">*</span></label>
-              <Input placeholder="Item name..." value={itemName} onChange={(e) => setItemName(e.target.value)} />
+              <div className="flex gap-2">
+                <Input placeholder="Item name..." value={itemName} onChange={(e) => setItemName(e.target.value)} className="flex-1" />
+                {onScanItem && (
+                  <Button type="button" variant="outline" size="icon" onClick={onScanItem} title="Scan item QR / barcode" className="shrink-0">
+                    <QrCode className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
