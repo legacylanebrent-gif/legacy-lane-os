@@ -98,30 +98,30 @@ export default function TransactionForm({
               </div>
 
               {photoSuggestions.length > 0 && (
-                <div className="mt-2 border border-cyan-300 rounded-lg bg-white shadow-lg max-h-64 overflow-y-auto">
-                  {photoSuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => selectPhotoItem(suggestion)}
-                      className="w-full flex items-start gap-3 p-3 hover:bg-cyan-50 border-b last:border-b-0 text-left"
-                    >
-                      {suggestion.imageUrl && (
-                        <img
-                          src={typeof suggestion.imageUrl === 'string' ? suggestion.imageUrl : suggestion.imageUrl.url}
-                          alt={suggestion.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{suggestion.name}</div>
-                        {suggestion.description && <div className="text-sm text-slate-600 line-clamp-2">{suggestion.description}</div>}
-                        {suggestion.suggested_price && (
-                          <div className="text-sm font-semibold text-green-600 mt-1">Suggested: ${suggestion.suggested_price.toFixed(2)}</div>
+                <div className="mt-2 border border-cyan-300 rounded-lg bg-white shadow-lg p-3 max-h-96 overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-3">
+                    {photoSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => selectPhotoItem(suggestion)}
+                        className="flex flex-col items-center p-3 hover:bg-cyan-50 border border-cyan-100 rounded-lg text-center hover:border-cyan-300 transition-colors"
+                      >
+                        {suggestion.imageUrl && (
+                          <img
+                            src={typeof suggestion.imageUrl === 'string' ? suggestion.imageUrl : suggestion.imageUrl.url}
+                            alt={suggestion.name}
+                            className="w-24 h-24 object-cover rounded mb-2"
+                          />
                         )}
-                      </div>
-                    </button>
-                  ))}
+                        <div className="font-medium text-slate-900 text-sm line-clamp-2">{suggestion.name}</div>
+                        {suggestion.description && <div className="text-xs text-slate-600 line-clamp-1 mt-1">{suggestion.description}</div>}
+                        {suggestion.suggested_price && (
+                          <div className="text-xs font-semibold text-green-600 mt-1">Suggested: ${suggestion.suggested_price.toFixed(2)}</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
