@@ -1371,35 +1371,25 @@ Return ONLY the description text, no extra commentary.`
                             <button
                               type="button"
                               onClick={() => {
-                                const updated = [...formData.images];
                                 const isSkipped = image.skip_item;
                                 if (!isSkipped) {
-                                  // Toggling ON (skipping): save current name/description into skip_saved_*, then clear
-                                  updated[index] = {
-                                    ...updated[index],
-                                    skip_item: true,
-                                    skip_saved_name: image.name || '',
-                                    skip_saved_description: image.description || '',
-                                    name: '',
-                                    description: ''
-                                  };
                                   setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
                                 } else {
-                                  // Toggling OFF (restoring): bring back saved values
                                   const restoredName = image.skip_saved_name || '';
                                   const restoredDesc = image.skip_saved_description || '';
-                                  updated[index] = {
-                                    ...updated[index],
-                                    skip_item: false,
-                                    name: restoredName,
-                                    description: restoredDesc
-                                  };
                                   setPhotoTitles(prev => ({ ...prev, [image.url]: restoredName }));
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: restoredDesc }));
                                 }
                                 setFormData(prev => {
-                                  const newImages = prev.images.map((img, i) => i === index ? updated[index] : img);
+                                  const newImages = prev.images.map((img, i) => {
+                                    if (i !== index) return img;
+                                    if (!img.skip_item) {
+                                      return { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '' };
+                                    } else {
+                                      return { ...img, skip_item: false, name: img.skip_saved_name || '', description: img.skip_saved_description || '' };
+                                    }
+                                  });
                                   if (saleIdRef.current) {
                                     base44.entities.EstateSale.update(saleIdRef.current, { images: newImages });
                                   }
