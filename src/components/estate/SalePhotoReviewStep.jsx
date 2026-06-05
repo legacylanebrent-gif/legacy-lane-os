@@ -125,11 +125,7 @@ export default function SalePhotoReviewStep({ saleId, onStepComplete }) {
             : <span className="text-sm text-red-600 font-medium">Complete Step 1 before continuing</span>
           }
         </div>
-        {!allReviewed && (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            Save SerpAPI credits by skipping generic, cluttered, duplicate, or unnecessary photos. Every photo must be marked before Step 2 unlocks.
-          </p>
-        )}
+
       </div>
 
       {/* Photo Grid */}
