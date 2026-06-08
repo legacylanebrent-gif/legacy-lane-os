@@ -97,6 +97,7 @@ import CompanyProfilePage from './pages/CompanyProfilePage';
 import SaleRecapPage from './pages/SaleRecapPage';
 import PriceGuidePage from './pages/PriceGuidePage';
 import WantedItemsPage from './pages/WantedItemsPage';
+import WeeklyVideoIntelligence from './pages/WeeklyVideoIntelligence';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -239,6 +240,7 @@ const AuthenticatedApp = () => {
       <Route path="/sale-recap" element={<SaleRecapPage />} />
       <Route path="/price-guide" element={<PriceGuidePage />} />
       <Route path="/wanted" element={<WantedItemsPage />} />
+      <Route path="/WeeklyVideoIntelligence" element={<LayoutWrapper currentPageName="WeeklyVideoIntelligence"><WeeklyVideoIntelligence /></LayoutWrapper>} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>

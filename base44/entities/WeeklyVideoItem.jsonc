@@ -1,0 +1,163 @@
+{
+  "name": "WeeklyVideoItem",
+  "type": "object",
+  "properties": {
+    "weekly_video_batch_id": {
+      "type": "string"
+    },
+    "source_sale_id": {
+      "type": "string"
+    },
+    "source_item_id": {
+      "type": "string"
+    },
+    "seo_item_profile_id": {
+      "type": "string"
+    },
+    "item_knowledge_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "style": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string"
+    },
+    "material": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "additional_image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "suggested_price": {
+      "type": "number"
+    },
+    "value_low": {
+      "type": "number"
+    },
+    "value_high": {
+      "type": "number"
+    },
+    "average_market_value": {
+      "type": "number"
+    },
+    "highest_market_value": {
+      "type": "number"
+    },
+    "lowest_market_value": {
+      "type": "number"
+    },
+    "serpapi_sources": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "google_lens_sources": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "similar_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "uniqueness_score": {
+      "type": "number",
+      "default": 0
+    },
+    "value_score": {
+      "type": "number",
+      "default": 0
+    },
+    "visual_score": {
+      "type": "number",
+      "default": 0
+    },
+    "collector_interest_score": {
+      "type": "number",
+      "default": 0
+    },
+    "resale_score": {
+      "type": "number",
+      "default": 0
+    },
+    "keyword_score": {
+      "type": "number",
+      "default": 0
+    },
+    "research_depth_score": {
+      "type": "number",
+      "default": 0
+    },
+    "total_video_score": {
+      "type": "number",
+      "default": 0
+    },
+    "ai_research_summary": {
+      "type": "string"
+    },
+    "ai_history_summary": {
+      "type": "string"
+    },
+    "ai_value_summary": {
+      "type": "string"
+    },
+    "ai_buy_or_pass_recommendation": {
+      "type": "string",
+      "enum": [
+        "strong_buy",
+        "buy",
+        "watch",
+        "pass",
+        "skip"
+      ]
+    },
+    "ai_video_segment_script": {
+      "type": "string"
+    },
+    "admin_selected": {
+      "type": "boolean",
+      "default": false
+    },
+    "admin_notes": {
+      "type": "string"
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "weekly_video_batch_id",
+    "title"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "name": "WeeklyVideoBatch",
+  "type": "object",
+  "properties": {
+    "week_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "week_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "items_selected",
+        "admin_reviewed",
+        "script_generated",
+        "sent_to_video_provider",
+        "video_rendered",
+        "posted_to_youtube",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "candidate_item_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "selected_item_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "video_theme": {
+      "type": "string"
+    },
+    "video_angle": {
+      "type": "string"
+    },
+    "quality_flag": {
+      "type": "string",
+      "description": "e.g. Low Quality Week"
+    },
+    "generated_video_title": {
+      "type": "string"
+    },
+    "generated_video_description": {
+      "type": "string"
+    },
+    "generated_video_script": {
+      "type": "string"
+    },
+    "generated_youtube_chapters": {
+      "type": "string"
+    },
+    "generated_thumbnail_text": {
+      "type": "string"
+    },
+    "generated_blog_post": {
+      "type": "string"
+    },
+    "generated_social_captions": {
+      "type": "object"
+    },
+    "generated_youtube_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "video_provider": {
+      "type": "string"
+    },
+    "video_provider_project_id": {
+      "type": "string"
+    },
+    "video_provider_render_id": {
+      "type": "string"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "youtube_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "week_start_date"
+  ]
+}
