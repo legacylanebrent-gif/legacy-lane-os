@@ -105,6 +105,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intelligence', icon: Film,           group: 'Admin' },
   { page: 'AdminProbateEngine',     label: 'Probate SEO Engine',         icon: Scale,           group: 'Admin' },
   { page: 'life-transition/ProbateHubV2', label: 'Life Transition Engine',   icon: Globe,           group: 'Admin' },
+  { page: 'AdminPhase12Deploy',     label: '🚀 Phase 12 Deploy (NJ)',     icon: Rocket,          group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },

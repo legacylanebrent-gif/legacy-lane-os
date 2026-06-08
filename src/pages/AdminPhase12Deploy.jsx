@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Rocket, CheckCircle2, AlertCircle, MapPin, Globe, Map } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, Rocket, CheckCircle2, AlertCircle, MapPin, Globe, Map, ArrowRight, ClipboardList, Users, FileSearch, Send } from 'lucide-react';
 
 const DEPLOYMENT_PLAN = [
   { category: 'State Guides (NJ)', items: ['/probate/new-jersey', '/inherited-property/new-jersey', '/estate-cleanout/new-jersey', '/senior-downsizing/new-jersey', '/moving-sale/new-jersey'] },
@@ -52,6 +53,66 @@ export default function AdminPhase12Deploy() {
           <strong className="text-amber-600"> All saved as draft. Nothing auto-publishes.</strong>
         </p>
       </div>
+
+      {/* Next Steps Plan */}
+      <Card className="border-slate-200 bg-slate-50">
+        <CardContent className="p-5">
+          <p className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <ClipboardList className="w-4 h-4 text-slate-600" /> Post-Deployment Next Steps
+          </p>
+          <div className="space-y-3">
+            {[
+              {
+                step: 1,
+                label: 'Review Generated Drafts',
+                desc: 'Check all state + county pages. Edit titles, content, CTAs as needed.',
+                link: '/AdminContentEngine',
+                linkLabel: 'Open Content Engine →',
+                icon: FileSearch,
+                color: 'text-blue-700 bg-blue-50 border-blue-200',
+              },
+              {
+                step: 2,
+                label: 'Assign Providers to NJ Counties',
+                desc: 'Map estate sale operators, probate realtors, cleanout vendors, and investors to Monmouth, Ocean, and Middlesex County.',
+                link: '/AdminLifeTransitionEngine',
+                linkLabel: 'Open Territory Engine →',
+                icon: Users,
+                color: 'text-amber-700 bg-amber-50 border-amber-200',
+              },
+              {
+                step: 3,
+                label: 'Publish Reviewed Pages',
+                desc: 'Change draft status → published on each approved page in the Content Engine.',
+                link: '/AdminContentEngine',
+                linkLabel: 'Open Content Engine →',
+                icon: CheckCircle2,
+                color: 'text-green-700 bg-green-50 border-green-200',
+              },
+              {
+                step: 4,
+                label: 'Submit Sitemap to Google',
+                desc: 'Trigger the full sitemap regeneration and submit queued URLs for indexing.',
+                link: '/PlatformSEODashboard',
+                linkLabel: 'Open SEO Dashboard →',
+                icon: Send,
+                color: 'text-purple-700 bg-purple-50 border-purple-200',
+              },
+            ].map(({ step, label, desc, link, linkLabel, icon: Icon, color }) => (
+              <div key={step} className={`flex items-start gap-3 rounded-lg border p-3 ${color}`}>
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white border flex items-center justify-center text-xs font-bold">{step}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">{label}</p>
+                  <p className="text-xs mt-0.5 opacity-80">{desc}</p>
+                </div>
+                <Link to={link} className="flex-shrink-0 text-xs font-semibold underline underline-offset-2 flex items-center gap-1 opacity-80 hover:opacity-100">
+                  {linkLabel} <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Deployment plan preview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
