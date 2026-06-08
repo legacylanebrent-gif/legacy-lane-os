@@ -1,0 +1,71 @@
+{
+  "name": "EstateSaleUniversityArticle",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "probate_101",
+        "estate_sale_process",
+        "pricing_and_value",
+        "cleanout_and_donations",
+        "inherited_home",
+        "downsizing",
+        "legal_and_tax",
+        "for_operators",
+        "for_buyers",
+        "general"
+      ]
+    },
+    "target_keyword": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "article_content": {
+      "type": "string"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "category"
+  ]
+}

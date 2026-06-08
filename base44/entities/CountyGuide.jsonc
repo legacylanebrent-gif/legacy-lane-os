@@ -1,0 +1,119 @@
+{
+  "name": "CountyGuide",
+  "type": "object",
+  "properties": {
+    "state_id": {
+      "type": "string",
+      "description": "FK to StateGuide.id"
+    },
+    "county_name": {
+      "type": "string"
+    },
+    "county_slug": {
+      "type": "string",
+      "description": "e.g. monmouth-county-nj"
+    },
+    "guide_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "downsizing",
+        "divorce",
+        "inherited_home",
+        "estate_sale",
+        "senior_transition",
+        "general"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "intro_content": {
+      "type": "string"
+    },
+    "main_content": {
+      "type": "string"
+    },
+    "court_info_json": {
+      "type": "object",
+      "description": "Court name, address, phone, URL, hours",
+      "properties": {
+        "court_name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "hours": {
+          "type": "string"
+        }
+      }
+    },
+    "provider_links_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider_id": {
+            "type": "string"
+          },
+          "provider_name": {
+            "type": "string"
+          },
+          "provider_type": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "last_verified_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "county_name",
+    "county_slug",
+    "guide_type"
+  ]
+}

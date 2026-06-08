@@ -1,0 +1,69 @@
+{
+  "name": "WeeklyMarketReport",
+  "type": "object",
+  "properties": {
+    "report_title": {
+      "type": "string"
+    },
+    "report_slug": {
+      "type": "string"
+    },
+    "week_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "week_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "weekly_finds",
+        "market_trends",
+        "top_sellers",
+        "category_spotlight"
+      ],
+      "default": "weekly_finds"
+    },
+    "selected_items_json": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "article_content": {
+      "type": "string"
+    },
+    "video_script": {
+      "type": "string"
+    },
+    "youtube_url": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "report_title",
+    "report_slug",
+    "week_start"
+  ]
+}

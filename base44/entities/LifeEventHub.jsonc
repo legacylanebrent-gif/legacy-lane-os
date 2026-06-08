@@ -1,0 +1,72 @@
+{
+  "name": "LifeEventHub",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug e.g. downsizing-guide"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "downsizing",
+        "divorce",
+        "relocation",
+        "senior_transition",
+        "inherited_home",
+        "estate_settlement",
+        "bankruptcy",
+        "foreclosure",
+        "other"
+      ]
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "intro_content": {
+      "type": "string"
+    },
+    "main_content": {
+      "type": "string"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "event_type"
+  ]
+}

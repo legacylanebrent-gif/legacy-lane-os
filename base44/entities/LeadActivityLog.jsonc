@@ -1,0 +1,35 @@
+{
+  "name": "LeadActivityLog",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "FK to EstateTransitionLead.id"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "lead_created",
+        "status_changed",
+        "note_added",
+        "routed",
+        "contacted",
+        "email_sent",
+        "call_made",
+        "follow_up",
+        "closed",
+        "other"
+      ]
+    },
+    "activity_notes": {
+      "type": "string"
+    },
+    "assigned_user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lead_id",
+    "activity_type"
+  ]
+}

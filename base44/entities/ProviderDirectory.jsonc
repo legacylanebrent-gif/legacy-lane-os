@@ -1,0 +1,85 @@
+{
+  "name": "ProviderDirectory",
+  "type": "object",
+  "properties": {
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale_operator",
+        "realtor",
+        "cleanout_vendor",
+        "investor",
+        "attorney_resource"
+      ]
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "counties_served_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "zip_codes_served_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "specialties_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "profile_slug": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "review_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "pending"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "provider_type",
+    "business_name",
+    "state"
+  ]
+}

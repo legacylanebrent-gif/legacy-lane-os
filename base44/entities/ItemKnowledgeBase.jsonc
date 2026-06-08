@@ -1,0 +1,107 @@
+{
+  "name": "ItemKnowledgeBase",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string"
+    },
+    "item_slug": {
+      "type": "string",
+      "description": "URL slug e.g. pyrex-butterprint-mixing-bowl"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string",
+      "description": "e.g. 1950s, Victorian, Mid-Century"
+    },
+    "keywords_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "identification_guide": {
+      "type": "string"
+    },
+    "value_guide": {
+      "type": "string"
+    },
+    "pricing_notes": {
+      "type": "string"
+    },
+    "sold_examples_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "image_urls_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "item_name",
+    "item_slug"
+  ]
+}

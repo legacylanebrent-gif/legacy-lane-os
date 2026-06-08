@@ -1,0 +1,99 @@
+{
+  "name": "StateGuide",
+  "type": "object",
+  "properties": {
+    "state_name": {
+      "type": "string"
+    },
+    "state_slug": {
+      "type": "string",
+      "description": "e.g. new-jersey"
+    },
+    "state_abbreviation": {
+      "type": "string"
+    },
+    "guide_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "downsizing",
+        "divorce",
+        "inherited_home",
+        "estate_sale",
+        "senior_transition",
+        "general"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "intro_content": {
+      "type": "string"
+    },
+    "main_content": {
+      "type": "string"
+    },
+    "quick_facts_json": {
+      "type": "object",
+      "description": "Key-value pairs of quick facts"
+    },
+    "official_resource_links_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "last_verified_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "state_name",
+    "state_slug",
+    "state_abbreviation",
+    "guide_type"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "name": "ProviderRoutingRule",
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "description": "FK to ProviderDirectory.id"
+    },
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "estate_sale_operator",
+        "realtor",
+        "cleanout_vendor",
+        "investor",
+        "attorney_resource"
+      ]
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "life_event_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "downsizing",
+        "divorce",
+        "relocation",
+        "senior_transition",
+        "inherited_home",
+        "estate_settlement",
+        "bankruptcy",
+        "foreclosure",
+        "any"
+      ]
+    },
+    "priority_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Lower = higher priority"
+    },
+    "exclusive_until_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "provider_id",
+    "provider_type",
+    "state"
+  ]
+}

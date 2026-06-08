@@ -1,0 +1,164 @@
+{
+  "name": "EstateTransitionLead",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "life_event_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "downsizing",
+        "divorce",
+        "relocation",
+        "senior_transition",
+        "inherited_home",
+        "estate_settlement",
+        "bankruptcy",
+        "foreclosure",
+        "other"
+      ]
+    },
+    "relationship_to_estate": {
+      "type": "string",
+      "enum": [
+        "executor",
+        "heir",
+        "spouse",
+        "child",
+        "attorney",
+        "trustee",
+        "owner",
+        "other"
+      ]
+    },
+    "has_real_estate": {
+      "type": "boolean",
+      "default": false
+    },
+    "has_personal_property_to_sell": {
+      "type": "boolean",
+      "default": false
+    },
+    "needs_probate_help": {
+      "type": "boolean",
+      "default": false
+    },
+    "needs_estate_sale": {
+      "type": "boolean",
+      "default": false
+    },
+    "needs_cleanout": {
+      "type": "boolean",
+      "default": false
+    },
+    "needs_realtor": {
+      "type": "boolean",
+      "default": false
+    },
+    "wants_cash_offer": {
+      "type": "boolean",
+      "default": false
+    },
+    "needs_attorney_resource": {
+      "type": "boolean",
+      "default": false
+    },
+    "urgency_level": {
+      "type": "string",
+      "enum": [
+        "within_30_days",
+        "1_to_3_months",
+        "3_to_6_months",
+        "6_plus_months",
+        "no_rush"
+      ],
+      "default": "no_rush"
+    },
+    "estimated_home_value": {
+      "type": "number"
+    },
+    "estimated_contents_value": {
+      "type": "number"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "source_page_type": {
+      "type": "string"
+    },
+    "lead_score": {
+      "type": "integer",
+      "default": 0
+    },
+    "lead_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "low"
+    },
+    "assigned_operator_id": {
+      "type": "string"
+    },
+    "assigned_agent_id": {
+      "type": "string"
+    },
+    "assigned_cleanout_vendor_id": {
+      "type": "string"
+    },
+    "assigned_investor_id": {
+      "type": "string"
+    },
+    "crm_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "routed",
+        "in_progress",
+        "closed_won",
+        "closed_lost",
+        "unqualified"
+      ],
+      "default": "new"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "first_name",
+    "email",
+    "state"
+  ]
+}
