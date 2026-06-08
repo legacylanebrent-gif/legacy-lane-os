@@ -116,17 +116,27 @@ export default function EstateTransitionLeadForm({
     const saved = await base44.entities.EstateTransitionLead.create(payload);
     setSubmittedLead(saved);
 
-    // Route
-    await base44.functions.invoke('routeEstateTransitionLead', {
-      lead_id: saved.id,
-      state: form.state,
-      county: form.county,
-      life_event_type: form.life_event_type,
-      needs_estate_sale: form.needs_estate_sale,
-      needs_realtor: form.needs_realtor,
-      needs_cleanout: form.needs_cleanout,
-      wants_cash_offer: form.wants_cash_offer,
-    });
+    // Route + Email sequence in parallel (automation also fires on create, these are belt-and-suspenders)
+    await Promise.all([
+      base44.functions.invoke('routeEstateTransitionLead', {
+        lead_id: saved.id,
+        state: form.state,
+        county: form.county,
+        zip_code: form.zip_code,
+        life_event_type: form.life_event_type,
+        needs_estate_sale: form.needs_estate_sale,
+        needs_realtor: form.needs_realtor,
+        needs_cleanout: form.needs_cleanout,
+        wants_cash_offer: form.wants_cash_offer,
+        has_real_estate: form.has_real_estate,
+        lead_level: payload.lead_level,
+        email: form.email,
+      }),
+      base44.functions.invoke('sendEstateTransitionEmailSequence', {
+        lead_id: saved.id,
+        send_immediately: true,
+      }),
+    ]);
 
     setSubmitted(true);
     setLoading(false);
@@ -135,11 +145,28 @@ export default function EstateTransitionLeadForm({
 
   if (submitted) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-        <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-3" />
-        <h3 className="text-xl font-bold text-green-800 mb-2">We've Got Your Information</h3>
-        <p className="text-green-700 text-sm mb-1">Thank you, {submittedLead?.first_name}. We'll connect you with the right local professionals shortly.</p>
-        <p className="text-xs text-green-600 mt-3">No obligation. Free service.</p>
+      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+        <div className="text-center mb-5">
+          <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-3" />
+          <h3 className="text-xl font-bold text-green-800 mb-1">We've Got Your Information</h3>
+          <p className="text-green-700 text-sm">Thank you, {submittedLead?.first_name}. We'll connect you with the right local professionals shortly.</p>
+          <p className="text-xs text-green-600 mt-1">Check your email — your estate settlement checklist is on its way.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <a href="/estate-checklist" className="flex items-center gap-2 bg-white border border-green-200 rounded-lg p-3 text-sm font-medium text-slate-800 hover:bg-green-50 transition-colors">
+            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" /> View your estate checklist
+          </a>
+          <a href="/estate-settlement-planner" className="flex items-center gap-2 bg-white border border-green-200 rounded-lg p-3 text-sm font-medium text-slate-800 hover:bg-green-50 transition-colors">
+            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" /> Open estate settlement planner
+          </a>
+          <a href="/estate-sale-companies" className="flex items-center gap-2 bg-white border border-green-200 rounded-lg p-3 text-sm font-medium text-slate-800 hover:bg-green-50 transition-colors">
+            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" /> Find estate sale companies
+          </a>
+          <a href="/probate-realtors" className="flex items-center gap-2 bg-white border border-green-200 rounded-lg p-3 text-sm font-medium text-slate-800 hover:bg-green-50 transition-colors">
+            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" /> Find a probate realtor
+          </a>
+        </div>
+        <p className="text-xs text-slate-400 text-center">Free service. No obligation. EstateSalen does not provide legal or financial advice. Consult a licensed attorney for legal guidance.</p>
       </div>
     );
   }
