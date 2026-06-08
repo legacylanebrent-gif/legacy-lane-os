@@ -13,7 +13,7 @@ import {
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
   ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2
+  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film
 } from 'lucide-react';
 
 // Master list of ALL nav items with the page name as the key
@@ -102,6 +102,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',      icon: TrendingUp,      group: 'Admin' },
   { page: 'AdminTerritoryDashboard', label: 'Territory Dashboard',     icon: MapPin,          group: 'Admin' },
   { page: 'ActualRevenue',          label: 'Actual Revenue',          icon: DollarSign,      group: 'Admin' },
+  { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intelligence', icon: Film,           group: 'Admin' },
 
   // Landing Pages (admin only)
   { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
