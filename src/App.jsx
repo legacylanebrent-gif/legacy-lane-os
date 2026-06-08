@@ -103,6 +103,27 @@ import ProbateStatePage from './pages/ProbateStatePage';
 import ProbateChecklist from './pages/ProbateChecklist';
 import AdminProbateEngine from './pages/AdminProbateEngine';
 
+// Life Transition SEO Engine — Phase 2
+import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
+import PreProbateHub from './pages/life-transition/PreProbateHub';
+import InheritedPropertyHub from './pages/life-transition/InheritedPropertyHub';
+import SeniorDownsizingHub from './pages/life-transition/SeniorDownsizingHub';
+import AssistedLivingHub from './pages/life-transition/AssistecdLivingHub';
+import DivorcePropertyHub from './pages/life-transition/DivorcePropertyHub';
+import ForeclosureCleanoutHub from './pages/life-transition/ForeclosureCleanoutHub';
+import EstateCleanoutHub from './pages/life-transition/EstateCleanoutHub';
+import ExecutorGuideHub from './pages/life-transition/ExecutorGuideHub';
+import TrusteeGuideHub from './pages/life-transition/TrusteeGuideHub';
+import HeirGuideHub from './pages/life-transition/HeirGuideHub';
+import MovingSaleHub from './pages/life-transition/MovingSaleHub';
+import ItemsHub from './pages/life-transition/ItemsHub';
+import ItemDetailPage from './pages/life-transition/ItemDetailPage';
+import LearnHub from './pages/life-transition/LearnHub';
+import EstateSettlementPlanner from './pages/life-transition/EstateSettlementPlanner';
+import LifeEventStatePage from './pages/life-transition/LifeEventStatePage';
+import LifeEventCountyPage from './pages/life-transition/LifeEventCountyPage';
+import ProviderDirectoryPage from './pages/life-transition/ProviderDirectoryPage';
+
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
@@ -252,6 +273,35 @@ const AuthenticatedApp = () => {
       <Route path="/probate/:stateSlug" element={<ProbateStatePage />} />
       <Route path="/probate/:stateSlug/:countySlug" element={<ProbateStatePage />} />
       <Route path="/probate-checklist" element={<ProbateChecklist />} />
+
+      {/* ── Life Transition SEO Engine — Static Hubs ── */}
+      <Route path="/pre-probate" element={<PreProbateHub />} />
+      <Route path="/inherited-property" element={<InheritedPropertyHub />} />
+      <Route path="/senior-downsizing" element={<SeniorDownsizingHub />} />
+      <Route path="/assisted-living-transition" element={<AssistedLivingHub />} />
+      <Route path="/divorce-property-sale" element={<DivorcePropertyHub />} />
+      <Route path="/foreclosure-cleanout" element={<ForeclosureCleanoutHub />} />
+      <Route path="/estate-cleanout" element={<EstateCleanoutHub />} />
+      <Route path="/executor-guide" element={<ExecutorGuideHub />} />
+      <Route path="/trustee-guide" element={<TrusteeGuideHub />} />
+      <Route path="/heir-guide" element={<HeirGuideHub />} />
+      <Route path="/moving-sale" element={<MovingSaleHub />} />
+      <Route path="/items" element={<ItemsHub />} />
+      <Route path="/items/:itemSlug" element={<ItemDetailPage />} />
+      <Route path="/learn" element={<LearnHub />} />
+      <Route path="/learn/:articleSlug" element={<LearnHub />} />
+      <Route path="/estate-checklist" element={<ProbateChecklist />} />
+      <Route path="/estate-settlement-planner" element={<EstateSettlementPlanner />} />
+
+      {/* ── Life Transition SEO Engine — Dynamic Routes ── */}
+      <Route path="/estate-sale-companies" element={<ProviderDirectoryPage directoryType="estate-sale-companies" />} />
+      <Route path="/estate-sale-companies/:stateSlug" element={<ProviderDirectoryPage directoryType="estate-sale-companies" />} />
+      <Route path="/estate-sale-companies/:stateSlug/:countySlug" element={<ProviderDirectoryPage directoryType="estate-sale-companies" />} />
+      <Route path="/probate-realtors" element={<ProviderDirectoryPage directoryType="probate-realtors" />} />
+      <Route path="/probate-realtors/:stateSlug" element={<ProviderDirectoryPage directoryType="probate-realtors" />} />
+      <Route path="/probate-realtors/:stateSlug/:countySlug" element={<ProviderDirectoryPage directoryType="probate-realtors" />} />
+      <Route path="/:lifeEventSlug/:stateSlug" element={<LifeEventStatePage />} />
+      <Route path="/:lifeEventSlug/:stateSlug/:countySlug" element={<LifeEventCountyPage />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
