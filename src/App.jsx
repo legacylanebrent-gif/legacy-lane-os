@@ -104,6 +104,7 @@ import ProbateChecklist from './pages/ProbateChecklist';
 import AdminProbateEngine from './pages/AdminProbateEngine';
 import AdminLifeTransitionEngine from './pages/AdminLifeTransitionEngine';
 import AdminContentEngine from './pages/AdminContentEngine';
+import EstateChecklist from './pages/EstateChecklist';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -276,7 +277,7 @@ const AuthenticatedApp = () => {
       <Route path="/probate" element={<ProbateHub />} />
       <Route path="/probate/:stateSlug" element={<ProbateStatePage />} />
       <Route path="/probate/:stateSlug/:countySlug" element={<ProbateStatePage />} />
-      <Route path="/probate-checklist" element={<ProbateChecklist />} />
+      <Route path="/probate-checklist" element={<EstateChecklist />} />
 
       {/* ── Life Transition SEO Engine — Static Hubs ── */}
       <Route path="/pre-probate" element={<PreProbateHub />} />
@@ -294,7 +295,10 @@ const AuthenticatedApp = () => {
       <Route path="/items/:itemSlug" element={<ItemDetailPage />} />
       <Route path="/learn" element={<LearnHub />} />
       <Route path="/learn/:articleSlug" element={<LearnHub />} />
-      <Route path="/estate-checklist" element={<ProbateChecklist />} />
+      <Route path="/estate-checklist" element={<EstateChecklist />} />
+      <Route path="/estate-checklist/:lifeEventSlug" element={<EstateChecklist />} />
+      <Route path="/estate-checklist/:lifeEventSlug/:stateSlug" element={<EstateChecklist />} />
+      <Route path="/estate-checklist/:lifeEventSlug/:stateSlug/:countySlug" element={<EstateChecklist />} />
       <Route path="/estate-settlement-planner" element={<EstateSettlementPlanner />} />
 
       {/* ── Life Transition SEO Engine — Dynamic Routes ── */}

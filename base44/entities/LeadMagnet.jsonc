@@ -1,0 +1,97 @@
+{
+  "name": "LeadMagnet",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug e.g. probate-estate-settlement-checklist"
+    },
+    "life_event_type": {
+      "type": "string",
+      "enum": [
+        "probate",
+        "executor_guide",
+        "inherited_home",
+        "estate_sale",
+        "senior_downsizing",
+        "assisted_living",
+        "estate_cleanout",
+        "divorce_property",
+        "foreclosure_cleanout",
+        "moving_sale"
+      ]
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "checklist_items_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "default": "medium"
+          }
+        }
+      },
+      "default": []
+    },
+    "pdf_url": {
+      "type": "string"
+    },
+    "email_subject": {
+      "type": "string"
+    },
+    "email_body": {
+      "type": "string"
+    },
+    "cta_headline": {
+      "type": "string"
+    },
+    "cta_body": {
+      "type": "string"
+    },
+    "download_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "life_event_type"
+  ]
+}
