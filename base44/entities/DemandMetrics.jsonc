@@ -1,0 +1,74 @@
+{
+  "name": "DemandMetrics",
+  "type": "object",
+  "properties": {
+    "item_knowledge_id": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "watch_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "wanted_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "save_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "active_inventory_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "sold_inventory_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "demand_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Computed 0-100 score"
+    },
+    "demand_trend": {
+      "type": "string",
+      "enum": [
+        "rising",
+        "stable",
+        "falling",
+        "new"
+      ],
+      "default": "new"
+    },
+    "price_trend": {
+      "type": "string",
+      "enum": [
+        "rising",
+        "stable",
+        "falling",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "avg_days_to_sell": {
+      "type": "number"
+    },
+    "last_computed": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "item_knowledge_id"
+  ]
+}

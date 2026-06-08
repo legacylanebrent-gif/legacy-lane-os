@@ -1,0 +1,68 @@
+{
+  "name": "BuyerIntent",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "style": {
+      "type": "string"
+    },
+    "material": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "budget_min": {
+      "type": "number"
+    },
+    "budget_max": {
+      "type": "number"
+    },
+    "distance_radius": {
+      "type": "integer",
+      "description": "Miles"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "shipping_ok": {
+      "type": "boolean",
+      "default": true
+    },
+    "priority_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "buyer_id"
+  ]
+}

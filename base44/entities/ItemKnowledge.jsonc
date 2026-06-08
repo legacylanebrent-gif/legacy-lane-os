@@ -1,0 +1,137 @@
+{
+  "name": "ItemKnowledge",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL slug: /items/{slug}"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Display name e.g. Pyrex Butterprint Mixing Bowl"
+    },
+    "normalized_name": {
+      "type": "string",
+      "description": "Lowercase normalized for dedup/matching"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "style": {
+      "type": "string",
+      "description": "e.g. Mid-Century Modern, Victorian"
+    },
+    "pattern": {
+      "type": "string",
+      "description": "e.g. Butterprint, Gooseberry"
+    },
+    "era": {
+      "type": "string",
+      "description": "e.g. 1950s, circa 1920"
+    },
+    "material": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "country_of_origin": {
+      "type": "string"
+    },
+    "estimated_age": {
+      "type": "string"
+    },
+    "ai_description": {
+      "type": "string"
+    },
+    "historical_context": {
+      "type": "string"
+    },
+    "collector_notes": {
+      "type": "string"
+    },
+    "primary_image_url": {
+      "type": "string"
+    },
+    "occurrence_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "average_value": {
+      "type": "number"
+    },
+    "highest_value": {
+      "type": "number"
+    },
+    "lowest_value": {
+      "type": "number"
+    },
+    "active_inventory_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "sold_inventory_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "buyer_interest_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "watch_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "wanted_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "demand_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100 computed demand signal"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "meta_description": {
+      "type": "string"
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "entity_name",
+    "slug"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "name": "CollectorProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "location_city": {
+      "type": "string"
+    },
+    "location_state": {
+      "type": "string"
+    },
+    "favorite_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "favorite_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "favorite_eras": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "public_visibility": {
+      "type": "boolean",
+      "default": true
+    },
+    "collection_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "watch_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "wanted_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "slug": {
+      "type": "string",
+      "description": "/collector/{username}"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "username"
+  ]
+}

@@ -88,6 +88,15 @@ import PlatformAds from './pages/PlatformAds';
 import PlatformSEODashboard from './pages/PlatformSEODashboard.jsx';
 import ActualRevenue from './pages/ActualRevenue';
 import MySalesGuide from './pages/MySalesGuide';
+import CityHubPage from './pages/CityHubPage';
+import CategoryHubPage from './pages/CategoryHubPage';
+import BrandHubPage from './pages/BrandHubPage';
+import BlogPost from './pages/BlogPost';
+import BlogIndex from './pages/BlogIndex';
+import CompanyProfilePage from './pages/CompanyProfilePage';
+import SaleRecapPage from './pages/SaleRecapPage';
+import PriceGuidePage from './pages/PriceGuidePage';
+import WantedItemsPage from './pages/WantedItemsPage';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -219,6 +228,18 @@ const AuthenticatedApp = () => {
       <Route path="/PlatformSEODashboard" element={<LayoutWrapper currentPageName="PlatformSEODashboard"><PlatformSEODashboard /></LayoutWrapper>} />
       <Route path="/ActualRevenue" element={<LayoutWrapper currentPageName="ActualRevenue"><ActualRevenue /></LayoutWrapper>} />
       <Route path="/MySalesGuide" element={<LayoutWrapper currentPageName="MySalesGuide"><MySalesGuide /></LayoutWrapper>} />
+
+      {/* ── Knowledge Graph Public Routes ── */}
+      <Route path="/estate-sales" element={<CityHubPage />} />
+      <Route path="/categories" element={<CategoryHubPage />} />
+      <Route path="/brands" element={<BrandHubPage />} />
+      <Route path="/blog" element={<BlogIndex />} />
+      <Route path="/blog-post" element={<BlogPost />} />
+      <Route path="/companies" element={<CompanyProfilePage />} />
+      <Route path="/sale-recap" element={<SaleRecapPage />} />
+      <Route path="/price-guide" element={<PriceGuidePage />} />
+      <Route path="/wanted" element={<WantedItemsPage />} />
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

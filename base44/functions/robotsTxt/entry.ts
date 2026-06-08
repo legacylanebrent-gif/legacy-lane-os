@@ -16,6 +16,15 @@ Allow: /StartYourCompany
 Allow: /CompareEstateSales
 Allow: /SaleLanding
 Allow: /ItemDetail
+Allow: /estate-sales
+Allow: /categories
+Allow: /brands
+Allow: /blog
+Allow: /blog-post
+Allow: /companies
+Allow: /sale-recap
+Allow: /price-guide
+Allow: /wanted
 
 # Block admin / operator-only pages
 Disallow: /Dashboard

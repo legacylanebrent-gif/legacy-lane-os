@@ -1,0 +1,72 @@
+{
+  "name": "CollectorCollection",
+  "type": "object",
+  "properties": {
+    "collector_id": {
+      "type": "string",
+      "description": "CollectorProfile user_id"
+    },
+    "collection_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string"
+    },
+    "brand_focus": {
+      "type": "string"
+    },
+    "item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "item_knowledge_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "cover_image_url": {
+      "type": "string"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "item_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "slug": {
+      "type": "string",
+      "description": "/collections/{slug}"
+    },
+    "public_visibility": {
+      "type": "boolean",
+      "default": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "collector_id",
+    "collection_name"
+  ]
+}

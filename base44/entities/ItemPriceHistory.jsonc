@@ -1,0 +1,63 @@
+{
+  "name": "ItemPriceHistory",
+  "type": "object",
+  "properties": {
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge"
+    },
+    "item_id": {
+      "type": "string",
+      "description": "FK to Item (if from marketplace)"
+    },
+    "sale_item_pricing_id": {
+      "type": "string",
+      "description": "FK to SaleItemPricing (if from SERP)"
+    },
+    "price": {
+      "type": "number"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "serp_api",
+        "sale_sold",
+        "marketplace_sold",
+        "manual",
+        "google_lens",
+        "operator_input"
+      ]
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "source_title": {
+      "type": "string"
+    },
+    "lookup_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sale_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_knowledge_id",
+    "price",
+    "source"
+  ]
+}

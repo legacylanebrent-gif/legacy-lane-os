@@ -1,0 +1,94 @@
+{
+  "name": "WantedItem",
+  "type": "object",
+  "properties": {
+    "buyer_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "style": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string"
+    },
+    "material": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "budget_min": {
+      "type": "number"
+    },
+    "budget_max": {
+      "type": "number"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "any",
+        "new",
+        "used_like_new",
+        "used_good",
+        "used_fair"
+      ]
+    },
+    "distance": {
+      "type": "integer"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "shipping_ok": {
+      "type": "boolean",
+      "default": true
+    },
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "Link to ItemKnowledge if matched"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug for /wanted/{slug}"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "fulfilled",
+        "expired",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "public_visibility": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "buyer_id",
+    "title"
+  ]
+}

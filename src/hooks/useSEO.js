@@ -6,7 +6,7 @@ import { useEffect } from 'react';
  *
  * Call at the top of any page component.
  */
-export function useSEO({ title, description, image, jsonLd } = {}) {
+export function useSEO({ title, description, image, jsonLd, canonical } = {}) {
   useEffect(() => {
     if (title) document.title = title;
 
@@ -14,7 +14,22 @@ export function useSEO({ title, description, image, jsonLd } = {}) {
     setMeta('property', 'og:title', title);
     setMeta('property', 'og:description', description);
     setMeta('property', 'og:type', 'website');
+    setMeta('property', 'og:site_name', 'EstateSalen.com');
     if (image) setMeta('property', 'og:image', image);
+    if (canonical) setMeta('property', 'og:url', canonical);
+
+    // Twitter Cards
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', description);
+    if (image) setMeta('name', 'twitter:image', image);
+
+    // Canonical link tag
+    if (canonical) {
+      let el = document.querySelector('link[rel="canonical"]');
+      if (!el) { el = document.createElement('link'); el.rel = 'canonical'; document.head.appendChild(el); }
+      el.href = canonical;
+    }
 
     // Inject / replace JSON-LD
     if (jsonLd) {

@@ -1,0 +1,133 @@
+{
+  "name": "SaleRecap",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "/sale-recap/{slug}"
+    },
+    "title": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "sale_dates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "total_items": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_sold": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_views": {
+      "type": "integer",
+      "default": 0
+    },
+    "estimated_sale_value": {
+      "type": "number"
+    },
+    "actual_revenue": {
+      "type": "number"
+    },
+    "top_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "notable_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "most_valuable_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sold_price": {
+            "type": "number"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "item_knowledge_id": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "category_breakdown": {
+      "type": "object",
+      "description": "{ category: count }"
+    },
+    "ai_summary": {
+      "type": "string"
+    },
+    "historical_notes": {
+      "type": "string"
+    },
+    "primary_image_url": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "meta_description": {
+      "type": "string"
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    }
+  },
+  "required": [
+    "sale_id"
+  ]
+}
