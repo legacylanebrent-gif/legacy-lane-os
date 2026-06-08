@@ -105,6 +105,7 @@ import AdminProbateEngine from './pages/AdminProbateEngine';
 import AdminLifeTransitionEngine from './pages/AdminLifeTransitionEngine';
 import AdminContentEngine from './pages/AdminContentEngine';
 import EstateChecklist from './pages/EstateChecklist';
+import AdminPhase12Deploy from './pages/AdminPhase12Deploy';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -272,6 +273,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminProbateEngine" element={<LayoutWrapper currentPageName="AdminProbateEngine"><AdminProbateEngine /></LayoutWrapper>} />
       <Route path="/AdminLifeTransitionEngine" element={<LayoutWrapper currentPageName="AdminLifeTransitionEngine"><AdminLifeTransitionEngine /></LayoutWrapper>} />
       <Route path="/AdminContentEngine" element={<LayoutWrapper currentPageName="AdminContentEngine"><AdminContentEngine /></LayoutWrapper>} />
+      <Route path="/AdminPhase12Deploy" element={<LayoutWrapper currentPageName="AdminPhase12Deploy"><AdminPhase12Deploy /></LayoutWrapper>} />
 
       {/* ── Probate SEO Engine Public Routes ── */}
       <Route path="/probate" element={<ProbateHub />} />
