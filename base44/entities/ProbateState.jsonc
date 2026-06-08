@@ -1,0 +1,95 @@
+{
+  "name": "ProbateState",
+  "type": "object",
+  "properties": {
+    "state_name": {
+      "type": "string"
+    },
+    "state_abbreviation": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "e.g. new-jersey"
+    },
+    "probate_court_name": {
+      "type": "string"
+    },
+    "small_estate_threshold": {
+      "type": "string"
+    },
+    "small_estate_process": {
+      "type": "string"
+    },
+    "official_court_url": {
+      "type": "string"
+    },
+    "official_forms_url": {
+      "type": "string"
+    },
+    "intro_content": {
+      "type": "string"
+    },
+    "step_by_step_process": {
+      "type": "string"
+    },
+    "estate_sale_section": {
+      "type": "string"
+    },
+    "inherited_home_section": {
+      "type": "string"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "quick_facts": {
+      "type": "object"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "meta_description": {
+      "type": "string"
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    },
+    "last_generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "county_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "state_name",
+    "state_abbreviation",
+    "slug"
+  ]
+}

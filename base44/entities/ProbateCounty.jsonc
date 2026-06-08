@@ -1,0 +1,91 @@
+{
+  "name": "ProbateCounty",
+  "type": "object",
+  "properties": {
+    "state_id": {
+      "type": "string"
+    },
+    "state_abbreviation": {
+      "type": "string"
+    },
+    "state_name": {
+      "type": "string"
+    },
+    "county_name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "e.g. monmouth-county-nj"
+    },
+    "state_slug": {
+      "type": "string"
+    },
+    "probate_court_name": {
+      "type": "string"
+    },
+    "probate_court_address": {
+      "type": "string"
+    },
+    "probate_court_phone": {
+      "type": "string"
+    },
+    "probate_court_url": {
+      "type": "string"
+    },
+    "intro_content": {
+      "type": "string"
+    },
+    "local_process_notes": {
+      "type": "string"
+    },
+    "estate_sale_section": {
+      "type": "string"
+    },
+    "faq_json": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "meta_description": {
+      "type": "string"
+    },
+    "schema_json": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "indexed_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "indexed",
+        "not_indexed",
+        "unknown"
+      ],
+      "default": "not_submitted"
+    },
+    "last_generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "state_abbreviation",
+    "county_name",
+    "slug"
+  ]
+}

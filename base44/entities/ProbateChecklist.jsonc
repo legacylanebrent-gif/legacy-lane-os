@@ -1,0 +1,55 @@
+{
+  "name": "ProbateChecklist",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "integer"
+          },
+          "category": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "completed": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "default": []
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

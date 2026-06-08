@@ -1,0 +1,131 @@
+{
+  "name": "ProbateLead",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "relationship_to_deceased": {
+      "type": "string",
+      "enum": [
+        "spouse",
+        "child",
+        "sibling",
+        "parent",
+        "executor",
+        "attorney",
+        "other"
+      ]
+    },
+    "stage_of_process": {
+      "type": "string",
+      "enum": [
+        "just_started",
+        "in_probate",
+        "nearly_done",
+        "not_sure"
+      ]
+    },
+    "has_will": {
+      "type": "boolean"
+    },
+    "has_real_estate": {
+      "type": "boolean"
+    },
+    "needs_estate_sale": {
+      "type": "boolean"
+    },
+    "needs_cleanout": {
+      "type": "boolean"
+    },
+    "needs_realtor": {
+      "type": "boolean"
+    },
+    "wants_cash_offer": {
+      "type": "boolean"
+    },
+    "needs_attorney": {
+      "type": "boolean"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "urgency_level": {
+      "type": "string",
+      "enum": [
+        "within_30_days",
+        "1_to_3_months",
+        "3_to_6_months",
+        "no_rush"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "lead_score": {
+      "type": "integer",
+      "default": 0
+    },
+    "source_page": {
+      "type": "string"
+    },
+    "source_state": {
+      "type": "string"
+    },
+    "source_county": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "routed",
+        "closed",
+        "unqualified"
+      ],
+      "default": "new"
+    },
+    "routed_to": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "routed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "first_name",
+    "email",
+    "state"
+  ]
+}

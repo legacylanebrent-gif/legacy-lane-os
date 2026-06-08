@@ -1,0 +1,49 @@
+{
+  "name": "ProbateContentJob",
+  "type": "object",
+  "properties": {
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "generate_state",
+        "generate_county",
+        "refresh_state",
+        "refresh_county"
+      ]
+    },
+    "target_id": {
+      "type": "string"
+    },
+    "target_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "result_summary": {
+      "type": "string"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "job_type",
+    "target_name"
+  ]
+}

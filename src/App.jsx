@@ -98,6 +98,10 @@ import SaleRecapPage from './pages/SaleRecapPage';
 import PriceGuidePage from './pages/PriceGuidePage';
 import WantedItemsPage from './pages/WantedItemsPage';
 import WeeklyVideoIntelligence from './pages/WeeklyVideoIntelligence';
+import ProbateHub from './pages/ProbateHub';
+import ProbateStatePage from './pages/ProbateStatePage';
+import ProbateChecklist from './pages/ProbateChecklist';
+import AdminProbateEngine from './pages/AdminProbateEngine';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -241,6 +245,13 @@ const AuthenticatedApp = () => {
       <Route path="/price-guide" element={<PriceGuidePage />} />
       <Route path="/wanted" element={<WantedItemsPage />} />
       <Route path="/WeeklyVideoIntelligence" element={<LayoutWrapper currentPageName="WeeklyVideoIntelligence"><WeeklyVideoIntelligence /></LayoutWrapper>} />
+      <Route path="/AdminProbateEngine" element={<LayoutWrapper currentPageName="AdminProbateEngine"><AdminProbateEngine /></LayoutWrapper>} />
+
+      {/* ── Probate SEO Engine Public Routes ── */}
+      <Route path="/probate" element={<ProbateHub />} />
+      <Route path="/probate/:stateSlug" element={<ProbateStatePage />} />
+      <Route path="/probate/:stateSlug/:countySlug" element={<ProbateStatePage />} />
+      <Route path="/probate-checklist" element={<ProbateChecklist />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
