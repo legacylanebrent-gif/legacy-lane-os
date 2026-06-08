@@ -16,6 +16,7 @@ import SEAdminUniversity from '@/components/seo-engine/admin/SEAdminUniversity';
 import SEAdminWeeklyReports from '@/components/seo-engine/admin/SEAdminWeeklyReports';
 import SEAdminSEOPerformance from '@/components/seo-engine/admin/SEAdminSEOPerformance';
 import SEAdminRevenue from '@/components/seo-engine/admin/SEAdminRevenue';
+import SEAdminTerritoryLaunches from '@/components/seo-engine/admin/SEAdminTerritoryLaunches';
 
 function StatsBar({ hubs, stateGuides, countyGuides, leads, providers, items, articles, reports }) {
   return (
@@ -58,12 +59,13 @@ export default function AdminLifeTransitionEngine() {
   const [articles, setArticles] = useState([]);
   const [reports, setReports] = useState([]);
   const [seoLogs, setSeoLogs] = useState([]);
+  const [territories, setTerritories] = useState([]);
 
   useEffect(() => { loadAll(); }, []);
 
   const loadAll = async () => {
     setLoading(true);
-    const [h, sg, cg, l, p, rr, i, a, r, sl] = await Promise.all([
+    const [h, sg, cg, l, p, rr, i, a, r, sl, ter] = await Promise.all([
       base44.entities.LifeEventHub.list('-created_date', 100),
       base44.entities.StateGuide.list('-created_date', 200),
       base44.entities.CountyGuide.list('-created_date', 200),
@@ -74,10 +76,11 @@ export default function AdminLifeTransitionEngine() {
       base44.entities.EstateSaleUniversityArticle.list('-created_date', 200),
       base44.entities.WeeklyMarketReport.list('-created_date', 50),
       base44.entities.SEOIndexLog.list('-created_date', 500),
+      base44.entities.TerritoryLaunch.list('-created_date', 200),
     ]);
     setHubs(h); setStateGuides(sg); setCountyGuides(cg); setLeads(l);
     setProviders(p); setRoutingRules(rr); setItems(i); setArticles(a);
-    setReports(r); setSeoLogs(sl);
+    setReports(r); setSeoLogs(sl); setTerritories(ter);
     setLoading(false);
   };
 
@@ -93,6 +96,7 @@ export default function AdminLifeTransitionEngine() {
     { value: 'reports', label: 'Weekly Reports', icon: BarChart3 },
     { value: 'seo', label: 'SEO Performance', icon: TrendingUp },
     { value: 'revenue', label: 'Revenue', icon: DollarSign },
+    { value: 'territories', label: `Territories (${territories.length})`, icon: MapPin },
   ];
 
   return (
@@ -129,6 +133,7 @@ export default function AdminLifeTransitionEngine() {
         <TabsContent value="reports"><SEAdminWeeklyReports reports={reports} onRefresh={loadAll} /></TabsContent>
         <TabsContent value="seo"><SEAdminSEOPerformance seoLogs={seoLogs} onRefresh={loadAll} /></TabsContent>
         <TabsContent value="revenue"><SEAdminRevenue leads={leads} seoLogs={seoLogs} /></TabsContent>
+        <TabsContent value="territories"><SEAdminTerritoryLaunches territories={territories} onRefresh={loadAll} /></TabsContent>
       </Tabs>
     </div>
   );

@@ -1,0 +1,109 @@
+{
+  "name": "TerritoryLaunch",
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string"
+    },
+    "state_slug": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "county_slug": {
+      "type": "string"
+    },
+    "cities_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "zip_codes_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "assigned_operator_id": {
+      "type": "string"
+    },
+    "assigned_operator_name": {
+      "type": "string"
+    },
+    "assigned_agent_id": {
+      "type": "string"
+    },
+    "assigned_agent_name": {
+      "type": "string"
+    },
+    "assigned_cleanout_vendor_id": {
+      "type": "string"
+    },
+    "assigned_cleanout_vendor_name": {
+      "type": "string"
+    },
+    "assigned_investor_id": {
+      "type": "string"
+    },
+    "assigned_investor_name": {
+      "type": "string"
+    },
+    "launch_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "review",
+        "published",
+        "unpublished"
+      ],
+      "default": "draft"
+    },
+    "pages_created_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "page_type": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "sitemap_status": {
+      "type": "string",
+      "enum": [
+        "not_queued",
+        "queued",
+        "submitted"
+      ],
+      "default": "not_queued"
+    },
+    "routing_rules_created": {
+      "type": "integer",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "state",
+    "state_slug",
+    "county",
+    "county_slug"
+  ]
+}
