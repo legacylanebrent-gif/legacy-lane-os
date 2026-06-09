@@ -108,6 +108,7 @@ import EstateChecklist from './pages/EstateChecklist';
 import AdminPhase12Deploy from './pages/AdminPhase12Deploy';
 import AdminBuildReport from './pages/AdminBuildReport';
 import PropstreamREListings from './pages/PropstreamREListings';
+import PropstreamREListingImporter from './pages/PropstreamREListingImporter';
 import AgentListingEstateSaleRequest from './pages/AgentListingEstateSaleRequest';
 import ClaimBusiness from './pages/ClaimBusiness';
 import ResellerNetwork from './pages/ResellerNetwork';
@@ -285,6 +286,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminPhase12Deploy" element={<LayoutWrapper currentPageName="AdminPhase12Deploy"><AdminPhase12Deploy /></LayoutWrapper>} />
       <Route path="/AdminBuildReport" element={<LayoutWrapper currentPageName="AdminBuildReport"><AdminBuildReport /></LayoutWrapper>} />
       <Route path="/PropstreamREListings" element={<LayoutWrapper currentPageName="PropstreamREListings"><PropstreamREListings /></LayoutWrapper>} />
+      <Route path="/PropstreamREListingImporter" element={<LayoutWrapper currentPageName="PropstreamREListingImporter"><PropstreamREListingImporter /></LayoutWrapper>} />
       <Route path="/agent-listing-estate-sale-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/claim-business" element={<ClaimBusiness />} />
       <Route path="/reseller-network" element={<ResellerNetwork />} />

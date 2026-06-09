@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import {
   Upload, Zap, Mail, Send, Download, History, Eye, Building2,
-  Filter, ChevronDown, ChevronUp, Loader, RefreshCw
+  Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet
 } from 'lucide-react';
 import PropstreamImportModal from '@/components/propstream/PropstreamImportModal';
 import PropstreamListingDrawer from '@/components/propstream/PropstreamListingDrawer';
@@ -138,8 +139,13 @@ export default function PropstreamREListings() {
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
           <Button onClick={() => setShowImport(true)} className="bg-purple-700 hover:bg-purple-800">
-            <Upload className="w-4 h-4 mr-1" /> Import CSV
+            <Upload className="w-4 h-4 mr-1" /> Quick Import
           </Button>
+          <Link to="/PropstreamREListingImporter">
+            <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+              <FileSpreadsheet className="w-4 h-4 mr-1" /> Full Importer
+            </Button>
+          </Link>
           <Button onClick={handleScoreAll} disabled={scoring} variant="outline">
             {scoring ? <Loader className="w-4 h-4 animate-spin mr-1" /> : <Zap className="w-4 h-4 mr-1" />} Score
           </Button>
