@@ -167,7 +167,7 @@
     },
     "geocoded_city": {
       "type": "string",
-      "description": "City resolved from geocoding (not the EstateSales.net region label)"
+      "description": "City resolved from geocoding"
     },
     "geocoded_county": {
       "type": "string",
@@ -192,6 +192,81 @@
       "type": "string",
       "format": "date-time",
       "description": "Timestamp of last geocoding attempt"
+    },
+    "claimed_listing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this listing has been claimed"
+    },
+    "claimed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the listing was claimed"
+    },
+    "claim_status": {
+      "type": "string",
+      "enum": [
+        "unclaimed",
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "unclaimed"
+    },
+    "claim_verification_status": {
+      "type": "string",
+      "enum": [
+        "not_submitted",
+        "submitted",
+        "verified",
+        "failed"
+      ],
+      "default": "not_submitted"
+    },
+    "lead_access_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this operator receives lead notifications"
+    },
+    "free_trial_started": {
+      "type": "boolean",
+      "default": false
+    },
+    "free_trial_start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "free_trial_end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "free_lead_access",
+        "free_trial",
+        "active",
+        "expired",
+        "cancelled"
+      ],
+      "default": "none"
+    },
+    "claimed_by_user_id": {
+      "type": "string",
+      "description": "EstateSalen User ID of the person who claimed"
+    },
+    "claim_contact_name": {
+      "type": "string"
+    },
+    "claim_contact_email": {
+      "type": "string"
+    },
+    "claim_contact_phone": {
+      "type": "string"
+    },
+    "claim_notes": {
+      "type": "string"
     }
   },
   "required": [

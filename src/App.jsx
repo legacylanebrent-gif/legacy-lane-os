@@ -109,6 +109,7 @@ import AdminPhase12Deploy from './pages/AdminPhase12Deploy';
 import AdminBuildReport from './pages/AdminBuildReport';
 import PropstreamREListings from './pages/PropstreamREListings';
 import AgentListingEstateSaleRequest from './pages/AgentListingEstateSaleRequest';
+import ClaimBusiness from './pages/ClaimBusiness';
 import AgentRequestThankYou from './pages/AgentRequestThankYou';
 
 // Life Transition SEO Engine — Phase 2
@@ -281,6 +282,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminBuildReport" element={<LayoutWrapper currentPageName="AdminBuildReport"><AdminBuildReport /></LayoutWrapper>} />
       <Route path="/PropstreamREListings" element={<LayoutWrapper currentPageName="PropstreamREListings"><PropstreamREListings /></LayoutWrapper>} />
       <Route path="/agent-listing-estate-sale-request" element={<AgentListingEstateSaleRequest />} />
+      <Route path="/claim-business" element={<ClaimBusiness />} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 
