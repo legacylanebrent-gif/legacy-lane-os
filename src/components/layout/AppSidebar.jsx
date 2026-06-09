@@ -69,7 +69,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminVendors',           label: 'Vendor Ads',          icon: Briefcase,       group: 'Admin' },
   { page: 'AdminLeads',             label: 'All Leads',           icon: Award,           group: 'Admin' },
   { page: 'AdminLeadsSocialAds',   label: 'Social Ads Leads',    icon: Award,           group: 'Admin' },
-  { page: 'AdminLeadsPropstream',  label: 'Propstream Leads',    icon: Award,           group: 'Admin' },
+  { page: 'AdminLeadsPropstream',  label: 'Propstream Probate Leads',    icon: Award,           group: 'Admin' },
   { page: 'AdminLeadsWebsite',     label: 'Website Leads',       icon: Award,           group: 'Admin' },
   { page: 'AdminLeadImporter',     label: 'Lead Importer',       icon: Upload,          group: 'Admin' },
   { page: 'AdminMarketplace',       label: 'Marketplace',         icon: ShoppingBag,     group: 'Admin' },
