@@ -1,0 +1,106 @@
+{
+  "name": "CleanoutVendorProfile",
+  "type": "object",
+  "properties": {
+    "business_name": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "service_radius": {
+      "type": "number",
+      "description": "Miles radius from base"
+    },
+    "service_states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "territory_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "whole_house",
+          "partial_house",
+          "garage",
+          "attic",
+          "basement",
+          "storage_unit",
+          "hoarding",
+          "estate_cleanout",
+          "foreclosure",
+          "rental_property"
+        ]
+      },
+      "default": []
+    },
+    "lead_notifications_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "membership_status": {
+      "type": "string",
+      "enum": [
+        "free",
+        "network_member",
+        "suspended"
+      ],
+      "default": "free"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "active",
+        "trial",
+        "expired",
+        "cancelled"
+      ],
+      "default": "none"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_name",
+    "contact_name",
+    "email"
+  ]
+}
