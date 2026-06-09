@@ -114,6 +114,7 @@ import ResellerNetwork from './pages/ResellerNetwork';
 import CleanoutNetwork from './pages/CleanoutNetwork';
 import AdminCleanoutLeads from './pages/AdminCleanoutLeads';
 import AgentRequestThankYou from './pages/AgentRequestThankYou';
+import LaunchAuditCenter from './pages/LaunchAuditCenter';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -289,6 +290,7 @@ const AuthenticatedApp = () => {
       <Route path="/reseller-network" element={<ResellerNetwork />} />
       <Route path="/cleanout-network" element={<CleanoutNetwork />} />
       <Route path="/AdminCleanoutLeads" element={<LayoutWrapper currentPageName="AdminCleanoutLeads"><AdminCleanoutLeads /></LayoutWrapper>} />
+      <Route path="/LaunchAuditCenter" element={<LayoutWrapper currentPageName="LaunchAuditCenter"><LaunchAuditCenter /></LayoutWrapper>} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 

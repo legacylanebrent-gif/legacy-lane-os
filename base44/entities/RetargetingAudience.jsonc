@@ -1,0 +1,67 @@
+{
+  "name": "RetargetingAudience",
+  "type": "object",
+  "properties": {
+    "lead_source": {
+      "type": "string",
+      "enum": [
+        "agent_estate_sale_request",
+        "reseller_request",
+        "cleanout_request",
+        "operator_claim",
+        "free_trial",
+        "directory_claim",
+        "propstream_outreach",
+        "agent_referral",
+        "other"
+      ]
+    },
+    "audience_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "lead_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "default": "new"
+    },
+    "territory": {
+      "type": "string"
+    },
+    "assigned_operator": {
+      "type": "string"
+    },
+    "assigned_agent": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lead_source"
+  ]
+}
