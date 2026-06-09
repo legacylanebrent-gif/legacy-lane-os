@@ -230,6 +230,78 @@
     },
     "notes": {
       "type": "string"
+    },
+    "agent_submitted_to_pool": {
+      "type": "boolean",
+      "default": false
+    },
+    "agent_submission_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent_submitter_first_name": {
+      "type": "string"
+    },
+    "agent_submitter_last_name": {
+      "type": "string"
+    },
+    "agent_submitter_email": {
+      "type": "string"
+    },
+    "agent_submitter_phone": {
+      "type": "string"
+    },
+    "agent_submitter_brokerage": {
+      "type": "string"
+    },
+    "agent_preferred_contact_method": {
+      "type": "string",
+      "enum": [
+        "email",
+        "phone",
+        "text",
+        "any"
+      ]
+    },
+    "agent_best_contact_time": {
+      "type": "string"
+    },
+    "agent_permission_to_share": {
+      "type": "boolean",
+      "default": false
+    },
+    "requested_estate_sale_timeline": {
+      "type": "string"
+    },
+    "requested_help_type": {
+      "type": "string"
+    },
+    "home_contents_level": {
+      "type": "string"
+    },
+    "seller_situation": {
+      "type": "string"
+    },
+    "target_closing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "operator_notes_from_agent": {
+      "type": "string"
+    },
+    "agent_submission_status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "matched_to_operators",
+        "sent_to_operators",
+        "operator_accepted",
+        "operator_declined",
+        "closed"
+      ]
+    },
+    "public_submission_source": {
+      "type": "string"
     }
   },
   "required": [

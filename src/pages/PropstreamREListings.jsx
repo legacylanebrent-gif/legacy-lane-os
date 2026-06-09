@@ -47,7 +47,7 @@ export default function PropstreamREListings() {
   const [filters, setFilters] = useState({
     search: '', batch: '', county: '', territory: '', scoreLabel: '',
     emailStatus: '', operatorStatus: '', probate: false, inherited: false,
-    absentee: false, vacant: false, hasAgentEmail: false, hasOperator: false
+    absentee: false, vacant: false, hasAgentEmail: false, hasOperator: false, agentSubmitted: false
   });
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -79,6 +79,7 @@ export default function PropstreamREListings() {
     if (filters.vacant && !l.vacant) return false;
     if (filters.hasAgentEmail && !l.listing_agent_email) return false;
     if (filters.hasOperator && (!l.matched_operator_ids || l.matched_operator_ids.length === 0)) return false;
+    if (filters.agentSubmitted && !l.agent_submitted_to_pool) return false;
     return true;
   });
 
@@ -266,7 +267,7 @@ export default function PropstreamREListings() {
                   </select>
                 </div>
                 <div className="col-span-2 flex flex-wrap gap-3 items-center pt-1">
-                  {[['probate', 'Probate'], ['inherited', 'Inherited'], ['absentee', 'Absentee'], ['vacant', 'Vacant'], ['hasAgentEmail', 'Has Agent Email'], ['hasOperator', 'Has Operator']].map(([key, label]) => (
+                  {[['probate', 'Probate'], ['inherited', 'Inherited'], ['absentee', 'Absentee'], ['vacant', 'Vacant'], ['hasAgentEmail', 'Has Agent Email'], ['hasOperator', 'Has Operator'], ['agentSubmitted', 'Agent Submitted']].map(([key, label]) => (
                     <label key={key} className="flex items-center gap-1.5 text-sm cursor-pointer">
                       <input type="checkbox" checked={!!filters[key]} onChange={e => setFilters(f => ({ ...f, [key]: e.target.checked }))} className="accent-purple-600" />
                       {label}
@@ -346,8 +347,11 @@ export default function PropstreamREListings() {
                     {listing.listing_agent_email && <p className="text-xs text-slate-400 truncate">{listing.listing_agent_email}</p>}
                   </td>
                   <td className="p-3 text-xs text-slate-500 max-w-[120px] truncate">{listing.territory_name || '—'}</td>
-                  <td className="p-3">
+                  <td className="p-3 space-y-1">
                     <Badge className={`${EMAIL_COLORS[listing.email_status] || 'bg-slate-100'} text-xs whitespace-nowrap`}>{listing.email_status}</Badge>
+                    {listing.agent_submitted_to_pool && (
+                      <Badge className="bg-green-100 text-green-700 text-xs block whitespace-nowrap">Agent Submitted</Badge>
+                    )}
                   </td>
                   <td className="p-3">
                     <Badge className={`text-xs whitespace-nowrap ${listing.operator_status === 'not_sent' ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-700'}`}>

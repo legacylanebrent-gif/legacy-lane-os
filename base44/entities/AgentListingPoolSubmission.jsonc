@@ -1,0 +1,102 @@
+{
+  "name": "AgentListingPoolSubmission",
+  "type": "object",
+  "properties": {
+    "propstream_re_listing_id": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "listing_agent_name_from_propstream": {
+      "type": "string"
+    },
+    "listing_agent_email_from_propstream": {
+      "type": "string"
+    },
+    "submitter_first_name": {
+      "type": "string"
+    },
+    "submitter_last_name": {
+      "type": "string"
+    },
+    "submitter_email": {
+      "type": "string"
+    },
+    "submitter_phone": {
+      "type": "string"
+    },
+    "submitter_brokerage": {
+      "type": "string"
+    },
+    "preferred_contact_method": {
+      "type": "string",
+      "enum": [
+        "email",
+        "phone",
+        "text",
+        "any"
+      ],
+      "default": "any"
+    },
+    "best_contact_time": {
+      "type": "string"
+    },
+    "permission_to_share": {
+      "type": "boolean",
+      "default": false
+    },
+    "requested_estate_sale_timeline": {
+      "type": "string"
+    },
+    "requested_help_type": {
+      "type": "string"
+    },
+    "home_contents_level": {
+      "type": "string"
+    },
+    "seller_situation": {
+      "type": "string"
+    },
+    "target_closing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes_for_operator": {
+      "type": "string"
+    },
+    "matched_operator_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "submission_status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "matched_to_operators",
+        "sent_to_operators",
+        "operator_accepted",
+        "operator_declined",
+        "closed"
+      ],
+      "default": "submitted"
+    }
+  },
+  "required": [
+    "property_address",
+    "state",
+    "submitter_email"
+  ]
+}

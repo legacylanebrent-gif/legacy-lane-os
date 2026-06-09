@@ -192,6 +192,33 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
           </Section>
         )}
 
+        {/* Agent Submission */}
+        {listing.agent_submitted_to_pool && (
+          <Section title="Agent Submission" icon={<CheckCircle className="w-4 h-4 text-green-500" />}>
+            <div className="mb-2">
+              <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full">
+                <CheckCircle className="w-3 h-3" /> Agent Submitted to Pool
+              </span>
+            </div>
+            <Grid2>
+              <DV label="Submitter" value={`${listing.agent_submitter_first_name || ''} ${listing.agent_submitter_last_name || ''}`.trim() || '—'} />
+              <DV label="Brokerage" value={listing.agent_submitter_brokerage || '—'} />
+              <DV label="Email" value={listing.agent_submitter_email ? <a href={`mailto:${listing.agent_submitter_email}`} className="text-blue-600 underline">{listing.agent_submitter_email}</a> : '—'} />
+              <DV label="Phone" value={listing.agent_submitter_phone || '—'} />
+              <DV label="Preferred Contact" value={listing.agent_preferred_contact_method || '—'} />
+              <DV label="Best Time" value={listing.agent_best_contact_time || '—'} />
+              <DV label="Timeline" value={listing.requested_estate_sale_timeline || '—'} />
+              <DV label="Help Type" value={listing.requested_help_type || '—'} />
+              <DV label="Contents Level" value={listing.home_contents_level || '—'} />
+              <DV label="Seller Situation" value={listing.seller_situation || '—'} />
+              <DV label="Target Close Date" value={listing.target_closing_date || '—'} />
+              <DV label="Submission Status" value={listing.agent_submission_status || '—'} />
+              {listing.operator_notes_from_agent && <DV label="Agent Notes" value={listing.operator_notes_from_agent} span2 />}
+              <DV label="Submitted" value={listing.agent_submission_date ? new Date(listing.agent_submission_date).toLocaleDateString() : '—'} />
+            </Grid2>
+          </Section>
+        )}
+
         {/* Notes */}
         <Section title="Notes">
           <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Add notes…" className="text-sm" />
