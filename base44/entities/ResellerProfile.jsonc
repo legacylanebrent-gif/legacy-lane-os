@@ -1,0 +1,122 @@
+{
+  "name": "ResellerProfile",
+  "type": "object",
+  "properties": {
+    "business_name": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "service_radius": {
+      "type": "number",
+      "description": "Miles radius from base location"
+    },
+    "territory_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "lead_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "online_reseller",
+          "buyout",
+          "liquidation",
+          "estate_sale_backup"
+        ]
+      },
+      "default": []
+    },
+    "business_type": {
+      "type": "string",
+      "enum": [
+        "ebay_seller",
+        "antique_dealer",
+        "auction_company",
+        "consignment",
+        "furniture_dealer",
+        "collectible_buyer",
+        "estate_buyer",
+        "cleanout_specialist",
+        "liquidator",
+        "buyout_company",
+        "vintage_dealer",
+        "online_reseller",
+        "other"
+      ]
+    },
+    "membership_status": {
+      "type": "string",
+      "enum": [
+        "free",
+        "network_member",
+        "suspended"
+      ],
+      "default": "free"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "active",
+        "trial",
+        "expired",
+        "cancelled"
+      ],
+      "default": "none"
+    },
+    "lead_notifications_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "claimed_listing": {
+      "type": "boolean",
+      "default": false
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "business_name",
+    "contact_name",
+    "email"
+  ]
+}

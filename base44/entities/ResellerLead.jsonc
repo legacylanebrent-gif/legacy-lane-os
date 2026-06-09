@@ -1,0 +1,100 @@
+{
+  "name": "ResellerLead",
+  "type": "object",
+  "properties": {
+    "lead_source": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "operator",
+        "homeowner",
+        "propstream"
+      ],
+      "default": "agent"
+    },
+    "lead_type": {
+      "type": "string",
+      "enum": [
+        "online_reseller",
+        "buyout",
+        "liquidation"
+      ]
+    },
+    "propstream_re_listing_id": {
+      "type": "string"
+    },
+    "agent_listing_submission_id": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "agent_email": {
+      "type": "string"
+    },
+    "agent_phone": {
+      "type": "string"
+    },
+    "seller_timeline": {
+      "type": "string"
+    },
+    "inventory_description": {
+      "type": "string"
+    },
+    "home_contents_level": {
+      "type": "string"
+    },
+    "seller_situation": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "assigned_reseller_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "lead_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "sent",
+        "accepted",
+        "declined",
+        "contacted",
+        "closed"
+      ],
+      "default": "new"
+    },
+    "notification_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "property_address",
+    "state",
+    "lead_type"
+  ]
+}
