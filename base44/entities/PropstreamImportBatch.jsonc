@@ -1,0 +1,40 @@
+{
+  "name": "PropstreamImportBatch",
+  "type": "object",
+  "properties": {
+    "uploaded_file_name": {
+      "type": "string"
+    },
+    "uploaded_by": {
+      "type": "string"
+    },
+    "total_rows": {
+      "type": "integer",
+      "default": 0
+    },
+    "imported_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "duplicate_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "error_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "import_status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "default": "processing"
+    }
+  },
+  "required": [
+    "uploaded_file_name"
+  ]
+}

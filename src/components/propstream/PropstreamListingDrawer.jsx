@@ -1,0 +1,230 @@
+import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { base44 } from '@/api/base44Client';
+import {
+  MapPin, User, Home, Building2, Mail, Phone, Star, CheckCircle,
+  Copy, ChevronDown, ChevronUp, Loader
+} from 'lucide-react';
+
+const SCORE_COLORS = { Priority: 'bg-red-100 text-red-700', Strong: 'bg-orange-100 text-orange-700', Moderate: 'bg-yellow-100 text-yellow-700', Low: 'bg-slate-100 text-slate-600' };
+const EMAIL_STATUS_COLORS = { draft: 'bg-slate-100 text-slate-600', ready: 'bg-blue-100 text-blue-700', sent: 'bg-green-100 text-green-700', replied: 'bg-purple-100 text-purple-700', interested: 'bg-emerald-100 text-emerald-700', not_interested: 'bg-red-100 text-red-700' };
+
+export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) {
+  const [notes, setNotes] = useState(listing?.notes || '');
+  const [saving, setSaving] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [opMsgOpen, setOpMsgOpen] = useState(false);
+  const [generatingEmail, setGeneratingEmail] = useState(false);
+
+  if (!listing) return null;
+
+  const fmt = (v) => v ?? '—';
+  const fmtPrice = (v) => v ? `$${Number(v).toLocaleString()}` : '—';
+  const flag = (bool, label) => bool ? <Badge key={label} className="bg-purple-100 text-purple-700 text-xs">{label}</Badge> : null;
+
+  const saveNotes = async () => {
+    setSaving(true);
+    await base44.entities.PropstreamREListing.update(listing.id, { notes });
+    setSaving(false);
+    onUpdate && onUpdate();
+  };
+
+  const generateEmail = async () => {
+    setGeneratingEmail(true);
+    await base44.functions.invoke('generateListingAgentEmails', { listing_ids: [listing.id] });
+    setGeneratingEmail(false);
+    onUpdate && onUpdate();
+  };
+
+  const updateStatus = async (field, value) => {
+    await base44.entities.PropstreamREListing.update(listing.id, { [field]: value });
+    onUpdate && onUpdate();
+  };
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-[520px] bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200 overflow-hidden">
+      {/* Header */}
+      <div className="p-5 border-b bg-slate-50 flex items-start justify-between">
+        <div>
+          <h2 className="font-bold text-slate-900 text-lg leading-tight">{listing.property_address}</h2>
+          <p className="text-slate-500 text-sm">{listing.city}, {listing.state} {listing.zip}</p>
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <Badge className={SCORE_COLORS[listing.estate_sale_score_label] || 'bg-slate-100 text-slate-600'}>
+              ★ {listing.estate_sale_score} — {listing.estate_sale_score_label}
+            </Badge>
+            <Badge className={EMAIL_STATUS_COLORS[listing.email_status] || ''}>Email: {listing.email_status}</Badge>
+            <Badge className="bg-slate-100 text-slate-600">Op: {(listing.operator_status || '').replace(/_/g, ' ')}</Badge>
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        {/* Flags */}
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            [listing.probate_indicator, 'Probate'],
+            [listing.inherited_indicator, 'Inherited'],
+            [listing.senior_owner_indicator, 'Senior Owner'],
+            [listing.absentee_owner, 'Absentee Owner'],
+            [listing.vacant, 'Vacant'],
+            [listing.preforeclosure_indicator, 'Pre-Foreclosure'],
+            [listing.lien_indicator, 'Lien'],
+            [listing.tax_delinquent_indicator, 'Tax Delinquent'],
+            [listing.divorce_indicator, 'Divorce'],
+          ].map(([v, label]) => v ? <Badge key={label} className="bg-purple-100 text-purple-700 text-xs">{label}</Badge> : null)}
+        </div>
+
+        {/* Property */}
+        <Section title="Property Details" icon={<Home className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="List Price" value={fmtPrice(listing.list_price)} />
+            <DV label="Est. Value" value={fmtPrice(listing.estimated_value)} />
+            <DV label="Beds / Baths" value={`${fmt(listing.beds)} / ${fmt(listing.baths)}`} />
+            <DV label="Sq Ft" value={listing.square_feet ? Number(listing.square_feet).toLocaleString() : '—'} />
+            <DV label="Year Built" value={fmt(listing.year_built)} />
+            <DV label="Property Type" value={fmt(listing.property_type)} />
+            <DV label="Days on Market" value={fmt(listing.days_on_market)} />
+            <DV label="County" value={fmt(listing.county)} />
+          </Grid2>
+        </Section>
+
+        {/* Owner */}
+        <Section title="Owner Details" icon={<User className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="Owner" value={fmt(listing.owner_name)} span2 />
+            <DV label="Ownership" value={listing.ownership_length_years ? `${listing.ownership_length_years} yrs` : '—'} />
+            <DV label="Equity" value={fmtPrice(listing.equity_estimate)} />
+            <DV label="Mailing Address" value={listing.owner_mailing_address ? `${listing.owner_mailing_address}, ${listing.owner_mailing_city || ''} ${listing.owner_mailing_state || ''} ${listing.owner_mailing_zip || ''}` : '—'} span2 />
+          </Grid2>
+        </Section>
+
+        {/* Agent */}
+        <Section title="Listing Agent" icon={<Building2 className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="Agent" value={fmt(listing.listing_agent_name)} />
+            <DV label="Brokerage" value={fmt(listing.listing_brokerage)} />
+            <DV label="Email" value={listing.listing_agent_email ? (
+              <a href={`mailto:${listing.listing_agent_email}`} className="text-blue-600 underline">{listing.listing_agent_email}</a>
+            ) : '—'} />
+            <DV label="Phone" value={listing.listing_agent_phone ? (
+              <a href={`tel:${listing.listing_agent_phone}`} className="text-blue-600 underline">{listing.listing_agent_phone}</a>
+            ) : '—'} />
+          </Grid2>
+        </Section>
+
+        {/* Territory */}
+        <Section title="Territory Match" icon={<MapPin className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="Territory" value={listing.territory_name || 'Not matched'} />
+            <DV label="Matched Operators" value={(listing.matched_operator_ids || []).length} />
+          </Grid2>
+        </Section>
+
+        {/* Score Breakdown */}
+        <Section title="Estate Sale Score Breakdown" icon={<Star className="w-4 h-4" />}>
+          {(listing.score_reasons || []).length > 0 ? (
+            <ul className="space-y-1">
+              {listing.score_reasons.map((r, i) => (
+                <li key={i} className="text-sm flex items-start gap-2">
+                  <span className={r.includes('negative') ? 'text-red-500' : 'text-green-600'}>
+                    {r.includes('negative') ? '−' : '+'}
+                  </span>
+                  <span className="text-slate-700">{r}</span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="text-slate-400 text-sm">No score reasons yet. Run scoring first.</p>}
+        </Section>
+
+        {/* Agent Email */}
+        <Section title="Agent Outreach Email" icon={<Mail className="w-4 h-4" />}>
+          {listing.email_body ? (
+            <>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className={EMAIL_STATUS_COLORS[listing.email_status] || ''}>{listing.email_status}</Badge>
+                <select value={listing.email_status} onChange={e => updateStatus('email_status', e.target.value)} className="text-xs border rounded px-2 py-1">
+                  {['draft', 'ready', 'sent', 'replied', 'interested', 'not_interested'].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <button onClick={() => setEmailOpen(!emailOpen)} className="text-xs text-blue-600 flex items-center gap-1 mb-2">
+                {emailOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                {emailOpen ? 'Collapse' : 'View email'}
+              </button>
+              {emailOpen && (
+                <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-2">
+                  <p className="font-medium text-slate-700">Subject: {listing.email_subject}</p>
+                  <pre className="whitespace-pre-wrap text-slate-600 font-sans text-xs">{listing.email_body}</pre>
+                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(`Subject: ${listing.email_subject}\n\n${listing.email_body}`)}>
+                    <Copy className="w-3 h-3 mr-1" /> Copy
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <Button size="sm" onClick={generateEmail} disabled={generatingEmail} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {generatingEmail ? <Loader className="w-3 h-3 animate-spin mr-1" /> : <Mail className="w-3 h-3 mr-1" />}
+              Generate Email
+            </Button>
+          )}
+        </Section>
+
+        {/* Operator Message */}
+        {listing.operator_message_body && (
+          <Section title="Operator Message" icon={<CheckCircle className="w-4 h-4" />}>
+            <button onClick={() => setOpMsgOpen(!opMsgOpen)} className="text-xs text-blue-600 flex items-center gap-1 mb-2">
+              {opMsgOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {opMsgOpen ? 'Collapse' : 'View message'}
+            </button>
+            {opMsgOpen && (
+              <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-2">
+                <p className="font-medium text-slate-700">Subject: {listing.operator_message_subject}</p>
+                <pre className="whitespace-pre-wrap text-slate-600 font-sans text-xs">{listing.operator_message_body}</pre>
+                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(listing.operator_message_body)}>
+                  <Copy className="w-3 h-3 mr-1" /> Copy
+                </Button>
+              </div>
+            )}
+          </Section>
+        )}
+
+        {/* Notes */}
+        <Section title="Notes">
+          <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Add notes…" className="text-sm" />
+          <Button size="sm" onClick={saveNotes} disabled={saving} className="mt-2">
+            {saving ? 'Saving…' : 'Save Notes'}
+          </Button>
+        </Section>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, icon, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        {icon && <span className="text-slate-500">{icon}</span>}
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{title}</h3>
+      </div>
+      <div className="bg-slate-50 rounded-lg p-3">{children}</div>
+    </div>
+  );
+}
+
+function Grid2({ children }) {
+  return <div className="grid grid-cols-2 gap-2">{children}</div>;
+}
+
+function DV({ label, value, span2 }) {
+  return (
+    <div className={span2 ? 'col-span-2' : ''}>
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-sm text-slate-800">{value ?? '—'}</p>
+    </div>
+  );
+}

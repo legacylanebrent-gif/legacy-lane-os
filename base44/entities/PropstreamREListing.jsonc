@@ -1,0 +1,239 @@
+{
+  "name": "PropstreamREListing",
+  "type": "object",
+  "properties": {
+    "import_batch_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "PropStream"
+    },
+    "propstream_property_id": {
+      "type": "string"
+    },
+    "mls_number": {
+      "type": "string"
+    },
+    "listing_status": {
+      "type": "string"
+    },
+    "list_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "days_on_market": {
+      "type": "integer",
+      "default": 0
+    },
+    "property_address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "list_price": {
+      "type": "number"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "beds": {
+      "type": "number"
+    },
+    "baths": {
+      "type": "number"
+    },
+    "square_feet": {
+      "type": "number"
+    },
+    "lot_size": {
+      "type": "string"
+    },
+    "year_built": {
+      "type": "integer"
+    },
+    "property_type": {
+      "type": "string"
+    },
+    "listing_remarks": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_mailing_address": {
+      "type": "string"
+    },
+    "owner_mailing_city": {
+      "type": "string"
+    },
+    "owner_mailing_state": {
+      "type": "string"
+    },
+    "owner_mailing_zip": {
+      "type": "string"
+    },
+    "ownership_length_years": {
+      "type": "number"
+    },
+    "absentee_owner": {
+      "type": "boolean",
+      "default": false
+    },
+    "vacant": {
+      "type": "boolean",
+      "default": false
+    },
+    "senior_owner_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "probate_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "inherited_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "divorce_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "preforeclosure_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "foreclosure_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "lien_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "tax_delinquent_indicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "equity_estimate": {
+      "type": "number"
+    },
+    "mortgage_balance": {
+      "type": "number"
+    },
+    "listing_agent_name": {
+      "type": "string"
+    },
+    "listing_agent_email": {
+      "type": "string"
+    },
+    "listing_agent_phone": {
+      "type": "string"
+    },
+    "listing_brokerage": {
+      "type": "string"
+    },
+    "listing_url": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "territory_name": {
+      "type": "string"
+    },
+    "matched_operator_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "estate_sale_score": {
+      "type": "integer",
+      "default": 0
+    },
+    "estate_sale_score_label": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Moderate",
+        "Strong",
+        "Priority"
+      ],
+      "default": "Low"
+    },
+    "score_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "email_subject": {
+      "type": "string"
+    },
+    "email_body": {
+      "type": "string"
+    },
+    "operator_message_subject": {
+      "type": "string"
+    },
+    "operator_message_body": {
+      "type": "string"
+    },
+    "email_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "sent",
+        "replied",
+        "interested",
+        "not_interested"
+      ],
+      "default": "draft"
+    },
+    "operator_status": {
+      "type": "string",
+      "enum": [
+        "not_sent",
+        "sent_to_operator",
+        "operator_accepted",
+        "operator_declined",
+        "contacted_agent"
+      ],
+      "default": "not_sent"
+    },
+    "assigned_operator_id": {
+      "type": "string"
+    },
+    "assigned_agent_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "property_address",
+    "state"
+  ]
+}

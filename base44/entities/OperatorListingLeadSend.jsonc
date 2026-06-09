@@ -1,0 +1,53 @@
+{
+  "name": "OperatorListingLeadSend",
+  "type": "object",
+  "properties": {
+    "propstream_re_listing_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "sent_by": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operator_response_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "contacted_agent"
+      ],
+      "default": "pending"
+    },
+    "operator_notes": {
+      "type": "string"
+    },
+    "agent_contact_status": {
+      "type": "string",
+      "enum": [
+        "not_contacted",
+        "contacted",
+        "replied",
+        "interested",
+        "not_interested"
+      ],
+      "default": "not_contacted"
+    }
+  },
+  "required": [
+    "propstream_re_listing_id",
+    "operator_id"
+  ]
+}
