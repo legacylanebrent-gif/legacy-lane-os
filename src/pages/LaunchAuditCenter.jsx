@@ -8,6 +8,10 @@ import LeadRoutingAudit from '@/components/audit/LeadRoutingAudit';
 import ScoringAndAgentAudit from '@/components/audit/ScoringAndAgentAudit';
 import AudienceExportCenter from '@/components/audit/AudienceExportCenter';
 import LeadPipelineAudit from '@/components/audit/LeadPipelineAudit';
+import SuperAgentUtilization from '@/components/audit/SuperAgentUtilization';
+import AutomationOpportunities from '@/components/audit/AutomationOpportunities';
+import SuperAgentPerformance from '@/components/audit/SuperAgentPerformance';
+import AICOOReport from '@/components/audit/AICOOReport';
 
 const NAV_ITEMS = [
   { tab: 'pages', label: 'Landing Pages', icon: Globe },
@@ -16,6 +20,7 @@ const NAV_ITEMS = [
   { tab: 'scoring', label: 'Scoring & AI', icon: Zap },
   { tab: 'pipeline', label: 'Pipeline', icon: BarChart2 },
   { tab: 'audiences', label: 'Audiences', icon: Users },
+  { tab: 'superagent', label: 'SuperAgent Optimization', icon: Zap },
 ];
 
 export default function LaunchAuditCenter() {
@@ -105,6 +110,13 @@ export default function LaunchAuditCenter() {
 
             <TabsContent value="audiences" className="mt-0">
               <AudienceExportCenter onScoreUpdate={data => updateScore('audiences', data)} />
+            </TabsContent>
+
+            <TabsContent value="superagent" className="mt-0 space-y-10">
+              <SuperAgentUtilization />
+              <div className="border-t border-slate-200 pt-8"><AutomationOpportunities /></div>
+              <div className="border-t border-slate-200 pt-8"><SuperAgentPerformance /></div>
+              <div className="border-t border-slate-200 pt-8"><AICOOReport /></div>
             </TabsContent>
           </div>
         </Tabs>
