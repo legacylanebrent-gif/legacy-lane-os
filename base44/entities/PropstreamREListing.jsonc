@@ -41,6 +41,10 @@
     "county": {
       "type": "string"
     },
+    "fips_code": {
+      "type": "string",
+      "description": "5-digit FIPS county code from PropStream CSV"
+    },
     "latitude": {
       "type": "number"
     },

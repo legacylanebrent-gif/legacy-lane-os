@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const normalizeAddr = s => (s || '').toLowerCase().replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+const normalizeCounty = s => (s || '').toLowerCase().replace(/ county$/, '').replace(/[^a-z\s]/g, '').trim();
+const normalizeState = s => (s || '').toLowerCase().trim();
+const normalizeFips = s => (s || '').toString().trim().replace(/^0+/, '').padStart(5, '0');
 
 async function geocodeAddress(address, city, state, zip, apiKey) {
   const query = [address, city, state, zip].filter(Boolean).join(', ');
@@ -12,7 +15,6 @@ async function geocodeAddress(address, city, state, zip, apiKey) {
     const data = await res.json();
     if (data.status !== 'OK' || !data.results?.[0]) return null;
     const { lat, lng } = data.results[0].geometry.location;
-    // Extract county from address components
     const countyComp = data.results[0].address_components?.find(c => c.types.includes('administrative_area_level_2'));
     const county = countyComp ? countyComp.long_name.replace(/ County$/, '') : null;
     return { lat, lng, county };
@@ -22,23 +24,43 @@ async function geocodeAddress(address, city, state, zip, apiKey) {
 }
 
 function matchTerritory(row, territories) {
+  const fips = normalizeFips(row.fips_code);
   const zip = (row.zip || '').trim();
   const city = (row.city || '').toLowerCase().trim();
-  const county = (row.county || '').toLowerCase().replace(/ county$/, '').trim();
-  const state = (row.state || '').toLowerCase().trim();
+  const county = normalizeCounty(row.county);
+  const state = normalizeState(row.state);
 
+  // 1. FIPS — most authoritative, zero ambiguity
+  if (fips && fips !== '00000') {
+    const m = territories.find(t => normalizeFips(t.fips_code) === fips);
+    if (m) return m;
+  }
+
+  // 2. County + State
+  if (county && state) {
+    const m = territories.find(t =>
+      normalizeCounty(t.county) === county &&
+      normalizeState(t.state) === state
+    );
+    if (m) return m;
+  }
+
+  // 3. ZIP code
   if (zip) {
     const m = territories.find(t => (t.zip_codes_json || []).some(z => z.trim() === zip));
     if (m) return m;
   }
-  if (city) {
-    const m = territories.find(t => (t.cities_json || []).some(c => c.toLowerCase().trim() === city));
+
+  // 4. City + State
+  if (city && state) {
+    const m = territories.find(t =>
+      normalizeState(t.state) === state &&
+      (t.cities_json || []).some(c => c.toLowerCase().trim() === city)
+    );
     if (m) return m;
   }
-  return territories.find(t =>
-    t.county?.toLowerCase().replace(/ county$/, '').trim() === county &&
-    t.state?.toLowerCase().trim() === state
-  ) || null;
+
+  return null;
 }
 
 function calcScore(r) {
@@ -122,16 +144,16 @@ Deno.serve(async (req) => {
 
         if (isDupe) { dupes++; continue; }
 
-        // Geocode if lat/lng not already present in the CSV
+        // Geocode to resolve lat/lng and county when missing
         let lat = row.latitude;
         let lng = row.longitude;
         let geocodedCounty = null;
-        if ((!lat || !lng) && googleApiKey) {
+        if (googleApiKey && (!lat || !lng || !row.county)) {
           const geo = await geocodeAddress(row.property_address, row.city, row.state, row.zip, googleApiKey);
           if (geo) {
-            lat = geo.lat;
-            lng = geo.lng;
-            if (!row.county && geo.county) geocodedCounty = geo.county;
+            if (!lat) lat = geo.lat;
+            if (!lng) lng = geo.lng;
+            if (geo.county) geocodedCounty = geo.county;
           }
         }
 
@@ -139,6 +161,7 @@ Deno.serve(async (req) => {
           ...row,
           ...(lat != null ? { latitude: lat } : {}),
           ...(lng != null ? { longitude: lng } : {}),
+          // Prefer geocoded county (authoritative) over CSV county
           ...(geocodedCounty ? { county: geocodedCounty } : {}),
         };
 

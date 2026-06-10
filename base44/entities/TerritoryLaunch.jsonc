@@ -14,6 +14,10 @@
     "county_slug": {
       "type": "string"
     },
+    "fips_code": {
+      "type": "string",
+      "description": "5-digit FIPS county code e.g. 34025 for Monmouth County NJ"
+    },
     "cities_json": {
       "type": "array",
       "items": {

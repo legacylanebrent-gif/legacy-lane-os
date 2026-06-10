@@ -15,6 +15,7 @@ const DEFAULT_MAPPING = {
   state:                    'State',
   zip:                      'Zip',
   county:                   'County',
+  fips_code:                'FIPS',
   listing_status:           'MLS Status',
   list_date:                'MLS Date',
   list_price:               'MLS Amount',
@@ -49,6 +50,7 @@ const FIELD_MAP = {
   state:                    ['state', 'prop state', 'property state', 'situs state'],
   zip:                      ['zip', 'zip code', 'postal code', 'situs zip', 'prop zip'],
   county:                   ['county', 'prop county'],
+  fips_code:                ['fips', 'fips code', 'county fips', 'fips_code'],
   mls_number:               ['mls number', 'mls#', 'mls id', 'listing id', 'mls_number'],
   propstream_property_id:   ['propstream id', 'property id', 'prop id', 'ps id'],
   listing_status:           ['mls status', 'status', 'listing status'],
@@ -103,7 +105,7 @@ const NUMBER_FIELDS = new Set([
 const INT_FIELDS = new Set(['year_built']);
 
 const FIELD_GROUPS = [
-  { label: 'Property Info', fields: ['property_address', 'city', 'state', 'zip', 'county', 'property_type', 'beds', 'baths', 'square_feet', 'lot_size', 'year_built'] },
+  { label: 'Property Info', fields: ['property_address', 'city', 'state', 'zip', 'county', 'fips_code', 'property_type', 'beds', 'baths', 'square_feet', 'lot_size', 'year_built'] },
   { label: 'MLS / Listing', fields: ['mls_number', 'propstream_property_id', 'listing_status', 'list_date', 'days_on_market', 'list_price', 'estimated_value', 'listing_remarks', 'listing_url'] },
   { label: 'Owner Info', fields: ['owner_name', 'owner_mailing_address', 'owner_mailing_city', 'owner_mailing_state', 'owner_mailing_zip', 'ownership_length_years'] },
   { label: 'Distress Indicators', fields: ['absentee_owner', 'vacant', 'senior_owner_indicator', 'probate_indicator', 'inherited_indicator', 'divorce_indicator', 'preforeclosure_indicator', 'foreclosure_indicator', 'lien_indicator', 'tax_delinquent_indicator'] },
