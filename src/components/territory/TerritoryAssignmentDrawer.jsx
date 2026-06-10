@@ -6,7 +6,71 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, User, Building2, Save, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { MapPin, User, Building2, Save, AlertCircle, CheckCircle2, Loader2, X } from 'lucide-react';
+
+// Simple multi-select checkbox list
+function MultiSelectList({ items, selectedIds, onToggle, labelKey, subLabelKey }) {
+  const [search, setSearch] = useState('');
+  const filtered = items.filter(item => {
+    const label = (item[labelKey] || item.id || '').toLowerCase();
+    return label.includes(search.toLowerCase());
+  });
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="px-3 py-2 border-b bg-slate-50">
+        <Input
+          placeholder="Search..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="h-7 text-sm"
+        />
+      </div>
+      <div className="max-h-48 overflow-y-auto">
+        {filtered.length === 0 && (
+          <p className="text-xs text-slate-400 text-center py-4">No matches</p>
+        )}
+        {filtered.map(item => {
+          const isSelected = selectedIds.includes(item.id);
+          return (
+            <div
+              key={item.id}
+              className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors ${isSelected ? 'bg-purple-50' : ''}`}
+              onClick={() => onToggle(item.id, item)}
+            >
+              <Checkbox checked={isSelected} onCheckedChange={() => onToggle(item.id, item)} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-800 truncate">{item[labelKey] || item.id}</p>
+                {subLabelKey && item[subLabelKey] && (
+                  <p className="text-xs text-slate-500 truncate">{item[subLabelKey]}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Selected chips display
+function SelectedChips({ items, selectedIds, labelKey, onRemove }) {
+  const selected = items.filter(i => selectedIds.includes(i.id));
+  if (selected.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {selected.map(item => (
+        <span key={item.id} className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 text-xs rounded-full px-2 py-0.5">
+          {item[labelKey] || item.id}
+          <button onClick={() => onRemove(item.id)} className="hover:text-purple-600 ml-0.5">
+            <X className="w-3 h-3" />
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved }) {
   const [tlRecord, setTlRecord] = useState(null);
@@ -17,10 +81,8 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
   const [saved, setSaved] = useState(false);
 
   const [form, setForm] = useState({
-    assigned_operator_id: '',
-    assigned_operator_name: '',
-    assigned_agent_id: '',
-    assigned_agent_name: '',
+    assigned_operator_ids: [],
+    assigned_agent_ids: [],
     fips_code: '',
     launch_status: 'draft',
   });
@@ -34,35 +96,56 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
     setLoading(true);
     setSaved(false);
     try {
-      const [tls, ops, ags] = await Promise.all([
-        base44.entities.TerritoryLaunch.filter({ county: territory.county, state: territory.state }),
-        base44.entities.FutureEstateOperator.filter({ claim_status: 'verified' }, '-created_date', 200),
-        base44.entities.User.filter({ role: 'real_estate_agent' }, '-created_date', 200),
+      // Normalize state for matching — territory.state could be abbreviation or full name
+      const stateVal = territory.state;
+
+      const [tls, ops, allUsers] = await Promise.all([
+        base44.entities.TerritoryLaunch.filter({ county: territory.county, state: stateVal }),
+        // Filter operators by state (supports abbreviation in state field)
+        base44.entities.FutureEstateOperator.filter({ claim_status: 'verified', state: stateVal }, '-created_date', 300),
+        // Get all CRM users with agent role — filter by state below
+        base44.entities.User.list('-created_date', 500),
       ]);
 
       const tl = tls[0] || null;
       setTlRecord(tl);
-      setOperators(ops);
-      setAgents(ags);
+
+      // Filter agents by state match on their profile
+      const stateUpper = stateVal?.toUpperCase();
+      const agentUsers = allUsers.filter(u =>
+        (u.role === 'real_estate_agent' || u.primary_account_type === 'real_estate_agent') &&
+        (
+          u.state?.toUpperCase() === stateUpper ||
+          u.state_abbreviation?.toUpperCase() === stateUpper ||
+          u.service_states?.map(s => s.toUpperCase()).includes(stateUpper)
+        )
+      );
+
+      // Normalize operators for display
+      const normalizedOps = ops.map(op => ({
+        ...op,
+        _label: op.company_name || op.claim_contact_name || op.id,
+        _sub: [op.city, op.state].filter(Boolean).join(', '),
+      }));
+
+      const normalizedAgents = agentUsers.map(ag => ({
+        ...ag,
+        _label: ag.full_name || ag.email,
+        _sub: ag.email,
+      }));
+
+      setOperators(normalizedOps);
+      setAgents(normalizedAgents);
 
       if (tl) {
         setForm({
-          assigned_operator_id: tl.assigned_operator_id || '',
-          assigned_operator_name: tl.assigned_operator_name || '',
-          assigned_agent_id: tl.assigned_agent_id || '',
-          assigned_agent_name: tl.assigned_agent_name || '',
+          assigned_operator_ids: tl.assigned_operator_ids || [],
+          assigned_agent_ids: tl.assigned_agent_ids || [],
           fips_code: tl.fips_code || '',
           launch_status: tl.launch_status || 'draft',
         });
       } else {
-        setForm({
-          assigned_operator_id: '',
-          assigned_operator_name: '',
-          assigned_agent_id: '',
-          assigned_agent_name: '',
-          fips_code: '',
-          launch_status: 'draft',
-        });
+        setForm({ assigned_operator_ids: [], assigned_agent_ids: [], fips_code: '', launch_status: 'draft' });
       }
     } catch (e) {
       console.error(e);
@@ -71,32 +154,35 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
     }
   };
 
-  const handleOperatorSelect = (id) => {
-    const op = operators.find(o => o.id === id);
+  const toggleOperator = (id) => {
     setForm(f => ({
       ...f,
-      assigned_operator_id: id === 'none' ? '' : id,
-      assigned_operator_name: op ? (op.company_name || `${op.claim_contact_name || ''}`.trim()) : '',
+      assigned_operator_ids: f.assigned_operator_ids.includes(id)
+        ? f.assigned_operator_ids.filter(x => x !== id)
+        : [...f.assigned_operator_ids, id],
     }));
   };
 
-  const handleAgentSelect = (id) => {
-    const ag = agents.find(a => a.id === id);
+  const toggleAgent = (id) => {
     setForm(f => ({
       ...f,
-      assigned_agent_id: id === 'none' ? '' : id,
-      assigned_agent_name: ag ? ag.full_name : '',
+      assigned_agent_ids: f.assigned_agent_ids.includes(id)
+        ? f.assigned_agent_ids.filter(x => x !== id)
+        : [...f.assigned_agent_ids, id],
     }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const selectedOps = operators.filter(o => form.assigned_operator_ids.includes(o.id));
+      const selectedAgs = agents.filter(a => form.assigned_agent_ids.includes(a.id));
+
       const payload = {
-        assigned_operator_id: form.assigned_operator_id || null,
-        assigned_operator_name: form.assigned_operator_name || null,
-        assigned_agent_id: form.assigned_agent_id || null,
-        assigned_agent_name: form.assigned_agent_name || null,
+        assigned_operator_ids: form.assigned_operator_ids,
+        assigned_operator_names: selectedOps.map(o => o._label),
+        assigned_agent_ids: form.assigned_agent_ids,
+        assigned_agent_names: selectedAgs.map(a => a._label),
         fips_code: form.fips_code || null,
         launch_status: form.launch_status,
         county: territory.county,
@@ -121,7 +207,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
 
   return (
     <Sheet open={!!territory} onOpenChange={() => onClose()}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-5">
           <SheetTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-purple-600" />
@@ -137,7 +223,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
               </Badge>
             ) : (
               <Badge className="text-xs bg-amber-100 text-amber-700 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" /> No TerritoryLaunch record yet — will create on save
+                <AlertCircle className="w-3 h-3" /> No record yet — will create on save
               </Badge>
             )}
           </div>
@@ -150,80 +236,92 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
         ) : (
           <div className="space-y-5">
 
-            <div>
-              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">FIPS Code</Label>
-              <Input
-                value={form.fips_code}
-                onChange={e => setForm(f => ({ ...f, fips_code: e.target.value }))}
-                placeholder="e.g. 34003"
-                className="font-mono"
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">FIPS Code</Label>
+                <Input
+                  value={form.fips_code}
+                  onChange={e => setForm(f => ({ ...f, fips_code: e.target.value }))}
+                  placeholder="e.g. 34003"
+                  className="font-mono"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Launch Status</Label>
+                <Select value={form.launch_status} onValueChange={v => setForm(f => ({ ...f, launch_status: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="unpublished">Unpublished</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Operators */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-orange-500" />
+                  <span className="font-semibold text-slate-800 text-sm">Estate Sale Operators</span>
+                  <span className="text-xs text-slate-400">({operators.length} in {territory?.state})</span>
+                </div>
+                {form.assigned_operator_ids.length > 0 && (
+                  <span className="text-xs font-medium text-purple-600">{form.assigned_operator_ids.length} selected</span>
+                )}
+              </div>
+              <MultiSelectList
+                items={operators}
+                selectedIds={form.assigned_operator_ids}
+                onToggle={toggleOperator}
+                labelKey="_label"
+                subLabelKey="_sub"
+              />
+              <SelectedChips
+                items={operators}
+                selectedIds={form.assigned_operator_ids}
+                labelKey="_label"
+                onRemove={toggleOperator}
               />
             </div>
 
-            <div>
-              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Launch Status</Label>
-              <Select value={form.launch_status} onValueChange={v => setForm(f => ({ ...f, launch_status: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="review">Review</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="unpublished">Unpublished</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+            {/* Agents */}
             <div className="border-t pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Building2 className="w-4 h-4 text-orange-500" />
-                <span className="font-semibold text-slate-800 text-sm">Estate Sale Operator</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-500" />
+                  <span className="font-semibold text-slate-800 text-sm">Real Estate Agents</span>
+                  <span className="text-xs text-slate-400">({agents.length} in {territory?.state})</span>
+                </div>
+                {form.assigned_agent_ids.length > 0 && (
+                  <span className="text-xs font-medium text-purple-600">{form.assigned_agent_ids.length} selected</span>
+                )}
               </div>
-              <Select value={form.assigned_operator_id || 'none'} onValueChange={handleOperatorSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select operator..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— None —</SelectItem>
-                  {operators.map(op => (
-                    <SelectItem key={op.id} value={op.id}>
-                      {op.company_name || op.claim_contact_name || op.id}
-                      {op.city ? ` · ${op.city}, ${op.state}` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.assigned_operator_id && (
-                <p className="text-xs text-slate-500 mt-1">{form.assigned_operator_name}</p>
+              {agents.length === 0 ? (
+                <p className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-3">No CRM users with agent role found in {territory?.state}.</p>
+              ) : (
+                <MultiSelectList
+                  items={agents}
+                  selectedIds={form.assigned_agent_ids}
+                  onToggle={toggleAgent}
+                  labelKey="_label"
+                  subLabelKey="_sub"
+                />
               )}
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <User className="w-4 h-4 text-blue-500" />
-                <span className="font-semibold text-slate-800 text-sm">Real Estate Agent</span>
-              </div>
-              <Select value={form.assigned_agent_id || 'none'} onValueChange={handleAgentSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select agent..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— None —</SelectItem>
-                  {agents.map(ag => (
-                    <SelectItem key={ag.id} value={ag.id}>
-                      {ag.full_name || ag.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.assigned_agent_id && (
-                <p className="text-xs text-slate-500 mt-1">{form.assigned_agent_name}</p>
-              )}
+              <SelectedChips
+                items={agents}
+                selectedIds={form.assigned_agent_ids}
+                labelKey="_label"
+                onRemove={toggleAgent}
+              />
             </div>
 
             {saved && (
               <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-sm">
                 <CheckCircle2 className="w-4 h-4" />
-                Assignments saved — PropStream importer will now route to these assignees.
+                Assignments saved — PropStream importer will route to these assignees.
               </div>
             )}
 

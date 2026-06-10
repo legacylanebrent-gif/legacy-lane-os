@@ -32,17 +32,35 @@
       },
       "default": []
     },
-    "assigned_operator_id": {
-      "type": "string"
+    "assigned_operator_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of assigned FutureEstateOperator records"
     },
-    "assigned_operator_name": {
-      "type": "string"
+    "assigned_operator_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
-    "assigned_agent_id": {
-      "type": "string"
+    "assigned_agent_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of assigned CRM User records (real_estate_agent role)"
     },
-    "assigned_agent_name": {
-      "type": "string"
+    "assigned_agent_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
     "assigned_cleanout_vendor_id": {
       "type": "string"
