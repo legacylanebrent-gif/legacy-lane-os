@@ -23,32 +23,57 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'HOUSIO_TERRITORIES_API_KEY not configured' }, { status: 500 });
     }
 
-    // Fetch micro-territories from LOCAL entity (synced from Housio)
+    // Try micro-territories first
     const microTerritories = await base44.entities.HousioMicroTerritory.filter({
       county: county,
       state: state,
     });
 
-    // Extract cities from micro-territories
     const municipalities = [];
     const seenNames = new Set();
 
-    microTerritories.forEach(mt => {
-      const cities = mt.cities_json || [];
-      cities.forEach(cityName => {
-        if (cityName && !seenNames.has(cityName)) {
-          seenNames.add(cityName);
-          municipalities.push({
-            name: cityName,
-            type: 'City',
-            incorporated: null,
-            lat: null,
-            lng: null,
-            zip_codes: [],
-          });
-        }
+    // If micro-territories found, use them
+    if (microTerritories.length > 0) {
+      microTerritories.forEach(mt => {
+        const cities = mt.cities_json || [];
+        cities.forEach(cityName => {
+          if (cityName && !seenNames.has(cityName)) {
+            seenNames.add(cityName);
+            municipalities.push({
+              name: cityName,
+              type: 'City',
+              incorporated: null,
+              lat: null,
+              lng: null,
+              zip_codes: [],
+            });
+          }
+        });
       });
-    });
+    } else {
+      // Fallback to TerritoryLaunch cities_json
+      const territories = await base44.entities.TerritoryLaunch.filter({
+        county: county,
+        state: state,
+      });
+
+      if (territories.length > 0) {
+        const cities = territories[0].cities_json || [];
+        cities.forEach(cityName => {
+          if (cityName && !seenNames.has(cityName)) {
+            seenNames.add(cityName);
+            municipalities.push({
+              name: cityName,
+              type: 'City',
+              incorporated: null,
+              lat: null,
+              lng: null,
+              zip_codes: [],
+            });
+          }
+        });
+      }
+    }
 
     // Sort by name
     municipalities.sort((a, b) => a.name.localeCompare(b.name));

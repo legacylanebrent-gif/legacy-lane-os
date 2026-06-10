@@ -336,7 +336,14 @@ export default function AdminTerritoryDashboard() {
                                 <RefreshCw className="w-4 h-4 animate-spin" /> Loading micro-territories...
                               </div>
                             ) : cities.length === 0 ? (
-                              <p className="text-sm text-purple-400">No micro-territories found</p>
+                               <div className="space-y-2">
+                                 <p className="text-sm text-purple-400">No micro-territories found</p>
+                                 <Link to="/AdminHousioSync">
+                                   <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
+                                     <RefreshCw className="w-3 h-3 mr-1" /> Sync Housio Data
+                                   </Button>
+                                 </Link>
+                               </div>
                             ) : (
                               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-64 overflow-y-auto pr-2">
                                 {cities.map((city, idx) => (
