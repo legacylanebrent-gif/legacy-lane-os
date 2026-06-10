@@ -17,7 +17,8 @@ import {
   User, Building2, Bell, CreditCard, Save, Upload, Check,
   ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, ArrowRight,
   ShoppingBag, Share2, MapPin, Globe, Shield, Star,
-  Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store
+  Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store,
+  Users, FileText, BarChart2, Send
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
@@ -231,6 +232,8 @@ export default function MyProfile() {
   const acct = user?.primary_account_type || 'consumer';
   const isConsumer = ['consumer','executor','home_seller','buyer','downsizer','diy_seller','consignor'].includes(acct) || !acct;
   const isReseller = acct === 'reseller';
+  const isOperator = acct === 'estate_sale_operator';
+  const isAgent = acct === 'real_estate_agent';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -244,11 +247,11 @@ export default function MyProfile() {
         <TabsList className="flex flex-wrap gap-1 h-auto w-full mb-6 justify-start bg-transparent p-0">
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Business</TabsTrigger>}
-          {!isConsumer && !isReseller && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Territory & Services</TabsTrigger>}
-          {!isConsumer && !isReseller && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
-          {!isConsumer && !isReseller && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
-          {!isConsumer && !isReseller && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
-          {!isConsumer && isReseller && subscription?.tier === 'pro' && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
+          {(isOperator || isAgent) && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isAgent ? 'Territory' : 'Territory & Services'}</TabsTrigger>}
+          {isOperator && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
+          {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
+          {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
+          {isAgent && <TabsTrigger value="agent_tools" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Agent Tools</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
         </TabsList>
 
@@ -518,11 +521,11 @@ export default function MyProfile() {
               </CardContent>
             </Card>
 
-            {/* Credentials & Early Sign-In — not shown to resellers */}
-            {!isReseller && (
+            {/* Operator-specific credentials */}
+            {isOperator && (
               <>
                 <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Credentials & Business Details</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Estate Sale Business Details</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
                       <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="State license" /></div>
@@ -552,12 +555,38 @@ export default function MyProfile() {
               </>
             )}
 
+            {/* Agent-specific credentials */}
+            {isAgent && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Real Estate License & Credentials</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div><Label>License Number</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="RE License #" /></div>
+                    <div>
+                      <Label>License State</Label>
+                      <select value={form.business_address_state} onChange={e => setForm(p => ({ ...p, business_address_state: e.target.value }))} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mt-1">
+                        <option value="">Select State</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="10" /></div>
+                    <div className="md:col-span-3"><Label>Brokerage Name</Label><Input value={form.company_name} onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))} placeholder="Keller Williams, RE/MAX, etc." /></div>
+                  </div>
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">E&O Insured</span></label>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reseller — no extra credentials block */}
+
             <SaveBtn label="Save Business Profile" />
           </TabsContent>
         )}
 
         {/* ─────────────── TERRITORY & SERVICES TAB ─────────────── */}
-        {!isConsumer && !isReseller && (
+        {(isOperator || isAgent) && (
           <TabsContent value="territory" className="space-y-6">
             {/* States */}
             <Card>
@@ -605,37 +634,39 @@ export default function MyProfile() {
               </CardContent>
             </Card>
 
-            {/* Services + Specialties side by side */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5">
-                    {SERVICE_OPTIONS.map(s => (
-                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                        <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
-                        <span className="text-sm">{s}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5">
-                    {SPECIALTY_OPTIONS.map(s => (
-                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                        <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
-                        <span className="text-sm">{s}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Services + Specialties — Operator only */}
+            {isOperator && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {SERVICE_OPTIONS.map(s => (
+                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                          <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
+                          <span className="text-sm">{s}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {SPECIALTY_OPTIONS.map(s => (
+                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                          <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
+                          <span className="text-sm">{s}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-            <SaveBtn label="Save Territory & Services" />
+            <SaveBtn label={isAgent ? 'Save Territory' : 'Save Territory & Services'} />
           </TabsContent>
         )}
 
@@ -693,7 +724,7 @@ export default function MyProfile() {
         )}
 
         {/* ─────────────── MY SALES TAB ─────────────── */}
-        {!isConsumer && !isReseller && (
+        {isOperator && (
           <TabsContent value="sales" className="space-y-4">
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><Home className="w-5 h-5" />My Estate Sales</CardTitle></CardHeader>
@@ -736,7 +767,7 @@ export default function MyProfile() {
         )}
 
         {/* ─────────────── SOCIAL & MARKETPLACES TAB ─────────────── */}
-        {!isConsumer && (!isReseller || subscription?.tier === 'pro') && (
+        {(isOperator || (isReseller && subscription?.tier === 'pro')) && (
           <TabsContent value="marketplace" className="space-y-4">
             <div className="flex gap-2 border-b pb-3">
               {['social','etsy','ebay'].map(t => (
@@ -749,6 +780,73 @@ export default function MyProfile() {
             {marketplaceTab === 'social' && <SocialMediaTab user={user} />}
             {marketplaceTab === 'etsy' && <MarketplaceCredentialsTab platform="etsy" />}
             {marketplaceTab === 'ebay' && <MarketplaceCredentialsTab platform="ebay" />}
+          </TabsContent>
+        )}
+
+        {/* ─────────────── AGENT TOOLS TAB ─────────────── */}
+        {isAgent && (
+          <TabsContent value="agent_tools" className="space-y-6">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />Agent Tools & Partnerships</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-slate-500 mb-4">Quick links to your agent-specific tools and dashboards.</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Link to="/AgentDashboard">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center"><BarChart2 className="w-5 h-5 text-orange-600" /></div>
+                      <div><p className="font-semibold text-sm">Agent Dashboard</p><p className="text-xs text-slate-500">Leads, commissions & activity</p></div>
+                    </div>
+                  </Link>
+                  <Link to="/AgentOperatorPortal">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-cyan-600" /></div>
+                      <div><p className="font-semibold text-sm">Operator Partnerships</p><p className="text-xs text-slate-500">Connect with estate sale operators</p></div>
+                    </div>
+                  </Link>
+                  <Link to="/AgentPartnerships">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center"><Send className="w-5 h-5 text-purple-600" /></div>
+                      <div><p className="font-semibold text-sm">Agent Partnerships</p><p className="text-xs text-slate-500">Co-op referral network</p></div>
+                    </div>
+                  </Link>
+                  <Link to="/ReferralDealPipeline">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><FileText className="w-5 h-5 text-green-600" /></div>
+                      <div><p className="font-semibold text-sm">Referral Deal Pipeline</p><p className="text-xs text-slate-500">Track & manage referral deals</p></div>
+                    </div>
+                  </Link>
+                  <Link to="/ReferralDashboard">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><Globe className="w-5 h-5 text-blue-600" /></div>
+                      <div><p className="font-semibold text-sm">Referral Dashboard</p><p className="text-xs text-slate-500">Earnings & referral history</p></div>
+                    </div>
+                  </Link>
+                  <Link to="/JoinReferralExchange">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                      <div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center"><Share2 className="w-5 h-5 text-amber-600" /></div>
+                      <div><p className="font-semibold text-sm">Join Referral Exchange</p><p className="text-xs text-slate-500">Expand your partner network</p></div>
+                    </div>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Agent bio/description */}
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />Agent Bio</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Professional Bio</Label>
+                  <Textarea value={form.company_description} onChange={e => setForm(p => ({ ...p, company_description: e.target.value }))} rows={5} placeholder="Tell estate sale operators and families about your experience with probate, senior transitions, inherited properties..." />
+                  <p className="text-xs text-slate-400 mt-1">{(form.company_description || '').length} characters</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div><Label>Avg. Sale Price (homes you represent)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="450000" /></div>
+                  <div><Label>Referral Fee % (for estate sale operators)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="25" /></div>
+                </div>
+              </CardContent>
+            </Card>
+            <SaveBtn label="Save Agent Profile" />
           </TabsContent>
         )}
 
