@@ -187,7 +187,12 @@ export default function MyProfile() {
       ]);
 
       if (subs.length) setSubscription(subs[0]);
-      setPackages(pkgs.sort((a, b) => ({ basic: 1, pro: 2, premium: 3 }[a.tier_level] - { basic: 1, pro: 2, premium: 3 }[b.tier_level])));
+      const tierOrder = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, elite: 3, premium: 3 };
+      setPackages(pkgs.sort((a, b) => {
+        const tierA = tierOrder[a.data?.tier_level || a.tier_level] ?? 99;
+        const tierB = tierOrder[b.data?.tier_level || b.tier_level] ?? 99;
+        return tierA - tierB;
+      }));
       setPurchases(purchases);
 
       const acct = u.primary_account_type || 'consumer';
@@ -233,7 +238,15 @@ export default function MyProfile() {
   };
   const removeTag = (field, value) => setForm(p => ({ ...p, [field]: p[field].filter(v => v !== value) }));
 
-  const getTierColor = (tier) => ({ basic: 'bg-slate-100 text-slate-700', pro: 'bg-cyan-100 text-cyan-700', premium: 'bg-orange-100 text-orange-700' }[tier] || 'bg-slate-100 text-slate-700');
+  const getTierColor = (tier) => ({
+    starter: 'bg-slate-100 text-slate-700',
+    basic: 'bg-slate-100 text-slate-700',
+    growth: 'bg-purple-100 text-purple-700',
+    professional: 'bg-blue-100 text-blue-700',
+    pro: 'bg-blue-100 text-blue-700',
+    elite: 'bg-orange-100 text-orange-800',
+    premium: 'bg-orange-100 text-orange-700',
+  }[tier] || 'bg-slate-100 text-slate-700');
 
   const SaveBtn = ({ label = 'Save Changes' }) => (
     <Button onClick={handleSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
@@ -1208,52 +1221,126 @@ export default function MyProfile() {
         {/* ─────────────── SUBSCRIPTION TAB ─────────────── */}
         {!isConsumer && (
           <TabsContent value="subscription" className="space-y-4">
+            {/* Current Plan Banner */}
             {subscription && (
-              <Card>
-                <CardHeader><CardTitle className="flex items-center gap-2"><Check className="w-5 h-5 text-green-600" />Current Plan</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="flex items-start justify-between mb-4">
+              <Card className="border-green-200 bg-green-50">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between flex-wrap gap-3">
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900 mb-1">{subscription.plan_type.replace(/_/g, ' ').replace(/\boperator\b/gi, '').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase())}</h3>
-                      <Badge className={getTierColor(subscription.tier)}>{subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Check className="w-5 h-5 text-green-600" />
+                        <h3 className="text-lg font-bold text-green-900">
+                          {subscription.plan_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Active Plan'}
+                        </h3>
+                        <Badge className="bg-green-600 text-white">{subscription.status}</Badge>
+                      </div>
+                      {subscription.tier && <Badge className={getTierColor(subscription.tier)}>{subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>}
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-slate-900">${subscription.price}</div>
-                      <div className="text-sm text-slate-500">per {subscription.billing_period === 'monthly' ? 'month' : 'year'}</div>
+                      {subscription.price > 0 && <>
+                        <div className="text-2xl font-bold text-green-900">${subscription.price}</div>
+                        <div className="text-sm text-green-700">per {subscription.billing_period === 'monthly' ? 'month' : 'year'}</div>
+                      </>}
+                      {subscription.renewal_date && <p className="text-xs text-green-600 mt-1">Renews {new Date(subscription.renewal_date).toLocaleDateString()}</p>}
                     </div>
-                  </div>
-                  <div className="space-y-1 text-sm text-slate-600">
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Status: <Badge variant="outline" className="text-green-600">{subscription.status}</Badge></div>
-                    {subscription.renewal_date && <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" />Renews {new Date(subscription.renewal_date).toLocaleDateString()}</div>}
                   </div>
                 </CardContent>
               </Card>
             )}
-            <Card>
-              <CardHeader><CardTitle>Available Plans</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4">
+
+            {/* Available Plans */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">Available Plans</h3>
+              {packages.length === 0 ? (
+                <Card><CardContent className="p-8 text-center text-slate-500">No packages available for your account type.</CardContent></Card>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {packages.map(pkg => {
-                    const isCurrent = subscription?.tier === pkg.tier_level;
+                    const pkgData = pkg.data || pkg;
+                    const tierOrder = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, elite: 3, premium: 3 };
+                    const currentTierNum = tierOrder[subscription?.tier] ?? -1;
+                    const pkgTierNum = tierOrder[pkgData.tier_level] ?? 0;
+                    const isCurrent = subscription?.tier === pkgData.tier_level;
+                    const isUpgrade = !isCurrent && pkgTierNum > currentTierNum;
+                    const isDowngrade = !isCurrent && subscription && pkgTierNum < currentTierNum;
+
                     return (
-                      <Card key={pkg.id} className={`relative ${isCurrent ? 'border-2 border-orange-500' : ''}`}>
-                        {isCurrent && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-600">Current Plan</Badge>}
-                        <CardContent className="p-5">
-                          <div className="text-center mb-4">
-                            <Badge className={getTierColor(pkg.tier_level)}>{pkg.tier_level}</Badge>
-                            <h3 className="text-lg font-bold mt-2 mb-1">{pkg.package_name}</h3>
-                            <p className="text-xs text-slate-500 mb-3">{pkg.description}</p>
-                            <div className="text-2xl font-bold">${pkg.monthly_price}</div>
-                            <div className="text-xs text-slate-500">per month</div>
-                            {pkg.annual_price && <div className="text-xs text-cyan-600 mt-1">${pkg.annual_price}/yr</div>}
+                      <Card key={pkg.id} className={`relative flex flex-col ${isCurrent ? 'border-2 border-orange-500' : ''} ${pkgData.featured ? 'ring-2 ring-orange-300' : ''}`}>
+                        {isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="bg-orange-600 text-white text-xs px-3">Current Plan</Badge></div>}
+                        {pkgData.featured && !isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="bg-slate-800 text-white text-xs px-3">Recommended</Badge></div>}
+                        <CardContent className="p-5 flex flex-col flex-1">
+                          {/* Header */}
+                          <div className="mb-4">
+                            <Badge className={getTierColor(pkgData.tier_level) + ' mb-2'}>{pkgData.tier_level}</Badge>
+                            <h3 className="text-xl font-bold text-slate-900">{pkgData.package_name}</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">{pkgData.description}</p>
                           </div>
-                          <div className="space-y-1.5 mb-4">
-                            {pkg.features?.slice(0, 5).map((f, i) => <div key={i} className="flex gap-2 text-xs"><Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" /><span className="text-slate-600">{f}</span></div>)}
-                            {pkg.features?.length > 5 && <p className="text-xs text-slate-400">+{pkg.features.length - 5} more</p>}
+
+                          {/* Pricing */}
+                          <div className="py-3 border-t border-b border-slate-100 mb-4">
+                            {pkgData.account_type === 'biz_in_a_box' ? (
+                              <div className="space-y-1">
+                                <div><span className="text-2xl font-bold">${pkgData.biz_in_a_box_setup_fee?.toLocaleString() || 0}</span><span className="text-sm text-slate-500 ml-1">one-time</span></div>
+                                <div><span className="text-lg font-semibold">${pkgData.biz_in_a_box_monthly_year1}/mo</span><span className="text-sm text-slate-500 ml-1">Year 1</span></div>
+                                <div className="text-sm text-slate-500">{pkgData.biz_in_a_box_revenue_share}% royalty</div>
+                              </div>
+                            ) : pkgData.pricing_model === 'per_item' ? (
+                              <div>
+                                {pkgData.monthly_price > 0 && <div><span className="text-2xl font-bold">${pkgData.monthly_price}</span><span className="text-sm text-slate-500 ml-1">/month</span></div>}
+                                {pkgData.monthly_price === 0 && <div className="text-2xl font-bold text-green-700">Free</div>}
+                                {pkgData.per_item_price > 0 && <div className="text-sm text-slate-500">+ ${pkgData.per_item_price} platform fee per sale</div>}
+                                {pkgData.platform_fee_percentage > 0 && <div className="text-sm text-slate-500">+ {pkgData.platform_fee_percentage}% on sold items</div>}
+                              </div>
+                            ) : (
+                              <div>
+                                {pkgData.monthly_price === 0
+                                  ? <div className="text-2xl font-bold text-green-700">Free</div>
+                                  : <div><span className="text-2xl font-bold">${pkgData.monthly_price}</span><span className="text-sm text-slate-500 ml-1">/month</span></div>
+                                }
+                                {pkgData.annual_price > 0 && pkgData.monthly_price > 0 && (
+                                  <div className="text-xs text-cyan-600 mt-0.5">
+                                    ${pkgData.annual_price}/yr · save ${Math.round(pkgData.monthly_price * 12 - pkgData.annual_price)}
+                                  </div>
+                                )}
+                                {pkgData.per_item_price > 0 && <div className="text-xs text-slate-500 mt-0.5">+ ${pkgData.per_item_price} per sale listing</div>}
+                                {pkgData.per_lead_price > 0 && <div className="text-xs text-slate-500 mt-0.5">+ ${pkgData.per_lead_price} per lead</div>}
+                                {pkgData.referral_fee_percentage > 0 && <div className="text-xs text-slate-500 mt-0.5">{pkgData.referral_fee_percentage}% referral fee on closed clients</div>}
+                              </div>
+                            )}
                           </div>
-                          {!isCurrent && (
-                            <Button size="sm" className="w-full" variant={pkg.tier_level === 'premium' ? 'default' : 'outline'}>
-                              {subscription && pkg.tier_level === 'premium' ? <><ArrowUpCircle className="w-3.5 h-3.5 mr-1" />Upgrade</> : subscription && pkg.tier_level === 'basic' ? <><ArrowDownCircle className="w-3.5 h-3.5 mr-1" />Downgrade</> : 'Select Plan'}
+
+                          {/* Features */}
+                          <div className="space-y-1.5 flex-1 mb-4">
+                            {pkgData.features?.slice(0, 6).map((f, i) => (
+                              <div key={i} className="flex gap-2 text-xs">
+                                <Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" />
+                                <span className="text-slate-600">{f}</span>
+                              </div>
+                            ))}
+                            {pkgData.features?.length > 6 && <p className="text-xs text-slate-400 pl-5">+{pkgData.features.length - 6} more features</p>}
+                          </div>
+
+                          {/* Limits */}
+                          {pkgData.limits && Object.values(pkgData.limits).some(v => v) && (
+                            <div className="bg-slate-50 rounded-lg p-3 mb-4 space-y-1">
+                              {Object.entries(pkgData.limits).map(([k, v]) => v ? (
+                                <div key={k} className="flex justify-between text-xs">
+                                  <span className="text-slate-500 capitalize">{k.replace(/_/g, ' ')}</span>
+                                  <span className="font-medium text-slate-700">{v}</span>
+                                </div>
+                              ) : null)}
+                            </div>
+                          )}
+
+                          {/* CTA */}
+                          {isCurrent ? (
+                            <div className="flex items-center justify-center gap-2 py-2 text-sm text-green-700 font-semibold">
+                              <Check className="w-4 h-4" /> Your Current Plan
+                            </div>
+                          ) : (
+                            <Button size="sm" className="w-full" variant={isUpgrade ? 'default' : 'outline'}
+                              onClick={() => alert('To change your plan, please contact support or visit your billing settings.')}>
+                              {isUpgrade ? <><ArrowUpCircle className="w-3.5 h-3.5 mr-1.5" />Upgrade</> : isDowngrade ? <><ArrowDownCircle className="w-3.5 h-3.5 mr-1.5" />Downgrade</> : 'Select Plan'}
                             </Button>
                           )}
                         </CardContent>
@@ -1261,9 +1348,8 @@ export default function MyProfile() {
                     );
                   })}
                 </div>
-                {packages.length === 0 && <p className="text-center text-slate-500 py-8">No subscription packages available.</p>}
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </TabsContent>
         )}
       </Tabs>
