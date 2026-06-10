@@ -49,15 +49,17 @@ Deno.serve(async (req) => {
     filteredMicros.forEach(mt => {
       const cities = mt.cities || [];
       cities.forEach(city => {
-        if (!seenNames.has(city.name)) {
-          seenNames.add(city.name);
+        // Cities are just strings, convert to objects
+        const cityName = typeof city === 'string' ? city : city.name;
+        if (cityName && !seenNames.has(cityName)) {
+          seenNames.add(cityName);
           municipalities.push({
-            name: city.name,
-            type: city.type || 'CDP',
-            incorporated: city.incorporated ?? null,
-            lat: city.lat || null,
-            lng: city.lng || null,
-            zip_codes: city.zip_codes || [],
+            name: cityName,
+            type: 'City',
+            incorporated: null,
+            lat: null,
+            lng: null,
+            zip_codes: [],
           });
         }
       });
