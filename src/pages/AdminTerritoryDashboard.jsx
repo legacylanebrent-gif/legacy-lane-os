@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2 } from 'lucide-react';
+import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2, UserCheck } from 'lucide-react';
+import TerritoryAssignmentDrawer from '@/components/territory/TerritoryAssignmentDrawer';
 
 const PAGE_SIZE = 50;
 
@@ -30,6 +31,7 @@ export default function AdminTerritoryDashboard() {
   const [filterState, setFilterState] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [page, setPage] = useState(1);
+  const [assigningTerritory, setAssigningTerritory] = useState(null);
 
   const { data: response, isLoading, refetch } = useQuery({
     queryKey: ['housioTerritories'],
@@ -216,8 +218,9 @@ export default function AdminTerritoryDashboard() {
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Agents</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Active Listings</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Avg Price</th>
-                </tr>
-              </thead>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Assign</th>
+                  </tr>
+                  </thead>
               <tbody>
                 {paged.length === 0 ? (
                   <tr>
@@ -246,7 +249,17 @@ export default function AdminTerritoryDashboard() {
                       <td className="px-4 py-3 text-slate-700">
                         {t.avg_listing_price ? `$${t.avg_listing_price.toLocaleString()}` : '—'}
                       </td>
-                    </tr>
+                      <td className="px-4 py-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                          onClick={() => setAssigningTerritory({ county: t.name, state: t.state, status: t.status })}
+                        >
+                          <UserCheck className="w-3 h-3 mr-1" /> Assign
+                        </Button>
+                      </td>
+                      </tr>
                   ))
                 )}
               </tbody>
@@ -279,6 +292,12 @@ export default function AdminTerritoryDashboard() {
         </Card>
 
       </div>
+
+      <TerritoryAssignmentDrawer
+        territory={assigningTerritory}
+        onClose={() => setAssigningTerritory(null)}
+        onSaved={() => setAssigningTerritory(null)}
+      />
     </div>
   );
 }
