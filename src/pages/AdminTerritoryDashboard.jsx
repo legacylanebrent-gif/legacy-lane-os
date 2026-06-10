@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2, UserCheck } from 'lucide-react';
+import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2, UserCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import TerritoryAssignmentDrawer from '@/components/territory/TerritoryAssignmentDrawer';
 
 const PAGE_SIZE = 50;
@@ -32,6 +32,9 @@ export default function AdminTerritoryDashboard() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [page, setPage] = useState(1);
   const [assigningTerritory, setAssigningTerritory] = useState(null);
+  const [expandedTerritory, setExpandedTerritory] = useState(null);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [citiesCache, setCitiesCache] = useState({});
 
   const { data: response, isLoading, refetch } = useQuery({
     queryKey: ['housioTerritories'],
@@ -74,6 +77,34 @@ export default function AdminTerritoryDashboard() {
 
   // Reset to page 1 when filters change
   useEffect(() => { setPage(1); }, [search, filterState, filterStatus]);
+
+  const loadCities = async (territory) => {
+    if (citiesCache[territory.territory_id]) return;
+    setLoadingCities(true);
+    try {
+      const res = await base44.functions.invoke('getTerritoryMunicipalities', { 
+        county: territory.name, 
+        state: territory.state 
+      });
+      setCitiesCache(prev => ({
+        ...prev,
+        [territory.territory_id]: res.data?.municipalities || []
+      }));
+    } catch (e) {
+      console.error('Failed to load cities:', e);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  const toggleExpand = (territory) => {
+    if (expandedTerritory?.territory_id === territory.territory_id) {
+      setExpandedTerritory(null);
+    } else {
+      setExpandedTerritory(territory);
+      loadCities(territory);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -210,6 +241,7 @@ export default function AdminTerritoryDashboard() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
                   <th className="text-left px-4 py-3 font-semibold text-slate-600 w-8">#</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 w-10"></th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Territory Name</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">State</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Territory ID</th>
@@ -224,18 +256,38 @@ export default function AdminTerritoryDashboard() {
               <tbody>
                 {paged.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-slate-400">
+                    <td colSpan={9} className="text-center py-16 text-slate-400">
                       <MapPin className="w-8 h-8 mx-auto mb-2 text-slate-200" />
                       No territories match your filters.
                     </td>
                   </tr>
                 ) : (
-                  paged.map((t, i) => (
-                    <tr key={t.territory_id || t.id || i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                  paged.map((t, i) => {
+                    const isExpanded = expandedTerritory?.territory_id === t.territory_id;
+                    const cities = citiesCache[t.territory_id] || [];
+                    
+                    return (
+                    <React.Fragment key={t.territory_id || t.id || i}>
+                    <tr className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3 text-slate-400 text-xs">
                         {(currentPage - 1) * PAGE_SIZE + i + 1}
                       </td>
-                      <td className="px-4 py-3 font-medium text-slate-900">{t.name || '—'}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => toggleExpand(t)}
+                          className="text-slate-400 hover:text-purple-600 transition-colors"
+                        >
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        <button
+                          onClick={() => toggleExpand(t)}
+                          className="text-left hover:text-purple-600 transition-colors font-medium"
+                        >
+                          {t.name || '—'}
+                        </button>
+                      </td>
                       <td className="px-4 py-3 text-slate-600">{t.state || '—'}</td>
                       <td className="px-4 py-3 text-slate-500 text-xs font-mono">{t.territory_id || t.id || '—'}</td>
                       <td className="px-4 py-3">
@@ -259,8 +311,50 @@ export default function AdminTerritoryDashboard() {
                           <UserCheck className="w-3 h-3 mr-1" /> Assign
                         </Button>
                       </td>
+                    </tr>
+                    {/* Expanded row showing micro-territories */}
+                    {isExpanded && (
+                      <tr>
+                        <td colSpan={11} className="px-4 py-4 bg-purple-50 border-b border-purple-100">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-semibold text-purple-900">
+                                Micro-Territories in {t.name} County
+                              </h4>
+                              <Badge className="bg-purple-600 text-white">
+                                {cities.length} cities
+                              </Badge>
+                            </div>
+                            {loadingCities && !cities.length ? (
+                              <div className="flex items-center gap-2 text-sm text-purple-600">
+                                <RefreshCw className="w-4 h-4 animate-spin" /> Loading micro-territories...
+                              </div>
+                            ) : cities.length === 0 ? (
+                              <p className="text-sm text-purple-400">No micro-territories found</p>
+                            ) : (
+                              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-64 overflow-y-auto pr-2">
+                                {cities.map((city, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="px-2.5 py-1.5 bg-white rounded-lg border border-purple-200 text-xs text-purple-800 hover:border-purple-400 hover:bg-purple-100 transition-colors cursor-default"
+                                  >
+                                    {city.name}
+                                    {city.type && (
+                                      <span className="text-purple-400 text-[10px] ml-1">
+                                        ({city.type})
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
                       </tr>
-                  ))
+                    )}
+                    </React.Fragment>
+                    );
+                  })
                 )}
               </tbody>
             </table>
