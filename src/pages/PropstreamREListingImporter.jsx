@@ -285,7 +285,8 @@ export default function PropstreamREListingImporter() {
               <ul className="text-xs text-blue-700 space-y-1 ml-6 list-disc">
                 <li>Duplicate detection by MLS number, PropStream ID, and address</li>
                 <li>Estate sale opportunity scoring (0–100) with label: Low / Moderate / Strong / Priority</li>
-                <li>Auto territory matching by ZIP, city, or county</li>
+                <li>Geocoding via Google Maps to resolve lat/lng and county (enables micro-territory matching)</li>
+                <li>Auto territory matching by ZIP, city, county, or geocoded coordinates</li>
                 <li>Matched operators pre-assigned based on territory</li>
                 <li>Import batch record created for tracking</li>
               </ul>
@@ -419,7 +420,7 @@ export default function PropstreamREListingImporter() {
         <Card>
           <CardContent className="py-20 text-center">
             <Loader className="w-12 h-12 animate-spin mx-auto text-purple-600 mb-4" />
-            <p className="font-semibold text-slate-700 text-lg">Importing, deduplicating, scoring, and territory-matching…</p>
+            <p className="font-semibold text-slate-700 text-lg">Importing, geocoding, deduplicating, scoring, and territory-matching…</p>
             <p className="text-slate-400 text-sm mt-1">This may take a moment for large files.</p>
           </CardContent>
         </Card>

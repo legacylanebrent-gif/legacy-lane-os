@@ -2,6 +2,25 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const normalizeAddr = s => (s || '').toLowerCase().replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
 
+async function geocodeAddress(address, city, state, zip, apiKey) {
+  const query = [address, city, state, zip].filter(Boolean).join(', ');
+  if (!query) return null;
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&components=country:US&key=${apiKey}`
+    );
+    const data = await res.json();
+    if (data.status !== 'OK' || !data.results?.[0]) return null;
+    const { lat, lng } = data.results[0].geometry.location;
+    // Extract county from address components
+    const countyComp = data.results[0].address_components?.find(c => c.types.includes('administrative_area_level_2'));
+    const county = countyComp ? countyComp.long_name.replace(/ County$/, '') : null;
+    return { lat, lng, county };
+  } catch {
+    return null;
+  }
+}
+
 function matchTerritory(row, territories) {
   const zip = (row.zip || '').trim();
   const city = (row.city || '').toLowerCase().trim();
@@ -80,6 +99,8 @@ Deno.serve(async (req) => {
       import_status: 'processing'
     });
 
+    const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+
     const [territories, existing] = await Promise.all([
       base44.asServiceRole.entities.TerritoryLaunch.list(),
       base44.asServiceRole.entities.PropstreamREListing.list('-created_date', 10000)
@@ -101,11 +122,31 @@ Deno.serve(async (req) => {
 
         if (isDupe) { dupes++; continue; }
 
-        const territory = matchTerritory(row, territories);
-        const { score, label, reasons } = calcScore(row);
+        // Geocode if lat/lng not already present in the CSV
+        let lat = row.latitude;
+        let lng = row.longitude;
+        let geocodedCounty = null;
+        if ((!lat || !lng) && googleApiKey) {
+          const geo = await geocodeAddress(row.property_address, row.city, row.state, row.zip, googleApiKey);
+          if (geo) {
+            lat = geo.lat;
+            lng = geo.lng;
+            if (!row.county && geo.county) geocodedCounty = geo.county;
+          }
+        }
+
+        const enrichedRow = {
+          ...row,
+          ...(lat != null ? { latitude: lat } : {}),
+          ...(lng != null ? { longitude: lng } : {}),
+          ...(geocodedCounty ? { county: geocodedCounty } : {}),
+        };
+
+        const territory = matchTerritory(enrichedRow, territories);
+        const { score, label, reasons } = calcScore(enrichedRow);
 
         await base44.asServiceRole.entities.PropstreamREListing.create({
-          ...row,
+          ...enrichedRow,
           import_batch_id: batch.id,
           source: 'PropStream',
           territory_id: territory?.id || '',
