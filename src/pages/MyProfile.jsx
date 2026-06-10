@@ -23,6 +23,7 @@ import {
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
+import InteractiveTerritorySelector from '@/components/profile/InteractiveTerritorySelector';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -649,49 +650,13 @@ export default function MyProfile() {
         {/* ─────────────── TERRITORY & SERVICES TAB ─────────────── */}
         {(isOperator || isAgent) && (
           <TabsContent value="territory" className="space-y-6">
-            {/* States */}
+            <InteractiveTerritorySelector form={form} setForm={setForm} />
+
+            {/* Max Radius */}
             <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area</CardTitle></CardHeader>
-              <CardContent className="space-y-5">
-                <div>
-                  <Label className="mb-2 block text-slate-600">States</Label>
-                  <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5">
-                    {US_STATES.map(s => (
-                      <button key={s} type="button" onClick={() => toggleArr('service_states', s)}
-                        className={`px-1.5 py-1 rounded text-xs font-medium border transition-all ${form.service_states.includes(s) ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300'}`}>{s}</button>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-5 pt-2 border-t">
-                  <div>
-                    <Label className="mb-2 block text-slate-600">Counties</Label>
-                    <div className="flex gap-2 mb-2">
-                      <Input value={newCounty} onChange={e => setNewCounty(e.target.value)} placeholder="Add county..." onKeyDown={e => { if (e.key === 'Enter') { addTag('service_counties', newCounty, setNewCounty); e.preventDefault(); } }} />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addTag('service_counties', newCounty, setNewCounty)}><Plus className="w-4 h-4" /></Button>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.service_counties.map(c => (
-                        <Badge key={c} variant="secondary" className="gap-1 pr-1 text-xs">{c}<button onClick={() => removeTag('service_counties', c)}><X className="w-3 h-3" /></button></Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="mb-2 block text-slate-600">Cities / Towns</Label>
-                    <div className="flex gap-2 mb-2">
-                      <Input value={newCity} onChange={e => setNewCity(e.target.value)} placeholder="Add city..." onKeyDown={e => { if (e.key === 'Enter') { addTag('service_cities', newCity, setNewCity); e.preventDefault(); } }} />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addTag('service_cities', newCity, setNewCity)}><Plus className="w-4 h-4" /></Button>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.service_cities.map(c => (
-                        <Badge key={c} variant="secondary" className="gap-1 pr-1 text-xs">{c}<button onClick={() => removeTag('service_cities', c)}><X className="w-3 h-3" /></button></Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <Label>Max Travel Radius (miles)</Label>
-                  <Input type="number" className="max-w-xs mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="50" />
-                </div>
+              <CardContent className="pt-5">
+                <Label>Max Travel Radius (miles)</Label>
+                <Input type="number" className="max-w-xs mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="50" />
               </CardContent>
             </Card>
 
