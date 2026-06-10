@@ -101,24 +101,20 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
 
       const [tls, ops, allUsers] = await Promise.all([
         base44.entities.TerritoryLaunch.filter({ county: territory.county, state: stateVal }),
-        // Filter operators by state (supports abbreviation in state field)
-        base44.entities.FutureEstateOperator.filter({ claim_status: 'verified', state: stateVal }, '-created_date', 300),
-        // Get all CRM users with agent role — filter by state below
+        // All operators in this state — no claim_status filter needed
+        base44.entities.FutureEstateOperator.filter({ state: stateVal }, '-created_date', 300),
+        // Get all CRM users — filter by role + state below
         base44.entities.User.list('-created_date', 500),
       ]);
 
       const tl = tls[0] || null;
       setTlRecord(tl);
 
-      // Filter agents by state match on their profile
+      // Filter agents: primary_account_type = real_estate_agent AND address.state matches
       const stateUpper = stateVal?.toUpperCase();
       const agentUsers = allUsers.filter(u =>
         (u.role === 'real_estate_agent' || u.primary_account_type === 'real_estate_agent') &&
-        (
-          u.state?.toUpperCase() === stateUpper ||
-          u.state_abbreviation?.toUpperCase() === stateUpper ||
-          u.service_states?.map(s => s.toUpperCase()).includes(stateUpper)
-        )
+        u.address?.state?.toUpperCase() === stateUpper
       );
 
       // Normalize operators for display
@@ -131,7 +127,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
       const normalizedAgents = agentUsers.map(ag => ({
         ...ag,
         _label: ag.full_name || ag.email,
-        _sub: ag.email,
+        _sub: [ag.address?.city, ag.address?.state, ag.email].filter(Boolean).join(' · '),
       }));
 
       setOperators(normalizedOps);
