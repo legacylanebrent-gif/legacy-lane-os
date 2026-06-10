@@ -16,7 +16,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'HOUSIO_TERRITORIES_API_KEY not configured' }, { status: 500 });
     }
 
-    const { batch_type = 'territories', offset = 0, limit = 100, clear_first = false } = await req.json();
+    let params = {};
+    try {
+      const body = await req.json();
+      params = body || {};
+    } catch (e) {
+      console.log('[syncHousioTerritories] No JSON body provided, using defaults');
+    }
+
+    const { batch_type = 'territories', offset = 0, limit = 100, clear_first = false } = params;
 
     // Validate parameters
     const safeOffset = Math.max(0, parseInt(offset) || 0);
