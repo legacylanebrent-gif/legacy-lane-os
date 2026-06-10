@@ -1,0 +1,41 @@
+{
+  "name": "HousioMicroTerritory",
+  "type": "object",
+  "properties": {
+    "micro_territory_id": {
+      "type": "string",
+      "description": "Unique micro-territory identifier"
+    },
+    "territory_id": {
+      "type": "string",
+      "description": "Parent territory ID"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation"
+    },
+    "county": {
+      "type": "string",
+      "description": "County name"
+    },
+    "cities_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of city/township names in this micro-territory"
+    },
+    "synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this record was last synced from Housio"
+    }
+  },
+  "required": [
+    "micro_territory_id",
+    "state",
+    "county",
+    "cities_json"
+  ]
+}

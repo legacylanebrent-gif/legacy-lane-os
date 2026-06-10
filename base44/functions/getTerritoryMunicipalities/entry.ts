@@ -23,34 +23,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'HOUSIO_TERRITORIES_API_KEY not configured' }, { status: 500 });
     }
 
-    // Fetch micro-territories from Housio for this county
-    const microRes = await fetch(TERRITORIES_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-      },
-      body: JSON.stringify({ action: 'micro_list' }),
+    // Fetch micro-territories from LOCAL entity (synced from Housio)
+    const microTerritories = await base44.entities.HousioMicroTerritory.filter({
+      county: county,
+      state: state,
     });
-
-    const microData = await microRes.json();
-    const microTerritories = microData?.micro_territories || [];
-
-    // Filter micro-territories for the requested county
-    const filteredMicros = microTerritories.filter(mt => 
-      mt.county?.toLowerCase() === county.toLowerCase() && 
-      mt.state === state
-    );
 
     // Extract cities from micro-territories
     const municipalities = [];
     const seenNames = new Set();
 
-    filteredMicros.forEach(mt => {
-      const cities = mt.cities || [];
-      cities.forEach(city => {
-        // Cities are just strings, convert to objects
-        const cityName = typeof city === 'string' ? city : city.name;
+    microTerritories.forEach(mt => {
+      const cities = mt.cities_json || [];
+      cities.forEach(cityName => {
         if (cityName && !seenNames.has(cityName)) {
           seenNames.add(cityName);
           municipalities.push({
@@ -73,7 +58,7 @@ Deno.serve(async (req) => {
       total_count: municipalities.length,
       county,
       state,
-      source: 'housio',
+      source: 'local_db',
     });
 
   } catch (error) {

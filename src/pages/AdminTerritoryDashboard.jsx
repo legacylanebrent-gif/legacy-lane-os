@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2, UserCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, RefreshCw, Search, ChevronLeft, ChevronRight, Code, ChevronsLeft, ChevronsRight, Building2, UserCheck, ChevronDown, ChevronUp, Database } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import TerritoryAssignmentDrawer from '@/components/territory/TerritoryAssignmentDrawer';
 
 const PAGE_SIZE = 50;
@@ -133,6 +134,11 @@ export default function AdminTerritoryDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Link to="/AdminHousioSync">
+              <Button variant="outline" size="sm">
+                <Database className="w-4 h-4 mr-1" /> Sync Housio
+              </Button>
+            </Link>
             <Button onClick={() => refetch()} variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-1" /> Refresh
             </Button>

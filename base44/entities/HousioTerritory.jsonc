@@ -1,0 +1,48 @@
+{
+  "name": "HousioTerritory",
+  "type": "object",
+  "properties": {
+    "territory_id": {
+      "type": "string",
+      "description": "Unique territory identifier from Housio"
+    },
+    "state": {
+      "type": "string",
+      "description": "State abbreviation (e.g. NJ)"
+    },
+    "state_name": {
+      "type": "string",
+      "description": "Full state name (e.g. New Jersey)"
+    },
+    "county": {
+      "type": "string",
+      "description": "County name (e.g. Monmouth County)"
+    },
+    "county_fips": {
+      "type": "string",
+      "description": "5-digit FIPS county code"
+    },
+    "zip_codes_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of ZIP codes in this territory"
+    },
+    "synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this record was last synced from Housio"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is this territory currently active"
+    }
+  },
+  "required": [
+    "territory_id",
+    "state"
+  ]
+}
