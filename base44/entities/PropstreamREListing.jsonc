@@ -29,6 +29,9 @@
     "property_address": {
       "type": "string"
     },
+    "unit_number": {
+      "type": "string"
+    },
     "city": {
       "type": "string"
     },
@@ -43,7 +46,11 @@
     },
     "fips_code": {
       "type": "string",
-      "description": "5-digit FIPS county code from PropStream CSV"
+      "description": "5-digit FIPS county code"
+    },
+    "apn": {
+      "type": "string",
+      "description": "Assessor Parcel Number"
     },
     "latitude": {
       "type": "number"
@@ -75,13 +82,55 @@
     "property_type": {
       "type": "string"
     },
+    "property_status": {
+      "type": "string"
+    },
     "listing_remarks": {
       "type": "string"
+    },
+    "last_sale_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_sale_recording_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_sale_amount": {
+      "type": "number"
+    },
+    "total_open_loans": {
+      "type": "integer"
+    },
+    "estimated_ltv": {
+      "type": "number",
+      "description": "Est. Loan-to-Value %"
+    },
+    "equity_estimate": {
+      "type": "number"
+    },
+    "mortgage_balance": {
+      "type": "number"
     },
     "owner_name": {
       "type": "string"
     },
+    "owner_1_first_name": {
+      "type": "string"
+    },
+    "owner_1_last_name": {
+      "type": "string"
+    },
+    "owner_2_first_name": {
+      "type": "string"
+    },
+    "owner_2_last_name": {
+      "type": "string"
+    },
     "owner_mailing_address": {
+      "type": "string"
+    },
+    "owner_mailing_unit": {
       "type": "string"
     },
     "owner_mailing_city": {
@@ -93,10 +142,94 @@
     "owner_mailing_zip": {
       "type": "string"
     },
+    "owner_mailing_county": {
+      "type": "string"
+    },
+    "mailing_care_of_name": {
+      "type": "string"
+    },
+    "do_not_mail": {
+      "type": "boolean",
+      "default": false
+    },
     "ownership_length_years": {
       "type": "number"
     },
+    "deceased_owner": {
+      "type": "boolean",
+      "default": false
+    },
+    "litigator": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone_1": {
+      "type": "string"
+    },
+    "phone_1_type": {
+      "type": "string"
+    },
+    "phone_1_dnc": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone_2": {
+      "type": "string"
+    },
+    "phone_2_type": {
+      "type": "string"
+    },
+    "phone_2_dnc": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone_3": {
+      "type": "string"
+    },
+    "phone_3_type": {
+      "type": "string"
+    },
+    "phone_3_dnc": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone_4": {
+      "type": "string"
+    },
+    "phone_4_type": {
+      "type": "string"
+    },
+    "phone_4_dnc": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone_5": {
+      "type": "string"
+    },
+    "phone_5_type": {
+      "type": "string"
+    },
+    "phone_5_dnc": {
+      "type": "boolean",
+      "default": false
+    },
+    "email_1": {
+      "type": "string"
+    },
+    "email_2": {
+      "type": "string"
+    },
+    "email_3": {
+      "type": "string"
+    },
+    "email_4": {
+      "type": "string"
+    },
     "absentee_owner": {
+      "type": "boolean",
+      "default": false
+    },
+    "owner_occupied": {
       "type": "boolean",
       "default": false
     },
@@ -124,6 +257,16 @@
       "type": "boolean",
       "default": false
     },
+    "prefc_doc_number": {
+      "type": "string"
+    },
+    "prefc_unpaid_balance": {
+      "type": "number"
+    },
+    "prefc_auction_date": {
+      "type": "string",
+      "format": "date"
+    },
     "foreclosure_indicator": {
       "type": "boolean",
       "default": false
@@ -132,15 +275,28 @@
       "type": "boolean",
       "default": false
     },
+    "lien_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "lien_amount": {
+      "type": "number"
+    },
     "tax_delinquent_indicator": {
       "type": "boolean",
       "default": false
     },
-    "equity_estimate": {
-      "type": "number"
+    "marketing_lists": {
+      "type": "string"
     },
-    "mortgage_balance": {
-      "type": "number"
+    "skip_traces": {
+      "type": "string"
+    },
+    "date_added_to_list": {
+      "type": "string"
+    },
+    "method_of_add": {
+      "type": "string"
     },
     "listing_agent_name": {
       "type": "string"
