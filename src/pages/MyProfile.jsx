@@ -408,43 +408,6 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* My Purchases summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />My Estate Sale Purchases</div>
-                <Link to={createPageUrl('MyPurchases')}>
-                  <Button variant="ghost" size="sm" className="text-orange-600">View All <ArrowRight className="w-4 h-4 ml-1" /></Button>
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {purchases.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="text-center p-3 bg-orange-50 rounded-lg"><div className="text-xl font-bold text-orange-700">{purchases.length}</div><div className="text-xs text-slate-500">Purchases</div></div>
-                    <div className="text-center p-3 bg-cyan-50 rounded-lg"><div className="text-xl font-bold text-cyan-700">${purchases.reduce((s, p) => s + (p.price * p.quantity || 0), 0).toFixed(0)}</div><div className="text-xs text-slate-500">Total Spent</div></div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg"><div className="text-xl font-bold text-purple-700">{purchases.reduce((s, p) => s + (p.quantity || 0), 0)}</div><div className="text-xs text-slate-500">Items</div></div>
-                  </div>
-                  <div className="space-y-2">
-                    {purchases.slice(0, 3).map(p => (
-                      <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div><p className="text-sm font-medium">{p.item_name}</p><p className="text-xs text-slate-400">{new Date(p.created_date).toLocaleDateString()}</p></div>
-                        <div className="text-right"><p className="font-semibold text-green-600 text-sm">${(p.price * p.quantity).toFixed(2)}</p><p className="text-xs text-slate-400">{p.quantity}x @ ${p.price}</p></div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-6">
-                  <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-slate-500 text-sm mb-3">No purchases recorded yet</p>
-                  <Link to={createPageUrl('RecordPurchase')}><Button size="sm" className="bg-orange-600 hover:bg-orange-700">Record First Purchase</Button></Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Reseller Application — show based on state */}
           {acct === 'reseller' ? (
             <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
@@ -1147,6 +1110,43 @@ export default function MyProfile() {
                 <Link to="/MyPurchases"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-amber-50 hover:border-amber-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"><ShoppingBag className="w-5 h-5 text-amber-600" /></div><div><p className="font-semibold text-sm">My Estate Sale Purchases</p><p className="text-xs text-slate-500">Track items you've bought at estate sales</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                 <Link to="/RecordPurchase"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 hover:border-slate-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><Plus className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Record a Purchase</p><p className="text-xs text-slate-500">Log an item you bought to earn rewards</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* My Purchases summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />My Estate Sale Purchases</div>
+                <Link to={createPageUrl('MyPurchases')}>
+                  <Button variant="ghost" size="sm" className="text-orange-600">View All <ArrowRight className="w-4 h-4 ml-1" /></Button>
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {purchases.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="text-center p-3 bg-orange-50 rounded-lg"><div className="text-xl font-bold text-orange-700">{purchases.length}</div><div className="text-xs text-slate-500">Purchases</div></div>
+                    <div className="text-center p-3 bg-cyan-50 rounded-lg"><div className="text-xl font-bold text-cyan-700">${purchases.reduce((s, p) => s + (p.price * p.quantity || 0), 0).toFixed(0)}</div><div className="text-xs text-slate-500">Total Spent</div></div>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg"><div className="text-xl font-bold text-purple-700">{purchases.reduce((s, p) => s + (p.quantity || 0), 0)}</div><div className="text-xs text-slate-500">Items</div></div>
+                  </div>
+                  <div className="space-y-2">
+                    {purchases.slice(0, 3).map(p => (
+                      <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div><p className="text-sm font-medium">{p.item_name}</p><p className="text-xs text-slate-400">{new Date(p.created_date).toLocaleDateString()}</p></div>
+                        <div className="text-right"><p className="font-semibold text-green-600 text-sm">${(p.price * p.quantity).toFixed(2)}</p><p className="text-xs text-slate-400">{p.quantity}x @ ${p.price}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-6">
+                  <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-slate-500 text-sm mb-3">No purchases recorded yet</p>
+                  <Link to={createPageUrl('RecordPurchase')}><Button size="sm" className="bg-orange-600 hover:bg-orange-700">Record First Purchase</Button></Link>
+                </div>
+              )}
             </CardContent>
           </Card>
 
