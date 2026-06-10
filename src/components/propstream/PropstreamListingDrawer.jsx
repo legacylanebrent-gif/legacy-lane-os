@@ -79,14 +79,11 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
         </div>
 
         {/* MLS / Import Meta */}
-        <Section title="MLS & Import Info" icon={<Building2 className="w-4 h-4" />}>
+        <Section title="MLS & Listing Info" icon={<Building2 className="w-4 h-4" />}>
           <Grid2>
             <DV label="MLS #" value={fmt(listing.mls_number)} />
             <DV label="Listing Status" value={fmt(listing.listing_status)} />
             <DV label="List Date" value={fmt(listing.list_date)} />
-            <DV label="Source" value={fmt(listing.source)} />
-            <DV label="PropStream ID" value={fmt(listing.propstream_property_id)} />
-            <DV label="Import Batch" value={fmt(listing.import_batch_id)} />
             {listing.listing_url && <DV label="Listing URL" value={<a href={listing.listing_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline truncate block max-w-[180px]">View Listing</a>} span2 />}
           </Grid2>
         </Section>
