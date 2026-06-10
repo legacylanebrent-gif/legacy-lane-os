@@ -29,12 +29,12 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
     // On mount or when form changes, load municipalities for all pre-selected counties
     if (form.service_states.length > 0) {
       setSelectedState(form.service_states[0]);
+      form.service_counties.forEach(county => {
+        if (!municipalitiesMap[county]) {
+          loadMunicipalities(county, form.service_states[0]);
+        }
+      });
     }
-    form.service_counties.forEach(county => {
-      if (!municipalitiesMap[county] && form.service_states.length > 0) {
-        loadMunicipalities(county);
-      }
-    });
   }, []);
 
   const loadCounties = async (state) => {
@@ -49,13 +49,14 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
     }
   };
 
-  const loadMunicipalities = async (county) => {
-    if (!selectedState) return;
+  const loadMunicipalities = async (county, state = null) => {
+    const stateToUse = state || selectedState;
+    if (!stateToUse) return;
     // Already loaded or loading
     if (municipalitiesMap[county]) return;
     setMunicipalitiesMap(prev => ({ ...prev, [county]: { loading: true, items: [] } }));
     try {
-      const res = await base44.functions.invoke('getTerritoryMunicipalities', { county, state: selectedState });
+      const res = await base44.functions.invoke('getTerritoryMunicipalities', { county, state: stateToUse });
       setMunicipalitiesMap(prev => ({
         ...prev,
         [county]: { loading: false, items: res.data?.municipalities || [] }
