@@ -71,11 +71,25 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             [listing.absentee_owner, 'Absentee Owner'],
             [listing.vacant, 'Vacant'],
             [listing.preforeclosure_indicator, 'Pre-Foreclosure'],
+            [listing.foreclosure_indicator, 'Foreclosure'],
             [listing.lien_indicator, 'Lien'],
             [listing.tax_delinquent_indicator, 'Tax Delinquent'],
             [listing.divorce_indicator, 'Divorce'],
           ].map(([v, label]) => v ? <Badge key={label} className="bg-purple-100 text-purple-700 text-xs">{label}</Badge> : null)}
         </div>
+
+        {/* MLS / Import Meta */}
+        <Section title="MLS & Import Info" icon={<Building2 className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="MLS #" value={fmt(listing.mls_number)} />
+            <DV label="Listing Status" value={fmt(listing.listing_status)} />
+            <DV label="List Date" value={fmt(listing.list_date)} />
+            <DV label="Source" value={fmt(listing.source)} />
+            <DV label="PropStream ID" value={fmt(listing.propstream_property_id)} />
+            <DV label="Import Batch" value={fmt(listing.import_batch_id)} />
+            {listing.listing_url && <DV label="Listing URL" value={<a href={listing.listing_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline truncate block max-w-[180px]">View Listing</a>} span2 />}
+          </Grid2>
+        </Section>
 
         {/* Property */}
         <Section title="Property Details" icon={<Home className="w-4 h-4" />}>
@@ -84,10 +98,13 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Est. Value" value={fmtPrice(listing.estimated_value)} />
             <DV label="Beds / Baths" value={`${fmt(listing.beds)} / ${fmt(listing.baths)}`} />
             <DV label="Sq Ft" value={listing.square_feet ? Number(listing.square_feet).toLocaleString() : '—'} />
+            <DV label="Lot Size" value={fmt(listing.lot_size)} />
             <DV label="Year Built" value={fmt(listing.year_built)} />
             <DV label="Property Type" value={fmt(listing.property_type)} />
             <DV label="Days on Market" value={fmt(listing.days_on_market)} />
             <DV label="County" value={fmt(listing.county)} />
+            <DV label="Lat / Lng" value={listing.latitude ? `${listing.latitude}, ${listing.longitude}` : '—'} />
+            {listing.listing_remarks && <DV label="Remarks" value={listing.listing_remarks} span2 />}
           </Grid2>
         </Section>
 
@@ -97,6 +114,7 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Owner" value={fmt(listing.owner_name)} span2 />
             <DV label="Ownership" value={listing.ownership_length_years ? `${listing.ownership_length_years} yrs` : '—'} />
             <DV label="Equity" value={fmtPrice(listing.equity_estimate)} />
+            <DV label="Mortgage Balance" value={fmtPrice(listing.mortgage_balance)} />
             <DV label="Mailing Address" value={listing.owner_mailing_address ? `${listing.owner_mailing_address}, ${listing.owner_mailing_city || ''} ${listing.owner_mailing_state || ''} ${listing.owner_mailing_zip || ''}` : '—'} span2 />
           </Grid2>
         </Section>
@@ -116,10 +134,14 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
         </Section>
 
         {/* Territory */}
-        <Section title="Territory Match" icon={<MapPin className="w-4 h-4" />}>
+        <Section title="Territory & Assignment" icon={<MapPin className="w-4 h-4" />}>
           <Grid2>
             <DV label="Territory" value={listing.territory_name || 'Not matched'} />
+            <DV label="Territory ID" value={fmt(listing.territory_id)} />
             <DV label="Matched Operators" value={(listing.matched_operator_ids || []).length} />
+            <DV label="Assigned Operator ID" value={fmt(listing.assigned_operator_id)} />
+            <DV label="Assigned Agent ID" value={fmt(listing.assigned_agent_id)} />
+            <DV label="Public Source" value={fmt(listing.public_submission_source)} />
           </Grid2>
         </Section>
 
