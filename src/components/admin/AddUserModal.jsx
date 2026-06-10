@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import VendorFields from './VendorFields';
 import VendorSubcategoryDropdown from './VendorSubcategoryDropdown';
+import TerritoryServiceSelector from './TerritoryServiceSelector';
 
 const US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
@@ -126,6 +127,11 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
     avg_sale_price: '',
     has_estate_sale_relationships: '',
     why_should_be_considered: '',
+    // Service territory selections
+    service_territory_county_ids: [],
+    service_territory_county_names: [],
+    service_micro_territory_ids: [],
+    service_micro_territory_names: [],
   });
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -223,6 +229,10 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
         avg_sale_price: editUser.avg_sale_price || '',
         has_estate_sale_relationships: editUser.has_estate_sale_relationships || '',
         why_should_be_considered: editUser.why_should_be_considered || '',
+        service_territory_county_ids: editUser.service_territory_county_ids || [],
+        service_territory_county_names: editUser.service_territory_county_names || [],
+        service_micro_territory_ids: editUser.service_micro_territory_ids || [],
+        service_micro_territory_names: editUser.service_micro_territory_names || [],
       });
     }
   }, [editUser]);
@@ -1093,6 +1103,31 @@ export default function AddUserModal({ open, onClose, onSuccess, editUser }) {
                   })}
                 />
               </div>
+            )}
+
+            {['estate_sale_operator', 'real_estate_agent'].includes(formData.primary_account_type) && (
+              <>
+                <div className="border-t pt-4 mt-2">
+                  <h4 className="font-semibold text-sm text-purple-700 mb-3 flex items-center gap-2">
+                    🗺️ Service Territories
+                    <span className="text-xs font-normal text-slate-500">— select counties then drill into micro-territories</span>
+                  </h4>
+                  <TerritoryServiceSelector
+                    state={formData.address?.state || formData.company_address?.state || formData.license_state || ''}
+                    selectedCountyIds={formData.service_territory_county_ids}
+                    selectedMicroIds={formData.service_micro_territory_ids}
+                    onChange={({ county_ids, micro_ids, county_names, micro_names }) =>
+                      setFormData(f => ({
+                        ...f,
+                        service_territory_county_ids: county_ids,
+                        service_territory_county_names: county_names,
+                        service_micro_territory_ids: micro_ids,
+                        service_micro_territory_names: micro_names,
+                      }))
+                    }
+                  />
+                </div>
+              </>
             )}
 
             {formData.primary_account_type === 'real_estate_agent' && (

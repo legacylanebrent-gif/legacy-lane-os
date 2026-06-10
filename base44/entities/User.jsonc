@@ -25,25 +25,20 @@
       "description": "Optional business name for resellers and operators"
     },
     "address_street": {
-      "type": "string",
-      "description": "Full street address (private, not shown to others)"
+      "type": "string"
     },
     "address_city": {
-      "type": "string",
-      "description": "City (visible to other users)"
+      "type": "string"
     },
     "address_state": {
-      "type": "string",
-      "description": "State (visible to other users)"
+      "type": "string"
     },
     "address_zip": {
-      "type": "string",
-      "description": "ZIP code (private, not shown to others)"
+      "type": "string"
     },
     "early_sign_in_default": {
       "type": "boolean",
-      "default": true,
-      "description": "Default setting for early sign-in on all new sales created by this operator"
+      "default": true
     },
     "phone": {
       "type": "string"
@@ -67,20 +62,16 @@
       "type": "string"
     },
     "business_address_street": {
-      "type": "string",
-      "description": "Business street address"
+      "type": "string"
     },
     "business_address_city": {
-      "type": "string",
-      "description": "Business city"
+      "type": "string"
     },
     "business_address_state": {
-      "type": "string",
-      "description": "Business state"
+      "type": "string"
     },
     "business_address_zip": {
-      "type": "string",
-      "description": "Business ZIP code"
+      "type": "string"
     },
     "years_in_business": {
       "type": "string"
@@ -190,54 +181,44 @@
     },
     "onboarding_shown_count": {
       "type": "number",
-      "default": 0,
-      "description": "How many times onboarding modal has been shown"
+      "default": 0
     },
     "onboarding_dismissed_permanently": {
       "type": "boolean",
-      "default": false,
-      "description": "User clicked do not show again"
+      "default": false
     },
     "onboarding_completed": {
       "type": "boolean",
-      "default": false,
-      "description": "User completed the full onboarding questionnaire"
+      "default": false
     },
     "onboarding_completed_date": {
       "type": "string",
       "format": "date-time"
     },
     "onboarding_answers": {
-      "type": "object",
-      "description": "Raw answers from onboarding questionnaire"
+      "type": "object"
     },
     "seo_title": {
-      "type": "string",
-      "description": "SEO page title for company/operator profile"
+      "type": "string"
     },
     "seo_description": {
-      "type": "string",
-      "description": "SEO meta description for company/operator profile"
+      "type": "string"
     },
     "seo_slug": {
-      "type": "string",
-      "description": "URL slug for SEO (e.g. john-doe-estate-sales-nj)"
+      "type": "string"
     },
     "seo_keywords": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "SEO keywords for this company/operator"
+      "default": []
     },
     "ai_summary": {
-      "type": "string",
-      "description": "AI-generated summary of this company/operator"
+      "type": "string"
     },
     "schema_json": {
-      "type": "object",
-      "description": "JSON-LD structured data for this company"
+      "type": "object"
     },
     "indexed_status": {
       "type": "string",
@@ -249,6 +230,38 @@
         "unknown"
       ],
       "default": "not_submitted"
+    },
+    "service_territory_county_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "TerritoryLaunch IDs of master (county) territories this user services"
+    },
+    "service_territory_county_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Human-readable county territory names"
+    },
+    "service_micro_territory_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Housio micro-territory IDs this user services"
+    },
+    "service_micro_territory_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Human-readable micro-territory names"
     }
   },
   "required": []
