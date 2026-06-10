@@ -25,6 +25,18 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
     loadCounties(selectedState);
   }, [selectedState]);
 
+  useEffect(() => {
+    // On mount or when form changes, load municipalities for all pre-selected counties
+    if (form.service_states.length > 0) {
+      setSelectedState(form.service_states[0]);
+    }
+    form.service_counties.forEach(county => {
+      if (!municipalitiesMap[county] && form.service_states.length > 0) {
+        loadMunicipalities(county);
+      }
+    });
+  }, []);
+
   const loadCounties = async (state) => {
     setLoadingCounties(true);
     try {
