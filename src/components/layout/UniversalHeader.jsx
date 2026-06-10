@@ -16,7 +16,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
-  Users, FileText, BarChart2, Send
+  Users, FileText, BarChart2, Send, UserCircle
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -66,6 +66,11 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('MyProfile')} className="cursor-pointer">
+                        <UserCircle className="w-4 h-4 mr-2" /> My Profile
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
                         <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
