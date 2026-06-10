@@ -143,6 +143,16 @@ export default function PropstreamREListingImporter() {
   const [result, setResult] = useState(null);
   const [importing, setImporting] = useState(false);
 
+  const STORAGE_KEY = 'propstream_re_listing_field_mapping';
+
+  const loadSavedMapping = () => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+  };
+
+  const saveMapping = (m) => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(m)); } catch {}
+  };
+
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -151,15 +161,27 @@ export default function PropstreamREListingImporter() {
       header: true,
       skipEmptyLines: true,
       complete: ({ data, meta }) => {
+        const headers = meta.fields || [];
+        // Merge: saved mapping takes priority, fill gaps with autoMap
+        const saved = loadSavedMapping();
+        const auto = autoMap(headers);
+        const merged = { ...auto };
+        // Only apply saved mappings if that CSV column still exists in this file
+        for (const [field, csvCol] of Object.entries(saved)) {
+          if (csvCol && headers.includes(csvCol)) {
+            merged[field] = csvCol;
+          }
+        }
         setCsvData(data);
-        setHeaders(meta.fields || []);
-        setMapping(autoMap(meta.fields || []));
+        setHeaders(headers);
+        setMapping(merged);
         setStep('mapping');
       }
     });
   };
 
   const handleImport = async () => {
+    saveMapping(mapping); // persist for next import
     setImporting(true);
     setStep('importing');
     const listings = csvData.map(row => mapRow(row, mapping));
@@ -300,15 +322,25 @@ export default function PropstreamREListingImporter() {
               </div>
             )}
 
-            <div className="flex gap-3 justify-end pt-2 border-t">
-              <Button variant="outline" onClick={reset}>Cancel</Button>
+            <div className="flex items-center justify-between pt-2 border-t">
               <Button
-                onClick={handleImport}
-                disabled={missingRequired.length > 0}
-                className="bg-purple-600 hover:bg-purple-700"
+                variant="ghost"
+                size="sm"
+                className="text-slate-400 hover:text-slate-600 text-xs"
+                onClick={() => { localStorage.removeItem('propstream_re_listing_field_mapping'); setMapping(autoMap(headers)); }}
               >
-                Import {csvData?.length} Listings
+                Reset to Auto-Detect
               </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={reset}>Cancel</Button>
+                <Button
+                  onClick={handleImport}
+                  disabled={missingRequired.length > 0}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Import {csvData?.length} Listings
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
