@@ -7,58 +7,85 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle, CheckCircle2, AlertCircle, Loader, Download, ArrowLeft, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Full field map: entity field -> array of CSV column aliases (lowercase)
+// Hardcoded default mapping from known PropStream export format (CSV column -> entity field)
+// These are the exact column names from the user's PropStream export
+const DEFAULT_MAPPING = {
+  property_address:         'Address',
+  city:                     'City',
+  state:                    'State',
+  zip:                      'Zip',
+  county:                   'County',
+  listing_status:           'MLS Status',
+  list_date:                'MLS Date',
+  list_price:               'MLS Amount',
+  estimated_value:          'Est. Value',
+  equity_estimate:          'Est. Equity',
+  mortgage_balance:         'Est. Remaining balance of Open Loans',
+  beds:                     'Bedrooms',
+  baths:                    'Total Bathrooms',
+  square_feet:              'Building Sqft',
+  lot_size:                 'Lot Size Sqft',
+  year_built:               'Year Built',
+  property_type:            'Property Type',
+  owner_mailing_address:    'Mailing Address',
+  owner_mailing_city:       'Mailing City',
+  owner_mailing_state:      'Mailing State',
+  owner_mailing_zip:        'Mailing Zip',
+  listing_agent_name:       'MLS Agent Name',
+  listing_agent_phone:      'MLS Agent Phone',
+  listing_agent_email:      'MLS Agent E-Mail',
+  listing_brokerage:        'MLS Brokerage Name',
+  preforeclosure_indicator: 'Pre-FC Recording Date',
+  foreclosure_indicator:    'Foreclosure Factor',
+  divorce_indicator:        'Divorce Date',
+  probate_indicator:        'BK Date',
+  lien_indicator:           'Lien Type',
+};
+
+// Full field map: entity field -> array of CSV column aliases (lowercase) — used as fallback
 const FIELD_MAP = {
-  // Property
   property_address:         ['address', 'property address', 'street address', 'situs address', 'prop address', 'property_address'],
   city:                     ['city', 'prop city', 'property city', 'situs city'],
   state:                    ['state', 'prop state', 'property state', 'situs state'],
   zip:                      ['zip', 'zip code', 'postal code', 'situs zip', 'prop zip'],
   county:                   ['county', 'prop county'],
-  // MLS
   mls_number:               ['mls number', 'mls#', 'mls id', 'listing id', 'mls_number'],
   propstream_property_id:   ['propstream id', 'property id', 'prop id', 'ps id'],
-  listing_status:           ['status', 'listing status', 'mls status'],
-  list_date:                ['list date', 'listing date', 'status date'],
+  listing_status:           ['mls status', 'status', 'listing status'],
+  list_date:                ['mls date', 'list date', 'listing date', 'status date'],
   days_on_market:           ['days on market', 'dom', 'days listed'],
-  list_price:               ['list price', 'listing price', 'price'],
-  estimated_value:          ['estimated value', 'avm', 'estimated avm', 'estimated market value', 'est. value'],
-  // Property details
-  beds:                     ['beds', 'bedrooms', 'bed'],
-  baths:                    ['baths', 'bathrooms', 'bath', 'total bathrooms'],
-  square_feet:              ['sqft', 'square feet', 'living sqft', 'gross living area', 'building sqft'],
-  lot_size:                 ['lot size', 'lot sqft', 'lot area'],
-  year_built:               ['year built', 'yr built', 'effective year built'],
+  list_price:               ['mls amount', 'list price', 'listing price', 'price'],
+  estimated_value:          ['est. value', 'estimated value', 'avm', 'estimated market value'],
+  beds:                     ['bedrooms', 'beds', 'bed'],
+  baths:                    ['total bathrooms', 'baths', 'bathrooms', 'bath'],
+  square_feet:              ['building sqft', 'sqft', 'square feet', 'living sqft', 'gross living area'],
+  lot_size:                 ['lot size sqft', 'lot size', 'lot sqft', 'lot area'],
+  year_built:               ['year built', 'yr built'],
   property_type:            ['property type', 'prop type'],
-  listing_remarks:          ['remarks', 'listing remarks', 'public remarks', 'description'],
+  listing_remarks:          ['remarks', 'listing remarks', 'public remarks', 'notes', 'description'],
   listing_url:              ['listing url', 'mls url', 'url'],
-  // Owner info
   owner_name:               ['owner name', 'owner', 'owner 1 full name'],
   owner_mailing_address:    ['mailing address', 'owner mailing address', 'mail address'],
   owner_mailing_city:       ['mailing city', 'mail city'],
   owner_mailing_state:      ['mailing state', 'mail state'],
   owner_mailing_zip:        ['mailing zip', 'mail zip', 'mailing postal'],
-  ownership_length_years:   ['ownership length', 'years owned', 'length of ownership', 'years of ownership'],
-  // Indicators (boolean)
-  absentee_owner:           ['absentee', 'absentee owner'],
+  ownership_length_years:   ['ownership length', 'years owned', 'length of ownership'],
+  absentee_owner:           ['absentee', 'absentee owner', 'owner occupied'],
   vacant:                   ['vacant', 'vacancy'],
   senior_owner_indicator:   ['senior', 'senior owner', 'senior indicator'],
-  probate_indicator:        ['probate', 'in probate'],
+  probate_indicator:        ['probate', 'in probate', 'bk date'],
   inherited_indicator:      ['inherited', 'inheritance'],
-  divorce_indicator:        ['divorce', 'divorcing'],
-  preforeclosure_indicator: ['preforeclosure', 'pre-foreclosure', 'lis pendens'],
-  foreclosure_indicator:    ['foreclosure', 'in foreclosure', 'reo'],
-  lien_indicator:           ['lien', 'has lien'],
+  divorce_indicator:        ['divorce', 'divorcing', 'divorce date'],
+  preforeclosure_indicator: ['pre-fc recording date', 'preforeclosure', 'pre-foreclosure', 'lis pendens'],
+  foreclosure_indicator:    ['foreclosure factor', 'foreclosure', 'in foreclosure', 'reo'],
+  lien_indicator:           ['lien type', 'lien', 'has lien'],
   tax_delinquent_indicator: ['tax delinquent', 'delinquent taxes', 'tax lien'],
-  // Financials
-  equity_estimate:          ['equity', 'estimated equity', 'equity estimate', 'est. equity'],
-  mortgage_balance:         ['mortgage balance', 'loan balance', 'open loan balance'],
-  // Listing agent
-  listing_agent_name:       ['listing agent', 'agent name', 'list agent name', 'agent'],
-  listing_agent_email:      ['agent email', 'listing agent email', 'list agent email'],
-  listing_agent_phone:      ['agent phone', 'listing agent phone', 'list agent phone'],
-  listing_brokerage:        ['brokerage', 'listing brokerage', 'broker name', 'list office name'],
-  // Geo
+  equity_estimate:          ['est. equity', 'equity', 'estimated equity'],
+  mortgage_balance:         ['est. remaining balance of open loans', 'mortgage balance', 'loan balance'],
+  listing_agent_name:       ['mls agent name', 'listing agent', 'agent name', 'list agent name'],
+  listing_agent_email:      ['mls agent e-mail', 'agent email', 'listing agent email'],
+  listing_agent_phone:      ['mls agent phone', 'agent phone', 'listing agent phone'],
+  listing_brokerage:        ['mls brokerage name', 'brokerage', 'listing brokerage', 'broker name'],
   latitude:                 ['latitude', 'lat'],
   longitude:                ['longitude', 'lng', 'lon'],
 };
@@ -86,9 +113,15 @@ const FIELD_GROUPS = [
 ];
 
 function autoMap(headers) {
+  // First apply hardcoded defaults where column exists in this file
   const mapping = {};
+  for (const [field, col] of Object.entries(DEFAULT_MAPPING)) {
+    if (headers.includes(col)) mapping[field] = col;
+  }
+  // Fill any remaining gaps with alias-based detection
   const lower = headers.map(h => h.toLowerCase().trim());
   for (const [field, aliases] of Object.entries(FIELD_MAP)) {
+    if (mapping[field]) continue; // already mapped
     const idx = lower.findIndex(h => aliases.includes(h));
     if (idx !== -1) mapping[field] = headers[idx];
   }
@@ -175,7 +208,8 @@ export default function PropstreamREListingImporter() {
         setCsvData(data);
         setHeaders(headers);
         setMapping(merged);
-        setStep('mapping');
+        // Skip mapping step — go straight to import with resolved mapping
+        setStep('confirm');
       }
     });
   };
@@ -255,6 +289,39 @@ export default function PropstreamREListingImporter() {
                 <li>Matched operators pre-assigned based on territory</li>
                 <li>Import batch record created for tracking</li>
               </ul>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Confirm step — quick import without reviewing mapping */}
+      {step === 'confirm' && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-800">{csvData?.length} rows ready to import</p>
+                <p className="text-sm text-slate-500">{mappedCount} fields mapped from <span className="font-medium">{filename}</span></p>
+              </div>
+            </div>
+            {missingRequired.length > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                Missing required fields: {missingRequired.join(', ')}. Please review the mapping.
+              </div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setStep('mapping')} className="flex-1">
+                Review Mapping
+              </Button>
+              <Button
+                onClick={handleImport}
+                disabled={missingRequired.length > 0}
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+              >
+                Import {csvData?.length} Listings →
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -341,6 +408,7 @@ export default function PropstreamREListingImporter() {
                   Import {csvData?.length} Listings
                 </Button>
               </div>
+              
             </div>
           </CardContent>
         </Card>
