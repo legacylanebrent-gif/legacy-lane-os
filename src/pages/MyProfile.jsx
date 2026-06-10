@@ -306,7 +306,7 @@ export default function MyProfile() {
         <TabsList className="flex flex-wrap gap-1 h-auto w-full mb-6 justify-start bg-transparent p-0">
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Business</TabsTrigger>}
-          {(isOperator || isAgent) && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isAgent ? 'Territory' : 'Territory & Services'}</TabsTrigger>}
+          <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Service Area</TabsTrigger>
           {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services & Area</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buying Preferences</TabsTrigger>}
@@ -647,54 +647,52 @@ export default function MyProfile() {
           </TabsContent>
         )}
 
-        {/* ─────────────── TERRITORY & SERVICES TAB ─────────────── */}
-        {(isOperator || isAgent) && (
-          <TabsContent value="territory" className="space-y-6">
-            <InteractiveTerritorySelector form={form} setForm={setForm} />
+        {/* ─────────────── SERVICE AREA TAB ─────────────── */}
+        <TabsContent value="territory" className="space-y-6">
+          <InteractiveTerritorySelector form={form} setForm={setForm} />
 
-            {/* Max Radius */}
-            <Card>
-              <CardContent className="pt-5">
-                <Label>Max Travel Radius (miles)</Label>
-                <Input type="number" className="max-w-xs mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="50" />
-              </CardContent>
-            </Card>
+          {/* Max Radius */}
+          <Card>
+            <CardContent className="pt-5">
+              <Label>Max Travel Radius (miles)</Label>
+              <Input type="number" className="max-w-xs mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="50" />
+            </CardContent>
+          </Card>
 
-            {/* Services + Specialties — Operator only */}
-            {isOperator && (
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="space-y-1.5">
-                      {SERVICE_OPTIONS.map(s => (
-                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                          <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
-                          <span className="text-sm">{s}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="space-y-1.5">
-                      {SPECIALTY_OPTIONS.map(s => (
-                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                          <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
-                          <span className="text-sm">{s}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+          {/* Services + Specialties — Operator only */}
+          {isOperator && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-1.5">
+                    {SERVICE_OPTIONS.map(s => (
+                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                        <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
+                        <span className="text-sm">{s}</span>
+                      </label>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-1.5">
+                    {SPECIALTY_OPTIONS.map(s => (
+                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                        <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
+                        <span className="text-sm">{s}</span>
+                      </label>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-            <SaveBtn label={isAgent ? 'Save Territory' : 'Save Territory & Services'} />
-          </TabsContent>
-        )}
+          <SaveBtn label="Save Service Area" />
+        </TabsContent>
 
         {/* ─────────────── PAYMENTS TAB ─────────────── */}
         {!isConsumer && !isReseller && (
