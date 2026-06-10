@@ -301,6 +301,7 @@ export default function MyProfile() {
           {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
           {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
           {isAgent && <TabsTrigger value="agent_tools" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Agent Tools</TabsTrigger>}
+          <TabsTrigger value="estate_sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Estate Sales</TabsTrigger>
           {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
         </TabsList>
 
@@ -398,7 +399,7 @@ export default function MyProfile() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />My Purchases</div>
+                <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />My Estate Sale Purchases</div>
                 <Link to={createPageUrl('MyPurchases')}>
                   <Button variant="ghost" size="sm" className="text-orange-600">View All <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 </Link>
@@ -1115,6 +1116,94 @@ export default function MyProfile() {
             </Card>
           </TabsContent>
         )}
+
+        {/* ─────────────── ESTATE SALES TAB ─────────────── */}
+        <TabsContent value="estate_sales" className="space-y-6">
+          {/* Consumer / Buyer links */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Home className="w-5 h-5" />Find Estate Sales</CardTitle>
+              <p className="text-sm text-slate-500">Browse upcoming sales, plan your route, and manage your favorites.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Link to="/"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Home className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Browse Estate Sales</p><p className="text-xs text-slate-500">Find upcoming sales near you</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/RoutePlanner"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><MapPin className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Route Planner</p><p className="text-xs text-slate-500">Plan your weekend sale route</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/FavoriteCompanies"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0"><Star className="w-5 h-5 text-purple-600" /></div><div><p className="font-semibold text-sm">Favorite Companies</p><p className="text-xs text-slate-500">Follow your favorite estate sale companies</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/MyEarlySignIns"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-green-50 hover:border-green-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"><Calendar className="w-5 h-5 text-green-600" /></div><div><p className="font-semibold text-sm">My Early Sign-Ins</p><p className="text-xs text-slate-500">View your sign-in list reservations</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/MyPurchases"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-amber-50 hover:border-amber-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"><ShoppingBag className="w-5 h-5 text-amber-600" /></div><div><p className="font-semibold text-sm">My Estate Sale Purchases</p><p className="text-xs text-slate-500">Track items you've bought at estate sales</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/RecordPurchase"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 hover:border-slate-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><Plus className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Record a Purchase</p><p className="text-xs text-slate-500">Log an item you bought to earn rewards</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Operator-specific estate sale actions */}
+          {isOperator && (
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" />Manage My Sales</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Link to="/MySales"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Home className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">My Sales Dashboard</p><p className="text-xs text-slate-500">Manage all your estate sales</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/OperatorDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Operator Dashboard</p><p className="text-xs text-slate-500">Analytics, leads & performance</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/SaleConversionPipeline"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-green-50 hover:border-green-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-green-600" /></div><div><p className="font-semibold text-sm">Sale Conversion Pipeline</p><p className="text-xs text-slate-500">Track leads to signed contracts</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/OperatorCommissions"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0"><CreditCard className="w-5 h-5 text-purple-600" /></div><div><p className="font-semibold text-sm">My Commissions</p><p className="text-xs text-slate-500">View earnings & commission history</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Agent estate sale tools */}
+          {isAgent && (
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />Agent Estate Sale Tools</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Link to="/agent-request"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Send className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Submit Estate Sale Request</p><p className="text-xs text-slate-500">Refer a client listing to the operator pool</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/PropstreamREListings"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">RE Listing Pipeline</p><p className="text-xs text-slate-500">View and score estate sale opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Reseller estate sale tools */}
+          {isReseller && (
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Estate Sale Tools</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Link to="/ResellerNetwork"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Reseller Network</p><p className="text-xs text-slate-500">Connect with operators & find buyout lots</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/ResellerDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Reseller Dashboard</p><p className="text-xs text-slate-500">Leads, lots & buyout opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Vendor estate sale tools */}
+          {isVendor && (
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Vendor Estate Sale Tools</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Link to="/AdminCleanoutLeads"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">My Cleanout Leads</p><p className="text-xs text-slate-500">Leads matched to your service area</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/cleanout-network"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Cleanout Network</p><p className="text-xs text-slate-500">Browse estate cleanout opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Education & Resources for all */}
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" />Learn & Explore</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Link to="/learn"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><Globe className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Estate Sale University</p><p className="text-xs text-slate-500">Guides, tips & how-to articles</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/estate-checklist"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Estate Checklist</p><p className="text-xs text-slate-500">Step-by-step estate transition checklists</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/probate"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><Shield className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Probate Guide</p><p className="text-xs text-slate-500">State-by-state probate information</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                <Link to="/estate-settlement-planner"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-all"><div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0"><Calendar className="w-5 h-5 text-slate-600" /></div><div><p className="font-semibold text-sm">Settlement Planner</p><p className="text-xs text-slate-500">Plan the full estate settlement process</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* ─────────────── SUBSCRIPTION TAB ─────────────── */}
         {!isConsumer && (
