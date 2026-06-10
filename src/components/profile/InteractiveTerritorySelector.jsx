@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { MapPin, ChevronRight, Loader2, X, Check } from 'lucide-react';
 
 const US_STATES = [
@@ -14,69 +15,67 @@ const US_STATES = [
 
 export default function InteractiveTerritorySelector({ form, setForm }) {
   const [selectedState, setSelectedState] = useState(null);
-  const [selectedCounty, setSelectedCounty] = useState(null);
-  const [counties, setCounties] = useState([]);   // TerritoryLaunch records for the selected state
-  const [municipalities, setMunicipalities] = useState([]);
+  const [counties, setCounties] = useState([]);
   const [loadingCounties, setLoadingCounties] = useState(false);
-  const [loadingMunis, setLoadingMunis] = useState(false);
+  // municipalitiesMap: { [county]: { loading, items } }
+  const [municipalitiesMap, setMunicipalitiesMap] = useState({});
 
-  // When state changes, load counties from TerritoryLaunch
   useEffect(() => {
-    if (!selectedState) { setCounties([]); setSelectedCounty(null); setMunicipalities([]); return; }
+    if (!selectedState) { setCounties([]); return; }
     loadCounties(selectedState);
   }, [selectedState]);
 
-  // When county changes, load municipalities via backend function
-  useEffect(() => {
-    if (!selectedCounty || !selectedState) { setMunicipalities([]); return; }
-    loadMunicipalities(selectedCounty, selectedState);
-  }, [selectedCounty]);
-
   const loadCounties = async (state) => {
     setLoadingCounties(true);
-    setSelectedCounty(null);
-    setMunicipalities([]);
     try {
       const data = await base44.entities.TerritoryLaunch.filter({ state });
       setCounties(data.sort((a, b) => (a.county || '').localeCompare(b.county || '')));
     } catch (e) {
-      console.error('Error loading counties:', e);
       setCounties([]);
     } finally {
       setLoadingCounties(false);
     }
   };
 
-  const loadMunicipalities = async (county, state) => {
-    setLoadingMunis(true);
-    setMunicipalities([]);
+  const loadMunicipalities = async (county) => {
+    if (!selectedState) return;
+    // Already loaded or loading
+    if (municipalitiesMap[county]) return;
+    setMunicipalitiesMap(prev => ({ ...prev, [county]: { loading: true, items: [] } }));
     try {
-      const res = await base44.functions.invoke('getTerritoryMunicipalities', { county, state });
-      setMunicipalities(res.data?.municipalities || []);
+      const res = await base44.functions.invoke('getTerritoryMunicipalities', { county, state: selectedState });
+      setMunicipalitiesMap(prev => ({
+        ...prev,
+        [county]: { loading: false, items: res.data?.municipalities || [] }
+      }));
     } catch (e) {
-      console.error('Error loading municipalities:', e);
-      setMunicipalities([]);
-    } finally {
-      setLoadingMunis(false);
+      setMunicipalitiesMap(prev => ({ ...prev, [county]: { loading: false, items: [] } }));
     }
   };
 
   const handleSelectState = (state) => {
-    // Also add to form.service_states
     setSelectedState(state);
+    setMunicipalitiesMap({});
     if (!form.service_states.includes(state)) {
       setForm(p => ({ ...p, service_states: [...p.service_states, state] }));
     }
   };
 
   const handleToggleCounty = (county) => {
-    const counties = form.service_counties || [];
-    if (counties.includes(county)) {
-      setForm(p => ({ ...p, service_counties: p.service_counties.filter(c => c !== county) }));
+    const isSelected = form.service_counties.includes(county);
+    if (isSelected) {
+      // Deselect: remove county and its cities
+      const munis = new Set((municipalitiesMap[county]?.items || []).map(m => m.name));
+      setForm(p => ({
+        ...p,
+        service_counties: p.service_counties.filter(c => c !== county),
+        service_cities: p.service_cities.filter(c => !munis.has(c)),
+      }));
     } else {
+      // Select: add county and start loading its municipalities
       setForm(p => ({ ...p, service_counties: [...p.service_counties, county] }));
+      loadMunicipalities(county);
     }
-    setSelectedCounty(county);
   };
 
   const handleToggleCity = (cityName) => {
@@ -90,21 +89,33 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
 
   const removeState = (s) => {
     setForm(p => ({ ...p, service_states: p.service_states.filter(x => x !== s) }));
-    if (selectedState === s) { setSelectedState(null); setSelectedCounty(null); }
+    if (selectedState === s) { setSelectedState(null); setCounties([]); setMunicipalitiesMap({}); }
   };
 
   const removeCounty = (c) => {
-    setForm(p => ({ ...p, service_counties: p.service_counties.filter(x => x !== c) }));
-    if (selectedCounty === c) { setSelectedCounty(null); setMunicipalities([]); }
+    const munis = new Set((municipalitiesMap[c]?.items || []).map(m => m.name));
+    setForm(p => ({
+      ...p,
+      service_counties: p.service_counties.filter(x => x !== c),
+      service_cities: p.service_cities.filter(x => !munis.has(x)),
+    }));
   };
 
-  const removeCity = (c) => setForm(p => ({ ...p, service_cities: p.service_cities.filter(x => x !== c) }));
+  const selectAllForCounty = (county) => {
+    const names = (municipalitiesMap[county]?.items || []).map(m => m.name);
+    setForm(p => ({ ...p, service_cities: [...new Set([...p.service_cities, ...names])] }));
+  };
+
+  const clearAllForCounty = (county) => {
+    const names = new Set((municipalitiesMap[county]?.items || []).map(m => m.name));
+    setForm(p => ({ ...p, service_cities: p.service_cities.filter(c => !names.has(c)) }));
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area</CardTitle>
-        <p className="text-sm text-slate-500">Select a state → then counties → then micro-territories (cities/boroughs)</p>
+        <p className="text-sm text-slate-500">Select a state → counties → micro-territories for each county</p>
       </CardHeader>
       <CardContent className="space-y-6">
 
@@ -149,7 +160,7 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
               <span className="w-5 h-5 bg-cyan-600 text-white text-xs rounded-full flex items-center justify-center font-bold">2</span>
               Counties in {selectedState}
               <ChevronRight className="w-4 h-4 text-slate-400" />
-              <span className="text-slate-500 font-normal text-xs">Click a county to load its micro-territories</span>
+              <span className="text-slate-500 font-normal text-xs">Select counties to expand their micro-territories below</span>
             </p>
             {loadingCounties ? (
               <div className="flex items-center gap-2 text-sm text-slate-500 py-3">
@@ -160,15 +171,14 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {counties.map(t => {
-                  const county = t.county || (t.data?.county);
+                  const county = t.county || t.data?.county;
                   const isSelected = form.service_counties.includes(county);
-                  const isActive = selectedCounty === county;
                   return (
                     <button key={t.id} type="button" onClick={() => handleToggleCounty(county)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all
-                        ${isActive ? 'bg-cyan-600 text-white border-cyan-600 ring-2 ring-cyan-200' :
-                          isSelected ? 'bg-cyan-100 text-cyan-800 border-cyan-400' :
-                          'bg-white text-slate-600 border-slate-200 hover:border-cyan-300 hover:bg-cyan-50'}`}>
+                        ${isSelected
+                          ? 'bg-cyan-600 text-white border-cyan-600'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-cyan-300 hover:bg-cyan-50'}`}>
                       {isSelected && <Check className="w-3 h-3 inline mr-1" />}
                       {county}
                     </button>
@@ -176,79 +186,79 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
                 })}
               </div>
             )}
-            {form.service_counties.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {form.service_counties.map(c => (
-                  <Badge key={c} className="bg-cyan-100 text-cyan-800 border border-cyan-300 gap-1 pr-1">
-                    {c}
-                    <button onClick={() => removeCounty(c)} className="hover:text-red-600"><X className="w-3 h-3" /></button>
-                  </Badge>
-                ))}
-              </div>
-            )}
           </div>
         )}
 
-        {/* ── Step 3: Micro-Territories (Municipalities) ── */}
-        {selectedCounty && (
-          <div>
-            <p className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+        {/* ── Step 3: One section per selected county ── */}
+        {form.service_counties.length > 0 && (
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
               <span className="w-5 h-5 bg-purple-600 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
-              Micro-Territories in {selectedCounty} County, {selectedState}
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-              <span className="text-slate-500 font-normal text-xs">Select specific towns/boroughs</span>
+              Micro-Territories by County
             </p>
-            {loadingMunis ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500 py-3">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading municipalities...
-              </div>
-            ) : municipalities.length === 0 ? (
-              <p className="text-sm text-slate-400 py-2">No micro-territories loaded yet</p>
-            ) : (
-              <>
-                <div className="flex gap-2 mb-2">
-                  <Button type="button" variant="outline" size="sm" className="text-xs h-7"
-                    onClick={() => {
-                      const names = municipalities.map(m => m.name);
-                      setForm(p => ({ ...p, service_cities: [...new Set([...p.service_cities, ...names])] }));
-                    }}>
-                    Select All ({municipalities.length})
-                  </Button>
-                  <Button type="button" variant="ghost" size="sm" className="text-xs h-7 text-red-500"
-                    onClick={() => {
-                      const names = new Set(municipalities.map(m => m.name));
-                      setForm(p => ({ ...p, service_cities: p.service_cities.filter(c => !names.has(c)) }));
-                    }}>
-                    Clear All
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-64 overflow-y-auto pr-1">
-                  {municipalities.map((m, i) => {
-                    const isSelected = form.service_cities.includes(m.name);
-                    return (
-                      <button key={i} type="button" onClick={() => handleToggleCity(m.name)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all text-left
-                          ${isSelected ? 'bg-purple-100 text-purple-800 border-purple-400' :
-                            'bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50'}`}>
-                        {isSelected ? <Check className="w-3 h-3 flex-shrink-0 text-purple-600" /> : <span className="w-3 h-3 flex-shrink-0" />}
-                        <span className="truncate">{m.name}</span>
-                        {m.type && <span className="text-slate-400 text-[10px] ml-auto flex-shrink-0">{m.type.slice(0,3)}</span>}
+            {form.service_counties.map(county => {
+              const muniData = municipalitiesMap[county];
+              const items = muniData?.items || [];
+              const loading = muniData?.loading;
+              const selectedCount = items.filter(m => form.service_cities.includes(m.name)).length;
+
+              return (
+                <div key={county} className="border border-slate-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm text-slate-800">{county} County</span>
+                      {!loading && items.length > 0 && (
+                        <span className="text-xs text-slate-500">{selectedCount}/{items.length} selected</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!loading && items.length > 0 && (
+                        <>
+                          <Button type="button" variant="outline" size="sm" className="text-xs h-7"
+                            onClick={() => selectAllForCounty(county)}>
+                            Select All
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" className="text-xs h-7 text-red-500"
+                            onClick={() => clearAllForCounty(county)}>
+                            Clear
+                          </Button>
+                        </>
+                      )}
+                      <button onClick={() => removeCounty(county)} className="text-slate-400 hover:text-red-500 ml-1">
+                        <X className="w-4 h-4" />
                       </button>
-                    );
-                  })}
+                    </div>
+                  </div>
+
+                  {loading ? (
+                    <div className="flex items-center gap-2 text-sm text-slate-500 py-2">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Loading municipalities...
+                    </div>
+                  ) : items.length === 0 ? (
+                    <p className="text-xs text-slate-400">No municipalities found</p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                      {items.map((m, i) => {
+                        const isSelected = form.service_cities.includes(m.name);
+                        return (
+                          <button key={i} type="button" onClick={() => handleToggleCity(m.name)}
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all text-left
+                              ${isSelected
+                                ? 'bg-purple-100 text-purple-800 border-purple-400'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:bg-purple-50'}`}>
+                            {isSelected
+                              ? <Check className="w-3 h-3 flex-shrink-0 text-purple-600" />
+                              : <span className="w-3 h-3 flex-shrink-0" />}
+                            <span className="truncate">{m.name}</span>
+                            {m.type && <span className="text-slate-400 text-[10px] ml-auto flex-shrink-0">{m.type.slice(0, 3)}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </>
-            )}
-            {form.service_cities.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                {form.service_cities.map(c => (
-                  <Badge key={c} className="bg-purple-100 text-purple-800 border border-purple-300 gap-1 pr-1 text-xs">
-                    {c}
-                    <button onClick={() => removeCity(c)} className="hover:text-red-600"><X className="w-3 h-3" /></button>
-                  </Badge>
-                ))}
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
 
