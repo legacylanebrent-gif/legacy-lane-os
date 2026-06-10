@@ -72,6 +72,11 @@ function SelectedChips({ items, selectedIds, labelKey, onRemove }) {
   );
 }
 
+const decodeHtml = (str) => {
+  if (!str) return str;
+  return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+};
+
 export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved }) {
   const [tlRecord, setTlRecord] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -120,7 +125,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
       // Normalize operators for display
       const normalizedOps = ops.map(op => ({
         ...op,
-        _label: op.company_name || op.claim_contact_name || op.id,
+        _label: decodeHtml(op.company_name || op.claim_contact_name || op.id),
         _sub: [op.city, op.state].filter(Boolean).join(', '),
       }));
 
