@@ -55,6 +55,38 @@ const SERVICE_OPTIONS = [
   'Senior Transition Services','Business Liquidations','Storage Unit Sales'
 ];
 
+// Vendor service specializations
+const VENDOR_SERVICE_CATEGORIES = [
+  { key: 'cleanout', label: 'Estate Cleanout', description: 'Full/partial home cleanout, junk removal, hauling' },
+  { key: 'staging', label: 'Home Staging', description: 'Furniture staging, styling, setup for sale' },
+  { key: 'moving', label: 'Moving & Packing', description: 'Local/long-distance moves, packing services' },
+  { key: 'storage', label: 'Storage Solutions', description: 'POD delivery, storage unit management' },
+  { key: 'donations', label: 'Donation Pickup', description: 'Charitable donation coordination and hauling' },
+  { key: 'hauling', label: 'Junk Hauling', description: 'General debris, furniture, appliance removal' },
+  { key: 'dumpster', label: 'Dumpster Rental', description: 'Roll-off dumpster delivery and pickup' },
+  { key: 'shredding', label: 'Document Shredding', description: 'On-site or off-site secure document destruction' },
+  { key: 'appraisal', label: 'Appraisal Services', description: 'Personal property appraisals for insurance/estate' },
+  { key: 'photography', label: 'Photography', description: 'Estate sale, real estate, inventory photography' },
+  { key: 'senior_moving', label: 'Senior Move Management', description: 'Specialized senior relocation and transition help' },
+  { key: 'biohazard', label: 'Biohazard / Hoarding', description: 'Specialized hoarding cleanout, biohazard remediation' },
+];
+
+// Reseller business types
+const RESELLER_BUSINESS_TYPES = [
+  'eBay Seller','Etsy Seller','Amazon Seller','Antique Dealer','Auction Company',
+  'Consignment Shop','Furniture Dealer','Collectibles Buyer','Estate Buyer',
+  'Liquidator','Buyout Company','Vintage Dealer','Online Reseller','Other'
+];
+
+// Reseller inventory interest categories
+const RESELLER_INTEREST_CATEGORIES = [
+  'Furniture','Jewelry','Antiques','Art','Collectibles','Electronics',
+  'Clothing & Accessories','Books & Media','China & Porcelain','Glassware',
+  'Tools & Hardware','Sporting Goods','Toys & Games','Musical Instruments',
+  'Coins & Currency','Rugs & Textiles','Kitchen & Dining','Whole-House Buyouts',
+  'Partial Lots','Individual Items'
+];
+
 export default function MyProfile() {
   const [user, setUser] = useState(null);
   const [subscription, setSubscription] = useState(null);
@@ -92,6 +124,11 @@ export default function MyProfile() {
     cashapp_tag: '', stripe_account_id: '', square_location_id: '',
     // media
     logo_dark: '', logo_light: '', profile_image_url: '', venmo_qr_code: '',
+    // vendor
+    vendor_service_categories: [],
+    // reseller
+    reseller_business_type: '', reseller_inventory_interests: [],
+    reseller_min_purchase: '', reseller_max_purchase: '', reseller_buys_whole_house: false,
   });
 
   const [notifications, setNotifications] = useState({
@@ -134,6 +171,12 @@ export default function MyProfile() {
         square_location_id: u.square_location_id || '',
         logo_dark: u.logo_dark || '', logo_light: u.logo_light || '',
         profile_image_url: u.profile_image_url || '', venmo_qr_code: u.venmo_qr_code || '',
+        vendor_service_categories: u.vendor_service_categories || [],
+        reseller_business_type: u.reseller_business_type || '',
+        reseller_inventory_interests: u.reseller_inventory_interests || [],
+        reseller_min_purchase: u.reseller_min_purchase || '',
+        reseller_max_purchase: u.reseller_max_purchase || '',
+        reseller_buys_whole_house: u.reseller_buys_whole_house || false,
       }));
       if (u.notification_settings) setNotifications(prev => ({ ...prev, ...u.notification_settings }));
 
@@ -150,9 +193,10 @@ export default function MyProfile() {
       const acct = u.primary_account_type || 'consumer';
       const isConsumer = ['consumer','executor','home_seller','buyer','downsizer','diy_seller','consignor'].includes(acct) || !acct;
       const isTeam = ['team_admin','team_member','team_marketer'].includes(acct);
+      const isOperatorAcct = acct === 'estate_sale_operator';
       if (!isConsumer) {
         const opId = isTeam ? u.operator_id : u.id;
-        if (opId) setEstateSales(await base44.entities.EstateSale.filter({ operator_id: opId }));
+        if (opId && isOperatorAcct) setEstateSales(await base44.entities.EstateSale.filter({ operator_id: opId }));
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -234,6 +278,7 @@ export default function MyProfile() {
   const isReseller = acct === 'reseller';
   const isOperator = acct === 'estate_sale_operator';
   const isAgent = acct === 'real_estate_agent';
+  const isVendor = acct === 'vendor';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -248,6 +293,10 @@ export default function MyProfile() {
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Business</TabsTrigger>}
           {(isOperator || isAgent) && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isAgent ? 'Territory' : 'Territory & Services'}</TabsTrigger>}
+          {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services & Area</TabsTrigger>}
+          {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
+          {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buying Preferences</TabsTrigger>}
+          {isReseller && <TabsTrigger value="reseller_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
           {isOperator && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
           {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
           {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
@@ -579,7 +628,42 @@ export default function MyProfile() {
               </Card>
             )}
 
-            {/* Reseller — no extra credentials block */}
+            {/* Vendor-specific credentials */}
+            {isVendor && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Vendor Business Details</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
+                    <div><Label>Year Founded</Label><Input type="number" value={form.founded_year} onChange={e => setForm(p => ({ ...p, founded_year: e.target.value }))} placeholder="2015" /></div>
+                    <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="Optional" /></div>
+                  </div>
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">Insured</span></label>
+                    <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.bonded} onCheckedChange={v => setForm(p => ({ ...p, bonded: v }))} /><span className="text-sm font-medium">Bonded / Licensed</span></label>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reseller-specific credentials */}
+            {isReseller && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Business Details</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Business Type</Label>
+                      <select value={form.reseller_business_type} onChange={e => setForm(p => ({ ...p, reseller_business_type: e.target.value }))} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mt-1">
+                        <option value="">Select type...</option>
+                        {RESELLER_BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <SaveBtn label="Save Business Profile" />
           </TabsContent>
@@ -847,6 +931,188 @@ export default function MyProfile() {
               </CardContent>
             </Card>
             <SaveBtn label="Save Agent Profile" />
+          </TabsContent>
+        )}
+
+        {/* ─────────────── VENDOR SERVICES & AREA TAB ─────────────── */}
+        {isVendor && (
+          <TabsContent value="vendor_services" className="space-y-6">
+            {/* Service Specializations */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5" />Service Specializations</CardTitle>
+                <p className="text-sm text-slate-500">Select every type of service your business provides. This determines which leads get matched to you.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {VENDOR_SERVICE_CATEGORIES.map(cat => (
+                    <label key={cat.key} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${form.vendor_service_categories.includes(cat.key) ? 'border-orange-500 bg-orange-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                      <Checkbox className="mt-0.5" checked={form.vendor_service_categories.includes(cat.key)} onCheckedChange={() => toggleArr('vendor_service_categories', cat.key)} />
+                      <div>
+                        <p className="font-semibold text-sm">{cat.label}</p>
+                        <p className="text-xs text-slate-500">{cat.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Service Area */}
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area</CardTitle></CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <Label className="mb-2 block text-slate-600">States Covered</Label>
+                  <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5">
+                    {US_STATES.map(s => (
+                      <button key={s} type="button" onClick={() => toggleArr('service_states', s)}
+                        className={`px-1.5 py-1 rounded text-xs font-medium border transition-all ${form.service_states.includes(s) ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300'}`}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-5 pt-2 border-t">
+                  <div>
+                    <Label className="mb-2 block text-slate-600">Counties</Label>
+                    <div className="flex gap-2 mb-2">
+                      <Input value={newCounty} onChange={e => setNewCounty(e.target.value)} placeholder="Add county..." onKeyDown={e => { if (e.key === 'Enter') { addTag('service_counties', newCounty, setNewCounty); e.preventDefault(); } }} />
+                      <Button type="button" variant="outline" size="sm" onClick={() => addTag('service_counties', newCounty, setNewCounty)}><Plus className="w-4 h-4" /></Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {form.service_counties.map(c => <Badge key={c} variant="secondary" className="gap-1 pr-1 text-xs">{c}<button onClick={() => removeTag('service_counties', c)}><X className="w-3 h-3" /></button></Badge>)}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Max Travel Radius (miles)</Label>
+                    <Input type="number" className="mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="30" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <SaveBtn label="Save Services & Area" />
+          </TabsContent>
+        )}
+
+        {/* ─────────────── VENDOR LEADS TAB ─────────────── */}
+        {isVendor && (
+          <TabsContent value="vendor_leads" className="space-y-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" />My Cleanout Leads</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-slate-500">Leads matched to your service area and specializations appear in your leads dashboard.</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/AdminCleanoutLeads" className="flex-1">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all">
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-orange-600" /></div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Cleanout Leads Dashboard</p>
+                        <p className="text-xs text-slate-500">View and manage all matched cleanout requests</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </Link>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mt-2">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">How lead matching works</p>
+                  <ul className="text-xs text-slate-500 space-y-1 list-disc list-inside">
+                    <li>Leads are matched to vendors based on service area (state, county, radius)</li>
+                    <li>Your selected service specializations determine lead type eligibility</li>
+                    <li>Enable lead notifications in the <strong>Account</strong> tab to get alerts</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* ─────────────── RESELLER BUYING PREFERENCES TAB ─────────────── */}
+        {isReseller && (
+          <TabsContent value="reseller_prefs" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><ShoppingBag className="w-5 h-5" />Inventory Interests</CardTitle>
+                <p className="text-sm text-slate-500">Tell us what you buy — this determines which estate sale buyout and lot opportunities get matched to you.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {RESELLER_INTEREST_CATEGORIES.map(cat => (
+                    <label key={cat} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${form.reseller_inventory_interests.includes(cat) ? 'border-orange-500 bg-orange-50 font-medium' : 'border-slate-200 hover:border-slate-300'}`}>
+                      <Checkbox checked={form.reseller_inventory_interests.includes(cat)} onCheckedChange={() => toggleArr('reseller_inventory_interests', cat)} />
+                      {cat}
+                    </label>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" />Purchase Range & Preferences</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div><Label>Min Purchase ($)</Label><Input type="number" value={form.reseller_min_purchase} onChange={e => setForm(p => ({ ...p, reseller_min_purchase: e.target.value }))} placeholder="500" /></div>
+                  <div><Label>Max Purchase ($)</Label><Input type="number" value={form.reseller_max_purchase} onChange={e => setForm(p => ({ ...p, reseller_max_purchase: e.target.value }))} placeholder="25000" /></div>
+                </div>
+                <div>
+                  <Label className="mb-2 block text-slate-600">Service States</Label>
+                  <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5">
+                    {US_STATES.map(s => (
+                      <button key={s} type="button" onClick={() => toggleArr('service_states', s)}
+                        className={`px-1.5 py-1 rounded text-xs font-medium border transition-all ${form.service_states.includes(s) ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300'}`}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border cursor-pointer">
+                  <Checkbox checked={form.reseller_buys_whole_house} onCheckedChange={v => setForm(p => ({ ...p, reseller_buys_whole_house: v }))} />
+                  <div>
+                    <p className="text-sm font-semibold">I buy whole-house lots / full buyouts</p>
+                    <p className="text-xs text-slate-500">Check this to receive buyout opportunity leads</p>
+                  </div>
+                </label>
+              </CardContent>
+            </Card>
+            <SaveBtn label="Save Buying Preferences" />
+          </TabsContent>
+        )}
+
+        {/* ─────────────── RESELLER LEADS TAB ─────────────── */}
+        {isReseller && (
+          <TabsContent value="reseller_leads" className="space-y-4">
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" />My Reseller Leads</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-slate-500">Buyout opportunities and reseller leads matched to your preferences appear in your dashboard.</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/ResellerDashboard" className="flex-1">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all">
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Reseller Dashboard</p>
+                        <p className="text-xs text-slate-500">Browse buyout opportunities, lots & leads</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </Link>
+                  <Link to="/ResellerNetwork" className="flex-1">
+                    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all">
+                      <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-cyan-600" /></div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Reseller Network</p>
+                        <p className="text-xs text-slate-500">Connect with operators & explore inventory</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </Link>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 mt-2">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">How lead matching works</p>
+                  <ul className="text-xs text-slate-500 space-y-1 list-disc list-inside">
+                    <li>Leads are matched based on your inventory interests and service states</li>
+                    <li>Whole-house buyout leads only go to resellers with that preference enabled</li>
+                    <li>Enable lead notifications in the <strong>Account</strong> tab for instant alerts</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
 
