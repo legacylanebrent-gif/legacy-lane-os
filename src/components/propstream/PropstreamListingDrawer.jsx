@@ -99,8 +99,6 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Year Built" value={fmt(listing.year_built)} />
             <DV label="Property Type" value={fmt(listing.property_type)} />
             <DV label="Days on Market" value={fmt(listing.days_on_market)} />
-            <DV label="County" value={fmt(listing.county)} />
-            <DV label="Lat / Lng" value={listing.latitude ? `${listing.latitude}, ${listing.longitude}` : '—'} />
             {listing.listing_remarks && <DV label="Remarks" value={listing.listing_remarks} span2 />}
           </Grid2>
         </Section>
@@ -108,11 +106,50 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
         {/* Owner */}
         <Section title="Owner Details" icon={<User className="w-4 h-4" />}>
           <Grid2>
-            <DV label="Owner" value={fmt(listing.owner_name)} span2 />
-            <DV label="Ownership" value={listing.ownership_length_years ? `${listing.ownership_length_years} yrs` : '—'} />
-            <DV label="Equity" value={fmtPrice(listing.equity_estimate)} />
-            <DV label="Mortgage Balance" value={fmtPrice(listing.mortgage_balance)} />
+            <DV label="Owner 1" value={`${fmt(listing.owner_1_first_name)} ${fmt(listing.owner_1_last_name)}`.trim() || fmt(listing.owner_name)} span2 />
+            {(listing.owner_2_first_name || listing.owner_2_last_name) && <DV label="Owner 2" value={`${listing.owner_2_first_name || ''} ${listing.owner_2_last_name || ''}`.trim()} span2 />}
+            <DV label="Ownership Length" value={listing.ownership_length_years ? `${listing.ownership_length_years} yrs` : '—'} />
+            <DV label="Owner Occupied" value={listing.owner_occupied ? 'Yes' : 'No'} />
+            <DV label="Deceased Owner" value={listing.deceased_owner ? 'Yes' : '—'} />
+            <DV label="Litigator" value={listing.litigator ? 'Yes' : '—'} />
             <DV label="Mailing Address" value={listing.owner_mailing_address ? `${listing.owner_mailing_address}, ${listing.owner_mailing_city || ''} ${listing.owner_mailing_state || ''} ${listing.owner_mailing_zip || ''}` : '—'} span2 />
+            {listing.mailing_care_of_name && <DV label="Care Of" value={listing.mailing_care_of_name} span2 />}
+            <DV label="Do Not Mail" value={listing.do_not_mail ? 'Yes' : 'No'} />
+          </Grid2>
+        </Section>
+
+        {/* Phones & Emails */}
+        <Section title="Contact Info" icon={<Phone className="w-4 h-4" />}>
+          <Grid2>
+            {[1,2,3,4,5].map(n => listing[`phone_${n}`] ? (
+              <DV key={n} label={`Phone ${n}${listing[`phone_${n}_type`] ? ` (${listing[`phone_${n}_type`]})` : ''}${listing[`phone_${n}_dnc`] ? ' ⛔' : ''}`}
+                value={<a href={`tel:${listing[`phone_${n}`]}`} className="text-blue-600 underline">{listing[`phone_${n}`]}</a>} />
+            ) : null)}
+            {[1,2,3,4].map(n => listing[`email_${n}`] ? (
+              <DV key={`e${n}`} label={`Email ${n}`}
+                value={<a href={`mailto:${listing[`email_${n}`]}`} className="text-blue-600 underline truncate block">{listing[`email_${n}`]}</a>} />
+            ) : null)}
+          </Grid2>
+        </Section>
+
+        {/* Financials */}
+        <Section title="Financials" icon={<Building2 className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="Equity Estimate" value={fmtPrice(listing.equity_estimate)} />
+            <DV label="Mortgage Balance" value={fmtPrice(listing.mortgage_balance)} />
+            <DV label="Est. LTV %" value={listing.estimated_ltv ? `${listing.estimated_ltv}%` : '—'} />
+            <DV label="Open Loans" value={fmt(listing.total_open_loans)} />
+            <DV label="Last Sale Amount" value={fmtPrice(listing.last_sale_amount)} />
+            <DV label="Last Sale Date" value={fmt(listing.last_sale_date)} />
+            {listing.lien_indicator && <>
+              <DV label="Lien Amount" value={fmtPrice(listing.lien_amount)} />
+              <DV label="Lien Date" value={fmt(listing.lien_date)} />
+            </>}
+            {listing.preforeclosure_indicator && <>
+              <DV label="PreFC Unpaid Bal" value={fmtPrice(listing.prefc_unpaid_balance)} />
+              <DV label="PreFC Auction Date" value={fmt(listing.prefc_auction_date)} />
+              <DV label="PreFC Doc #" value={fmt(listing.prefc_doc_number)} />
+            </>}
           </Grid2>
         </Section>
 
@@ -133,11 +170,15 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
         {/* Territory */}
         <Section title="Territory & Assignment" icon={<MapPin className="w-4 h-4" />}>
           <Grid2>
+            <DV label="FIPS Code" value={fmt(listing.fips_code)} />
+            <DV label="County" value={fmt(listing.county)} />
             <DV label="Territory" value={listing.territory_name || 'Not matched'} />
             <DV label="Territory ID" value={fmt(listing.territory_id)} />
             <DV label="Matched Operators" value={(listing.matched_operator_ids || []).length} />
             <DV label="Assigned Operator ID" value={fmt(listing.assigned_operator_id)} />
             <DV label="Assigned Agent ID" value={fmt(listing.assigned_agent_id)} />
+            <DV label="APN" value={fmt(listing.apn)} />
+            <DV label="Lat / Lng" value={listing.latitude ? `${listing.latitude}, ${listing.longitude}` : '—'} />
             <DV label="Public Source" value={fmt(listing.public_submission_source)} />
           </Grid2>
         </Section>
