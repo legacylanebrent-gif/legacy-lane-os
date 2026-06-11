@@ -26,6 +26,23 @@
     "zip": {
       "type": "string"
     },
+    "lat": {
+      "type": "number",
+      "description": "Latitude geocoded from zip/city"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Longitude geocoded from zip/city"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed"
+      ],
+      "default": "not_geocoded"
+    },
     "service_radius": {
       "type": "number",
       "description": "Miles radius from base location"
