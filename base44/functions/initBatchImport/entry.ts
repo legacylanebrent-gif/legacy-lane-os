@@ -18,8 +18,7 @@ Deno.serve(async (req) => {
       imported_count: 0,
       duplicate_count: 0,
       error_count: 0,
-      import_status: 'in_progress',
-      created_date: new Date().toISOString()
+      import_status: 'in_progress'
     });
     
     return Response.json({ batch_id: batch.id });
