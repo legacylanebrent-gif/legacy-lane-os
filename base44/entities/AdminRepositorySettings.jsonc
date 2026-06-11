@@ -1,0 +1,43 @@
+{
+  "name": "AdminRepositorySettings",
+  "type": "object",
+  "properties": {
+    "setting_key": {
+      "type": "string",
+      "description": "Unique key \u2014 use 'global' for the single settings record"
+    },
+    "public_repository_launch_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Admin-configured target launch date"
+    },
+    "minimum_item_count_goal": {
+      "type": "integer",
+      "default": 10000,
+      "description": "Minimum total items before public launch"
+    },
+    "minimum_public_approved_goal": {
+      "type": "integer",
+      "default": 5000,
+      "description": "Minimum approved_public items before public launch"
+    },
+    "minimum_avg_confidence_required": {
+      "type": "number",
+      "default": 70,
+      "description": "Minimum average identity confidence score required"
+    },
+    "public_launch_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Admin must manually flip this to true to go public"
+    },
+    "serpapi_cost_per_call": {
+      "type": "number",
+      "default": 0.05,
+      "description": "Cost per SERPAPI call in USD for savings calculation"
+    }
+  },
+  "required": [
+    "setting_key"
+  ]
+}

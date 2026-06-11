@@ -119,6 +119,7 @@ import LaunchAuditCenter from './pages/LaunchAuditCenter';
 import AdminHousioSync from './pages/AdminHousioSync';
 import ResellerPackupEventEditor from './pages/ResellerPackupEventEditor';
 import ResellerPackupEvents from './pages/ResellerPackupEvents';
+import AdminCentralRepository from './pages/AdminCentralRepository';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -299,6 +300,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminHousioSync" element={<LayoutWrapper currentPageName="AdminHousioSync"><AdminHousioSync /></LayoutWrapper>} />
       <Route path="/ResellerPackupEventEditor" element={<LayoutWrapper currentPageName="ResellerPackupEventEditor"><ResellerPackupEventEditor /></LayoutWrapper>} />
       <Route path="/ResellerPackupEvents" element={<LayoutWrapper currentPageName="ResellerPackupEvents"><ResellerPackupEvents /></LayoutWrapper>} />
+      <Route path="/AdminCentralRepository" element={<LayoutWrapper currentPageName="AdminCentralRepository"><AdminCentralRepository /></LayoutWrapper>} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 

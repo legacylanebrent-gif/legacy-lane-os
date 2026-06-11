@@ -6,10 +6,11 @@ import {
   Users, Building2, Merge, BarChart3, DollarSign, Megaphone, Brain,
   TrendingUp, Mail, MapPin, Zap, Award, Shield, RefreshCw,
   ArrowUpRight, CheckCircle2, AlertTriangle, Clock, Target,
-  Rocket, ChevronRight, Activity, MessageSquare, Send, Cpu
+  Rocket, ChevronRight, Activity, MessageSquare, Send, Cpu, Database
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import CentralRepositoryWidget from '@/components/repository/CentralRepositoryWidget';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => (n ?? 0).toLocaleString();
@@ -386,6 +387,9 @@ export default function AdminDashboard() {
             <QuickLinkCard icon={TrendingUp} label="SEO Dashboard" sub="Google Search Console metrics" href="/PlatformSEODashboard" color="bg-cyan-100 text-cyan-600" />
           </div>
         </div>
+
+        {/* ── Central Repository Daily Snapshot ── */}
+        <CentralRepositoryWidget />
 
         {/* ── Motivational Footer ── */}
         <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-2xl p-6 shadow-lg">

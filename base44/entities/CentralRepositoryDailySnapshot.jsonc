@@ -1,0 +1,100 @@
+{
+  "name": "CentralRepositoryDailySnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The date this snapshot was taken (YYYY-MM-DD)"
+    },
+    "total_item_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "new_items_added": {
+      "type": "integer",
+      "default": 0
+    },
+    "approved_public_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "review_needed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "private_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "rejected_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "barcode_match_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "database_match_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "serpapi_lookup_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "serpapi_lookup_avoided_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "estimated_serpapi_savings": {
+      "type": "number",
+      "default": 0
+    },
+    "duplicate_match_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100 percentage"
+    },
+    "avg_identity_confidence": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_pricing_confidence": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_seo_confidence": {
+      "type": "number",
+      "default": 0
+    },
+    "launch_readiness_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "days_until_launch": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_image_references": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_barcode_records": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_price_history_records": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_demand_metric_records": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "snapshot_date"
+  ]
+}
