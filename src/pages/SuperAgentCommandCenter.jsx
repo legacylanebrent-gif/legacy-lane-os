@@ -45,6 +45,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Find users who haven\'t completed onboarding and trigger re-engagement',
       action: 'Run Re-engagement Campaign',
       icon: RefreshCw
+    },
+    { 
+      title: 'Create onboarding email sequence', 
+      description: 'Build 5-email welcome series for new user activation',
+      action: 'Build Email Sequence',
+      icon: MessageSquare
+    },
+    { 
+      title: 'Audit onboarding completion', 
+      description: 'Analyze onboarding funnel drop-off points and suggest improvements',
+      action: 'Audit Funnel',
+      icon: BarChart3
     }
   ],
   admin_ops_agent: [
@@ -59,6 +71,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Prioritize pending admin tasks and suggest automation workflows',
       action: 'Optimize Task Queue',
       icon: CheckCircle2
+    },
+    { 
+      title: 'Monitor system health', 
+      description: 'Check API status, rate limits, and integration connectivity',
+      action: 'Run Health Check',
+      icon: Activity
+    },
+    { 
+      title: 'Backfill missing data', 
+      description: 'Identify and populate gaps in entity records',
+      action: 'Backfill Data',
+      icon: RefreshCw
     }
   ],
   relationship_coach: [
@@ -73,6 +97,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Create personalized follow-up suggestions for dormant partnerships',
       action: 'Generate Outreach Plan',
       icon: MessageSquare
+    },
+    { 
+      title: 'Identify top referrers', 
+      description: 'Find highest-value partnership sources and suggest rewards',
+      action: 'Analyze Referrals',
+      icon: DollarSign
+    },
+    { 
+      title: 'Schedule partnership check-ins', 
+      description: 'Automate quarterly review meetings with strategic partners',
+      action: 'Schedule Reviews',
+      icon: Clock
     }
   ],
   marketing_autopilot_agent: [
@@ -87,6 +123,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Create and schedule targeted ads for estate sale promotions',
       action: 'Build Ad Campaign',
       icon: Zap
+    },
+    { 
+      title: 'A/B test ad creatives', 
+      description: 'Run split tests on ad images and copy to optimize CTR',
+      action: 'Run A/B Tests',
+      icon: Activity
+    },
+    { 
+      title: 'Analyze campaign ROI', 
+      description: 'Review ad spend vs conversions and recommend budget shifts',
+      action: 'Analyze ROI',
+      icon: TrendingUp
     }
   ],
   lead_conversion_agent: [
@@ -101,6 +149,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Create personalized email sequences for high-value leads',
       action: 'Build Sequences',
       icon: MessageSquare
+    },
+    { 
+      title: 'Follow up stale leads', 
+      description: 'Re-engage leads that haven\'t responded in 7+ days',
+      action: 'Re-engage Leads',
+      icon: RefreshCw
+    },
+    { 
+      title: 'Optimize conversion funnel', 
+      description: 'Identify bottlenecks in lead-to-deal pipeline',
+      action: 'Analyze Funnel',
+      icon: BarChart3
     }
   ],
   inventory_pricing_agent: [
@@ -115,6 +175,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Apply data-driven price recommendations to active listings',
       action: 'Update Prices',
       icon: RefreshCw
+    },
+    { 
+      title: 'Flag high-value items', 
+      description: 'Identify items needing expert appraisal or special handling',
+      action: 'Flag Items',
+      icon: AlertCircle
+    },
+    { 
+      title: 'Track price trends', 
+      description: 'Monitor market demand shifts for key categories',
+      action: 'Analyze Trends',
+      icon: TrendingUp
     }
   ],
   customer_success_agent: [
@@ -128,6 +200,18 @@ const AGENT_SUGGESTIONS = {
       title: 'Send proactive check-ins', 
       description: 'Generate personalized check-in messages for at-risk users',
       action: 'Send Check-ins',
+      icon: MessageSquare
+    },
+    { 
+      title: 'Resolve support tickets', 
+      description: 'Triage and route open tickets to appropriate teams',
+      action: 'Process Tickets',
+      icon: CheckCircle2
+    },
+    { 
+      title: 'Gather user feedback', 
+      description: 'Send satisfaction surveys to recent active users',
+      action: 'Send Surveys',
       icon: MessageSquare
     }
   ],
@@ -143,6 +227,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Index new content via Search Console API',
       action: 'Submit to Index',
       icon: Globe
+    },
+    { 
+      title: 'Build internal links', 
+      description: 'Connect related content to improve site authority',
+      action: 'Build Links',
+      icon: Zap
+    },
+    { 
+      title: 'Audit content quality', 
+      description: 'Review existing pages for SEO optimization opportunities',
+      action: 'Content Audit',
+      icon: CheckCircle2
     }
   ],
   financial_ops_agent: [
@@ -157,6 +253,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Compile revenue, expenses, and wallet transactions',
       action: 'Build Report',
       icon: FileText
+    },
+    { 
+      title: 'Process withdrawal requests', 
+      description: 'Review and approve pending operator withdrawals',
+      action: 'Process Withdrawals',
+      icon: CheckCircle2
+    },
+    { 
+      title: 'Reconcile transactions', 
+      description: 'Match wallet entries with actual payments',
+      action: 'Reconcile',
+      icon: RefreshCw
     }
   ],
   quality_assurance_agent: [
@@ -171,6 +279,18 @@ const AGENT_SUGGESTIONS = {
       description: 'Check entity relationships and flag inconsistencies',
       action: 'Validate Data',
       icon: Shield
+    },
+    { 
+      title: 'Review agent outputs', 
+      description: 'Quality-check recent autonomous agent actions',
+      action: 'Review Actions',
+      icon: Eye
+    },
+    { 
+      title: 'Flag policy violations', 
+      description: 'Detect and report potential terms of service breaches',
+      action: 'Detect Violations',
+      icon: AlertTriangle
     }
   ]
 };
