@@ -89,6 +89,11 @@
       "type": "boolean",
       "default": false
     },
+    "reseller_invite_radius_miles": {
+      "type": "integer",
+      "default": 25,
+      "description": "Miles radius from sale address to notify resellers when not invite-only"
+    },
     "max_reseller_spots": {
       "type": "integer"
     },

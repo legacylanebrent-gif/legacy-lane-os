@@ -56,6 +56,7 @@ export default function ResellerPackupEventEditor() {
     address_visibility: 'city_state_only',
     reseller_registration_required: true,
     invite_only: false,
+    reseller_invite_radius_miles: '25',
   });
 
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function ResellerPackupEventEditor() {
           address_visibility: ev.address_visibility || 'city_state_only',
           reseller_registration_required: ev.reseller_registration_required ?? true,
           invite_only: ev.invite_only ?? false,
+          reseller_invite_radius_miles: ev.reseller_invite_radius_miles ?? 25,
         });
 
         const eventPhotos = await base44.entities.ResellerPackupPhoto.filter({ event_id: eid });
@@ -154,6 +156,7 @@ export default function ResellerPackupEventEditor() {
         ...form,
         max_reseller_spots: form.max_reseller_spots ? parseInt(form.max_reseller_spots) : null,
         bundle_buyout_amount: form.bundle_buyout_amount ? parseFloat(form.bundle_buyout_amount) : null,
+        reseller_invite_radius_miles: form.reseller_invite_radius_miles ? parseInt(form.reseller_invite_radius_miles) : 25,
         original_sale_id: saleId,
         operator_id: sale?.operator_id || user.id,
         company_id: sale?.company_id || null,
@@ -377,6 +380,28 @@ export default function ResellerPackupEventEditor() {
                 </div>
                 <Switch checked={form.invite_only} onCheckedChange={v => setForm(f => ({ ...f, invite_only: v }))} />
               </div>
+              {!form.invite_only && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">Reseller Notification Radius</p>
+                      <p className="text-xs text-slate-500">Resellers within this radius of the sale address will be notified when you publish</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Input
+                        type="number"
+                        min="5"
+                        max="150"
+                        step="5"
+                        value={form.reseller_invite_radius_miles}
+                        onChange={e => setForm(f => ({ ...f, reseller_invite_radius_miles: e.target.value }))}
+                        className="w-20 text-center"
+                      />
+                      <span className="text-sm text-slate-600 whitespace-nowrap">miles</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
