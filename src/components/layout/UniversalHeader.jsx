@@ -67,8 +67,8 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('MyProfile')} className="cursor-pointer">
-                        <UserCircle className="w-4 h-4 mr-2" /> My Profile
+                      <Link to={createPageUrl('MyProfile')} className="cursor-pointer font-medium">
+                        <UserCircle className="w-4 h-4 mr-2 text-orange-500" /> My Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
