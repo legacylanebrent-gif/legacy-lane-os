@@ -76,6 +76,9 @@ export default function PropstreamAgentLeads() {
   const [notes, setNotes] = useState('');
   const [extractingAgents, setExtractingAgents] = useState(false);
   const [backfillingData, setBackfillingData] = useState(false);
+  const [extractDialogOpen, setExtractDialogOpen] = useState(false);
+  const [listingStats, setListingStats] = useState(null);
+  const [fetchingStats, setFetchingStats] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [agentFilter, setAgentFilter] = useState('');
@@ -153,7 +156,34 @@ export default function PropstreamAgentLeads() {
     setNotesModalOpen(true);
   };
 
-  const handleExtractAgents = async () => {
+  const handleOpenExtractDialog = async () => {
+    setFetchingStats(true);
+    try {
+      // Fetch listing count from PropstreamREListing
+      const listings = await base44.entities.PropstreamREListing.list();
+      const totalListings = listings.length;
+      
+      // Estimate unique agents (typically 1 agent per 3-5 listings)
+      const estimatedAgents = Math.ceil(totalListings / 4);
+      
+      setListingStats({
+        totalListings,
+        estimatedAgents,
+        estimatedRange: {
+          min: Math.ceil(totalListings / 5),
+          max: Math.ceil(totalListings / 3)
+        }
+      });
+      setExtractDialogOpen(true);
+    } catch (error) {
+      alert('Error fetching listing stats: ' + error.message);
+    } finally {
+      setFetchingStats(false);
+    }
+  };
+
+  const handleConfirmExtract = async () => {
+    setExtractDialogOpen(false);
     setExtractingAgents(true);
     try {
       const result = await base44.functions.invoke('extractAgentLeadsFromPropstream');
@@ -251,10 +281,10 @@ export default function PropstreamAgentLeads() {
               size="sm" 
               variant="outline" 
               className="gap-2 text-blue-600 hover:text-blue-700" 
-              onClick={handleExtractAgents}
-              disabled={extractingAgents}
+              onClick={handleOpenExtractDialog}
+              disabled={extractingAgents || fetchingStats}
             >
-              {extractingAgents ? (
+              {(extractingAgents || fetchingStats) ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
               ) : (
                 <Download className="w-4 h-4" />
@@ -689,6 +719,93 @@ export default function PropstreamAgentLeads() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Extract Dialog */}
+      <Dialog open={extractDialogOpen} onOpenChange={setExtractDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Extract Agent Leads
+            </DialogTitle>
+            <DialogDescription>
+              Review the estimated extraction results before proceeding
+            </DialogDescription>
+          </DialogHeader>
+
+          {fetchingStats ? (
+            <div className="py-8 text-center">
+              <RefreshCw className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
+              <p className="text-slate-600">Analyzing PropStream database...</p>
+            </div>
+          ) : listingStats ? (
+            <div className="space-y-4 py-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <Building className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-slate-800">Source Database</h3>
+                </div>
+                <div className="text-3xl font-bold text-blue-600">
+                  {listingStats.totalListings.toLocaleString()}
+                </div>
+                <p className="text-sm text-slate-600 mt-1">Total RE Listings in PropStream</p>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <Users className="w-5 h-5 text-green-600" />
+                  <h3 className="font-semibold text-slate-800">Estimated Unique Agents</h3>
+                </div>
+                <div className="text-3xl font-bold text-green-600">
+                  {listingStats.estimatedAgents.toLocaleString()}
+                </div>
+                <p className="text-sm text-slate-600 mt-1">
+                  Estimated range: {listingStats.estimatedRange.min.toLocaleString()} - {listingStats.estimatedRange.max.toLocaleString()} agents
+                </p>
+                <p className="text-xs text-slate-500 mt-2">
+                  Based on typical ratio of 1 agent per 3-5 listings
+                </p>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
+                  <div className="text-xs text-amber-800">
+                    <strong>Note:</strong> This will deduplicate agents by email and phone, aggregating all their listings into a single profile.
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setExtractDialogOpen(false)}
+              disabled={extractingAgents}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleConfirmExtract}
+              disabled={extractingAgents || !listingStats}
+            >
+              {extractingAgents ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Extracting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Start Extraction
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
