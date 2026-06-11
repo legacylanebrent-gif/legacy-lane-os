@@ -154,6 +154,8 @@ export default function SuperAgentCommandCenter() {
   const [recentAgentRuns, setRecentAgentRuns] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [configureModalOpen, setConfigureModalOpen] = useState(false);
+  const [configuringAgent, setConfiguringAgent] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -196,6 +198,11 @@ export default function SuperAgentCommandCenter() {
   const handleInfoClick = (agent) => {
     setSelectedAgent(agent);
     setInfoModalOpen(true);
+  };
+
+  const handleConfigureClick = (agent) => {
+    setConfiguringAgent(agent);
+    setConfigureModalOpen(true);
   };
 
   if (loading) return (
@@ -353,7 +360,7 @@ export default function SuperAgentCommandCenter() {
                           <Eye className="w-3 h-3 mr-1" />
                           View Logs
                         </Button>
-                        <Button size="sm" variant="outline" className="flex-1 text-xs h-8">
+                        <Button size="sm" variant="outline" className="flex-1 text-xs h-8" onClick={() => handleConfigureClick(agent)}>
                           <Settings className="w-3 h-3 mr-1" />
                           Configure
                         </Button>
@@ -452,6 +459,108 @@ export default function SuperAgentCommandCenter() {
             )}
           </CardContent>
         </Card>
+
+        {/* Agent Configuration Modal */}
+        <Dialog open={configureModalOpen} onOpenChange={setConfigureModalOpen}>
+          <DialogContent className="max-w-2xl">
+            {configuringAgent && (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-12 h-12 rounded-lg ${configuringAgent.bg} border border-slate-200 flex items-center justify-center`}>
+                      <configuringAgent.icon className={`w-6 h-6 ${configuringAgent.color}`} />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-bold text-slate-800">
+                        Configure {configuringAgent.name}
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-slate-500">
+                        Manage settings and automation rules
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Agent Configuration
+                    </h4>
+                    <p className="text-sm text-amber-700">
+                      Configure automation rules, triggers, and execution parameters for {configuringAgent.name}.
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between py-2 border-b border-amber-100">
+                        <span className="text-sm text-amber-900">Status</span>
+                        <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-amber-100">
+                        <span className="text-sm text-amber-900">Execution Mode</span>
+                        <span className="text-sm font-medium text-amber-900">Autonomous (Approval Required)</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-amber-100">
+                        <span className="text-sm text-amber-900">Last Configured</span>
+                        <span className="text-sm text-amber-700">System Default</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3">Quick Actions</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="outline" className="text-xs h-8 justify-start">
+                        <Play className="w-3 h-3 mr-1 text-green-600" />
+                        Run Now
+                      </Button>
+                      <Button variant="outline" className="text-xs h-8 justify-start">
+                        <Pause className="w-3 h-3 mr-1 text-amber-600" />
+                        Pause Agent
+                      </Button>
+                      <Button variant="outline" className="text-xs h-8 justify-start">
+                        <RefreshCw className="w-3 h-3 mr-1 text-blue-600" />
+                        Reset Defaults
+                      </Button>
+                      <Button variant="outline" className="text-xs h-8 justify-start">
+                        <Eye className="w-3 h-3 mr-1 text-purple-600" />
+                        View History
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                      <Brain className="w-4 h-4" />
+                      AI Configuration
+                    </h4>
+                    <p className="text-sm text-blue-700 mb-3">
+                      This agent uses AI to make autonomous decisions. Configure approval thresholds and execution parameters.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-900">Auto-approve low-impact actions</span>
+                        <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-900">Execution frequency</span>
+                        <span className="text-sm font-medium text-blue-900">On-demand</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setConfigureModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => setConfigureModalOpen(false)}>
+                    Save Configuration
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Agent Info Modal */}
         <Dialog open={infoModalOpen} onOpenChange={setInfoModalOpen}>
