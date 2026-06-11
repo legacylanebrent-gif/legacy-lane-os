@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle, CheckCircle2, AlertCircle, Loader, Download, ArrowLeft, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Hardcoded default mapping from known PropStream export format (CSV column -> entity field)
-// These are the exact column names from the user's PropStream export
+// Hardcoded default mapping from known PropStream export format
 const DEFAULT_MAPPING = {
   property_address:         'Address',
   unit_number:              'Unit #',
@@ -90,115 +89,9 @@ const DEFAULT_MAPPING = {
   method_of_add:            'Method of Add',
 };
 
-// Full field map: entity field -> array of CSV column aliases (lowercase) — used as fallback
-const FIELD_MAP = {
-  property_address:         ['address', 'property address', 'street address', 'situs address', 'prop address', 'property_address'],
-  unit_number:              ['unit #', 'unit', 'unit number', 'apt', 'suite'],
-  city:                     ['city', 'prop city', 'property city', 'situs city'],
-  state:                    ['state', 'prop state', 'property state', 'situs state'],
-  zip:                      ['zip', 'zip code', 'postal code', 'situs zip', 'prop zip'],
-  county:                   ['county', 'prop county'],
-  fips_code:                ['fips', 'fips code', 'county fips', 'fips_code'],
-  apn:                      ['apn', 'assessor parcel number', 'parcel number', 'parcel id'],
-  mls_number:               ['mls number', 'mls#', 'mls id', 'listing id', 'mls_number'],
-  propstream_property_id:   ['propstream id', 'property id', 'prop id', 'ps id'],
-  listing_status:           ['mls status', 'status', 'listing status'],
-  list_date:                ['mls date', 'list date', 'listing date', 'status date'],
-  days_on_market:           ['days on market', 'dom', 'days listed'],
-  list_price:               ['mls amount', 'list price', 'listing price', 'price'],
-  estimated_value:          ['est. value', 'estimated value', 'avm', 'estimated market value'],
-  estimated_ltv:            ['est. loan-to-value', 'ltv', 'loan to value'],
-  beds:                     ['bedrooms', 'beds', 'bed'],
-  baths:                    ['total bathrooms', 'baths', 'bathrooms', 'bath'],
-  square_feet:              ['building sqft', 'sqft', 'square feet', 'living sqft', 'gross living area'],
-  lot_size:                 ['lot size sqft', 'lot size', 'lot sqft', 'lot area'],
-  year_built:               ['year built', 'yr built'],
-  property_type:            ['property type', 'prop type'],
-  property_status:          ['property status', 'prop status'],
-  listing_remarks:          ['remarks', 'listing remarks', 'public remarks', 'description'],
-  listing_url:              ['listing url', 'mls url', 'url'],
-  last_sale_date:           ['last sale date', 'sale date', 'prior sale date'],
-  last_sale_recording_date: ['last sale recording date', 'recording date'],
-  last_sale_amount:         ['last sale amount', 'sale amount', 'prior sale amount'],
-  total_open_loans:         ['total open loans', 'open loans'],
-  owner_name:               ['owner name', 'owner', 'owner 1 full name'],
-  owner_1_first_name:       ['owner 1 first name'],
-  owner_1_last_name:        ['owner 1 last name'],
-  owner_2_first_name:       ['owner 2 first name'],
-  owner_2_last_name:        ['owner 2 last name'],
-  litigator:                ['litigator'],
-  deceased_owner:           ['deceased owner', 'deceased'],
-  mailing_care_of_name:     ['mailing care of name', 'care of name', 'c/o'],
-  owner_mailing_address:    ['mailing address', 'owner mailing address', 'mail address'],
-  owner_mailing_unit:       ['mailing unit #', 'mailing unit', 'mail unit'],
-  owner_mailing_city:       ['mailing city', 'mail city'],
-  owner_mailing_state:      ['mailing state', 'mail state'],
-  owner_mailing_zip:        ['mailing zip', 'mail zip', 'mailing postal'],
-  owner_mailing_county:     ['mailing county', 'mail county'],
-  do_not_mail:              ['do not mail', 'dnm'],
-  owner_occupied:           ['owner occupied'],
-  ownership_length_years:   ['ownership length', 'years owned', 'length of ownership'],
-  absentee_owner:           ['absentee', 'absentee owner'],
-  vacant:                   ['vacant', 'vacancy'],
-  senior_owner_indicator:   ['senior', 'senior owner', 'senior indicator'],
-  probate_indicator:        ['probate', 'in probate', 'bk date'],
-  inherited_indicator:      ['inherited', 'inheritance'],
-  divorce_indicator:        ['divorce', 'divorcing', 'divorce date'],
-  preforeclosure_indicator: ['pre-fc recording date', 'preforeclosure', 'pre-foreclosure', 'lis pendens'],
-  prefc_doc_number:         ['pre-fc doc number', 'pre-fc doc #', 'lis pendens doc'],
-  prefc_unpaid_balance:     ['pre-fc unpaid balance', 'unpaid balance'],
-  prefc_auction_date:       ['pre-fc auction date', 'auction date'],
-  foreclosure_indicator:    ['foreclosure factor', 'foreclosure', 'in foreclosure', 'reo'],
-  lien_indicator:           ['lien type', 'lien', 'has lien'],
-  lien_date:                ['lien date'],
-  lien_amount:              ['lien amount'],
-  tax_delinquent_indicator: ['tax delinquent', 'delinquent taxes', 'tax lien'],
-  equity_estimate:          ['est. equity', 'equity', 'estimated equity'],
-  mortgage_balance:         ['est. remaining balance of open loans', 'mortgage balance', 'loan balance'],
-  phone_1:                  ['phone 1'],
-  phone_1_type:             ['phone 1 type'],
-  phone_1_dnc:              ['phone 1 dnc'],
-  phone_2:                  ['phone 2'],
-  phone_2_type:             ['phone 2 type'],
-  phone_2_dnc:              ['phone 2 dnc'],
-  phone_3:                  ['phone 3'],
-  phone_3_type:             ['phone 3 type'],
-  phone_3_dnc:              ['phone 3 dnc'],
-  phone_4:                  ['phone 4'],
-  phone_4_type:             ['phone 4 type'],
-  phone_4_dnc:              ['phone 4 dnc'],
-  phone_5:                  ['phone 5'],
-  phone_5_type:             ['phone 5 type'],
-  phone_5_dnc:              ['phone 5 dnc'],
-  email_1:                  ['email 1'],
-  email_2:                  ['email 2'],
-  email_3:                  ['email 3'],
-  email_4:                  ['email 4'],
-  listing_agent_name:       ['mls agent name', 'listing agent', 'agent name', 'list agent name'],
-  listing_agent_email:      ['mls agent e-mail', 'agent email', 'listing agent email'],
-  listing_agent_phone:      ['mls agent phone', 'agent phone', 'listing agent phone'],
-  listing_brokerage:        ['mls brokerage name', 'brokerage', 'listing brokerage', 'broker name'],
-  marketing_lists:          ['marketing lists', 'list name', 'lists'],
-  skip_traces:              ['skip traces', 'skip trace'],
-  date_added_to_list:       ['date added to list', 'date added'],
-  method_of_add:            ['method of add', 'add method'],
-  latitude:                 ['latitude', 'lat'],
-  longitude:                ['longitude', 'lng', 'lon'],
-};
-
-const BOOLEAN_FIELDS = new Set([
-  'absentee_owner', 'owner_occupied', 'vacant', 'senior_owner_indicator', 'probate_indicator',
-  'inherited_indicator', 'divorce_indicator', 'preforeclosure_indicator',
-  'foreclosure_indicator', 'lien_indicator', 'tax_delinquent_indicator',
-  'deceased_owner', 'litigator', 'do_not_mail',
-  'phone_1_dnc', 'phone_2_dnc', 'phone_3_dnc', 'phone_4_dnc', 'phone_5_dnc',
-]);
-const NUMBER_FIELDS = new Set([
-  'list_price', 'estimated_value', 'equity_estimate', 'mortgage_balance', 'estimated_ltv',
-  'ownership_length_years', 'beds', 'baths', 'square_feet', 'days_on_market',
-  'last_sale_amount', 'lien_amount', 'prefc_unpaid_balance',
-  'latitude', 'longitude',
-]);
+const FIELD_MAP = {};
+const BOOLEAN_FIELDS = new Set(['absentee_owner', 'owner_occupied', 'vacant', 'senior_owner_indicator', 'probate_indicator', 'inherited_indicator', 'divorce_indicator', 'preforeclosure_indicator', 'foreclosure_indicator', 'lien_indicator', 'tax_delinquent_indicator', 'deceased_owner', 'litigator', 'do_not_mail', 'phone_1_dnc', 'phone_2_dnc', 'phone_3_dnc', 'phone_4_dnc', 'phone_5_dnc']);
+const NUMBER_FIELDS = new Set(['list_price', 'estimated_value', 'equity_estimate', 'mortgage_balance', 'estimated_ltv', 'ownership_length_years', 'beds', 'baths', 'square_feet', 'days_on_market', 'last_sale_amount', 'lien_amount', 'prefc_unpaid_balance', 'latitude', 'longitude']);
 const INT_FIELDS = new Set(['year_built', 'total_open_loans']);
 
 const FIELD_GROUPS = [
@@ -216,17 +109,9 @@ const FIELD_GROUPS = [
 ];
 
 function autoMap(headers) {
-  // First apply hardcoded defaults where column exists in this file
   const mapping = {};
   for (const [field, col] of Object.entries(DEFAULT_MAPPING)) {
     if (headers.includes(col)) mapping[field] = col;
-  }
-  // Fill any remaining gaps with alias-based detection
-  const lower = headers.map(h => h.toLowerCase().trim());
-  for (const [field, aliases] of Object.entries(FIELD_MAP)) {
-    if (mapping[field]) continue; // already mapped
-    const idx = lower.findIndex(h => aliases.includes(h));
-    if (idx !== -1) mapping[field] = headers[idx];
   }
   return mapping;
 }
@@ -256,17 +141,9 @@ function mapRow(row, mapping) {
   return mapped;
 }
 
-const TEMPLATE_HEADERS = [
-  'Address', 'City', 'State', 'Zip', 'County', 'Property Type',
-  'MLS Number', 'Listing Status', 'List Date', 'Days On Market', 'List Price', 'Estimated Value',
-  'Beds', 'Baths', 'Building Sqft', 'Lot Size', 'Year Built', 'Remarks', 'Listing URL',
-  'Owner Name', 'Mailing Address', 'Mailing City', 'Mailing State', 'Mailing Zip', 'Years Owned',
-  'Absentee Owner', 'Vacant', 'Senior Owner', 'Probate', 'Inherited', 'Divorce',
-  'Preforeclosure', 'Foreclosure', 'Lien', 'Tax Delinquent',
-  'Equity', 'Mortgage Balance',
-  'Listing Agent', 'Agent Email', 'Agent Phone', 'Brokerage',
-  'Latitude', 'Longitude',
-];
+const TEMPLATE_HEADERS = ['Address', 'City', 'State', 'Zip', 'County', 'Property Type', 'MLS Number', 'Listing Status', 'List Date', 'Days On Market', 'List Price', 'Estimated Value', 'Beds', 'Baths', 'Building Sqft', 'Lot Size', 'Year Built', 'Remarks', 'Listing URL', 'Owner Name', 'Mailing Address', 'Mailing City', 'Mailing State', 'Mailing Zip', 'Years Owned', 'Absentee Owner', 'Vacant', 'Senior Owner', 'Probate', 'Inherited', 'Divorce', 'Preforeclosure', 'Foreclosure', 'Lien', 'Tax Delinquent', 'Equity', 'Mortgage Balance', 'Listing Agent', 'Agent Email', 'Agent Phone', 'Brokerage', 'Latitude', 'Longitude'];
+
+const BATCH_SIZE = 100;
 
 export default function PropstreamREListingImporter() {
   const navigate = useNavigate();
@@ -278,6 +155,10 @@ export default function PropstreamREListingImporter() {
   const [filename, setFilename] = useState('');
   const [result, setResult] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [batchResults, setBatchResults] = useState([]);
+  const [currentBatchIndex, setCurrentBatchIndex] = useState(0);
+  const [batchId, setBatchId] = useState(null);
+  const [totalBatches, setTotalBatches] = useState(0);
 
   const STORAGE_KEY = 'propstream_re_listing_field_mapping';
 
@@ -298,11 +179,9 @@ export default function PropstreamREListingImporter() {
       skipEmptyLines: true,
       complete: ({ data, meta }) => {
         const headers = meta.fields || [];
-        // Merge: saved mapping takes priority, fill gaps with autoMap
         const saved = loadSavedMapping();
         const auto = autoMap(headers);
         const merged = { ...auto };
-        // Only apply saved mappings if that CSV column still exists in this file
         for (const [field, csvCol] of Object.entries(saved)) {
           if (csvCol && headers.includes(csvCol)) {
             merged[field] = csvCol;
@@ -311,19 +190,116 @@ export default function PropstreamREListingImporter() {
         setCsvData(data);
         setHeaders(headers);
         setMapping(merged);
-        // Skip mapping step — go straight to import with resolved mapping
         setStep('confirm');
       }
     });
   };
 
-  const handleImport = async () => {
-    saveMapping(mapping); // persist for next import
-    setImporting(true);
-    setStep('importing');
+  const startBatchImport = async () => {
+    saveMapping(mapping);
     const listings = csvData.map(row => mapRow(row, mapping));
-    const res = await base44.functions.invoke('importPropstreamCSV', { listings, filename });
-    setResult(res.data);
+    const totalBatches = Math.ceil(listings.length / BATCH_SIZE);
+    setTotalBatches(totalBatches);
+    
+    const initRes = await base44.functions.invoke('initBatchImport', { filename, total_rows: listings.length });
+    setBatchId(initRes.data.batch_id);
+    
+    setStep('batch_import');
+    setCurrentBatchIndex(0);
+    setBatchResults([]);
+    
+    processBatch(listings, 0, totalBatches);
+  };
+
+  const processBatch = async (listings, batchIdx) => {
+    setImporting(true);
+    const start = batchIdx * BATCH_SIZE;
+    const end = Math.min(start + BATCH_SIZE, listings.length);
+    const batchData = listings.slice(start, end);
+    
+    try {
+      const res = await base44.functions.invoke('importBatchChunk', { 
+        batch_id: batchId,
+        listings: batchData,
+        batch_index: batchIdx,
+        total_batches: totalBatches
+      });
+      
+      const batchResult = {
+        batchIndex: batchIdx,
+        imported: res.data.imported,
+        duplicates: res.data.duplicates,
+        errors: res.data.errors,
+        total: end - start
+      };
+      
+      setBatchResults(prev => [...prev, batchResult]);
+      
+      if (end < listings.length) {
+        setCurrentBatchIndex(batchIdx + 1);
+        setImporting(false);
+      } else {
+        const totalImported = batchResults.reduce((sum, r) => sum + r.imported, 0) + res.data.imported;
+        const totalDupes = batchResults.reduce((sum, r) => sum + r.duplicates, 0) + res.data.duplicates;
+        const totalErrors = batchResults.reduce((sum, r) => sum + r.errors, 0) + res.data.errors;
+        
+        setResult({
+          batch_id: batchId,
+          total: listings.length,
+          imported: totalImported,
+          duplicates: totalDupes,
+          errors: totalErrors
+        });
+        setStep('done');
+        setImporting(false);
+      }
+    } catch (error) {
+      alert('Error importing batch: ' + error.message);
+      setImporting(false);
+    }
+  };
+
+  const handleNextBatch = () => {
+    const listings = csvData.map(row => mapRow(row, mapping));
+    processBatch(listings, currentBatchIndex);
+  };
+
+  const handleImportAllRemaining = async () => {
+    const listings = csvData.map(row => mapRow(row, mapping));
+    setImporting(true);
+    
+    for (let i = currentBatchIndex; i < totalBatches; i++) {
+      const start = i * BATCH_SIZE;
+      const end = Math.min(start + BATCH_SIZE, listings.length);
+      const batchData = listings.slice(start, end);
+      
+      const res = await base44.functions.invoke('importBatchChunk', { 
+        batch_id: batchId,
+        listings: batchData,
+        batch_index: i,
+        total_batches: totalBatches
+      });
+      
+      setBatchResults(prev => [...prev, {
+        batchIndex: i,
+        imported: res.data.imported,
+        duplicates: res.data.duplicates,
+        errors: res.data.errors,
+        total: end - start
+      }]);
+    }
+    
+    const totalImported = batchResults.reduce((sum, r) => sum + r.imported, 0) + batchResults.reduce((sum, r) => r.imported, 0);
+    const totalDupes = batchResults.reduce((sum, r) => sum + r.duplicates, 0) + batchResults.reduce((sum, r) => r.duplicates, 0);
+    const totalErrors = batchResults.reduce((sum, r) => sum + r.errors, 0) + batchResults.reduce((sum, r) => r.errors, 0);
+    
+    setResult({
+      batch_id: batchId,
+      total: listings.length,
+      imported: totalImported,
+      duplicates: totalDupes,
+      errors: totalErrors
+    });
     setStep('done');
     setImporting(false);
   };
@@ -335,6 +311,9 @@ export default function PropstreamREListingImporter() {
     setMapping({});
     setResult(null);
     setFilename('');
+    setBatchId(null);
+    setBatchResults([]);
+    setCurrentBatchIndex(0);
     if (fileRef.current) fileRef.current.value = '';
   };
 
@@ -360,17 +339,13 @@ export default function PropstreamREListingImporter() {
 
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-1">PropStream RE Listing Importer</h1>
-        <p className="text-slate-500 text-sm">Import MLS/PropStream CSV exports directly into the RE Listings pipeline. Fields are auto-mapped, scored, deduped, and territory-matched on import.</p>
+        <p className="text-slate-500 text-sm">Import MLS/PropStream CSV exports in batches of 100 records. Review each batch before continuing.</p>
       </div>
 
-      {/* Upload step */}
       {step === 'upload' && (
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <div
-              className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center hover:bg-slate-50 cursor-pointer transition-colors"
-              onClick={() => fileRef.current.click()}
-            >
+            <div className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => fileRef.current.click()}>
               <Upload className="w-10 h-10 mx-auto text-slate-400 mb-3" />
               <p className="font-semibold text-slate-700 mb-1">Drop your PropStream CSV here or click to browse</p>
               <p className="text-xs text-slate-400">Supports all standard PropStream MLS export formats. All fields auto-detected.</p>
@@ -383,22 +358,19 @@ export default function PropstreamREListingImporter() {
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <div className="flex gap-2 mb-2">
                 <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs font-semibold text-blue-700">What happens on import?</p>
+                <p className="text-xs font-semibold text-blue-700">Batch Import Process</p>
               </div>
               <ul className="text-xs text-blue-700 space-y-1 ml-6 list-disc">
-                <li>Duplicate detection by MLS number, PropStream ID, and address</li>
-                <li>Estate sale opportunity scoring (0–100) with label: Low / Moderate / Strong / Priority</li>
-                <li>Geocoding via Google Maps to resolve lat/lng and county (enables micro-territory matching)</li>
-                <li>Auto territory matching by ZIP, city, county, or geocoded coordinates</li>
-                <li>Matched operators pre-assigned based on territory</li>
-                <li>Import batch record created for tracking</li>
+                <li>Records are imported in batches of 100</li>
+                <li>Review each batch results before continuing</li>
+                <li>Or click "Import All Remaining" to process automatically</li>
+                <li>Duplicate detection, scoring, and territory matching included</li>
               </ul>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Confirm step — quick import without reviewing mapping */}
       {step === 'confirm' && (
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -407,6 +379,7 @@ export default function PropstreamREListingImporter() {
               <div>
                 <p className="font-semibold text-slate-800">{csvData?.length} rows ready to import</p>
                 <p className="text-sm text-slate-500">{mappedCount} fields mapped from <span className="font-medium">{filename}</span></p>
+                <p className="text-xs text-slate-400 mt-1">Will be processed in {Math.ceil(csvData?.length / BATCH_SIZE)} batches of {BATCH_SIZE} records</p>
               </div>
             </div>
             {missingRequired.length > 0 && (
@@ -416,22 +389,15 @@ export default function PropstreamREListingImporter() {
               </div>
             )}
             <div className="flex gap-3 pt-2">
-              <Button variant="outline" onClick={() => setStep('mapping')} className="flex-1">
-                Review Mapping
-              </Button>
-              <Button
-                onClick={handleImport}
-                disabled={missingRequired.length > 0}
-                className="flex-1 bg-purple-600 hover:bg-purple-700"
-              >
-                Import {csvData?.length} Listings →
+              <Button variant="outline" onClick={() => setStep('mapping')} className="flex-1">Review Mapping</Button>
+              <Button onClick={startBatchImport} disabled={missingRequired.length > 0} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                Start Batch Import →
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Mapping step */}
       {step === 'mapping' && (
         <Card>
           <CardHeader>
@@ -439,9 +405,7 @@ export default function PropstreamREListingImporter() {
               <CardTitle>Column Mapping — {csvData?.length} rows · {headers.length} columns detected</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge className="bg-green-100 text-green-700">{mappedCount} mapped</Badge>
-                {missingRequired.length > 0 && (
-                  <Badge className="bg-red-100 text-red-700">Missing: {missingRequired.join(', ')}</Badge>
-                )}
+                {missingRequired.length > 0 && <Badge className="bg-red-100 text-red-700">Missing: {missingRequired.join(', ')}</Badge>}
               </div>
             </div>
           </CardHeader>
@@ -453,83 +417,95 @@ export default function PropstreamREListingImporter() {
                   {group.fields.map(field => (
                     <div key={field} className="flex items-center gap-2 text-sm">
                       <span className="w-44 text-slate-700 font-medium shrink-0 text-xs">{field.replace(/_/g, ' ')}</span>
-                      <select
-                        value={mapping[field] || ''}
-                        onChange={e => setMapping(m => ({ ...m, [field]: e.target.value }))}
-                        className="flex-1 border rounded px-2 py-1 text-xs bg-white"
-                      >
+                      <select value={mapping[field] || ''} onChange={e => setMapping(m => ({ ...m, [field]: e.target.value }))} className="flex-1 border rounded px-2 py-1 text-xs bg-white">
                         <option value="">— not mapped —</option>
                         {headers.map(h => <option key={h} value={h}>{h}</option>)}
                       </select>
-                      {mapping[field]
-                        ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                        : <div className="w-4 h-4 shrink-0" />}
+                      {mapping[field] ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" /> : <div className="w-4 h-4 shrink-0" />}
                     </div>
                   ))}
                 </div>
               </div>
             ))}
-
-            {/* Preview */}
-            {csvData?.length > 0 && (
-              <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Preview (first 2 rows)</p>
-                <div className="overflow-x-auto rounded-lg border">
-                  <table className="text-xs w-full min-w-max">
-                    <thead className="bg-slate-50 border-b">
-                      <tr>
-                        {headers.map(h => <th key={h} className="px-3 py-2 text-left font-medium text-slate-500 whitespace-nowrap">{h}</th>)}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {csvData.slice(0, 2).map((row, i) => (
-                        <tr key={i} className="border-b">
-                          {headers.map(h => <td key={h} className="px-3 py-2 truncate max-w-[120px]">{row[h]}</td>)}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
             <div className="flex items-center justify-between pt-2 border-t">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-400 hover:text-slate-600 text-xs"
-                onClick={() => { localStorage.removeItem('propstream_re_listing_field_mapping'); setMapping(autoMap(headers)); }}
-              >
-                Reset to Auto-Detect
-              </Button>
+              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-600 text-xs" onClick={() => { localStorage.removeItem('propstream_re_listing_field_mapping'); setMapping(autoMap(headers)); }}>Reset to Auto-Detect</Button>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={reset}>Cancel</Button>
-                <Button
-                  onClick={handleImport}
-                  disabled={missingRequired.length > 0}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  Import {csvData?.length} Listings
-                </Button>
+                <Button onClick={startBatchImport} disabled={missingRequired.length > 0} className="bg-purple-600 hover:bg-purple-700">Start Batch Import</Button>
               </div>
-              
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Importing step */}
-      {step === 'importing' && (
-        <Card>
-          <CardContent className="py-20 text-center">
-            <Loader className="w-12 h-12 animate-spin mx-auto text-purple-600 mb-4" />
-            <p className="font-semibold text-slate-700 text-lg">Importing, geocoding, deduplicating, scoring, and territory-matching…</p>
-            <p className="text-slate-400 text-sm mt-1">This may take a moment for large files.</p>
-          </CardContent>
-        </Card>
+      {step === 'batch_import' && (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="py-12 text-center">
+              {importing ? (
+                <>
+                  <Loader className="w-12 h-12 animate-spin mx-auto text-purple-600 mb-4" />
+                  <p className="font-semibold text-slate-700 text-lg">Importing batch {currentBatchIndex + 1} of {totalBatches}...</p>
+                  <p className="text-slate-400 text-sm mt-1">Processing records {currentBatchIndex * BATCH_SIZE + 1} to {Math.min((currentBatchIndex + 1) * BATCH_SIZE, csvData?.length || 0)}</p>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-4" />
+                  <p className="font-semibold text-slate-700 text-lg mb-2">Batch {currentBatchIndex} Complete!</p>
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    {batchResults[batchResults.length - 1] && (
+                      <>
+                        <div className="bg-green-50 rounded-lg p-3">
+                          <p className="text-xs text-slate-500">Imported</p>
+                          <p className="text-2xl font-bold text-green-600">{batchResults[batchResults.length - 1].imported}</p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-3">
+                          <p className="text-xs text-slate-500">Duplicates</p>
+                          <p className="text-2xl font-bold text-yellow-600">{batchResults[batchResults.length - 1].duplicates}</p>
+                        </div>
+                        <div className="bg-red-50 rounded-lg p-3">
+                          <p className="text-xs text-slate-500">Errors</p>
+                          <p className="text-2xl font-bold text-red-600">{batchResults[batchResults.length - 1].errors}</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-600 mb-4">Batch {currentBatchIndex + 1} of {totalBatches} ready to process</p>
+                  <div className="flex gap-3 max-w-md mx-auto">
+                    <Button onClick={handleNextBatch} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                      Import Next Batch →
+                    </Button>
+                    <Button onClick={handleImportAllRemaining} variant="outline" className="flex-1">
+                      Import All Remaining
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {batchResults.length > 0 && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-sm mb-3">Batch History</h3>
+                <div className="space-y-2 max-h-64 overflow-auto">
+                  {batchResults.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 bg-slate-50 rounded text-xs">
+                      <span>Batch {r.batchIndex + 1}</span>
+                      <div className="flex gap-3">
+                        <span className="text-green-600 font-medium">{r.imported} imported</span>
+                        <span className="text-yellow-600">{r.duplicates} dupes</span>
+                        <span className="text-red-600">{r.errors} errors</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
-      {/* Done step */}
       {step === 'done' && result && (
         <div className="space-y-4">
           <Card className={result.imported > 0 ? 'border-green-200' : 'border-yellow-200'}>
@@ -558,9 +534,7 @@ export default function PropstreamREListingImporter() {
           </Card>
           <div className="flex gap-3">
             <Button variant="outline" onClick={reset} className="flex-1">Import Another File</Button>
-            <Button onClick={() => navigate('/PropstreamREListings')} className="flex-1 bg-purple-600 hover:bg-purple-700">
-              View RE Listings →
-            </Button>
+            <Button onClick={() => navigate('/PropstreamREListings')} className="flex-1 bg-purple-600 hover:bg-purple-700">View RE Listings →</Button>
           </div>
         </div>
       )}
