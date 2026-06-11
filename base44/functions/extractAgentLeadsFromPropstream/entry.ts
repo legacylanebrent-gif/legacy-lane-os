@@ -9,8 +9,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
-    // Fetch all PropstreamREListing records
-    const listings = await base44.asServiceRole.entities.PropstreamREListing.list('-imported_date', 1000);
+    // Fetch all PropstreamREListing records (no limit)
+    const listings = await base44.asServiceRole.entities.PropstreamREListing.list('-imported_date', 100000);
     
     if (listings.length === 0) {
       return Response.json({ 
