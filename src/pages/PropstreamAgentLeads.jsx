@@ -245,19 +245,15 @@ export default function PropstreamAgentLeads() {
         batchNum++;
       }
       
-      // Extraction complete
+      // Extraction complete - modal will show complete status, user closes manually
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
-      setExtractDialogOpen(false);
-      alert(`Extraction complete!\n\n` +
-        `Total agents created: ${totals.totalCreated}\n` +
-        `Total agents updated: ${totals.totalUpdated}\n` +
-        `Total listings processed: ${totals.totalProcessed}\n` +
-        `Batches completed: ${batchNum}`
-      );
+      setExtractingAgents(false);
+      setListingStats(null);
     } catch (error) {
       alert('Error during extraction: ' + error.message);
       setExtractingAgents(false);
       setExtractionProgress(null);
+      setListingStats(null);
     }
   };
 
@@ -300,18 +296,12 @@ export default function PropstreamAgentLeads() {
         batchNum++;
       }
       
-      // Extraction complete
+      // Extraction complete - modal shows complete status, user closes manually
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
-      setExtractDialogOpen(false);
-      alert(`Extraction complete!\n\n` +
-        `Total agents created: ${totals.totalCreated}\n` +
-        `Total agents updated: ${totals.totalUpdated}\n` +
-        `Total listings processed: ${totals.totalProcessed}\n` +
-        `Batches completed: ${batchNum}`
-      );
+      setExtractingAgents(false);
+      setListingStats(null);
     } catch (error) {
       alert('Error during extraction: ' + error.message);
-    } finally {
       setExtractingAgents(false);
       setExtractionProgress(null);
       setListingStats(null);
