@@ -876,6 +876,18 @@ export default function PropstreamAgentLeads() {
             </DialogDescription>
           </DialogHeader>
 
+          {extractionProgress && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <div className="text-xs font-mono text-amber-900">
+                <div className="font-semibold mb-1">Debug Info:</div>
+                <div>Batch: {extractionProgress.currentBatch} / {extractionProgress.totalBatches || '?'}</div>
+                <div>Created: {extractionProgress.totalCreated} | Updated: {extractionProgress.totalUpdated}</div>
+                <div>Processed: {extractionProgress.totalProcessed}</div>
+                <div>Status: {extractionProgress.status}</div>
+              </div>
+            </div>
+          )}
+
           {fetchingStats ? (
             <div className="py-8 text-center">
               <RefreshCw className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
