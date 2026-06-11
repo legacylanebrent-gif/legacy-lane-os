@@ -122,6 +122,7 @@ import ResellerPackupEvents from './pages/ResellerPackupEvents';
 import AdminCentralRepository from './pages/AdminCentralRepository';
 import LandingPageBizInABox from './pages/LandingPageBizInABox';
 import LaunchCommandCenter from './pages/LaunchCommandCenter';
+import NotificationAnalytics from './pages/NotificationAnalytics';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -305,6 +306,7 @@ const AuthenticatedApp = () => {
       <Route path="/ResellerPackupEventEditor" element={<LayoutWrapper currentPageName="ResellerPackupEventEditor"><ResellerPackupEventEditor /></LayoutWrapper>} />
       <Route path="/ResellerPackupEvents" element={<LayoutWrapper currentPageName="ResellerPackupEvents"><ResellerPackupEvents /></LayoutWrapper>} />
       <Route path="/AdminCentralRepository" element={<LayoutWrapper currentPageName="AdminCentralRepository"><AdminCentralRepository /></LayoutWrapper>} />
+      <Route path="/NotificationAnalytics" element={<LayoutWrapper currentPageName="NotificationAnalytics"><NotificationAnalytics /></LayoutWrapper>} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 
