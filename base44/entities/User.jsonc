@@ -16,13 +16,15 @@
         "consumer",
         "estate_sale_operator",
         "real_estate_agent",
-        "vendor"
+        "vendor",
+        "reseller",
+        "agent_operator"
       ],
-      "default": "consumer"
+      "default": "consumer",
+      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Operator role."
     },
     "business_name": {
-      "type": "string",
-      "description": "Optional business name for resellers and operators"
+      "type": "string"
     },
     "address_street": {
       "type": "string"
@@ -262,6 +264,50 @@
       },
       "default": [],
       "description": "Human-readable micro-territory names"
+    },
+    "reseller_application_submitted": {
+      "type": "boolean",
+      "default": false
+    },
+    "reseller_application_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reseller_business_type": {
+      "type": "string"
+    },
+    "reseller_inventory_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "reseller_min_purchase": {
+      "type": "string"
+    },
+    "reseller_max_purchase": {
+      "type": "string"
+    },
+    "reseller_buys_whole_house": {
+      "type": "boolean",
+      "default": false
+    },
+    "vendor_service_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "agent_operator_upgrade_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When user upgraded to the combined agent+operator role"
+    },
+    "previous_account_type": {
+      "type": "string",
+      "description": "The role they held before upgrading to agent_operator"
     }
   },
   "required": []

@@ -290,8 +290,9 @@ export default function MyProfile() {
   const acct = user?.primary_account_type || 'consumer';
   const isConsumer = ['consumer','executor','home_seller','buyer','downsizer','diy_seller','consignor'].includes(acct) || !acct;
   const isReseller = acct === 'reseller';
-  const isOperator = acct === 'estate_sale_operator';
-  const isAgent = acct === 'real_estate_agent';
+  const isAgentOperator = acct === 'agent_operator';
+  const isOperator = acct === 'estate_sale_operator' || isAgentOperator;
+  const isAgent = acct === 'real_estate_agent' || isAgentOperator;
   const isVendor = acct === 'vendor';
 
   return (
@@ -306,8 +307,8 @@ export default function MyProfile() {
           }
         </p>
         {!isConsumer && (
-          <span className="inline-block mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full capitalize">
-            {acct.replace(/_/g, ' ')}
+          <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full capitalize ${isAgentOperator ? 'bg-gradient-to-r from-orange-100 to-cyan-100 text-slate-800 border border-orange-300' : 'bg-orange-100 text-orange-700'}`}>
+            {isAgentOperator ? '⚡ Agent + Operator' : acct.replace(/_/g, ' ')}
           </span>
         )}
       </div>
@@ -319,7 +320,7 @@ export default function MyProfile() {
           <TabsTrigger value="estate_sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Estate Sales</TabsTrigger>
           {/* ── Role-specific tabs ── */}
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
-            {isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
+            {isAgentOperator ? 'Business Profile' : isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
           </TabsTrigger>}
           {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Service Area</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services</TabsTrigger>}
@@ -422,6 +423,60 @@ export default function MyProfile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* ── Agent + Operator Upgrade CTA ── */}
+          {(isOperator && !isAgentOperator) && (
+            <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 border border-orange-200 rounded-xl">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-800 mb-1">Are you also a Real Estate Agent?</h3>
+                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Operator</strong> role to unlock RE listing pipeline, referral deal management, agent partnerships, and a bundled subscription — all in one account.</p>
+                <Button size="sm" className="bg-gradient-to-r from-orange-500 to-cyan-600 hover:from-orange-600 hover:to-cyan-700 text-white gap-2"
+                  onClick={async () => {
+                    if (!window.confirm('Upgrade to the combined Agent + Operator role? This unlocks all features from both roles. Contact support to adjust pricing.')) return;
+                    await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                    await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
+                    alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
+                  }}>
+                  <Users className="w-4 h-4" /> Upgrade to Agent + Operator
+                </Button>
+              </div>
+            </div>
+          )}
+          {(isAgent && !isAgentOperator && acct !== 'estate_sale_operator') && (
+            <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-cyan-50 to-orange-50 border border-cyan-200 rounded-xl">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-800 mb-1">Do you also run an estate sale company?</h3>
+                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Operator</strong> role to run estate sales, manage inventory, accept bookings, and keep your agent tools — all under one subscription.</p>
+                <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-orange-600 hover:from-cyan-600 hover:to-orange-700 text-white gap-2"
+                  onClick={async () => {
+                    if (!window.confirm('Upgrade to the combined Agent + Operator role? This unlocks all estate sale operator features while keeping your agent tools.')) return;
+                    await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                    await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
+                    alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
+                  }}>
+                  <Building2 className="w-4 h-4" /> Upgrade to Agent + Operator
+                </Button>
+              </div>
+            </div>
+          )}
+          {isAgentOperator && (
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 border border-orange-300 rounded-xl">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Users className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 text-sm">⚡ Agent + Operator — Combined Role Active</p>
+                <p className="text-xs text-slate-600">You have full access to both estate sale operator and real estate agent tools under one account.</p>
+              </div>
+              <Badge className="ml-auto bg-gradient-to-r from-orange-500 to-cyan-500 text-white border-0">Active</Badge>
+            </div>
+          )}
 
           {/* Reseller Application — show based on state */}
           {acct === 'reseller' ? (
