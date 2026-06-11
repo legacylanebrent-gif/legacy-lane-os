@@ -83,10 +83,27 @@ export default function PropstreamAgentLeads() {
   const [currentBatch, setCurrentBatch] = useState(1);
   const [totalBatches, setTotalBatches] = useState(1);
   const [statusMessage, setStatusMessage] = useState('');
+  const [lastResponse, setLastResponse] = useState(null);
   const continueRef = React.useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [agentFilter, setAgentFilter] = useState('');
+  const [sortColumn, setSortColumn] = useState('created_date');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const SortIcon = ({ column }) => {
+    if (sortColumn !== column) return <span className="w-4 h-4 ml-1 opacity-20 inline-block">↕</span>;
+    return <span className="w-4 h-4 ml-1 inline-block">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
+  };
 
   const queryClient = useQueryClient();
 
@@ -202,7 +219,9 @@ export default function PropstreamAgentLeads() {
         batch_size: 100
       });
       
-      const result = response.data || response;
+      const result = response?.data || response;
+      
+      setLastResponse(result);
       
       if (!result) {
         throw new Error('Backend function returned no result');
@@ -360,6 +379,15 @@ export default function PropstreamAgentLeads() {
     const matchesTerritory = territoryFilter === 'all' || !lead.territory_name || lead.territory_name === territoryFilter;
     
     return matchesSearch && matchesStatus && matchesPriority && matchesState && matchesTerritory;
+  }).sort((a, b) => {
+    const aVal = a[sortColumn] || '';
+    const bVal = b[sortColumn] || '';
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
+      return (aVal - bVal) * direction;
+    }
+    return String(aVal).localeCompare(String(bVal)) * direction;
   });
 
   const uniqueStates = [...new Set(leads.map(l => l.brokerage_state).filter(Boolean))].sort();
@@ -619,13 +647,48 @@ export default function PropstreamAgentLeads() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-200">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Agent</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Brokerage</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">State</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Territory</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Listings</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Status</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Priority</th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('agent_name')}
+                      >
+                        Agent <SortIcon column="agent_name" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('brokerage_name')}
+                      >
+                        Brokerage <SortIcon column="brokerage_name" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('brokerage_state')}
+                      >
+                        State <SortIcon column="brokerage_state" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('territory_name')}
+                      >
+                        Territory <SortIcon column="territory_name" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('listing_count')}
+                      >
+                        Listings <SortIcon column="listing_count" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('lead_status')}
+                      >
+                        Status <SortIcon column="lead_status" />
+                      </th>
+                      <th 
+                        className="text-left py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
+                        onClick={() => handleSort('priority')}
+                      >
+                        Priority <SortIcon column="priority" />
+                      </th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Actions</th>
                     </tr>
                   </thead>
