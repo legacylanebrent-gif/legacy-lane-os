@@ -5,7 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
+import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2, Info } from 'lucide-react';
 
 const STATUS_COLORS = {
   awaiting_approval: 'bg-amber-100 text-amber-700 border-amber-300',
@@ -29,6 +32,119 @@ const AGENT_CONFIGS = [
   { id: 'quality_assurance_agent', name: 'Quality Assurance Agent', icon: CheckCircle2, color: 'text-amber-600', bg: 'bg-amber-50', domain: 'QA & Compliance' },
 ];
 
+const AGENT_DESCRIPTIONS = {
+  onboarding_agent: {
+    purpose: 'Guides new users through platform onboarding',
+    responsibilities: [
+      'Analyzes new user registration and account setup',
+      'Generates personalized onboarding recommendations',
+      'Creates targeted tasks to help users discover key features',
+      'Tracks onboarding progress and engagement metrics',
+      'Triggers follow-up sequences for inactive users'
+    ],
+    impact: 'Improves user activation rates and time-to-first-value'
+  },
+  admin_ops_agent: {
+    purpose: 'Automates platform operations and administrative workflows',
+    responsibilities: [
+      'Monitors system health and performance metrics',
+      'Generates operational reports and insights',
+      'Identifies automation opportunities',
+      'Manages admin task queues and priorities',
+      'Coordinates multi-agent execution chains'
+    ],
+    impact: 'Reduces manual admin workload and improves operational efficiency'
+  },
+  relationship_coach: {
+    purpose: 'Manages and strengthens business partnerships',
+    responsibilities: [
+      'Analyzes relationship health scores across connections',
+      'Identifies at-risk partnerships needing attention',
+      'Generates personalized outreach recommendations',
+      'Tracks engagement patterns and response rates',
+      'Suggests strategic partnership growth opportunities'
+    ],
+    impact: 'Increases partnership retention and referral quality'
+  },
+  marketing_autopilot_agent: {
+    purpose: 'Autonomous social media and content marketing',
+    responsibilities: [
+      'Generates and schedules social media content calendars',
+      'Creates targeted Facebook and Instagram ad campaigns',
+      'Analyzes campaign performance and optimizes spend',
+      'Produces territory-specific promotional posts',
+      'Manages A/B testing for ad creatives and copy'
+    ],
+    impact: 'Drives consistent lead flow with minimal manual intervention'
+  },
+  lead_conversion_agent: {
+    purpose: 'Optimizes lead routing and conversion workflows',
+    responsibilities: [
+      'Scores incoming leads based on fit and intent signals',
+      'Routes leads to optimal operators or agents',
+      'Generates personalized outreach sequences',
+      'Tracks conversion funnel performance',
+      'Identifies bottlenecks in lead handling'
+    ],
+    impact: 'Maximizes lead-to-deal conversion rates'
+  },
+  inventory_pricing_agent: {
+    purpose: 'Intelligent item pricing and valuation',
+    responsibilities: [
+      'Researches comparable sales across marketplaces',
+      'Generates data-driven pricing recommendations',
+      'Monitors market trends and demand signals',
+      'Updates pricing based on sale performance',
+      'Identifies high-value items needing expert review'
+    ],
+    impact: 'Optimizes sale revenue through strategic pricing'
+  },
+  customer_success_agent: {
+    purpose: 'Proactive user support and satisfaction',
+    responsibilities: [
+      'Monitors user activity for potential issues',
+      'Generates proactive check-in messages',
+      'Routes support tickets to appropriate teams',
+      'Tracks customer satisfaction metrics',
+      'Identifies users needing additional training or resources'
+    ],
+    impact: 'Improves customer retention and reduces churn'
+  },
+  content_seo_agent: {
+    purpose: 'Automated SEO content generation and optimization',
+    responsibilities: [
+      'Generates SEO-optimized estate sale pages',
+      'Creates location-based content hubs (state/county/city)',
+      'Produces educational articles for life transition topics',
+      'Builds item knowledge authority pages',
+      'Manages sitemap and search console submissions'
+    ],
+    impact: 'Drives organic traffic growth through search visibility'
+  },
+  financial_ops_agent: {
+    purpose: 'Financial tracking and commission management',
+    responsibilities: [
+      'Tracks operator wallet balances and transactions',
+      'Processes commission calculations and payouts',
+      'Monitors referral fee agreements',
+      'Generates financial performance reports',
+      'Identifies revenue optimization opportunities'
+    ],
+    impact: 'Ensures accurate financial operations and timely payouts'
+  },
+  quality_assurance_agent: {
+    purpose: 'Platform compliance and content quality',
+    responsibilities: [
+      'Reviews auto-generated content for accuracy',
+      'Validates data integrity across entities',
+      'Flags potential policy violations',
+      'Audits agent performance and outputs',
+      'Maintains content quality standards'
+    ],
+    impact: 'Maintains platform trust and data reliability'
+  }
+};
+
 export default function SuperAgentCommandCenter() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +152,8 @@ export default function SuperAgentCommandCenter() {
   const [agentStats, setAgentStats] = useState({});
   const [recentRuns, setRecentRuns] = useState([]);
   const [recentAgentRuns, setRecentAgentRuns] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -73,6 +191,11 @@ export default function SuperAgentCommandCenter() {
       setAgentStats(stats);
     } catch (_) {}
     setRefreshing(false);
+  };
+
+  const handleInfoClick = (agent) => {
+    setSelectedAgent(agent);
+    setInfoModalOpen(true);
   };
 
   if (loading) return (
@@ -194,9 +317,19 @@ export default function SuperAgentCommandCenter() {
                             <p className="text-xs text-slate-500">{agent.domain}</p>
                           </div>
                         </div>
-                        <Badge className={`text-xs ${isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                          {isActive ? 'Active' : 'Idle'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs ${isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                            {isActive ? 'Active' : 'Idle'}
+                          </Badge>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 text-slate-400 hover:text-amber-600"
+                            onClick={() => handleInfoClick(agent)}
+                          >
+                            <Info className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -319,6 +452,74 @@ export default function SuperAgentCommandCenter() {
             )}
           </CardContent>
         </Card>
+
+        {/* Agent Info Modal */}
+        <Dialog open={infoModalOpen} onOpenChange={setInfoModalOpen}>
+          <DialogContent className="max-w-2xl">
+            {selectedAgent && AGENT_DESCRIPTIONS[selectedAgent.id] && (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-12 h-12 rounded-lg ${selectedAgent.bg} border border-slate-200 flex items-center justify-center`}>
+                      <selectedAgent.icon className={`w-6 h-6 ${selectedAgent.color}`} />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-bold text-slate-800">
+                        {selectedAgent.name}
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-slate-500">
+                        {selectedAgent.domain}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-amber-600" />
+                      Purpose
+                    </h4>
+                    <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      {AGENT_DESCRIPTIONS[selectedAgent.id].purpose}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                      Key Responsibilities
+                    </h4>
+                    <ul className="space-y-2">
+                      {AGENT_DESCRIPTIONS[selectedAgent.id].responsibilities.map((resp, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
+                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span>{resp}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-amber-600" />
+                      Business Impact
+                    </h4>
+                    <p className="text-sm text-slate-600 bg-green-50 p-3 rounded-lg border border-green-100">
+                      {AGENT_DESCRIPTIONS[selectedAgent.id].impact}
+                    </p>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button onClick={() => setInfoModalOpen(false)} className="bg-amber-600 hover:bg-amber-700">
+                    Got it
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
