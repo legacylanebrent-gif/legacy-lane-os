@@ -39,7 +39,8 @@ import {
   Eye,
   Edit,
   MessageSquare,
-  UserCheck
+  UserCheck,
+  Download
 } from 'lucide-react';
 import { isAdminUser } from '@/lib/isAdminUser';
 
@@ -69,6 +70,7 @@ export default function PropstreamAgentLeads() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [notes, setNotes] = useState('');
+  const [extractingAgents, setExtractingAgents] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -135,6 +137,19 @@ export default function PropstreamAgentLeads() {
     setNotesModalOpen(true);
   };
 
+  const handleExtractAgents = async () => {
+    setExtractingAgents(true);
+    try {
+      const result = await base44.functions.invoke('extractAgentLeadsFromPropstream');
+      queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
+      alert(`Agent leads extracted successfully!\n\n${result.agents_created} new agents created\n${result.agents_updated} existing agents updated\nTotal listings processed: ${result.total_listings_processed}`);
+    } catch (error) {
+      alert('Error extracting agents: ' + error.message);
+    } finally {
+      setExtractingAgents(false);
+    }
+  };
+
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = 
       lead.agent_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -181,10 +196,26 @@ export default function PropstreamAgentLeads() {
               <p className="text-sm text-slate-500 mt-0.5">Manage real estate agent partnerships from MLS listings</p>
             </div>
           </div>
-          <Button size="sm" variant="outline" className="gap-2" onClick={() => queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] })}>
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="gap-2 text-blue-600 hover:text-blue-700" 
+              onClick={handleExtractAgents}
+              disabled={extractingAgents}
+            >
+              {extractingAgents ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Extract from PropStream
+            </Button>
+            <Button size="sm" variant="outline" className="gap-2" onClick={() => queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] })}>
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
 
