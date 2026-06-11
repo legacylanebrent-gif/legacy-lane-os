@@ -103,6 +103,11 @@ Deno.serve(async (req) => {
           total_volume: agentData.total_volume,
           property_addresses: agentData.property_addresses,
           propstream_listing_ids: agentData.propstream_listing_ids,
+          territory_name: agentData.territory_name,
+          territory_id: agentData.territory_id,
+          state: agentData.state,
+          county: agentData.county,
+          brokerage_state: agentData.brokerage_state,
           last_updated_date: new Date().toISOString(),
         });
         updated++;
