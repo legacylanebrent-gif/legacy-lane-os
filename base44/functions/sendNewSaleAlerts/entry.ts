@@ -28,12 +28,16 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const payload = await req.json().catch(() => ({}));
-    const { sale_id } = payload;
+    
+    // Handle both direct calls (sale_id) and entity automation triggers (event.entity_id)
+    const sale_id = payload.sale_id || payload.event?.entity_id;
+
+    if (!sale_id) {
+      return Response.json({ error: 'sale_id required', payload }, { status: 400 });
+    }
 
     // Use service role for this automation-triggered function
-    const sale = sale_id
-      ? (await base44.asServiceRole.entities.EstateSale.list()).find(s => s.id === sale_id)
-      : null;
+    const sale = await base44.asServiceRole.entities.EstateSale.get(sale_id);
 
     if (!sale) {
       return Response.json({ error: 'Sale not found', sale_id }, { status: 400 });
