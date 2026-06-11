@@ -75,6 +75,7 @@ export default function PropstreamAgentLeads() {
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [notes, setNotes] = useState('');
   const [extractingAgents, setExtractingAgents] = useState(false);
+  const [backfillingData, setBackfillingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
@@ -149,10 +150,21 @@ export default function PropstreamAgentLeads() {
       const result = await base44.functions.invoke('extractAgentLeadsFromPropstream');
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
       alert(`Agent leads extracted successfully!\n\n${result.agents_created} new agents created\n${result.agents_updated} existing agents updated\nTotal listings processed: ${result.total_listings_processed}`);
-    } catch (error) {
-      alert('Error extracting agents: ' + error.message);
     } finally {
       setExtractingAgents(false);
+    }
+  };
+
+  const handleBackfillTerritoryData = async () => {
+    setBackfillingData(true);
+    try {
+      const result = await base44.functions.invoke('backfillAgentTerritoryData');
+      queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
+      alert(`Territory data backfilled successfully!\n\n${result.updated_count} agents updated with territory/state data\nTotal agents processed: ${result.total_agents}`);
+    } catch (error) {
+      alert('Error backfilling territory data: ' + error.message);
+    } finally {
+      setBackfillingData(false);
     }
   };
 
@@ -239,6 +251,20 @@ export default function PropstreamAgentLeads() {
                 <Download className="w-4 h-4" />
               )}
               Extract from PropStream
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="gap-2 text-green-600 hover:text-green-700" 
+              onClick={handleBackfillTerritoryData}
+              disabled={backfillingData}
+            >
+              {backfillingData ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+              Backfill Territory Data
             </Button>
             <Button size="sm" variant="outline" className="gap-2" onClick={() => queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] })}>
               <RefreshCw className="w-4 h-4" />

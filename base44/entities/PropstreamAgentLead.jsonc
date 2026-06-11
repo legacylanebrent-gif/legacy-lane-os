@@ -38,6 +38,22 @@
       "type": "string",
       "description": "Brokerage ZIP code"
     },
+    "territory_name": {
+      "type": "string",
+      "description": "Territory name from PropStream data"
+    },
+    "territory_id": {
+      "type": "string",
+      "description": "Territory ID from PropStream data"
+    },
+    "state": {
+      "type": "string",
+      "description": "State where the property is located"
+    },
+    "county": {
+      "type": "string",
+      "description": "County where the property is located"
+    },
     "listing_count": {
       "type": "integer",
       "default": 1,
