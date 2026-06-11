@@ -19,39 +19,72 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Extract unique agents from listings
+    // Extract unique agents from listings using email OR phone as unique identifier
     const agentMap = new Map();
+    const emailToAgentKey = new Map();
+    const phoneToAgentKey = new Map();
 
     listings.forEach(listing => {
-      // Extract agent data from listing
-      const agentKey = `${listing.listing_agent_name || ''}-${listing.listing_agent_email || ''}`.toLowerCase();
+      const agentName = listing.listing_agent_name;
+      const agentEmail = listing.listing_agent_email?.toLowerCase().trim();
+      const agentPhone = listing.listing_agent_phone?.replace(/[^0-9]/g, '');
       
-      if (!agentKey || !listing.listing_agent_name) return;
+      if (!agentName) return;
+
+      // Try to find existing agent by email or phone
+      let agentKey = null;
+      
+      // Priority 1: Match by email
+      if (agentEmail && emailToAgentKey.has(agentEmail)) {
+        agentKey = emailToAgentKey.get(agentEmail);
+      }
+      // Priority 2: Match by phone
+      else if (agentPhone && phoneToAgentKey.has(agentPhone)) {
+        agentKey = phoneToAgentKey.get(agentPhone);
+        // If this listing has an email, also map it
+        if (agentEmail) emailToAgentKey.set(agentEmail, agentKey);
+      }
+      // Priority 3: Create new agent using name-email or name-phone
+      else {
+        agentKey = agentEmail 
+          ? `email:${agentEmail}`
+          : agentPhone 
+            ? `phone:${agentPhone}`
+            : `name:${agentName.toLowerCase()}`;
+        
+        if (agentEmail) emailToAgentKey.set(agentEmail, agentKey);
+        if (agentPhone) phoneToAgentKey.set(agentPhone, agentKey);
+      }
 
       const existing = agentMap.get(agentKey);
       
       if (existing) {
-        // Update existing agent record
+        // Update existing agent record - aggregate all listings
         existing.listing_count += 1;
         existing.total_volume += listing.estimated_value || 0;
-        if (listing.property_address) {
+        if (listing.property_address && !existing.property_addresses.includes(listing.property_address)) {
           existing.property_addresses.push(listing.property_address);
         }
-        if (listing.id) {
+        if (listing.id && !existing.propstream_listing_ids.includes(listing.id)) {
           existing.propstream_listing_ids.push(listing.id);
         }
+        // Update contact info if we have better data
+        if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
+        if (!existing.agent_phone && agentPhone) existing.agent_phone = agentPhone;
+        if (!existing.agent_license && listing.listing_agent_license) existing.agent_license = listing.listing_agent_license;
+        if (!existing.brokerage_name && listing.brokerage_name) existing.brokerage_name = listing.brokerage_name;
       } else {
         // Create new agent record
         agentMap.set(agentKey, {
-          agent_name: listing.listing_agent_name,
-          agent_email: listing.listing_agent_email,
-          agent_phone: listing.listing_agent_phone,
-          agent_license: listing.listing_agent_license,
-          brokerage_name: listing.brokerage_name,
-          brokerage_address: listing.brokerage_address,
-          brokerage_city: listing.brokerage_city,
-          brokerage_state: listing.brokerage_state,
-          brokerage_zip: listing.brokerage_zip,
+          agent_name: agentName,
+          agent_email: agentEmail || null,
+          agent_phone: agentPhone || null,
+          agent_license: listing.listing_agent_license || null,
+          brokerage_name: listing.brokerage_name || null,
+          brokerage_address: listing.brokerage_address || null,
+          brokerage_city: listing.brokerage_city || null,
+          brokerage_state: listing.brokerage_state || null,
+          brokerage_zip: listing.brokerage_zip || null,
           territory_name: listing.territory_name || null,
           territory_id: listing.territory_id || null,
           state: listing.state || null,
