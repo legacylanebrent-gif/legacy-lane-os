@@ -24,49 +24,31 @@ Deno.serve(async (req) => {
       console.log('[syncHousioTerritories] No JSON body provided, using defaults');
     }
 
-    const { batch_type = 'territories', offset = 0, limit = 100, clear_first = false } = params;
+    // write_offset/write_limit slice which records to write this call (Housio API returns all at once)
+    const { batch_type = 'territories', write_offset = 0, write_limit = 250 } = params;
 
-    // Validate parameters
-    const safeOffset = Math.max(0, parseInt(offset) || 0);
-    const safeLimit = Math.min(100, Math.max(1, parseInt(limit) || 100));
+    const safeWriteOffset = Math.max(0, parseInt(write_offset) || 0);
+    const safeWriteLimit = Math.min(300, Math.max(1, parseInt(write_limit) || 250));
 
-    console.log(`[syncHousioTerritories] Batch sync: ${batch_type}, offset=${safeOffset}, limit=${safeLimit}`);
+    console.log(`[syncHousioTerritories] Syncing ${batch_type}, write_offset=${safeWriteOffset}, write_limit=${safeWriteLimit}`);
 
-    // Clear existing data if requested (only on first batch)
-    if (clear_first && safeOffset === 0) {
-      console.log('[syncHousioTerritories] Clearing existing data...');
-      const existingTerritories = await base44.asServiceRole.entities.HousioTerritory.filter({});
-      const existingMicro = await base44.asServiceRole.entities.HousioMicroTerritory.filter({});
-      
-      for (const t of existingTerritories) {
-        await base44.asServiceRole.entities.HousioTerritory.delete(t.id);
-      }
-      for (const m of existingMicro) {
-        await base44.asServiceRole.entities.HousioMicroTerritory.delete(m.id);
-      }
-      console.log(`[syncHousioTerritories] Cleared ${existingTerritories.length} territories and ${existingMicro.length} micro-territories`);
-    }
-
-    // Fetch batch based on type
+    // Fetch ALL from Housio (no server-side pagination)
     const action = batch_type === 'micro' ? 'micro_list' : 'list';
     const apiRes = await fetch(TERRITORIES_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-      body: JSON.stringify({ action, offset: safeOffset, limit: safeLimit }),
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+      body: JSON.stringify({ action, offset: 0, limit: 9999 }),
     });
 
-    if (!apiRes.ok) {
-      throw new Error(`Housio API error: ${apiRes.status}`);
-    }
+    if (!apiRes.ok) throw new Error(`Housio API error: ${apiRes.status}`);
 
     const data = await apiRes.json();
-    const items = batch_type === 'micro' ? (data.micro_territories || []) : (data.territories || []);
-    const total = data.total || items.length;
+    const allItems = batch_type === 'micro' ? (data.micro_territories || []) : (data.territories || []);
+    const total = allItems.length;
 
-    console.log(`[syncHousioTerritories] Fetched ${items.length} items (total: ${total})`);
+    // Take just the slice we need this call
+    const items = allItems.slice(safeWriteOffset, safeWriteOffset + safeWriteLimit);
+    console.log(`[syncHousioTerritories] Total from Housio: ${total}, writing slice ${safeWriteOffset}-${safeWriteOffset + items.length}`);
 
     // Map to entities
     const now = new Date().toISOString();
@@ -75,7 +57,7 @@ Deno.serve(async (req) => {
         const cities = item.cities || [];
         const cityList = cities.map(c => typeof c === 'string' ? c : c.name).filter(Boolean);
         return {
-          micro_territory_id: item.micro_territory_id || `${item.state}-${item.county}-${Date.now()}-${Math.random()}`,
+          micro_territory_id: item.micro_territory_id || `${item.state}-${item.county}-${safeWriteOffset}-${Math.random()}`,
           territory_id: item.territory_id || `${item.state}-${item.county}`,
           state: item.state,
           county: item.county,
@@ -84,35 +66,40 @@ Deno.serve(async (req) => {
         };
       } else {
         return {
-          territory_id: item.territory_id || item.id || `${item.state}-${Date.now()}-${Math.random()}`,
+          territory_id: item.territory_id || item.id || `${item.state}-${safeWriteOffset}-${Math.random()}`,
           state: item.state,
           state_name: item.state_name || item.state,
           county: item.county || item.name || null,
           county_fips: item.county_fips || null,
           zip_codes_json: item.zip_codes || [],
           synced_at: now,
-          is_active: item.is_active ?? item.status === 'ACTIVE' ?? true,
+          is_active: item.is_active ?? true,
         };
       }
     });
 
-    // Bulk create records
+    // Write in chunks of 25 to avoid rate limits
     if (records.length > 0) {
       const entityName = batch_type === 'micro' ? 'HousioMicroTerritory' : 'HousioTerritory';
-      const createResult = await base44.asServiceRole.entities[entityName].bulkCreate(records);
-      console.log(`[syncHousioTerritories] Created ${records.length} ${entityName} records`, createResult);
+      const CHUNK_SIZE = 25;
+      for (let i = 0; i < records.length; i += CHUNK_SIZE) {
+        const chunk = records.slice(i, i + CHUNK_SIZE);
+        await base44.asServiceRole.entities[entityName].bulkCreate(chunk);
+        if (i + CHUNK_SIZE < records.length) await new Promise(r => setTimeout(r, 200));
+      }
+      console.log(`[syncHousioTerritories] Wrote ${records.length} ${entityName} records`);
     }
 
-    const nextOffset = safeOffset + records.length;
-    const hasMore = nextOffset < total;
+    const nextWriteOffset = safeWriteOffset + records.length;
+    const hasMore = nextWriteOffset < total;
 
     return Response.json({
       success: true,
       batch_type,
       synced_count: records.length,
-      total_count: total,
-      offset: safeOffset,
-      next_offset: hasMore ? nextOffset : null,
+      total_available: total,
+      write_offset: safeWriteOffset,
+      next_write_offset: hasMore ? nextWriteOffset : null,
       has_more: hasMore,
       synced_at: now,
     });
