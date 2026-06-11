@@ -82,6 +82,7 @@ export default function PropstreamAgentLeads() {
   const [extractionProgress, setExtractionProgress] = useState(null);
   const [currentBatch, setCurrentBatch] = useState(1);
   const [totalBatches, setTotalBatches] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
   const continueRef = React.useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
@@ -188,7 +189,7 @@ export default function PropstreamAgentLeads() {
   };
 
   const processBatch = async (batchNum, totals) => {
-    console.log(`[Extraction] Processing batch ${batchNum}...`, { totals });
+    setStatusMessage(`Processing batch ${batchNum} of ${totalBatches || '?'}...`);
     setExtractionProgress({
       currentBatch: batchNum,
       ...totals,
@@ -200,8 +201,6 @@ export default function PropstreamAgentLeads() {
         batch_number: batchNum,
         batch_size: 100
       });
-      
-      console.log(`[Extraction] Batch ${batchNum} result:`, result);
       
       if (!result) {
         throw new Error('Backend function returned no result');
@@ -215,13 +214,13 @@ export default function PropstreamAgentLeads() {
         totalBatches: result.total_batches || batchNum
       };
     } catch (error) {
-      console.error(`[Extraction] Batch ${batchNum} failed:`, error);
+      setStatusMessage(`Error in batch ${batchNum}: ${error.message}`);
       throw error;
     }
   };
 
   const handleConfirmExtract = async () => {
-    console.log('[Extraction] Starting extraction process...');
+    setStatusMessage('Starting extraction process...');
     setExtractingAgents(true);
     setCurrentBatch(1);
     
@@ -234,11 +233,9 @@ export default function PropstreamAgentLeads() {
         const result = await processBatch(batchNum, totals);
         totals = { totalCreated: result.totalCreated, totalUpdated: result.totalUpdated, totalProcessed: result.totalProcessed };
         
-        console.log(`[Extraction] Batch ${batchNum} completed. hasMore:`, result.hasMore);
-        
         if (!result.hasMore) {
           hasMore = false;
-          console.log('[Extraction] All batches complete!', totals);
+          setStatusMessage('All batches complete!');
           setExtractionProgress({
             currentBatch: batchNum,
             ...totals,
@@ -246,7 +243,7 @@ export default function PropstreamAgentLeads() {
             totalBatches: batchNum
           });
         } else {
-          console.log(`[Extraction] Waiting for user to continue to batch ${batchNum + 1}`);
+          setStatusMessage(`Batch ${batchNum} complete. Ready to continue.`);
           setTotalBatches(result.totalBatches);
           setCurrentBatch(batchNum + 1);
           setExtractionProgress({
@@ -255,20 +252,18 @@ export default function PropstreamAgentLeads() {
             status: 'waiting',
             totalBatches: result.totalBatches
           });
-          // Wait for user to click Continue - the Continue button will call continueExtraction
-          return; // Exit and wait for user input
+          return;
         }
         
         batchNum++;
       }
       
-      // Extraction complete - modal will show complete status, user closes manually
-      console.log('[Extraction] Extraction finished, invalidating query...');
+      setStatusMessage('Extraction complete! Refreshing data...');
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
       setExtractingAgents(false);
       setListingStats(null);
     } catch (error) {
-      console.error('[Extraction] Fatal error:', error);
+      setStatusMessage(`Error: ${error.message}`);
       alert('Error during extraction: ' + error.message);
       setExtractingAgents(false);
       setExtractionProgress(null);
@@ -277,9 +272,8 @@ export default function PropstreamAgentLeads() {
   };
 
   const continueExtraction = async () => {
-    console.log('[Extraction] Continue clicked. Current state:', { extractionProgress, currentBatch });
     if (!extractionProgress) {
-      console.error('[Extraction] No extraction progress state found!');
+      setStatusMessage('Error: No extraction state found');
       return;
     }
     
@@ -292,17 +286,15 @@ export default function PropstreamAgentLeads() {
       let batchNum = currentBatch;
       let hasMore = true;
       
-      console.log(`[Extraction] Resuming from batch ${batchNum}`);
+      setStatusMessage(`Resuming extraction at batch ${batchNum}...`);
       
       while (hasMore) {
         const result = await processBatch(batchNum, totals);
         totals = { totalCreated: result.totalCreated, totalUpdated: result.totalUpdated, totalProcessed: result.totalProcessed };
         
-        console.log(`[Extraction] Batch ${batchNum} completed. hasMore:`, result.hasMore);
-        
         if (!result.hasMore) {
           hasMore = false;
-          console.log('[Extraction] All batches complete!', totals);
+          setStatusMessage('All batches complete!');
           setExtractionProgress({
             currentBatch: batchNum,
             ...totals,
@@ -310,7 +302,7 @@ export default function PropstreamAgentLeads() {
             totalBatches: batchNum
           });
         } else {
-          console.log(`[Extraction] Waiting for user to continue to batch ${batchNum + 1}`);
+          setStatusMessage(`Batch ${batchNum} complete. Ready to continue.`);
           setTotalBatches(result.totalBatches);
           setCurrentBatch(batchNum + 1);
           setExtractionProgress({
@@ -319,19 +311,18 @@ export default function PropstreamAgentLeads() {
             status: 'waiting',
             totalBatches: result.totalBatches
           });
-          return; // Wait for next continue
+          return;
         }
         
         batchNum++;
       }
       
-      // Extraction complete - modal shows complete status, user closes manually
-      console.log('[Extraction] Extraction finished, invalidating query...');
+      setStatusMessage('Extraction complete! Refreshing data...');
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
       setExtractingAgents(false);
       setListingStats(null);
     } catch (error) {
-      console.error('[Extraction] Fatal error in continueExtraction:', error);
+      setStatusMessage(`Error: ${error.message}`);
       alert('Error during extraction: ' + error.message);
       setExtractingAgents(false);
       setExtractionProgress(null);
