@@ -137,30 +137,42 @@ Deno.serve(async (req) => {
 
     let created = 0;
     let updated = 0;
+    const BATCH_SIZE = 100;
 
-    for (const agentData of agentsToCreate) {
-      const key = `${agentData.agent_name || ''}-${agentData.agent_email || ''}`.toLowerCase();
-      const existingId = existingAgentMap.get(key);
+    // Process agents in batches to avoid rate limits
+    for (let i = 0; i < agentsToCreate.length; i += BATCH_SIZE) {
+      const batch = agentsToCreate.slice(i, i + BATCH_SIZE);
+      console.log(`Processing agent batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(agentsToCreate.length / BATCH_SIZE)} (${batch.length} agents)`);
 
-      if (existingId) {
-        // Update existing agent
-        await base44.asServiceRole.entities.PropstreamAgentLead.update(existingId, {
-          listing_count: agentData.listing_count,
-          total_volume: agentData.total_volume,
-          property_addresses: agentData.property_addresses,
-          propstream_listing_ids: agentData.propstream_listing_ids,
-          territory_name: agentData.territory_name,
-          territory_id: agentData.territory_id,
-          state: agentData.state,
-          county: agentData.county,
-          brokerage_state: agentData.brokerage_state,
-          last_updated_date: new Date().toISOString(),
-        });
-        updated++;
-      } else {
-        // Create new agent
-        await base44.asServiceRole.entities.PropstreamAgentLead.create(agentData);
-        created++;
+      for (const agentData of batch) {
+        const key = `${agentData.agent_name || ''}-${agentData.agent_email || ''}`.toLowerCase();
+        const existingId = existingAgentMap.get(key);
+
+        if (existingId) {
+          // Update existing agent
+          await base44.asServiceRole.entities.PropstreamAgentLead.update(existingId, {
+            listing_count: agentData.listing_count,
+            total_volume: agentData.total_volume,
+            property_addresses: agentData.property_addresses,
+            propstream_listing_ids: agentData.propstream_listing_ids,
+            territory_name: agentData.territory_name,
+            territory_id: agentData.territory_id,
+            state: agentData.state,
+            county: agentData.county,
+            brokerage_state: agentData.brokerage_state,
+            last_updated_date: new Date().toISOString(),
+          });
+          updated++;
+        } else {
+          // Create new agent
+          await base44.asServiceRole.entities.PropstreamAgentLead.create(agentData);
+          created++;
+        }
+      }
+
+      // Small delay between batches to avoid rate limits
+      if (i + BATCH_SIZE < agentsToCreate.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
