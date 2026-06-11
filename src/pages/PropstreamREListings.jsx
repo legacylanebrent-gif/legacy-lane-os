@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import {
-  Upload, Zap, Mail, Send, Download, History, Eye, Building2, Users,
+  Upload, Zap, Mail, Send, Eye, Building2, Users, Info, HelpCircle,
   Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function PropstreamREListings() {
 
   // Modals
   const [showImport, setShowImport] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showScoring, setShowScoring] = useState(false);
   const [activeDrawer, setActiveDrawer] = useState(null);
   const [sendToOpsListing, setSendToOpsListing] = useState(null);
 
@@ -183,6 +183,9 @@ export default function PropstreamREListings() {
               <FileSpreadsheet className="w-4 h-4 mr-1" /> Full Importer
             </Button>
           </Link>
+          <Button onClick={() => setShowScoring(true)} variant="outline" className="gap-2">
+            <Info className="w-4 h-4" /> How Scoring Works
+          </Button>
           <Button onClick={handleScoreAll} disabled={scoring} variant="outline">
             {scoring ? <Loader className="w-4 h-4 animate-spin mr-1" /> : <Zap className="w-4 h-4 mr-1" />} Score
           </Button>
@@ -197,12 +200,6 @@ export default function PropstreamREListings() {
               <Users className="w-4 h-4 mr-1" /> View Agent Leads
             </Button>
           </Link>
-          <Button onClick={handleExport} variant="outline">
-            <Download className="w-4 h-4 mr-1" /> Export
-          </Button>
-          <Button onClick={() => setShowHistory(!showHistory)} variant="outline">
-            <History className="w-4 h-4 mr-1" /> History
-          </Button>
           <Button onClick={loadData} variant="ghost" size="icon"><RefreshCw className="w-4 h-4" /></Button>
         </div>
       </div>
@@ -262,35 +259,7 @@ export default function PropstreamREListings() {
         ))}
       </div>
 
-      {/* Import History */}
-      {showHistory && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-sm mb-3">Import History</h3>
-            {batches.length === 0 ? <p className="text-slate-400 text-sm">No imports yet.</p> : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead><tr className="text-left text-xs text-slate-500 border-b">
-                    <th className="pb-2 pr-4">File</th><th className="pb-2 pr-4">Date</th><th className="pb-2 pr-4">Total</th><th className="pb-2 pr-4">Imported</th><th className="pb-2 pr-4">Dupes</th><th className="pb-2">Status</th>
-                  </tr></thead>
-                  <tbody>
-                    {batches.map(b => (
-                      <tr key={b.id} className="border-b last:border-0 hover:bg-slate-50 cursor-pointer" onClick={() => setFilters(f => ({ ...f, batch: f.batch === b.id ? '' : b.id }))}>
-                        <td className="py-2 pr-4 font-medium truncate max-w-[200px]">{b.uploaded_file_name}</td>
-                        <td className="py-2 pr-4 text-slate-500">{new Date(b.created_date).toLocaleDateString()}</td>
-                        <td className="py-2 pr-4">{b.total_rows}</td>
-                        <td className="py-2 pr-4 text-green-600">{b.imported_count}</td>
-                        <td className="py-2 pr-4 text-yellow-600">{b.duplicate_count}</td>
-                        <td className="py-2"><Badge className={b.import_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>{b.import_status}</Badge></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Filters */}
       <div className="space-y-3">
@@ -529,6 +498,106 @@ export default function PropstreamREListings() {
               <ChevronRight className="w-4 h-4" />
               <ChevronRight className="w-4 h-4 -ml-1" />
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Scoring Modal */}
+      {showScoring && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowScoring(false)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-700 rounded-lg flex items-center justify-center">
+                  <Info className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-serif font-bold text-slate-900">Estate Sale Scoring System</h2>
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => setShowScoring(false)}>✕</Button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="font-semibold text-sm mb-3 text-slate-700">Score Labels</h3>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="bg-red-100 border border-red-200 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-red-700">80-100</p>
+                    <p className="text-xs text-red-600 font-semibold">Priority</p>
+                  </div>
+                  <div className="bg-orange-100 border border-orange-200 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-orange-700">60-79</p>
+                    <p className="text-xs text-orange-600 font-semibold">Strong</p>
+                  </div>
+                  <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-yellow-700">30-59</p>
+                    <p className="text-xs text-yellow-600 font-semibold">Moderate</p>
+                  </div>
+                  <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-slate-600">0-29</p>
+                    <p className="text-xs text-slate-500 font-semibold">Low</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-sm mb-3 text-green-700 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center text-xs font-bold">+</span>
+                  Positive Signals (Adds Points)
+                </h3>
+                <div className="grid md:grid-cols-2 gap-2 text-sm">
+                  {[
+                    ['Ownership 20+ years', '+35 pts'],
+                    ['Ownership 10-20 years', '+25 pts'],
+                    ['Probate indicator', '+25 pts'],
+                    ['Senior owner indicator', '+20 pts'],
+                    ['Inherited property', '+20 pts'],
+                    ['Absentee owner', '+15 pts'],
+                    ['Vacant property', '+15 pts'],
+                    ['Financial distress (preforeclosure/lien/tax)', '+15 pts'],
+                    ['Large home (2500+ sqft)', '+10 pts'],
+                    ['Older home (pre-1980)', '+10 pts'],
+                    ['Different mailing address', '+10 pts'],
+                    ['Single-family residence', '+10 pts'],
+                    ['Estate keywords in remarks', '+10 pts'],
+                  ].map(([signal, pts]) => (
+                    <div key={signal} className="flex justify-between items-center bg-green-50 border border-green-100 rounded px-3 py-2">
+                      <span className="text-slate-700">{signal}</span>
+                      <span className="font-bold text-green-700">{pts}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-sm mb-3 text-red-700 flex items-center gap-2">
+                  <span className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-xs font-bold">−</span>
+                  Negative Signals (Subtracts Points)
+                </h3>
+                <div className="grid md:grid-cols-2 gap-2 text-sm">
+                  {[
+                    ['Short ownership (0-3 years)', '−20 pts'],
+                    ['Corporate owner (LLC, Inc, Trust)', '−25 pts'],
+                    ['New construction / Builder', '−15 pts'],
+                    ['Investor flip language', '−10 pts'],
+                  ].map(([signal, pts]) => (
+                    <div key={signal} className="flex justify-between items-center bg-red-50 border border-red-100 rounded px-3 py-2">
+                      <span className="text-slate-700">{signal}</span>
+                      <span className="font-bold text-red-700">{pts}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600">
+                <p className="font-medium mb-2">How it works:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Each property is scored based on 15 different signals</li>
+                  <li>The score is capped between 0-100</li>
+                  <li>Click "Score" to calculate scores for unscored listings</li>
+                  <li>View detailed scoring reasons by clicking "View" on any listing</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       )}
