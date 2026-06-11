@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { getOptimizedImageUrl, getImageDimensions } from '@/utils/imageOptimizer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -496,9 +497,12 @@ export default function EstateSaleDetail() {
                       onClick={() => setModalOpen(true)}
                     >
                       <img
-                        src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
+                        src={getOptimizedImageUrl(typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url, 'gallery')}
                         alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        width="800"
+                        height="600"
                       />
                       {currentUser && (
                         <button
@@ -539,31 +543,38 @@ export default function EstateSaleDetail() {
                     </div>
                     <div className="p-4">
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                        {sale.images.slice(0, visibleThumbnails).map((image, index) => (
-                          <div key={index} className="relative">
-                            <button
-                              onClick={() => {
-                                setSelectedImage(index);
-                                setModalOpen(true);
-                              }}
-                              className={`w-full aspect-square rounded-lg overflow-hidden border-2 hover:border-orange-400 transition-colors cursor-pointer ${
-                                selectedImage === index ? 'border-orange-600' : 'border-slate-200'
-                              }`}
-                            >
-                              <img
-                                src={typeof image === 'string' ? image : image?.url}
-                                alt={typeof image === 'object' && image?.name ? `${image.name} — ${sale.title}${saleLocation ? ` in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''} — photo ${index + 1}`}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform"
-                                loading="lazy"
-                              />
-                            </button>
-                            {currentUser && savedImages.includes(index) && (
-                              <div className="absolute top-1 right-1">
-                                <Heart className="w-4 h-4 fill-red-600 text-red-600" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        {sale.images.slice(0, visibleThumbnails).map((image, index) => {
+                          const imageUrl = typeof image === 'string' ? image : image?.url;
+                          const thumbnailUrl = getOptimizedImageUrl(imageUrl, 'thumbnail');
+                          
+                          return (
+                            <div key={index} className="relative">
+                              <button
+                                onClick={() => {
+                                  setSelectedImage(index);
+                                  setModalOpen(true);
+                                }}
+                                className={`w-full aspect-square rounded-lg overflow-hidden border-2 hover:border-orange-400 transition-colors cursor-pointer ${
+                                  selectedImage === index ? 'border-orange-600' : 'border-slate-200'
+                                }`}
+                              >
+                                <img
+                                  src={thumbnailUrl}
+                                  alt={typeof image === 'object' && image?.name ? `${image.name} — ${sale.title}${saleLocation ? ` in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''} — photo ${index + 1}`}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                                  loading="lazy"
+                                  width="300"
+                                  height="300"
+                                />
+                              </button>
+                              {currentUser && savedImages.includes(index) && (
+                                <div className="absolute top-1 right-1">
+                                  <Heart className="w-4 h-4 fill-red-600 text-red-600" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                       {sale.images.length > visibleThumbnails && (
                         <div className="mt-4 text-center">
@@ -584,9 +595,11 @@ export default function EstateSaleDetail() {
                 <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
                   <div className="relative flex items-center justify-center bg-black h-[70vh] sm:min-h-[85vh] group">
                     <img
-                      src={typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url}
+                      src={getOptimizedImageUrl(typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url, 'large')}
                       alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                       className="max-h-[70vh] sm:max-h-[85vh] max-w-full object-contain"
+                      width="1920"
+                      height="1080"
                     />
                     {currentUser && (
                       <button
@@ -815,23 +828,31 @@ export default function EstateSaleDetail() {
                      Saved Photos ({savedImages.length})
                    </h3>
                    <div className="grid grid-cols-2 gap-2">
-                     {savedImages.map((imageIndex) => (
-                       <button
-                         key={imageIndex}
-                         onClick={() => {
-                           setSelectedImage(imageIndex);
-                           setModalOpen(true);
-                         }}
-                         className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-200 hover:border-red-600 transition-colors group"
-                       >
-                         <img
-                           src={typeof sale.images[imageIndex] === 'string' ? sale.images[imageIndex] : sale.images[imageIndex]?.url}
-                           alt={`Saved photo ${imageIndex + 1}`}
-                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                         />
-                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                       </button>
-                     ))}
+                     {savedImages.map((imageIndex) => {
+                       const imageUrl = typeof sale.images[imageIndex] === 'string' ? sale.images[imageIndex] : sale.images[imageIndex]?.url;
+                       const thumbnailUrl = getOptimizedImageUrl(imageUrl, 'thumbnail');
+
+                       return (
+                         <button
+                           key={imageIndex}
+                           onClick={() => {
+                             setSelectedImage(imageIndex);
+                             setModalOpen(true);
+                           }}
+                           className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-200 hover:border-red-600 transition-colors group"
+                         >
+                           <img
+                             src={thumbnailUrl}
+                             alt={`Saved photo ${imageIndex + 1}`}
+                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                             width="300"
+                             height="300"
+                             loading="lazy"
+                           />
+                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                         </button>
+                       );
+                     })}
                    </div>
                    <Button
                      onClick={handleMessageOperator}
