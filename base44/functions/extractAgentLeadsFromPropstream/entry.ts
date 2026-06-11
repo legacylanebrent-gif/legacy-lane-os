@@ -194,22 +194,26 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Bulk update
+    // Bulk update - process in smaller chunks of 20 to avoid rate limits
     if (updates.length > 0) {
-      let retries = 0;
-      while (retries < maxRetries) {
-        try {
-          for (const update of updates) {
-            await base44.asServiceRole.entities.PropstreamAgentLead.update(update.id, update.data);
-          }
-          updated = updates.length;
-          break;
-        } catch (error) {
-          if (error.status === 429 && retries < maxRetries - 1) {
-            retries++;
-            await delay(1000 * Math.pow(2, retries));
-          } else {
-            throw error;
+      const chunkSize = 20;
+      for (let i = 0; i < updates.length; i += chunkSize) {
+        const chunk = updates.slice(i, i + chunkSize);
+        let retries = 0;
+        while (retries < maxRetries) {
+          try {
+            for (const update of chunk) {
+              await base44.asServiceRole.entities.PropstreamAgentLead.update(update.id, update.data);
+            }
+            updated += chunk.length;
+            break;
+          } catch (error) {
+            if (error.status === 429 && retries < maxRetries - 1) {
+              retries++;
+              await delay(2000 * Math.pow(2, retries));
+            } else {
+              throw error;
+            }
           }
         }
       }

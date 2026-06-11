@@ -81,7 +81,7 @@ export default function PropstreamAgentLeads() {
   const [fetchingStats, setFetchingStats] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState(null);
   const [currentBatch, setCurrentBatch] = useState(1);
-  const [totalBatches, setTotalBatches] = useState(null);
+  const [totalBatches, setTotalBatches] = useState(1);
   const [statusMessage, setStatusMessage] = useState('');
   const continueRef = React.useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -240,17 +240,18 @@ export default function PropstreamAgentLeads() {
             currentBatch: batchNum,
             ...totals,
             status: 'complete',
-            totalBatches: batchNum
+            totalBatches: result.totalBatches || batchNum
           });
         } else {
           setStatusMessage(`Batch ${batchNum} complete. Ready to continue.`);
-          setTotalBatches(result.totalBatches);
+          const totalBatchesCount = result.totalBatches || batchNum + 1;
+          setTotalBatches(totalBatchesCount);
           setCurrentBatch(batchNum + 1);
           setExtractionProgress({
             currentBatch: batchNum,
             ...totals,
             status: 'waiting',
-            totalBatches: result.totalBatches
+            totalBatches: totalBatchesCount
           });
           return;
         }
