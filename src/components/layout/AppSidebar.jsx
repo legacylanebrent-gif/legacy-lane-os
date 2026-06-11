@@ -134,9 +134,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'PricingImport',          label: 'Pricing Import',         icon: BarChart3,       group: 'Admin', subgroup: '🤖 Repository & AI' },
 
   // Admin › SuperAgents
-  { page: 'SuperAgentCommandCenter', label: 'SuperAgent Command Center', icon: Brain,        group: 'Admin', subgroup: '🧠 SuperAgents' },
-
-  // Admin › SuperAgents
   { page: 'SuperAgentCommandCenter', label: 'SuperAgent Command Center', icon: Brain,       group: 'Admin', subgroup: '🧠 SuperAgents' },
 
   // Admin › Finance & Revenue
