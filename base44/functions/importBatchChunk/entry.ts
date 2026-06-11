@@ -195,13 +195,25 @@ Deno.serve(async (req) => {
       import_status: isLastBatch ? 'completed' : 'in_progress'
     });
 
+    // Auto-extract agent leads after final batch
+    let agentExtractionTriggered = false;
+    if (isLastBatch && imported > 0) {
+      try {
+        await base44.asServiceRole.functions.invoke('extractAgentLeadsFromPropstream', {});
+        agentExtractionTriggered = true;
+      } catch (extractError) {
+        console.error('Agent extraction failed:', extractError);
+      }
+    }
+
     return Response.json({ 
       imported, 
       duplicates: dupes, 
       errors,
       batch_index: batch_index,
       total_batches,
-      is_last_batch: isLastBatch
+      is_last_batch: isLastBatch,
+      agent_extraction_triggered: agentExtractionTriggered
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

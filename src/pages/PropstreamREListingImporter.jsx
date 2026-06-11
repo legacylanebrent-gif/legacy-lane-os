@@ -242,13 +242,15 @@ export default function PropstreamREListingImporter() {
         const totalImported = batchResults.reduce((sum, r) => sum + r.imported, 0) + res.data.imported;
         const totalDupes = batchResults.reduce((sum, r) => sum + r.duplicates, 0) + res.data.duplicates;
         const totalErrors = batchResults.reduce((sum, r) => sum + r.errors, 0) + res.data.errors;
+        const agentExtracted = res.data.agent_extraction_triggered;
         
         setResult({
           batch_id: batchId,
           total: listings.length,
           imported: totalImported,
           duplicates: totalDupes,
-          errors: totalErrors
+          errors: totalErrors,
+          agent_extracted: agentExtracted
         });
         setStep('done');
         setImporting(false);
@@ -515,18 +517,25 @@ export default function PropstreamREListingImporter() {
                 <div>
                   <p className="text-xl font-bold text-slate-800">Import Complete</p>
                   <p className="text-slate-500 text-sm">Batch ID: {result.batch_id}</p>
+                  {result.agent_extracted && (
+                    <div className="flex items-center gap-2 mt-2 text-sm text-purple-600">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Agent leads automatically extracted to PropStream Agent Leads table</span>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                   ['Total Rows', result.total, 'text-slate-700'],
                   ['Imported', result.imported, 'text-green-600'],
-                  ['Duplicates Skipped', result.duplicates, 'text-yellow-600'],
+                  ['Duplicates', result.duplicates, 'text-yellow-600'],
                   ['Errors', result.errors, 'text-red-600'],
+                  ['Agents Extracted', result.agent_extracted ? 'Yes' : 'No', result.agent_extracted ? 'text-purple-600' : 'text-slate-400'],
                 ].map(([label, val, cls]) => (
                   <div key={label} className="bg-slate-50 rounded-xl p-4 text-center">
                     <p className="text-xs text-slate-500 mb-1">{label}</p>
-                    <p className={`text-3xl font-black ${cls}`}>{val ?? 0}</p>
+                    <p className={`text-2xl font-black ${cls}`}>{val ?? 0}</p>
                   </div>
                 ))}
               </div>
