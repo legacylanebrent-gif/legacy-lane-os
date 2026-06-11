@@ -121,6 +121,7 @@ import ResellerPackupEventEditor from './pages/ResellerPackupEventEditor';
 import ResellerPackupEvents from './pages/ResellerPackupEvents';
 import AdminCentralRepository from './pages/AdminCentralRepository';
 import LandingPageBizInABox from './pages/LandingPageBizInABox';
+import LaunchCommandCenter from './pages/LaunchCommandCenter';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -299,6 +300,7 @@ const AuthenticatedApp = () => {
       <Route path="/cleanout-network" element={<CleanoutNetwork />} />
       <Route path="/AdminCleanoutLeads" element={<LayoutWrapper currentPageName="AdminCleanoutLeads"><AdminCleanoutLeads /></LayoutWrapper>} />
       <Route path="/LaunchAuditCenter" element={<LayoutWrapper currentPageName="LaunchAuditCenter"><LaunchAuditCenter /></LayoutWrapper>} />
+      <Route path="/LaunchCommandCenter" element={<LayoutWrapper currentPageName="LaunchCommandCenter"><LaunchCommandCenter /></LayoutWrapper>} />
       <Route path="/AdminHousioSync" element={<LayoutWrapper currentPageName="AdminHousioSync"><AdminHousioSync /></LayoutWrapper>} />
       <Route path="/ResellerPackupEventEditor" element={<LayoutWrapper currentPageName="ResellerPackupEventEditor"><ResellerPackupEventEditor /></LayoutWrapper>} />
       <Route path="/ResellerPackupEvents" element={<LayoutWrapper currentPageName="ResellerPackupEvents"><ResellerPackupEvents /></LayoutWrapper>} />

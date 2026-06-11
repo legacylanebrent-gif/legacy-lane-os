@@ -109,6 +109,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminPhase12Deploy',     label: '🚀 Phase 12 Deploy (NJ)',     icon: Rocket,          group: 'Admin' },
   { page: 'AdminBuildReport',       label: '📋 Build Completion Report',  icon: FileText,        group: 'Admin' },
   { page: 'LaunchAuditCenter',      label: '🎯 Launch Audit Center',      icon: Rocket,          group: 'Admin' },
+  { page: 'LaunchCommandCenter',    label: '🚨 Launch Command Center',    icon: Rocket,          group: 'Admin' },
   { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',              icon: Briefcase,       group: 'Admin' },
 
   // Landing Pages (admin only)
