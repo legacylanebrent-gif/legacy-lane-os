@@ -72,9 +72,6 @@ Deno.serve(async (req) => {
       if (fullAddress && !existing.property_addresses.includes(fullAddress)) {
         existing.property_addresses.push(fullAddress);
       }
-      if (listing.id && !existing.propstream_listing_ids.includes(listing.id)) {
-        existing.propstream_listing_ids.push(listing.id);
-      }
       // Update contact info if we have better data
       if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
       if (!existing.agent_phone && agentPhone) existing.agent_phone = agentPhone;
@@ -94,10 +91,7 @@ Deno.serve(async (req) => {
         agent_phone: agentPhone || null,
         agent_license: listing.listing_agent_license || null,
         brokerage_name: listing.listing_brokerage || null,
-        brokerage_address: listing.listing_brokerage_address || null,
-        brokerage_city: listing.listing_brokerage_city || null,
-        brokerage_state: listing.listing_brokerage_state || null,
-        brokerage_zip: listing.listing_brokerage_zip || null,
+        brokerage_state: listing.state || null,
         territory_name: listing.territory_name || null,
         territory_id: listing.territory_id || null,
         state: listing.state || null,
@@ -105,13 +99,13 @@ Deno.serve(async (req) => {
         listing_count: 1,
         total_volume: listing.estimated_value || 0,
         property_addresses: fullAddress ? [fullAddress] : [],
-        propstream_listing_ids: listing.id ? [listing.id] : [],
         lead_status: 'new',
         priority: 'medium',
         lead_score: 0,
         source_batch_id: listing.import_batch_id,
-        first_seen_date: listing.imported_date || new Date().toISOString(),
-        last_updated_date: new Date().toISOString(),
+        last_contact_date: null,
+        next_follow_up: null,
+        notes: null,
       });
       }
     });
@@ -154,17 +148,12 @@ Deno.serve(async (req) => {
             listing_count: agentData.listing_count,
             total_volume: agentData.total_volume,
             property_addresses: agentData.property_addresses,
-            propstream_listing_ids: agentData.propstream_listing_ids,
             territory_name: agentData.territory_name,
             territory_id: agentData.territory_id,
             state: agentData.state,
             county: agentData.county,
             brokerage_name: agentData.brokerage_name,
-            brokerage_address: agentData.brokerage_address,
-            brokerage_city: agentData.brokerage_city,
             brokerage_state: agentData.brokerage_state,
-            brokerage_zip: agentData.brokerage_zip,
-            last_updated_date: new Date().toISOString(),
           });
           updated++;
         } else {
