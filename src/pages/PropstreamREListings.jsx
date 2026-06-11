@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import {
-  Upload, Zap, Mail, Send, Download, History, Eye, Building2,
+  Upload, Zap, Mail, Send, Download, History, Eye, Building2, Users,
   Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet
 } from 'lucide-react';
 import PropstreamImportModal from '@/components/propstream/PropstreamImportModal';
@@ -43,6 +43,7 @@ export default function PropstreamREListings() {
   // Actions
   const [scoring, setScoring] = useState(false);
   const [genEmails, setGenEmails] = useState(false);
+  const [extractingAgents, setExtractingAgents] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -99,6 +100,18 @@ export default function PropstreamREListings() {
     loadData();
   };
 
+  const handleExtractAgents = async () => {
+    setExtractingAgents(true);
+    try {
+      const result = await base44.functions.invoke('extractAgentLeadsFromPropstream');
+      alert(`Agent leads extracted!\n\n${result.agents_created} new agents created\n${result.agents_updated} existing agents updated\n\nView them in the Agent Leads page.`);
+    } catch (error) {
+      alert('Error extracting agents: ' + error.message);
+    } finally {
+      setExtractingAgents(false);
+    }
+  };
+
   const handleExport = () => {
     const rows = (selected.size > 0 ? filtered.filter(l => selected.has(l.id)) : filtered);
     const headers = ['property_address', 'city', 'state', 'zip', 'county', 'list_price', 'estate_sale_score', 'estate_sale_score_label', 'listing_agent_name', 'listing_agent_email', 'listing_agent_phone', 'email_status', 'operator_status', 'territory_name'];
@@ -152,6 +165,14 @@ export default function PropstreamREListings() {
           <Button onClick={handleGenEmails} disabled={genEmails} variant="outline">
             {genEmails ? <Loader className="w-4 h-4 animate-spin mr-1" /> : <Mail className="w-4 h-4 mr-1" />} Gen Emails
           </Button>
+          <Button onClick={handleExtractAgents} disabled={extractingAgents} variant="outline" className="text-blue-600 hover:text-blue-700">
+            {extractingAgents ? <Loader className="w-4 h-4 animate-spin mr-1" /> : <Users className="w-4 h-4 mr-1" />} Extract Agents
+          </Button>
+          <Link to="/PropstreamAgentLeads">
+            <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+              <Users className="w-4 h-4 mr-1" /> View Agent Leads
+            </Button>
+          </Link>
           <Button onClick={handleExport} variant="outline">
             <Download className="w-4 h-4 mr-1" /> Export
           </Button>

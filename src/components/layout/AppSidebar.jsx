@@ -39,6 +39,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AgentPartnerships',      label: 'Agent Partnerships',     icon: Users,           group: 'Agent + Operator' },
   { page: 'ReferralDealPipeline',   label: 'Referral Pipeline',      icon: GitBranch,       group: 'Agent + Operator' },
   { page: 'PropstreamREListings',   label: 'RE Listing Pipeline',    icon: Building2,       group: 'Agent + Operator' },
+  { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'Agent + Operator' },
   { page: 'OperatorCommissions',    label: 'Commissions',            icon: DollarSign,      group: 'Agent + Operator' },
 
   // ── ESTATE SALES (operator-facing) ──────────────────────────────────────────
@@ -54,6 +55,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Leads',                  label: 'Lead Center',            icon: Award,           group: 'CRM & Leads' },
   { page: 'SaleConversionPipeline', label: 'Sale Pipeline',          icon: TrendingUp,      group: 'CRM & Leads' },
   { page: 'AgentOperatorPortal',    label: 'Operator Partnerships',  icon: Briefcase,       group: 'CRM & Leads' },
+  { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'CRM & Leads' },
 
   // ── MARKETING ───────────────────────────────────────────────────────────────
   { page: 'Campaigns',              label: 'Campaigns',              icon: Megaphone,       group: 'Marketing' },
@@ -108,6 +110,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminLeadsSocialAds',    label: 'Social Ads Leads',       icon: Share2,          group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'AdminLeadsPropstream',   label: 'Propstream Probate',     icon: Search,          group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'PropstreamREListings',   label: 'PropStream RE Listings', icon: Building2,       group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'AdminLeadImporter',      label: 'Lead Importer',          icon: Upload,          group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',         icon: Briefcase,       group: 'Admin', subgroup: '📋 Leads & CRM' },
 

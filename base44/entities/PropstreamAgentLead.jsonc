@@ -1,0 +1,119 @@
+{
+  "name": "PropstreamAgentLead",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Full name of the real estate agent"
+    },
+    "agent_email": {
+      "type": "string",
+      "description": "Agent's email address"
+    },
+    "agent_phone": {
+      "type": "string",
+      "description": "Agent's phone number"
+    },
+    "agent_license": {
+      "type": "string",
+      "description": "Real estate license number"
+    },
+    "brokerage_name": {
+      "type": "string",
+      "description": "Name of the brokerage firm"
+    },
+    "brokerage_address": {
+      "type": "string",
+      "description": "Brokerage street address"
+    },
+    "brokerage_city": {
+      "type": "string",
+      "description": "Brokerage city"
+    },
+    "brokerage_state": {
+      "type": "string",
+      "description": "Brokerage state"
+    },
+    "brokerage_zip": {
+      "type": "string",
+      "description": "Brokerage ZIP code"
+    },
+    "listing_count": {
+      "type": "integer",
+      "default": 1,
+      "description": "Number of active listings from this agent"
+    },
+    "property_addresses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of property addresses listed by this agent"
+    },
+    "total_volume": {
+      "type": "number",
+      "default": 0,
+      "description": "Total estimated value of all listings"
+    },
+    "lead_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "partnership_requested",
+        "partnership_active",
+        "not_interested",
+        "archived"
+      ],
+      "default": "new",
+      "description": "Current status in the partnership pipeline"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium",
+      "description": "Priority level for outreach"
+    },
+    "lead_score": {
+      "type": "integer",
+      "default": 0,
+      "description": "Calculated lead score 0-100"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes from interactions with this agent"
+    },
+    "last_contact_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of last contact"
+    },
+    "next_follow_up": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Scheduled next follow-up date"
+    },
+    "partnership_agreement_id": {
+      "type": "string",
+      "description": "Reference to MasterReferralAgreement if partnership established"
+    },
+    "source_batch_id": {
+      "type": "string",
+      "description": "PropstreamImportBatch ID this lead came from"
+    },
+    "assigned_to_id": {
+      "type": "string",
+      "description": "User ID of team member assigned to this lead"
+    }
+  },
+  "required": [
+    "agent_name"
+  ]
+}

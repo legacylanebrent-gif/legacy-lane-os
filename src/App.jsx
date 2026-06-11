@@ -126,6 +126,7 @@ import NotificationAnalytics from './pages/NotificationAnalytics';
 import RelationshipHealthDashboard from './pages/RelationshipHealthDashboard';
 import RelationshipsDashboard from './pages/RelationshipsDashboard';
 import SuperAgentCommandCenter from './pages/SuperAgentCommandCenter.jsx';
+import PropstreamAgentLeads from './pages/PropstreamAgentLeads';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -313,6 +314,7 @@ const AuthenticatedApp = () => {
       <Route path="/RelationshipHealthDashboard" element={<LayoutWrapper currentPageName="RelationshipHealthDashboard"><RelationshipHealthDashboard /></LayoutWrapper>} />
       <Route path="/RelationshipsDashboard" element={<LayoutWrapper currentPageName="RelationshipsDashboard"><RelationshipsDashboard /></LayoutWrapper>} />
       <Route path="/SuperAgentCommandCenter" element={<LayoutWrapper currentPageName="SuperAgentCommandCenter"><SuperAgentCommandCenter /></LayoutWrapper>} />
+      <Route path="/PropstreamAgentLeads" element={<LayoutWrapper currentPageName="PropstreamAgentLeads"><PropstreamAgentLeads /></LayoutWrapper>} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 
