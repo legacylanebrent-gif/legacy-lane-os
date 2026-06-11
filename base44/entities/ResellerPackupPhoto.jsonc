@@ -1,0 +1,30 @@
+{
+  "name": "ResellerPackupPhoto",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "original_sale_id": {
+      "type": "string"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "storage_path": {
+      "type": "string"
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0
+    },
+    "uploaded_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "original_sale_id",
+    "photo_url"
+  ]
+}

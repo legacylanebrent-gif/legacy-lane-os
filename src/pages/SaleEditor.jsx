@@ -954,6 +954,7 @@ Be practical and realistic for an estate sale context.`,
                       <SelectItem value="buyout_or_cleanout">Buyout Or Cleanout</SelectItem>
                       <SelectItem value="demolition_sale">Demolition Sale</SelectItem>
                       <SelectItem value="single_item_type_collection">Single Item Type Collection</SelectItem>
+                      <SelectItem value="bundle_buyout">Bundle Buyout</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1752,6 +1753,28 @@ Return ONLY the description text, no extra commentary.`
             </div>
           </CardContent>
         </Card>
+
+        {/* Post-Sale Actions */}
+        {saleId && (
+          <Card className="border-purple-200 bg-purple-50/40">
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-purple-600" />
+                <h2 className="text-base font-semibold text-slate-900">Post-Sale Actions</h2>
+              </div>
+              <p className="text-xs text-slate-500">After your sale completes, offer remaining inventory to registered resellers privately.</p>
+              <Button
+                variant="outline"
+                className="border-purple-400 text-purple-700 hover:bg-purple-100 w-full sm:w-auto"
+                onClick={() => navigate(`/ResellerPackupEventEditor?saleId=${saleId}`)}
+              >
+                <span className="mr-2">📦</span>
+                Create Reseller Pack-Up Event
+              </Button>
+              <p className="text-xs text-slate-400">This creates a private, invite-only event for resellers only. Not visible to the public.</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Footer */}
         <div className="flex gap-3 justify-end pb-8">

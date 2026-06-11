@@ -1,0 +1,133 @@
+{
+  "name": "ResellerPackupEvent",
+  "type": "object",
+  "properties": {
+    "original_sale_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "free_giveaway",
+        "low_cost_purchase",
+        "fill_a_bag",
+        "fill_a_car",
+        "fill_a_trailer",
+        "bundle_buyout"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "open",
+        "full",
+        "closed",
+        "cancelled",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "territory_id": {
+      "type": "string"
+    },
+    "original_sale_title": {
+      "type": "string"
+    },
+    "original_sale_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "start_time": {
+      "type": "string"
+    },
+    "end_time": {
+      "type": "string"
+    },
+    "address_visibility": {
+      "type": "string",
+      "enum": [
+        "full_address",
+        "city_state_only",
+        "zip_only"
+      ],
+      "default": "city_state_only"
+    },
+    "reseller_registration_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "invite_only": {
+      "type": "boolean",
+      "default": false
+    },
+    "max_reseller_spots": {
+      "type": "integer"
+    },
+    "event_notes": {
+      "type": "string"
+    },
+    "pickup_rules": {
+      "type": "string"
+    },
+    "seller_goal": {
+      "type": "string",
+      "enum": [
+        "clear_as_much_as_possible",
+        "avoid_cleanout_cost",
+        "recover_small_amount",
+        "bundle_remaining",
+        "invite_trusted_resellers"
+      ]
+    },
+    "bundle_buyout_amount": {
+      "type": "number"
+    },
+    "published_to_resellers_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "photo_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "registration_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "original_sale_id",
+    "operator_id",
+    "event_title",
+    "event_type"
+  ]
+}

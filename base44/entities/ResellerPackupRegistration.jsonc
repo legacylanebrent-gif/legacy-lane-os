@@ -1,0 +1,56 @@
+{
+  "name": "ResellerPackupRegistration",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "reseller_user_id": {
+      "type": "string"
+    },
+    "reseller_name": {
+      "type": "string"
+    },
+    "reseller_company": {
+      "type": "string"
+    },
+    "reseller_email": {
+      "type": "string"
+    },
+    "reseller_phone": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "waitlisted",
+        "declined",
+        "cancelled",
+        "checked_in"
+      ],
+      "default": "pending"
+    },
+    "registered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checked_in_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "reseller_user_id",
+    "reseller_email"
+  ]
+}

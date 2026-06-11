@@ -24,7 +24,8 @@
         "outside_sale",
         "buyout_or_cleanout",
         "demolition_sale",
-        "single_item_type_collection"
+        "single_item_type_collection",
+        "bundle_buyout"
       ],
       "description": "Type of sale"
     },
