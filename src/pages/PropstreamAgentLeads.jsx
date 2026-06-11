@@ -108,7 +108,7 @@ export default function PropstreamAgentLeads() {
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ['propstream-agent-leads'],
-    queryFn: () => base44.entities.PropstreamAgentLead.list('-first_seen_date', 100),
+    queryFn: () => base44.entities.PropstreamAgentLead.list('-created_date', 10000),
     initialData: [],
   });
 
