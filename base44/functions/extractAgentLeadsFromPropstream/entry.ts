@@ -9,6 +9,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
+    // Parse request body for batch parameters
+    const body = await req.json().catch(() => ({}));
+    const batchSize = body.batch_size || 100;
+    const batchNumber = body.batch_number || 1;
+
     // Fetch all PropstreamREListing records (no limit)
     const listings = await base44.asServiceRole.entities.PropstreamREListing.list('-imported_date', 100000);
     
@@ -116,7 +121,8 @@ Deno.serve(async (req) => {
     if (agentsToCreate.length === 0) {
       return Response.json({ 
         message: 'No valid agent data found in listings',
-        agents_created: 0 
+        agents_created: 0,
+        has_more_batches: false
       });
     }
 
@@ -131,50 +137,51 @@ Deno.serve(async (req) => {
 
     let created = 0;
     let updated = 0;
-    const BATCH_SIZE = 100;
+    
+    // Calculate batch range
+    const startIndex = (batchNumber - 1) * batchSize;
+    const endIndex = Math.min(startIndex + batchSize, agentsToCreate.length);
+    const batchToProcess = agentsToCreate.slice(startIndex, endIndex);
+    
+    // Process this batch
+    for (const agentData of batchToProcess) {
+      const key = `${agentData.agent_name || ''}-${agentData.agent_email || ''}`.toLowerCase();
+      const existingId = existingAgentMap.get(key);
 
-    // Process agents in batches to avoid rate limits
-    for (let i = 0; i < agentsToCreate.length; i += BATCH_SIZE) {
-      const batch = agentsToCreate.slice(i, i + BATCH_SIZE);
-      console.log(`Processing agent batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(agentsToCreate.length / BATCH_SIZE)} (${batch.length} agents)`);
-
-      for (const agentData of batch) {
-        const key = `${agentData.agent_name || ''}-${agentData.agent_email || ''}`.toLowerCase();
-        const existingId = existingAgentMap.get(key);
-
-        if (existingId) {
-          // Update existing agent
-          await base44.asServiceRole.entities.PropstreamAgentLead.update(existingId, {
-            listing_count: agentData.listing_count,
-            total_volume: agentData.total_volume,
-            property_addresses: agentData.property_addresses,
-            territory_name: agentData.territory_name,
-            territory_id: agentData.territory_id,
-            state: agentData.state,
-            county: agentData.county,
-            brokerage_name: agentData.brokerage_name,
-            brokerage_state: agentData.brokerage_state,
-          });
-          updated++;
-        } else {
-          // Create new agent
-          await base44.asServiceRole.entities.PropstreamAgentLead.create(agentData);
-          created++;
-        }
-      }
-
-      // Small delay between batches to avoid rate limits
-      if (i + BATCH_SIZE < agentsToCreate.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      if (existingId) {
+        // Update existing agent
+        await base44.asServiceRole.entities.PropstreamAgentLead.update(existingId, {
+          listing_count: agentData.listing_count,
+          total_volume: agentData.total_volume,
+          property_addresses: agentData.property_addresses,
+          territory_name: agentData.territory_name,
+          territory_id: agentData.territory_id,
+          state: agentData.state,
+          county: agentData.county,
+          brokerage_name: agentData.brokerage_name,
+          brokerage_state: agentData.brokerage_state,
+        });
+        updated++;
+      } else {
+        // Create new agent
+        await base44.asServiceRole.entities.PropstreamAgentLead.create(agentData);
+        created++;
       }
     }
 
+    // Check if there are more batches
+    const hasMoreBatches = endIndex < agentsToCreate.length;
+
     return Response.json({
-      message: 'Successfully processed PropStream agent leads',
+      message: `Successfully processed batch ${batchNumber} of PropStream agent leads`,
       total_listings_processed: listings.length,
       unique_agents_found: agentsToCreate.length,
       agents_created: created,
       agents_updated: updated,
+      batch_number: batchNumber,
+      batch_size: batchSize,
+      has_more_batches: hasMoreBatches,
+      total_batches: Math.ceil(agentsToCreate.length / batchSize)
     });
 
   } catch (error) {

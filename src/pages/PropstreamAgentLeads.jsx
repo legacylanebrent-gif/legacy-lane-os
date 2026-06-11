@@ -172,7 +172,8 @@ export default function PropstreamAgentLeads() {
         estimatedRange: {
           min: Math.ceil(totalListings / 5),
           max: Math.ceil(totalListings / 3)
-        }
+        },
+        totalBatches: Math.ceil(estimatedAgents / 100)
       });
       setExtractDialogOpen(true);
     } catch (error) {
@@ -185,12 +186,58 @@ export default function PropstreamAgentLeads() {
   const handleConfirmExtract = async () => {
     setExtractDialogOpen(false);
     setExtractingAgents(true);
+    
     try {
-      const result = await base44.functions.invoke('extractAgentLeadsFromPropstream');
+      let totalCreated = 0;
+      let totalUpdated = 0;
+      let totalProcessed = 0;
+      let currentBatch = 1;
+      let continueExtraction = true;
+      
+      while (continueExtraction) {
+        // Process batch of 100
+        const result = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
+          batch_number: currentBatch,
+          batch_size: 100
+        });
+        
+        totalCreated += result.agents_created || 0;
+        totalUpdated += result.agents_updated || 0;
+        totalProcessed += result.total_listings_processed || 0;
+        
+        // Check if there are more batches
+        if (!result.has_more_batches) {
+          continueExtraction = false;
+        } else {
+          // Prompt user to continue
+          const userWantsToContinue = window.confirm(
+            `Batch ${currentBatch} complete!\n\n` +
+            `Agents created: ${result.agents_created}\n` +
+            `Agents updated: ${result.agents_updated}\n` +
+            `Listings processed: ${result.total_listings_processed}\n\n` +
+            `Continue with batch ${currentBatch + 1}?`
+          );
+          
+          if (!userWantsToContinue) {
+            continueExtraction = false;
+          } else {
+            currentBatch++;
+          }
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
-      alert(`Agent leads extracted successfully!\n\n${result.agents_created} new agents created\n${result.agents_updated} existing agents updated\nTotal listings processed: ${result.total_listings_processed}`);
+      alert(`Extraction complete!\n\n` +
+        `Total agents created: ${totalCreated}\n` +
+        `Total agents updated: ${totalUpdated}\n` +
+        `Total listings processed: ${totalProcessed}\n` +
+        `Batches completed: ${currentBatch}`
+      );
+    } catch (error) {
+      alert('Error during extraction: ' + error.message);
     } finally {
       setExtractingAgents(false);
+      setListingStats(null);
     }
   };
 
@@ -773,7 +820,16 @@ export default function PropstreamAgentLeads() {
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
                   <div className="text-xs text-amber-800">
-                    <strong>Note:</strong> This will deduplicate agents by email and phone, aggregating all their listings into a single profile.
+                    <strong>Batch Processing:</strong> Agents will be extracted in batches of 100. You'll be prompted to continue after each batch.
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Users className="w-4 h-4 text-purple-600 mt-0.5" />
+                  <div className="text-xs text-purple-800">
+                    <strong>Total Batches:</strong> {listingStats.totalBatches} batches of 100 agents each
                   </div>
                 </div>
               </div>
