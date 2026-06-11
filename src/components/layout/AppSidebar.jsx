@@ -133,6 +133,12 @@ export const ALL_NAV_ITEMS = [
   { page: 'AutonomousRunsDashboard', label: 'Autonomous Runs',       icon: Brain,           group: 'Admin', subgroup: '🤖 Repository & AI' },
   { page: 'PricingImport',          label: 'Pricing Import',         icon: BarChart3,       group: 'Admin', subgroup: '🤖 Repository & AI' },
 
+  // Admin › SuperAgents
+  { page: 'SuperAgentCommandCenter', label: 'SuperAgent Command Center', icon: Brain,        group: 'Admin', subgroup: '🧠 SuperAgents' },
+
+  // Admin › SuperAgents
+  { page: 'SuperAgentCommandCenter', label: 'SuperAgent Command Center', icon: Brain,       group: 'Admin', subgroup: '🧠 SuperAgents' },
+
   // Admin › Finance & Revenue
   { page: 'AdminTransactions',      label: 'All Transactions',       icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'ActualRevenue',          label: 'Actual Revenue',         icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
@@ -186,6 +192,7 @@ const ADMIN_SUBGROUP_ORDER = [
   '🏠 Sales & Territory',
   '🔍 SEO & Content',
   '🤖 Repository & AI',
+  '🧠 SuperAgents',
   '💰 Finance & Revenue',
   '📣 Marketing & Ads',
   '⚙️ Platform Config',
