@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
@@ -12,144 +12,239 @@ import {
   LayoutDashboard, Home, User, Users, Building2, ShoppingBag, Package,
   TrendingUp, DollarSign, Megaphone, GraduationCap, BarChart3, MapPin,
   Star, Heart, MessageSquare, FileText, Bell, Shield, Settings, Menu, X,
-  ChevronDown, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
-  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film, Scale
+  ChevronDown, ChevronRight, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
+  UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film,
+  Scale, Database, AlertTriangle, Target, Search, GitBranch, Mail, Share2,
+  Wrench, Eye, Building, Network, Banknote, Bot, Image
 } from 'lucide-react';
 
-// Master list of ALL nav items with the page name as the key
+// ─── Master Nav Item List ─────────────────────────────────────────────────────
+// group = top-level section label shown in sidebar
+// subgroup = collapsible sub-section within an admin group (optional)
 export const ALL_NAV_ITEMS = [
-  { page: 'Dashboard',              label: 'Dashboard',           icon: LayoutDashboard, group: 'Main' },
-  { page: 'ConsumerHome',           label: 'Consumer Profile',    icon: Home,            group: 'Main' },
-  { page: 'MyProfile',              label: 'Business Profile',    icon: User,            group: 'Main' },
-  { page: 'Notifications',          label: 'Notifications',       icon: Bell,            group: 'Main' },
-  { page: 'Messages',               label: 'Messages',            icon: MessageSquare,   group: 'Main' },
-  { page: 'BrowseItems',            label: 'Marketplace',         icon: ShoppingBag,     group: 'Main' },
-  { page: 'AdminDashboard',         label: 'Admin Dashboard',     icon: BarChart2,       group: 'Admin' },
-  { page: 'Settings',               label: 'Settings',            icon: Settings,        group: 'Admin' },
 
-  { page: 'MySales',                label: 'My Sales',            icon: Building2,       group: 'Estate Sales' },
-  { page: 'ManageTeam',             label: 'Manage Team',         icon: UserPlus,        group: 'Estate Sales' },
-  { page: 'Inventory',              label: 'Inventory',           icon: Package,         group: 'Estate Sales' },
-  { page: 'StorageManagement',      label: 'Storage Management',  icon: Warehouse,       group: 'Estate Sales' },
-  { page: 'Buyouts',                label: 'Buyouts',             icon: HandCoins,       group: 'Estate Sales' },
-  { page: 'ApiKeyManager',          label: 'Website API',         icon: Globe,           group: 'Admin' },
+  // ── MAIN ────────────────────────────────────────────────────────────────────
+  { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
+  { page: 'ConsumerHome',           label: 'Consumer Profile',       icon: Home,            group: 'Main' },
+  { page: 'MyProfile',              label: 'Business Profile',       icon: User,            group: 'Main' },
+  { page: 'Notifications',          label: 'Notifications',          icon: Bell,            group: 'Main' },
+  { page: 'Messages',               label: 'Messages',               icon: MessageSquare,   group: 'Main' },
+  { page: 'BrowseItems',            label: 'Marketplace',            icon: ShoppingBag,     group: 'Main' },
 
-  { page: 'MyListings',             label: 'Marketplace Listings', icon: ShoppingBag,     group: 'Estate Sales' },
+  // ── ESTATE SALES (operator-facing) ──────────────────────────────────────────
+  { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },
+  { page: 'ManageTeam',             label: 'Manage Team',            icon: UserPlus,        group: 'Estate Sales' },
+  { page: 'Inventory',              label: 'Inventory',              icon: Package,         group: 'Estate Sales' },
+  { page: 'StorageManagement',      label: 'Storage Management',     icon: Warehouse,       group: 'Estate Sales' },
+  { page: 'Buyouts',                label: 'Buyouts',                icon: HandCoins,       group: 'Estate Sales' },
+  { page: 'MyListings',             label: 'Marketplace Listings',   icon: ShoppingBag,     group: 'Estate Sales' },
 
-  { page: 'CRM',                    label: 'CRM',                 icon: Users,           group: 'CRM & Leads' },
-  { page: 'Leads',                  label: 'Lead Center',         icon: Award,           group: 'CRM & Leads' },
-  { page: 'SaleConversionPipeline', label: 'Sale Pipeline',       icon: TrendingUp,      group: 'CRM & Leads' },
-  { page: 'AgentOperatorPortal',   label: 'Operator Partnerships', icon: Briefcase,       group: 'CRM & Leads' },
+  // ── CRM & LEADS ─────────────────────────────────────────────────────────────
+  { page: 'CRM',                    label: 'CRM',                    icon: Users,           group: 'CRM & Leads' },
+  { page: 'Leads',                  label: 'Lead Center',            icon: Award,           group: 'CRM & Leads' },
+  { page: 'SaleConversionPipeline', label: 'Sale Pipeline',          icon: TrendingUp,      group: 'CRM & Leads' },
+  { page: 'AgentOperatorPortal',    label: 'Operator Partnerships',  icon: Briefcase,       group: 'CRM & Leads' },
 
-  { page: 'Campaigns',              label: 'Campaigns',           icon: Megaphone,       group: 'Marketing' },
-  { page: 'MarketingTasks',         label: 'Marketing Tasks',     icon: Megaphone,       group: 'Marketing' },
-  { page: 'CampaignBuilder',        label: 'Campaign Builder',    icon: Zap,             group: 'Marketing' },
-  { page: 'Analytics',              label: 'Analytics',           icon: BarChart3,       group: 'Marketing' },
+  // ── MARKETING ───────────────────────────────────────────────────────────────
+  { page: 'Campaigns',              label: 'Campaigns',              icon: Megaphone,       group: 'Marketing' },
+  { page: 'MarketingTasks',         label: 'Marketing Tasks',        icon: Megaphone,       group: 'Marketing' },
+  { page: 'CampaignBuilder',        label: 'Campaign Builder',       icon: Zap,             group: 'Marketing' },
+  { page: 'Analytics',              label: 'Analytics',              icon: BarChart3,       group: 'Marketing' },
+  { page: 'SocialAdsHub',           label: 'Social Ads Hub',         icon: Megaphone,       group: 'Marketing' },
 
-  { page: 'Courses',                label: 'Browse Courses',      icon: GraduationCap,   group: 'Education' },
-  { page: 'MyCourses',              label: 'My Courses',          icon: GraduationCap,   group: 'Education' },
+  // ── EDUCATION ───────────────────────────────────────────────────────────────
+  { page: 'Courses',                label: 'Browse Courses',         icon: GraduationCap,   group: 'Education' },
+  { page: 'MyCourses',              label: 'My Courses',             icon: GraduationCap,   group: 'Education' },
 
-  { page: 'IncomeTracker',          label: 'Income Tracker',      icon: TrendingUp,      group: 'Finance' },
-  { page: 'MyBusinessExpenses',     label: 'Business Expenses',   icon: FileText,        group: 'Finance' },
-  { page: 'AIAssistant',            label: 'AI Assistant',         icon: Sparkles,        group: 'Finance' },
-  { page: 'SocialAdsHub',           label: 'Social Ads Hub',       icon: Megaphone,       group: 'Marketing' },
+  // ── FINANCE ─────────────────────────────────────────────────────────────────
+  { page: 'IncomeTracker',          label: 'Income Tracker',         icon: TrendingUp,      group: 'Finance' },
+  { page: 'MyBusinessExpenses',     label: 'Business Expenses',      icon: FileText,        group: 'Finance' },
+  { page: 'AIAssistant',            label: 'AI Assistant',           icon: Sparkles,        group: 'Finance' },
 
-  { page: 'RewardsCheckins',        label: 'Check-ins',           icon: MapPin,          group: 'Consumer' },
-  { page: 'Favorites',              label: 'Favorites',           icon: Heart,           group: 'Consumer' },
-  { page: 'MyRewards',              label: 'My Rewards',          icon: Star,            group: 'Consumer' },
-  { page: 'MyReferrals',            label: 'My Referrals',        icon: Users,           group: 'Consumer' },
-  { page: 'MyTickets',              label: 'Support',             icon: MessageSquare,   group: 'Consumer' },
+  // ── CONSUMER ────────────────────────────────────────────────────────────────
+  { page: 'RewardsCheckins',        label: 'Check-ins',              icon: MapPin,          group: 'Consumer' },
+  { page: 'Favorites',              label: 'Favorites',              icon: Heart,           group: 'Consumer' },
+  { page: 'MyRewards',              label: 'My Rewards',             icon: Star,            group: 'Consumer' },
+  { page: 'MyReferrals',            label: 'My Referrals',           icon: Users,           group: 'Consumer' },
+  { page: 'MyTickets',              label: 'Support',                icon: MessageSquare,   group: 'Consumer' },
 
-  { page: 'Vendors',                label: 'Vendors',             icon: Briefcase,       group: 'Directory' },
-  { page: 'EstateSaleFinder',       label: 'Find Estate Sales',   icon: MapPin,          group: 'Directory' },
+  // ── DIRECTORY ───────────────────────────────────────────────────────────────
+  { page: 'Vendors',                label: 'Vendors',                icon: Briefcase,       group: 'Directory' },
+  { page: 'EstateSaleFinder',       label: 'Find Estate Sales',      icon: MapPin,          group: 'Directory' },
 
-  // Admin pages
-  { page: 'AdminUsers',             label: 'Users',               icon: Users,           group: 'Admin' },
-  { page: 'AdminEstateSales',       label: 'Estate Sales',        icon: Building2,       group: 'Admin' },
-  { page: 'AdminVendors',           label: 'Vendor Ads',          icon: Briefcase,       group: 'Admin' },
-  { page: 'AdminLeads',             label: 'All Leads',           icon: Award,           group: 'Admin' },
-  { page: 'AdminLeadsSocialAds',   label: 'Social Ads Leads',    icon: Award,           group: 'Admin' },
-  { page: 'AdminLeadsPropstream',  label: 'Propstream Probate Leads',    icon: Award,           group: 'Admin' },
-  { page: 'PropstreamREListings',  label: 'PropStream RE Listings',       icon: Building2,       group: 'Admin' },
-  { page: 'AdminLeadsWebsite',     label: 'Website Leads',       icon: Award,           group: 'Admin' },
-  { page: 'AdminLeadImporter',     label: 'Lead Importer',       icon: Upload,          group: 'Admin' },
-  { page: 'AdminMarketplace',       label: 'Marketplace',         icon: ShoppingBag,     group: 'Admin' },
-  { page: 'AdminCourses',           label: 'Courses',             icon: GraduationCap,   group: 'Admin' },
-  { page: 'AdminTickets',           label: 'Support Tickets',     icon: MessageSquare,   group: 'Admin' },
-  { page: 'AdminTemplates',         label: 'Templates',           icon: FileText,        group: 'Admin' },
-  { page: 'AdminAutomations',       label: 'Automations',         icon: Zap,             group: 'Admin' },
-  { page: 'AdminPackages',          label: 'Subscription Pkgs',   icon: Package,         group: 'Admin' },
-  { page: 'AdminAdvertisingPackages', label: 'Ad Packages',       icon: Package,         group: 'Admin' },
-  { page: 'AdminAdPlacements',      label: 'Ad Placements',       icon: Megaphone,       group: 'Admin' },
-  { page: 'AdminRewards',           label: 'Rewards & Draws',     icon: Gift,            group: 'Admin' },
-  { page: 'AdminCampaigns',         label: 'Campaigns',           icon: Zap,             group: 'Admin' },
-  { page: 'AdminAmazonProducts',    label: 'Amazon Products',     icon: Package,         group: 'Admin' },
-  { page: 'AdminTransactions',      label: 'Transactions',        icon: DollarSign,      group: 'Admin' },
-  { page: 'AdminFutureOperators',   label: 'EstateSaleNet Operators', icon: Briefcase,   group: 'Admin' },
-  { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops', icon: Building2,       group: 'Admin' },
-  { page: 'FutOperLeads',           label: 'Fut Oper Leads',      icon: Merge,           group: 'Admin' },
-  { page: 'PlatformAnalytics',      label: 'Platform Analytics',  icon: BarChart3,       group: 'Admin' },
-  { page: 'Revenue',                label: 'Revenue Projections', icon: DollarSign,      group: 'Admin' },
-  { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',  icon: DollarSign,      group: 'Admin' },
-  { page: 'FutureOperatorsAnalytics', label: 'Future Ops Rev.',   icon: DollarSign,      group: 'Admin' },
-  { page: 'PricingImport',          label: 'Pricing Import',      icon: BarChart3,       group: 'Admin' },
-  { page: 'AdminAICredits',         label: 'AI Credit Mgmt',      icon: Zap,             group: 'Admin' },
-  { page: 'BizInABox',              label: 'Biz in a Box',        icon: Briefcase,       group: 'Admin' },
-  { page: 'AdminPageAccess',        label: 'Page Permissions',    icon: Shield,          group: 'Admin' },
-  { page: 'AdminAIOperator',        label: 'Admin AI Operator',   icon: Brain,           group: 'Admin' },
-  { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,          group: 'Admin' },
-  { page: 'PlatformExpenses',       label: 'Platform Expenses',       icon: DollarSign,      group: 'Admin' },
-  { page: 'PlatformAds',            label: 'Platform Ads',             icon: Megaphone,       group: 'Admin' },
-  { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',      icon: TrendingUp,      group: 'Admin' },
-  { page: 'AdminTerritoryDashboard', label: 'Territory Dashboard',     icon: MapPin,          group: 'Admin' },
-  { page: 'ActualRevenue',          label: 'Actual Revenue',          icon: DollarSign,      group: 'Admin' },
-  { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intelligence', icon: Film,           group: 'Admin' },
-  { page: 'AdminProbateEngine',     label: 'Probate SEO Engine',         icon: Scale,           group: 'Admin' },
-  { page: 'life-transition/ProbateHubV2', label: 'Life Transition Engine',   icon: Globe,           group: 'Admin' },
-  { page: 'AdminPhase12Deploy',     label: '🚀 Phase 12 Deploy (NJ)',     icon: Rocket,          group: 'Admin' },
-  { page: 'AdminBuildReport',       label: '📋 Build Completion Report',  icon: FileText,        group: 'Admin' },
-  { page: 'LaunchAuditCenter',      label: '🎯 Launch Audit Center',      icon: Rocket,          group: 'Admin' },
-  { page: 'LaunchCommandCenter',    label: '🚨 Launch Command Center',    icon: Rocket,          group: 'Admin' },
-  { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',              icon: Briefcase,       group: 'Admin' },
+  // ══════════════════════════════════════════════════════════════════════
+  // ADMIN — broken into subgroups for easy navigation
+  // ══════════════════════════════════════════════════════════════════════
 
-  // Landing Pages (admin only)
-  { page: 'LandingPageSaleLeak',    label: 'LP: Sale Leak Quiz',  icon: Rocket,          group: 'Landing Pages' },
-  { page: 'LandingPageProfitLevers', label: 'LP: 5 Profit Levers', icon: Rocket,          group: 'Landing Pages' },
-  { page: 'LandingPageScaleReady',   label: 'LP: Scale Readiness', icon: Rocket,          group: 'Landing Pages' },
-  { page: 'LandingPageCalculator',      label: 'LP: Time & Profit Calc',   icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageChaosToControl', label: 'LP: Chaos to Control',     icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageOfferClose',     label: 'LP: Offer & Close',         icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageFitFinder',      label: 'LP: Fit Finder Quiz',        icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageReferralEngine', label: 'LP: Referral Engine',         icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageAIPlan',         label: 'LP: AI Custom Plan',          icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageRetarget',       label: 'LP: Retargeting Page',        icon: Rocket, group: 'Landing Pages' },
-  { page: 'LandingPageBizInABox',      label: 'LP: Own A Division',           icon: Rocket, group: 'Landing Pages' },
+  // Admin › Command Center
+  { page: 'AdminDashboard',         label: 'Admin Dashboard',        icon: BarChart2,       group: 'Admin', subgroup: '🖥 Command Center' },
+  { page: 'LaunchCommandCenter',    label: '🚨 Launch Command Center', icon: Rocket,         group: 'Admin', subgroup: '🖥 Command Center' },
+  { page: 'LaunchAuditCenter',      label: '🎯 Launch Audit Center',  icon: Target,          group: 'Admin', subgroup: '🖥 Command Center' },
+  { page: 'AdminBuildReport',       label: 'Build Report',           icon: FileText,        group: 'Admin', subgroup: '🖥 Command Center' },
+  { page: 'Settings',               label: 'Settings',               icon: Settings,        group: 'Admin', subgroup: '🖥 Command Center' },
+  { page: 'ApiKeyManager',          label: 'Website API Keys',       icon: Globe,           group: 'Admin', subgroup: '🖥 Command Center' },
+
+  // Admin › Users & Operators
+  { page: 'AdminUsers',             label: 'All Users',              icon: Users,           group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'AdminFutureOperators',   label: 'EstateSales.net Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'FutOperLeads',           label: 'Future Operator Leads',  icon: Merge,           group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'AdminAgentApplications', label: 'Agent Applications',     icon: Award,           group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'AdminPageAccess',        label: 'Page Permissions',       icon: Shield,          group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'BizInABox',              label: 'Biz in a Box',           icon: Briefcase,       group: 'Admin', subgroup: '👥 Users & Operators' },
+
+  // Admin › Leads & CRM
+  { page: 'AdminLeads',             label: 'All Leads',              icon: Award,           group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminLeadsWebsite',      label: 'Website Leads',          icon: Globe,           group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminLeadsSocialAds',    label: 'Social Ads Leads',       icon: Share2,          group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminLeadsPropstream',   label: 'Propstream Probate',     icon: Search,          group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'PropstreamREListings',   label: 'PropStream RE Listings', icon: Building2,       group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminLeadImporter',      label: 'Lead Importer',          icon: Upload,          group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',         icon: Briefcase,       group: 'Admin', subgroup: '📋 Leads & CRM' },
+
+  // Admin › Estate Sales & Territory
+  { page: 'AdminEstateSales',       label: 'All Estate Sales',       icon: Building2,       group: 'Admin', subgroup: '🏠 Sales & Territory' },
+  { page: 'AdminTerritoryDashboard', label: 'Territory Dashboard',   icon: MapPin,          group: 'Admin', subgroup: '🏠 Sales & Territory' },
+  { page: 'NationalCoverageGrid',   label: 'National Coverage',      icon: Globe,           group: 'Admin', subgroup: '🏠 Sales & Territory' },
+  { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
+  { page: 'AdminHousioSync',        label: 'Housio Territory Sync',  icon: Network,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
+
+  // Admin › SEO & Content
+  { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',    icon: TrendingUp,      group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'AdminLifeTransitionEngine', label: 'Life Transition Engine', icon: Globe,        group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'AdminProbateEngine',     label: 'Probate SEO Engine',     icon: Scale,           group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'AdminContentEngine',     label: 'Content Engine',         icon: FileText,        group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'AdminPhase12Deploy',     label: 'Phase 12 Deploy (NJ)',   icon: Rocket,          group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intel',    icon: Film,            group: 'Admin', subgroup: '🔍 SEO & Content' },
+
+  // Admin › Repository & AI
+  { page: 'AdminCentralRepository', label: 'Central Repository',    icon: Database,        group: 'Admin', subgroup: '🤖 Repository & AI' },
+  { page: 'AdminAIOperator',        label: 'Admin AI Operator',      icon: Bot,             group: 'Admin', subgroup: '🤖 Repository & AI' },
+  { page: 'AdminAICredits',         label: 'AI Credit Management',   icon: Zap,             group: 'Admin', subgroup: '🤖 Repository & AI' },
+  { page: 'AutonomousRunsDashboard', label: 'Autonomous Runs',       icon: Brain,           group: 'Admin', subgroup: '🤖 Repository & AI' },
+  { page: 'PricingImport',          label: 'Pricing Import',         icon: BarChart3,       group: 'Admin', subgroup: '🤖 Repository & AI' },
+
+  // Admin › Finance & Revenue
+  { page: 'AdminTransactions',      label: 'All Transactions',       icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'ActualRevenue',          label: 'Actual Revenue',         icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'Revenue',                label: 'Revenue Projections',    icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',     icon: BarChart3,       group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'FutureOperatorsAnalytics', label: 'Future Ops Revenue',   icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'PlatformExpenses',       label: 'Platform Expenses',      icon: Banknote,        group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'AdminWalletDashboard',   label: 'Wallet Dashboard',       icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+
+  // Admin › Marketing & Ads
+  { page: 'AdminCampaigns',         label: 'Campaigns',              icon: Zap,             group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'PlatformAds',            label: 'Platform Ads',           icon: Megaphone,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'AdminAdPlacements',      label: 'Ad Placements',          icon: Megaphone,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'AdminAdvertisingPackages', label: 'Ad Packages',          icon: Package,         group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'PlatformAnalytics',      label: 'Platform Analytics',     icon: BarChart3,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'CustomerIODashboard',    label: 'Customer.io Dashboard',  icon: Mail,            group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'CustomerIOReportingCenter', label: 'Email Reporting',     icon: Mail,            group: 'Admin', subgroup: '📣 Marketing & Ads' },
+  { page: 'TerritoryFBManager',     label: 'Territory FB Manager',   icon: Share2,          group: 'Admin', subgroup: '📣 Marketing & Ads' },
+
+  // Admin › Platform Config
+  { page: 'AdminPackages',          label: 'Subscription Packages',  icon: Package,         group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminRewards',           label: 'Rewards & Draws',        icon: Gift,            group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminCourses',           label: 'Courses',                icon: GraduationCap,   group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminTemplates',         label: 'Templates',              icon: FileText,        group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminAutomations',       label: 'Automations',            icon: Zap,             group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminMarketplace',       label: 'Marketplace Items',      icon: ShoppingBag,     group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminVendors',           label: 'Vendor Ads',             icon: Briefcase,       group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminAmazonProducts',    label: 'Amazon Products',        icon: Package,         group: 'Admin', subgroup: '⚙️ Platform Config' },
+  { page: 'AdminTickets',           label: 'Support Tickets',        icon: MessageSquare,   group: 'Admin', subgroup: '⚙️ Platform Config' },
+
+  // ── LANDING PAGES ────────────────────────────────────────────────────────────
+  { page: 'LandingPageSaleLeak',       label: 'LP: Sale Leak Quiz',     icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageProfitLevers',   label: 'LP: 5 Profit Levers',    icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageScaleReady',     label: 'LP: Scale Readiness',    icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageCalculator',     label: 'LP: Time & Profit Calc', icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageChaosToControl', label: 'LP: Chaos to Control',   icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageOfferClose',     label: 'LP: Offer & Close',      icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageFitFinder',      label: 'LP: Fit Finder Quiz',    icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageReferralEngine', label: 'LP: Referral Engine',    icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageAIPlan',         label: 'LP: AI Custom Plan',     icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageRetarget',       label: 'LP: Retargeting Page',   icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageBizInABox',      label: 'LP: Own A Division',     icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageOneDay',         label: 'LP: One Day',            icon: Rocket, group: 'Landing Pages' },
 ];
 
+// Subgroup ordering within Admin
+const ADMIN_SUBGROUP_ORDER = [
+  '🖥 Command Center',
+  '👥 Users & Operators',
+  '📋 Leads & CRM',
+  '🏠 Sales & Territory',
+  '🔍 SEO & Content',
+  '🤖 Repository & AI',
+  '💰 Finance & Revenue',
+  '📣 Marketing & Ads',
+  '⚙️ Platform Config',
+];
+
+const TOP_GROUP_ORDER = ['Main', 'Estate Sales', 'CRM & Leads', 'Marketing', 'Finance', 'Education', 'Consumer', 'Directory', 'Admin', 'Landing Pages'];
+
+// ─── Collapsible subgroup component ──────────────────────────────────────────
+function SubGroup({ label, items, currentPageName, defaultOpen }) {
+  const hasActive = items.some(i => i.page === currentPageName);
+  const [open, setOpen] = useState(defaultOpen || hasActive);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-slate-700/50 transition-colors group"
+      >
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-slate-300">{label}</span>
+        {open
+          ? <ChevronDown className="w-3 h-3 text-slate-500" />
+          : <ChevronRight className="w-3 h-3 text-slate-500" />
+        }
+      </button>
+      {open && items.map(item => <NavItem key={item.page} item={item} currentPageName={currentPageName} />)}
+    </div>
+  );
+}
+
+function NavItem({ item, currentPageName }) {
+  const Icon = item.icon;
+  const active = currentPageName === item.page;
+  return (
+    <Link to={createPageUrl(item.page)}>
+      <Button
+        variant="ghost"
+        className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
+          active
+            ? 'bg-orange-600 text-white hover:bg-orange-700'
+            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+        }`}
+      >
+        <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+        <span className="truncate">{item.label}</span>
+      </Button>
+    </Link>
+  );
+}
+
+// ─── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
   const [open, setOpen] = useState(true);
 
-  const handleLogout = () => {
-    base44.auth.logout(createPageUrl('Home'));
-  };
+  const handleLogout = () => base44.auth.logout(createPageUrl('Home'));
 
-  // Filter nav items to only those allowed for this user
   const visibleItems = ALL_NAV_ITEMS.filter(item => allowedPages.includes(item.page));
 
-  // Group them
+  // Group all items by top-level group
   const grouped = visibleItems.reduce((acc, item) => {
     if (!acc[item.group]) acc[item.group] = [];
     acc[item.group].push(item);
     return acc;
   }, {});
 
-  const groupOrder = ['Main', 'Estate Sales', 'Marketplace', 'CRM & Leads', 'Marketing', 'Education', 'Finance', 'Consumer', 'Directory', 'Admin', 'Landing Pages'];
-
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   return (
     <>
-      {/* Toggle button when closed */}
       {!open && (
         <Button
           variant="ghost"
@@ -184,37 +279,57 @@ export default function AppSidebar({ user, currentPageName, allowedPages }) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
-          {groupOrder.map(group => {
+          {TOP_GROUP_ORDER.map(group => {
             const items = grouped[group];
             if (!items || items.length === 0) return null;
+
+            // Admin group: render collapsible subgroups
+            if (group === 'Admin') {
+              // gather subgroup → items
+              const subgrouped = {};
+              const noSubgroup = [];
+              items.forEach(item => {
+                if (item.subgroup) {
+                  if (!subgrouped[item.subgroup]) subgrouped[item.subgroup] = [];
+                  subgrouped[item.subgroup].push(item);
+                } else {
+                  noSubgroup.push(item);
+                }
+              });
+
+              return (
+                <div key={group}>
+                  <p className="px-4 text-xs font-bold text-orange-400 uppercase tracking-widest mb-1 mt-1">Admin</p>
+                  {ADMIN_SUBGROUP_ORDER.map(sg => {
+                    const sgItems = subgrouped[sg];
+                    if (!sgItems || sgItems.length === 0) return null;
+                    const isCommandCenter = sg === '🖥 Command Center';
+                    return (
+                      <SubGroup
+                        key={sg}
+                        label={sg}
+                        items={sgItems}
+                        currentPageName={currentPageName}
+                        defaultOpen={isCommandCenter}
+                      />
+                    );
+                  })}
+                  {noSubgroup.map(item => <NavItem key={item.page} item={item} currentPageName={currentPageName} />)}
+                </div>
+              );
+            }
+
+            // All other groups: flat list
             return (
               <div key={group}>
                 <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{group}</p>
-                {items.map(item => {
-                  const Icon = item.icon;
-                  const active = currentPageName === item.page;
-                  return (
-                    <Link key={item.page} to={createPageUrl(item.page)}>
-                      <Button
-                        variant="ghost"
-                        className={`w-full justify-start rounded-none px-4 h-9 text-sm ${
-                          active
-                            ? 'bg-orange-600 text-white hover:bg-orange-700'
-                            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
-                        <span className="truncate">{item.label}</span>
-                      </Button>
-                    </Link>
-                  );
-                })}
+                {items.map(item => <NavItem key={item.page} item={item} currentPageName={currentPageName} />)}
               </div>
             );
           })}
         </nav>
 
-        {/* Footer — user info + logout */}
+        {/* Footer */}
         <div className="border-t border-slate-700 p-3 flex-shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
