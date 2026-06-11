@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Camera, Plus, X, Package, Users, Eye, EyeOff } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import PublishEventModal from '@/components/reseller/PublishEventModal';
 
 const EVENT_TYPE_LABELS = {
   free_giveaway: 'Free Giveaway',
@@ -41,6 +42,7 @@ export default function ResellerPackupEventEditor() {
   const [registrations, setRegistrations] = useState([]);
   const [parentSale, setParentSale] = useState(null);
   const [eventId, setEventId] = useState(null);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   const [form, setForm] = useState({
     event_title: 'Post-Sale Reseller Pack-Up Event',
@@ -187,13 +189,16 @@ export default function ResellerPackupEventEditor() {
     }
   };
 
-  const handlePublish = async () => {
+  const handlePublish = () => {
     if (!eventId) { alert('Save the event first.'); return; }
     if (!photos.length) { alert('Please upload at least one photo before publishing.'); return; }
     if (!form.event_date) { alert('Please set an event date before publishing.'); return; }
-    if (!window.confirm('Publish this event to registered resellers in your territory?')) return;
+    setShowPublishModal(true);
+  };
 
+  const handleConfirmPublish = async ({ include_sms }) => {
     setPublishing(true);
+    setShowPublishModal(false);
     try {
       await base44.entities.ResellerPackupEvent.update(eventId, {
         status: 'open',
@@ -201,7 +206,18 @@ export default function ResellerPackupEventEditor() {
         photo_count: photos.length,
       });
       setEvent(prev => ({ ...prev, status: 'open', published_to_resellers_at: new Date().toISOString() }));
-      alert('Event is now open to registered resellers!');
+
+      // Trigger notifications (email + in-app always free; SMS if opted-in)
+      const result = await base44.functions.invoke('notifyResellerEventResellers', {
+        event_id: eventId,
+        include_sms,
+      });
+
+      const data = result?.data || {};
+      const smsNote = include_sms
+        ? ` | ${data.sms_sent || 0} SMS sent ($${((data.sms_sent || 0) * 0.05).toFixed(2)})`
+        : '';
+      alert(`Event published! ${data.emails_sent || 0} email notifications sent${smsNote}.`);
     } catch (err) {
       alert('Publish failed: ' + err.message);
     } finally {
@@ -242,6 +258,14 @@ export default function ResellerPackupEventEditor() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {showPublishModal && (
+        <PublishEventModal
+          event={event}
+          radiusMiles={parseInt(form.reseller_invite_radius_miles) || 25}
+          onConfirm={handleConfirmPublish}
+          onCancel={() => setShowPublishModal(false)}
+        />
+      )}
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
