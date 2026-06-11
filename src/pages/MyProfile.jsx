@@ -294,7 +294,8 @@ export default function MyProfile() {
   const isAgent = acct === 'real_estate_agent' || isAgentOperator;
   const isVendor = acct === 'vendor';
   // Operators on Professional or Elite tiers get reseller features included
-  const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(subscription?.tier);
+  const activeTierForReseller = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
+  const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(activeTierForReseller);
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
 
   return (
