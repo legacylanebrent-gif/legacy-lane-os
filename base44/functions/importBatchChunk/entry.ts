@@ -171,9 +171,9 @@ Deno.serve(async (req) => {
           ...enrichedRow,
           import_batch_id: batch_id,
           source: 'PropStream',
-          territory_id: territory?.id || '',
+          territory_id: territory?.territory_id || '',
           territory_name: territory ? `${territory.county}, ${territory.state}` : '',
-          matched_operator_ids: territory?.assigned_operator_id ? [territory.assigned_operator_id] : [],
+          matched_operator_ids: territory?.assigned_operator_ids || [],
           estate_sale_score: score,
           estate_sale_score_label: label,
           score_reasons: reasons,
@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
       imported_count: cumulativeImported,
       duplicate_count: cumulativeDupes,
       error_count: cumulativeErrors,
-      import_status: isLastBatch ? 'completed' : 'in_progress'
+      import_status: isLastBatch ? 'completed' : 'processing'
     });
 
     // Auto-extract agent leads after final batch
