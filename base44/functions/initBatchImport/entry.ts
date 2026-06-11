@@ -9,7 +9,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { filename, total_rows } = await req.json();
+    const body = await req.json();
+    console.log('initBatchImport received:', body);
+    const { filename, total_rows } = body;
+    
+    if (!filename || !total_rows) {
+      console.error('Validation failed:', { filename, total_rows });
+      return Response.json({ error: 'filename and total_rows required' }, { status: 400 });
+    }
     
     // Create a batch record
     const batch = await base44.asServiceRole.entities.PropstreamImportBatch.create({

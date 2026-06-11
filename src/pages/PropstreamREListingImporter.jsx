@@ -256,7 +256,9 @@ export default function PropstreamREListingImporter() {
         setImporting(false);
       }
     } catch (error) {
-      alert('Error importing batch: ' + error.message);
+      console.error('Import error:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
+      alert('Error importing batch: ' + errorMsg);
       setImporting(false);
     }
   };

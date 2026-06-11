@@ -109,10 +109,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { batch_id, listings, batch_index, total_batches } = await req.json();
+    const body = await req.json();
+    console.log('Received payload:', { 
+      batch_id: body.batch_id, 
+      listings_count: body.listings?.length, 
+      batch_index: body.batch_index,
+      total_batches: body.total_batches
+    });
+    
+    const { batch_id, listings, batch_index, total_batches } = body;
     
     if (!batch_id || !Array.isArray(listings)) {
-      return Response.json({ error: 'Invalid parameters' }, { status: 400 });
+      console.error('Validation failed:', { batch_id, listings: Array.isArray(listings) });
+      return Response.json({ error: 'Invalid parameters: batch_id and listings array required' }, { status: 400 });
     }
 
     const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
