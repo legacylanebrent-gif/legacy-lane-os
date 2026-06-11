@@ -289,11 +289,13 @@ export default function MyProfile() {
   const initials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   const acct = user?.primary_account_type || 'consumer';
   const isConsumer = ['consumer','executor','home_seller','buyer','downsizer','diy_seller','consignor'].includes(acct) || !acct;
-  const isReseller = acct === 'reseller';
   const isAgentOperator = acct === 'agent_operator';
   const isOperator = acct === 'estate_sale_operator' || isAgentOperator;
   const isAgent = acct === 'real_estate_agent' || isAgentOperator;
   const isVendor = acct === 'vendor';
+  // Operators on Professional or Elite tiers get reseller features included
+  const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(subscription?.tier);
+  const isReseller = acct === 'reseller' || operatorHasResellerAccess;
 
   return (
     <div className="flex flex-col min-h-screen">
