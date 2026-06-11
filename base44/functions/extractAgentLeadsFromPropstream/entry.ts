@@ -24,41 +24,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Extract unique agents from listings using email OR phone as unique identifier
+    // Extract unique agents from listings using email as primary unique identifier
+    // Then state, then name. Phone is NOT used for deduplication to avoid shared office lines.
     const agentMap = new Map();
     const emailToAgentKey = new Map();
-    const phoneToAgentKey = new Map();
 
     listings.forEach(listing => {
       const agentName = listing.listing_agent_name;
       const agentEmail = listing.listing_agent_email?.toLowerCase().trim();
       const agentPhone = listing.listing_agent_phone?.replace(/[^0-9]/g, '');
+      const agentState = listing.state?.toUpperCase().trim();
       
       if (!agentName) return;
 
-      // Try to find existing agent by email or phone
+      // Try to find existing agent by email first (most reliable unique identifier)
       let agentKey = null;
       
-      // Priority 1: Match by email
+      // Priority 1: If listing has email, check if we've seen this email before
       if (agentEmail && emailToAgentKey.has(agentEmail)) {
         agentKey = emailToAgentKey.get(agentEmail);
       }
-      // Priority 2: Match by phone
-      else if (agentPhone && phoneToAgentKey.has(agentPhone)) {
-        agentKey = phoneToAgentKey.get(agentPhone);
-        // If this listing has an email, also map it
-        if (agentEmail) emailToAgentKey.set(agentEmail, agentKey);
-      }
-      // Priority 3: Create new agent using name-email or name-phone
-      else {
+      // Priority 2: If no email match, create NEW record using email as key (if available)
+      // This prevents phone number collisions from merging different agents
+      if (!agentKey) {
         agentKey = agentEmail 
           ? `email:${agentEmail}`
-          : agentPhone 
-            ? `phone:${agentPhone}`
+          : agentState
+            ? `state:${agentState}:${agentName.toLowerCase()}`
             : `name:${agentName.toLowerCase()}`;
         
-        if (agentEmail) emailToAgentKey.set(agentEmail, agentKey);
-        if (agentPhone) phoneToAgentKey.set(agentPhone, agentKey);
+        // Map email to this key for future listings
+        if (agentEmail) {
+          emailToAgentKey.set(agentEmail, agentKey);
+        }
       }
 
       const existing = agentMap.get(agentKey);
