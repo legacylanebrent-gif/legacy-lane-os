@@ -370,7 +370,15 @@ export default function PropstreamREListings() {
                     </div>
                   </td>
                   <td className="p-3 max-w-[140px]">
-                    <p className="text-xs font-medium truncate">{listing.listing_agent_name || '—'}</p>
+                    {listing.listing_agent_name ? (
+                      <Link to={`/PropstreamAgentLeads?agent=${encodeURIComponent(listing.listing_agent_name)}`}>
+                        <p className="text-xs font-medium truncate text-blue-600 hover:text-blue-800 hover:underline" title={listing.listing_agent_name}>
+                          {listing.listing_agent_name}
+                        </p>
+                      </Link>
+                    ) : (
+                      <p className="text-xs text-slate-400">—</p>
+                    )}
                     {listing.listing_agent_email && <p className="text-xs text-slate-400 truncate">{listing.listing_agent_email}</p>}
                   </td>
                   <td className="p-3 text-xs text-slate-500 max-w-[120px] truncate">{listing.territory_name || '—'}</td>

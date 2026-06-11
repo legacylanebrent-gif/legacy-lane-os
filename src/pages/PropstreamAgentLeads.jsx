@@ -78,6 +78,7 @@ export default function PropstreamAgentLeads() {
   const [backfillingData, setBackfillingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [agentFilter, setAgentFilter] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -88,6 +89,14 @@ export default function PropstreamAgentLeads() {
         setUser(me);
       } catch (_) {}
     })();
+    
+    // Read agent filter from URL parameter
+    const params = new URLSearchParams(window.location.search);
+    const agentParam = params.get('agent');
+    if (agentParam) {
+      setAgentFilter(agentParam);
+      setSearchTerm(agentParam);
+    }
   }, []);
 
   const { data: leads, isLoading } = useQuery({
