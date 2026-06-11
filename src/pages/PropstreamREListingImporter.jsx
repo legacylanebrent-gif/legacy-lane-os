@@ -160,6 +160,8 @@ export default function PropstreamREListingImporter() {
   const [batchId, setBatchId] = useState(null);
   const [totalBatches, setTotalBatches] = useState(0);
   const [errorDetails, setErrorDetails] = useState(null);
+  const [existingListingCount, setExistingListingCount] = useState(null);
+  const [showBatchDialog, setShowBatchDialog] = useState(false);
 
   const STORAGE_KEY = 'propstream_re_listing_field_mapping';
 
@@ -169,6 +171,16 @@ export default function PropstreamREListingImporter() {
 
   const saveMapping = (m) => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(m)); } catch {}
+  };
+
+  const fetchExistingListingCount = async () => {
+    try {
+      const listings = await base44.asServiceRole.entities.PropstreamREListing.list(undefined, 1);
+      setExistingListingCount(listings.length || 0);
+    } catch (error) {
+      console.error('Error fetching existing listings:', error);
+      setExistingListingCount(0);
+    }
   };
 
   const handleFile = (e) => {
@@ -191,6 +203,7 @@ export default function PropstreamREListingImporter() {
         setCsvData(data);
         setHeaders(headers);
         setMapping(merged);
+        fetchExistingListingCount();
         setStep('confirm');
       }
     });
@@ -208,12 +221,8 @@ export default function PropstreamREListingImporter() {
       const batchIdValue = initRes.data.batch_id;
       setBatchId(batchIdValue);
       
-      setStep('batch_import');
-      setCurrentBatchIndex(0);
-      setBatchResults([]);
-      
-      // Process first batch directly with the batch ID value (not state)
-      await processBatchWithId(listings, 0, totalBatches, batchIdValue);
+      // Show batch dialog instead of immediately starting
+      setShowBatchDialog(true);
     } catch (err) {
       setErrorDetails({
         step: 'Initializing Import',
@@ -223,6 +232,15 @@ export default function PropstreamREListingImporter() {
       });
       setImporting(false);
     }
+  };
+
+  const confirmStartImport = () => {
+    setShowBatchDialog(false);
+    setStep('batch_import');
+    setCurrentBatchIndex(0);
+    setBatchResults([]);
+    const listings = csvData.map(row => mapRow(row, mapping));
+    processBatchWithId(listings, 0, totalBatches, batchId);
   };
 
   const processBatchWithId = async (listings, batchIdx, totalB, batchIdValue) => {
@@ -368,6 +386,53 @@ export default function PropstreamREListingImporter() {
         <h1 className="text-3xl font-bold text-slate-900 mb-1">PropStream RE Listing Importer</h1>
         <p className="text-slate-500 text-sm">Import MLS/PropStream CSV exports in batches of 100 records. Review each batch before continuing.</p>
       </div>
+
+      {showBatchDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="max-w-lg w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-purple-600" />
+                Batch Import Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                  <span className="text-sm text-slate-600">Existing Listings in Table:</span>
+                  <span className="text-lg font-bold text-slate-800">{existingListingCount ?? 'Loading...'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <span className="text-sm text-purple-700">New Records to Import:</span>
+                  <span className="text-lg font-bold text-purple-700">{csvData?.length}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                  <span className="text-sm text-slate-600">Total After Import:</span>
+                  <span className="text-lg font-bold text-slate-800">
+                    {existingListingCount !== null && csvData ? (existingListingCount + csvData.length).toLocaleString() : '...'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span className="text-sm text-blue-700">Number of Batches:</span>
+                  <span className="text-lg font-bold text-blue-700">{totalBatches} × 100</span>
+                </div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-800 font-semibold mb-1">Batch Process:</p>
+                <p className="text-xs text-amber-700">Each batch of 100 records will be processed separately. Review results and continue to the next batch manually, or use "Import All" for automatic processing.</p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button onClick={() => setShowBatchDialog(false)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={confirmStartImport} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  Start First Batch →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {errorDetails && (
         <Card className="border-red-300 bg-red-50">
