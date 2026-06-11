@@ -120,6 +120,7 @@ import AdminHousioSync from './pages/AdminHousioSync';
 import ResellerPackupEventEditor from './pages/ResellerPackupEventEditor';
 import ResellerPackupEvents from './pages/ResellerPackupEvents';
 import AdminCentralRepository from './pages/AdminCentralRepository';
+import LandingPageBizInABox from './pages/LandingPageBizInABox';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -232,6 +233,7 @@ const AuthenticatedApp = () => {
       <Route path="/LandingPageReferralEngine" element={<LandingPageReferralEngine />} />
       <Route path="/LandingPageAIPlan" element={<LandingPageAIPlan />} />
       <Route path="/LandingPageRetarget" element={<LandingPageRetarget />} />
+      <Route path="/LandingPageBizInABox" element={<LandingPageBizInABox />} />
       <Route path="/AgentPartnerships" element={<LayoutWrapper currentPageName="AgentPartnerships"><AgentPartnerships /></LayoutWrapper>} />
       <Route path="/JoinReferralExchange" element={<LayoutWrapper currentPageName="JoinReferralExchange"><JoinReferralExchange /></LayoutWrapper>} />
       <Route path="/ReferralDealPipeline" element={<LayoutWrapper currentPageName="ReferralDealPipeline"><ReferralDealPipeline /></LayoutWrapper>} />

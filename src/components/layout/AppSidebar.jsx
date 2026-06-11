@@ -122,6 +122,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'LandingPageReferralEngine', label: 'LP: Referral Engine',         icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageAIPlan',         label: 'LP: AI Custom Plan',          icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageRetarget',       label: 'LP: Retargeting Page',        icon: Rocket, group: 'Landing Pages' },
+  { page: 'LandingPageBizInABox',      label: 'LP: Own A Division',           icon: Rocket, group: 'Landing Pages' },
 ];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
