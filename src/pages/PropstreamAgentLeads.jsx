@@ -589,21 +589,10 @@ export default function PropstreamAgentLeads() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-700">Brokerage Address</Label>
-                  <div className="flex items-start gap-2 mt-1">
-                    <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
-                    <div className="text-sm text-slate-600">
-                      {selectedLead.brokerage_address && (
-                        <div>{selectedLead.brokerage_address}</div>
-                      )}
-                      {(selectedLead.brokerage_city || selectedLead.brokerage_state || selectedLead.brokerage_zip) && (
-                        <div>
-                          {[selectedLead.brokerage_city, selectedLead.brokerage_state, selectedLead.brokerage_zip]
-                            .filter(Boolean)
-                            .join(', ')}
-                        </div>
-                      )}
-                    </div>
+                  <Label className="text-sm font-medium text-slate-700">Brokerage Name</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Building className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">{selectedLead.brokerage_name || '—'}</span>
                   </div>
                 </div>
 

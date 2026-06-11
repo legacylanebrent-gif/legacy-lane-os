@@ -59,47 +59,60 @@ Deno.serve(async (req) => {
       const existing = agentMap.get(agentKey);
       
       if (existing) {
-        // Update existing agent record - aggregate all listings
-        existing.listing_count += 1;
-        existing.total_volume += listing.estimated_value || 0;
-        if (listing.property_address && !existing.property_addresses.includes(listing.property_address)) {
-          existing.property_addresses.push(listing.property_address);
-        }
-        if (listing.id && !existing.propstream_listing_ids.includes(listing.id)) {
-          existing.propstream_listing_ids.push(listing.id);
-        }
-        // Update contact info if we have better data
-        if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
-        if (!existing.agent_phone && agentPhone) existing.agent_phone = agentPhone;
-        if (!existing.agent_license && listing.listing_agent_license) existing.agent_license = listing.listing_agent_license;
-        if (!existing.brokerage_name && listing.brokerage_name) existing.brokerage_name = listing.brokerage_name;
+      // Update existing agent record - aggregate all listings
+      existing.listing_count += 1;
+      existing.total_volume += listing.estimated_value || 0;
+      // Store full address with city, state, zip
+      const fullAddress = [
+        listing.property_address,
+        listing.city,
+        listing.state,
+        listing.zip
+      ].filter(Boolean).join(', ');
+      if (fullAddress && !existing.property_addresses.includes(fullAddress)) {
+        existing.property_addresses.push(fullAddress);
+      }
+      if (listing.id && !existing.propstream_listing_ids.includes(listing.id)) {
+        existing.propstream_listing_ids.push(listing.id);
+      }
+      // Update contact info if we have better data
+      if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
+      if (!existing.agent_phone && agentPhone) existing.agent_phone = agentPhone;
+      if (!existing.agent_license && listing.listing_agent_license) existing.agent_license = listing.listing_agent_license;
+      if (!existing.brokerage_name && listing.brokerage_name) existing.brokerage_name = listing.brokerage_name;
       } else {
-        // Create new agent record
-        agentMap.set(agentKey, {
-          agent_name: agentName,
-          agent_email: agentEmail || null,
-          agent_phone: agentPhone || null,
-          agent_license: listing.listing_agent_license || null,
-          brokerage_name: listing.brokerage_name || null,
-          brokerage_address: listing.brokerage_address || null,
-          brokerage_city: listing.brokerage_city || null,
-          brokerage_state: listing.brokerage_state || null,
-          brokerage_zip: listing.brokerage_zip || null,
-          territory_name: listing.territory_name || null,
-          territory_id: listing.territory_id || null,
-          state: listing.state || null,
-          county: listing.county || null,
-          listing_count: 1,
-          total_volume: listing.estimated_value || 0,
-          property_addresses: listing.property_address ? [listing.property_address] : [],
-          propstream_listing_ids: listing.id ? [listing.id] : [],
-          lead_status: 'new',
-          priority: 'medium',
-          lead_score: 0,
-          source_batch_id: listing.import_batch_id,
-          first_seen_date: listing.imported_date || new Date().toISOString(),
-          last_updated_date: new Date().toISOString(),
-        });
+      // Create new agent record
+      const fullAddress = [
+        listing.property_address,
+        listing.city,
+        listing.state,
+        listing.zip
+      ].filter(Boolean).join(', ');
+      agentMap.set(agentKey, {
+        agent_name: agentName,
+        agent_email: agentEmail || null,
+        agent_phone: agentPhone || null,
+        agent_license: listing.listing_agent_license || null,
+        brokerage_name: listing.brokerage_name || null,
+        brokerage_address: listing.brokerage_address || null,
+        brokerage_city: listing.brokerage_city || null,
+        brokerage_state: listing.brokerage_state || null,
+        brokerage_zip: listing.brokerage_zip || null,
+        territory_name: listing.territory_name || null,
+        territory_id: listing.territory_id || null,
+        state: listing.state || null,
+        county: listing.county || null,
+        listing_count: 1,
+        total_volume: listing.estimated_value || 0,
+        property_addresses: fullAddress ? [fullAddress] : [],
+        propstream_listing_ids: listing.id ? [listing.id] : [],
+        lead_status: 'new',
+        priority: 'medium',
+        lead_score: 0,
+        source_batch_id: listing.import_batch_id,
+        first_seen_date: listing.imported_date || new Date().toISOString(),
+        last_updated_date: new Date().toISOString(),
+      });
       }
     });
 
