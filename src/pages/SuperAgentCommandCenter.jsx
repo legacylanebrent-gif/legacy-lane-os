@@ -652,7 +652,7 @@ export default function SuperAgentCommandCenter() {
                   <div className="bg-white border border-slate-200 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
                       <Zap className="w-4 h-4 text-amber-600" />
-                      Recommended Actions for {configuringAgent.name}
+                      Recommended Actions
                     </h4>
                     <div className="space-y-3">
                       {AGENT_SUGGESTIONS[configuringAgent.id]?.map((suggestion, idx) => {
