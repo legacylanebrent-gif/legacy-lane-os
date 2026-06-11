@@ -55,7 +55,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'Leads',                  label: 'Lead Center',            icon: Award,           group: 'CRM & Leads' },
   { page: 'SaleConversionPipeline', label: 'Sale Pipeline',          icon: TrendingUp,      group: 'CRM & Leads' },
   { page: 'AgentOperatorPortal',    label: 'Operator Partnerships',  icon: Briefcase,       group: 'CRM & Leads' },
-  { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'CRM & Leads' },
 
   // ── MARKETING ───────────────────────────────────────────────────────────────
   { page: 'Campaigns',              label: 'Campaigns',              icon: Megaphone,       group: 'Marketing' },
