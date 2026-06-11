@@ -65,12 +65,21 @@ Deno.serve(async (req) => {
           synced_at: now,
         };
       } else {
+        // Extract FIPS from territory_id if not provided directly (format: 'NJ-34003' -> '34003')
+        let countyFips = item.county_fips;
+        if (!countyFips && item.territory_id) {
+          const parts = item.territory_id.split('-');
+          if (parts.length === 2 && parts[1] && /^\d{5}$/.test(parts[1])) {
+            countyFips = parts[1];
+          }
+        }
+        
         return {
           territory_id: item.territory_id || item.id || `${item.state}-${safeWriteOffset}-${Math.random()}`,
           state: item.state,
           state_name: item.state_name || item.state,
           county: item.county || item.name || null,
-          county_fips: item.county_fips || null,
+          county_fips: countyFips,
           zip_codes_json: item.zip_codes || [],
           synced_at: now,
           is_active: item.is_active ?? true,
