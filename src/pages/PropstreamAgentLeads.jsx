@@ -66,6 +66,8 @@ export default function PropstreamAgentLeads() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
+  const [territoryFilter, setTerritoryFilter] = useState('all');
   const [selectedLead, setSelectedLead] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
@@ -158,9 +160,14 @@ export default function PropstreamAgentLeads() {
     
     const matchesStatus = statusFilter === 'all' || lead.lead_status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || lead.priority === priorityFilter;
+    const matchesState = stateFilter === 'all' || lead.brokerage_state === stateFilter;
+    const matchesTerritory = territoryFilter === 'all' || !lead.territory_name || lead.territory_name === territoryFilter;
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesState && matchesTerritory;
   });
+
+  const uniqueStates = [...new Set(leads.map(l => l.brokerage_state).filter(Boolean))].sort();
+  const uniqueTerritories = [...new Set(leads.map(l => l.territory_name).filter(Boolean))].sort();
 
   const stats = {
     total: leads.length,
@@ -313,6 +320,34 @@ export default function PropstreamAgentLeads() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="w-48">
+                <Label className="text-sm font-medium text-slate-700 mb-2">State</Label>
+                <Select value={stateFilter} onValueChange={setStateFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All States" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {uniqueStates.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-48">
+                <Label className="text-sm font-medium text-slate-700 mb-2">Territory</Label>
+                <Select value={territoryFilter} onValueChange={setTerritoryFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Territories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Territories</SelectItem>
+                    {uniqueTerritories.map(territory => (
+                      <SelectItem key={territory} value={territory}>{territory}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -344,7 +379,8 @@ export default function PropstreamAgentLeads() {
                     <tr className="border-b border-slate-200">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Agent</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Brokerage</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Location</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">State</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Territory</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Listings</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Status</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Priority</th>
@@ -366,11 +402,10 @@ export default function PropstreamAgentLeads() {
                           <div className="text-sm text-slate-700">{lead.brokerage_name || '—'}</div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="text-sm text-slate-700">
-                            {lead.brokerage_city && lead.brokerage_state
-                              ? `${lead.brokerage_city}, ${lead.brokerage_state}`
-                              : '—'}
-                          </div>
+                          <div className="text-sm text-slate-700 font-medium">{lead.brokerage_state || '—'}</div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm text-slate-700">{lead.territory_name || '—'}</div>
                         </td>
                         <td className="py-3 px-4">
                           <div className="text-sm text-slate-700">{lead.listing_count || 1}</div>
