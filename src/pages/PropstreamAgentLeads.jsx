@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,6 +82,7 @@ export default function PropstreamAgentLeads() {
   const [extractionProgress, setExtractionProgress] = useState(null);
   const [currentBatch, setCurrentBatch] = useState(1);
   const [totalBatches, setTotalBatches] = useState(null);
+  const continueRef = React.useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [agentFilter, setAgentFilter] = useState('');
@@ -186,79 +187,126 @@ export default function PropstreamAgentLeads() {
     }
   };
 
+  const processBatch = async (batchNum, totals) => {
+    setExtractionProgress({
+      currentBatch: batchNum,
+      ...totals,
+      status: 'processing'
+    });
+    
+    const result = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
+      batch_number: batchNum,
+      batch_size: 100
+    });
+    
+    return {
+      totalCreated: totals.totalCreated + (result.agents_created || 0),
+      totalUpdated: totals.totalUpdated + (result.agents_updated || 0),
+      totalProcessed: totals.totalProcessed + (result.total_listings_processed || 0),
+      hasMore: result.has_more_batches,
+      totalBatches: result.total_batches
+    };
+  };
+
   const handleConfirmExtract = async () => {
     setExtractingAgents(true);
     setCurrentBatch(1);
     
     try {
-      let totalCreated = 0;
-      let totalUpdated = 0;
-      let totalProcessed = 0;
+      let totals = { totalCreated: 0, totalUpdated: 0, totalProcessed: 0 };
       let batchNum = 1;
-      let continueExtraction = true;
+      let hasMore = true;
       
-      while (continueExtraction) {
-        setExtractionProgress({
-          currentBatch: batchNum,
-          totalCreated,
-          totalUpdated,
-          totalProcessed,
-          status: 'processing'
-        });
+      while (hasMore) {
+        const result = await processBatch(batchNum, totals);
+        totals = { totalCreated: result.totalCreated, totalUpdated: result.totalUpdated, totalProcessed: result.totalProcessed };
         
-        // Process batch of 100
-        const result = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
-          batch_number: batchNum,
-          batch_size: 100
-        });
-        
-        totalCreated += result.agents_created || 0;
-        totalUpdated += result.agents_updated || 0;
-        totalProcessed += result.total_listings_processed || 0;
-        
-        // Check if there are more batches
-        if (!result.has_more_batches) {
-          continueExtraction = false;
+        if (!result.hasMore) {
+          hasMore = false;
           setExtractionProgress({
             currentBatch: batchNum,
-            totalCreated,
-            totalUpdated,
-            totalProcessed,
+            ...totals,
             status: 'complete',
             totalBatches: batchNum
           });
         } else {
-          setTotalBatches(result.total_batches);
+          setTotalBatches(result.totalBatches);
           setCurrentBatch(batchNum + 1);
           setExtractionProgress({
             currentBatch: batchNum,
-            totalCreated,
-            totalUpdated,
-            totalProcessed,
+            ...totals,
             status: 'waiting',
-            totalBatches: result.total_batches
+            totalBatches: result.totalBatches
           });
-          
-          // Wait for user to click continue
-          await new Promise((resolve) => {
-            const checkContinue = setInterval(() => {
-              if (!extractionProgress || extractionProgress.status !== 'waiting') {
-                clearInterval(checkContinue);
-                resolve();
-              }
-            }, 500);
-          });
-          
-          batchNum++;
+          // Wait for user to click Continue - the Continue button will call continueExtraction
+          return; // Exit and wait for user input
         }
+        
+        batchNum++;
       }
       
+      // Extraction complete
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
       setExtractDialogOpen(false);
       alert(`Extraction complete!\n\n` +
-        `Total agents created: ${totalCreated}\n` +
-        `Total agents updated: ${totalUpdated}\n` +
-        `Total listings processed: ${totalProcessed}\n` +
+        `Total agents created: ${totals.totalCreated}\n` +
+        `Total agents updated: ${totals.totalUpdated}\n` +
+        `Total listings processed: ${totals.totalProcessed}\n` +
+        `Batches completed: ${batchNum}`
+      );
+    } catch (error) {
+      alert('Error during extraction: ' + error.message);
+      setExtractingAgents(false);
+      setExtractionProgress(null);
+    }
+  };
+
+  const continueExtraction = async () => {
+    if (!extractionProgress) return;
+    
+    try {
+      let totals = { 
+        totalCreated: extractionProgress.totalCreated, 
+        totalUpdated: extractionProgress.totalUpdated, 
+        totalProcessed: extractionProgress.totalProcessed 
+      };
+      let batchNum = currentBatch;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const result = await processBatch(batchNum, totals);
+        totals = { totalCreated: result.totalCreated, totalUpdated: result.totalUpdated, totalProcessed: result.totalProcessed };
+        
+        if (!result.hasMore) {
+          hasMore = false;
+          setExtractionProgress({
+            currentBatch: batchNum,
+            ...totals,
+            status: 'complete',
+            totalBatches: batchNum
+          });
+        } else {
+          setTotalBatches(result.totalBatches);
+          setCurrentBatch(batchNum + 1);
+          setExtractionProgress({
+            currentBatch: batchNum,
+            ...totals,
+            status: 'waiting',
+            totalBatches: result.totalBatches
+          });
+          return; // Wait for next continue
+        }
+        
+        batchNum++;
+      }
+      
+      // Extraction complete
+      queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
+      setExtractDialogOpen(false);
+      alert(`Extraction complete!\n\n` +
+        `Total agents created: ${totals.totalCreated}\n` +
+        `Total agents updated: ${totals.totalUpdated}\n` +
+        `Total listings processed: ${totals.totalProcessed}\n` +
         `Batches completed: ${batchNum}`
       );
     } catch (error) {
@@ -913,13 +961,17 @@ export default function PropstreamAgentLeads() {
                 <>
                   <Button 
                     variant="outline" 
-                    onClick={() => setExtractDialogOpen(false)}
+                    onClick={() => {
+                      setExtractDialogOpen(false);
+                      setExtractionProgress(null);
+                      setExtractingAgents(false);
+                    }}
                   >
                     Cancel
                   </Button>
                   <Button 
                     className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setExtractionProgress({ ...extractionProgress, status: 'processing' })}
+                    onClick={continueExtraction}
                   >
                     Continue to Batch {currentBatch}
                   </Button>
