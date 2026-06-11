@@ -1,0 +1,105 @@
+{
+  "name": "ItemImageReference",
+  "type": "object",
+  "properties": {
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 required after matching"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "sale_upload",
+        "marketplace",
+        "reseller_lookup",
+        "serpapi",
+        "barcode",
+        "admin"
+      ],
+      "description": "Where this image came from"
+    },
+    "source_record_id": {
+      "type": "string",
+      "description": "ID of the originating record (SaleItemPricing, MarketplaceItem, etc.)"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "sale_item_id": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string"
+    },
+    "reseller_id": {
+      "type": "string"
+    },
+    "original_image_url": {
+      "type": "string",
+      "description": "Raw upload URL \u2014 temporary, private"
+    },
+    "compressed_image_url": {
+      "type": "string",
+      "description": "Web-optimized version for public display"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Small thumbnail (e.g. 200x200)"
+    },
+    "image_hash": {
+      "type": "string",
+      "description": "MD5/SHA hash of original file for exact dedup"
+    },
+    "perceptual_hash": {
+      "type": "string",
+      "description": "pHash for near-duplicate detection"
+    },
+    "barcode_detected": {
+      "type": "boolean",
+      "default": false
+    },
+    "barcode_value": {
+      "type": "string"
+    },
+    "image_confidence_score": {
+      "type": "number",
+      "description": "0-100 confidence that this image matches the ItemKnowledge record"
+    },
+    "is_primary_image": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_public_approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "retention_status": {
+      "type": "string",
+      "enum": [
+        "temporary",
+        "keep_compressed",
+        "archive",
+        "delete"
+      ],
+      "default": "temporary",
+      "description": "Originals are temporary by default. Only keep_compressed or archive for retained items."
+    },
+    "ai_metadata": {
+      "type": "object",
+      "description": "Raw AI extraction payload stored here to avoid re-processing"
+    },
+    "width": {
+      "type": "integer"
+    },
+    "height": {
+      "type": "integer"
+    },
+    "file_size_bytes": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "source_type",
+    "original_image_url"
+  ]
+}

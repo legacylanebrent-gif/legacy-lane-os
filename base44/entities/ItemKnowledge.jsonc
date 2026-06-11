@@ -2,17 +2,17 @@
   "name": "ItemKnowledge",
   "type": "object",
   "properties": {
-    "slug": {
+    "canonical_name": {
       "type": "string",
-      "description": "URL slug: /items/{slug}"
-    },
-    "entity_name": {
-      "type": "string",
-      "description": "Display name e.g. Pyrex Butterprint Mixing Bowl"
+      "description": "Clean display name e.g. Pyrex Butterprint Cinderella Mixing Bowl"
     },
     "normalized_name": {
       "type": "string",
       "description": "Lowercase normalized for dedup/matching"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug: /items/{slug} \u2014 unique"
     },
     "brand": {
       "type": "string"
@@ -26,9 +26,12 @@
     "subcategory": {
       "type": "string"
     },
-    "style": {
+    "item_type": {
       "type": "string",
-      "description": "e.g. Mid-Century Modern, Victorian"
+      "description": "e.g. bowl, chair, painting, coin"
+    },
+    "model": {
+      "type": "string"
     },
     "pattern": {
       "type": "string",
@@ -36,7 +39,11 @@
     },
     "era": {
       "type": "string",
-      "description": "e.g. 1950s, circa 1920"
+      "description": "e.g. 1950s, circa 1920, Victorian"
+    },
+    "style": {
+      "type": "string",
+      "description": "e.g. Mid-Century Modern, Art Deco"
     },
     "material": {
       "type": "string"
@@ -47,11 +54,17 @@
     "country_of_origin": {
       "type": "string"
     },
-    "estimated_age": {
-      "type": "string"
+    "condition_profile": {
+      "type": "string",
+      "description": "General condition summary for this item type"
     },
-    "ai_description": {
-      "type": "string"
+    "short_description": {
+      "type": "string",
+      "description": "1-2 sentence collector-grade summary"
+    },
+    "long_description": {
+      "type": "string",
+      "description": "Full AI-generated or human-edited description"
     },
     "historical_context": {
       "type": "string"
@@ -59,55 +72,36 @@
     "collector_notes": {
       "type": "string"
     },
-    "primary_image_url": {
-      "type": "string"
-    },
-    "occurrence_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "average_value": {
-      "type": "number"
-    },
-    "highest_value": {
-      "type": "number"
-    },
-    "lowest_value": {
-      "type": "number"
-    },
-    "active_inventory_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "sold_inventory_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "buyer_interest_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "watch_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "wanted_count": {
-      "type": "integer",
-      "default": 0
-    },
-    "demand_score": {
-      "type": "number",
-      "default": 0,
-      "description": "0-100 computed demand signal"
-    },
     "seo_title": {
       "type": "string"
     },
-    "meta_description": {
+    "seo_description": {
       "type": "string"
+    },
+    "search_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
     "schema_json": {
       "type": "object"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "0-100 confidence that this record is a clean canonical identity"
+    },
+    "public_status": {
+      "type": "string",
+      "enum": [
+        "private",
+        "review_needed",
+        "approved_public",
+        "rejected"
+      ],
+      "default": "private",
+      "description": "Only approved_public generates public authority pages"
     },
     "indexed_status": {
       "type": "string",
@@ -120,18 +114,79 @@
       ],
       "default": "not_submitted"
     },
-    "status": {
+    "primary_image_url": {
       "type": "string",
-      "enum": [
-        "draft",
-        "published",
-        "archived"
-      ],
-      "default": "draft"
+      "description": "Reference to the best approved compressed image"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "times_seen": {
+      "type": "integer",
+      "default": 0,
+      "description": "How many times this item has appeared across all sources"
+    },
+    "avg_price": {
+      "type": "number"
+    },
+    "low_price": {
+      "type": "number"
+    },
+    "high_price": {
+      "type": "number"
+    },
+    "first_seen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "related_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "related_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "related_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "source_types_seen": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Which source types have contributed: sale_upload, marketplace, serpapi, barcode, etc."
+    },
+    "match_method_first": {
+      "type": "string",
+      "description": "How this record was first created: barcode, exact_name, image_hash, brand_model, ai_semantic, serpapi, manual"
+    },
+    "has_barcode": {
+      "type": "boolean",
+      "default": false
+    },
+    "has_verified_image": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [
-    "entity_name",
+    "canonical_name",
     "slug"
   ]
 }

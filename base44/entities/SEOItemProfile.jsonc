@@ -4,47 +4,41 @@
   "properties": {
     "item_id": {
       "type": "string",
-      "description": "Linked item ID (from EstateSale images or MarketplaceItem)"
+      "description": "Short item ID within a sale"
+    },
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 central authority record"
     },
     "sale_id": {
-      "type": "string",
-      "description": "Linked EstateSale ID"
+      "type": "string"
     },
     "company_id": {
-      "type": "string",
-      "description": "Linked operator/company user ID"
+      "type": "string"
     },
     "brand_name": {
-      "type": "string",
-      "description": "Identified brand name"
+      "type": "string"
     },
     "category_name": {
-      "type": "string",
-      "description": "Primary category (e.g. Furniture, Jewelry, Art)"
+      "type": "string"
     },
     "style": {
-      "type": "string",
-      "description": "Style descriptor (e.g. Mid-Century Modern, Victorian, Art Deco)"
+      "type": "string"
     },
     "estimated_age": {
-      "type": "string",
-      "description": "Estimated age or era (e.g. 1950s, circa 1920)"
+      "type": "string"
     },
     "condition_summary": {
-      "type": "string",
-      "description": "Condition description (e.g. Excellent, Good, Fair)"
+      "type": "string"
     },
     "value_low": {
-      "type": "number",
-      "description": "Low end of estimated value range"
+      "type": "number"
     },
     "value_high": {
-      "type": "number",
-      "description": "High end of estimated value range"
+      "type": "number"
     },
     "sold_price": {
-      "type": "number",
-      "description": "Actual sold price if known"
+      "type": "number"
     },
     "sold_status": {
       "type": "string",
@@ -53,36 +47,29 @@
         "sold",
         "unknown"
       ],
-      "default": "available",
-      "description": "Whether the item has been sold"
+      "default": "available"
     },
     "ai_description": {
-      "type": "string",
-      "description": "AI-generated SEO-rich item description"
+      "type": "string"
     },
     "historical_context": {
-      "type": "string",
-      "description": "Historical or collector context for the item"
+      "type": "string"
     },
     "search_keywords": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "SEO keywords associated with this item"
+      "default": []
     },
     "image_url": {
-      "type": "string",
-      "description": "Primary image URL for this item"
+      "type": "string"
     },
     "item_name": {
-      "type": "string",
-      "description": "Item name/title"
+      "type": "string"
     },
     "slug": {
-      "type": "string",
-      "description": "URL slug for this item's SEO page"
+      "type": "string"
     },
     "indexed_status": {
       "type": "string",

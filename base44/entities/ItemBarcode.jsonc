@@ -1,0 +1,66 @@
+{
+  "name": "ItemBarcode",
+  "type": "object",
+  "properties": {
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 matched or created from this barcode"
+    },
+    "barcode_type": {
+      "type": "string",
+      "enum": [
+        "UPC",
+        "EAN",
+        "ISBN",
+        "GTIN",
+        "QR",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "barcode_value": {
+      "type": "string",
+      "description": "The raw barcode string \u2014 unique index"
+    },
+    "product_title": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Manufacturer product image if available from lookup"
+    },
+    "msrp": {
+      "type": "number"
+    },
+    "source": {
+      "type": "string",
+      "description": "API or method used: open_food_facts, barcodelookup, manual, scan"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "0-100 confidence in match"
+    },
+    "raw_lookup_response": {
+      "type": "object",
+      "description": "Full raw response from barcode lookup API"
+    }
+  },
+  "required": [
+    "barcode_value"
+  ]
+}

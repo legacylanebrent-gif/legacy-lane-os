@@ -4,15 +4,17 @@
   "properties": {
     "item_id": {
       "type": "string",
-      "description": "Reference to the Item"
+      "description": "Reference to the Item entity"
+    },
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 central authority record"
     },
     "marketplace_item_id": {
-      "type": "string",
-      "description": "Reference to MarketplaceItem if applicable"
+      "type": "string"
     },
     "estate_sale_id": {
-      "type": "string",
-      "description": "Reference to EstateSale if applicable"
+      "type": "string"
     },
     "boost_type": {
       "type": "string",
@@ -23,48 +25,41 @@
         "internal_links",
         "featured_snippet"
       ],
-      "default": "keyword_rich_title",
-      "description": "Type of SEO boost applied"
+      "default": "keyword_rich_title"
     },
     "keywords": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Keywords extracted and optimized"
+      "default": []
     },
     "primary_keyword": {
-      "type": "string",
-      "description": "Main keyword for the item"
+      "type": "string"
     },
     "secondary_keywords": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Related long-tail keywords"
+      "default": []
     },
     "suggested_title": {
-      "type": "string",
-      "description": "SEO-optimized title suggestion"
+      "type": "string"
     },
     "suggested_description": {
-      "type": "string",
-      "description": "SEO-optimized description with keyword integration"
+      "type": "string"
     },
     "meta_description": {
-      "type": "string",
-      "description": "Meta description for search engines (max 160 chars)"
+      "type": "string"
     },
     "seo_score": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 100,
-      "description": "SEO optimization score"
+      "maximum": 100
     },
     "estimated_organic_reach": {
-      "type": "integer",
-      "description": "Estimated monthly organic search traffic"
+      "type": "integer"
     },
     "category_insights": {
       "type": "object",
@@ -105,8 +100,7 @@
       "format": "date-time"
     },
     "boost_reason": {
-      "type": "string",
-      "description": "Why this boost was applied"
+      "type": "string"
     }
   },
   "required": [

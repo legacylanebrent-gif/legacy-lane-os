@@ -4,29 +4,21 @@
   "properties": {
     "item_knowledge_id": {
       "type": "string",
-      "description": "FK to ItemKnowledge"
+      "description": "FK to ItemKnowledge \u2014 required"
     },
-    "item_id": {
-      "type": "string",
-      "description": "FK to Item (if from marketplace)"
-    },
-    "sale_item_pricing_id": {
-      "type": "string",
-      "description": "FK to SaleItemPricing (if from SERP)"
-    },
-    "price": {
-      "type": "number"
-    },
-    "source": {
+    "source_type": {
       "type": "string",
       "enum": [
-        "serp_api",
-        "sale_sold",
-        "marketplace_sold",
-        "manual",
+        "serpapi",
+        "ebay",
+        "marketplace",
+        "operator_price",
+        "reseller_research",
+        "pos_sale",
         "google_lens",
-        "operator_input"
-      ]
+        "manual"
+      ],
+      "description": "Where this price observation came from"
     },
     "source_url": {
       "type": "string"
@@ -34,30 +26,45 @@
     "source_title": {
       "type": "string"
     },
-    "lookup_date": {
+    "price": {
+      "type": "number"
+    },
+    "currency": {
       "type": "string",
-      "format": "date-time"
-    },
-    "sale_date": {
-      "type": "string",
-      "format": "date"
-    },
-    "city": {
-      "type": "string"
-    },
-    "state": {
-      "type": "string"
+      "default": "USD"
     },
     "condition": {
+      "type": "string",
+      "description": "e.g. excellent, good, fair, poor, unknown"
+    },
+    "sold_status": {
+      "type": "string",
+      "enum": [
+        "sold",
+        "listed",
+        "estimated",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "location": {
+      "type": "string"
+    },
+    "sale_id": {
       "type": "string"
     },
     "operator_id": {
       "type": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this price was observed (not created_at)"
     }
   },
   "required": [
     "item_knowledge_id",
     "price",
-    "source"
+    "source_type"
   ]
 }

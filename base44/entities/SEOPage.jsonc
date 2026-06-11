@@ -22,29 +22,28 @@
       "type": "string",
       "description": "ID of the linked entity (sale, item, company, etc.)"
     },
+    "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 set for all item-type pages"
+    },
     "slug": {
       "type": "string",
-      "description": "URL-safe slug for this page"
+      "description": "URL-safe slug"
     },
     "title": {
-      "type": "string",
-      "description": "Page title (SEO optimized)"
+      "type": "string"
     },
     "meta_description": {
-      "type": "string",
-      "description": "Meta description for search engines"
+      "type": "string"
     },
     "h1": {
-      "type": "string",
-      "description": "Primary H1 heading"
+      "type": "string"
     },
     "intro_content": {
-      "type": "string",
-      "description": "Introductory paragraph content"
+      "type": "string"
     },
     "main_content": {
-      "type": "string",
-      "description": "Main body content (HTML or markdown)"
+      "type": "string"
     },
     "faq_json": {
       "type": "array",
@@ -59,16 +58,13 @@
           }
         }
       },
-      "default": [],
-      "description": "FAQ entries for FAQ schema markup"
+      "default": []
     },
     "schema_json": {
-      "type": "object",
-      "description": "Structured data / JSON-LD schema"
+      "type": "object"
     },
     "canonical_url": {
-      "type": "string",
-      "description": "Canonical URL for this page"
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -77,8 +73,7 @@
         "published",
         "archived"
       ],
-      "default": "draft",
-      "description": "Publication status"
+      "default": "draft"
     },
     "indexed_status": {
       "type": "string",
@@ -89,13 +84,11 @@
         "not_indexed",
         "unknown"
       ],
-      "default": "not_submitted",
-      "description": "Google indexing status"
+      "default": "not_submitted"
     },
     "published_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "When the page was published"
+      "format": "date-time"
     }
   },
   "required": [

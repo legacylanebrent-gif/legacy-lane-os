@@ -3,13 +3,28 @@
   "type": "object",
   "properties": {
     "item_knowledge_id": {
+      "type": "string",
+      "description": "FK to ItemKnowledge \u2014 one row per item"
+    },
+    "category": {
       "type": "string"
     },
-    "slug": {
-      "type": "string"
+    "region": {
+      "type": "string",
+      "description": "Optional geo region for regional demand tracking"
     },
-    "entity_name": {
-      "type": "string"
+    "times_seen": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total appearances across all sources"
+    },
+    "active_inventory_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "sold_inventory_count": {
+      "type": "integer",
+      "default": 0
     },
     "watch_count": {
       "type": "integer",
@@ -27,18 +42,23 @@
       "type": "integer",
       "default": 0
     },
-    "active_inventory_count": {
-      "type": "integer",
-      "default": 0
+    "avg_price": {
+      "type": "number"
     },
-    "sold_inventory_count": {
-      "type": "integer",
-      "default": 0
+    "low_price": {
+      "type": "number"
+    },
+    "high_price": {
+      "type": "number"
+    },
+    "sell_through_estimate": {
+      "type": "number",
+      "description": "Estimated sell-through rate 0-100"
     },
     "demand_score": {
       "type": "number",
       "default": 0,
-      "description": "Computed 0-100 score"
+      "description": "Computed 0-100 overall demand signal"
     },
     "demand_trend": {
       "type": "string",
@@ -63,7 +83,7 @@
     "avg_days_to_sell": {
       "type": "number"
     },
-    "last_computed": {
+    "last_calculated_at": {
       "type": "string",
       "format": "date-time"
     }
