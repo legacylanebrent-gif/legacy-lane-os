@@ -205,7 +205,15 @@ export default function PropstreamREListingImporter() {
     
     try {
       const initRes = await base44.functions.invoke('initBatchImport', { filename, total_rows: listings.length });
-      setBatchId(initRes.data.batch_id);
+      const batchIdValue = initRes.data.batch_id;
+      setBatchId(batchIdValue);
+      
+      setStep('batch_import');
+      setCurrentBatchIndex(0);
+      setBatchResults([]);
+      
+      // Process first batch directly with the batch ID value (not state)
+      await processBatchWithId(listings, 0, totalBatches, batchIdValue);
     } catch (err) {
       setErrorDetails({
         step: 'Initializing Import',
@@ -214,17 +222,10 @@ export default function PropstreamREListingImporter() {
         details: JSON.stringify(err.response?.data || err, null, 2)
       });
       setImporting(false);
-      return;
     }
-    
-    setStep('batch_import');
-    setCurrentBatchIndex(0);
-    setBatchResults([]);
-    
-    processBatch(listings, 0, totalBatches);
   };
 
-  const processBatch = async (listings, batchIdx) => {
+  const processBatchWithId = async (listings, batchIdx, totalB, batchIdValue) => {
     setImporting(true);
     const start = batchIdx * BATCH_SIZE;
     const end = Math.min(start + BATCH_SIZE, listings.length);
@@ -232,10 +233,10 @@ export default function PropstreamREListingImporter() {
     
     try {
       const res = await base44.functions.invoke('importBatchChunk', { 
-        batch_id: batchId,
+        batch_id: batchIdValue,
         listings: batchData,
         batch_index: batchIdx,
-        total_batches: totalBatches
+        total_batches: totalB
       });
       
       const batchResult = {
@@ -258,7 +259,7 @@ export default function PropstreamREListingImporter() {
         const agentExtracted = res.data.agent_extraction_triggered;
         
         setResult({
-          batch_id: batchId,
+          batch_id: batchIdValue,
           total: listings.length,
           imported: totalImported,
           duplicates: totalDupes,
@@ -279,6 +280,10 @@ export default function PropstreamREListingImporter() {
       });
       setImporting(false);
     }
+  };
+
+  const processBatch = async (listings, batchIdx) => {
+    await processBatchWithId(listings, batchIdx, totalBatches, batchId);
   };
 
   const handleNextBatch = () => {
