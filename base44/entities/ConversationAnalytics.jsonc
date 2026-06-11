@@ -1,0 +1,75 @@
+{
+  "name": "ConversationAnalytics",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User this analytics record belongs to"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "total_conversations": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_messages_sent": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_messages_received": {
+      "type": "integer",
+      "default": 0
+    },
+    "avg_response_time_hours": {
+      "type": "number"
+    },
+    "conversations_with_replies": {
+      "type": "integer",
+      "default": 0
+    },
+    "reply_rate_percentage": {
+      "type": "number",
+      "description": "Percentage of sent messages that received replies"
+    },
+    "new_connections_made": {
+      "type": "integer",
+      "default": 0
+    },
+    "partnerships_initiated": {
+      "type": "integer",
+      "default": 0
+    },
+    "partnerships_closed": {
+      "type": "integer",
+      "default": 0
+    },
+    "top_contact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Top 5 most frequent contacts"
+    },
+    "sentiment_score_avg": {
+      "type": "number",
+      "description": "Average sentiment score of conversations (-1 to 1)"
+    },
+    "action_items_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Action items extracted from conversations"
+    }
+  },
+  "required": [
+    "user_id",
+    "period_start",
+    "period_end"
+  ]
+}

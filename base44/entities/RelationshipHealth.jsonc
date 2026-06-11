@@ -1,0 +1,99 @@
+{
+  "name": "RelationshipHealth",
+  "type": "object",
+  "properties": {
+    "connection_id": {
+      "type": "string",
+      "description": "FK to Connection entity"
+    },
+    "health_score": {
+      "type": "number",
+      "description": "Overall relationship health score 0-100"
+    },
+    "engagement_level": {
+      "type": "string",
+      "enum": [
+        "very_high",
+        "high",
+        "moderate",
+        "low",
+        "very_low"
+      ],
+      "description": "Categorized engagement level"
+    },
+    "last_interaction_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of last message exchange"
+    },
+    "days_since_last_contact": {
+      "type": "integer",
+      "description": "Days since last interaction"
+    },
+    "total_messages_exchanged": {
+      "type": "integer",
+      "description": "Total messages in conversation history"
+    },
+    "avg_response_time_hours": {
+      "type": "number",
+      "description": "Average response time in hours"
+    },
+    "partnership_status": {
+      "type": "string",
+      "enum": [
+        "prospect",
+        "initial_contact",
+        "active_partner",
+        "at_risk",
+        "dormant"
+      ],
+      "description": "Current partnership status"
+    },
+    "referrals_sent": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of referrals sent to this partner"
+    },
+    "referrals_received": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of referrals received from this partner"
+    },
+    "revenue_generated": {
+      "type": "number",
+      "default": 0,
+      "description": "Total revenue generated from this partnership"
+    },
+    "next_follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Recommended next follow-up date"
+    },
+    "relationship_stage": {
+      "type": "string",
+      "enum": [
+        "awareness",
+        "exploration",
+        "commitment",
+        "growth",
+        "decline"
+      ],
+      "description": "Stage in relationship lifecycle"
+    },
+    "ai_insights_json": {
+      "type": "object",
+      "description": "AI-generated insights with strengths, concerns, recommendations"
+    },
+    "calculated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this health record was calculated"
+    }
+  },
+  "required": [
+    "connection_id",
+    "health_score",
+    "engagement_level",
+    "calculated_at"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "name": "MessageTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name (e.g., 'Partnership Introduction', 'Follow-up After Meeting')"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "partnership_outreach",
+        "follow_up",
+        "lead_introduction",
+        "referral_thank_you",
+        "partnership_renewal",
+        "re_engagement",
+        "milestone_celebration",
+        "general"
+      ],
+      "description": "Template category"
+    },
+    "subject_template": {
+      "type": "string",
+      "description": "Email/message subject line with {{variables}}"
+    },
+    "body_template": {
+      "type": "string",
+      "description": "Message body with {{variables}} like {{first_name}}, {{company_name}}, {{territory}}"
+    },
+    "variables_json": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of variable names used in template"
+    },
+    "tone": {
+      "type": "string",
+      "enum": [
+        "professional",
+        "friendly",
+        "enthusiastic",
+        "formal",
+        "casual"
+      ],
+      "default": "professional"
+    },
+    "context_suggestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "When to use this template (e.g., 'After attending networking event')"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "usage_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "created_by_id": {
+      "type": "string",
+      "description": "User who created this template"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "body_template"
+  ]
+}

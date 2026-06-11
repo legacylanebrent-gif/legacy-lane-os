@@ -123,6 +123,8 @@ import AdminCentralRepository from './pages/AdminCentralRepository';
 import LandingPageBizInABox from './pages/LandingPageBizInABox';
 import LaunchCommandCenter from './pages/LaunchCommandCenter';
 import NotificationAnalytics from './pages/NotificationAnalytics';
+import RelationshipHealthDashboard from './pages/RelationshipHealthDashboard';
+import RelationshipsDashboard from './pages/RelationshipsDashboard';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -307,6 +309,8 @@ const AuthenticatedApp = () => {
       <Route path="/ResellerPackupEvents" element={<LayoutWrapper currentPageName="ResellerPackupEvents"><ResellerPackupEvents /></LayoutWrapper>} />
       <Route path="/AdminCentralRepository" element={<LayoutWrapper currentPageName="AdminCentralRepository"><AdminCentralRepository /></LayoutWrapper>} />
       <Route path="/NotificationAnalytics" element={<LayoutWrapper currentPageName="NotificationAnalytics"><NotificationAnalytics /></LayoutWrapper>} />
+      <Route path="/RelationshipHealthDashboard" element={<LayoutWrapper currentPageName="RelationshipHealthDashboard"><RelationshipHealthDashboard /></LayoutWrapper>} />
+      <Route path="/RelationshipsDashboard" element={<LayoutWrapper currentPageName="RelationshipsDashboard"><RelationshipsDashboard /></LayoutWrapper>} />
       <Route path="/agent-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/agent-request/thank-you" element={<AgentRequestThankYou />} />
 

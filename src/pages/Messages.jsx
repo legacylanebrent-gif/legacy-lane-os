@@ -22,6 +22,18 @@ export default function Messages() {
 
   useEffect(() => {
     loadMessages();
+    
+    // Real-time subscription for new messages
+    const unsubscribe = base44.entities.Message.subscribe((event) => {
+      if (event.type === 'create') {
+        // Refresh if message involves current user
+        if (event.data?.sender_id === currentUser?.id || event.data?.recipient_id === currentUser?.id) {
+          loadMessages();
+        }
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const loadMessages = async () => {
