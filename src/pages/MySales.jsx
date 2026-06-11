@@ -117,11 +117,30 @@ export default function MySales() {
   };
 
   const handleToggleLocalFeatured = async (sale) => {
+    const newVal = !sale.local_featured;
+
+    // Enforce 4-sale cap when featuring
+    if (newVal) {
+      const currentlyFeatured = sales.filter(s => s.local_featured && s.id !== sale.id);
+      if (currentlyFeatured.length >= 4) {
+        alert('You can only have 4 locally featured sales at a time. Please un-feature one first.');
+        return;
+      }
+    }
+
     setFeaturingId(sale.id);
     try {
-      const newVal = !sale.local_featured;
-      await base44.entities.EstateSale.update(sale.id, { local_featured: newVal });
-      setSales(prev => prev.map(s => s.id === sale.id ? { ...s, local_featured: newVal } : s));
+      const updateData = { local_featured: newVal };
+      if (newVal) {
+        // Set expiry 30 days from now
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 30);
+        updateData.local_featured_until = expiry.toISOString();
+      } else {
+        updateData.local_featured_until = null;
+      }
+      await base44.entities.EstateSale.update(sale.id, updateData);
+      setSales(prev => prev.map(s => s.id === sale.id ? { ...s, ...updateData } : s));
     } catch (e) {
       alert('Failed to update featured status');
     } finally {

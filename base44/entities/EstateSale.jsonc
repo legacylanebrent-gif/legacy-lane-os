@@ -219,6 +219,11 @@
       "type": "boolean",
       "default": false
     },
+    "local_featured_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiry timestamp for local featured status (set to 30 days from activation)"
+    },
     "national_featured_price": {
       "type": "number"
     },

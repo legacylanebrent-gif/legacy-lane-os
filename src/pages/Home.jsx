@@ -625,10 +625,20 @@ export default function Home() {
     // Only show active/upcoming sales on frontend (hide draft and completed)
     const visibleSales = allSales.filter(s => s.status === 'active' || s.status === 'upcoming');
     
-    // Separate into categories and filter by distance
+    // Filter out expired local featured
+    const now = new Date();
+    const isLocalFeaturedActive = (s) => {
+      if (!s.local_featured) return false;
+      if (s.local_featured_until && new Date(s.local_featured_until) < now) return false;
+      return true;
+    };
+
+    // Separate into categories — local featured shows even without user location
     const national = filterByDistance(visibleSales.filter(s => s.national_featured));
-    const local = filterByDistance(visibleSales.filter(s => !s.national_featured && s.local_featured));
-    const regular = filterByDistance(visibleSales.filter(s => !s.national_featured && !s.local_featured));
+    const local = userLocation
+      ? filterByDistance(visibleSales.filter(s => !s.national_featured && isLocalFeaturedActive(s)))
+      : visibleSales.filter(s => !s.national_featured && isLocalFeaturedActive(s));
+    const regular = filterByDistance(visibleSales.filter(s => !s.national_featured && !isLocalFeaturedActive(s)));
 
     setNationalFeatured(national);
     setLocalFeatured(local);
