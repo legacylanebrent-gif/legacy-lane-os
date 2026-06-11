@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2, Info, Globe, FileText } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -725,7 +726,7 @@ export default function SuperAgentCommandCenter() {
 
         {/* Agent Configuration Modal */}
         <Dialog open={configureModalOpen} onOpenChange={setConfigureModalOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
             {configuringAgent && (
               <>
                 <DialogHeader>
@@ -744,7 +745,8 @@ export default function SuperAgentCommandCenter() {
                   </div>
                 </DialogHeader>
                 
-                <div className="space-y-4 py-4">
+                <ScrollArea className="max-h-[60vh] pr-4 -mr-4">
+                  <div className="space-y-4 py-4">
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
                       <Settings className="w-4 h-4" />
@@ -826,8 +828,9 @@ export default function SuperAgentCommandCenter() {
                     </div>
                   </div>
                 </div>
+                </ScrollArea>
 
-                <DialogFooter>
+                <DialogFooter className="border-t pt-4 mt-4">
                   <Button variant="outline" onClick={() => setConfigureModalOpen(false)}>
                     Cancel
                   </Button>
@@ -842,7 +845,7 @@ export default function SuperAgentCommandCenter() {
 
         {/* Agent Info Modal */}
         <Dialog open={infoModalOpen} onOpenChange={setInfoModalOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
             {selectedAgent && AGENT_DESCRIPTIONS[selectedAgent.id] && (
               <>
                 <DialogHeader>
@@ -861,7 +864,8 @@ export default function SuperAgentCommandCenter() {
                   </div>
                 </DialogHeader>
                 
-                <div className="space-y-4 py-4">
+                <ScrollArea className="max-h-[60vh] pr-4 -mr-4">
+                  <div className="space-y-4 py-4">
                   <div>
                     <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
                       <Brain className="w-4 h-4 text-amber-600" />
@@ -897,8 +901,9 @@ export default function SuperAgentCommandCenter() {
                     </p>
                   </div>
                 </div>
+                </ScrollArea>
 
-                <DialogFooter>
+                <DialogFooter className="border-t pt-4 mt-4">
                   <Button onClick={() => setInfoModalOpen(false)} className="bg-amber-600 hover:bg-amber-700">
                     Got it
                   </Button>
