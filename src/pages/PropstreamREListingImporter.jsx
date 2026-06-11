@@ -159,6 +159,7 @@ export default function PropstreamREListingImporter() {
   const [currentBatchIndex, setCurrentBatchIndex] = useState(0);
   const [batchId, setBatchId] = useState(null);
   const [totalBatches, setTotalBatches] = useState(0);
+  const [errorDetails, setErrorDetails] = useState(null);
 
   const STORAGE_KEY = 'propstream_re_listing_field_mapping';
 
@@ -196,13 +197,25 @@ export default function PropstreamREListingImporter() {
   };
 
   const startBatchImport = async () => {
+    setErrorDetails(null);
     saveMapping(mapping);
     const listings = csvData.map(row => mapRow(row, mapping));
     const totalBatches = Math.ceil(listings.length / BATCH_SIZE);
     setTotalBatches(totalBatches);
     
-    const initRes = await base44.functions.invoke('initBatchImport', { filename, total_rows: listings.length });
-    setBatchId(initRes.data.batch_id);
+    try {
+      const initRes = await base44.functions.invoke('initBatchImport', { filename, total_rows: listings.length });
+      setBatchId(initRes.data.batch_id);
+    } catch (err) {
+      setErrorDetails({
+        step: 'Initializing Import',
+        error: err.message,
+        response: err.response?.data,
+        details: JSON.stringify(err.response?.data || err, null, 2)
+      });
+      setImporting(false);
+      return;
+    }
     
     setStep('batch_import');
     setCurrentBatchIndex(0);
@@ -257,8 +270,13 @@ export default function PropstreamREListingImporter() {
       }
     } catch (error) {
       console.error('Import error:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
-      alert('Error importing batch: ' + errorMsg);
+      setErrorDetails({
+        step: `Processing Batch ${batchIdx + 1}`,
+        error: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        details: JSON.stringify(error.response?.data || error, null, 2)
+      });
       setImporting(false);
     }
   };
@@ -345,6 +363,61 @@ export default function PropstreamREListingImporter() {
         <h1 className="text-3xl font-bold text-slate-900 mb-1">PropStream RE Listing Importer</h1>
         <p className="text-slate-500 text-sm">Import MLS/PropStream CSV exports in batches of 100 records. Review each batch before continuing.</p>
       </div>
+
+      {errorDetails && (
+        <Card className="border-red-300 bg-red-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              Import Error Detected
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid gap-2 text-sm">
+              <div className="flex gap-2">
+                <span className="font-semibold text-red-700 w-24">Step:</span>
+                <span className="text-red-600">{errorDetails.step}</span>
+              </div>
+              {errorDetails.status && (
+                <div className="flex gap-2">
+                  <span className="font-semibold text-red-700 w-24">Status:</span>
+                  <span className="text-red-600">HTTP {errorDetails.status}</span>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <span className="font-semibold text-red-700 w-24">Error:</span>
+                <span className="text-red-600">{errorDetails.error}</span>
+              </div>
+              {errorDetails.response?.error && (
+                <div className="flex gap-2">
+                  <span className="font-semibold text-red-700 w-24">Response:</span>
+                  <span className="text-red-600">{errorDetails.response.error}</span>
+                </div>
+              )}
+            </div>
+            <div className="bg-white border border-red-200 rounded p-3 mt-3">
+              <p className="text-xs font-semibold text-red-700 mb-2">Full Error Details:</p>
+              <pre className="text-xs text-red-600 overflow-auto max-h-64 whitespace-pre-wrap break-words">
+                {errorDetails.details}
+              </pre>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={() => setErrorDetails(null)} 
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Dismiss Error
+              </Button>
+              <Button 
+                onClick={reset} 
+                variant="outline"
+              >
+                Start Over
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {step === 'upload' && (
         <Card>
