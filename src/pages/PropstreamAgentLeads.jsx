@@ -40,7 +40,9 @@ import {
   Edit,
   MessageSquare,
   UserCheck,
-  Download
+  Download,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { isAdminUser } from '@/lib/isAdminUser';
 
@@ -73,6 +75,8 @@ export default function PropstreamAgentLeads() {
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [notes, setNotes] = useState('');
   const [extractingAgents, setExtractingAgents] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const queryClient = useQueryClient();
 
@@ -168,6 +172,24 @@ export default function PropstreamAgentLeads() {
 
   const uniqueStates = [...new Set(leads.map(l => l.brokerage_state).filter(Boolean))].sort();
   const uniqueTerritories = [...new Set(leads.map(l => l.territory_name).filter(Boolean))].sort();
+
+  // Pagination
+  const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
 
   const stats = {
     total: leads.length,
@@ -359,6 +381,20 @@ export default function PropstreamAgentLeads() {
               <CardTitle className="text-sm font-semibold text-slate-700">
                 Agent Leads ({filteredLeads.length})
               </CardTitle>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-slate-600">Rows per page:</Label>
+                <Select value={rowsPerPage.toString()} onValueChange={(value) => { setRowsPerPage(Number(value)); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -388,7 +424,7 @@ export default function PropstreamAgentLeads() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredLeads.map((lead) => (
+                    {paginatedLeads.map((lead) => (
                       <tr key={lead.id} className="border-b border-slate-100 hover:bg-slate-50">
                         <td className="py-3 px-4">
                           <div>
@@ -447,6 +483,38 @@ export default function PropstreamAgentLeads() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {filteredLeads.length > 0 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+                <div className="text-sm text-slate-600">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length} results
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-slate-600">Page</span>
+                    <span className="text-sm font-medium text-slate-800">{currentPage}</span>
+                    <span className="text-sm text-slate-600">of {totalPages}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
