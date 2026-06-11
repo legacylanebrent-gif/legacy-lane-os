@@ -1269,32 +1269,35 @@ export default function MyProfile() {
         {/* ─────────────── SUBSCRIPTION TAB ─────────────── */}
         {!isConsumer && (
           <TabsContent value="subscription" className="space-y-4">
-            {/* Current Plan Banner */}
-            {subscription && (
-              <Card className="border-green-200 bg-green-50">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between flex-wrap gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <h3 className="text-lg font-bold text-green-900">
-                          {subscription.plan_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Active Plan'}
-                        </h3>
-                        <Badge className="bg-green-600 text-white">{subscription.status}</Badge>
+            {/* Current Plan Banner — prefer user.subscription_tier as source of truth */}
+            {(user?.subscription_tier || subscription) && (() => {
+              const tier = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
+              const planName = subscription?.plan_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                || (tier ? tier.replace(/\b\w/g, c => c.toUpperCase()) + ' Plan' : 'Active Plan');
+              return (
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between flex-wrap gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Check className="w-5 h-5 text-green-600" />
+                          <h3 className="text-lg font-bold text-green-900">{planName}</h3>
+                          <Badge className="bg-green-600 text-white">active</Badge>
+                        </div>
+                        {tier && <Badge className={getTierColor(tier)}>{tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>}
                       </div>
-                      {subscription.tier && <Badge className={getTierColor(subscription.tier)}>{subscription.tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>}
+                      <div className="text-right">
+                        {subscription?.price > 0 && <>
+                          <div className="text-2xl font-bold text-green-900">${subscription.price}</div>
+                          <div className="text-sm text-green-700">per {subscription?.billing_period === 'monthly' ? 'month' : 'year'}</div>
+                        </>}
+                        {subscription?.renewal_date && <p className="text-xs text-green-600 mt-1">Renews {new Date(subscription.renewal_date).toLocaleDateString()}</p>}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      {subscription.price > 0 && <>
-                        <div className="text-2xl font-bold text-green-900">${subscription.price}</div>
-                        <div className="text-sm text-green-700">per {subscription.billing_period === 'monthly' ? 'month' : 'year'}</div>
-                      </>}
-                      {subscription.renewal_date && <p className="text-xs text-green-600 mt-1">Renews {new Date(subscription.renewal_date).toLocaleDateString()}</p>}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Available Plans */}
             <div>
@@ -1306,9 +1309,10 @@ export default function MyProfile() {
                   {packages.map(pkg => {
                     const pkgData = pkg.data || pkg;
                     const tierOrder = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, elite: 3, premium: 3 };
-                    const currentTierNum = tierOrder[subscription?.tier] ?? -1;
+                    const activeTier = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
+                    const currentTierNum = tierOrder[activeTier] ?? -1;
                     const pkgTierNum = tierOrder[pkgData.tier_level] ?? 0;
-                    const isCurrent = subscription?.tier === pkgData.tier_level;
+                    const isCurrent = activeTier === pkgData.tier_level;
                     const isUpgrade = !isCurrent && pkgTierNum > currentTierNum;
                     const isDowngrade = !isCurrent && subscription && pkgTierNum < currentTierNum;
 
