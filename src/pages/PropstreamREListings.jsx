@@ -7,7 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import {
   Upload, Zap, Mail, Send, Download, History, Eye, Building2, Users,
-  Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet
+  Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import PropstreamImportModal from '@/components/propstream/PropstreamImportModal';
 import PropstreamListingDrawer from '@/components/propstream/PropstreamListingDrawer';
@@ -53,6 +54,10 @@ export default function PropstreamREListings() {
   });
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     const [listData, batchData] = await Promise.all([
@@ -65,6 +70,11 @@ export default function PropstreamREListings() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   const filtered = listings.filter(l => {
     const q = filters.search.toLowerCase();
@@ -84,6 +94,20 @@ export default function PropstreamREListings() {
     if (filters.agentSubmitted && !l.agent_submitted_to_pool) return false;
     return true;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = filtered.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const resetPagination = () => {
+    setCurrentPage(1);
+  };
 
   const handleScoreAll = async () => {
     setScoring(true);
@@ -345,7 +369,18 @@ export default function PropstreamREListings() {
           </Card>
         )}
 
-        <p className="text-xs text-slate-500">{filtered.length} of {listings.length} listings · {selected.size} selected</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-500">{filtered.length} of {listings.length} listings · {selected.size} selected</p>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-500">Rows per page:</label>
+            <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }} className="border rounded px-2 py-1 text-xs">
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -377,7 +412,7 @@ export default function PropstreamREListings() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map(listing => (
+              {paginatedData.map(listing => (
                 <tr key={listing.id} className={`hover:bg-slate-50 ${selected.has(listing.id) ? 'bg-purple-50' : ''}`}>
                   <td className="p-3"><input type="checkbox" checked={selected.has(listing.id)} onChange={() => toggleSelect(listing.id)} className="accent-purple-600" /></td>
                   <td className="p-3">
@@ -443,6 +478,58 @@ export default function PropstreamREListings() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            Showing {startIndex + 1} to {Math.min(endIndex, filtered.length)} of {filtered.length} listings
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(1)}
+              disabled={currentPage === 1}
+              className="h-8 px-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 -ml-1" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-8 px-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-slate-600 px-2">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="h-8 px-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="h-8 px-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 -ml-1" />
+            </Button>
+          </div>
         </div>
       )}
 
