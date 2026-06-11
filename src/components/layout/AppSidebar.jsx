@@ -25,8 +25,7 @@ export const ALL_NAV_ITEMS = [
 
   // ── MAIN ────────────────────────────────────────────────────────────────────
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
-  { page: 'ConsumerHome',           label: 'Consumer Profile',       icon: Home,            group: 'Main' },
-  { page: 'MyProfile',              label: 'Business Profile',       icon: User,            group: 'Main' },
+  { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
   { page: 'Notifications',          label: 'Notifications',          icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',               icon: MessageSquare,   group: 'Main' },
   { page: 'BrowseItems',            label: 'Marketplace',            icon: ShoppingBag,     group: 'Main' },
@@ -61,10 +60,9 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyBusinessExpenses',     label: 'Business Expenses',      icon: FileText,        group: 'Finance' },
   { page: 'AIAssistant',            label: 'AI Assistant',           icon: Sparkles,        group: 'Finance' },
 
-  // ── CONSUMER ────────────────────────────────────────────────────────────────
-  { page: 'RewardsCheckins',        label: 'Check-ins',              icon: MapPin,          group: 'Consumer' },
+  // ── CONSUMER (available to all roles) ───────────────────────────────────────
+  { page: 'RewardsCheckins',        label: 'Check-ins & Rewards',    icon: Star,            group: 'Consumer' },
   { page: 'Favorites',              label: 'Favorites',              icon: Heart,           group: 'Consumer' },
-  { page: 'MyRewards',              label: 'My Rewards',             icon: Star,            group: 'Consumer' },
   { page: 'MyReferrals',            label: 'My Referrals',           icon: Users,           group: 'Consumer' },
   { page: 'MyTickets',              label: 'Support',                icon: MessageSquare,   group: 'Consumer' },
 
