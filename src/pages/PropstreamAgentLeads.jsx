@@ -79,6 +79,9 @@ export default function PropstreamAgentLeads() {
   const [extractDialogOpen, setExtractDialogOpen] = useState(false);
   const [listingStats, setListingStats] = useState(null);
   const [fetchingStats, setFetchingStats] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState(null);
+  const [currentBatch, setCurrentBatch] = useState(1);
+  const [totalBatches, setTotalBatches] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [agentFilter, setAgentFilter] = useState('');
@@ -184,20 +187,28 @@ export default function PropstreamAgentLeads() {
   };
 
   const handleConfirmExtract = async () => {
-    setExtractDialogOpen(false);
     setExtractingAgents(true);
+    setCurrentBatch(1);
     
     try {
       let totalCreated = 0;
       let totalUpdated = 0;
       let totalProcessed = 0;
-      let currentBatch = 1;
+      let batchNum = 1;
       let continueExtraction = true;
       
       while (continueExtraction) {
+        setExtractionProgress({
+          currentBatch: batchNum,
+          totalCreated,
+          totalUpdated,
+          totalProcessed,
+          status: 'processing'
+        });
+        
         // Process batch of 100
         const result = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
-          batch_number: currentBatch,
+          batch_number: batchNum,
           batch_size: 100
         });
         
@@ -208,35 +219,53 @@ export default function PropstreamAgentLeads() {
         // Check if there are more batches
         if (!result.has_more_batches) {
           continueExtraction = false;
+          setExtractionProgress({
+            currentBatch: batchNum,
+            totalCreated,
+            totalUpdated,
+            totalProcessed,
+            status: 'complete',
+            totalBatches: batchNum
+          });
         } else {
-          // Prompt user to continue
-          const userWantsToContinue = window.confirm(
-            `Batch ${currentBatch} complete!\n\n` +
-            `Agents created: ${result.agents_created}\n` +
-            `Agents updated: ${result.agents_updated}\n` +
-            `Listings processed: ${result.total_listings_processed}\n\n` +
-            `Continue with batch ${currentBatch + 1}?`
-          );
+          setTotalBatches(result.total_batches);
+          setCurrentBatch(batchNum + 1);
+          setExtractionProgress({
+            currentBatch: batchNum,
+            totalCreated,
+            totalUpdated,
+            totalProcessed,
+            status: 'waiting',
+            totalBatches: result.total_batches
+          });
           
-          if (!userWantsToContinue) {
-            continueExtraction = false;
-          } else {
-            currentBatch++;
-          }
+          // Wait for user to click continue
+          await new Promise((resolve) => {
+            const checkContinue = setInterval(() => {
+              if (!extractionProgress || extractionProgress.status !== 'waiting') {
+                clearInterval(checkContinue);
+                resolve();
+              }
+            }, 500);
+          });
+          
+          batchNum++;
         }
       }
       
       queryClient.invalidateQueries({ queryKey: ['propstream-agent-leads'] });
+      setExtractDialogOpen(false);
       alert(`Extraction complete!\n\n` +
         `Total agents created: ${totalCreated}\n` +
         `Total agents updated: ${totalUpdated}\n` +
         `Total listings processed: ${totalProcessed}\n` +
-        `Batches completed: ${currentBatch}`
+        `Batches completed: ${batchNum}`
       );
     } catch (error) {
       alert('Error during extraction: ' + error.message);
     } finally {
       setExtractingAgents(false);
+      setExtractionProgress(null);
       setListingStats(null);
     }
   };
@@ -778,7 +807,7 @@ export default function PropstreamAgentLeads() {
               Extract Agent Leads
             </DialogTitle>
             <DialogDescription>
-              Review the estimated extraction results before proceeding
+              {extractionProgress ? 'Monitor extraction progress' : 'Review the estimated extraction results before proceeding'}
             </DialogDescription>
           </DialogHeader>
 
@@ -786,6 +815,48 @@ export default function PropstreamAgentLeads() {
             <div className="py-8 text-center">
               <RefreshCw className="w-8 h-8 mx-auto mb-3 animate-spin text-blue-600" />
               <p className="text-slate-600">Analyzing PropStream database...</p>
+            </div>
+          ) : extractionProgress ? (
+            <div className="space-y-4 py-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <RefreshCw className={`w-5 h-5 text-blue-600 ${extractionProgress.status === 'processing' ? 'animate-spin' : ''}`} />
+                  <h3 className="font-semibold text-blue-800">
+                    {extractionProgress.status === 'processing' && `Processing Batch ${extractionProgress.currentBatch}...`}
+                    {extractionProgress.status === 'waiting' && `Batch ${extractionProgress.currentBatch} Complete!`}
+                    {extractionProgress.status === 'complete' && 'Extraction Complete!'}
+                  </h3>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Agents Created:</span>
+                    <span className="font-semibold">{extractionProgress.totalCreated}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Agents Updated:</span>
+                    <span className="font-semibold">{extractionProgress.totalUpdated}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Listings Processed:</span>
+                    <span className="font-semibold">{extractionProgress.totalProcessed}</span>
+                  </div>
+                  {extractionProgress.totalBatches && (
+                    <div className="flex justify-between pt-2 border-t border-blue-200">
+                      <span className="text-slate-600">Progress:</span>
+                      <span className="font-semibold">{extractionProgress.currentBatch} of {extractionProgress.totalBatches} batches</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {extractionProgress.status === 'waiting' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="text-sm text-amber-800">
+                    <strong>Ready for next batch?</strong> Click Continue to process batch {currentBatch} of {totalBatches}.
+                  </div>
+                </div>
+              )}
             </div>
           ) : listingStats ? (
             <div className="space-y-4 py-4">
@@ -837,30 +908,60 @@ export default function PropstreamAgentLeads() {
           ) : null}
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setExtractDialogOpen(false)}
-              disabled={extractingAgents}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={handleConfirmExtract}
-              disabled={extractingAgents || !listingStats}
-            >
-              {extractingAgents ? (
+            {extractionProgress ? (
+              extractionProgress.status === 'waiting' ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Extracting...
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setExtractDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setExtractionProgress({ ...extractionProgress, status: 'processing' })}
+                  >
+                    Continue to Batch {currentBatch}
+                  </Button>
                 </>
+              ) : extractionProgress.status === 'complete' ? (
+                <Button onClick={() => setExtractDialogOpen(false)}>
+                  Close
+                </Button>
               ) : (
-                <>
-                  <Download className="w-4 h-4 mr-2" />
-                  Start Extraction
-                </>
-              )}
-            </Button>
+                <Button disabled>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </Button>
+              )
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setExtractDialogOpen(false)}
+                  disabled={extractingAgents}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={handleConfirmExtract}
+                  disabled={extractingAgents || !listingStats}
+                >
+                  {extractingAgents ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Extracting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Start Extraction
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
