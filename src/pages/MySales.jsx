@@ -12,7 +12,7 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import {
@@ -61,6 +61,8 @@ export default function MySales() {
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [socialSale, setSocialSale] = useState(null);
   const [showCompletedSection, setShowCompletedSection] = useState(false);
+  const [isElite, setIsElite] = useState(false);
+  const [featuringId, setFeaturingId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -78,6 +80,10 @@ export default function MySales() {
         ? await base44.entities.EstateSale.filter({ operator_id: operatorId }, '-created_date')
         : [];
       setSales(salesData);
+
+      // Check if user is on Elite subscription
+      const subs = await base44.entities.Subscription.filter({ user_id: userData.id });
+      if (subs.length > 0 && subs[0].tier === 'elite') setIsElite(true);
     } catch (error) {
       console.error('Error loading sales:', error);
     } finally {
@@ -108,6 +114,19 @@ export default function MySales() {
 
   const handleEdit = (sale) => {
     navigate(createPageUrl('SaleEditor') + '?saleId=' + sale.id);
+  };
+
+  const handleToggleLocalFeatured = async (sale) => {
+    setFeaturingId(sale.id);
+    try {
+      const newVal = !sale.local_featured;
+      await base44.entities.EstateSale.update(sale.id, { local_featured: newVal });
+      setSales(prev => prev.map(s => s.id === sale.id ? { ...s, local_featured: newVal } : s));
+    } catch (e) {
+      alert('Failed to update featured status');
+    } finally {
+      setFeaturingId(null);
+    }
   };
 
   const handleDelete = async (saleId) => {
@@ -347,6 +366,18 @@ export default function MySales() {
                       return (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className="w-full border-blue-500 text-black hover:bg-blue-50"><Edit className="w-3 h-3 mr-1" />Edit</Button>)}
+                          {!isCompleted && isElite && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleLocalFeatured(sale)}
+                              disabled={featuringId === sale.id}
+                              className={`w-full text-black ${sale.local_featured ? 'border-amber-500 bg-amber-50 hover:bg-amber-100' : 'border-amber-400 hover:bg-amber-50'}`}
+                            >
+                              <Pin className="w-3 h-3 mr-1" />
+                              {featuringId === sale.id ? 'Updating...' : sale.local_featured ? '★ Local Featured' : 'Feature Locally'}
+                            </Button>
+                          )}
                           {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-teal-500 text-black hover:bg-teal-50"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Worksheet</Link></Button>)}
                           <Button variant="outline" size="sm" asChild className="w-full border-purple-500 text-black hover:bg-purple-50"><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1" />Inventory</Link></Button>
                           <Button variant="outline" size="sm" asChild className="w-full border-cyan-500 text-black hover:bg-cyan-50"><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1" />Attendance</Link></Button>
