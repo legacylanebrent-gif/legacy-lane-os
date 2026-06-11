@@ -26,12 +26,21 @@ Deno.serve(async (req) => {
     const propertyDataMap = new Map();
     listings.forEach(listing => {
       if (listing.property_address) {
+        // Extract state from territory name if not directly available (e.g., "Cumberland, NJ" -> "NJ")
+        let extractedState = listing.brokerage_state || listing.state;
+        if (!extractedState && listing.territory_name) {
+          const parts = listing.territory_name.split(',').map(p => p.trim());
+          if (parts.length > 1 && parts[1].length === 2) {
+            extractedState = parts[1];
+          }
+        }
+        
         propertyDataMap.set(listing.property_address.toLowerCase(), {
           territory_name: listing.territory_name || null,
           territory_id: listing.territory_id || null,
           state: listing.state || null,
           county: listing.county || null,
-          brokerage_state: listing.brokerage_state || null
+          brokerage_state: extractedState
         });
       }
     });

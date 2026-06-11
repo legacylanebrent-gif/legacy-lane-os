@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
         agent_phone: agentPhone || null,
         agent_license: listing.listing_agent_license || null,
         brokerage_name: listing.listing_brokerage || null,
-        brokerage_state: listing.state || null,
+        brokerage_state: listing.brokerage_state || listing.state || null,
         territory_name: listing.territory_name || null,
         territory_id: listing.territory_id || null,
         state: listing.state || null,

@@ -473,7 +473,7 @@ export default function PropstreamAgentLeads() {
                           <div className="text-sm text-slate-700">{lead.brokerage_name || '—'}</div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="text-sm text-slate-700 font-medium">{lead.brokerage_state || '—'}</div>
+                          <div className="text-sm text-slate-700 font-medium">{lead.brokerage_state || lead.state || '—'}</div>
                         </td>
                         <td className="py-3 px-4">
                           <div className="text-sm text-slate-700">{lead.territory_name || '—'}</div>
