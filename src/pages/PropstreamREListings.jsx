@@ -175,12 +175,9 @@ export default function PropstreamREListings() {
           <p className="text-slate-500 text-sm">Import daily PropStream MLS listings, score estate sale opportunities, prep agent outreach, and distribute leads to operators.</p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
-          <Button onClick={() => setShowImport(true)} className="bg-purple-700 hover:bg-purple-800">
-            <Upload className="w-4 h-4 mr-1" /> Quick Import
-          </Button>
           <Link to="/PropstreamREListingImporter">
-            <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
-              <FileSpreadsheet className="w-4 h-4 mr-1" /> Full Importer
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md">
+              <FileSpreadsheet className="w-4 h-4 mr-1" /> Full Import
             </Button>
           </Link>
           <Button onClick={() => setShowScoring(true)} variant="outline" className="gap-2">
