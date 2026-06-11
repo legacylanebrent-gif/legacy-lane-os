@@ -197,10 +197,12 @@ export default function PropstreamAgentLeads() {
     });
     
     try {
-      const result = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
+      const response = await base44.functions.invoke('extractAgentLeadsFromPropstream', {
         batch_number: batchNum,
         batch_size: 100
       });
+      
+      const result = response.data || response;
       
       if (!result) {
         throw new Error('Backend function returned no result');
@@ -232,6 +234,8 @@ export default function PropstreamAgentLeads() {
       while (hasMore) {
         const result = await processBatch(batchNum, totals);
         totals = { totalCreated: result.totalCreated, totalUpdated: result.totalUpdated, totalProcessed: result.totalProcessed };
+        
+        console.log('Batch result:', result);
         
         if (!result.hasMore) {
           hasMore = false;
