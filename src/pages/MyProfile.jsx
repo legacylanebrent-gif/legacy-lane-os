@@ -480,6 +480,20 @@ export default function MyProfile() {
             </div>
           )}
 
+          {/* Reseller included with operator plan banner */}
+          {operatorHasResellerAccess && (
+            <div className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+              <div className="w-9 h-9 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Store className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-purple-800 text-sm">✅ Reseller Features Included in Your Plan</p>
+                <p className="text-xs text-purple-600">Your {subscription?.tier} plan includes full reseller network access, buyout matching, inventory interests, and Pack-Up event tools.</p>
+              </div>
+              <Badge className="ml-auto bg-purple-600 text-white capitalize">{subscription?.tier}</Badge>
+            </div>
+          )}
+
           {/* Reseller Application — show based on state */}
           {acct === 'reseller' ? (
             <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
@@ -766,7 +780,7 @@ export default function MyProfile() {
         </TabsContent>
 
         {/* ─────────────── PAYMENTS TAB ─────────────── */}
-        {!isConsumer && !isReseller && (
+        {!isConsumer && !(acct === 'reseller') && (
           <TabsContent value="payments" className="space-y-6">
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5" />Accepted Payment Methods</CardTitle></CardHeader>
