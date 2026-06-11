@@ -14,11 +14,12 @@ Deno.serve(async (req) => {
     // Create a batch record
     const batch = await base44.asServiceRole.entities.PropstreamImportBatch.create({
       uploaded_file_name: filename,
+      uploaded_by: user.id,
       total_rows,
       imported_count: 0,
       duplicate_count: 0,
       error_count: 0,
-      import_status: 'in_progress'
+      import_status: 'processing'
     });
     
     return Response.json({ batch_id: batch.id });
