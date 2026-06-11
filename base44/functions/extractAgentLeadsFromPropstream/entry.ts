@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
       if (!existing.agent_phone && agentPhone) existing.agent_phone = agentPhone;
       if (!existing.agent_license && listing.listing_agent_license) existing.agent_license = listing.listing_agent_license;
-      if (!existing.brokerage_name && listing.brokerage_name) existing.brokerage_name = listing.brokerage_name;
+      if (!existing.brokerage_name && listing.listing_brokerage) existing.brokerage_name = listing.listing_brokerage;
       } else {
       // Create new agent record
       const fullAddress = [
@@ -93,11 +93,11 @@ Deno.serve(async (req) => {
         agent_email: agentEmail || null,
         agent_phone: agentPhone || null,
         agent_license: listing.listing_agent_license || null,
-        brokerage_name: listing.brokerage_name || null,
-        brokerage_address: listing.brokerage_address || null,
-        brokerage_city: listing.brokerage_city || null,
-        brokerage_state: listing.brokerage_state || null,
-        brokerage_zip: listing.brokerage_zip || null,
+        brokerage_name: listing.listing_brokerage || null,
+        brokerage_address: listing.listing_brokerage_address || null,
+        brokerage_city: listing.listing_brokerage_city || null,
+        brokerage_state: listing.listing_brokerage_state || null,
+        brokerage_zip: listing.listing_brokerage_zip || null,
         territory_name: listing.territory_name || null,
         territory_id: listing.territory_id || null,
         state: listing.state || null,
@@ -159,7 +159,11 @@ Deno.serve(async (req) => {
             territory_id: agentData.territory_id,
             state: agentData.state,
             county: agentData.county,
+            brokerage_name: agentData.brokerage_name,
+            brokerage_address: agentData.brokerage_address,
+            brokerage_city: agentData.brokerage_city,
             brokerage_state: agentData.brokerage_state,
+            brokerage_zip: agentData.brokerage_zip,
             last_updated_date: new Date().toISOString(),
           });
           updated++;
