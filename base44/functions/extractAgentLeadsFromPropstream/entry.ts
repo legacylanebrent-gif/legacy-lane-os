@@ -143,29 +143,75 @@ Deno.serve(async (req) => {
     const endIndex = Math.min(startIndex + batchSize, agentsToCreate.length);
     const batchToProcess = agentsToCreate.slice(startIndex, endIndex);
     
-    // Process this batch
-    for (const agentData of batchToProcess) {
+    // Separate creates and updates for bulk operations
+    const creates = [];
+    const updates = [];
+    
+    batchToProcess.forEach(agentData => {
       const key = `${agentData.agent_name || ''}-${agentData.agent_email || ''}`.toLowerCase();
       const existingId = existingAgentMap.get(key);
 
       if (existingId) {
-        // Update existing agent
-        await base44.asServiceRole.entities.PropstreamAgentLead.update(existingId, {
-          listing_count: agentData.listing_count,
-          total_volume: agentData.total_volume,
-          property_addresses: agentData.property_addresses,
-          territory_name: agentData.territory_name,
-          territory_id: agentData.territory_id,
-          state: agentData.state,
-          county: agentData.county,
-          brokerage_name: agentData.brokerage_name,
-          brokerage_state: agentData.brokerage_state,
+        updates.push({
+          id: existingId,
+          data: {
+            listing_count: agentData.listing_count,
+            total_volume: agentData.total_volume,
+            property_addresses: agentData.property_addresses,
+            territory_name: agentData.territory_name,
+            territory_id: agentData.territory_id,
+            state: agentData.state,
+            county: agentData.county,
+            brokerage_name: agentData.brokerage_name,
+            brokerage_state: agentData.brokerage_state,
+          }
         });
-        updated++;
       } else {
-        // Create new agent
-        await base44.asServiceRole.entities.PropstreamAgentLead.create(agentData);
-        created++;
+        creates.push(agentData);
+      }
+    });
+    
+    // Execute bulk operations with retry logic for rate limits
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    const maxRetries = 3;
+    
+    // Bulk create
+    if (creates.length > 0) {
+      let retries = 0;
+      while (retries < maxRetries) {
+        try {
+          await base44.asServiceRole.entities.PropstreamAgentLead.bulkCreate(creates);
+          created = creates.length;
+          break;
+        } catch (error) {
+          if (error.status === 429 && retries < maxRetries - 1) {
+            retries++;
+            await delay(1000 * Math.pow(2, retries)); // Exponential backoff
+          } else {
+            throw error;
+          }
+        }
+      }
+    }
+    
+    // Bulk update
+    if (updates.length > 0) {
+      let retries = 0;
+      while (retries < maxRetries) {
+        try {
+          for (const update of updates) {
+            await base44.asServiceRole.entities.PropstreamAgentLead.update(update.id, update.data);
+          }
+          updated = updates.length;
+          break;
+        } catch (error) {
+          if (error.status === 429 && retries < maxRetries - 1) {
+            retries++;
+            await delay(1000 * Math.pow(2, retries));
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
