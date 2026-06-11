@@ -625,11 +625,23 @@ export default function Home() {
     // Only show active/upcoming sales on frontend (hide draft and completed)
     const visibleSales = allSales.filter(s => s.status === 'active' || s.status === 'upcoming');
     
-    // Filter out expired local featured
+    // A locally featured sale is active only while its sale dates haven't all passed
     const now = new Date();
     const isLocalFeaturedActive = (s) => {
       if (!s.local_featured) return false;
-      if (s.local_featured_until && new Date(s.local_featured_until) < now) return false;
+      // If the sale has dates, expire local featured once the last sale end time has passed
+      if (s.sale_dates && s.sale_dates.length > 0) {
+        const allPast = s.sale_dates.every(saleDate => {
+          const [year, month, day] = saleDate.date.split('-');
+          const saleEnd = new Date(
+            parseInt(year), parseInt(month) - 1, parseInt(day),
+            parseInt(saleDate.end_time?.split(':')[0] ?? 23),
+            parseInt(saleDate.end_time?.split(':')[1] ?? 59)
+          );
+          return now > saleEnd;
+        });
+        if (allPast) return false;
+      }
       return true;
     };
 
