@@ -7,6 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
 
+const STATUS_COLORS = {
+  awaiting_approval: 'bg-amber-100 text-amber-700 border-amber-300',
+  approved: 'bg-blue-100 text-blue-700 border-blue-300',
+  completed: 'bg-green-100 text-green-700 border-green-300',
+  failed: 'bg-red-100 text-red-700 border-red-300',
+  running: 'bg-cyan-100 text-cyan-700 border-cyan-300',
+  cancelled: 'bg-slate-100 text-slate-600 border-slate-300',
+};
+
 const AGENT_CONFIGS = [
   { id: 'onboarding_agent', name: 'Onboarding Agent', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', domain: 'User Onboarding' },
   { id: 'admin_ops_agent', name: 'AdminOps Agent', icon: Shield, color: 'text-slate-600', bg: 'bg-slate-50', domain: 'Platform Operations' },
