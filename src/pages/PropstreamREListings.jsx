@@ -183,6 +183,42 @@ export default function PropstreamREListings() {
         </div>
       </div>
 
+      {/* Flags Legend */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+            <span className="w-5 h-5 bg-slate-100 border border-slate-200 rounded flex items-center justify-center text-xs font-bold">?</span>
+            Property Flags Legend
+          </h3>
+          <div className="flex flex-wrap gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">P</span>
+              <span className="text-slate-600">Probate</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-bold">I</span>
+              <span className="text-slate-600">Inherited</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold">S</span>
+              <span className="text-slate-600">Senior Owner</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">A</span>
+              <span className="text-slate-600">Absentee Owner</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold">V</span>
+              <span className="text-slate-600">Vacant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-red-200 text-red-800 px-2 py-0.5 rounded font-bold">F</span>
+              <span className="text-slate-600">Foreclosure</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         {[
