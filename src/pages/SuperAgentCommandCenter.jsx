@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
-import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2, Info } from 'lucide-react';
+import { AlertTriangle, Brain, Cpu, Activity, Shield, RefreshCw, Play, Pause, Eye, Settings, BarChart3, Clock, CheckCircle2, AlertCircle, Zap, Users, MessageSquare, DollarSign, TrendingUp, Loader2, Info, Globe, FileText } from 'lucide-react';
 
 const STATUS_COLORS = {
   awaiting_approval: 'bg-amber-100 text-amber-700 border-amber-300',
@@ -31,6 +31,149 @@ const AGENT_CONFIGS = [
   { id: 'financial_ops_agent', name: 'Financial Ops Agent', icon: DollarSign, color: 'text-green-700', bg: 'bg-green-50', domain: 'Finance' },
   { id: 'quality_assurance_agent', name: 'Quality Assurance Agent', icon: CheckCircle2, color: 'text-amber-600', bg: 'bg-amber-50', domain: 'QA & Compliance' },
 ];
+
+const AGENT_SUGGESTIONS = {
+  onboarding_agent: [
+    { 
+      title: 'Analyze new user registrations', 
+      description: 'Review recent signups and generate personalized onboarding tasks',
+      action: 'Generate Onboarding Plans',
+      icon: Users
+    },
+    { 
+      title: 'Identify inactive users', 
+      description: 'Find users who haven\'t completed onboarding and trigger re-engagement',
+      action: 'Run Re-engagement Campaign',
+      icon: RefreshCw
+    }
+  ],
+  admin_ops_agent: [
+    { 
+      title: 'Generate weekly operations report', 
+      description: 'Compile platform metrics, agent performance, and automation opportunities',
+      action: 'Generate Report',
+      icon: BarChart3
+    },
+    { 
+      title: 'Review admin task queue', 
+      description: 'Prioritize pending admin tasks and suggest automation workflows',
+      action: 'Optimize Task Queue',
+      icon: CheckCircle2
+    }
+  ],
+  relationship_coach: [
+    { 
+      title: 'Analyze partnership health', 
+      description: 'Score all active partnerships and identify at-risk relationships',
+      action: 'Calculate Health Scores',
+      icon: TrendingUp
+    },
+    { 
+      title: 'Generate outreach recommendations', 
+      description: 'Create personalized follow-up suggestions for dormant partnerships',
+      action: 'Generate Outreach Plan',
+      icon: MessageSquare
+    }
+  ],
+  marketing_autopilot_agent: [
+    { 
+      title: 'Create weekly social calendar', 
+      description: 'Generate 7 days of territory-specific social media posts',
+      action: 'Generate Content Calendar',
+      icon: BarChart3
+    },
+    { 
+      title: 'Launch Facebook ad campaign', 
+      description: 'Create and schedule targeted ads for estate sale promotions',
+      action: 'Build Ad Campaign',
+      icon: Zap
+    }
+  ],
+  lead_conversion_agent: [
+    { 
+      title: 'Score incoming leads', 
+      description: 'Evaluate lead quality and route to optimal operators',
+      action: 'Score & Route Leads',
+      icon: TrendingUp
+    },
+    { 
+      title: 'Generate outreach sequences', 
+      description: 'Create personalized email sequences for high-value leads',
+      action: 'Build Sequences',
+      icon: MessageSquare
+    }
+  ],
+  inventory_pricing_agent: [
+    { 
+      title: 'Research comparable sales', 
+      description: 'Analyze marketplace data for items needing pricing',
+      action: 'Run Price Research',
+      icon: DollarSign
+    },
+    { 
+      title: 'Update sale pricing', 
+      description: 'Apply data-driven price recommendations to active listings',
+      action: 'Update Prices',
+      icon: RefreshCw
+    }
+  ],
+  customer_success_agent: [
+    { 
+      title: 'Monitor user activity', 
+      description: 'Identify users experiencing issues or needing support',
+      action: 'Run Health Check',
+      icon: Eye
+    },
+    { 
+      title: 'Send proactive check-ins', 
+      description: 'Generate personalized check-in messages for at-risk users',
+      action: 'Send Check-ins',
+      icon: MessageSquare
+    }
+  ],
+  content_seo_agent: [
+    { 
+      title: 'Generate SEO content', 
+      description: 'Create optimized estate sale pages and location hubs',
+      action: 'Generate Content',
+      icon: BarChart3
+    },
+    { 
+      title: 'Submit pages to Google', 
+      description: 'Index new content via Search Console API',
+      action: 'Submit to Index',
+      icon: Globe
+    }
+  ],
+  financial_ops_agent: [
+    { 
+      title: 'Process commission calculations', 
+      description: 'Calculate operator commissions and referral fees',
+      action: 'Calculate Commissions',
+      icon: DollarSign
+    },
+    { 
+      title: 'Generate financial report', 
+      description: 'Compile revenue, expenses, and wallet transactions',
+      action: 'Build Report',
+      icon: FileText
+    }
+  ],
+  quality_assurance_agent: [
+    { 
+      title: 'Audit auto-generated content', 
+      description: 'Review AI-generated pages for accuracy and quality',
+      action: 'Run Content Audit',
+      icon: CheckCircle2
+    },
+    { 
+      title: 'Validate data integrity', 
+      description: 'Check entity relationships and flag inconsistencies',
+      action: 'Validate Data',
+      icon: Shield
+    }
+  ]
+};
 
 const AGENT_DESCRIPTIONS = {
   onboarding_agent: {
@@ -506,25 +649,40 @@ export default function SuperAgentCommandCenter() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3">Quick Actions</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" className="text-xs h-8 justify-start">
-                        <Play className="w-3 h-3 mr-1 text-green-600" />
-                        Run Now
-                      </Button>
-                      <Button variant="outline" className="text-xs h-8 justify-start">
-                        <Pause className="w-3 h-3 mr-1 text-amber-600" />
-                        Pause Agent
-                      </Button>
-                      <Button variant="outline" className="text-xs h-8 justify-start">
-                        <RefreshCw className="w-3 h-3 mr-1 text-blue-600" />
-                        Reset Defaults
-                      </Button>
-                      <Button variant="outline" className="text-xs h-8 justify-start">
-                        <Eye className="w-3 h-3 mr-1 text-purple-600" />
-                        View History
-                      </Button>
+                  <div className="bg-white border border-slate-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-amber-600" />
+                      Recommended Actions for {configuringAgent.name}
+                    </h4>
+                    <div className="space-y-3">
+                      {AGENT_SUGGESTIONS[configuringAgent.id]?.map((suggestion, idx) => {
+                        const SuggestionIcon = suggestion.icon;
+                        return (
+                          <div key={idx} className="border border-slate-200 rounded-lg p-3 hover:border-amber-300 transition-colors">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                                <SuggestionIcon className="w-4 h-4 text-amber-600" />
+                              </div>
+                              <div className="flex-1">
+                                <h5 className="text-sm font-semibold text-slate-800 mb-1">{suggestion.title}</h5>
+                                <p className="text-xs text-slate-600 mb-2">{suggestion.description}</p>
+                                <Button 
+                                  size="sm" 
+                                  className="h-7 text-xs bg-amber-600 hover:bg-amber-700"
+                                  onClick={() => {
+                                    // TODO: Implement agent-specific action
+                                    console.log(`Running: ${suggestion.action} for ${configuringAgent.id}`);
+                                    setConfigureModalOpen(false);
+                                  }}
+                                >
+                                  <Play className="w-3 h-3 mr-1" />
+                                  {suggestion.action}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
