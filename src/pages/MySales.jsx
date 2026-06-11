@@ -435,7 +435,8 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-slate-400 text-black hover:bg-slate-50 px-2"><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1" />Export</Link></Button>
                                 <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="h-7 text-xs border-emerald-500 text-black hover:bg-emerald-50 px-2"><Receipt className="w-3 h-3 mr-1" />Expenses</Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
-                              </div>
+                                <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-500 text-black hover:bg-purple-50 px-2"><Link to={`/ResellerPackupEventEditor?saleId=${sale.id}`}><Package className="w-3 h-3 mr-1" />Pack-Up Event</Link></Button>
+                                </div>
                             </CardContent>
                           </Card>
                         ))}
