@@ -354,7 +354,7 @@ export default function EstateSaleFinder() {
           // Map View
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Card className="overflow-hidden h-[600px]">
+              <Card className="overflow-hidden h-[600px] [&_.leaflet-container]:z-0 [&_.leaflet-pane]:z-[5] [&_.leaflet-top]:z-[10] [&_.leaflet-bottom]:z-[10]">
                 <MapContainer
                   center={mapCenter}
                   zoom={12}

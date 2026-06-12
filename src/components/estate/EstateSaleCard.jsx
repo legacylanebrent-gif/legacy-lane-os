@@ -145,7 +145,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
 
         {expanded && (
           <div className="pt-3 space-y-2">
-            <Button className="w-full bg-gold-600 hover:bg-gold-700">
+            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
               View Details
             </Button>
             <Button variant="outline" className="w-full">
