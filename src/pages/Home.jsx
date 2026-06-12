@@ -33,6 +33,7 @@ import {
   TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
+import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -280,22 +281,7 @@ export default function Home() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const activeSales = (salesData || []).filter(s => {
-        // Filter by status
-        if (s.status !== 'upcoming' && s.status !== 'active') return false;
-        
-        // Filter by date - only show sales with future or today dates
-        if (s.sale_dates && s.sale_dates.length > 0) {
-          const hasFutureDate = s.sale_dates.some(dateObj => {
-            const saleDate = new Date(dateObj.date);
-            saleDate.setHours(0, 0, 0, 0);
-            return saleDate >= today;
-          });
-          return hasFutureDate;
-        }
-        
-        return true; // Include if no dates set
-      });
+      const activeSales = (salesData || []).filter(s => shouldShowSaleOnFrontend(s));
       console.log('Active sales after filter:', activeSales.length);
       
       setSales(activeSales);
@@ -622,8 +608,8 @@ export default function Home() {
       return salesList;
     };
 
-    // Only show active/upcoming sales on frontend (hide draft and completed)
-    const visibleSales = allSales.filter(s => s.status === 'active' || s.status === 'upcoming');
+    // Only show active/upcoming sales on frontend (hide draft and completed by date)
+    const visibleSales = allSales.filter(s => shouldShowSaleOnFrontend(s));
     
     // A locally featured sale is active only while its sale dates haven't all passed
     const now = new Date();
@@ -948,78 +934,78 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && operators[sale.operator_id] && (
-                        <Link 
-                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
-                        >
-                          by {operators[sale.operator_id]}
-                        </Link>
+                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                       <Link 
+                         to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
+                         onClick={(e) => e.stopPropagation()}
+                         className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                       >
+                         by {operators[sale.operator_id] || sale.operator_name}
+                       </Link>
                       )}
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-start gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          {isSaleAddressVisible(sale) ? (
-                            <span>
-                              {sale.property_address?.street && `${sale.property_address.street}, `}
-                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                            </span>
-                          ) : (
-                            <span className="italic text-slate-400 text-xs">Address revealed 24 hrs before sale · {sale.property_address?.city}, {sale.property_address?.state}</span>
-                          )}
-                        </div>
+                       <div className="flex items-start gap-2 text-slate-600">
+                         <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                         {isSaleAddressVisible(sale) ? (
+                           <span>
+                             {sale.property_address?.street && `${sale.property_address.street}, `}
+                             {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                           </span>
+                         ) : (
+                           <span className="italic text-slate-400 text-xs">Address revealed 24 hrs before sale · {sale.property_address?.city}, {sale.property_address?.state}</span>
+                         )}
+                       </div>
 
-                        {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-start gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                            <div className="space-y-0.5 text-sm">
-                              {sale.sale_dates.map((d, idx) => (
-                                <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
-                                  {d.start_time && (
-                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                       {sale.sale_dates && sale.sale_dates.length > 0 && (
+                         <div className="flex items-start gap-2 text-slate-600">
+                           <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                           <div className="space-y-0.5 text-sm">
+                             {sale.sale_dates.map((d, idx) => (
+                               <div key={idx} className="flex items-center justify-between gap-2">
+                                 <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
+                                 {d.start_time && (
+                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                 )}
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
                       </div>
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={(e) => handleAddToRoute(e, sale.id)}
-                            variant="outline"
-                            size="sm"
-                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
-                          >
-                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
-                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                          </Button>
-                          <Button
-                            onClick={(e) => handleGetDirections(e, sale)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Navigation className="w-4 h-4 mr-1" />
-                            Directions
-                          </Button>
-                        </div>
+                       <div className="flex gap-2">
+                         <Button
+                           onClick={(e) => handleAddToRoute(e, sale.id)}
+                           variant="outline"
+                           size="sm"
+                           className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                         >
+                           <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                           {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                         </Button>
+                         <Button
+                           onClick={(e) => handleGetDirections(e, sale)}
+                           variant="outline"
+                           size="sm"
+                           className="flex-1"
+                         >
+                           <Navigation className="w-4 h-4 mr-1" />
+                           Directions
+                         </Button>
+                       </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                      </CardContent>
+                      </Card>
+                      </Link>
+                      ))}
+                      </div>
+                      </div>
+                      </section>
+                      )}
 
-      {/* Locally Featured Sales */}
+                      {/* Locally Featured Sales */}
       {localFeatured.length > 0 && (
         <section className="py-8 sm:py-16 px-2 sm:px-4 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
           <div className="max-w-7xl mx-auto px-2 sm:px-0">
@@ -1062,88 +1048,88 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && operators[sale.operator_id] && (
-                        <Link 
-                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
-                        >
-                          by {operators[sale.operator_id]}
-                        </Link>
+                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                       <Link 
+                         to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
+                         onClick={(e) => e.stopPropagation()}
+                         className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                       >
+                         by {operators[sale.operator_id] || sale.operator_name}
+                       </Link>
                       )}
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-start gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          {isSaleAddressVisible(sale) ? (
-                            <span>
-                              {sale.property_address?.street && `${sale.property_address.street}, `}
-                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                              {sale.distance !== null && sale.distance !== undefined && (
-                                <span className="ml-2 text-xs text-orange-600 font-semibold">
-                                  ({sale.distance.toFixed(1)} mi)
-                                </span>
-                              )}
-                            </span>
-                          ) : (
-                            <span className="italic text-slate-400 text-xs">
-                              Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
-                              {sale.distance !== null && sale.distance !== undefined && (
-                                <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
-                              )}
-                            </span>
-                          )}
-                        </div>
+                       <div className="flex items-start gap-2 text-slate-600">
+                         <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                         {isSaleAddressVisible(sale) ? (
+                           <span>
+                             {sale.property_address?.street && `${sale.property_address.street}, `}
+                             {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                             {sale.distance !== null && sale.distance !== undefined && (
+                               <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                 ({sale.distance.toFixed(1)} mi)
+                               </span>
+                             )}
+                           </span>
+                         ) : (
+                           <span className="italic text-slate-400 text-xs">
+                             Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
+                             {sale.distance !== null && sale.distance !== undefined && (
+                               <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
+                             )}
+                           </span>
+                         )}
+                       </div>
 
-                        {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-start gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                            <div className="space-y-0.5 text-sm">
-                              {sale.sale_dates.map((d, idx) => (
-                                <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
-                                  {d.start_time && (
-                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                       {sale.sale_dates && sale.sale_dates.length > 0 && (
+                         <div className="flex items-start gap-2 text-slate-600">
+                           <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                           <div className="space-y-0.5 text-sm">
+                             {sale.sale_dates.map((d, idx) => (
+                               <div key={idx} className="flex items-center justify-between gap-2">
+                                 <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
+                                 {d.start_time && (
+                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                 )}
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
                       </div>
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={(e) => handleAddToRoute(e, sale.id)}
-                            variant="outline"
-                            size="sm"
-                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
-                          >
-                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
-                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                          </Button>
-                          <Button
-                            onClick={(e) => handleGetDirections(e, sale)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Navigation className="w-4 h-4 mr-1" />
-                            Directions
-                          </Button>
-                        </div>
+                       <div className="flex gap-2">
+                         <Button
+                           onClick={(e) => handleAddToRoute(e, sale.id)}
+                           variant="outline"
+                           size="sm"
+                           className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                         >
+                           <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                           {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                         </Button>
+                         <Button
+                           onClick={(e) => handleGetDirections(e, sale)}
+                           variant="outline"
+                           size="sm"
+                           className="flex-1"
+                         >
+                           <Navigation className="w-4 h-4 mr-1" />
+                           Directions
+                         </Button>
+                       </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                      </CardContent>
+                      </Card>
+                      </Link>
+                      ))}
+                      </div>
+                      </div>
+                      </section>
+                      )}
 
-      {/* Regular Local Sales */}
+                      {/* Regular Local Sales */}
       <section className="py-8 sm:py-16 px-2 sm:px-4 bg-white">
         <div className="max-w-7xl mx-auto px-2 sm:px-0">
           <div className="text-center mb-8 sm:mb-12">
@@ -1201,88 +1187,88 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && operators[sale.operator_id] && (
-                        <Link 
-                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
-                        >
-                          by {operators[sale.operator_id]}
-                        </Link>
+                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                       <Link 
+                         to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
+                         onClick={(e) => e.stopPropagation()}
+                         className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
+                       >
+                         by {operators[sale.operator_id] || sale.operator_name}
+                       </Link>
                       )}
 
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-start gap-2 text-slate-600">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                          {isSaleAddressVisible(sale) ? (
-                            <span>
-                              {sale.property_address?.street && `${sale.property_address.street}, `}
-                              {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
-                              {sale.distance !== null && sale.distance !== undefined && (
-                                <span className="ml-2 text-xs text-orange-600 font-semibold">
-                                  ({sale.distance.toFixed(1)} mi)
-                                </span>
-                              )}
-                            </span>
-                          ) : (
-                            <span className="italic text-slate-400 text-xs">
-                              Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
-                              {sale.distance !== null && sale.distance !== undefined && (
-                                <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
-                              )}
-                            </span>
-                          )}
-                        </div>
+                       <div className="flex items-start gap-2 text-slate-600">
+                         <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                         {isSaleAddressVisible(sale) ? (
+                           <span>
+                             {sale.property_address?.street && `${sale.property_address.street}, `}
+                             {sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}
+                             {sale.distance !== null && sale.distance !== undefined && (
+                               <span className="ml-2 text-xs text-orange-600 font-semibold">
+                                 ({sale.distance.toFixed(1)} mi)
+                               </span>
+                             )}
+                           </span>
+                         ) : (
+                           <span className="italic text-slate-400 text-xs">
+                             Address revealed 24 hrs before sale<br />{sale.property_address?.city}, {sale.property_address?.state}
+                             {sale.distance !== null && sale.distance !== undefined && (
+                               <span className="ml-2 text-orange-600 font-semibold not-italic">({sale.distance.toFixed(1)} mi)</span>
+                             )}
+                           </span>
+                         )}
+                       </div>
 
-                        {sale.sale_dates && sale.sale_dates.length > 0 && (
-                          <div className="flex items-start gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                            <div className="space-y-0.5 text-sm">
-                              {sale.sale_dates.map((d, idx) => (
-                                <div key={idx} className="flex items-center justify-between gap-2">
-                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
-                                  {d.start_time && (
-                                    <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                       {sale.sale_dates && sale.sale_dates.length > 0 && (
+                         <div className="flex items-start gap-2 text-slate-600">
+                           <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                           <div className="space-y-0.5 text-sm">
+                             {sale.sale_dates.map((d, idx) => (
+                               <div key={idx} className="flex items-center justify-between gap-2">
+                                 <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
+                                 {d.start_time && (
+                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                 )}
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
                       </div>
 
                       <div className="mt-4 pt-4 border-t">
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={(e) => handleAddToRoute(e, sale.id)}
-                            variant="outline"
-                            size="sm"
-                            className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
-                          >
-                            <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
-                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
-                          </Button>
-                          <Button
-                            onClick={(e) => handleGetDirections(e, sale)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Navigation className="w-4 h-4 mr-1" />
-                            Directions
-                          </Button>
-                        </div>
+                       <div className="flex gap-2">
+                         <Button
+                           onClick={(e) => handleAddToRoute(e, sale.id)}
+                           variant="outline"
+                           size="sm"
+                           className={`flex-1 ${routeSales.includes(sale.id) ? 'bg-cyan-100 border-cyan-600 text-cyan-700' : ''}`}
+                         >
+                           <Bookmark className={`w-4 h-4 mr-1 ${routeSales.includes(sale.id) ? 'fill-current' : ''}`} />
+                           {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
+                         </Button>
+                         <Button
+                           onClick={(e) => handleGetDirections(e, sale)}
+                           variant="outline"
+                           size="sm"
+                           className="flex-1"
+                         >
+                           <Navigation className="w-4 h-4 mr-1" />
+                           Directions
+                         </Button>
+                       </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
-          </div>
-          </section>
+                      </CardContent>
+                      </Card>
+                      </Link>
+                      ))}
+                      </div>
+                      )}
+                      </div>
+                      </section>
 
-          {/* Local Advertising Panel */}
+                      {/* Local Advertising Panel */}
           <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
           <div className="max-w-7xl mx-auto">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">

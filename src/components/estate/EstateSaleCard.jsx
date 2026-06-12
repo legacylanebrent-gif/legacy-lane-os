@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
-export default function EstateSaleCard({ estate, onClick, expanded = false }) {
+export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName }) {
   const [, setRefresh] = useState(0);
 
   // Force re-render every minute to update status based on current time
@@ -104,7 +104,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
         {/* Estate Sale Company Owner */}
         <div className="flex items-center gap-2 text-sm text-slate-600">
           <Package className="w-4 h-4 text-gold-600 shrink-0" />
-          <span>by {estate.operator_name || 'Legacy Lane'}</span>
+          <span>by {operatorDisplayName || estate.operator_name || 'Legacy Lane'}</span>
         </div>
 
         {/* Stats */}

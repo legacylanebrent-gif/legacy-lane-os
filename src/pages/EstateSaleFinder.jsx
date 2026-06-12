@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, Navigation } from 'lucide-react';
 import EstateSaleCard from '@/components/estate/EstateSaleCard';
+import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
 import { useSEO } from '@/hooks/useSEO';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
@@ -66,6 +67,7 @@ export default function EstateSaleFinder() {
   const [selectedEstate, setSelectedEstate] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
   const [isBrowsingByRegion, setIsBrowsingByRegion] = useState(false);
+  const [operators, setOperators] = useState({}); // operator ID → company_name || full_name
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -130,7 +132,18 @@ export default function EstateSaleFinder() {
       const stateParam = urlParams.get('state');
       const cityParam = urlParams.get('city');
 
-      const data = await base44.entities.EstateSale.list('-created_date', 100);
+      const rawData = await base44.entities.EstateSale.list('-created_date', 100);
+      
+      // Exclude completed/past sales using display status
+      const data = rawData.filter(s => shouldShowSaleOnFrontend(s));
+      
+      // Load operator names (company_name or fallback to full_name)
+      try {
+        const users = await base44.entities.User.list();
+        const opMap = {};
+        (users || []).forEach(u => { opMap[u.id] = u.company_name || u.full_name; });
+        setOperators(opMap);
+      } catch (e) { /* non-critical */ }
       
       // Filter by region if state and city are specified
       if (stateParam && cityParam) {
@@ -294,6 +307,7 @@ export default function EstateSaleFinder() {
                           key={estate.id}
                           estate={estate}
                           onClick={() => handleEstateClick(estate)}
+                          operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
                     </div>
@@ -313,6 +327,7 @@ export default function EstateSaleFinder() {
                           key={estate.id}
                           estate={estate}
                           onClick={() => handleEstateClick(estate)}
+                          operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
                     </div>
@@ -327,6 +342,7 @@ export default function EstateSaleFinder() {
                         key={estate.id}
                         estate={estate}
                         onClick={() => handleEstateClick(estate)}
+                        operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                       />
                     ))}
                   </div>
@@ -387,7 +403,7 @@ export default function EstateSaleFinder() {
             {/* Selected Estate Details */}
             <div className="space-y-4 overflow-y-auto max-h-[600px]">
               {selectedEstate ? (
-                <EstateSaleCard estate={selectedEstate} expanded />
+                <EstateSaleCard estate={selectedEstate} expanded operatorDisplayName={selectedEstate.operator_name || operators[selectedEstate.operator_id]} />
               ) : (
                 <Card className="p-6 text-center">
                   <MapPin className="w-12 h-12 mx-auto text-slate-300 mb-3" />
