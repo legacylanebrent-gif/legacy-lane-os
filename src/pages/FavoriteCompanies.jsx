@@ -64,17 +64,13 @@ export default function FavoriteCompanies() {
       const user = await base44.auth.me();
       setCurrentUser(user);
 
-      const [myFollows, allUsers] = await Promise.all([
+      const [myFollows, opsRes] = await Promise.all([
         base44.entities.CompanyFollow.filter({ consumer_user_id: user.id }),
-        base44.entities.User.list()
+        base44.functions.invoke('getOperatorsWithLocation', {})
       ]);
 
       setFollows(myFollows);
-      const ops = allUsers.filter(u =>
-        u.company_name ||
-        u.primary_account_type === 'estate_sale_operator' ||
-        u.role === 'Estate Sale Company Owner'
-      );
+      const ops = opsRes.data?.operators || [];
       setOperators(ops);
     } catch (err) {
       console.error('Error loading data:', err);
@@ -132,7 +128,9 @@ export default function FavoriteCompanies() {
 
   // Estimate Estate Sale Company Owner location from city/state (use their lat/lng if stored, else skip distance filter)
   const getOperatorLocation = (op) => {
-    if (op.location?.lat && op.location?.lng) return op.location;
+    const lat = op.location?.lat;
+    const lng = op.location?.lng;
+    if (lat != null && lng != null && lat !== 0 && lng !== 0) return { lat, lng };
     return null;
   };
 
@@ -140,7 +138,7 @@ export default function FavoriteCompanies() {
     if (radiusMiles === 0) return true; // "All"
     if (!userLocation) return true; // Can't filter without user location
     const loc = getOperatorLocation(op);
-    if (!loc) return true; // No coords for operator, include them
+    if (!loc) return false; // No coords for operator — exclude when radius is active
     return haversine(userLocation.lat, userLocation.lng, loc.lat, loc.lng) <= radiusMiles;
   };
 
