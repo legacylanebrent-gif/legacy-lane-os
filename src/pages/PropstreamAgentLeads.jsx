@@ -899,7 +899,7 @@ export default function PropstreamAgentLeads() {
                         
                         if (priceAndTerritory) {
                           const priceParts = priceAndTerritory.split(' (');
-                          price = priceParts[0];
+                          price = priceParts[0]?.replace(/,/g, ''); // Remove commas from price
                           territory = priceParts[1]?.replace(')', '');
                         }
                         
