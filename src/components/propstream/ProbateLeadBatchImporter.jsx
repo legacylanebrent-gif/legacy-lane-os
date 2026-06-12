@@ -181,6 +181,23 @@ function mapRow(row, mapping) {
       if (val !== '' && val !== undefined) mapped[field] = String(val).trim();
     }
   }
+  // Combine first+last into contact_name if not set
+  if (!mapped.contact_name && (mapped.contact_name_first || mapped.contact_name_last)) {
+    mapped.contact_name = [mapped.contact_name_first, mapped.contact_name_last].filter(Boolean).join(' ');
+  }
+  // Derive owner type from indicators if not in CSV
+  if (!mapped.propstream_owner_type) {
+    const types = [];
+    if (mapped.probate_indicator) types.push('Probate');
+    if (mapped.inherited_indicator) types.push('Inherited');
+    if (mapped.preforeclosure_indicator) types.push('Pre-Foreclosure');
+    if (mapped.foreclosure_indicator) types.push('Foreclosure');
+    if (mapped.absentee_owner) types.push('Absentee Owner');
+    if (mapped.senior_owner_indicator) types.push('Senior Owner');
+    if (mapped.propstream_equity > 0 && !mapped.total_open_loans) types.push('Free & Clear');
+    else if (mapped.propstream_equity > 100000) types.push('High Equity');
+    if (types.length > 0) mapped.propstream_owner_type = types[0];
+  }
   return mapped;
 }
 

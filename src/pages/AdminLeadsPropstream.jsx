@@ -193,9 +193,17 @@ export default function AdminLeadsPropstream() {
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Score</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Owner</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Property Address</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">County</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Contact</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Owner Type</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Situation</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Est. Value</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Equity</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Beds</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Baths</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Sq Ft</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Year</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Type</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Status</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Actions</th>
               </tr>
@@ -208,17 +216,18 @@ export default function AdminLeadsPropstream() {
                       {lead.score || 0}
                     </div>
                   </td>
-                  <td className="p-3">
-                    <p className="font-medium text-slate-800">{lead.contact_name || 'Unknown'}</p>
-                    {lead.propstream_id && <p className="text-xs text-slate-400">PS: {lead.propstream_id}</p>}
+                  <td className="p-3 max-w-[140px]">
+                    <p className="font-medium text-slate-800 truncate" title={lead.contact_name}>{lead.contact_name || 'Unknown'}</p>
+                    {lead.propstream_id && <p className="text-xs text-slate-400">PS: {lead.propstream_id.slice(0, 12)}</p>}
                   </td>
-                  <td className="p-3 max-w-[200px]">
+                  <td className="p-3 max-w-[140px]">
                     <p className="font-medium truncate" title={lead.property_address}>{lead.property_address}</p>
                     <p className="text-xs text-slate-400">
                       {lead.property_city}{lead.property_city && lead.property_state ? ', ' : ''}{lead.property_state}{lead.property_state && lead.property_zip ? ' ' : ''}{lead.property_zip}
                     </p>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-xs text-slate-500 whitespace-nowrap">{lead.property_county || '—'}</td>
+                  <td className="p-3 max-w-[130px]">
                     {lead.contact_email && (
                       <a href={`mailto:${lead.contact_email}`} className="text-xs text-blue-600 hover:underline truncate block" onClick={e => e.stopPropagation()}>
                         {lead.contact_email}
@@ -232,11 +241,30 @@ export default function AdminLeadsPropstream() {
                   </td>
                   <td className="p-3">
                     {lead.propstream_owner_type ? (
-                      <Badge className="bg-purple-100 text-purple-700 text-xs">{lead.propstream_owner_type}</Badge>
+                      <Badge className="bg-purple-100 text-purple-700 text-xs whitespace-nowrap">{lead.propstream_owner_type}</Badge>
+                    ) : <span className="text-slate-400 text-xs">—</span>}
+                  </td>
+                  <td className="p-3">
+                    {lead.situation ? (
+                      <Badge className="bg-blue-100 text-blue-700 text-xs capitalize whitespace-nowrap">{lead.situation}</Badge>
                     ) : <span className="text-slate-400 text-xs">—</span>}
                   </td>
                   <td className="p-3 text-slate-700 whitespace-nowrap">
-                    {lead.estimated_value ? `$${lead.estimated_value.toLocaleString()}` : <span className="text-slate-400">—</span>}
+                    {lead.estimated_value ? `$${Number(lead.estimated_value).toLocaleString()}` : <span className="text-slate-400">—</span>}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {lead.propstream_equity ? (
+                      <span className="text-purple-600 font-medium">${Number(lead.propstream_equity).toLocaleString()}</span>
+                    ) : <span className="text-slate-400">—</span>}
+                  </td>
+                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_beds || '—'}</td>
+                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_baths || '—'}</td>
+                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_sqft ? Number(lead.propstream_sqft).toLocaleString() : '—'}</td>
+                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_year_built || '—'}</td>
+                  <td className="p-3">
+                    {lead.propstream_property_type ? (
+                      <span className="text-xs text-slate-600 capitalize">{lead.propstream_property_type}</span>
+                    ) : <span className="text-slate-400">—</span>}
                   </td>
                   <td className="p-3">
                     {lead.converted ? <Badge className="bg-green-100 text-green-800 text-xs">Converted</Badge>
