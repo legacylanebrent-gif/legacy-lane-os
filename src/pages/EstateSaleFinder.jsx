@@ -307,7 +307,7 @@ export default function EstateSaleFinder() {
                           key={estate.id}
                           estate={estate}
                           onClick={() => handleEstateClick(estate)}
-                          operatorDisplayName={operators[estate.operator_id] || estate.operator_name}
+                          operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
                     </div>
@@ -327,7 +327,7 @@ export default function EstateSaleFinder() {
                           key={estate.id}
                           estate={estate}
                           onClick={() => handleEstateClick(estate)}
-                          operatorDisplayName={operators[estate.operator_id] || estate.operator_name}
+                          operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
                     </div>
@@ -342,7 +342,7 @@ export default function EstateSaleFinder() {
                         key={estate.id}
                         estate={estate}
                         onClick={() => handleEstateClick(estate)}
-                        operatorDisplayName={operators[estate.operator_id] || estate.operator_name}
+                        operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                       />
                     ))}
                   </div>
@@ -403,7 +403,7 @@ export default function EstateSaleFinder() {
             {/* Selected Estate Details */}
             <div className="space-y-4 overflow-y-auto max-h-[600px]">
               {selectedEstate ? (
-                <EstateSaleCard estate={selectedEstate} expanded operatorDisplayName={operators[selectedEstate.operator_id] || selectedEstate.operator_name} />
+                <EstateSaleCard estate={selectedEstate} expanded operatorDisplayName={selectedEstate.operator_name || operators[selectedEstate.operator_id]} />
               ) : (
                 <Card className="p-6 text-center">
                   <MapPin className="w-12 h-12 mx-auto text-slate-300 mb-3" />

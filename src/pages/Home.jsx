@@ -934,13 +934,13 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                      {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
                        <Link 
                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
                          onClick={(e) => e.stopPropagation()}
                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
                        >
-                         by {operators[sale.operator_id] || sale.operator_name}
+                         by {sale.operator_name || operators[sale.operator_id]}
                        </Link>
                       )}
 
@@ -1048,13 +1048,13 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                      {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
                        <Link 
                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
                          onClick={(e) => e.stopPropagation()}
                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
                        >
-                         by {operators[sale.operator_id] || sale.operator_name}
+                         by {sale.operator_name || operators[sale.operator_id]}
                        </Link>
                       )}
 
@@ -1187,13 +1187,13 @@ export default function Home() {
                         {sale.title}
                       </h4>
                       
-                      {sale.operator_id && (operators[sale.operator_id] || sale.operator_name) && (
+                      {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
                        <Link 
                          to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id}
                          onClick={(e) => e.stopPropagation()}
                          className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3"
                        >
-                         by {operators[sale.operator_id] || sale.operator_name}
+                         by {sale.operator_name || operators[sale.operator_id]}
                        </Link>
                       )}
 
