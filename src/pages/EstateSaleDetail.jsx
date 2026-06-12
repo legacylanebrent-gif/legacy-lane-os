@@ -771,7 +771,7 @@ export default function EstateSaleDetail() {
                     Sale Dates & Times
                   </h3>
                   <div className="space-y-3">
-                    {sale.sale_dates && sale.sale_dates.map((dateInfo, idx) => (
+                    {sale.sale_dates && sale.sale_dates.length > 0 ? sale.sale_dates.map((dateInfo, idx) => (
                       <div key={idx} className="bg-slate-50 rounded-lg p-3">
                         <div className="font-semibold text-slate-900">
                           {format(new Date(dateInfo.date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
@@ -781,7 +781,9 @@ export default function EstateSaleDetail() {
                           {convertTo12Hour(dateInfo.start_time)} - {convertTo12Hour(dateInfo.end_time)}
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <p className="text-sm text-slate-500 italic">Dates and times coming soon</p>
+                    )}
                   </div>
                 </div>
 
