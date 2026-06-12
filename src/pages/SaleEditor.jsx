@@ -21,12 +21,14 @@ import DeepSearchPricingModal from '@/components/estate/DeepSearchPricingModal';
 import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
+import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
 export default function SaleEditor() {
   const navigate = useNavigate();
   const [saleId, setSaleId] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -160,6 +162,9 @@ export default function SaleEditor() {
 
   useEffect(() => {
     const init = async () => {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+
       const params = new URLSearchParams(window.location.search);
       const id = params.get('saleId');
       if (id) {
@@ -301,6 +306,7 @@ export default function SaleEditor() {
   };
 
   const handleSave = async (publish = false, skipFeeCheck = false) => {
+    if (!isProfileComplete(user)) { alert('Please complete your profile first (company name + location) before saving a sale.'); navigate(createPageUrl('MyProfile')); return; }
     if (!formData.title.trim()) { alert('Please enter a sale title'); return; }
     if (!formData.property_address.city.trim()) { alert('Please enter a city'); return; }
 
@@ -682,8 +688,15 @@ Be practical and realistic for an estate sale context.`,
     );
   }
 
+  const profileOk = isProfileComplete(user);
+
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden w-full max-w-full">
+      {!profileOk && (
+        <div className="max-w-5xl mx-auto px-4 lg:px-6 pt-6">
+          <ProfileCompletionGate user={user} actionLabel="create a sale" />
+        </div>
+      )}
       <div className="bg-white border-b border-slate-200">
         <div className="px-4 lg:px-6 py-4 flex items-center justify-between gap-2 lg:gap-4">
           <div className="flex items-center gap-2 lg:gap-4 min-w-0">

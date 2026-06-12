@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
+import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 
 const formatTo12Hour = (time) => {
   if (!time) return '';
@@ -213,7 +214,14 @@ export default function MySales() {
             How to Use
           </Button>
           <Button 
-            onClick={() => navigate(createPageUrl('SaleEditor'))}
+            onClick={() => {
+              if (!isProfileComplete(user)) {
+                alert('Please complete your profile first. Set your company name and location in My Profile.');
+                navigate(createPageUrl('MyProfile'));
+                return;
+              }
+              navigate(createPageUrl('SaleEditor'));
+            }}
             className="bg-orange-600 hover:bg-orange-700"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -221,6 +229,11 @@ export default function MySales() {
           </Button>
         </div>
       </div>
+
+      {/* Profile completion gate */}
+      {user && !isProfileComplete(user) && (
+        <ProfileCompletionGate user={user} actionLabel="create a sale" />
+      )}
 
 
 

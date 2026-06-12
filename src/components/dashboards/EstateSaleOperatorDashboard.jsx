@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 
 export default function EstateSaleOperatorDashboard({ user }) {
   const navigate = useNavigate();
@@ -149,7 +150,14 @@ export default function EstateSaleOperatorDashboard({ user }) {
             My Sales Manager
           </Button>
           <Button
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => {
+              if (!isProfileComplete(user)) {
+                alert('Please complete your profile first. Set your company name and location in My Profile.');
+                navigate(createPageUrl('MyProfile'));
+                return;
+              }
+              setCreateModalOpen(true);
+            }}
             className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -157,6 +165,11 @@ export default function EstateSaleOperatorDashboard({ user }) {
           </Button>
         </div>
       </div>
+
+      {/* Profile completion gate */}
+      {user && !isProfileComplete(user) && (
+        <ProfileCompletionGate user={user} actionLabel="create a sale" />
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
