@@ -38,23 +38,33 @@ export default function ConsumerDashboard({ user }) {
       const savedIds = JSON.parse(localStorage.getItem('savedSales') || '[]');
       setSavedSaleIds(savedIds);
 
-      // Fetch all active/upcoming sales
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
-      const upcoming = allSales.filter(s =>
+
+      // Fetch sales directly by followed operator IDs — avoids 200-record limit
+      let operatorSales = [];
+      if (opIds.length > 0) {
+        // Fetch up to 50 sales per followed operator, then merge
+        const salesByOperator = await Promise.all(
+          opIds.map(operatorId =>
+            base44.entities.EstateSale.filter({ operator_id: operatorId }, '-created_date', 50)
+          )
+        );
+        operatorSales = salesByOperator.flat();
+      }
+
+      const upcoming = operatorSales.filter(s =>
         (s.status === 'upcoming' || s.status === 'active') &&
         (s.sale_dates || []).some(d => new Date(d.date + 'T00:00:00') >= today)
       );
 
       // Timeline: sales from followed operators OR saved sales
-      const relevantIds = new Set([...opIds.flatMap(id =>
-        upcoming.filter(s => s.operator_id === id).map(s => s.id)
-      ), ...savedIds]);
-      const relevantSales = upcoming.filter(s => relevantIds.has(s.id));
+      const followedIds = new Set(upcoming.map(s => s.id));
+      const relevantSales = upcoming.filter(s => followedIds.has(s.id));
       setFollowedSales(relevantSales);
 
-      // Saved items gallery: sales with saved images in localStorage
+      // Saved items & saved sales: fetch all sales once for gallery + saved cards
+      const allSales = await base44.entities.EstateSale.list('-created_date', 500);
       const salesWithSavedImgs = allSales.filter(s => {
         const stored = localStorage.getItem(`savedImages_${s.id}`);
         if (!stored) return false;
@@ -62,7 +72,6 @@ export default function ConsumerDashboard({ user }) {
       });
       setAllFollowedSales(salesWithSavedImgs);
 
-      // Saved sales cards
       const saved = allSales.filter(s => savedIds.includes(s.id));
       setSavedSales(saved);
     } catch (err) {
