@@ -306,7 +306,6 @@ export default function EstateSaleFinder() {
                         <EstateSaleCard
                           key={estate.id}
                           estate={estate}
-                          onClick={() => handleEstateClick(estate)}
                           operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
@@ -326,7 +325,6 @@ export default function EstateSaleFinder() {
                         <EstateSaleCard
                           key={estate.id}
                           estate={estate}
-                          onClick={() => handleEstateClick(estate)}
                           operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
@@ -341,7 +339,6 @@ export default function EstateSaleFinder() {
                       <EstateSaleCard
                         key={estate.id}
                         estate={estate}
-                        onClick={() => handleEstateClick(estate)}
                         operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                       />
                     ))}

@@ -6,8 +6,14 @@ import { Calendar, MapPin, Eye, Bookmark, Navigation, DollarSign, Package } from
 import { format } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
+import { createPageUrl } from '@/utils';
 
 export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName }) {
+  const navigateToDetail = () => {
+    if (estate?.id) {
+      window.location.href = createPageUrl('EstateSaleDetail') + '?id=' + estate.id;
+    }
+  };
   const [, setRefresh] = useState(0);
 
   // Force re-render every minute to update status based on current time
@@ -34,7 +40,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
       className={`overflow-hidden transition-all hover:shadow-xl cursor-pointer ${
         expanded ? '' : 'hover:-translate-y-1'
       }`}
-      onClick={onClick}
+      onClick={onClick || navigateToDetail}
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
@@ -58,7 +64,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           <h3 className="text-lg font-serif font-bold text-navy-900 leading-tight">
             {estate.title}
           </h3>
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={(e) => e.stopPropagation()}>
             <Bookmark className="w-4 h-4" />
           </Button>
         </div>
@@ -145,10 +151,16 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
 
         {expanded && (
           <div className="pt-3 space-y-2">
-            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white" onClick={navigateToDetail}>
               View Details
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={(e) => {
+              e.stopPropagation();
+              if (estate?.property_address) {
+                const addr = `${estate.property_address.street || ''}, ${estate.property_address.city || ''}, ${estate.property_address.state || ''} ${estate.property_address.zip || ''}`;
+                window.open(`https://maps.google.com/maps?q=${encodeURIComponent(addr)}`, '_blank');
+              }
+            }}>
               Get Directions
             </Button>
           </div>
