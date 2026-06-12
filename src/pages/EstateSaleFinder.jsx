@@ -69,6 +69,20 @@ export default function EstateSaleFinder() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
   const [isBrowsingByRegion, setIsBrowsingByRegion] = useState(false);
   const [operators, setOperators] = useState({}); // operator ID → company_name || full_name
+  const [savedSaleIds, setSavedSaleIds] = useState(() => {
+    const s = localStorage.getItem('savedSales');
+    return s ? JSON.parse(s) : [];
+  });
+
+  const handleToggleSave = (estate) => {
+    setSavedSaleIds(prev => {
+      const next = prev.includes(estate.id) 
+        ? prev.filter(id => id !== estate.id)
+        : [...prev, estate.id];
+      localStorage.setItem('savedSales', JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -307,6 +321,8 @@ export default function EstateSaleFinder() {
                         <EstateSaleCard
                           key={estate.id}
                           estate={estate}
+                          saved={savedSaleIds.includes(estate.id)}
+                          onToggleSave={handleToggleSave}
                           operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
@@ -326,6 +342,8 @@ export default function EstateSaleFinder() {
                         <EstateSaleCard
                           key={estate.id}
                           estate={estate}
+                          saved={savedSaleIds.includes(estate.id)}
+                          onToggleSave={handleToggleSave}
                           operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                         />
                       ))}
@@ -340,6 +358,8 @@ export default function EstateSaleFinder() {
                       <EstateSaleCard
                         key={estate.id}
                         estate={estate}
+                        saved={savedSaleIds.includes(estate.id)}
+                        onToggleSave={handleToggleSave}
                         operatorDisplayName={estate.operator_name || operators[estate.operator_id]}
                       />
                     ))}
@@ -401,7 +421,7 @@ export default function EstateSaleFinder() {
             {/* Selected Estate Details */}
             <div className="space-y-4 overflow-y-auto max-h-[600px]">
               {selectedEstate ? (
-                <EstateSaleCard estate={selectedEstate} expanded operatorDisplayName={selectedEstate.operator_name || operators[selectedEstate.operator_id]} />
+                <EstateSaleCard estate={selectedEstate} expanded saved={savedSaleIds.includes(selectedEstate.id)} onToggleSave={handleToggleSave} operatorDisplayName={selectedEstate.operator_name || operators[selectedEstate.operator_id]} />
               ) : (
                 <Card className="p-6 text-center">
                   <MapPin className="w-12 h-12 mx-auto text-slate-300 mb-3" />

@@ -8,7 +8,7 @@ import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import { createPageUrl } from '@/utils';
 
-export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName }) {
+export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName, saved = false, onToggleSave }) {
   const navigateToDetail = () => {
     if (estate?.id) {
       window.location.href = createPageUrl('EstateSaleDetail') + '?id=' + estate.id;
@@ -64,8 +64,8 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           <h3 className="text-lg font-serif font-bold text-navy-900 leading-tight">
             {estate.title}
           </h3>
-          <Button variant="ghost" size="icon" className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            <Bookmark className="w-4 h-4" />
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={(e) => { e.stopPropagation(); onToggleSave?.(estate); }}>
+            <Bookmark className={`w-4 h-4 ${saved ? 'fill-orange-500 text-orange-500' : ''}`} />
           </Button>
         </div>
       </CardHeader>
