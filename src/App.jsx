@@ -127,6 +127,7 @@ import RelationshipHealthDashboard from './pages/RelationshipHealthDashboard';
 import RelationshipsDashboard from './pages/RelationshipsDashboard';
 import SuperAgentCommandCenter from './pages/SuperAgentCommandCenter.jsx';
 import PropstreamAgentLeads from './pages/PropstreamAgentLeads';
+import MobileHome from './pages/MobileHome';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -356,6 +357,8 @@ const AuthenticatedApp = () => {
       <Route path="/:lifeEventSlug/:stateSlug" element={<LifeEventStatePage />} />
       <Route path="/:lifeEventSlug/:stateSlug/:countySlug" element={<LifeEventCountyPage />} />
 
+      {/* ── Mobile Consumer App Routes ── */}
+      <Route path="/mobile" element={<MobileHome />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
