@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { AlertTriangle, X, Building2, MapPin, ArrowRight } from 'lucide-react';
 import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
@@ -9,6 +10,7 @@ import UniversalHeader from '@/components/layout/UniversalHeader';
 import AICoachButton from '@/components/coach/AICoachButton';
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import { useOperatorOnboarding } from '@/hooks/useOperatorOnboarding';
+import { isProfileComplete, getMissingFields } from '@/components/profile/ProfileCompletionGate';
 
 const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page); // includes FutOperLeads
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
@@ -53,6 +55,9 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [profileBannerDismissed, setProfileBannerDismissed] = useState(() => {
+    try { return !!localStorage.getItem('profileBannerDismissed'); } catch { return false; }
+  });
   // Set browser tab title immediately (synchronously) on every render when page changes
   const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
   if (friendly && !PUBLIC_PAGES.includes(currentPageName)) {
@@ -140,6 +145,33 @@ export default function Layout({ children, currentPageName }) {
           <MessagesDropdown />
           <NotificationsDropdown />
         </div>
+
+        {/* Profile incomplete banner — non-consumer users only */}
+        {user && !CONSUMER_ROLES.includes(role) && !isProfileComplete(user) && !profileBannerDismissed && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span className="text-amber-800 font-medium">Complete your profile to unlock all features</span>
+              <span className="text-amber-700 flex flex-wrap gap-x-3 gap-y-0.5">
+                {getMissingFields(user).map(f => (
+                  <span key={f} className="inline-flex items-center gap-1">
+                    {f === 'company name' ? <Building2 className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
+                    {f}
+                  </span>
+                ))}
+              </span>
+              <Link to="/MyProfile" className="inline-flex items-center gap-1 text-amber-700 font-semibold hover:text-amber-900 underline whitespace-nowrap">
+                Go to Profile <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <button
+              onClick={() => { localStorage.setItem('profileBannerDismissed', '1'); setProfileBannerDismissed(true); }}
+              className="text-amber-500 hover:text-amber-700 flex-shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <main className="flex-1 overflow-auto">
           {children}
