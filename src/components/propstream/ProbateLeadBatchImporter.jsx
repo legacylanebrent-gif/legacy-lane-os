@@ -168,7 +168,7 @@ function parseBoolean(val) {
 }
 
 function mapRow(row, mapping) {
-  const mapped = { source: 'propstream' };
+  const mapped = { source: 'propstream', intent: 'estate_sale' };
   for (const [field, csvCol] of Object.entries(mapping)) {
     if (!csvCol || row[csvCol] === undefined) continue;
     const val = row[csvCol];
