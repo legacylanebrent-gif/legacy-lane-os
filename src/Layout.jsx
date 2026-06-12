@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
@@ -53,8 +53,6 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
   // Set browser tab title immediately (synchronously) on every render when page changes
   const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
   if (friendly && !PUBLIC_PAGES.includes(currentPageName)) {
@@ -66,15 +64,6 @@ export default function Layout({ children, currentPageName }) {
     loadUserAndAccess();
   }, []);
 
-  // Check if user needs onboarding redirect
-  const needsOnboarding = (userData) => {
-    if (!userData) return false;
-    if (userData.onboarding_completed) return false;
-    if (userData.onboarding_dismissed_permanently) return false;
-    const shownCount = userData.onboarding_shown_count || 0;
-    return shownCount < 2; // show at most twice
-  };
-
   const loadUserAndAccess = async () => {
     try {
       const userData = await base44.auth.me();
@@ -84,12 +73,7 @@ export default function Layout({ children, currentPageName }) {
       if (!userData.primary_account_type) userData.primary_account_type = 'consumer';
       setUser(userData);
 
-      // Redirect to onboarding if needed (skip if already on onboarding page)
-      if (needsOnboarding(userData) && currentPageName !== 'OnboardingChat') {
-        navigate('/onboarding');
-        setLoading(false);
-        return;
-      }
+      // Onboarding redirect removed — no /onboarding route exists
 
       const role = userData.primary_account_type;
 
