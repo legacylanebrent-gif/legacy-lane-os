@@ -1067,7 +1067,7 @@ Return ONLY the description text, no extra commentary.`
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Date & Time</h2>
             <div className="space-y-4 mb-4">
               <div>
-                <Label htmlFor="start-date">Start Date *</Label>
+                <Label htmlFor="start-date">Select Date *</Label>
                 <Input id="start-date" type="date" value={dateForm.start_date} onChange={(e) => setDateForm({ ...dateForm, start_date: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
