@@ -45,6 +45,7 @@ export default function EstateSaleFinder() {
   const urlParams = new URLSearchParams(window.location.search);
   const cityParam = urlParams.get('city');
   const stateParam = urlParams.get('state');
+  const searchParam = urlParams.get('search');
 
   useSEO({
     title: cityParam
@@ -61,7 +62,7 @@ export default function EstateSaleFinder() {
   const [featuredEstates, setFeaturedEstates] = useState([]);
   const [regularEstates, setRegularEstates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParam ? decodeURIComponent(searchParam) : '');
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]); // Default to LA
   const [selectedEstate, setSelectedEstate] = useState(null);

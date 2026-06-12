@@ -415,6 +415,34 @@ export default function FavoriteCompanies() {
                         {[follow.operator_city, follow.operator_state].filter(Boolean).join(', ')}
                       </p>
                     )}
+                    <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                      {seoSlugMap[follow.operator_id] ? (
+                        <>
+                          <Link
+                            to={`/companies?slug=${encodeURIComponent(seoSlugMap[follow.operator_id])}`}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700 hover:underline"
+                          >
+                            <Building2 className="w-3 h-3" />
+                            Business Profile
+                          </Link>
+                          <Link
+                            to={`/EstateSaleFinder?search=${encodeURIComponent(operatorMap[follow.operator_id]?.company_name || follow.operator_name)}`}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-cyan-600 hover:text-cyan-700 hover:underline"
+                          >
+                            <ShoppingBag className="w-3 h-3" />
+                            View Sales
+                          </Link>
+                        </>
+                      ) : (
+                        <Link
+                          to={`/EstateSaleFinder?search=${encodeURIComponent(operatorMap[follow.operator_id]?.company_name || follow.operator_name)}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-cyan-600 hover:text-cyan-700 hover:underline"
+                        >
+                          <ShoppingBag className="w-3 h-3" />
+                          View Sales
+                        </Link>
+                      )}
+                    </div>
                   </div>
                   {/* Badge summary when collapsed */}
                   {!isExpanded && (
@@ -502,7 +530,7 @@ export default function FavoriteCompanies() {
                             <ExternalLink className="w-3 h-3" />
                           </Link>
                           <Link
-                            to={`/companies?slug=${encodeURIComponent(seoSlugMap[follow.operator_id])}`}
+                            to={`/EstateSaleFinder?search=${encodeURIComponent(operatorMap[follow.operator_id]?.company_name || follow.operator_name)}`}
                             className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 hover:text-cyan-700 hover:underline transition-colors"
                           >
                             <ShoppingBag className="w-4 h-4" />
