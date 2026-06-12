@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import LocationSetter from '@/components/location/LocationSetter';
 import {
   Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp
 } from 'lucide-react';
@@ -236,9 +237,7 @@ export default function FavoriteCompanies() {
             </div>
 
             {!userLocation && browseRadius !== 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-sm text-amber-700">
-                ⚠️ No saved location found. Visit the home page and allow location access, or select "All" to see all companies.
-              </div>
+              <LocationSetter onLocationSet={(loc) => setUserLocation(loc)} />
             )}
 
             <div className="relative">
