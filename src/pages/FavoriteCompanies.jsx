@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import LocationSetter from '@/components/location/LocationSetter';
+import { Link } from 'react-router-dom';
 import {
-  Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp
+  Building2, Search, Trash2, Bell, Mail, MessageSquare, Star, Plus, MapPin, SlidersHorizontal, ChevronDown, ChevronUp, ExternalLink, ShoppingBag
 } from 'lucide-react';
 
 // Haversine distance in miles
@@ -40,6 +41,7 @@ export default function FavoriteCompanies() {
   const [filterCity, setFilterCity] = useState('');
   const [filterRadius, setFilterRadius] = useState(0); // 0 = all followed companies
   const [expandedIds, setExpandedIds] = useState(new Set());
+  const [seoSlugMap, setSeoSlugMap] = useState({}); // operator user ID → SEOPage slug
 
   const toggleExpanded = (id) => {
     setExpandedIds(prev => {
@@ -72,6 +74,14 @@ export default function FavoriteCompanies() {
       setFollows(myFollows);
       const ops = opsRes.data?.operators || [];
       setOperators(ops);
+
+      // Load company SEOPage slugs for profile links
+      try {
+        const seoPages = await base44.entities.SEOPage.filter({ page_type: 'company' });
+        const slugMap = {};
+        seoPages.forEach(p => { if (p.entity_id) slugMap[p.entity_id] = p.slug; });
+        setSeoSlugMap(slugMap);
+      } catch (e) { /* non-critical */ }
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
@@ -477,6 +487,32 @@ export default function FavoriteCompanies() {
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div className="flex gap-3 mt-4 pt-3 border-t border-slate-200">
+                      {seoSlugMap[follow.operator_id] ? (
+                        <>
+                          <Link
+                            to={`/companies?slug=${encodeURIComponent(seoSlugMap[follow.operator_id])}`}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 hover:underline transition-colors"
+                          >
+                            <Building2 className="w-4 h-4" />
+                            Business Profile
+                            <ExternalLink className="w-3 h-3" />
+                          </Link>
+                          <Link
+                            to={`/companies?slug=${encodeURIComponent(seoSlugMap[follow.operator_id])}`}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 hover:text-cyan-700 hover:underline transition-colors"
+                          >
+                            <ShoppingBag className="w-4 h-4" />
+                            View Sales
+                            <ExternalLink className="w-3 h-3" />
+                          </Link>
+                        </>
+                      ) : (
+                        <span className="text-xs text-slate-400">No public profile available yet</span>
+                      )}
                     </div>
 
                     <Button
