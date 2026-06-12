@@ -14,11 +14,17 @@ const getScoreColor = (score) => {
 
 const FieldRow = ({ label, value, mono }) => {
   if (value === undefined || value === null || value === '') return null;
-  const display = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+  const isReactEl = React.isValidElement(value);
+  const boolClass = typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-500') : '';
+  const display = isReactEl ? null : (typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value));
   return (
     <div>
       <p className="text-xs text-slate-500">{label}</p>
-      <p className={`text-sm ${mono ? 'font-mono' : ''} ${typeof value === 'boolean' ? (value ? 'text-green-600' : 'text-red-500') : 'text-slate-700'}`}>{display}</p>
+      {isReactEl ? (
+        <div className="text-sm">{value}</div>
+      ) : (
+        <p className={`text-sm ${mono ? 'font-mono' : ''} ${boolClass} text-slate-700`}>{display}</p>
+      )}
     </div>
   );
 };

@@ -9,8 +9,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet } from 'lucide-react';
 import ProbateLeadBatchImporter from '@/components/propstream/ProbateLeadBatchImporter';
+import LeadDetailModal from '@/components/leads/LeadDetailModal';
 
 const OWNER_TYPES = ['Absentee Owner', 'Inherited', 'Distressed', 'Pre-Foreclosure', 'High Equity', 'Free & Clear', 'Probate'];
 
@@ -348,163 +349,14 @@ export default function AdminLeadsPropstream() {
       )}
 
       {/* Detail Modal */}
-      <Dialog open={showDetail} onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Propstream Lead</DialogTitle></DialogHeader>
-          {selectedLead && (
-            <div className="space-y-4 mt-2">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold ${getScoreColor(selectedLead.score || 0)}`}>{selectedLead.score || 0}</div>
-                <div>
-                  <p className="font-bold text-lg">{selectedLead.contact_name || 'Unknown Owner'}</p>
-                  {selectedLead.propstream_owner_type && <Badge className="bg-purple-100 text-purple-700">{selectedLead.propstream_owner_type}</Badge>}
-                  {selectedLead.propstream_id && <p className="text-xs text-slate-500 mt-1">PS ID: {selectedLead.propstream_id}</p>}
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-2 border-t pt-3">
-                <p className="font-semibold text-sm">Contact Info</p>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {selectedLead.contact_email && <div><p className="text-xs text-slate-500">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="text-cyan-600 hover:underline break-all">{selectedLead.contact_email}</a></div>}
-                  {selectedLead.contact_phone && <div><p className="text-xs text-slate-500">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
-                </div>
-                {selectedLead.contact_name_2_first || selectedLead.contact_name_2_last && <div><p className="text-xs text-slate-500">Co-Owner</p><p>{selectedLead.contact_name_2_first} {selectedLead.contact_name_2_last}</p></div>}
-              </div>
-
-              {/* Property Address */}
-              <div className="space-y-2 border-t pt-3">
-                <p className="font-semibold text-sm">Property Address</p>
-                <div className="text-sm space-y-1">
-                  {selectedLead.property_address && <p>{selectedLead.property_address}</p>}
-                  {selectedLead.property_unit && <p className="text-slate-600">Unit: {selectedLead.property_unit}</p>}
-                  {selectedLead.property_city && <p className="text-slate-600">{selectedLead.property_city}, {selectedLead.property_state} {selectedLead.property_zip}</p>}
-                  {selectedLead.property_county && <p className="text-slate-600">County: {selectedLead.property_county}</p>}
-                  {selectedLead.property_apn && <p className="text-slate-600">APN: {selectedLead.property_apn}</p>}
-                </div>
-              </div>
-
-              {/* Mailing Address */}
-              {(selectedLead.mailing_address || selectedLead.mailing_city) && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-semibold text-sm">Mailing Address</p>
-                  <div className="text-sm space-y-1">
-                    {selectedLead.mailing_care_of && <p>{selectedLead.mailing_care_of}</p>}
-                    {selectedLead.mailing_address && <p>{selectedLead.mailing_address}</p>}
-                    {selectedLead.mailing_unit && <p className="text-slate-600">Unit: {selectedLead.mailing_unit}</p>}
-                    {selectedLead.mailing_city && <p className="text-slate-600">{selectedLead.mailing_city}, {selectedLead.mailing_state} {selectedLead.mailing_zip}</p>}
-                    {selectedLead.mailing_county && <p className="text-slate-600">County: {selectedLead.mailing_county}</p>}
-                  </div>
-                </div>
-              )}
-
-              {/* Property Details */}
-              <div className="space-y-2 border-t pt-3">
-                <p className="font-semibold text-sm">Property Details</p>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {selectedLead.estimated_value && <div><p className="text-xs text-slate-500">Est. Value</p><p className="text-green-600 font-semibold">${selectedLead.estimated_value.toLocaleString()}</p></div>}
-                  {selectedLead.propstream_equity && <div><p className="text-xs text-slate-500">Equity</p><p className="text-purple-600 font-semibold">${selectedLead.propstream_equity.toLocaleString()}</p></div>}
-                  {selectedLead.propstream_market_value && <div><p className="text-xs text-slate-500">Market Value</p><p>${selectedLead.propstream_market_value.toLocaleString()}</p></div>}
-                  {selectedLead.propstream_beds && <div><p className="text-xs text-slate-500">Beds</p><p>{selectedLead.propstream_beds}</p></div>}
-                  {selectedLead.propstream_baths && <div><p className="text-xs text-slate-500">Baths</p><p>{selectedLead.propstream_baths}</p></div>}
-                  {selectedLead.propstream_sqft && <div><p className="text-xs text-slate-500">Sq Ft</p><p>{selectedLead.propstream_sqft.toLocaleString()}</p></div>}
-                  {selectedLead.propstream_lot_size && <div><p className="text-xs text-slate-500">Lot Size</p><p>{selectedLead.propstream_lot_size}</p></div>}
-                  {selectedLead.propstream_year_built && <div><p className="text-xs text-slate-500">Year Built</p><p>{selectedLead.propstream_year_built}</p></div>}
-                  {selectedLead.propstream_property_type && <div><p className="text-xs text-slate-500">Property Type</p><p>{selectedLead.propstream_property_type}</p></div>}
-                  {selectedLead.propstream_zoning && <div><p className="text-xs text-slate-500">Zoning</p><p>{selectedLead.propstream_zoning}</p></div>}
-                </div>
-              </div>
-
-              {/* Property Condition */}
-              {(selectedLead.total_condition || selectedLead.interior_condition || selectedLead.exterior_condition) && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-semibold text-sm">Condition</p>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {selectedLead.total_condition && <div><p className="text-xs text-slate-500">Overall</p><p className="capitalize">{selectedLead.total_condition}</p></div>}
-                    {selectedLead.interior_condition && <div><p className="text-xs text-slate-500">Interior</p><p className="capitalize">{selectedLead.interior_condition}</p></div>}
-                    {selectedLead.exterior_condition && <div><p className="text-xs text-slate-500">Exterior</p><p className="capitalize">{selectedLead.exterior_condition}</p></div>}
-                    {selectedLead.bathroom_condition && <div><p className="text-xs text-slate-500">Bathrooms</p><p className="capitalize">{selectedLead.bathroom_condition}</p></div>}
-                    {selectedLead.kitchen_condition && <div><p className="text-xs text-slate-500">Kitchen</p><p className="capitalize">{selectedLead.kitchen_condition}</p></div>}
-                  </div>
-                </div>
-              )}
-
-              {/* Loan & Title Info */}
-              {(selectedLead.total_open_loans || selectedLead.lien_amount) && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-semibold text-sm">Loan & Title</p>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {selectedLead.total_open_loans && <div><p className="text-xs text-slate-500">Open Loans</p><p>{selectedLead.total_open_loans}</p></div>}
-                    {selectedLead.est_remaining_balance_loans && <div><p className="text-xs text-slate-500">Est. Remaining Balance</p><p>${selectedLead.est_remaining_balance_loans.toLocaleString()}</p></div>}
-                    {selectedLead.est_loan_to_value && <div><p className="text-xs text-slate-500">Loan-to-Value</p><p>{(selectedLead.est_loan_to_value * 100).toFixed(1)}%</p></div>}
-                    {selectedLead.total_assessed_value && <div><p className="text-xs text-slate-500">Assessed Value</p><p>${selectedLead.total_assessed_value.toLocaleString()}</p></div>}
-                    {selectedLead.lien_amount && <div><p className="text-xs text-slate-500">Lien Amount</p><p>${selectedLead.lien_amount.toLocaleString()}</p></div>}
-                  </div>
-                </div>
-              )}
-
-              {/* Sales History */}
-              {(selectedLead.propstream_last_sale_date || selectedLead.mls_status) && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-semibold text-sm">Sales History</p>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {selectedLead.propstream_last_sale_date && <div><p className="text-xs text-slate-500">Last Sale Date</p><p>{new Date(selectedLead.propstream_last_sale_date).toLocaleDateString()}</p></div>}
-                    {selectedLead.propstream_last_sale_price && <div><p className="text-xs text-slate-500">Last Sale Price</p><p>${selectedLead.propstream_last_sale_price.toLocaleString()}</p></div>}
-                    {selectedLead.mls_status && <div><p className="text-xs text-slate-500">MLS Status</p><p className="capitalize">{selectedLead.mls_status}</p></div>}
-                    {selectedLead.mls_date && <div><p className="text-xs text-slate-500">MLS Date</p><p>{new Date(selectedLead.mls_date).toLocaleDateString()}</p></div>}
-                    {selectedLead.mls_amount && <div><p className="text-xs text-slate-500">MLS Amount</p><p>${selectedLead.mls_amount.toLocaleString()}</p></div>}
-                  </div>
-                </div>
-              )}
-
-              {/* Lead Info */}
-              <div className="space-y-2 border-t pt-3">
-                <p className="font-semibold text-sm">Lead Info</p>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {selectedLead.timeline && <div><p className="text-xs text-slate-500">Timeline</p><p className="capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
-                  {selectedLead.situation && <div><p className="text-xs text-slate-500">Situation</p><p className="capitalize">{selectedLead.situation}</p></div>}
-                  {selectedLead.owner_occupied !== undefined && <div><p className="text-xs text-slate-500">Owner Occupied</p><p>{selectedLead.owner_occupied ? 'Yes' : 'No'}</p></div>}
-                  {selectedLead.litigator !== undefined && <div><p className="text-xs text-slate-500">Litigator</p><p>{selectedLead.litigator ? 'Yes' : 'No'}</p></div>}
-                  {selectedLead.gated_community !== undefined && <div><p className="text-xs text-slate-500">Gated Community</p><p>{selectedLead.gated_community ? 'Yes' : 'No'}</p></div>}
-                </div>
-              </div>
-
-              {/* Marketing Activity */}
-              {(selectedLead.marketing_lists || selectedLead.marketing_campaigns) && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-semibold text-sm">Marketing Activity</p>
-                  <div className="grid grid-cols-3 gap-3 text-sm">
-                    {selectedLead.marketing_lists && <div><p className="text-xs text-slate-500">Lists</p><p>{selectedLead.marketing_lists}</p></div>}
-                    {selectedLead.marketing_campaigns && <div><p className="text-xs text-slate-500">Campaigns</p><p>{selectedLead.marketing_campaigns}</p></div>}
-                    {selectedLead.voicemail_drops && <div><p className="text-xs text-slate-500">VM Drops</p><p>{selectedLead.voicemail_drops}</p></div>}
-                    {selectedLead.dialer && <div><p className="text-xs text-slate-500">Dialer</p><p>{selectedLead.dialer}</p></div>}
-                    {selectedLead.postcards && <div><p className="text-xs text-slate-500">Postcards</p><p>{selectedLead.postcards}</p></div>}
-                    {selectedLead.emails && <div><p className="text-xs text-slate-500">Emails</p><p>{selectedLead.emails}</p></div>}
-                    {selectedLead.skip_traces && <div><p className="text-xs text-slate-500">Skip Traces</p><p>{selectedLead.skip_traces}</p></div>}
-                  </div>
-                </div>
-              )}
-
-              {selectedLead.notes && <div className="p-3 bg-slate-50 rounded-lg text-sm border-t pt-3"><p className="font-medium mb-1">Notes</p><p className="text-slate-600">{selectedLead.notes}</p></div>}
-              {!selectedLead.routed_to && !selectedLead.converted && (
-                <div><p className="text-sm font-medium mb-1">Assign to Operator</p>
-                  <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
-                    <SelectTrigger><SelectValue placeholder="Select operator..." /></SelectTrigger>
-                    <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              )}
-              {selectedLead.routed_to && !selectedLead.converted && (
-                <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700"><CheckCircle className="w-4 h-4 mr-2" />Mark as Converted</Button>
-              )}
-              <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
-                <Clock className="w-3 h-3" />{new Date(selectedLead.created_date).toLocaleDateString()}
-                {selectedLead.converted && <Badge className="ml-auto bg-green-100 text-green-800">Converted</Badge>}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <LeadDetailModal
+        lead={selectedLead}
+        operators={operators}
+        onAssign={handleAssign}
+        onMarkConverted={handleMarkConverted}
+        open={showDetail}
+        onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}
+      />
 
       {/* Batch Import Modal */}
       <ProbateLeadBatchImporter
