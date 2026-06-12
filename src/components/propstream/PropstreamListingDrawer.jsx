@@ -84,6 +84,7 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="MLS #" value={fmt(listing.mls_number)} />
             <DV label="Listing Status" value={fmt(listing.listing_status)} />
             <DV label="List Date" value={fmt(listing.list_date)} />
+            <DV label="PropStream ID" value={fmt(listing.propstream_property_id)} />
             {listing.listing_url && <DV label="Listing URL" value={<a href={listing.listing_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline truncate block max-w-[180px]">View Listing</a>} span2 />}
           </Grid2>
         </Section>
@@ -98,6 +99,8 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Lot Size" value={fmt(listing.lot_size)} />
             <DV label="Year Built" value={fmt(listing.year_built)} />
             <DV label="Property Type" value={fmt(listing.property_type)} />
+            <DV label="Property Status" value={fmt(listing.property_status)} />
+            <DV label="Unit #" value={fmt(listing.unit_number)} />
             <DV label="Days on Market" value={fmt(listing.days_on_market)} />
             {listing.listing_remarks && <DV label="Remarks" value={listing.listing_remarks} span2 />}
           </Grid2>
@@ -112,7 +115,9 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Owner Occupied" value={listing.owner_occupied ? 'Yes' : 'No'} />
             <DV label="Deceased Owner" value={listing.deceased_owner ? 'Yes' : '—'} />
             <DV label="Litigator" value={listing.litigator ? 'Yes' : '—'} />
-            <DV label="Mailing Address" value={listing.owner_mailing_address ? `${listing.owner_mailing_address}, ${listing.owner_mailing_city || ''} ${listing.owner_mailing_state || ''} ${listing.owner_mailing_zip || ''}` : '—'} span2 />
+            <DV label="Mailing Address" value={listing.owner_mailing_address ? `${listing.owner_mailing_address}${listing.owner_mailing_unit ? ` ${listing.owner_mailing_unit}` : ''}, ${listing.owner_mailing_city || ''} ${listing.owner_mailing_state || ''} ${listing.owner_mailing_zip || ''}` : '—'} span2 />
+            <DV label="Mailing County" value={fmt(listing.owner_mailing_county)} />
+            <DV label="Mailing Unit" value={fmt(listing.owner_mailing_unit)} />
             {listing.mailing_care_of_name && <DV label="Care Of" value={listing.mailing_care_of_name} span2 />}
             <DV label="Do Not Mail" value={listing.do_not_mail ? 'Yes' : 'No'} />
           </Grid2>
@@ -141,6 +146,7 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="Open Loans" value={fmt(listing.total_open_loans)} />
             <DV label="Last Sale Amount" value={fmtPrice(listing.last_sale_amount)} />
             <DV label="Last Sale Date" value={fmt(listing.last_sale_date)} />
+            <DV label="Sale Recording Date" value={fmt(listing.last_sale_recording_date)} />
             {listing.lien_indicator && <>
               <DV label="Lien Amount" value={fmtPrice(listing.lien_amount)} />
               <DV label="Lien Date" value={fmt(listing.lien_date)} />
@@ -149,7 +155,21 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
               <DV label="PreFC Unpaid Bal" value={fmtPrice(listing.prefc_unpaid_balance)} />
               <DV label="PreFC Auction Date" value={fmt(listing.prefc_auction_date)} />
               <DV label="PreFC Doc #" value={fmt(listing.prefc_doc_number)} />
+              <DV label="PreFC Recording" value={fmt(listing.prefc_recording_date)} />
             </>}
+            <DV label="Foreclosure Factor" value={fmt(listing.foreclosure_factor)} />
+            <DV label="Bankruptcy Date" value={fmt(listing.bk_date)} />
+            {listing.divorce_indicator && <DV label="Divorce Date" value={fmt(listing.divorce_date)} />}
+          </Grid2>
+        </Section>
+
+        {/* Marketing / List Info */}
+        <Section title="Marketing & List Info" icon={<Mail className="w-4 h-4" />}>
+          <Grid2>
+            <DV label="Marketing Lists" value={fmt(listing.marketing_lists)} />
+            <DV label="Skip Traces" value={fmt(listing.skip_traces)} />
+            <DV label="Date Added to List" value={fmt(listing.date_added_to_list)} />
+            <DV label="Method of Add" value={fmt(listing.method_of_add)} />
           </Grid2>
         </Section>
 
