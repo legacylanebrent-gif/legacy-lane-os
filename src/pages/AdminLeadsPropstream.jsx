@@ -9,7 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet, Share2 } from 'lucide-react';
+import { exportToFacebookAudienceCSV } from '@/lib/facebookAudienceExport';
 import ProbateLeadBatchImporter from '@/components/propstream/ProbateLeadBatchImporter';
 import LeadDetailModal from '@/components/leads/LeadDetailModal';
 
@@ -131,6 +132,9 @@ export default function AdminLeadsPropstream() {
         <div className="flex gap-2">
           <Button onClick={() => setShowImport(true)} className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md">
             <FileSpreadsheet className="w-4 h-4 mr-2" />Batch Import
+          </Button>
+          <Button onClick={() => exportToFacebookAudienceCSV(leads)} variant="outline" className="gap-2">
+            <Share2 className="w-4 h-4" />Export FB Audience
           </Button>
           <Button onClick={() => setShowAdd(true)} className="bg-purple-600 hover:bg-purple-700">
             <Plus className="w-4 h-4 mr-2" />Add Lead
