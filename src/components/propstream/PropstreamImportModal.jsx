@@ -32,7 +32,7 @@ const FIELD_MAP = {
   list_date: ['list date', 'listing date', 'mls date', 'status date'],
   days_on_market: ['days on market', 'dom', 'days listed'],
   list_price: ['list price', 'listing price', 'price', 'mls amount'],
-  listing_remarks: ['remarks', 'listing remarks', 'public remarks', 'description', 'notes'],
+  listing_remarks: ['remarks', 'listing remarks', 'public remarks', 'description'],
   listing_url: ['listing url', 'mls url', 'url'],
   // ── Owner Info ──
   owner_1_first_name: ['owner 1 first name', 'owner first name', 'first name'],
@@ -87,10 +87,13 @@ const FIELD_MAP = {
   prefc_doc_number: ['pre-fc doc number', 'prefc doc number'],
   prefc_unpaid_balance: ['pre-fc unpaid balance', 'prefc unpaid balance'],
   prefc_auction_date: ['pre-fc auction date', 'prefc auction date'],
-  foreclosure_indicator: ['foreclosure', 'in foreclosure', 'reo'],
+  foreclosure_indicator: ['foreclosure', 'in foreclosure', 'reo', 'foreclosure factor'],
+  foreclosure_factor: ['foreclosure factor'],
   lien_indicator: ['lien', 'has lien'],
+  lien_type: ['lien type'],
   lien_date: ['lien date'],
   lien_amount: ['lien amount'],
+  bk_date: ['bk date', 'bankruptcy date'],
   tax_delinquent_indicator: ['tax delinquent', 'delinquent taxes', 'tax lien'],
   // ── Financials ──
   estimated_value: ['estimated value', 'avm', 'estimated avm', 'estimated market value', 'est. value'],
@@ -112,6 +115,7 @@ const FIELD_MAP = {
   skip_traces: ['skip traces'],
   date_added_to_list: ['date added to list'],
   method_of_add: ['method of add'],
+  notes: ['notes'],
 };
 
 function autoMap(headers) {

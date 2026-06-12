@@ -253,9 +253,19 @@
       "type": "boolean",
       "default": false
     },
+    "divorce_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of divorce filing or decree"
+    },
     "preforeclosure_indicator": {
       "type": "boolean",
       "default": false
+    },
+    "prefc_recording_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Pre-foreclosure recording date"
     },
     "prefc_doc_number": {
       "type": "string"
@@ -271,9 +281,17 @@
       "type": "boolean",
       "default": false
     },
+    "foreclosure_factor": {
+      "type": "string",
+      "description": "Foreclosure factor classification (e.g. high, medium, low)"
+    },
     "lien_indicator": {
       "type": "boolean",
       "default": false
+    },
+    "lien_type": {
+      "type": "string",
+      "description": "Type of lien (e.g. tax, mechanic, judgment)"
     },
     "lien_date": {
       "type": "string",
@@ -281,6 +299,11 @@
     },
     "lien_amount": {
       "type": "number"
+    },
+    "bk_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Bankruptcy filing date"
     },
     "tax_delinquent_indicator": {
       "type": "boolean",
