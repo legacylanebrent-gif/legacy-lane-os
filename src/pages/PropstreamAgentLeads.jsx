@@ -887,13 +887,26 @@ export default function PropstreamAgentLeads() {
 
                 {selectedLead.property_addresses && selectedLead.property_addresses.length > 0 && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">Property Addresses</Label>
-                    <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                      {selectedLead.property_addresses.map((addr, idx) => (
-                        <div key={idx} className="text-sm text-slate-600 bg-slate-50 px-2 py-1 rounded">
-                          {addr}
-                        </div>
-                      ))}
+                    <Label className="text-sm font-medium text-slate-700">Property Addresses & Prices</Label>
+                    <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                      {selectedLead.property_addresses.map((addr, idx) => {
+                        // Split address and price if format is "address - $price"
+                        const parts = addr.split(' - $');
+                        const address = parts[0];
+                        const price = parts[1];
+                        return (
+                          <div key={idx} className="flex justify-between items-start bg-slate-50 px-3 py-2 rounded border border-slate-200">
+                            <div className="text-sm text-slate-700 flex-1 pr-4">
+                              {address}
+                            </div>
+                            {price && (
+                              <div className="text-sm font-semibold text-slate-800 whitespace-nowrap">
+                                ${parseInt(price).toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

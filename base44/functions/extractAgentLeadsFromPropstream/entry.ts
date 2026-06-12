@@ -86,15 +86,19 @@ Deno.serve(async (req) => {
       // Update existing agent record - aggregate all listings
       existing.listing_count += 1;
       existing.total_volume += listing.estimated_value || 0;
-      // Store full address with city, state, zip
+      // Store full address with city, state, zip and price
       const fullAddress = [
         listing.property_address,
         listing.city,
         listing.state,
         listing.zip
       ].filter(Boolean).join(', ');
-      if (fullAddress && !existing.property_addresses.includes(fullAddress)) {
-        existing.property_addresses.push(fullAddress);
+      if (fullAddress) {
+        const price = listing.list_price || listing.estimated_value || 0;
+        const addressWithPrice = `${fullAddress} - $${price.toLocaleString()}`;
+        if (!existing.property_addresses.includes(addressWithPrice)) {
+          existing.property_addresses.push(addressWithPrice);
+        }
       }
       // Update contact info if we have better data
       if (!existing.agent_email && agentEmail) existing.agent_email = agentEmail;
@@ -109,6 +113,8 @@ Deno.serve(async (req) => {
         listing.state,
         listing.zip
       ].filter(Boolean).join(', ');
+      const price = listing.list_price || listing.estimated_value || 0;
+      const addressWithPrice = fullAddress ? `${fullAddress} - $${price.toLocaleString()}` : '';
       agentMap.set(agentKey, {
         agent_name: agentName,
         agent_email: agentEmail || null,
@@ -122,7 +128,7 @@ Deno.serve(async (req) => {
         county: listing.county || null,
         listing_count: 1,
         total_volume: listing.estimated_value || 0,
-        property_addresses: fullAddress ? [fullAddress] : [],
+        property_addresses: addressWithPrice ? [addressWithPrice] : [],
         lead_status: 'new',
         priority: 'medium',
         lead_score: 0,
