@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader } from 'lucide-react';
+import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, RefreshCw } from 'lucide-react';
 
 const OWNER_TYPES = ['Absentee Owner', 'Inherited', 'Distressed', 'Pre-Foreclosure', 'High Equity', 'Free & Clear', 'Probate'];
 
@@ -101,6 +101,18 @@ export default function AdminLeadsPropstream() {
     return match;
   });
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = filtered.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between">
@@ -143,53 +155,160 @@ export default function AdminLeadsPropstream() {
         </Button>
       </div>
 
-      {/* Cards */}
-      {loading ? <div className="animate-pulse h-48 bg-slate-100 rounded-lg" /> : filtered.length === 0 ? (
-        <Card><CardContent className="p-12 text-center"><Database className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No Propstream leads found</p></CardContent></Card>
+      {/* Page Size */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-slate-500">{filtered.length} leads</p>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-slate-500">Rows per page:</label>
+          <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }} className="border rounded px-2 py-1 text-xs">
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20"><Loader className="w-8 h-8 animate-spin text-purple-600" /></div>
+      ) : filtered.length === 0 ? (
+        <Card><CardContent className="p-16 text-center text-slate-400">
+          <Database className="w-16 h-16 mx-auto mb-4 opacity-30" />
+          <p className="font-medium">No leads found</p>
+          <p className="text-sm mt-1">Add leads manually or import from PropStream</p>
+        </CardContent></Card>
       ) : (
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map(lead => (
-            <Card key={lead.id} className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-purple-400" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold ${getScoreColor(lead.score || 0)}`}>{lead.score || 0}</div>
-                    <div>
-                      <p className="font-semibold">{lead.contact_name || 'Unknown Owner'}</p>
-                      {lead.propstream_owner_type && <Badge className="bg-purple-100 text-purple-700 text-xs">{lead.propstream_owner_type}</Badge>}
+        <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b">
+              <tr className="text-left">
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Score</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Owner</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Property Address</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Contact</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Owner Type</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Est. Value</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Status</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {paginatedData.map(lead => (
+                <tr key={lead.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
+                  <td className="p-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${getScoreColor(lead.score || 0)}`}>
+                      {lead.score || 0}
                     </div>
-                  </div>
-                  {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
-                    : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
-                    : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
-                </div>
-                <div className="space-y-1 text-sm">
-                  {lead.contact_email && <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /><span className="text-cyan-600 truncate">{lead.contact_email}</span></div>}
-                  {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{lead.contact_phone}</span></div>}
-                  {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600">{lead.property_address}{lead.property_city ? `, ${lead.property_city}` : ''}{lead.property_state ? `, ${lead.property_state}` : ''}{lead.property_zip ? ` ${lead.property_zip}` : ''}</span></div>}
-                </div>
-                <div className="space-y-2 mt-3 pt-2 border-t text-xs">
-                  {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
-                  {lead.estimated_value && (
-                    <>
-                      <div className="flex justify-between"><span className="text-slate-500">Platform Referral Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.70).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-500">Operator Referral Income:</span><span className="text-purple-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                    </>
-                  )}
-                  {lead.propstream_equity && <div className="flex justify-between"><span className="text-slate-500">Equity:</span><span className="text-slate-600">${lead.propstream_equity.toLocaleString()}</span></div>}
-                  {lead.propstream_last_sale_date && <div className="flex justify-between"><span className="text-slate-500">Last Sold:</span><span className="text-slate-600">{new Date(lead.propstream_last_sale_date).toLocaleDateString()}</span></div>}
-                </div>
-                {!lead.routed_to && !lead.converted && (
-                  <div className="mt-3" onClick={e => e.stopPropagation()}>
-                    <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to operator..." /></SelectTrigger>
-                      <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  </td>
+                  <td className="p-3">
+                    <p className="font-medium text-slate-800">{lead.contact_name || 'Unknown'}</p>
+                    {lead.propstream_id && <p className="text-xs text-slate-400">PS: {lead.propstream_id}</p>}
+                  </td>
+                  <td className="p-3 max-w-[200px]">
+                    <p className="font-medium truncate" title={lead.property_address}>{lead.property_address}</p>
+                    <p className="text-xs text-slate-400">
+                      {lead.property_city}{lead.property_city && lead.property_state ? ', ' : ''}{lead.property_state}{lead.property_state && lead.property_zip ? ' ' : ''}{lead.property_zip}
+                    </p>
+                  </td>
+                  <td className="p-3">
+                    {lead.contact_email && (
+                      <a href={`mailto:${lead.contact_email}`} className="text-xs text-blue-600 hover:underline truncate block" onClick={e => e.stopPropagation()}>
+                        {lead.contact_email}
+                      </a>
+                    )}
+                    {lead.contact_phone && (
+                      <a href={`tel:${lead.contact_phone}`} className="text-xs text-slate-600 hover:underline block" onClick={e => e.stopPropagation()}>
+                        {lead.contact_phone}
+                      </a>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {lead.propstream_owner_type ? (
+                      <Badge className="bg-purple-100 text-purple-700 text-xs">{lead.propstream_owner_type}</Badge>
+                    ) : <span className="text-slate-400 text-xs">—</span>}
+                  </td>
+                  <td className="p-3 text-slate-700 whitespace-nowrap">
+                    {lead.estimated_value ? `$${lead.estimated_value.toLocaleString()}` : <span className="text-slate-400">—</span>}
+                  </td>
+                  <td className="p-3">
+                    {lead.converted ? <Badge className="bg-green-100 text-green-800 text-xs">Converted</Badge>
+                      : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800 text-xs">Assigned</Badge>
+                      : <Badge className="bg-orange-100 text-orange-800 text-xs">New</Badge>}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
+                        <Eye className="w-3 h-3 mr-1" /> View
+                      </Button>
+                      {!lead.routed_to && !lead.converted && (
+                        <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
+                          <SelectTrigger className="h-7 w-32 text-xs">
+                            <SelectValue placeholder="Assign..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            Showing {startIndex + 1} to {Math.min(endIndex, filtered.length)} of {filtered.length} leads
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(1)}
+              disabled={currentPage === 1}
+              className="h-8 px-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 -ml-1" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-8 px-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-slate-600 px-2">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="h-8 px-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => goToPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="h-8 px-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 -ml-1" />
+            </Button>
+          </div>
         </div>
       )}
 
