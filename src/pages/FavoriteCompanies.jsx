@@ -266,6 +266,9 @@ export default function FavoriteCompanies() {
                   <div key={op.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 border border-slate-200">
                     <div>
                       <p className="font-medium text-slate-900">{op.company_name || op.full_name}</p>
+                      {op.company_name && op.full_name && op.full_name !== op.company_name && (
+                        <p className="text-xs text-slate-500">{op.full_name}</p>
+                      )}
                       {(op.city || op.state) && (
                         <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3" />
@@ -392,6 +395,10 @@ export default function FavoriteCompanies() {
                     <p className="font-semibold text-slate-900 truncate">{
                       operatorMap[follow.operator_id]?.company_name || follow.operator_name
                     }</p>
+                    {operatorMap[follow.operator_id]?.full_name &&
+                      operatorMap[follow.operator_id]?.full_name !== (operatorMap[follow.operator_id]?.company_name) && (
+                        <p className="text-xs text-slate-500 truncate">{operatorMap[follow.operator_id].full_name}</p>
+                      )}
                     {(follow.operator_city || follow.operator_state) && (
                       <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3 h-3" />
