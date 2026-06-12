@@ -9,7 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet } from 'lucide-react';
+import ProbateLeadBatchImporter from '@/components/propstream/ProbateLeadBatchImporter';
 
 const OWNER_TYPES = ['Absentee Owner', 'Inherited', 'Distressed', 'Pre-Foreclosure', 'High Equity', 'Free & Clear', 'Probate'];
 
@@ -28,6 +29,7 @@ export default function AdminLeadsPropstream() {
   const [selectedLead, setSelectedLead] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [scoring, setScoring] = useState(false);
   const [form, setForm] = useState({
     contact_name: '', contact_email: '', contact_phone: '',
@@ -125,9 +127,14 @@ export default function AdminLeadsPropstream() {
           </div>
           <p className="text-slate-600">Leads sourced from Propstream API — absentee owners, inherited, distressed properties</p>
         </div>
-        <Button onClick={() => setShowAdd(true)} className="bg-purple-600 hover:bg-purple-700">
-          <Plus className="w-4 h-4 mr-2" />Add Lead
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowImport(true)} className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md">
+            <FileSpreadsheet className="w-4 h-4 mr-2" />Batch Import
+          </Button>
+          <Button onClick={() => setShowAdd(true)} className="bg-purple-600 hover:bg-purple-700">
+            <Plus className="w-4 h-4 mr-2" />Add Lead
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -470,6 +477,13 @@ export default function AdminLeadsPropstream() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Batch Import Modal */}
+      <ProbateLeadBatchImporter
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        onImportComplete={() => { setShowImport(false); loadData(); }}
+      />
 
       {/* Add Modal */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
