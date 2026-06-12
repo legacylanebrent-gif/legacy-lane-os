@@ -24,34 +24,55 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Extract unique agents from listings using email as primary unique identifier
-    // Then state, then name. Phone is NOT used for deduplication to avoid shared office lines.
+    // Extract unique agents using multi-tier matching:
+    // 1. Email (most reliable)
+    // 2. Agent Name + State + Brokerage (handles missing email scenarios)
+    // 3. Agent Name + State (fallback)
+    // Phone is NOT used for deduplication to avoid shared office lines.
     const agentMap = new Map();
     const emailToAgentKey = new Map();
+    const nameStateBrokerageKey = new Map();
 
     listings.forEach(listing => {
       const agentName = listing.listing_agent_name;
       const agentEmail = listing.listing_agent_email?.toLowerCase().trim();
       const agentPhone = listing.listing_agent_phone?.replace(/[^0-9]/g, '');
       const agentState = listing.state?.toUpperCase().trim();
+      const brokerageName = listing.listing_brokerage?.toUpperCase().trim();
       
       if (!agentName) return;
 
-      // Try to find existing agent by email first (most reliable unique identifier)
+      // Try to find existing agent using multi-tier matching
       let agentKey = null;
       
-      // Priority 1: If listing has email, check if we've seen this email before
+      // Priority 1: Match by email (most reliable unique identifier)
       if (agentEmail && emailToAgentKey.has(agentEmail)) {
         agentKey = emailToAgentKey.get(agentEmail);
       }
-      // Priority 2: If no email match, create NEW record using email as key (if available)
-      // This prevents phone number collisions from merging different agents
+      // Priority 2: Match by Agent Name + State + Brokerage
+      // This handles cases where same agent appears with/without email
+      else if (agentState && brokerageName) {
+        const compositeKey = `${agentName.toLowerCase()}|${agentState}|${brokerageName}`;
+        if (nameStateBrokerageKey.has(compositeKey)) {
+          agentKey = nameStateBrokerageKey.get(compositeKey);
+          // If this listing has email, map it to existing agent
+          if (agentEmail) {
+            emailToAgentKey.set(agentEmail, agentKey);
+          }
+        }
+      }
+      
+      // Create new agent key if no match found
       if (!agentKey) {
-        agentKey = agentEmail 
-          ? `email:${agentEmail}`
-          : agentState
-            ? `state:${agentState}:${agentName.toLowerCase()}`
-            : `name:${agentName.toLowerCase()}`;
+        // Use composite key if we have state and brokerage
+        if (agentState && brokerageName) {
+          agentKey = `composite:${agentName.toLowerCase()}|${agentState}|${brokerageName}`;
+          nameStateBrokerageKey.set(`${agentName.toLowerCase()}|${agentState}|${brokerageName}`, agentKey);
+        } else if (agentState) {
+          agentKey = `state:${agentState}:${agentName.toLowerCase()}`;
+        } else {
+          agentKey = `name:${agentName.toLowerCase()}`;
+        }
         
         // Map email to this key for future listings
         if (agentEmail) {
