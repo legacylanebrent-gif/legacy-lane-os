@@ -620,7 +620,11 @@ export default function PropstreamREListings() {
           <PropstreamListingDrawer
             listing={activeDrawer}
             onClose={() => setActiveDrawer(null)}
-            onUpdate={() => { loadData(); const updated = listings.find(l => l.id === activeDrawer.id); if (updated) setActiveDrawer(updated); }}
+            onUpdate={async () => {
+              await loadData();
+              const [refreshed] = await base44.asServiceRole.entities.PropstreamREListing.filter({ id: activeDrawer.id }, undefined, 1);
+              if (refreshed) setActiveDrawer(refreshed);
+            }}
           />
         </>
       )}
