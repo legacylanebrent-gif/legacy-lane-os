@@ -232,7 +232,7 @@ const unsubscribe = base44.entities.Message.subscribe((event) => {
 
 ## 💡 Usage Examples
 
-### Operator Finding Agent Partners:
+### Estate Sale Company Owner Finding Agent Partners:
 1. Navigate to RelationshipsDashboard
 2. Filter by "Needs Follow-up"
 3. Click on high-potential prospect

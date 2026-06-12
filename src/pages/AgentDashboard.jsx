@@ -107,7 +107,7 @@ export default function AgentDashboard() {
           </div>
         </div>
 
-        {/* Leads + Operator Outreach */}
+        {/* Leads + Estate Sale Company Owner Outreach */}
         <div className="grid lg:grid-cols-2 gap-6">
           <AgentLeadsList application={application} userId={user?.id} userEmail={user?.email} />
           <AgentOperatorOutreach application={application} />

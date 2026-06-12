@@ -293,7 +293,7 @@ export default function MyProfile() {
   const isOperator = acct === 'estate_sale_operator' || isAgentOperator;
   const isAgent = acct === 'real_estate_agent' || isAgentOperator;
   const isVendor = acct === 'vendor';
-  // Operators on Professional or Elite tiers get reseller features included
+  // Estate Sale Company Owners on Professional or Elite tiers get reseller features included
   const activeTierForReseller = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
   const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(activeTierForReseller);
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
@@ -427,7 +427,7 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* ── Agent + Operator Upgrade CTA ── */}
+          {/* ── Agent + Estate Sale Company Owner Upgrade CTA ── */}
           {(isOperator && !isAgentOperator) && (
             <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 border border-orange-200 rounded-xl">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -435,15 +435,15 @@ export default function MyProfile() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-800 mb-1">Are you also a Real Estate Agent?</h3>
-                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Operator</strong> role to unlock RE listing pipeline, referral deal management, agent partnerships, and a bundled subscription — all in one account.</p>
+                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Estate Sale Company Owner</strong> role to unlock RE listing pipeline, referral deal management, agent partnerships, and a bundled subscription — all in one account.</p>
                 <Button size="sm" className="bg-gradient-to-r from-orange-500 to-cyan-600 hover:from-orange-600 hover:to-cyan-700 text-white gap-2"
                   onClick={async () => {
-                    if (!window.confirm('Upgrade to the combined Agent + Operator role? This unlocks all features from both roles. Contact support to adjust pricing.')) return;
+                    if (!window.confirm('Upgrade to the combined Agent + Estate Sale Company Owner role? This unlocks all features from both roles. Contact support to adjust pricing.')) return;
                     await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
                     await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
                     alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
                   }}>
-                  <Users className="w-4 h-4" /> Upgrade to Agent + Operator
+                  <Users className="w-4 h-4" /> Upgrade to Agent + Estate Sale Company Owner
                 </Button>
               </div>
             </div>
@@ -455,15 +455,15 @@ export default function MyProfile() {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-800 mb-1">Do you also run an estate sale company?</h3>
-                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Operator</strong> role to run estate sales, manage inventory, accept bookings, and keep your agent tools — all under one subscription.</p>
+                <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Estate Sale Company Owner</strong> role to run estate sales, manage inventory, accept bookings, and keep your agent tools — all under one subscription.</p>
                 <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-orange-600 hover:from-cyan-600 hover:to-orange-700 text-white gap-2"
                   onClick={async () => {
-                    if (!window.confirm('Upgrade to the combined Agent + Operator role? This unlocks all estate sale operator features while keeping your agent tools.')) return;
+                    if (!window.confirm('Upgrade to the combined Agent + Estate Sale Company Owner role? This unlocks all Estate Sale Company Owner features while keeping your agent tools.')) return;
                     await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
                     await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
                     alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
                   }}>
-                  <Building2 className="w-4 h-4" /> Upgrade to Agent + Operator
+                  <Building2 className="w-4 h-4" /> Upgrade to Agent + Estate Sale Company Owner
                 </Button>
               </div>
             </div>
@@ -474,14 +474,14 @@ export default function MyProfile() {
                 <Users className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="font-semibold text-slate-800 text-sm">⚡ Agent + Operator — Combined Role Active</p>
-                <p className="text-xs text-slate-600">You have full access to both estate sale operator and real estate agent tools under one account.</p>
+                <p className="font-semibold text-slate-800 text-sm">⚡ Agent + Estate Sale Company Owner — Combined Role Active</p>
+                <p className="text-xs text-slate-600">You have full access to both Estate Sale Company Owner and real estate agent tools under one account.</p>
               </div>
               <Badge className="ml-auto bg-gradient-to-r from-orange-500 to-cyan-500 text-white border-0">Active</Badge>
             </div>
           )}
 
-          {/* Reseller included with operator plan banner */}
+          {/* Reseller included with Estate Sale Company Owner plan banner */}
           {operatorHasResellerAccess && (
             <div className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-200 rounded-xl">
               <div className="w-9 h-9 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -634,7 +634,7 @@ export default function MyProfile() {
               </CardContent>
             </Card>
 
-            {/* Operator-specific credentials */}
+            {/* Estate Sale Company Owner-specific credentials */}
             {isOperator && (
               <>
                 <Card>
@@ -745,7 +745,7 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* Services + Specialties — Operator only */}
+          {/* Services + Specialties — Estate Sale Company Owner only */}
           {isOperator && (
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
@@ -910,7 +910,7 @@ export default function MyProfile() {
                   <Link to="/AgentOperatorPortal">
                     <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                       <div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-cyan-600" /></div>
-                      <div><p className="font-semibold text-sm">Operator Partnerships</p><p className="text-xs text-slate-500">Connect with estate sale operators</p></div>
+                      <div><p className="font-semibold text-sm">Estate Sale Company Owner Partnerships</p><p className="text-xs text-slate-500">Connect with Estate Sale Company Owners</p></div>
                     </div>
                   </Link>
                   <Link to="/AgentPartnerships">
@@ -947,12 +947,12 @@ export default function MyProfile() {
               <CardContent className="space-y-4">
                 <div>
                   <Label>Professional Bio</Label>
-                  <Textarea value={form.company_description} onChange={e => setForm(p => ({ ...p, company_description: e.target.value }))} rows={5} placeholder="Tell estate sale operators and families about your experience with probate, senior transitions, inherited properties..." />
+                  <Textarea value={form.company_description} onChange={e => setForm(p => ({ ...p, company_description: e.target.value }))} rows={5} placeholder="Tell Estate Sale Company Owners and families about your experience with probate, senior transitions, inherited properties..." />
                   <p className="text-xs text-slate-400 mt-1">{(form.company_description || '').length} characters</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div><Label>Avg. Sale Price (homes you represent)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="450000" /></div>
-                  <div><Label>Referral Fee % (for estate sale operators)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="25" /></div>
+                  <div><Label>Referral Fee % (for Estate Sale Company Owners)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="25" /></div>
                 </div>
               </CardContent>
             </Card>
@@ -1123,7 +1123,7 @@ export default function MyProfile() {
                       <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-cyan-600" /></div>
                       <div className="flex-1">
                         <p className="font-semibold text-sm">Reseller Network</p>
-                        <p className="text-xs text-slate-500">Connect with operators & explore inventory</p>
+                        <p className="text-xs text-slate-500">Connect with Estate Sale Company Owners & explore inventory</p>
                       </div>
                       <ArrowRight className="w-4 h-4 text-slate-400" />
                     </div>
@@ -1199,14 +1199,14 @@ export default function MyProfile() {
             </CardContent>
           </Card>
 
-          {/* Operator-specific estate sale actions */}
+          {/* Estate Sale Company Owner-specific estate sale actions */}
           {isOperator && (
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" />Manage My Sales</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <Link to="/MySales"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Home className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">My Sales Dashboard</p><p className="text-xs text-slate-500">Manage all your estate sales</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
-                  <Link to="/OperatorDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Operator Dashboard</p><p className="text-xs text-slate-500">Analytics, leads & performance</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/OperatorDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Estate Sale Company Owner Dashboard</p><p className="text-xs text-slate-500">Analytics, leads & performance</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                   <Link to="/SaleConversionPipeline"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-green-50 hover:border-green-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-green-600" /></div><div><p className="font-semibold text-sm">Sale Conversion Pipeline</p><p className="text-xs text-slate-500">Track leads to signed contracts</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                   <Link to="/OperatorCommissions"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0"><CreditCard className="w-5 h-5 text-purple-600" /></div><div><p className="font-semibold text-sm">My Commissions</p><p className="text-xs text-slate-500">View earnings & commission history</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                 </div>
@@ -1220,7 +1220,7 @@ export default function MyProfile() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />Agent Estate Sale Tools</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Link to="/agent-request"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Send className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Submit Estate Sale Request</p><p className="text-xs text-slate-500">Refer a client listing to the operator pool</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/agent-request"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Send className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Submit Estate Sale Request</p><p className="text-xs text-slate-500">Refer a client listing to the Estate Sale Company Owner pool</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                   <Link to="/PropstreamREListings"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><FileText className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">RE Listing Pipeline</p><p className="text-xs text-slate-500">View and score estate sale opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                 </div>
               </CardContent>
@@ -1233,7 +1233,7 @@ export default function MyProfile() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Estate Sale Tools</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Link to="/ResellerNetwork"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Reseller Network</p><p className="text-xs text-slate-500">Connect with operators & find buyout lots</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/ResellerNetwork"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Reseller Network</p><p className="text-xs text-slate-500">Connect with Estate Sale Company Owners & find buyout lots</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                   <Link to="/ResellerDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Reseller Dashboard</p><p className="text-xs text-slate-500">Leads, lots & buyout opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                 </div>
               </CardContent>

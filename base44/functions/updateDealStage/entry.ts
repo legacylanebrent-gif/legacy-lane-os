@@ -54,12 +54,12 @@ Deno.serve(async (req) => {
         closing_date: now,
       });
 
-      // Trigger credit calculation for operator
+      // Trigger credit calculation for Estate Sale Company Owner
       if (deal.operator_id && actualReferralFee > 0) {
         const creditAmount = Math.floor(actualReferralFee / 100 / 10); // Convert to credits (~$10 per credit)
-        console.log(`[CREDITS] Crediting ${creditAmount} credits to operator ${deal.operator_id}`);
+        console.log(`[CREDITS] Crediting ${creditAmount} credits to Estate Sale Company Owner ${deal.operator_id}`);
         
-        // Get or create operator credit account
+        // Get or create Estate Sale Company Owner credit account
         const creditAccounts = await base44.asServiceRole.entities.OperatorAICreditAccount.filter({
           operator_id: deal.operator_id,
         });

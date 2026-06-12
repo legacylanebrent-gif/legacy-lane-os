@@ -27,7 +27,7 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
         u.primary_account_type === 'estate_sale_operator' ||
         u.account_types?.includes('estate_sale_operator')
       );
-      // prioritize matched operators
+      // prioritize matched Estate Sale Company Owners
       const matched = new Set(listing?.matched_operator_ids || []);
       ops.sort((a, b) => (matched.has(b.id) ? 1 : 0) - (matched.has(a.id) ? 1 : 0));
       setOperators(ops);
@@ -52,13 +52,13 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Send Lead to Operators</DialogTitle>
+          <DialogTitle>Send Lead to Estate Sale Company Owners</DialogTitle>
         </DialogHeader>
 
         {done ? (
           <div className="py-8 text-center">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <p className="font-semibold text-lg text-slate-800">Sent to {selected.length} operator{selected.length !== 1 ? 's' : ''}!</p>
+            <p className="font-semibold text-lg text-slate-800">Sent to {selected.length} Estate Sale Company Owner{selected.length !== 1 ? 's' : ''}!</p>
             <p className="text-slate-500 text-sm mt-1">{listing?.property_address}</p>
             <Button className="mt-5" onClick={onClose}>Done</Button>
           </div>
@@ -70,12 +70,12 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
               <p className="text-slate-500">Territory: {listing?.territory_name || 'Not matched'}</p>
             </div>
 
-            <p className="text-sm font-medium text-slate-700">Select operators to notify:</p>
+            <p className="text-sm font-medium text-slate-700">Select Estate Sale Company Owners to notify:</p>
 
             {loading ? (
               <div className="py-6 text-center"><Loader className="w-6 h-6 animate-spin mx-auto text-slate-400" /></div>
             ) : operators.length === 0 ? (
-              <div className="py-6 text-center text-slate-400"><Users className="w-8 h-8 mx-auto mb-2" /><p>No operators found</p></div>
+              <div className="py-6 text-center text-slate-400"><Users className="w-8 h-8 mx-auto mb-2" /><p>No Estate Sale Company Owners found</p></div>
             ) : (
               <div className="max-h-64 overflow-y-auto space-y-2">
                 {operators.map(op => (
@@ -94,7 +94,7 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
             <div className="flex gap-3 justify-end pt-3 border-t">
               <Button variant="outline" onClick={onClose}>Cancel</Button>
               <Button onClick={handleSend} disabled={selected.length === 0 || sending} className="bg-purple-600 hover:bg-purple-700">
-                {sending ? <><Loader className="w-4 h-4 animate-spin mr-2" />Sending…</> : `Send to ${selected.length} Operator${selected.length !== 1 ? 's' : ''}`}
+                {sending ? <><Loader className="w-4 h-4 animate-spin mr-2" />Sending…</> : `Send to ${selected.length} Estate Sale Company Owner${selected.length !== 1 ? 's' : ''}`}
               </Button>
             </div>
           </div>

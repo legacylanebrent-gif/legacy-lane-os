@@ -8,7 +8,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
 
-// Avg monthly revenue per operator based on package mix assumption
+// Avg monthly revenue per Estate Sale Company Owner based on package mix assumption
 // Mix: 60% Basic ($99/sale × 6/yr ÷ 12 = $49.50), 25% Bronze ($35 + $64×1.25 = $115), 10% Silver ($149), 5% Gold ($299)
 const AVG_OPERATOR_MONTHLY_REVENUE = 0.60 * 49.5 + 0.25 * 115 + 0.10 * 149 + 0.05 * 299;
 
@@ -36,10 +36,10 @@ const loadValue = (key, defaultValue) => {
 };
 
 export default function Revenue() {
-  const [activeTab, setActiveTab] = useState('operators');
+  const [activeTab, setActiveTab] = useState('Estate Sale Company Owners');
   const [savedOperators, setSavedOperators] = useState(() => loadValue('launchOperators', 100));
 
-  // Operator Growth Inputs
+  // Estate Sale Company Owner Growth Inputs
   const [launchOperators, setLaunchOperators] = useState(() => loadValue('launchOperators', 100));
   const [operatorGrowthRate, setOperatorGrowthRate] = useState(() => loadValue('operatorGrowthRate', 10)); // % per month
   const [avgMonthlyRevenuePerOp, setAvgMonthlyRevenuePerOp] = useState(() => loadValue('avgMonthlyRevenuePerOp', Math.round(AVG_OPERATOR_MONTHLY_REVENUE)));
@@ -113,15 +113,15 @@ export default function Revenue() {
   const getYearProjection = (projections, year) =>
     projections.slice(0, year * 12).reduce((s, v) => s + v, 0);
 
-  // Build operator count curve: starts at launchOperators, grows at operatorGrowthRate% per month, capped at 12,000
+  // Build Estate Sale Company Owner count curve: starts at launchOperators, grows at operatorGrowthRate% per month, capped at 12,000
   const operatorCounts = Array.from({ length: 120 }, (_, i) =>
     Math.min(12000, Math.round(launchOperators * Math.pow(1 + operatorGrowthRate / 100, i)))
   );
 
-  // Operator revenue = operator count × avg monthly revenue per operator
+  // Estate Sale Company Owner revenue = Estate Sale Company Owner count × avg monthly revenue per Estate Sale Company Owner
   const operatorProjections = operatorCounts.map(count => count * avgMonthlyRevenuePerOp);
 
-  // Vendor subs: operator count × vendorPerOperator = new vendors that month (with churn)
+  // Vendor subs: Estate Sale Company Owner count × vendorPerOperator = new vendors that month (with churn)
   const vendorSubProjections = (() => {
     const proj = [];
     let subs = 0;
@@ -167,7 +167,7 @@ export default function Revenue() {
     return proj;
   })();
 
-  // Advertising: cities = operators × citiesPerOperator
+  // Advertising: cities = Estate Sale Company Owners × citiesPerOperator
   const adProjections = (() => {
     const proj = [];
     for (let i = 0; i < 120; i++) {
@@ -212,7 +212,7 @@ export default function Revenue() {
     Advertising: Math.round(adProjections[i]),
     Websites: Math.round(websiteTotalProjections[i]),
     Total: Math.round(totalProjections[i]),
-    'Operator Count': operatorCounts[i],
+    'Estate Sale Company Owner Count': operatorCounts[i],
   }));
 
   const pieData = [
@@ -230,7 +230,7 @@ export default function Revenue() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
-          <p className="text-slate-600">Launch-based growth model — starting from {launchOperators} operators, all revenue streams included</p>
+          <p className="text-slate-600">Launch-based growth model — starting from {launchOperators} Estate Sale Company Owners, all revenue streams included</p>
         </div>
 
         {/* Summary Cards */}
@@ -260,7 +260,7 @@ export default function Revenue() {
           <Card className="bg-gradient-to-br from-purple-500 to-pink-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">Launch Operators</span>
+                <span className="text-sm font-medium opacity-90">Launch Estate Sale Company Owners</span>
                 <Building2 className="w-5 h-5 opacity-75" />
               </div>
               <div className="text-3xl font-bold mb-1">{launchOperators.toLocaleString()}</div>
@@ -293,7 +293,7 @@ export default function Revenue() {
                 <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                 <Legend />
-                <Area type="monotone" dataKey="Operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
+                <Area type="monotone" dataKey="Estate Sale Company Owners" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
@@ -334,10 +334,10 @@ export default function Revenue() {
             </CardContent>
           </Card>
 
-          {/* Operator Growth Curve */}
+          {/* Estate Sale Company Owner Growth Curve */}
           <Card>
             <CardHeader>
-              <CardTitle>Operator Growth Curve (36 months)</CardTitle>
+              <CardTitle>Estate Sale Company Owner Growth Curve (36 months)</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -346,7 +346,7 @@ export default function Revenue() {
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="Operator Count" stroke="#8b5cf6" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="Estate Sale Company Owner Count" stroke="#8b5cf6" strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -357,9 +357,9 @@ export default function Revenue() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
             <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
-              <TabsTrigger value="operators" className="whitespace-nowrap flex-shrink-0">
+              <TabsTrigger value="Estate Sale Company Owners" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
-                Operators
+                Estate Sale Company Owners
               </TabsTrigger>
               <TabsTrigger value="vendorSubs" className="whitespace-nowrap flex-shrink-0">
                 <Users className="w-4 h-4 mr-1" />
@@ -389,34 +389,34 @@ export default function Revenue() {
             </TabsList>
           </div>
 
-          {/* Operators Tab */}
-          <TabsContent value="operators">
+          {/* Estate Sale Company Owners Tab */}
+          <TabsContent value="Estate Sale Company Owners">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-purple-600" />
-                  Operator Growth & Revenue Calculator
+                  Estate Sale Company Owner Growth & Revenue Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Model:</strong> Start with {launchOperators} operators at launch, grow {operatorGrowthRate}% per month (compounding).
+                    <strong>Model:</strong> Start with {launchOperators} Estate Sale Company Owners at launch, grow {operatorGrowthRate}% per month (compounding).
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Month 1 Operators:</strong> {operatorCounts[0].toLocaleString()} &nbsp;→&nbsp;
+                    <strong>Month 1 operators:</strong> {operatorCounts[0].toLocaleString()} &nbsp;→&nbsp;
                     <strong>Month 12:</strong> {operatorCounts[11].toLocaleString()} &nbsp;→&nbsp;
                     <strong>Month 36:</strong> {operatorCounts[35].toLocaleString()} &nbsp;→&nbsp;
                     <strong>Month 120:</strong> {operatorCounts[119].toLocaleString()}
                   </div>
                   <div className="text-sm font-semibold text-slate-800">
-                    <strong>Avg Monthly Revenue / Operator:</strong> ${avgMonthlyRevenuePerOp}/mo (blended package mix)
+                    <strong>Avg Monthly Revenue / Estate Sale Company Owner:</strong> ${avgMonthlyRevenuePerOp}/mo (blended package mix)
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Launch Operators (Month 1)</Label>
+                    <Label>Launch Estate Sale Company Owners (Month 1)</Label>
                     <div className="flex gap-2 items-center mt-1">
                       <Input type="number" value={launchOperators} onChange={(e) => setLaunchOperators(Number(e.target.value))} />
                       <button
@@ -432,7 +432,7 @@ export default function Revenue() {
                     <Input type="number" value={operatorGrowthRate} onChange={(e) => setOperatorGrowthRate(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Avg Revenue / Operator / Month ($)</Label>
+                    <Label>Avg Revenue / Estate Sale Company Owner / Month ($)</Label>
                     <Input type="number" value={avgMonthlyRevenuePerOp} onChange={(e) => setAvgMonthlyRevenuePerOp(Number(e.target.value))} />
                   </div>
                 </div>
@@ -467,7 +467,7 @@ export default function Revenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Model:</strong> Each operator brings {vendorPerOperator} vendors/month. Vendors pay ${vendorSubPrice}/mo with {vendorChurnRate}% monthly churn.
+                    <strong>Model:</strong> Each Estate Sale Company Owner brings {vendorPerOperator} vendors/month. Vendors pay ${vendorSubPrice}/mo with {vendorChurnRate}% monthly churn.
                   </div>
                   <div className="text-sm text-slate-700">
                     <strong>Month 1 Vendors:</strong> {(operatorCounts[0] * vendorPerOperator).toLocaleString()} &nbsp;→&nbsp;
@@ -481,7 +481,7 @@ export default function Revenue() {
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Vendors Per Operator / Month</Label>
+                    <Label>Vendors Per Estate Sale Company Owner / Month</Label>
                     <Input type="number" value={vendorPerOperator} onChange={(e) => setVendorPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
@@ -530,7 +530,7 @@ export default function Revenue() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Avg Annual Sales per Operator</Label>
+                    <Label>Avg Annual Sales per Estate Sale Company Owner</Label>
                     <Input type="number" value={avgAnnualSalesPerOperator} onChange={(e) => setAvgAnnualSalesPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
@@ -590,7 +590,7 @@ export default function Revenue() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Annual Referral Conv (per operator)</Label>
+                    <Label>Annual Referral Conv (per Estate Sale Company Owner)</Label>
                     <Input type="number" value={annualReferralConv} onChange={(e) => setAnnualReferralConv(Number(e.target.value))} />
                   </div>
                   <div>
@@ -711,7 +711,7 @@ export default function Revenue() {
                     <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Cities Per Operator</Label>
+                    <Label>Cities Per Estate Sale Company Owner</Label>
                     <Input type="number" value={citiesPerOperator} onChange={(e) => setCitiesPerOperator(Number(e.target.value))} />
                   </div>
                 </div>
@@ -748,7 +748,7 @@ export default function Revenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-indigo-600" />
-                  Operator Website Calculator
+                  Estate Sale Company Owner Website Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>

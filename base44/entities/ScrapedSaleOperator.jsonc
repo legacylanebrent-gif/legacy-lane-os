@@ -30,11 +30,11 @@
         "type": "string"
       },
       "default": [],
-      "description": "ScrapedSaleTerritory IDs this operator is active in"
+      "description": "ScrapedSaleTerritory IDs this Estate Sale Company Owner is active in"
     },
     "platform_user_id": {
       "type": "string",
-      "description": "Linked EstateSalen User ID if operator is a subscribed user"
+      "description": "Linked EstateSalen User ID if Estate Sale Company Owner is a subscribed user"
     },
     "future_operator_lead_id": {
       "type": "string",
@@ -51,7 +51,7 @@
     },
     "source_profile_url": {
       "type": "string",
-      "description": "EstateSales.net operator profile URL"
+      "description": "EstateSales.net Estate Sale Company Owner profile URL"
     },
     "total_sales_scraped": {
       "type": "integer",

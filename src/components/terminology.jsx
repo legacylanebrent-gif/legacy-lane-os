@@ -2,13 +2,13 @@
 // Change terms here and they'll update throughout the app
 
 const TERMINOLOGY = {
-  // Estate Sale Operators
-  operator: 'company',
+  // Estate Sale Company Owners
+  Estate Sale Company Owner: 'company',
   operators: 'companies',
-  Operator: 'Company',
-  Operators: 'Companies',
-  'estate sale operator': 'estate sale company',
-  'Estate Sale Operator': 'Estate Sale Company',
+  Estate Sale Company Owner: 'Company',
+  operators: 'Companies',
+  'Estate Sale Company Owner': 'estate sale company',
+  'Estate Sale Company Owner': 'Estate Sale Company',
   'estate_sale_operator': 'estate_sale_company',
   'Estate Operators': 'Estate Sale Co\'s',
   

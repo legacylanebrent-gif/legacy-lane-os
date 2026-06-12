@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-import ClaimCompanyModal from '@/components/operators/ClaimCompanyModal';
-import { ReferByEmailModal, logReferral } from '@/components/operators/ReferOperatorModal';
+import ClaimCompanyModal from '@/components/Estate Sale Company Owners/ClaimCompanyModal';
+import { ReferByEmailModal, logReferral } from '@/components/Estate Sale Company Owners/ReferOperatorModal';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -214,16 +214,16 @@ export default function StateOperators() {
     const referralCode = currentUser.id.slice(-8).toUpperCase();
     const referralLink = `${window.location.origin}/OperatorPackages?ref=${referralCode}`;
     const smsBody = `Hi ${op.company_name}! I think you'd love EstateSalen.com — it helps estate sale companies grow with digital listings, marketing tools & a national buyer network. Sign up here: ${referralLink}`;
-    await logReferral({ currentUser, operator: op, contactEmail: op.email || '' });
+    await logReferral({ currentUser, Estate Sale Company Owner: op, contactEmail: op.email || '' });
     setTextSentId(op.id);
     setTimeout(() => setTextSentId(null), 3000);
     const phone = op.phone ? op.phone.replace(/\D/g, '') : '';
     window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
   };
 
-  // Filtered + sorted operators
+  // Filtered + sorted Estate Sale Company Owners
   const displayedOperators = useMemo(() => {
-    let list = operators;
+    let list = Estate Sale Company Owners;
 
     // Text search (skip if it looks like a ZIP code)
     if (searchQuery.trim() && !/^\d{3,5}$/.test(searchQuery.trim())) {
@@ -238,7 +238,7 @@ export default function StateOperators() {
     if (zipCoords) {
       list = list.filter(op => {
         const coords = opCoords(op);
-        if (!coords) return false; // exclude operators without coordinates when filtering by radius
+        if (!coords) return false; // exclude Estate Sale Company Owners without coordinates when filtering by radius
         return haversine(zipCoords, coords) <= radiusMiles;
       });
     }
@@ -265,7 +265,7 @@ export default function StateOperators() {
   const eliteOperators = useMemo(() => displayedOperators.filter(isElite), [displayedOperators]);
   const regularOperators = useMemo(() => displayedOperators.filter(op => !isElite(op)), [displayedOperators]);
 
-  // Map markers: operators with geocoded coords
+  // Map markers: Estate Sale Company Owners with geocoded coords
   const mapMarkers = useMemo(() =>
     operators.filter(op => op.lat && op.lng).slice(0, 200),
   [operators]);
@@ -339,8 +339,8 @@ export default function StateOperators() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
 
-      <ClaimCompanyModal operator={claimingOperator} open={!!claimingOperator} onClose={() => setClaimingOperator(null)} />
-      <ReferByEmailModal operator={emailReferOperator} open={!!emailReferOperator} onClose={() => setEmailReferOperator(null)} currentUser={currentUser} />
+      <ClaimCompanyModal Estate Sale Company Owner={claimingOperator} open={!!claimingOperator} onClose={() => setClaimingOperator(null)} />
+      <ReferByEmailModal Estate Sale Company Owner={emailReferOperator} open={!!emailReferOperator} onClose={() => setEmailReferOperator(null)} currentUser={currentUser} />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">

@@ -33,7 +33,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "User ID of the operator involved"
+      "description": "User ID of the Estate Sale Company Owner involved"
     },
     "violation_type": {
       "type": "string",

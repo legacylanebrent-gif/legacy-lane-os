@@ -135,7 +135,7 @@ export default function ComprehensiveRevenue() {
         }
       }
 
-      console.log(`Loaded ${allOperators.length} total operators`);
+      console.log(`Loaded ${allOperators.length} total Estate Sale Company Owners`);
       setOperators(allOperators);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -222,7 +222,7 @@ export default function ComprehensiveRevenue() {
     );
   }
 
-  // Calculate Future Operators data
+  // Calculate Future Estate Sale Company Owners data
   const packageCounts = operators.reduce((acc, op) => {
     const pkg = op.package_type || 'Unknown';
     acc[pkg] = (acc[pkg] || 0) + 1;
@@ -282,7 +282,7 @@ export default function ComprehensiveRevenue() {
   const vendorSubData = calculateSimpleSubRevenue(vendorSubPrice, calculatedVendorNewPerMonth, vendorChurnRate, 120);
   const vendorSubProjections = vendorSubData.projections;
   
-  // Marketplace: operators × avg annual sales ÷ 12 × avg items per sale × $3 fee
+  // Marketplace: Estate Sale Company Owners × avg annual sales ÷ 12 × avg items per sale × $3 fee
   const marketplaceMonthlyItems = totalOperators * (avgAnnualSalesPerOperator / 12) * avgItemsPostedPerSale;
   const marketplaceProjections = calculateProjections(marketplaceMonthlyItems * itemPostFee, marketplaceGrowth, 120);
   
@@ -303,7 +303,7 @@ export default function ComprehensiveRevenue() {
   const referralMonthlyRevenue = totalOperators * (annualReferralConv / 12) * referralIncomePerConversion;
   const referralProjections = calculateProjections(referralMonthlyRevenue, referralGrowth, 120);
   
-  // Every operator features 1 sale/year locally; 10% feature 1 sale/year nationally
+  // Every Estate Sale Company Owner features 1 sale/year locally; 10% feature 1 sale/year nationally
   const localFeaturesPerMonth = totalOperators / 12;
   const nationalFeaturesPerMonth = (totalOperators * 0.10) / 12;
   const totalFeatureRevenuePerMonth = (nationalFeaturesPerMonth * nationalFeaturePrice) + (localFeaturesPerMonth * localFeaturePrice);
@@ -331,7 +331,7 @@ export default function ComprehensiveRevenue() {
   }
   const websiteTotalProjections = websiteSetupProjections.map((s, i) => s + websiteRecurringProjections[i]);
 
-  // Create operator projections (assuming current base grows)
+  // Create Estate Sale Company Owner projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
 
   const totalProjections = operatorProjections.map((_, i) => 
@@ -379,7 +379,7 @@ export default function ComprehensiveRevenue() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Comprehensive Revenue Dashboard</h1>
-          <p className="text-slate-600">Future Operators + Additional Revenue Streams Analysis</p>
+          <p className="text-slate-600">Future Estate Sale Company Owners + Additional Revenue Streams Analysis</p>
         </div>
 
         {/* Summary Cards */}
@@ -409,7 +409,7 @@ export default function ComprehensiveRevenue() {
           <Card className="bg-gradient-to-br from-purple-500 to-pink-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">Future Operators</span>
+                <span className="text-sm font-medium opacity-90">Future Estate Sale Company Owners</span>
                 <Building2 className="w-5 h-5 opacity-75" />
               </div>
               <div className="text-3xl font-bold mb-1">{operators.length.toLocaleString()}</div>
@@ -453,7 +453,7 @@ export default function ComprehensiveRevenue() {
                 <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                 <Legend />
-                <Area type="monotone" dataKey="Future Operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
+                <Area type="monotone" dataKey="Future Estate Sale Company Owners" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="RE Agents" stackId="1" stroke="#f43f5e" fill="#f43f5e" />
@@ -514,10 +514,10 @@ export default function ComprehensiveRevenue() {
              </CardContent>
            </Card>
 
-          {/* Future Operators by State */}
+          {/* Future Estate Sale Company Owners by State */}
           <Card>
             <CardHeader>
-              <CardTitle>Top 20 States - Future Operators</CardTitle>
+              <CardTitle>Top 20 States - Future Estate Sale Company Owners</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -539,7 +539,7 @@ export default function ComprehensiveRevenue() {
             <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
-                Operators
+                Estate Sale Company Owners
               </TabsTrigger>
               <TabsTrigger value="vendorSubs" className="whitespace-nowrap flex-shrink-0">
                 <Users className="w-4 h-4 mr-1" />
@@ -577,7 +577,7 @@ export default function ComprehensiveRevenue() {
           <TabsContent value="overview">
             <Card>
               <CardHeader>
-                <CardTitle>Future Operators Package Distribution</CardTitle>
+                <CardTitle>Future Estate Sale Company Owners Package Distribution</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -590,7 +590,7 @@ export default function ComprehensiveRevenue() {
                       <div className="text-left sm:text-right pl-7 sm:pl-0">
                         <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                         <div className="text-xs text-slate-500">
-                          {pkg.value} operators
+                          {pkg.value} Estate Sale Company Owners
                           {pkg.name === 'Basic' && ' ($99/sale × 6 sales/yr)'}
                           {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
                         </div>
@@ -689,10 +689,10 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                    <strong>Total operators:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Items Posted/Month:</strong> {totalOperators.toLocaleString()} operators × {avgAnnualSalesPerOperator} sales/yr ÷ 12 × {avgItemsPostedPerSale} items/sale = {Math.round(marketplaceMonthlyItems).toLocaleString()} items/month
+                    <strong>Items Posted/Month:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners × {avgAnnualSalesPerOperator} sales/yr ÷ 12 × {avgItemsPostedPerSale} items/sale = {Math.round(marketplaceMonthlyItems).toLocaleString()} items/month
                   </div>
                   <div className="text-sm text-slate-700">
                     <strong>Monthly Revenue:</strong> {Math.round(marketplaceMonthlyItems).toLocaleString()} items × $3/item = ${(marketplaceMonthlyItems * itemPostFee).toLocaleString('en-US', { maximumFractionDigits: 0 })}/month
@@ -701,11 +701,11 @@ export default function ComprehensiveRevenue() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <div>
-                    <Label>Total Operators</Label>
+                    <Label>Total Estate Sale Company Owners</Label>
                     <Input type="number" value={totalOperators} disabled className="bg-slate-100" />
                   </div>
                   <div>
-                    <Label>Avg Annual Sales per Operator</Label>
+                    <Label>Avg Annual Sales per Estate Sale Company Owner</Label>
                     <Input type="number" value={avgAnnualSalesPerOperator} onChange={(e) => setAvgAnnualSalesPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
@@ -773,7 +773,7 @@ export default function ComprehensiveRevenue() {
                     <strong>Territory Buy-In Revenue:</strong> {agentTerritoryBuyInPerMonth} new buy-ins/month × avg ${agentTerritoryBuyInAvg.toLocaleString()} = <strong>${agentBuyInMonthlyRevenue.toLocaleString()}/mo</strong>
                   </div>
                   <div className="text-xs text-slate-500 italic mt-1">
-                    Note: Buy-in amounts vary by territory size and operator count. The avg reflects a blended lump-sum or 12-month split equivalent.
+                    Note: Buy-in amounts vary by territory size and Estate Sale Company Owner count. The avg reflects a blended lump-sum or 12-month split equivalent.
                   </div>
                 </div>
 
@@ -847,10 +847,10 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
                   <div className="text-sm text-slate-700">
-                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                    <strong>Total operators:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Formula:</strong> {totalOperators.toLocaleString()} operators × {annualReferralConv} annual conv ÷ 12 × ${refAvgPropertyValue.toLocaleString()} × 2% × 25% × {platformIncomePercent}% = <strong>${referralMonthlyRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</strong>
+                    <strong>Formula:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners × {annualReferralConv} annual conv ÷ 12 × ${refAvgPropertyValue.toLocaleString()} × 2% × 25% × {platformIncomePercent}% = <strong>${referralMonthlyRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</strong>
                   </div>
                   <div className="text-sm text-slate-700">
                     <strong>Income per Conversion:</strong> ${referralIncomePerConversion.toLocaleString('en-US', { maximumFractionDigits: 0 })}
@@ -859,7 +859,7 @@ export default function ComprehensiveRevenue() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Annual Referral Conv (per operator)</Label>
+                    <Label>Annual Referral Conv (per Estate Sale Company Owner)</Label>
                     <Input type="number" value={annualReferralConv} onChange={(e) => setAnnualReferralConv(Number(e.target.value))} />
                   </div>
                   <div>
@@ -914,13 +914,13 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Total Operators:</strong> {totalOperators.toLocaleString()} operators
+                    <strong>Total operators:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Local Features/Month:</strong> {totalOperators.toLocaleString()} operators × 1 sale/yr ÷ 12 = {localFeaturesPerMonth.toFixed(1)}/month × ${localFeaturePrice}
+                    <strong>Local Features/Month:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners × 1 sale/yr ÷ 12 = {localFeaturesPerMonth.toFixed(1)}/month × ${localFeaturePrice}
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>National Features/Month:</strong> {totalOperators.toLocaleString()} operators × 10% × 1 sale/yr ÷ 12 = {nationalFeaturesPerMonth.toFixed(1)}/month × ${nationalFeaturePrice}
+                    <strong>National Features/Month:</strong> {totalOperators.toLocaleString()} Estate Sale Company Owners × 10% × 1 sale/yr ÷ 12 = {nationalFeaturesPerMonth.toFixed(1)}/month × ${nationalFeaturePrice}
                   </div>
                   <div className="text-sm font-semibold text-slate-800">
                     <strong>Monthly Revenue:</strong> ${totalFeatureRevenuePerMonth.toLocaleString('en-US', { maximumFractionDigits: 0 })}
@@ -1051,7 +1051,7 @@ export default function ComprehensiveRevenue() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-indigo-600" />
-                  Operator Website Calculator
+                  Estate Sale Company Owner Website Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>

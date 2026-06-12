@@ -14,7 +14,7 @@ import RouteMapWidget from './consumer/RouteMapWidget';
 import SavedItemsGallery from './consumer/SavedItemsGallery';
 
 export default function ConsumerDashboard({ user }) {
-  const [followedSales, setFollowedSales] = useState([]);   // upcoming sales from followed operators
+  const [followedSales, setFollowedSales] = useState([]);   // upcoming sales from followed Estate Sale Company Owners
   const [allFollowedSales, setAllFollowedSales] = useState([]); // for SavedItemsGallery (saved images)
   const [followedOperatorIds, setFollowedOperatorIds] = useState([]);
   const [savedSaleIds, setSavedSaleIds] = useState([]);
@@ -47,7 +47,7 @@ export default function ConsumerDashboard({ user }) {
         (s.sale_dates || []).some(d => new Date(d.date + 'T00:00:00') >= today)
       );
 
-      // Timeline: sales from followed operators OR saved sales
+      // Timeline: sales from followed Estate Sale Company Owners OR saved sales
       const relevantIds = new Set([...opIds.flatMap(id =>
         upcoming.filter(s => s.operator_id === id).map(s => s.id)
       ), ...savedIds]);
@@ -86,7 +86,7 @@ export default function ConsumerDashboard({ user }) {
   }
 
   const role = user?.primary_account_type || 'consumer';
-  const canSeeBuyouts = ['reseller', 'operator', 'estate_sale_operator', 'admin'].includes(role) || user?.role === 'admin';
+  const canSeeBuyouts = ['reseller', 'Estate Sale Company Owner', 'estate_sale_operator', 'admin'].includes(role) || user?.role === 'admin';
 
   const quickActions = [
     { title: 'Find Sales', icon: MapPin, link: 'EstateSaleFinder', color: 'bg-orange-100 text-orange-600' },

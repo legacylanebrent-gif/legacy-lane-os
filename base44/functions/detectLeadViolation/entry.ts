@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
     let enforcementActions = ['flagged'];
 
-    // Get operator AI credit account if exists
+    // Get Estate Sale Company Owner AI credit account if exists
     if (operatorUser.length > 0) {
       const creditAccounts = await base44.asServiceRole.entities.OperatorAICreditAccount.filter({
         operator_id,
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       violation_id: violationLog.id,
       lead_id,
       party_user_id: operator_id,
-      party_type: 'operator',
+      party_type: 'Estate Sale Company Owner',
       property_address: lead.property_address,
       amount: damagesAmount,
       reason: `${violation_type}: Non-circumvention violation on property ${lead.property_address}`,

@@ -19,12 +19,12 @@ Deno.serve(async (req) => {
   const pass = (id, label, detail = '') => results.push({ id, label, status: 'PASS', detail });
   const fail = (id, label, detail = '') => results.push({ id, label, status: 'FAIL', detail });
 
-  // ── Test 1: Operator login / auth check (uses the calling user as proxy) ──
+  // ── Test 1: Estate Sale Company Owner login / auth check (uses the calling user as proxy) ──
   try {
     const me = await base44.auth.me();
-    if (me && me.id) pass(1, 'Operator logs in — auth.me() returns user', `user.id=${me.id}`);
-    else fail(1, 'Operator logs in — auth.me() returns user', 'No user returned');
-  } catch (e) { fail(1, 'Operator logs in', e.message); }
+    if (me && me.id) pass(1, 'Estate Sale Company Owner logs in — auth.me() returns user', `user.id=${me.id}`);
+    else fail(1, 'Estate Sale Company Owner logs in — auth.me() returns user', 'No user returned');
+  } catch (e) { fail(1, 'Estate Sale Company Owner logs in', e.message); }
 
   // ── Test 2 & 3: AICoachButton role check (static code analysis — component only renders for OPERATOR_ROLES) ──
   const OPERATOR_ROLES = ['estate_sale_operator','team_admin','team_member','team_marketer','real_estate_agent','investor','coach','super_admin','platform_ops','admin'];
@@ -37,12 +37,12 @@ Deno.serve(async (req) => {
   try {
     // Simulate what the backend does — fetch context for THIS user server-side
     const fetchedUser = await base44.auth.me();
-    if (fetchedUser.id === user.id) pass(4, 'Coach recognizes logged-in operator', `full_name=${fetchedUser.full_name}`);
-    else fail(4, 'Coach recognizes logged-in operator', 'User ID mismatch');
+    if (fetchedUser.id === user.id) pass(4, 'Coach recognizes logged-in Estate Sale Company Owner', `full_name=${fetchedUser.full_name}`);
+    else fail(4, 'Coach recognizes logged-in Estate Sale Company Owner', 'User ID mismatch');
 
     const companyName = fetchedUser.company_name || fetchedUser.full_name;
-    if (companyName) pass(5, 'Coach loads operator profile', `company="${companyName}"`);
-    else fail(5, 'Coach loads operator profile', 'No company name or full_name');
+    if (companyName) pass(5, 'Coach loads Estate Sale Company Owner profile', `company="${companyName}"`);
+    else fail(5, 'Coach loads Estate Sale Company Owner profile', 'No company name or full_name');
 
     const territory = fetchedUser.territory || fetchedUser.location_city || '';
     pass(6, 'Coach loads territory (server-side)', territory ? `territory="${territory}"` : 'No territory set — field exists, will be empty string in prompt');
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: `You are an AI coach for estate sale operator ${user.full_name}. Territory: Test Territory.` },
+        { role: 'system', content: `You are an AI coach for Estate Sale Company Owner ${user.full_name}. Territory: Test Territory.` },
         { role: 'user', content: 'Say exactly: OPENAI_CONNECTED_OK and nothing else.' },
       ],
       max_tokens: 20,
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     const personalizedCompletion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: `You are an AI coach. Operator name: ${user.full_name}. Company: ${user.company_name || 'LegacyLane Test Co'}. Territory: Bergen County NJ.` },
+        { role: 'system', content: `You are an AI coach. Estate Sale Company Owner name: ${user.full_name}. Company: ${user.company_name || 'LegacyLane Test Co'}. Territory: Bergen County NJ.` },
         { role: 'user', content: 'Give me a one-sentence personalized greeting using my name and company.' },
       ],
       max_tokens: 80,
@@ -159,9 +159,9 @@ Deno.serve(async (req) => {
       const exhaustedAccount = (await base44.asServiceRole.entities.OperatorAICreditAccount.filter({ operator_id: TEST_OPERATOR_ID }))[0];
       const available = (exhaustedAccount.monthly_credit_limit || 0) + (exhaustedAccount.bonus_credits || 0) - (exhaustedAccount.monthly_credits_used || 0);
       if (available <= 0) {
-        pass(13, 'Operator is blocked when credits are exhausted — backend returns 402', `available=${available}, credit gate triggers`);
+        pass(13, 'Estate Sale Company Owner is blocked when credits are exhausted — backend returns 402', `available=${available}, credit gate triggers`);
       } else {
-        fail(13, 'Operator is blocked when credits are exhausted', `available=${available}, should be 0`);
+        fail(13, 'Estate Sale Company Owner is blocked when credits are exhausted', `available=${available}, should be 0`);
       }
 
     } catch (e) { fail(11, 'Credit ledger / usage tracking', e.message); }
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     } catch (e) { fail(15, 'Admin add bonus credits', e.message); }
   }
 
-  // ── Test 16 & 17: Token storage vs. operator exposure ──
+  // ── Test 16 & 17: Token storage vs. Estate Sale Company Owner exposure ──
   if (openAIUsage) {
     const hasTokens = openAIUsage.prompt_tokens > 0 || openAIUsage.completion_tokens > 0;
     if (hasTokens) {
@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
   // It does NOT expose usage.prompt_tokens / usage.completion_tokens to the UI
   const exposedKeys = ['reply', 'available_credits_remaining', 'model', 'is_promotion_package'];
   const hiddenKeys = ['prompt_tokens', 'completion_tokens', 'total_tokens', 'usage'];
-  pass(17, 'Token usage is NOT shown to operator — response omits raw token counts from UI', `Operator sees: ${exposedKeys.join(', ')} | Hidden: ${hiddenKeys.join(', ')}`);
+  pass(17, 'Token usage is NOT shown to Estate Sale Company Owner — response omits raw token counts from UI', `Estate Sale Company Owner sees: ${exposedKeys.join(', ')} | Hidden: ${hiddenKeys.join(', ')}`);
 
   // ── Cleanup test data ──
   try {

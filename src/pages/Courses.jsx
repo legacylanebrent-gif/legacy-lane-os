@@ -19,7 +19,7 @@ export default function Courses() {
 
   const categories = [
     { value: 'all', label: 'All Courses' },
-    { value: 'estate_sale_operator', label: 'Estate Sale Operator' },
+    { value: 'estate_sale_operator', label: 'Estate Sale Company Owner' },
     { value: 'probate_consultant', label: 'Probate Consultant' },
     { value: 'investor_training', label: 'Investor Training' },
     { value: 'agent_life_change', label: 'Agent Life-Change' },

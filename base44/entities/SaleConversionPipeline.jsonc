@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "Operator user ID"
+      "description": "Estate Sale Company Owner user ID"
     },
     "lead_id": {
       "type": "string",
@@ -88,12 +88,12 @@
     "pre_sale_selling_enabled": {
       "type": "boolean",
       "default": false,
-      "description": "Operator has agreed to allow pre-sale item sales"
+      "description": "Estate Sale Company Owner has agreed to allow pre-sale item sales"
     },
     "post_sale_selling_enabled": {
       "type": "boolean",
       "default": false,
-      "description": "Operator has agreed to allow post-sale item sales"
+      "description": "Estate Sale Company Owner has agreed to allow post-sale item sales"
     },
     "ai_timeline_generated": {
       "type": "boolean",

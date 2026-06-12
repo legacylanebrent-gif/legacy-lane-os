@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Generic state operator updater.
+// Generic state Estate Sale Company Owner updater.
 // Accepts { state: "AR" } in the request body.
 // Re-scrapes estatesales.net for that state, upserts records, then deduplicates by phone.
 

@@ -366,7 +366,7 @@ export default function ResellerNetwork() {
           <div className="grid md:grid-cols-2 gap-6">
             {[
               { icon: <Users className="w-5 h-5" />, title: 'Real Estate Agents', desc: 'Agents submit active listings where sellers may need help selling contents before closing.' },
-              { icon: <Star className="w-5 h-5" />, title: 'Estate Sale Companies', desc: 'Operators refer opportunities that are not a fit for a traditional estate sale.' },
+              { icon: <Star className="w-5 h-5" />, title: 'Estate Sale Companies', desc: 'Estate Sale Company Owners refer opportunities that are not a fit for a traditional estate sale.' },
               { icon: <MapPin className="w-5 h-5" />, title: 'Homeowners', desc: 'Consumers request help through EstateSalen directly.' },
               { icon: <BarChart2 className="w-5 h-5" />, title: 'Property Opportunity Matching', desc: 'EstateSalen identifies opportunities through listing and territory systems.' },
             ].map(({ icon, title, desc }) => (

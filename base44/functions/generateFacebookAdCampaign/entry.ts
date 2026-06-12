@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     creative_count = 3,
   } = await req.json();
 
-  const prompt = `You are a Facebook/Instagram Ads strategist for Legacy Lane OS, a SaaS platform for estate sale operators.
+  const prompt = `You are a Facebook/Instagram Ads strategist for Legacy Lane OS, a SaaS platform for Estate Sale Company Owners.
 
 Build a complete Facebook Ad campaign plan based on these inputs:
 - Campaign Goal: ${campaign_goal}

@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
 
     if (!center) return Response.json({ error: 'Could not geocode ZIP', geoData });
 
-    // Fetch all NJ operators
+    // Fetch all NJ Estate Sale Company Owners
     const [leads, netOps, orgOps] = await Promise.all([
       base44.asServiceRole.entities.FutureOperatorLead.filter({ state: 'NJ' }, '-created_date', 1000).catch(() => []),
       base44.asServiceRole.entities.FutureEstateOperator.filter({ state: 'NJ' }, '-created_date', 1000).catch(() => []),

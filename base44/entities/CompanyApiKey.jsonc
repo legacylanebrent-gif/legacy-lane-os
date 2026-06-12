@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "operator_name": {
       "type": "string"

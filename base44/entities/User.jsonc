@@ -21,7 +21,7 @@
         "agent_operator"
       ],
       "default": "consumer",
-      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Operator role."
+      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role."
     },
     "business_name": {
       "type": "string"
@@ -303,7 +303,7 @@
     "agent_operator_upgrade_date": {
       "type": "string",
       "format": "date-time",
-      "description": "When user upgraded to the combined agent+operator role"
+      "description": "When user upgraded to the combined agent+Estate Sale Company Owner role"
     },
     "previous_account_type": {
       "type": "string",

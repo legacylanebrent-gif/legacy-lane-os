@@ -25,19 +25,19 @@
 #### b. **Contract Signed Notifications** (`notifyContractSigned`)
 - **Triggers:** When a contract is signed
 - **Channels:** In-app + Email
-- **Recipients:** Operator
+- **Recipients:** Estate Sale Company Owner
 - **Status:** ✅ Function created
 
 #### c. **Item Sold Notifications** (`notifyItemSold`)
 - **Triggers:** When an item is sold
 - **Channels:** In-app (always), Email (for items ≥$100)
-- **Recipients:** Operator
+- **Recipients:** Estate Sale Company Owner
 - **Status:** ✅ Function created
 
 #### d. **Payment Received Notifications** (`notifyPaymentReceived`)
-- **Triggers:** When operator receives payment (commission, withdrawal, etc.)
+- **Triggers:** When Estate Sale Company Owner receives payment (commission, withdrawal, etc.)
 - **Channels:** In-app + Email
-- **Recipients:** Operator
+- **Recipients:** Estate Sale Company Owner
 - **Status:** ✅ Function created
 
 #### e. **Reseller Event Invitations** (`notifyResellerEventInvite`)
@@ -80,7 +80,7 @@
 
 ## 📋 NOTIFICATION TYPES MATRIX (Updated)
 
-| Type | Consumer | Operator | Agent | Reseller | Vendor | Admin | Status |
+| Type | Consumer | Estate Sale Company Owner | Agent | Reseller | Vendor | Admin | Status |
 |------|----------|----------|-------|----------|--------|-------|--------|
 | New Lead | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ Existing |
 | Sale Update | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ Enhanced |
@@ -118,7 +118,7 @@
 ### **Scheduled Automations**
 | Name | Schedule | Function | Status |
 |------|----------|----------|--------|
-| Weekly Operator SEO Digest | Mondays 8am | sendOperatorSEODigest | ✅ Existing |
+| Weekly Estate Sale Company Owner SEO Digest | Mondays 8am | sendOperatorSEODigest | ✅ Existing |
 | Estate Transition — Daily Email Sequence | Daily 8am | processEstateTransitionSequence | ✅ Existing |
 | **Daily Notification Cleanup** | **Daily 4am** | **archiveOldNotifications** | ✅ **NEW** |
 | **Daily Sale Alert Digest** | **Daily 9am** | **sendSaleAlertDigest** | ✅ **NEW** |
@@ -184,7 +184,7 @@
 
 ### **Low Priority (2027)**
 12. **AI-Powered Insights** - Suggest optimal frequencies and content
-13. **Webhook Integrations** - Allow operators to receive notifications via webhooks
+13. **Webhook Integrations** - Allow Estate Sale Company Owners to receive notifications via webhooks
 14. **Slack/Teams Integration** - Send business notifications to team channels
 15. **Voice Notifications** - AI voice calls for critical alerts
 

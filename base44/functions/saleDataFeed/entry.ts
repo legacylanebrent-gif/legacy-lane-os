@@ -45,10 +45,10 @@ Deno.serve(async (req) => {
   const apiKeyRecord = apiKeys[0];
   const operatorId = apiKeyRecord.operator_id;
 
-  // Fetch all sales for this operator
+  // Fetch all sales for this Estate Sale Company Owner
   const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
 
-  // Fetch all inventory items for this operator's sales
+  // Fetch all inventory items for this Estate Sale Company Owner's sales
   const saleIds = sales.map(s => s.id);
   let items = [];
   for (const saleId of saleIds) {

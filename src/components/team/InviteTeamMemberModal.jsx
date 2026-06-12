@@ -10,15 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus, Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 const ROLE_OPTIONS = [
-  { value: 'team_admin', label: 'Team Admin', description: 'Full operator access, manages other team members' },
+  { value: 'team_admin', label: 'Team Admin', description: 'Full Estate Sale Company Owner access, manages other team members' },
   { value: 'team_member', label: 'Team Member', description: 'Operational access to sales, inventory, POS' },
   { value: 'team_marketer', label: 'Team Marketer', description: 'Marketing campaigns, statistics, VIP events' },
 ];
 
-export default function InviteTeamMemberModal({ open, onClose, operator, onSuccess }) {
+export default function InviteTeamMemberModal({ open, onClose, Estate Sale Company Owner, onSuccess }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('team_member');
-  const companyName = operator?.company_name || operator?.full_name || 'our company';
+  const companyName = Estate Sale Company Owner?.company_name || Estate Sale Company Owner?.full_name || 'our company';
   const [personalNote, setPersonalNote] = useState(
     `Hi! I'd like to invite you to join the ${companyName} team on EstateSalen.com. We use this platform to manage our estate sales and I think you'll find it easy and powerful to work with. Looking forward to having you on board!`
   );
@@ -65,14 +65,14 @@ export default function InviteTeamMemberModal({ open, onClose, operator, onSucce
   const handleSend = async () => {
     setSending(true);
     const roleLabel = ROLE_OPTIONS.find(r => r.value === role)?.label || role;
-    const companyName = operator?.company_name || operator?.full_name || 'our company';
+    const companyName = Estate Sale Company Owner?.company_name || Estate Sale Company Owner?.full_name || 'our company';
 
     try {
       if (result?.type === 'existing') {
         // Update existing user: assign team role + operator_id
         await base44.entities.User.update(result.user.id, {
           primary_account_type: role,
-          operator_id: operator.id,
+          operator_id: Estate Sale Company Owner.id,
           team_permissions: {}
         });
 
@@ -109,7 +109,7 @@ You've been invited to join the ${companyName} team on EstateSalen.com as a ${ro
 ${personalNote ? `A personal note from ${companyName}:\n"${personalNote}"\n` : ''}
 Please check your inbox for a separate registration email from EstateSalen.com to create your account. Once registered, you'll have access to your team dashboard and the tools assigned to your role.
 
-If you have any questions, reach out to your team manager at ${operator?.email || companyName}.
+If you have any questions, reach out to your team manager at ${Estate Sale Company Owner?.email || companyName}.
 
 We're excited to have you on board!
 — The EstateSalen.com Team`

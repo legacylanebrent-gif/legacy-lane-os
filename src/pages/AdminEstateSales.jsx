@@ -111,7 +111,7 @@ export default function AdminEstateSales() {
       filtered = filtered.filter(sale => sale.property_address?.city === cityFilter);
     }
 
-    // Operator filter
+    // Estate Sale Company Owner filter
     if (operatorFilter !== 'all') {
       filtered = filtered.filter(sale => sale.operator_id === operatorFilter);
     }
@@ -182,7 +182,7 @@ export default function AdminEstateSales() {
     cityFilter !== 'all' || operatorFilter !== 'all' || premiumFilter !== 'all' || 
     dateRangeFilter !== 'all' || minValue || maxValue;
 
-  // Get unique states, cities and operators for filters
+  // Get unique states, cities and Estate Sale Company Owners for filters
   const uniqueStates = [...new Set(sales.map(s => s.property_address?.state).filter(Boolean))].sort();
   const uniqueCities = [...new Set(sales.map(s => s.property_address?.city).filter(Boolean))].sort();
   const uniqueOperators = [...new Set(sales.map(s => ({ id: s.operator_id, name: s.operator_name })).filter(o => o.id))];
@@ -374,7 +374,7 @@ export default function AdminEstateSales() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <Input
-              placeholder="Search by title, description, address, operator, categories, or ID..."
+              placeholder="Search by title, description, address, Estate Sale Company Owner, categories, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11"
@@ -430,13 +430,13 @@ export default function AdminEstateSales() {
             </div>
 
             <div>
-              <Label className="text-xs text-slate-600 mb-2 block">Operator</Label>
+              <Label className="text-xs text-slate-600 mb-2 block">Estate Sale Company Owner</Label>
               <Select value={operatorFilter} onValueChange={setOperatorFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Operators" />
+                  <SelectValue placeholder="All Estate Sale Company Owners" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Operators</SelectItem>
+                  <SelectItem value="all">All Estate Sale Company Owners</SelectItem>
                   {Object.entries(uniqueOperatorsMap).map(([id, name]) => (
                     <SelectItem key={id} value={id}>{name}</SelectItem>
                   ))}
@@ -551,7 +551,7 @@ export default function AdminEstateSales() {
                   {sale.operator_name && (
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">Operator:</span> {sale.operator_name}
+                        <span className="font-medium">Estate Sale Company Owner:</span> {sale.operator_name}
                       </div>
                       {operatorSubscriptions[sale.operator_id] && (
                         <div className="flex items-center gap-2 text-xs">

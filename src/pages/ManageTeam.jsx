@@ -150,7 +150,7 @@ export default function ManageTeam() {
       <InviteTeamMemberModal
         open={showInviteModal}
         onClose={() => setShowInviteModal(false)}
-        operator={user}
+        Estate Sale Company Owner={user}
         onSuccess={loadData}
       />
 

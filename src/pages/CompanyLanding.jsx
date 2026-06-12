@@ -35,7 +35,7 @@ const CUSTOMER_FEATURES = [
   { icon: Gift, title: 'Purchase Rewards', desc: 'Every purchase earns points redeemable for discounts — turning one-time shoppers into loyal regulars.' },
   { icon: Trophy, title: 'Monthly Drawings', desc: 'Active buyers are automatically entered into monthly prize drawings, driving repeat engagement.' },
   { icon: Navigation, title: 'Multi-Sale GPS Routes', desc: 'Buyers plan optimized driving routes across multiple sales in one day — maximizing their experience.' },
-  { icon: Bell, title: 'Multi-Company Text Alerts', desc: 'Buyers subscribe to alerts from multiple operators and get SMS notifications the moment new sales go live.' },
+  { icon: Bell, title: 'Multi-Company Text Alerts', desc: 'Buyers subscribe to alerts from multiple Estate Sale Company Owners and get SMS notifications the moment new sales go live.' },
   { icon: Star, title: 'VIP List Access', desc: 'Exclusive VIP buyers get early access before sales open and special post-sale bonuses — rewarding your best customers.' },
 ];
 
@@ -419,7 +419,7 @@ export default function CompanyLanding() {
           <blockquote className="text-2xl md:text-3xl font-serif italic leading-relaxed mb-6">
             "EstateSalen.com completely transformed how we run our business. We doubled our revenue in the first 6 months — and the AI content tool alone saves us 10 hours a week."
           </blockquote>
-          <p className="text-orange-200 font-medium">— Estate Sale Operator, Nashville TN</p>
+          <p className="text-orange-200 font-medium">— Estate Sale Company Owner, Nashville TN</p>
         </div>
       </section>
 

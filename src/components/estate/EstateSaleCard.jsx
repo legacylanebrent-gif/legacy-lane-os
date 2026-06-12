@@ -101,7 +101,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false }) {
           </div>
         )}
 
-        {/* Operator */}
+        {/* Estate Sale Company Owner */}
         <div className="flex items-center gap-2 text-sm text-slate-600">
           <Package className="w-4 h-4 text-gold-600 shrink-0" />
           <span>by {estate.operator_name || 'Legacy Lane'}</span>

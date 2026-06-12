@@ -126,7 +126,7 @@ export default function CustomerIOReportingCenter() {
   const TABS = [
     { key: 'overview', label: 'Overview' },
     { key: 'events', label: `Events (${engagementLogs.length})` },
-    { key: 'operators', label: `Operators (${operatorPerfs.length})` },
+    { key: 'Estate Sale Company Owners', label: `Estate Sale Company Owners (${operatorPerfs.length})` },
     { key: 'sales', label: `Sales (${salePerfs.length})` },
     { key: 'suppressed', label: `Suppressed (${suppressedProfiles.length})` },
     { key: 'setup', label: 'Webhook Setup' },
@@ -143,7 +143,7 @@ export default function CustomerIOReportingCenter() {
             </div>
             Customer.io Reporting Center
           </h1>
-          <p className="text-slate-500 mt-1">Monitor campaign performance, webhook activity, deliverability, operator results, and buyer engagement across Legacy Lane OS.</p>
+          <p className="text-slate-500 mt-1">Monitor campaign performance, webhook activity, deliverability, Estate Sale Company Owner results, and buyer engagement across Legacy Lane OS.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={exportCSV} className="text-xs">
@@ -201,10 +201,10 @@ export default function CustomerIOReportingCenter() {
             ))}
           </div>
 
-          {/* Top operators */}
+          {/* Top Estate Sale Company Owners */}
           {operatorPerfs.length > 0 && (
             <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-sm">Top Performing Operators</CardTitle></CardHeader>
+              <CardHeader className="pb-3"><CardTitle className="text-sm">Top Performing Estate Sale Company Owners</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {operatorPerfs.slice(0, 5).map(op => (
                   <div key={op.id} className="flex items-center gap-3 text-sm py-2 border-b border-slate-100 last:border-0">
@@ -285,11 +285,11 @@ export default function CustomerIOReportingCenter() {
       )}
 
       {/* ── OPERATORS TAB ── */}
-      {activeTab === 'operators' && (
+      {activeTab === 'Estate Sale Company Owners' && (
         <Card>
           <CardContent className="p-0">
             {operatorPerfs.length === 0 ? (
-              <p className="text-center text-slate-400 text-sm py-10">No operator performance data yet. Recalculate stats after events are received.</p>
+              <p className="text-center text-slate-400 text-sm py-10">No Estate Sale Company Owner performance data yet. Recalculate stats after events are received.</p>
             ) : (
               <div className="overflow-auto">
                 <table className="w-full text-xs">

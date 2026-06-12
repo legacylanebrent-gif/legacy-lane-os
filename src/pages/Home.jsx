@@ -306,7 +306,7 @@ export default function Home() {
       setTotalItems(itemsCount);
       setTotalEstimatedValue(estimatedValue);
       
-      // Load operator company names (skip if not authenticated)
+      // Load Estate Sale Company Owner company names (skip if not authenticated)
       try {
         const authenticated = await base44.auth.isAuthenticated();
         if (authenticated) {
@@ -560,7 +560,7 @@ export default function Home() {
             connection_type: 'favorite',
             source: saleId
           };
-          setDebugMessage(`🔄 Creating connection... User: ${currentUser.id}, Operator: ${sale.operator_id}`);
+          setDebugMessage(`🔄 Creating connection... User: ${currentUser.id}, Estate Sale Company Owner: ${sale.operator_id}`);
           await base44.entities.Connection.create(connectionData);
           setDebugMessage('✅ Connection created successfully!');
           setTimeout(() => setDebugMessage(''), 5000);
@@ -569,7 +569,7 @@ export default function Home() {
           setTimeout(() => setDebugMessage(''), 5000);
         }
       } else {
-        setDebugMessage(`⚠️ Missing: User=${!!currentUser}, Operator=${sale?.operator_id}`);
+        setDebugMessage(`⚠️ Missing: User=${!!currentUser}, Estate Sale Company Owner=${sale?.operator_id}`);
         setTimeout(() => setDebugMessage(''), 5000);
       }
     }

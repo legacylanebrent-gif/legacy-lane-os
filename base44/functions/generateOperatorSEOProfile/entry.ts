@@ -1,8 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Nightly function that computes SEO authority scores for each estate sale operator
+// Nightly function that computes SEO authority scores for each Estate Sale Company Owner
 // based on their activity: number of sales, calendar density, image richness, and item quality.
-// Writes computed profile data back to the User entity for use in operator profile pages.
+// Writes computed profile data back to the User entity for use in Estate Sale Company Owner profile pages.
 
 Deno.serve(async (req) => {
   try {
@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     // Fetch all sales
     const allSales = await base44.asServiceRole.entities.EstateSale.list('-created_date', 1000);
 
-    // Group by operator
+    // Group by Estate Sale Company Owner
     const byOperator = {};
     for (const sale of allSales) {
       if (!sale.operator_id) continue;
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
         (sale.categories || []).forEach(c => allCategories.add(c));
       }
 
-      // Generate an AI-powered SEO bio for this operator
+      // Generate an AI-powered SEO bio for this Estate Sale Company Owner
       let seoBio = '';
       try {
         const bioResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
@@ -136,7 +136,7 @@ Write naturally, include location keywords, mention estate sale expertise. Do NO
         });
         operatorsUpdated++;
       } catch (e) {
-        console.error(`Failed to update operator ${operatorId}:`, e.message);
+        console.error(`Failed to update Estate Sale Company Owner ${operatorId}:`, e.message);
       }
     }
 

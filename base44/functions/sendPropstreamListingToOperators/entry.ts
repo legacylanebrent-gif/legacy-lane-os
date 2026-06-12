@@ -18,13 +18,13 @@ Deno.serve(async (req) => {
     const sends = [];
 
     for (const operatorId of operator_ids) {
-      // Get operator details
-      let operators = [];
+      // Get Estate Sale Company Owner details
+      let Estate Sale Company Owners = [];
       try {
-        operators = await base44.asServiceRole.entities.User.filter({ id: operatorId });
+        Estate Sale Company Owners = await base44.asServiceRole.entities.User.filter({ id: operatorId });
       } catch {}
-      const operator = operators[0];
-      const opName = operator?.company_name || operator?.full_name || 'Estate Sale Operator';
+      const Estate Sale Company Owner = Estate Sale Company Owners[0];
+      const opName = Estate Sale Company Owner?.company_name || Estate Sale Company Owner?.full_name || 'Estate Sale Company Owner';
 
       const subject = `New Real Estate Listing Lead in Your Service Area`;
       const body = `Hi ${opName.split(' ')[0]},
@@ -69,7 +69,7 @@ EstateSalen Lead Distribution`;
       });
       sends.push(send.id);
 
-      // Store message on listing (update for last operator message)
+      // Store message on listing (update for last Estate Sale Company Owner message)
       await base44.asServiceRole.entities.PropstreamREListing.update(listing.id, {
         operator_message_subject: subject,
         operator_message_body: body,

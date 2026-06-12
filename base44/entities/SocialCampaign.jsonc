@@ -35,7 +35,7 @@
     "generated_by": {
       "type": "string",
       "enum": [
-        "operator",
+        "Estate Sale Company Owner",
         "admin",
         "ai_agent"
       ],

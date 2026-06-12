@@ -226,7 +226,7 @@
     "lead_access_enabled": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this operator receives lead notifications"
+      "description": "Whether this Estate Sale Company Owner receives lead notifications"
     },
     "free_trial_started": {
       "type": "boolean",

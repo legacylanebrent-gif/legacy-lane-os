@@ -391,7 +391,7 @@ Deno.serve(async (req) => {
       return Response.json({ message: `Skipped — sale status is "${sale.status}"` });
     }
 
-    // Load operator/company user
+    // Load Estate Sale Company Owner/company user
     let company = null;
     if (sale.operator_id) {
       const users = await base44.asServiceRole.entities.User.filter({ id: sale.operator_id });

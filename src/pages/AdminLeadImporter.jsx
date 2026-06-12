@@ -285,7 +285,7 @@ export default function AdminLeadImporter() {
 
       <div>
         <h1 className="text-4xl font-bold text-slate-900 mb-2">Lead Importer</h1>
-        <p className="text-slate-600">Import property lists from Propstream and assign to local operators by territory</p>
+        <p className="text-slate-600">Import property lists from Propstream and assign to local Estate Sale Company Owners by territory</p>
       </div>
 
       {!data.length ? (

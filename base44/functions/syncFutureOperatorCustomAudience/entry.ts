@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         name: audienceName,
         subtype: 'CUSTOM',
-        description: 'Legacy Lane OS Future Operator leads for targeting',
+        description: 'Legacy Lane OS Future Estate Sale Company Owner leads for targeting',
         customer_file_source: 'USER_PROVIDED_ONLY',
         access_token: META_ACCESS_TOKEN,
       }),

@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 const SECTIONS = [
-  { title: '1. Platform Overview', body: 'Houszu and Legacy Lane provide a shared ecosystem connecting real estate agents and estate sale operators. By participating, you agree to use the platform infrastructure for all lead management, communication, and transaction tracking related to introduced leads.' },
+  { title: '1. Platform Overview', body: 'Houszu and Legacy Lane provide a shared ecosystem connecting real estate agents and Estate Sale Company Owners. By participating, you agree to use the platform infrastructure for all lead management, communication, and transaction tracking related to introduced leads.' },
   { title: '2. Lead Introductions', body: 'Leads may be provided at no upfront cost and remain subject to platform protections. All introduced leads are considered proprietary to the platform and are shared under the terms of this agreement.' },
   { title: '3. Referral Routing', body: 'All real estate transactions resulting from platform-introduced leads must be routed through the designated referral agent, Brent Cramp, Keller Williams Realty Central Monmouth, or another approved licensed referral entity as designated by the platform.' },
   { title: '4. Compensation Structure', body: 'All payments to participants are structured as platform credits, marketing incentives, or service-based compensation — not direct real estate commissions. Nothing in this agreement creates an agency, employment, or partnership relationship.' },

@@ -45,7 +45,7 @@ export default function ResellerPackupEvents() {
     setUser(u);
 
     const role = u?.primary_account_type || u?.role;
-    const isOperator = role === 'estate_sale_operator' || role === 'operator';
+    const isOperator = role === 'estate_sale_operator' || role === 'Estate Sale Company Owner';
     const isAdmin = u?.role === 'admin';
 
     // Load open events — visible to everyone
@@ -100,7 +100,7 @@ export default function ResellerPackupEvents() {
         registered_at: new Date().toISOString(),
       });
       setMyRegistrations(prev => ({ ...prev, [eventId]: reg }));
-      alert('Registration submitted! The operator will review and approve your request.');
+      alert('Registration submitted! The Estate Sale Company Owner will review and approve your request.');
     } catch (err) {
       alert('Registration failed: ' + err.message);
     } finally {
@@ -110,7 +110,7 @@ export default function ResellerPackupEvents() {
 
   const role = user?.primary_account_type || user?.role;
   const isReseller = role === 'reseller';
-  const isOperator = role === 'estate_sale_operator' || role === 'operator';
+  const isOperator = role === 'estate_sale_operator' || role === 'Estate Sale Company Owner';
   const isAdmin = user?.role === 'admin';
   const isRegisteredReseller = isReseller && resellerProfile;
 
@@ -153,7 +153,7 @@ export default function ResellerPackupEvents() {
                 <span className="text-purple-200 text-xs font-semibold uppercase tracking-wide">Reseller Network</span>
               </div>
               <p className="font-bold text-lg">Get access to exclusive post-sale inventory events</p>
-              <p className="text-purple-200 text-sm mt-1">Register as a reseller to RSVP for events, get early access to discounted estate sale inventory, and connect with operators in your area.</p>
+              <p className="text-purple-200 text-sm mt-1">Register as a reseller to RSVP for events, get early access to discounted estate sale inventory, and connect with Estate Sale Company Owners in your area.</p>
             </div>
             <div className="flex flex-col gap-2 flex-shrink-0">
               {!user
@@ -277,7 +277,7 @@ export default function ResellerPackupEvents() {
 
                 {/* CTA section */}
                 <div className="pt-2 border-t border-slate-100">
-                  {/* Operator owner */}
+                  {/* Estate Sale Company Owner owner */}
                   {isOwner && (
                     <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/ResellerPackupEventEditor?eventId=${ev.id}`)}>
                       Manage This Event <ChevronRight className="w-4 h-4 ml-1" />
@@ -293,7 +293,7 @@ export default function ResellerPackupEvents() {
                           <span className="text-xs text-green-700 font-medium">You're approved — see you there!</span>
                         )}
                         {myReg.status === 'pending' && (
-                          <span className="text-xs text-yellow-700">Awaiting operator approval</span>
+                          <span className="text-xs text-yellow-700">Awaiting Estate Sale Company Owner approval</span>
                         )}
                       </div>
                     ) : (

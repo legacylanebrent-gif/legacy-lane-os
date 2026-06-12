@@ -73,7 +73,7 @@ export default function PortalPartnershipsTab({ user }) {
           <CardContent className="p-12 text-center">
             <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="font-semibold text-slate-500 mb-1">No Partnerships Yet</p>
-            <p className="text-sm text-slate-400">Use the Invite Operators tab to start building your network.</p>
+            <p className="text-sm text-slate-400">Use the Invite Estate Sale Company Owners tab to start building your network.</p>
           </CardContent>
         </Card>
       ) : (
@@ -89,7 +89,7 @@ export default function PortalPartnershipsTab({ user }) {
                       <Building2 className="w-5 h-5 text-slate-500" />
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm">Operator ID: {m.operator_id}</p>
+                      <p className="font-semibold text-slate-900 text-sm">Estate Sale Company Owner ID: {m.operator_id}</p>
                       {m.brokerage_name && <p className="text-xs text-slate-500">{m.brokerage_name}</p>}
                       <div className="flex items-center gap-2 mt-1">
                         <Badge className={`text-xs ${cfg.color}`}>

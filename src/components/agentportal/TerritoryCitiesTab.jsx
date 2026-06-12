@@ -35,7 +35,7 @@ async function fetchCitiesFromAPI(county, state) {
   };
 }
 
-function OperatorMatchCard({ operator, type }) {
+function OperatorMatchCard({ Estate Sale Company Owner, type }) {
   const isActive = type === 'active';
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg border ${isActive ? 'border-emerald-200 bg-emerald-50' : 'border-orange-200 bg-orange-50'}`}>
@@ -44,11 +44,11 @@ function OperatorMatchCard({ operator, type }) {
           {isActive ? <Users className="w-4 h-4 text-emerald-600" /> : <Building2 className="w-4 h-4 text-orange-600" />}
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-slate-800 text-sm truncate">{operator.company_name}</p>
-          <p className="text-xs text-slate-500 truncate">{operator.city}{operator.state ? `, ${operator.state}` : ''}</p>
-          {operator.matchedCity && (
+          <p className="font-semibold text-slate-800 text-sm truncate">{Estate Sale Company Owner.company_name}</p>
+          <p className="text-xs text-slate-500 truncate">{Estate Sale Company Owner.city}{Estate Sale Company Owner.state ? `, ${Estate Sale Company Owner.state}` : ''}</p>
+          {Estate Sale Company Owner.matchedCity && (
             <p className="text-xs font-medium mt-0.5 truncate" style={{ color: isActive ? '#059669' : '#ea580c' }}>
-              Matched: {operator.matchedCity}
+              Matched: {Estate Sale Company Owner.matchedCity}
             </p>
           )}
         </div>
@@ -175,7 +175,7 @@ export default function TerritoryCitiesTab({ user }) {
       setActiveMatches(activeFound);
       setProspectMatches(prospectFound);
     } catch (e) {
-      console.error('Error loading operator matches:', e);
+      console.error('Error loading Estate Sale Company Owner matches:', e);
     } finally {
       setLoadingMatches(false);
     }
@@ -218,7 +218,7 @@ export default function TerritoryCitiesTab({ user }) {
       setApplication(prev => ({ ...prev, territory_cities: updatedList, territory_municipalities: updatedMunis }));
       setMunicipalities(updatedMunis);
 
-      // Re-run operator matching with updated list
+      // Re-run Estate Sale Company Owner matching with updated list
       await loadOperatorMatches(updatedList, application.license_state, application.county_requested);
 
       setNewCityName('');
@@ -422,14 +422,14 @@ export default function TerritoryCitiesTab({ user }) {
         </CardContent>
       </Card>
 
-      {/* Operator matches */}
+      {/* Estate Sale Company Owner matches */}
       {municipalities.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="border-emerald-200">
             <div className="flex items-center justify-between px-5 py-3 border-b border-emerald-100 bg-emerald-50 rounded-t-lg">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold text-slate-800 text-sm">Active Operators in Territory</span>
+                <span className="font-semibold text-slate-800 text-sm">Active Estate Sale Company Owners in Territory</span>
                 {!loadingMatches && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 border text-xs">{activeMatches.length}</Badge>
                 )}
@@ -440,9 +440,9 @@ export default function TerritoryCitiesTab({ user }) {
               {loadingMatches ? (
                 <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
               ) : activeMatches.length > 0 ? (
-                activeMatches.map((op, i) => <OperatorMatchCard key={op.id || i} operator={op} type="active" />)
+                activeMatches.map((op, i) => <OperatorMatchCard key={op.id || i} Estate Sale Company Owner={op} type="active" />)
               ) : (
-                <p className="text-sm text-slate-400 text-center py-6">No active operators found in these cities.</p>
+                <p className="text-sm text-slate-400 text-center py-6">No active Estate Sale Company Owners found in these cities.</p>
               )}
             </CardContent>
           </Card>
@@ -451,7 +451,7 @@ export default function TerritoryCitiesTab({ user }) {
             <div className="flex items-center justify-between px-5 py-3 border-b border-orange-100 bg-orange-50 rounded-t-lg">
               <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 text-orange-500" />
-                <span className="font-semibold text-slate-800 text-sm">Prospect Operators in Territory</span>
+                <span className="font-semibold text-slate-800 text-sm">Prospect Estate Sale Company Owners in Territory</span>
                 {!loadingMatches && (
                   <Badge className="bg-orange-100 text-orange-700 border-orange-200 border text-xs">{prospectMatches.length}</Badge>
                 )}
@@ -462,9 +462,9 @@ export default function TerritoryCitiesTab({ user }) {
               {loadingMatches ? (
                 <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
               ) : prospectMatches.length > 0 ? (
-                prospectMatches.map((op, i) => <OperatorMatchCard key={op.id || i} operator={op} type="prospect" />)
+                prospectMatches.map((op, i) => <OperatorMatchCard key={op.id || i} Estate Sale Company Owner={op} type="prospect" />)
               ) : (
-                <p className="text-sm text-slate-400 text-center py-6">No prospect operators found in these cities.</p>
+                <p className="text-sm text-slate-400 text-center py-6">No prospect Estate Sale Company Owners found in these cities.</p>
               )}
             </CardContent>
           </Card>

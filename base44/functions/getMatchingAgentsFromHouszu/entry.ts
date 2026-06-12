@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     try { body = await req.clone().json(); } catch (_) {}
     const operatorId = (user.role === 'admin' && body.operator_id) ? body.operator_id : user.id;
 
-    // 1. Load operator territory profile
+    // 1. Load Estate Sale Company Owner territory profile
     const profiles = await base44.asServiceRole.entities.OperatorTerritoryProfile.filter({ operator_id: operatorId });
     if (!profiles || profiles.length === 0) {
       return Response.json({ error: 'No territory profile found. Please create one first.' }, { status: 404 });

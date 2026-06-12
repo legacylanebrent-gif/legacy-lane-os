@@ -5,7 +5,7 @@ const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY") });
 
 const CONTENT_CATEGORIES = [
   'Legacy Lane OS feature education',
-  'Operator business growth',
+  'Estate Sale Company Owner business growth',
   'Estate sale lead generation',
   'Referral program education',
   'AI automation benefits',
@@ -16,12 +16,12 @@ const CONTENT_CATEGORIES = [
   'Monthly subscription ROI',
 ];
 
-const SYSTEM_PROMPT = `You are the Legacy Lane OS Social Media Strategist AI. You create professional, benefits-driven social media content for Legacy Lane OS — a SaaS platform for estate sale operators.
+const SYSTEM_PROMPT = `You are the Legacy Lane OS Social Media Strategist AI. You create professional, benefits-driven social media content for Legacy Lane OS — a SaaS platform for Estate Sale Company Owners.
 
 BRAND VOICE: Professional, trustworthy, growth-focused, practical. Not hype. Not exaggerated claims.
 
 COMPLIANCE RULES:
-- Do NOT guarantee referral income to operators.
+- Do NOT guarantee referral income to Estate Sale Company Owners.
 - Do NOT imply Legacy Lane or Houszu receives real estate commission directly.
 - Use cautious language: "potential referral opportunities", "eligible to participate in referral programs", "subject to written agreements and applicable licensing requirements."
 - Do not claim tax advantages or legal benefits.
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
   const pl = platforms?.length ? platforms : ['Facebook', 'Instagram', 'LinkedIn'];
   const ppw = posts_per_week || 5;
-  const audience = target_audience || 'Estate sale operators, real estate agents, and estate liquidation business owners';
+  const audience = target_audience || 'Estate Sale Company Owners, real estate agents, and estate liquidation business owners';
   const theme = campaign_theme || 'Legacy Lane OS platform features and business growth benefits';
 
   // Compute posting dates for the month

@@ -21,9 +21,9 @@ const STATUS_BADGE = {
 };
 
 const STATUS_LABEL = {
-  imported:  'Imported from public listing — operator verification pending',
-  matched:   'Imported from public listing — operator verification pending',
-  claimed:   'Claimed by operator',
+  imported:  'Imported from public listing — Estate Sale Company Owner verification pending',
+  matched:   'Imported from public listing — Estate Sale Company Owner verification pending',
+  claimed:   'Claimed by Estate Sale Company Owner',
   published: 'Published on platform',
   ignored:   'Ignored'
 };
@@ -146,7 +146,7 @@ export default function ImportedSalesDashboard() {
           {[
             { label: 'Total Scraped', value: stats.total, color: 'text-slate-700' },
             { label: 'Unmatched', value: stats.imported, color: 'text-yellow-600' },
-            { label: 'Operator Matched', value: stats.matched, color: 'text-blue-600' },
+            { label: 'Estate Sale Company Owner Matched', value: stats.matched, color: 'text-blue-600' },
             { label: 'Published', value: stats.published, color: 'text-green-600' },
           ].map((s, i) => (
             <Card key={i} className="shadow-sm bg-white">
@@ -162,14 +162,14 @@ export default function ImportedSalesDashboard() {
           <TabsList className="mb-6">
             <TabsTrigger value="sales">Scraped Sales ({filteredSales.length})</TabsTrigger>
             <TabsTrigger value="territories">Territories ({territories.length})</TabsTrigger>
-            <TabsTrigger value="operators">Operators ({operators.length})</TabsTrigger>
+            <TabsTrigger value="Estate Sale Company Owners">Estate Sale Company Owners ({operators.length})</TabsTrigger>
           </TabsList>
 
           {/* SALES TAB */}
           <TabsContent value="sales">
             <div className="flex flex-wrap gap-3 mb-4">
               <Input
-                placeholder="Search title, operator, city..."
+                placeholder="Search title, Estate Sale Company Owner, city..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-64 bg-white"
@@ -221,14 +221,14 @@ export default function ImportedSalesDashboard() {
                             )}
                             {sale.operator_id && !sale.platform_operator_user_id && (
                               <Badge className="bg-blue-100 text-blue-700">
-                                <Link2 className="w-3 h-3 mr-1" /> Operator Linked
+                                <Link2 className="w-3 h-3 mr-1" /> Estate Sale Company Owner Linked
                               </Badge>
                             )}
                           </div>
                           <h3 className="font-semibold text-slate-900 text-sm truncate">{sale.title}</h3>
                           <p className="text-xs text-slate-500 mt-0.5">
                             <Building2 className="w-3 h-3 inline mr-1" />
-                            {sale.operator_name_raw || 'Unknown operator'}
+                            {sale.operator_name_raw || 'Unknown Estate Sale Company Owner'}
                           </p>
                           <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
@@ -306,7 +306,7 @@ export default function ImportedSalesDashboard() {
           </TabsContent>
 
           {/* OPERATORS TAB */}
-          <TabsContent value="operators">
+          <TabsContent value="Estate Sale Company Owners">
             <div className="space-y-3">
               {operators.map(op => (
                 <Card key={op.id} className="bg-white shadow-sm">
@@ -367,7 +367,7 @@ export default function ImportedSalesDashboard() {
               )}
 
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-slate-400 text-xs block">Operator</span>{selectedSale.operator_name_raw || '—'}</div>
+                <div><span className="text-slate-400 text-xs block">Estate Sale Company Owner</span>{selectedSale.operator_name_raw || '—'}</div>
                 <div><span className="text-slate-400 text-xs block">Location</span>{selectedSale.address_partial || [selectedSale.city, selectedSale.state].filter(Boolean).join(', ')}</div>
                 <div><span className="text-slate-400 text-xs block">Start Date</span>{selectedSale.start_date || '—'}</div>
                 <div><span className="text-slate-400 text-xs block">End Date</span>{selectedSale.end_date || '—'}</div>

@@ -300,7 +300,7 @@ export default function MarketplaceItemDetail() {
                 {/* Seller Info */}
                 <div className="bg-slate-50 rounded-lg p-4">
                   <p className="text-sm text-slate-600 mb-2">Sold by</p>
-                  <p className="font-semibold text-slate-900">{item.operator_name || item.seller_name || 'Estate Sale Operator'}</p>
+                  <p className="font-semibold text-slate-900">{item.operator_name || item.seller_name || 'Estate Sale Company Owner'}</p>
                   {(item.operator_city || item.operator_state) && (
                     <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" />

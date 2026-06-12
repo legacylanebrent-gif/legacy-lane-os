@@ -78,13 +78,13 @@ Create 3 social media posts for this sale. You decide the angle, tone, and forma
 
     return `You are the Legacy Lane AI Coach, an expert in estate sale marketing, buyer psychology, and local demand generation.
 
-Your task is to automatically generate a COMPLETE promotional package for a specific estate sale using the operator's real data, images, and branding.
+Your task is to automatically generate a COMPLETE promotional package for a specific estate sale using the Estate Sale Company Owner's real data, images, and branding.
 
 ---
 
 ## INPUT DATA
 
-Operator Profile:
+Estate Sale Company Owner Profile:
 - Company Name: ${user?.company_name || sale?.company_name || 'Legacy Lane Partner'}
 - City/Primary Market: ${user?.city || sale?.city || sale?.location || 'Local Market'}
 
@@ -95,7 +95,7 @@ Sale Details:
 - Times: ${sale?.start_time || '8:00 AM'} – ${sale?.end_time || '3:00 PM'}
 - Sale Type: ${sale?.sale_type || sale?.type || 'Estate Sale'}
 
-Operator-Selected Sale Images (USE THESE as the primary visual assets):
+Estate Sale Company Owner-Selected Sale Images (USE THESE as the primary visual assets):
 ${imgList}
 
 Featured Items: ${featuredItems.length > 0 ? featuredItems.join(', ') : 'General household, furniture, collectibles, antiques'}
@@ -111,7 +111,7 @@ This is performance marketing for a time-sensitive event. NOT generic branding.
 
 ## PART 1: IMAGE ASSIGNMENT
 
-From the operator-selected images above, recommend which specific image URL to use for each post and why.
+From the Estate Sale Company Owner-selected images above, recommend which specific image URL to use for each post and why.
 
 ---
 
@@ -134,7 +134,7 @@ For EACH post include:
 ## PART 3: IMAGE DESIGN SPECS
 
 For each post:
-- Which operator image to use as background (reference by URL or describe)
+- Which Estate Sale Company Owner image to use as background (reference by URL or describe)
 - Overlay text (exact wording)
 - Recommended visual enhancements
 - Logo placement
@@ -149,7 +149,7 @@ For each post, write a ready-to-use AI image generation prompt that incorporates
 
 ## PART 5: BOOST STRATEGY
 
-Suggest best posting times, ad spend recommendations, and one quick tip for the operator.
+Suggest best posting times, ad spend recommendations, and one quick tip for the Estate Sale Company Owner.
 
 ---
 

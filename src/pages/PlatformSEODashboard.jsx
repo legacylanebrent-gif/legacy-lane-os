@@ -137,7 +137,7 @@ export default function PlatformSEODashboard() {
       // Items: with/without ai_description
       setItemStats({ total: allItems.length, withDesc: allItems.filter(i => i.ai_description).length });
 
-      // Companies: scraped operators vs those with company SEO pages
+      // Companies: scraped Estate Sale Company Owners vs those with company SEO pages
       setCompanyStats({ total: 0, withProfile: companyPages.length }); // total loaded lazily
 
       // Blog queue breakdown

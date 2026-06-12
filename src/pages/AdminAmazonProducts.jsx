@@ -181,7 +181,7 @@ export default function AdminAmazonProducts() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Amazon Products</h1>
-          <p className="text-slate-600">Manage affiliate product recommendations for estate sale operators</p>
+          <p className="text-slate-600">Manage affiliate product recommendations for Estate Sale Company Owners</p>
         </div>
         <div className="flex gap-3">
           <Button

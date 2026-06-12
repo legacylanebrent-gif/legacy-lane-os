@@ -290,7 +290,7 @@ export default function OperatorMarketingDashboard() {
         />
       )}
 
-      {/* Top ZIP codes (operator-level) */}
+      {/* Top ZIP codes (Estate Sale Company Owner-level) */}
       {op?.top_zip_codes_json && Object.keys(op.top_zip_codes_json).length > 0 && (
         <Card>
           <CardHeader className="pb-3">

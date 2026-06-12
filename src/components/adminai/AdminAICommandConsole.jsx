@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Zap, Loader2 } from 'lucide-react';
 
 const COMMAND_TYPES = [
-  'Growth Strategy', 'Operator Acquisition', 'Agent Referral Program',
+  'Growth Strategy', 'Estate Sale Company Owner Acquisition', 'Agent Referral Program',
   'Territory Expansion', 'Marketing Campaign', 'Revenue Analysis',
   'CRM Cleanup', 'Support Review', 'Funnel Builder',
   'Weekly Execution Plan', 'General Admin'
@@ -21,7 +21,7 @@ const EXECUTION_MODES = [
 ];
 
 const CONTEXT_TOGGLES = [
-  { key: 'operators', label: 'Operator Data' },
+  { key: 'Estate Sale Company Owners', label: 'Estate Sale Company Owner Data' },
   { key: 'leads', label: 'Lead Data' },
   { key: 'referrals', label: 'Referral Data' },
   { key: 'subscriptions', label: 'Subscription Data' },
@@ -31,15 +31,15 @@ const CONTEXT_TOGGLES = [
 ];
 
 const QUICK_COMMANDS = [
-  { label: "Build this week's operator acquisition plan", type: 'Operator Acquisition' },
+  { label: "Build this week's Estate Sale Company Owner acquisition plan", type: 'Estate Sale Company Owner Acquisition' },
   { label: 'Analyze subscription growth opportunities', type: 'Growth Strategy' },
   { label: 'Create agent referral recruiting campaign', type: 'Agent Referral Program' },
-  { label: 'Find weak points in operator onboarding', type: 'Operator Acquisition' },
+  { label: 'Find weak points in Estate Sale Company Owner onboarding', type: 'Estate Sale Company Owner Acquisition' },
   { label: 'Build 30-day revenue plan', type: 'Revenue Analysis' },
   { label: 'Draft support response summaries', type: 'Support Review' },
   { label: 'Recommend top territories to target', type: 'Territory Expansion' },
   { label: 'Create Legacy Lane OS demo script', type: 'Marketing Campaign' },
-  { label: 'Build follow-up campaign for inactive operators', type: 'Marketing Campaign' },
+  { label: 'Build follow-up campaign for inactive Estate Sale Company Owners', type: 'Marketing Campaign' },
   { label: 'Create weekly admin priority list', type: 'Weekly Execution Plan' },
 ];
 
@@ -87,7 +87,7 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
         <Textarea
           value={command}
           onChange={e => setCommand(e.target.value)}
-          placeholder='Example: Build a 30-day plan to acquire 25 new estate sale operators in New Jersey and create the campaigns, follow-up tasks, and KPIs.'
+          placeholder='Example: Build a 30-day plan to acquire 25 new Estate Sale Company Owners in New Jersey and create the campaigns, follow-up tasks, and KPIs.'
           className="min-h-[120px] bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-amber-400 resize-none text-sm"
         />
       </div>
@@ -149,7 +149,7 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
         className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm tracking-wide"
       >
         {loading ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Admin AI Operator is thinking...</>
+          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Admin AI Estate Sale Company Owner is thinking...</>
         ) : (
           <><Zap className="w-4 h-4 mr-2" />Execute Command</>
         )}

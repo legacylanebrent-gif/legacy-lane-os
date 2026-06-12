@@ -89,7 +89,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
     try {
       const userData = await base44.auth.me();
       setOperator(userData);
-      // Apply operator's default early sign-in setting to new sales
+      // Apply Estate Sale Company Owner's default early sign-in setting to new sales
       if (!sale) {
         setFormData(prev => ({
           ...prev,
@@ -97,7 +97,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         }));
       }
     } catch (error) {
-      console.error('Error loading operator:', error);
+      console.error('Error loading Estate Sale Company Owner:', error);
     }
   };
 
@@ -829,7 +829,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           open={showSignTemplate}
           onClose={() => setShowSignTemplate(false)}
           sale={sale}
-          operator={operator}
+          Estate Sale Company Owner={Estate Sale Company Owner}
         />
 
         <PhotoLabelingModal

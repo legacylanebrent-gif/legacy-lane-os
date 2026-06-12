@@ -212,7 +212,7 @@ export default function CustomerIODashboard() {
         </CardHeader>
         <CardContent>
           {eventLogs.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-6">No events logged yet. Events will appear here once users follow operators or sales are created.</p>
+            <p className="text-sm text-slate-400 text-center py-6">No events logged yet. Events will appear here once users follow Estate Sale Company Owners or sales are created.</p>
           ) : (
             <div className="space-y-1 max-h-80 overflow-y-auto">
               {eventLogs.map(log => (

@@ -129,9 +129,9 @@ export default function AgentListingEstateSaleRequest() {
             estate sales, moving sales, downsizing sales, and contents liquidation before the property closes.
           </p>
           <a href="#form-section" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl text-lg transition-colors shadow-lg">
-            Add My Listing to the Estate Sale Operator Pool <ArrowRight className="w-5 h-5" />
+            Add My Listing to the Estate Sale Company Owner Pool <ArrowRight className="w-5 h-5" />
           </a>
-          <p className="text-slate-400 text-sm">No cost to submit. No obligation. Local operators may reach out if they service the area.</p>
+          <p className="text-slate-400 text-sm">No cost to submit. No obligation. Local Estate Sale Company Owners may reach out if they service the area.</p>
         </div>
       </section>
 
@@ -147,7 +147,7 @@ export default function AgentListingEstateSaleRequest() {
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
               { icon: <Home className="w-6 h-6" />, title: 'For the Seller', desc: 'Reduce stress and generate value from items before closing.' },
-              { icon: <Users className="w-6 h-6" />, title: 'For the Agent', desc: 'Help your client solve a real problem and potentially earn future leads from local operators.' },
+              { icon: <Users className="w-6 h-6" />, title: 'For the Agent', desc: 'Help your client solve a real problem and potentially earn future leads from local Estate Sale Company Owners.' },
               { icon: <Building2 className="w-6 h-6" />, title: 'For the Operator', desc: 'Receive qualified opportunities from listings with estate sale potential.' },
             ].map(({ icon, title, desc }) => (
               <div key={title} className="bg-orange-50 rounded-xl p-6 space-y-2">
@@ -179,8 +179,8 @@ export default function AgentListingEstateSaleRequest() {
               'Confirm your active listing.',
               'Tell us the approximate timeline.',
               'Choose the best contact method.',
-              'EstateSalen matches the listing to operators who service that area.',
-              'Interested operators may contact you directly.',
+              'EstateSalen matches the listing to Estate Sale Company Owners who service that area.',
+              'Interested Estate Sale Company Owners may contact you directly.',
             ].map((step, i) => (
               <div key={i} className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm">
                 <div className="w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">{i + 1}</div>
@@ -189,7 +189,7 @@ export default function AgentListingEstateSaleRequest() {
             ))}
           </div>
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <strong>Important:</strong> EstateSalen does not guarantee that every property will qualify for an estate sale or that every operator will accept the opportunity. This simply places the listing into the operator opportunity pool.
+            <strong>Important:</strong> EstateSalen does not guarantee that every property will qualify for an estate sale or that every Estate Sale Company Owner will accept the opportunity. This simply places the listing into the Estate Sale Company Owner opportunity pool.
           </div>
         </div>
       </section>
@@ -198,7 +198,7 @@ export default function AgentListingEstateSaleRequest() {
       <section id="form-section" className="bg-white px-6 py-14">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-800 mb-2 text-center">Add Your Listing</h2>
-          <p className="text-slate-500 text-center mb-8">Search your active listing from the PropStream database and submit to the operator pool.</p>
+          <p className="text-slate-500 text-center mb-8">Search your active listing from the PropStream database and submit to the Estate Sale Company Owner pool.</p>
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6 md:p-8">
             <StepIndicator currentStep={step} steps={STEPS} />
@@ -300,7 +300,7 @@ export default function AgentListingEstateSaleRequest() {
                   {selectedListing.agent_submitted_to_pool && (
                     <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                      This listing has already been submitted to the operator pool.
+                      This listing has already been submitted to the Estate Sale Company Owner pool.
                     </div>
                   )}
                 </div>
@@ -387,7 +387,7 @@ export default function AgentListingEstateSaleRequest() {
                     onChange={e => setAgentInfo(a => ({ ...a, permission_to_share: e.target.checked }))}
                     className="mt-0.5 accent-orange-500" />
                   <span className="text-sm text-slate-700">
-                    I agree that EstateSalen may share this listing request and my contact information with estate sale operators who service this area.
+                    I agree that EstateSalen may share this listing request and my contact information with Estate Sale Company Owners who service this area.
                   </span>
                 </label>
                 <div className="flex gap-3">
@@ -448,9 +448,9 @@ export default function AgentListingEstateSaleRequest() {
                 </div>
 
                 <div>
-                  <Label className="mb-1 block">Notes for the Operator</Label>
+                  <Label className="mb-1 block">Notes for the Estate Sale Company Owner</Label>
                   <textarea value={timelineInfo.notes} onChange={e => setTimelineInfo(t => ({ ...t, notes: e.target.value }))}
-                    rows={3} placeholder="Any additional context that would help an estate sale operator understand the opportunity…"
+                    rows={3} placeholder="Any additional context that would help an Estate Sale Company Owner understand the opportunity…"
                     className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 resize-none" />
                 </div>
 
@@ -460,12 +460,12 @@ export default function AgentListingEstateSaleRequest() {
                   <Button variant="outline" onClick={() => setStep(4)} className="flex-1"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
                   <Button onClick={handleSubmit} disabled={!timelineInfo.timeline || submitting}
                     className="flex-1 bg-orange-500 hover:bg-orange-600 h-12 font-semibold">
-                    {submitting ? <><Loader className="w-4 h-4 animate-spin mr-2" />Submitting…</> : 'Submit Listing to Estate Sale Operators'}
+                    {submitting ? <><Loader className="w-4 h-4 animate-spin mr-2" />Submitting…</> : 'Submit Listing to Estate Sale Company Owners'}
                   </Button>
                 </div>
 
                 <p className="text-xs text-slate-400 text-center">
-                  By submitting, you agree to our terms. EstateSalen does not guarantee operator response. No cost, no obligation.
+                  By submitting, you agree to our terms. EstateSalen does not guarantee Estate Sale Company Owner response. No cost, no obligation.
                 </p>
               </div>
             )}

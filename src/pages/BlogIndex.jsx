@@ -32,7 +32,7 @@ export default function BlogIndex() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
       <SEOHead
         title="Estate Sale & Collectibles Blog | EstateSalen.com"
-        description="Buying guides, value guides, identification tips, and collector resources for estate sale shoppers and operators."
+        description="Buying guides, value guides, identification tips, and collector resources for estate sale shoppers and Estate Sale Company Owners."
         canonical={canonical}
         jsonLd={jsonLd}
       />

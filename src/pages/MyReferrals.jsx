@@ -111,7 +111,7 @@ export default function MyReferrals() {
                 Earn $25 Visa Gift Cards!
               </h3>
               <p className="text-slate-700 leading-relaxed">
-                Refer estate sale operators to Legacy Lane and earn a <strong>$25 Visa gift card</strong> for 
+                Refer Estate Sale Company Owners to Legacy Lane and earn a <strong>$25 Visa gift card</strong> for 
                 each company that signs up and completes their first monthly subscription payment. 
                 Share your QR code or referral link below to get started.
               </p>
@@ -187,7 +187,7 @@ export default function MyReferrals() {
                   <img src={qrCodeUrl} alt="Referral QR Code" className="w-64 h-64" />
                 )}
                 <p className="text-sm text-slate-600 mt-4 text-center">
-                  Operators can scan this QR code to sign up with your referral
+                  Estate Sale Company Owners can scan this QR code to sign up with your referral
                 </p>
               </div>
               <Button 

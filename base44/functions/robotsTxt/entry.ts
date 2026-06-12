@@ -26,7 +26,7 @@ Allow: /sale-recap
 Allow: /price-guide
 Allow: /wanted
 
-# Block admin / operator-only pages
+# Block admin / Estate Sale Company Owner-only pages
 Disallow: /Dashboard
 Disallow: /AdminUsers
 Disallow: /AdminEstateSales

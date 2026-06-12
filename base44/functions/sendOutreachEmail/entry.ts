@@ -23,14 +23,14 @@ function buildRawEmail({ from, to, subject, body, inReplyTo, references, threadI
 
 async function generateEmailCopy(company, emailNum, template, previousSubject) {
   const templatePrompts = {
-    value_first: `You are an outreach specialist for EstateSalen.com, a platform that helps estate sale operators grow their business with professional tools, marketing, and lead generation. Write email #${emailNum} of a 3-email cold outreach sequence to convert "${company.company_name}" (${company.city}, ${company.state}) into a paid operator subscriber. 
+    value_first: `You are an outreach specialist for EstateSalen.com, a platform that helps Estate Sale Company Owners grow their business with professional tools, marketing, and lead generation. Write email #${emailNum} of a 3-email cold outreach sequence to convert "${company.company_name}" (${company.city}, ${company.state}) into a paid Estate Sale Company Owner subscriber. 
 
 Email #1: Lead with value — mention the platform helps estate sale companies get more clients, manage sales professionally, and grow their reputation. Be warm, specific to their location, and end with a soft CTA to learn more or hop on a quick call.
-Email #2: Social proof / follow-up — mention other operators in their area are using it, reference a benefit like marketing automation or client referrals. CTA is a 15-min call.
+Email #2: Social proof / follow-up — mention other Estate Sale Company Owners in their area are using it, reference a benefit like marketing automation or client referrals. CTA is a 15-min call.
 Email #3: Final nudge — keep it short, acknowledge they're busy, offer a free demo or trial, and close the door politely.
 
 Write email #${emailNum} only. Return JSON: { "subject": "...", "body": "..." }`,
-    pain_point: `You are writing cold outreach email #${emailNum} for EstateSalen.com targeting "${company.company_name}" in ${company.city}, ${company.state}. The platform solves common estate sale operator pain points: no-show clients, poor marketing reach, manual inventory tracking, and low repeat business. Email #1 opens with a specific pain point. Email #2 follows up with a solution story. Email #3 is a brief final check-in. Write email #${emailNum} only. Return JSON: { "subject": "...", "body": "..." }`,
+    pain_point: `You are writing cold outreach email #${emailNum} for EstateSalen.com targeting "${company.company_name}" in ${company.city}, ${company.state}. The platform solves common Estate Sale Company Owner pain points: no-show clients, poor marketing reach, manual inventory tracking, and low repeat business. Email #1 opens with a specific pain point. Email #2 follows up with a solution story. Email #3 is a brief final check-in. Write email #${emailNum} only. Return JSON: { "subject": "...", "body": "..." }`,
     direct: `Write a direct, brief cold outreach email #${emailNum} to "${company.company_name}" (${company.city}, ${company.state}) from EstateSalen.com. We help estate sale companies get more clients and run more professional operations. Be concise. Email #1 is the intro. Email #2 is a quick follow-up. Email #3 is a final one-liner. Write email #${emailNum} only. Return JSON: { "subject": "...", "body": "..." }`,
   };
 

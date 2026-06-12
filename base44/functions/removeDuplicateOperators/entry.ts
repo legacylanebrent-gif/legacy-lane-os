@@ -9,27 +9,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Fetching all operators...');
+    console.log('Fetching all Estate Sale Company Owners...');
     const allOperators = await base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', 5000);
     
-    console.log(`Total operators: ${allOperators.length}`);
+    console.log(`Total Estate Sale Company Owners: ${allOperators.length}`);
 
     // Group by phone number
     const phoneMap = new Map();
     const duplicates = [];
     
-    for (const operator of allOperators) {
-      const phone = operator.phone;
+    for (const Estate Sale Company Owner of allOperators) {
+      const phone = Estate Sale Company Owner.phone;
       
-      if (!phone) continue; // Skip operators without phone numbers
+      if (!phone) continue; // Skip Estate Sale Company Owners without phone numbers
       
       if (phoneMap.has(phone)) {
         // This is a duplicate - mark for deletion
-        duplicates.push(operator.id);
-        console.log(`Duplicate found: ${operator.company_name} (${phone})`);
+        duplicates.push(Estate Sale Company Owner.id);
+        console.log(`Duplicate found: ${Estate Sale Company Owner.company_name} (${phone})`);
       } else {
         // First occurrence - keep it
-        phoneMap.set(phone, operator);
+        phoneMap.set(phone, Estate Sale Company Owner);
       }
     }
 

@@ -66,7 +66,7 @@ export default function ReferralLanding() {
       if (pkgId) {
         const user = await base44.auth.me();
         
-        // Update user to operator account type
+        // Update user to Estate Sale Company Owner account type
         await base44.auth.updateMe({
           primary_account_type: 'estate_sale_operator',
           selected_package: pkgId,

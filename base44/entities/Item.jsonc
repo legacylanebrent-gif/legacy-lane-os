@@ -120,12 +120,12 @@
     "pre_sale_allowed": {
       "type": "boolean",
       "default": false,
-      "description": "Operator has enabled pre-sale selling for this item"
+      "description": "Estate Sale Company Owner has enabled pre-sale selling for this item"
     },
     "post_sale_allowed": {
       "type": "boolean",
       "default": false,
-      "description": "Operator has enabled post-sale selling for this item"
+      "description": "Estate Sale Company Owner has enabled post-sale selling for this item"
     },
     "sold_date": {
       "type": "string",

@@ -192,7 +192,7 @@ ${DISCLAIMER}`,
 By now, you may have a clearer picture of what you need. Here's how we can connect you with the right professionals in ${state}.
 
 ESTATE SALE COMPANIES
-We work with vetted estate sale operators who specialize in probate, inherited homes, and downsizing situations. They handle setup, pricing, advertising, the sale, and cleanup.
+We work with vetted Estate Sale Company Owners who specialize in probate, inherited homes, and downsizing situations. They handle setup, pricing, advertising, the sale, and cleanup.
 ${BASE_URL}/estate-sale-companies
 
 PROBATE-FRIENDLY REALTORS

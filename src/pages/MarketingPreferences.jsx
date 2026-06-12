@@ -143,7 +143,7 @@ export default function MarketingPreferences() {
 
           {isGloballyOptedOut && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-xs text-red-700 font-medium">You are currently opted out of all Legacy Lane marketing emails. Individual operator alerts are paused.</p>
+              <p className="text-xs text-red-700 font-medium">You are currently opted out of all Legacy Lane marketing emails. Individual Estate Sale Company Owner alerts are paused.</p>
             </div>
           )}
         </CardContent>
@@ -179,7 +179,7 @@ export default function MarketingPreferences() {
         </CardContent>
       </Card>
 
-      {/* Operator Subscriptions */}
+      {/* Estate Sale Company Owner Subscriptions */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function MarketingPreferences() {
         </CardHeader>
         <CardContent className="space-y-3">
           {subscriptions.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">You're not following any estate sale companies yet. Visit an operator's profile to follow them.</p>
+            <p className="text-sm text-slate-400 text-center py-4">You're not following any estate sale companies yet. Visit an Estate Sale Company Owner's profile to follow them.</p>
           ) : (
             subscriptions.map(sub => (
               <div key={sub.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50">

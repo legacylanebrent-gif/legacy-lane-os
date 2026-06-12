@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const lead = leads.length > 0 ? leads[0] : {};
 
-    // 3. Get agent and operator info
+    // 3. Get agent and Estate Sale Company Owner info
     let agentName = 'Unknown Agent';
     let operatorName = 'Unknown Operator';
 
@@ -43,8 +43,8 @@ Deno.serve(async (req) => {
     }
 
     if (deal.operator_id) {
-      const operators = await base44.asServiceRole.entities.User.filter({ id: deal.operator_id });
-      if (operators.length > 0) operatorName = operators[0].full_name;
+      const Estate Sale Company Owners = await base44.asServiceRole.entities.User.filter({ id: deal.operator_id });
+      if (Estate Sale Company Owners.length > 0) operatorName = Estate Sale Company Owners[0].full_name;
     }
 
     // 4. Format timestamp
@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
     <div class="header-info-item">
       <div class="label">Assigned Agent</div>
       <div class="value">${agentName}</div>
-      <div class="label">Assigned Operator</div>
+      <div class="label">Assigned Estate Sale Company Owner</div>
       <div class="value">${operatorName}</div>
     </div>
   </div>
@@ -261,7 +261,7 @@ Deno.serve(async (req) => {
         <div class="value">${agentName}</div>
       </div>
       <div class="signature-item">
-        <div class="label">Operator Signature</div>
+        <div class="label">Estate Sale Company Owner Signature</div>
         <div class="value">${operatorName}</div>
       </div>
     </div>

@@ -93,7 +93,7 @@
     },
     "launch_checklist": {
       "type": "object",
-      "description": "Checklist of launch steps completed by operator",
+      "description": "Checklist of launch steps completed by Estate Sale Company Owner",
       "properties": {
         "caption_copied": {
           "type": "boolean",

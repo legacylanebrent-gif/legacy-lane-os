@@ -27,7 +27,7 @@ const MOCK_POSTS = [
   { id: 3, platform: 'facebook', content: 'New listing alert: 4-bedroom home with full estate contents available. Call now!', date: '2026-04-26', likes: 67, comments: 18, shares: 29, reach: 1900, clicks: 52 },
   { id: 4, platform: 'tiktok', content: 'Watch us price this rare coin collection using AI 🪙🤖', date: '2026-04-25', likes: 890, comments: 112, shares: 203, reach: 18400, clicks: 441 },
   { id: 5, platform: 'instagram', content: 'Before and after staging! This living room is now sale-ready ✅', date: '2026-04-24', likes: 543, comments: 78, shares: 61, reach: 9200, clicks: 198 },
-  { id: 6, platform: 'linkedin', content: 'Legacy Lane OS helps estate sale operators go digital. Join 300+ operators nationwide.', date: '2026-04-23', likes: 89, comments: 23, shares: 41, reach: 2100, clicks: 76 },
+  { id: 6, platform: 'linkedin', content: 'Legacy Lane OS helps Estate Sale Company Owners go digital. Join 300+ Estate Sale Company Owners nationwide.', date: '2026-04-23', likes: 89, comments: 23, shares: 41, reach: 2100, clicks: 76 },
 ];
 
 const MOCK_TREND = [

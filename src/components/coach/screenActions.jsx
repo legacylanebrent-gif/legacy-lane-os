@@ -81,7 +81,7 @@ export const SCREEN_ACTIONS = {
   ],
   SocialAdsHub: [
     { label: "📘 Create Facebook ad copy", mode: 'social_media_post', message: "Write high-converting Facebook ad copy for my estate sale business — include headline, primary text, and CTA." },
-    { label: "🎯 Build lead gen strategy", mode: 'lead_generation', message: "Build me a Facebook Ads lead generation strategy specifically for estate sale operators in my territory." },
+    { label: "🎯 Build lead gen strategy", mode: 'lead_generation', message: "Build me a Facebook Ads lead generation strategy specifically for Estate Sale Company Owners in my territory." },
     { label: "✍️ Create landing page copy", mode: 'general_assistant', message: "Write compelling landing page copy for a Facebook Ads lead capture page for estate sale services." },
   ],
 

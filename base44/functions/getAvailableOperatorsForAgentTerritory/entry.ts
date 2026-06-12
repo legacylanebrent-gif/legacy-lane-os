@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 /**
  * getAvailableOperatorsForAgentTerritory
  *
- * Returns a scored, ranked list of available Legacy Lane operators
+ * Returns a scored, ranked list of available Legacy Lane Estate Sale Company Owners
  * for a given agent territory request.
  *
  * Scoring priority:
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
   if (req.method === 'GET') {
     return Response.json({
       success: true,
-      message: 'Legacy Lane OS operator endpoint is reachable. Use POST with x-legacy-shared-key header.',
+      message: 'Legacy Lane OS Estate Sale Company Owner endpoint is reachable. Use POST with x-legacy-shared-key header.',
       correct_url: '/functions/getAvailableOperatorsForAgentTerritory',
       scoring: 'ZIP (50pts) → County (30pts) → Town (10pts) → Available (+10)',
     });
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     min_score = 0,
   } = body;
 
-  // Load all operator territory profiles
+  // Load all Estate Sale Company Owner territory profiles
   const allProfiles = await base44.asServiceRole.entities.OperatorTerritoryProfile.list('-created_date', 200);
 
   // Score and filter
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
 
   return Response.json({
     success: true,
-    operators: results,
+    Estate Sale Company Owners: results,
     total_evaluated: allProfiles.length,
     total_matched: results.length,
     territory_requested: { zip_codes, counties, towns, state },

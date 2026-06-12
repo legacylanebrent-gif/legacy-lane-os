@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "ai_mode": {
       "type": "string",
@@ -12,7 +12,7 @@
     },
     "screen_context": {
       "type": "string",
-      "description": "Which screen/page the operator was on when they sent the message"
+      "description": "Which screen/page the Estate Sale Company Owner was on when they sent the message"
     },
     "active_sale_id": {
       "type": "string",
@@ -20,7 +20,7 @@
     },
     "user_message": {
       "type": "string",
-      "description": "The message the operator sent"
+      "description": "The message the Estate Sale Company Owner sent"
     },
     "ai_response": {
       "type": "string",
@@ -35,7 +35,7 @@
         "list"
       ],
       "default": "text",
-      "description": "The format the operator requested for the output"
+      "description": "The format the Estate Sale Company Owner requested for the output"
     },
     "model_used": {
       "type": "string",

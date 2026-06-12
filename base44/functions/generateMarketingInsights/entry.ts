@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const { operator_id, sale_id } = body;
 
-  // Operators can only access their own data
+  // Estate Sale Company Owners can only access their own data
   const isAdmin = user.role === 'admin';
   if (!isAdmin && !operator_id) return Response.json({ error: 'operator_id required' }, { status: 400 });
 
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const results = await base44.asServiceRole.entities.SaleMarketingPerformance.filter({ sale_id }).catch(() => []);
     salePerf = results[0] || null;
     engagementLogs = await base44.asServiceRole.entities.MarketingEngagementLog.filter({ sale_id }).catch(() => []);
-    // Security: ensure operator can only see their sale
+    // Security: ensure Estate Sale Company Owner can only see their sale
     if (!isAdmin && salePerf && salePerf.operator_id !== operator_id) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -68,7 +68,7 @@ Sale: "${salePerf.sale_title}"
 ` : '';
 
   const opContext = operatorPerf ? `
-Operator: "${operatorPerf.operator_name}"
+Estate Sale Company Owner: "${operatorPerf.operator_name}"
 - Sales Promoted: ${operatorPerf.total_sales_promoted}
 - Avg Human Open Rate: ${operatorPerf.average_human_open_rate}%
 - Avg Human Click Rate: ${operatorPerf.average_human_click_rate}%
@@ -83,7 +83,7 @@ Operator: "${operatorPerf.operator_name}"
 
   const prompt = `You are a marketing analytics expert specializing in estate sales and local event promotion.
 
-Analyze the following email marketing performance data for a Legacy Lane OS operator:
+Analyze the following email marketing performance data for a Legacy Lane OS Estate Sale Company Owner:
 
 ${perfContext}${opContext}
 
@@ -95,7 +95,7 @@ Provide a practical, specific analysis in this exact JSON structure:
   "recommended_next_action": "One specific, actionable next step",
   "suggested_followup_email": "A 2-3 sentence follow-up email to send to high-engagement subscribers",
   "suggested_social_post": "A 1-2 sentence social media post based on buyer interest signals",
-  "operator_coaching_note": "A 2-3 sentence note the platform admin would share with the operator",
+  "operator_coaching_note": "A 2-3 sentence note the platform admin would share with the Estate Sale Company Owner",
   "best_send_time": "Recommendation on when to send next email",
   "subject_line_suggestions": ["2 alternative subject lines to test"]
 }

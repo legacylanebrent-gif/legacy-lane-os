@@ -103,7 +103,7 @@ export default function ItemDetail() {
         if (saleData.length > 0) {
           setSale(saleData[0]);
           
-          // Load operator
+          // Load Estate Sale Company Owner
           if (saleData[0].operator_id) {
             try {
               const operatorData = await base44.entities.User.filter({ 
@@ -113,7 +113,7 @@ export default function ItemDetail() {
                 setOperator(operatorData[0]);
               }
             } catch (error) {
-              console.log('ItemDetail - Could not load operator:', error);
+              console.log('ItemDetail - Could not load Estate Sale Company Owner:', error);
             }
           }
 
@@ -278,7 +278,7 @@ export default function ItemDetail() {
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Edit className="w-4 h-4 text-orange-600" />
-                    <span className="text-sm font-medium text-slate-700">You're the operator</span>
+                    <span className="text-sm font-medium text-slate-700">You're the Estate Sale Company Owner</span>
                   </div>
                   {!isEditing ? (
                     <Button onClick={() => setIsEditing(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
@@ -431,7 +431,7 @@ export default function ItemDetail() {
             )}
 
             {/* Contact Seller */}
-            {operator && (
+            {Estate Sale Company Owner && (
               <Card className="bg-gradient-to-br from-orange-50 to-cyan-50 border-2 border-orange-200">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-4">Interested in this item?</h3>
@@ -454,13 +454,13 @@ export default function ItemDetail() {
                       </Button>
                     )}
 
-                    {operator.phone && (
+                    {Estate Sale Company Owner.phone && (
                       <a
-                        href={`tel:${operator.phone}`}
+                        href={`tel:${Estate Sale Company Owner.phone}`}
                         className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                       >
                         <Phone className="w-4 h-4" />
-                        {operator.phone}
+                        {Estate Sale Company Owner.phone}
                       </a>
                     )}
                   </div>
@@ -515,11 +515,11 @@ export default function ItemDetail() {
       </div>
 
       {/* Message Modal */}
-      {currentUser && operator && (
+      {currentUser && Estate Sale Company Owner && (
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={operator}
+          recipient={Estate Sale Company Owner}
           relatedEntity={{ type: 'Item', id: item.id, title: item.title }}
         />
       )}

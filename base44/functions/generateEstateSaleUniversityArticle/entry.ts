@@ -18,7 +18,7 @@ const CATEGORY_CONTEXTS = {
   inherited_home: 'practical guidance for families who inherited real property',
   downsizing: 'helping seniors and families downsize a home',
   legal_and_tax: 'general educational overview of legal and tax considerations — never specific advice',
-  for_operators: 'best practices for estate sale operators and companies',
+  for_operators: 'best practices for Estate Sale Company Owners and companies',
   for_buyers: 'tips and guidance for estate sale shoppers',
   general: 'general estate sale and life transition education',
 };

@@ -4,12 +4,12 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  * notifyTopOperatorsForAgentTerritory
  *
  * Called when an agent requests coverage in a territory.
- * Scores all available Legacy Lane operators using:
+ * Scores all available Legacy Lane Estate Sale Company Owners using:
  *   1. ZIP code match (highest priority)
  *   2. County match
  *   3. Houszu territory fallback (towns)
  *
- * Notifies the top 3 operators via in-app notification + email.
+ * Notifies the top 3 Estate Sale Company Owners via in-app notification + email.
  *
  * Input (POST body):
  *   - agent_id        (string)
@@ -18,10 +18,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  *   - counties        (string[])   — County names
  *   - towns           (string[])   — Optional town/city names
  *   - state           (string)     — e.g. "NJ"
- *   - top_n           (number)     — How many operators to notify (default: 3)
+ *   - top_n           (number)     — How many Estate Sale Company Owners to notify (default: 3)
  *
  * Auth: LEGACY_SHARED_API_KEY header (x-legacy-shared-key)
- *       OR authenticated operator/admin user
+ *       OR authenticated Estate Sale Company Owner/admin user
  */
 
 function scoreOperator(profile, requestZips, requestCounties, requestTowns) {
@@ -120,14 +120,14 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'agent_id and at least one of zip_codes or counties required' }, { status: 400 });
   }
 
-  // 1. Load all available operator territory profiles
+  // 1. Load all available Estate Sale Company Owner territory profiles
   const allProfiles = await base44.asServiceRole.entities.OperatorTerritoryProfile.filter({ status: 'available' });
 
   if (!allProfiles || allProfiles.length === 0) {
-    return Response.json({ success: true, message: 'No available operators found', notified: [] });
+    return Response.json({ success: true, message: 'No available Estate Sale Company Owners found', notified: [] });
   }
 
-  // 2. Score each operator
+  // 2. Score each Estate Sale Company Owner
   const scored = allProfiles
     .map(profile => {
       const { score, reasons } = scoreOperator(profile, zip_codes, counties, towns);
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
   if (scored.length === 0) {
     return Response.json({
       success: true,
-      message: 'No operators matched the requested territory',
+      message: 'No Estate Sale Company Owners matched the requested territory',
       territory_requested: { zip_codes, counties, towns, state },
       notified: [],
     });
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
     towns.length       ? `Towns: ${towns.join(', ')}`         : null,
   ].filter(Boolean).join(' | ');
 
-  // 4. Notify each top operator
+  // 4. Notify each top Estate Sale Company Owner
   const notified = [];
   for (const { profile, score, reasons } of scored) {
     const operatorId = profile.operator_id;
@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
         user_id: operatorId,
         type: 'territory_match',
         title: '🏡 New Agent Territory Request — You\'re a Top Match!',
-        message: `${agent_name} is requesting operator coverage for ${territoryDesc}. Your match score: ${score}/100. Log in to review and respond.`,
+        message: `${agent_name} is requesting Estate Sale Company Owner coverage for ${territoryDesc}. Your match score: ${score}/100. Log in to review and respond.`,
         link_to_page: 'AgentPartnerships',
         read: false,
       });
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
 </td></tr>
 <tr><td style="padding:36px 32px;">
   <h2 style="margin:0 0 8px 0;font-size:22px;color:#1e293b;font-family:Georgia,serif;">You're a Top Territory Match</h2>
-  <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;">Hi ${operatorUser.full_name || 'there'},<br/><br/>A real estate agent has requested operator coverage in your service area and you ranked as a top match.</p>
+  <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;">Hi ${operatorUser.full_name || 'there'},<br/><br/>A real estate agent has requested Estate Sale Company Owner coverage in your service area and you ranked as a top match.</p>
 
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:24px;">
     <tr><td style="padding:8px 16px;font-size:13px;color:#64748b;font-weight:600;width:40%;">Agent</td><td style="padding:8px 16px;font-size:14px;color:#1e293b;">${agent_name}</td></tr>
@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
   }
 
   // 5. Log the match event for audit trail
-  console.log(`[notifyTopOperators] Agent ${agent_id} territory request. Notified ${notified.length} operators:`,
+  console.log(`[notifyTopOperators] Agent ${agent_id} territory request. Notified ${notified.length} Estate Sale Company Owners:`,
     notified.map(n => `${n.company_name} (${n.score})`).join(', '));
 
   return Response.json({

@@ -34,7 +34,7 @@
     },
     "platform_operator_user_id": {
       "type": "string",
-      "description": "EstateSalen platform User ID if operator is subscribed"
+      "description": "EstateSalen platform User ID if Estate Sale Company Owner is subscribed"
     },
     "status": {
       "type": "string",
@@ -46,7 +46,7 @@
         "ignored"
       ],
       "default": "imported",
-      "description": "imported=raw, matched=linked to operator, claimed=operator verified, published=shown on platform, ignored=skip"
+      "description": "imported=raw, matched=linked to Estate Sale Company Owner, claimed=Estate Sale Company Owner verified, published=shown on platform, ignored=skip"
     },
     "city": {
       "type": "string"

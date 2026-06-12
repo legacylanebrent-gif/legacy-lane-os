@@ -246,7 +246,7 @@ export default function AdminAIOperator() {
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-slate-800 font-serif tracking-tight">Legacy Lane Admin AI Operator</h1>
+                <h1 className="text-xl font-bold text-slate-800 font-serif tracking-tight">Legacy Lane Admin AI Estate Sale Company Owner</h1>
                 <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">Admin Only</Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">Command the AI to analyze, plan, draft, and execute administrative growth workflows across Legacy Lane OS.</p>

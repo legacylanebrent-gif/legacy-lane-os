@@ -6,7 +6,7 @@
       "type": "string",
       "enum": [
         "agent",
-        "operator",
+        "Estate Sale Company Owner",
         "homeowner",
         "propstream"
       ],

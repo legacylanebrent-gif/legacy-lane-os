@@ -15,7 +15,7 @@ const TYPE_CONFIG = {
   'estate-sale-companies': {
     label: 'Estate Sale Companies', providerType: 'estate_sale_operator',
     title: (s) => `Estate Sale Companies in ${s}`,
-    desc: (s) => `Find licensed estate sale companies in ${s}. Connect with operators who specialize in estate liquidation, probate sales, and downsizing.`,
+    desc: (s) => `Find licensed estate sale companies in ${s}. Connect with Estate Sale Company Owners who specialize in estate liquidation, probate sales, and downsizing.`,
     lifeEventType: 'estate_settlement',
   },
   'probate-realtors': {

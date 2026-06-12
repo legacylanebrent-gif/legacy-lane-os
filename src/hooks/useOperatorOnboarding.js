@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
-const OPERATOR_ROLES = ['estate_sale_operator', 'operator'];
+const OPERATOR_ROLES = ['estate_sale_operator', 'Estate Sale Company Owner'];
 const MAX_SHOWS = 3;
 
 export function useOperatorOnboarding(user) {
@@ -11,7 +11,7 @@ export function useOperatorOnboarding(user) {
     if (!user) return;
 
     const role = user.primary_account_type || user.role;
-    const isOperator = OPERATOR_ROLES.includes(role) || role === 'operator';
+    const isOperator = OPERATOR_ROLES.includes(role) || role === 'Estate Sale Company Owner';
     if (!isOperator) return;
 
     const shownCount = user.onboarding_shown_count || 0;

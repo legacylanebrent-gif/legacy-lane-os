@@ -362,7 +362,7 @@ export default function LandingPageRetarget() {
       {/* Objections */}
       <section className="py-16 px-6 bg-slate-50">
         <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">Common Reasons Operators Wait</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">Common Reasons Estate Sale Company Owners Wait</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {OBJECTIONS.map(obj => (
               <div key={obj.title} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-2">

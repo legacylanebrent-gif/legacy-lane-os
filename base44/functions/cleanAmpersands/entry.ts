@@ -14,9 +14,9 @@ Deno.serve(async (req) => {
         let processed = 0;
 
         // Get all FutureEstateOperator records
-        const operators = await base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', 50000);
+        const Estate Sale Company Owners = await base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', 50000);
         
-        for (const operator of operators) {
+        for (const Estate Sale Company Owner of Estate Sale Company Owners) {
             processed++;
             let needsUpdate = false;
             const updates = {};
@@ -26,14 +26,14 @@ Deno.serve(async (req) => {
                           'package_type', 'facebook', 'twitter', 'instagram', 'youtube', 'pinterest'];
             
             for (const field of fields) {
-                if (operator[field] && typeof operator[field] === 'string' && operator[field].includes('&amp;')) {
-                    updates[field] = operator[field].replace(/&amp;/g, '&');
+                if (Estate Sale Company Owner[field] && typeof Estate Sale Company Owner[field] === 'string' && Estate Sale Company Owner[field].includes('&amp;')) {
+                    updates[field] = Estate Sale Company Owner[field].replace(/&amp;/g, '&');
                     needsUpdate = true;
                 }
             }
 
             if (needsUpdate) {
-                await base44.asServiceRole.entities.FutureEstateOperator.update(operator.id, updates);
+                await base44.asServiceRole.entities.FutureEstateOperator.update(Estate Sale Company Owner.id, updates);
                 updated++;
             }
         }
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
             success: true,
             processed,
             updated,
-            message: `Processed ${processed} operators, updated ${updated} records`
+            message: `Processed ${processed} Estate Sale Company Owners, updated ${updated} records`
         });
 
     } catch (error) {

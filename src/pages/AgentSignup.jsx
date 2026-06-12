@@ -29,7 +29,7 @@ const exclusiveFeatures = [
   'Territory protection subject to performance standards',
   '20% Referral Fee to Owners of EstateSalen* still applies on closed platform-generated deals',
   'Recruit estate sale companies & resellers — earn 20% of their monthly platform profit ... not only do you earn listings, you also earn residual income on the territory you build in recruiting',
-  'Build a passive income stream from every operator you bring into your territory',
+  'Build a passive income stream from every Estate Sale Company Owner you bring into your territory',
   'Receive priority access to Own a Territory on our sister platform Houszu for FSBO, Investor, Buyers and Home Seller leads and listings service',
 ];
 
@@ -38,7 +38,7 @@ const benefits = [
   { icon: Users, title: 'Referral Relationships With Operators', desc: 'Build trusted relationships with estate sale companies already inside these homes.' },
   { icon: MapPin, title: 'Territory-Based Positioning', desc: "You're the preferred or exclusive agent in the cities you choose to protect." },
   { icon: TrendingUp, title: 'Lead Routing From the Platform', desc: 'Opportunities routed directly from EstateSalen.com.' },
-  { icon: Star, title: 'Priority Visibility in Selected Markets', desc: 'Be the agent estate sale operators call first when a real estate need arises.' },
+  { icon: Star, title: 'Priority Visibility in Selected Markets', desc: 'Be the agent Estate Sale Company Owners call first when a real estate need arises.' },
   { icon: Award, title: 'Life-Transition Niche Authority', desc: 'Build a reputation serving probate, downsizing, senior moves, inherited homes, and more.' },
 ];
 
@@ -240,7 +240,7 @@ export default function AgentSignup() {
                 <Building2 className="w-6 h-6 text-blue-600" />
               </div>
               <h4 className="font-bold text-slate-900 mb-1">Recruit Estate Sale Companies</h4>
-              <p className="text-slate-500 text-sm leading-relaxed">Invite local estate sale operators to join the platform. You already know them — you're their agent partner.</p>
+              <p className="text-slate-500 text-sm leading-relaxed">Invite local Estate Sale Company Owners to join the platform. You already know them — you're their agent partner.</p>
             </div>
             <div className="bg-white border border-blue-200 rounded-2xl p-6 text-center shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">

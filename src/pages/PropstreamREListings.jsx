@@ -173,7 +173,7 @@ export default function PropstreamREListings() {
             </div>
             <h1 className="text-3xl font-serif font-bold text-slate-900">PropStream RE Listings</h1>
           </div>
-          <p className="text-slate-500 text-sm">Import daily PropStream MLS listings, score estate sale opportunities, prep agent outreach, and distribute leads to operators.</p>
+          <p className="text-slate-500 text-sm">Import daily PropStream MLS listings, score estate sale opportunities, prep agent outreach, and distribute leads to Estate Sale Company Owners.</p>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
           <Link to="/PropstreamREListingImporter">
@@ -310,7 +310,7 @@ export default function PropstreamREListings() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 block mb-1">Operator Status</label>
+                  <label className="text-xs text-slate-500 block mb-1">Estate Sale Company Owner Status</label>
                   <select value={filters.operatorStatus} onChange={e => setFilters(f => ({ ...f, operatorStatus: e.target.value }))} className="w-full border rounded px-2 py-1.5 text-sm">
                     <option value="">All</option>
                     {['not_sent', 'sent_to_operator', 'operator_accepted', 'operator_declined', 'contacted_agent'].map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
@@ -377,7 +377,7 @@ export default function PropstreamREListings() {
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Agent</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Territory</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Email</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Operator</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Estate Sale Company Owner</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Actions</th>
               </tr>
             </thead>

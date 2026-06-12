@@ -186,12 +186,12 @@ export default function LandingPageBizInABox() {
         },
         {
           title: 'Your AI Marketing Department',
-          subtitle: 'Most operators spend hours creating content. Legacy Lane partners can create campaigns in minutes.',
+          subtitle: 'Most Estate Sale Company Owners spend hours creating content. Legacy Lane partners can create campaigns in minutes.',
           items: ['Social Media Campaigns', 'AI Ad Copy', 'Facebook Campaign Assets', 'Instagram Campaign Assets', 'Email Campaigns', 'Text Campaigns', 'Featured Item Promotions', 'Sale Countdown Campaigns', 'VIP Event Promotions', 'Reseller Event Promotions', 'Cleanout Campaigns', 'Real Estate Referral Campaigns']
         },
         {
           title: 'Free Coaching Included',
-          subtitle: 'Most operators learn through expensive mistakes. Founding Market Partners receive ongoing coaching.',
+          subtitle: 'Most Estate Sale Company Owners learn through expensive mistakes. Founding Market Partners receive ongoing coaching.',
           items: ['Business Launch Coaching', 'Marketing Coaching', 'Sales Coaching', 'Growth Coaching', 'Pricing Guidance', 'Team Building Guidance', 'Monthly Group Coaching', 'Quarterly Strategy Sessions', 'Private Community Access', 'Best Practices Library']
         },
         {

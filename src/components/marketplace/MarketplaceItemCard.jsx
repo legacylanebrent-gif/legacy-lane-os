@@ -10,7 +10,7 @@ export default function MarketplaceItemCard({ item, viewMode = 'grid' }) {
   const [saleTitle, setSaleTitle] = useState(null);
 
   useEffect(() => {
-    // Fetch operator business name and sale title
+    // Fetch Estate Sale Company Owner business name and sale title
     const loadDetails = async () => {
       try {
         if (item.operator_id) {

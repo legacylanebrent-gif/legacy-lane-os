@@ -83,13 +83,13 @@ export default function LaunchCommandCenter() {
           {/* ONBOARDING AUDIT */}
           <TabsContent value="onboarding" className="mt-4">
             <AuditSection
-              title="Operator Onboarding Audit"
+              title="Estate Sale Company Owner Onboarding Audit"
               description="Registration, login, and onboarding workflow tests"
               sections={[
                 {
                   heading: 'Registration Tests',
                   checks: [
-                    { label: 'New Operator Signup', status: 'pending' },
+                    { label: 'New Estate Sale Company Owner Signup', status: 'pending' },
                     { label: 'Duplicate Email Prevention', status: 'pending' },
                     { label: 'Password Reset Flow', status: 'pending' },
                     { label: 'Email Verification', status: 'pending' },
@@ -355,8 +355,8 @@ export default function LaunchCommandCenter() {
                 {
                   heading: 'Referral Scenarios',
                   checks: [
-                    { label: 'Operator → Agent Routing', status: 'pending' },
-                    { label: 'Agent → Operator Routing', status: 'pending' },
+                    { label: 'Estate Sale Company Owner → Agent Routing', status: 'pending' },
+                    { label: 'Agent → Estate Sale Company Owner Routing', status: 'pending' },
                     { label: 'Territory Match', status: 'pending' },
                     { label: 'Territory Conflict Handling', status: 'pending' },
                     { label: 'No Territory Available — Fallback', status: 'pending' },
@@ -390,7 +390,7 @@ export default function LaunchCommandCenter() {
                     { label: 'Last Chance — Email Sent', status: 'pending' },
                     { label: 'Price Reduction — Email Sent', status: 'pending' },
                     { label: 'Referral Lead — Email Sent', status: 'pending' },
-                    { label: 'Operator Signup — Email Sent', status: 'pending' },
+                    { label: 'Estate Sale Company Owner Signup — Email Sent', status: 'pending' },
                     { label: 'Password Reset — Email Sent', status: 'pending' },
                   ]
                 },
@@ -446,7 +446,7 @@ export default function LaunchCommandCenter() {
                 {
                   heading: 'Access Control Tests',
                   checks: [
-                    { label: 'Access Other Operator\'s Sales — Denied', status: 'pending' },
+                    { label: 'Access Other Estate Sale Company Owner\'s Sales — Denied', status: 'pending' },
                     { label: 'Access Hidden Sales — Denied', status: 'pending' },
                     { label: 'Access Admin Pages Without Admin Role — Denied', status: 'pending' },
                     { label: 'Access Reseller Pages Without Reseller Role — Denied', status: 'pending' },
@@ -459,7 +459,7 @@ export default function LaunchCommandCenter() {
                   checks: [
                     { label: 'Consumer Cannot View Reseller Events', status: 'pending' },
                     { label: 'Google Cannot Index Reseller Events', status: 'pending' },
-                    { label: 'Operator Can Manage Events', status: 'pending' },
+                    { label: 'Estate Sale Company Owner Can Manage Events', status: 'pending' },
                     { label: 'Reseller Can Register', status: 'pending' },
                   ]
                 }

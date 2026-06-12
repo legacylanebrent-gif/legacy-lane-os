@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
 
     const prompt = `You are a business advisor for Legacy Lane OS, an estate sale management platform.
 
-An operator just completed their onboarding questionnaire. Based on their answers, recommend the most relevant features from our platform and explain WHY each one fits their specific situation.
+An Estate Sale Company Owner just completed their onboarding questionnaire. Based on their answers, recommend the most relevant features from our platform and explain WHY each one fits their specific situation.
 
 Their answers:
 ${Object.entries(answers).map(([q, a]) => `- ${q}: ${Array.isArray(a) ? a.join(', ') : a}`).join('\n')}
@@ -29,7 +29,7 @@ Our platform features:
 11. **Sale Conversion Pipeline** - Track a lead from signed contract to completed sale
 12. **CRM & Contacts** - Maintain a database of clients, vendors, and referral partners
 13. **Vendor Network** - Connect with cleanout crews, movers, photographers, stagers
-14. **Referral Dashboard** - Earn commissions by referring agents and other operators
+14. **Referral Dashboard** - Earn commissions by referring agents and other Estate Sale Company Owners
 15. **Settlement Statement** - Generate professional client payout statements
 16. **Early Sign-In List** - Let buyers sign up before a sale to build buzz
 17. **AI Pricing Tool** - Use AI to suggest item prices based on market data
@@ -37,7 +37,7 @@ Our platform features:
 19. **AI Assistant** - Get AI-powered business advice, copy writing, and strategic help
 20. **VIP Events** - Host exclusive preview events for your best buyers
 
-Based on the operator's answers, select the 6-8 MOST relevant features for THEM specifically. For each, provide:
+Based on the Estate Sale Company Owner's answers, select the 6-8 MOST relevant features for THEM specifically. For each, provide:
 - A clear, specific reason why it fits their business situation (reference their actual answers)
 - A priority level: "Must-Have", "High Value", or "Nice to Have"
 - One concrete action they can take first

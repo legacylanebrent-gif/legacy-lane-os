@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
       who_made: 'someone_else',
       when_made: 'made_to_order',
       taxonomy_id: 1,  // General / Other category
-      shipping_profile_id: null, // Operator must set their shipping profile
-      state: 'draft', // Post as draft so operator can review before activating
+      shipping_profile_id: null, // Estate Sale Company Owner must set their shipping profile
+      state: 'draft', // Post as draft so Estate Sale Company Owner can review before activating
       tags: item.tags || [],
       materials: [],
       is_supply: false,

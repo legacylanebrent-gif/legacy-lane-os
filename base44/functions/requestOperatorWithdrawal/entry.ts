@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // Verify operator owns the request
+  // Verify Estate Sale Company Owner owns the request
   if (user.id !== operator_id && user.role !== 'admin') {
     return Response.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     type: 'withdrawal',
     amount,
     status: 'pending',
-    description: 'Operator withdrawal request'
+    description: 'Estate Sale Company Owner withdrawal request'
   });
 
   // Deduct from available balance
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     last_updated: new Date().toISOString()
   });
 
-  // Send confirmation email to operator
+  // Send confirmation email to Estate Sale Company Owner
   try {
     const users = await base44.asServiceRole.entities.User.filter({ id: operator_id });
     const operatorUser = users[0];

@@ -47,7 +47,7 @@ Rules:
 - market_overview: 3-5 sentences about active sales, volume, geographic spread
 - trending_analysis: 3-4 sentences on trending brands and categories this week
 - buyer_takeaways: 2-3 actionable insights for buyers
-- seller_takeaways: 2-3 actionable insights for sellers/operators`;
+- seller_takeaways: 2-3 actionable insights for sellers/Estate Sale Company Owners`;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
@@ -132,7 +132,7 @@ function buildReportContent(ai, stats, topSales, topBrands, topCategories, topIt
   }
 
   if (ai.buyer_takeaways) c += `## For Buyers\n\n${ai.buyer_takeaways}\n\n`;
-  if (ai.seller_takeaways) c += `## For Estate Sale Operators\n\n${ai.seller_takeaways}\n\n`;
+  if (ai.seller_takeaways) c += `## For Estate Sale Company Owners\n\n${ai.seller_takeaways}\n\n`;
 
   c += `## Browse Estate Sales\n\nFind upcoming estate sales near you on [EstateSalen.com](/estate-sales/finder).\n`;
   return c;

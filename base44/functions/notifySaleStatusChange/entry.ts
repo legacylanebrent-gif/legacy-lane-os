@@ -24,12 +24,12 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'status unchanged' });
     }
 
-    const operator = await base44.asServiceRole.entities.User.get(sale.operator_id);
-    if (!operator) {
-      return Response.json({ error: 'Operator not found' }, { status: 404 });
+    const Estate Sale Company Owner = await base44.asServiceRole.entities.User.get(sale.operator_id);
+    if (!Estate Sale Company Owner) {
+      return Response.json({ error: 'Estate Sale Company Owner not found' }, { status: 404 });
     }
 
-    // Get operator's notification preferences
+    // Get Estate Sale Company Owner's notification preferences
     const prefs = await base44.asServiceRole.entities.NotificationPreference.filter({ 
       user_id: sale.operator_id 
     });
@@ -77,14 +77,14 @@ Deno.serve(async (req) => {
     }
 
     // Send email notification
-    if (pref?.sale_update_email && operator.email) {
+    if (pref?.sale_update_email && Estate Sale Company Owner.email) {
       const saleAddress = sale.property_address
         ? `${sale.property_address.city}, ${sale.property_address.state}`
         : 'Location TBA';
       
       const body = `
 <h2 style="color:#1e293b;font-family:Georgia,serif;">${title}</h2>
-<p style="color:#475569;">Hi ${operator.full_name || 'there'},</p>
+<p style="color:#475569;">Hi ${Estate Sale Company Owner.full_name || 'there'},</p>
 <p style="color:#475569;">${message}</p>
 
 <div style="background:#f8fafc;border-left:4px solid #f97316;padding:16px 20px;border-radius:6px;margin:16px 0;">
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       `.trim();
 
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: operator.email,
+        to: Estate Sale Company Owner.email,
         subject: `${title}: ${sale.title}`,
         body
       });

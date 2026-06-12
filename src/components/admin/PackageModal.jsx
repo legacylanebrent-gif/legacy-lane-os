@@ -234,7 +234,7 @@ export default function PackageModal({ open, onClose, package: pkg, onSuccess })
                 <Select value={formData.account_type} onValueChange={v => setFormData({ ...formData, account_type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="estate_sale_operator">Estate Sale Operator</SelectItem>
+                    <SelectItem value="estate_sale_operator">Estate Sale Company Owner</SelectItem>
                     <SelectItem value="real_estate_agent">Real Estate Agent</SelectItem>
                     <SelectItem value="vendor">Vendor</SelectItem>
                     <SelectItem value="consignor">Consignor</SelectItem>

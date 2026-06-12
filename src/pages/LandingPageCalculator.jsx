@@ -60,7 +60,7 @@ const QUESTIONS = [
   },
   {
     id: 'ownerHourlyValue',
-    question: 'What is your time worth as the owner/operator?',
+    question: 'What is your time worth as the owner/Estate Sale Company Owner?',
     options: [
       { text: '$50/hour', value: 50, score: 1 },
       { text: '$75/hour', value: 75, score: 2 },

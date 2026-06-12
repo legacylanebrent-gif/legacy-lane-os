@@ -249,7 +249,7 @@ Continuous → AdminOpsAgent (health checks)
 
 ### **5. Domain-Specific Training**
 - Instructions tailored to estate transition industry
-- Understands probate, cleanouts, resellers, operators
+- Understands probate, cleanouts, resellers, Estate Sale Company Owners
 - Context-aware recommendations
 
 ---

@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "subscription_tier": {
       "type": "string",
@@ -15,7 +15,7 @@
         "unlimited"
       ],
       "default": "starter",
-      "description": "Operator's subscription tier"
+      "description": "Estate Sale Company Owner's subscription tier"
     },
     "monthly_credit_limit": {
       "type": "integer",

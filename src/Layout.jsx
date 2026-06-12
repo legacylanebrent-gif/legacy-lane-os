@@ -44,8 +44,8 @@ const PAGE_TITLES = {
   RecordPurchase: 'Record Purchase',
   RoutePlanner: 'Route Planner',
   MarketingTasks: 'Marketing',
-  OperatorDashboard: 'Operator Dashboard',
-  OperatorProfile: 'Operator Profile',
+  OperatorDashboard: 'Estate Sale Company Owner Dashboard',
+  OperatorProfile: 'Estate Sale Company Owner Profile',
   AdminUsers: 'Admin — Users',
 };
 

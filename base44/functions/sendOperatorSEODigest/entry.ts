@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const operators = await base44.asServiceRole.entities.User.filter(
+    const Estate Sale Company Owners = await base44.asServiceRole.entities.User.filter(
       { primary_account_type: 'estate_sale_operator' },
       '-created_date', 500
     );
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     let sent = 0;
     let skipped = 0;
 
-    for (const op of operators) {
+    for (const op of Estate Sale Company Owners) {
       const opSales = salesByOperator[op.id] || [];
       if (opSales.length === 0 || !op.email) { skipped++; continue; }
 

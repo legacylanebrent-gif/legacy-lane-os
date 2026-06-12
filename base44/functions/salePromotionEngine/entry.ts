@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     }, { status: 402 });
   }
 
-  // Operator profile (server-side only)
+  // Estate Sale Company Owner profile (server-side only)
   const companyName = user.company_name || user.full_name || 'Our Company';
   const territory = user.territory || user.location_city || sale_city || '';
   const brandVoice = user.brand_voice || 'Professional, warm, and trustworthy';
@@ -114,7 +114,7 @@ Special Notes: ${special_notes || 'None'}
   const systemPrompt = `You are the Legacy Lane AI Coach — a world-class estate sale marketing expert generating a complete 15-piece Sale Promotion Package.
 
 == OPERATOR PROFILE ==
-Operator: ${user.full_name || 'Operator'}
+Estate Sale Company Owner: ${user.full_name || 'Operator'}
 Company: ${companyName}
 Territory: ${territory}
 Brand Voice: ${brandVoice}
@@ -127,7 +127,7 @@ ${saleInfo}
 == INSTRUCTIONS ==
 Generate ALL 15 pieces of content below. Each piece must:
 - Be fully written (not a placeholder or outline)
-- Use the operator's brand voice and the specific sale details
+- Use the Estate Sale Company Owner's brand voice and the specific sale details
 - Be ready to copy and use immediately
 - Include the sale title, city, dates, and featured items where relevant
 
@@ -173,10 +173,10 @@ Format EXACTLY as follows — use the exact section headers shown (the system pa
 [Post-sale thank-you post for social media. 80–120 words. Warm, grateful tone. Thank buyers and the family. Mention success/volume without specific dollar amounts. Invite followers to sign up for the list. 3–4 hashtags.]
 
 ---SECTION: review_request---
-[Review request message the operator sends to the client family after the sale. 3 versions: (1) Text/SMS version (max 160 chars), (2) Email version (150–180 words with subject line), (3) Verbal script (what to say on the phone).]
+[Review request message the Estate Sale Company Owner sends to the client family after the sale. 3 versions: (1) Text/SMS version (max 160 chars), (2) Email version (150–180 words with subject line), (3) Verbal script (what to say on the phone).]
 
 ---SECTION: referral_request---
-[Referral ask message the operator sends to the client family. 3 versions: (1) Text/SMS (max 160 chars), (2) Email (120–160 words with subject line), (3) Verbal script. Warm, not transactional. Focus on helping others in similar situations.]`;
+[Referral ask message the Estate Sale Company Owner sends to the client family. 3 versions: (1) Text/SMS (max 160 chars), (2) Email (120–160 words with subject line), (3) Verbal script. Warm, not transactional. Focus on helping others in similar situations.]`;
 
   // Build messages array — include photo URLs as vision content if provided
   const userContent = photo_urls && photo_urls.length > 0

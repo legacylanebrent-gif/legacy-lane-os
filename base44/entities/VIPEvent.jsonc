@@ -12,7 +12,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "Operator user ID"
+      "description": "Estate Sale Company Owner user ID"
     },
     "title": {
       "type": "string",

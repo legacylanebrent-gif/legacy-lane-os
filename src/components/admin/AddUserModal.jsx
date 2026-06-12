@@ -28,7 +28,7 @@ const ACCOUNT_TYPES = [
   { value: 'partnerships', label: 'Partnerships' },
   { value: 'education_admin', label: 'Education Admin' },
   { value: 'finance_admin', label: 'Finance Admin' },
-  { value: 'estate_sale_operator', label: 'Estate Sale Operator' },
+  { value: 'estate_sale_operator', label: 'Estate Sale Company Owner' },
   { value: 'real_estate_agent', label: 'Real Estate Agent' },
   { value: 'investor', label: 'Investor' },
   { value: 'consignor', label: 'Consignor' },

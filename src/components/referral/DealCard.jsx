@@ -35,7 +35,7 @@ export default function DealCard({ deal, onStageChange, stages }) {
 
         <div className="flex items-center gap-1 text-xs text-slate-500">
           <User className="w-3 h-3" />
-          <span className="truncate">Agent / Operator</span>
+          <span className="truncate">Agent / Estate Sale Company Owner</span>
         </div>
 
         <div className="pt-2 border-t border-slate-100">

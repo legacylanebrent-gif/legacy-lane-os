@@ -54,7 +54,7 @@ STRUCTURE:
 - Introduce EstateSalen as the connection to local estate sale companies
 - Briefly explain what estate sale companies do
 - Ask if their seller may benefit
-- Softly introduce agent referral program (estate sale operators meet sellers before listing, can refer future leads to agent partners - no upfront cost, referral fee only at closing)
+- Softly introduce agent referral program (Estate Sale Company Owners meet sellers before listing, can refer future leads to agent partners - no upfront cost, referral fee only at closing)
 - Clear CTA
 - Sign off: Best, Brent Cramp / EstateSalen.com
 

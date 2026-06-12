@@ -6,7 +6,7 @@ import { Download, Users, Loader } from 'lucide-react';
 
 const AUDIENCE_SOURCES = [
   { key: 'all', label: 'Master Audience', color: 'bg-slate-100 text-slate-700' },
-  { key: 'operator_claim', label: 'Operator Audience', color: 'bg-blue-100 text-blue-700' },
+  { key: 'operator_claim', label: 'Estate Sale Company Owner Audience', color: 'bg-blue-100 text-blue-700' },
   { key: 'agent_estate_sale_request', label: 'Agent / Estate Sale', color: 'bg-orange-100 text-orange-700' },
   { key: 'reseller_request', label: 'Reseller Audience', color: 'bg-purple-100 text-purple-700' },
   { key: 'cleanout_request', label: 'Cleanout Audience', color: 'bg-green-100 text-green-700' },

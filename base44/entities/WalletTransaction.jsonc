@@ -8,7 +8,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "deal_id": {
       "type": "string",

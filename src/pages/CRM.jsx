@@ -654,7 +654,7 @@ function AddConnectionForm({ user, onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check for duplicate connection under this operator
+    // Check for duplicate connection under this Estate Sale Company Owner
     const existing = await base44.entities.Connection.filter({
       account_owner_id: user.id,
       connected_user_email: formData.connected_user_email.trim()

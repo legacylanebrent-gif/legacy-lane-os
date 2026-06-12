@@ -12,7 +12,7 @@ const SCORING_ENGINES = [
 
 const SUPERAGENT_FUNCTIONS = [
   { name: 'Generate Agent Email', exists: true, active: true, function: 'generateListingAgentEmails', last_run: '2026-06-08' },
-  { name: 'Generate Operator Email', exists: true, active: true, function: 'sendPropstreamListingToOperators', last_run: '2026-06-08' },
+  { name: 'Generate Estate Sale Company Owner Email', exists: true, active: true, function: 'sendPropstreamListingToOperators', last_run: '2026-06-08' },
   { name: 'Generate Reseller Email', exists: true, active: true, function: 'matchResellerLead', last_run: '2026-06-09' },
   { name: 'Generate Cleanout Vendor Email', exists: true, active: true, function: 'matchCleanoutLead', last_run: '2026-06-09' },
   { name: 'Generate Follow-Up', exists: false, active: false, function: '—', last_run: '—' },

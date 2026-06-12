@@ -141,7 +141,7 @@ const AGENT_SUGGESTIONS = {
   lead_conversion_agent: [
     { 
       title: 'Score incoming leads', 
-      description: 'Evaluate lead quality and route to optimal operators',
+      description: 'Evaluate lead quality and route to optimal Estate Sale Company Owners',
       action: 'Score & Route Leads',
       icon: TrendingUp
     },
@@ -245,7 +245,7 @@ const AGENT_SUGGESTIONS = {
   financial_ops_agent: [
     { 
       title: 'Process commission calculations', 
-      description: 'Calculate operator commissions and referral fees',
+      description: 'Calculate Estate Sale Company Owner commissions and referral fees',
       action: 'Calculate Commissions',
       icon: DollarSign
     },
@@ -257,7 +257,7 @@ const AGENT_SUGGESTIONS = {
     },
     { 
       title: 'Process withdrawal requests', 
-      description: 'Review and approve pending operator withdrawals',
+      description: 'Review and approve pending Estate Sale Company Owner withdrawals',
       action: 'Process Withdrawals',
       icon: CheckCircle2
     },
@@ -345,7 +345,7 @@ const AGENT_DESCRIPTIONS = {
     purpose: 'Optimizes lead routing and conversion workflows',
     responsibilities: [
       'Scores incoming leads based on fit and intent signals',
-      'Routes leads to optimal operators or agents',
+      'Routes leads to optimal Estate Sale Company Owners or agents',
       'Generates personalized outreach sequences',
       'Tracks conversion funnel performance',
       'Identifies bottlenecks in lead handling'
@@ -388,7 +388,7 @@ const AGENT_DESCRIPTIONS = {
   financial_ops_agent: {
     purpose: 'Financial tracking and commission management',
     responsibilities: [
-      'Tracks operator wallet balances and transactions',
+      'Tracks Estate Sale Company Owner wallet balances and transactions',
       'Processes commission calculations and payouts',
       'Monitors referral fee agreements',
       'Generates financial performance reports',

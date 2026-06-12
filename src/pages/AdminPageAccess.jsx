@@ -29,7 +29,7 @@ const ACCOUNT_TYPES = [
   { value: 'partnerships', label: 'Partnerships', color: 'bg-cyan-100 text-cyan-700' },
   { value: 'education_admin', label: 'Education Admin', color: 'bg-indigo-100 text-indigo-700' },
   { value: 'finance_admin', label: 'Finance Admin', color: 'bg-emerald-100 text-emerald-700' },
-  { value: 'estate_sale_operator', label: 'Estate Sale Operator', color: 'bg-orange-100 text-orange-700' },
+  { value: 'estate_sale_operator', label: 'Estate Sale Company Owner', color: 'bg-orange-100 text-orange-700' },
   { value: 'real_estate_agent', label: 'Real Estate Agent', color: 'bg-red-100 text-red-700' },
   { value: 'investor', label: 'Investor', color: 'bg-yellow-100 text-yellow-700' },
   { value: 'vendor', label: 'Vendor', color: 'bg-pink-100 text-pink-700' },

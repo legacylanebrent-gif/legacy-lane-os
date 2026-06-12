@@ -20,7 +20,7 @@ import {
 } from "recharts";
 
 const REVENUE_STREAMS = [
-  { key: "subscriptions", label: "Operator Subscriptions", color: "#0891b2" },
+  { key: "subscriptions", label: "Estate Sale Company Owner Subscriptions", color: "#0891b2" },
   { key: "marketplace", label: "Marketplace Fees", color: "#f97316" },
   { key: "referrals", label: "Referral Fees", color: "#22c55e" },
   { key: "advertisements", label: "Advertisements", color: "#8b5cf6" },

@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Target, AlertTriangle, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 
 const WEIGHTS = [
-  { key: 'operator', label: 'Operator Experience', weight: 15 },
+  { key: 'Estate Sale Company Owner', label: 'Estate Sale Company Owner Experience', weight: 15 },
   { key: 'sale', label: 'Sale Creation', weight: 15 },
   { key: 'image', label: 'Image Pipeline', weight: 15 },
   { key: 'ai_serp', label: 'AI & SERP Systems', weight: 10 },
@@ -140,11 +140,11 @@ export default function LaunchReadinessScorecard() {
         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Final Launch Scorecard</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
           {[
-            'Operator Signup', 'Sale Creation', 'Upload Pipeline', 'SERP API', 'AI Research',
+            'Estate Sale Company Owner Signup', 'Sale Creation', 'Upload Pipeline', 'SERP API', 'AI Research',
             'SEO Engine', 'Repository', 'VIP Events', 'POS System', 'Referrals',
             'Email Automation', 'Social Automation', 'Security', 'Database Health', 'Load Testing'
           ].map((item, i) => {
-            const keys = ['operator', 'sale', 'image', 'ai_serp', 'ai_serp', 'seo', 'operator', 'pos', 'pos', 'referral', 'ai_serp', 'ai_serp', 'security', 'operator', 'load'];
+            const keys = ['Estate Sale Company Owner', 'sale', 'image', 'ai_serp', 'ai_serp', 'seo', 'Estate Sale Company Owner', 'pos', 'pos', 'referral', 'ai_serp', 'ai_serp', 'security', 'Estate Sale Company Owner', 'load'];
             const status = statuses[keys[i]] || 'not_started';
             const isPassed = status === 'passed';
             const isFailed = status === 'failed';

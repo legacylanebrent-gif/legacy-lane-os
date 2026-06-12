@@ -7,15 +7,15 @@ import { Loader2, Sparkles, Calendar } from 'lucide-react';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PLATFORM_OPTIONS = ['Facebook','Instagram','LinkedIn','Twitter','TikTok'];
 const AUDIENCE_OPTIONS = [
-  'Estate sale operators and company owners',
+  'Estate Sale Company Owners and company owners',
   'Real estate agents looking for referral partnerships',
-  'Estate sale operators + real estate agents',
+  'Estate Sale Company Owners + real estate agents',
   'Estate liquidation business owners',
   'Home sellers and downsizers',
 ];
 const THEME_OPTIONS = [
   'Legacy Lane OS features and platform benefits',
-  'Operator business growth and automation',
+  'Estate Sale Company Owner business growth and automation',
   'Referral program and revenue opportunities',
   'Estate sale business education',
   'Platform launch and onboarding',

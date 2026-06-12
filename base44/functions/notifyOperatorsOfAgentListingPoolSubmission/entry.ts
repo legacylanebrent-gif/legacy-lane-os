@@ -20,23 +20,23 @@ Deno.serve(async (req) => {
     const operatorIds = submission.matched_operator_ids || [];
 
     if (operatorIds.length === 0) {
-      return Response.json({ success: true, notified: 0, note: 'No matched operators' });
+      return Response.json({ success: true, notified: 0, note: 'No matched Estate Sale Company Owners' });
     }
 
     let notified = 0;
     for (const operatorId of operatorIds) {
       try {
         const ops = await base44.asServiceRole.entities.User.filter({ id: operatorId });
-        const operator = ops[0];
-        if (!operator) continue;
+        const Estate Sale Company Owner = ops[0];
+        if (!Estate Sale Company Owner) continue;
 
-        const opName = operator.company_name || operator.full_name || 'Estate Sale Operator';
+        const opName = Estate Sale Company Owner.company_name || Estate Sale Company Owner.full_name || 'Estate Sale Company Owner';
         const opFirstName = opName.split(' ')[0];
 
         const subject = `New Agent-Submitted Estate Sale Opportunity in Your Area`;
         const body = `Hi ${opFirstName},
 
-A real estate agent has submitted an active listing into the EstateSalen operator opportunity pool for your service area.
+A real estate agent has submitted an active listing into the EstateSalen Estate Sale Company Owner opportunity pool for your service area.
 
 PROPERTY
 ${address}
@@ -64,7 +64,7 @@ ${submission.notes_for_operator || 'None'}
 
 ---
 SUGGESTED NEXT STEP
-Reach out to the agent and introduce yourself as a local estate sale operator who can help their seller.
+Reach out to the agent and introduce yourself as a local Estate Sale Company Owner who can help their seller.
 
 Suggested opener:
 "Hi ${submission.submitter_first_name || agentName}, I saw that you submitted ${submission.property_address} through EstateSalen. I service that area and help sellers prepare homes for closing by handling estate sales, moving sales, and contents liquidation. I'd be happy to learn more and see if I can help your client."
@@ -72,11 +72,11 @@ Suggested opener:
 View this lead in your EstateSalen dashboard.
 
 —
-EstateSalen Operator Lead System`;
+EstateSalen Estate Sale Company Owner Lead System`;
 
-        // Store notification on operator record or send via email integration
+        // Store notification on Estate Sale Company Owner record or send via email integration
         await base44.asServiceRole.integrations.Core.SendEmail({
-          to: operator.email,
+          to: Estate Sale Company Owner.email,
           subject,
           body
         });

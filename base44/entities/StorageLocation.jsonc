@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the operator who owns this storage location"
+      "description": "User ID of the Estate Sale Company Owner who owns this storage location"
     },
     "space_name": {
       "type": "string",

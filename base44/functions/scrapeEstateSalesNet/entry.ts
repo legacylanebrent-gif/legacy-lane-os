@@ -78,7 +78,7 @@ function parseDetailPage(html) {
   const title = titleMatch?.[1]?.trim() || null;
 
   // ── Company name ──────────────────────────────────────────────────────────
-  // Structure: <h3 ...>PC'S Pine Cone and Sons</h3>  (first h3 on the page, inside operator card)
+  // Structure: <h3 ...>PC'S Pine Cone and Sons</h3>  (first h3 on the page, inside Estate Sale Company Owner card)
   const companyMatch =
     html.match(/class="[^"]*company[^"]*"[^>]*>([^<]{3,100})<\/[a-z]+>/i) ||
     html.match(/<h3[^>]*>\s*([^<]{3,100})\s*<\/h3>/i);
@@ -184,7 +184,7 @@ function parseDetailPage(html) {
   };
 }
 
-// ─── Operator Matching ────────────────────────────────────────────────────────
+// ─── Estate Sale Company Owner Matching ────────────────────────────────────────────────────────
 
 async function matchOperator(operatorNameRaw, allOperators) {
   if (!operatorNameRaw) return null;

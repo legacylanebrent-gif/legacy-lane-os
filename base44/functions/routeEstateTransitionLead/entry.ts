@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     // ── 3. Match by service need — one provider per type ──
     const SERVICE_MAP = {
-      estate_sale_operator: needs_estate_sale,
+      estate_sale_company_owner: needs_estate_sale,
       realtor: needs_realtor,
       cleanout_vendor: needs_cleanout,
       investor: wants_cash_offer,
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       crm_status: noMatch ? 'new' : 'routed',
     };
 
-    if (assignments.estate_sale_operator) updateData.assigned_operator_id = assignments.estate_sale_operator;
+    if (assignments.estate_sale_company_owner) updateData.assigned_operator_id = assignments.estate_sale_company_owner;
     if (assignments.realtor) updateData.assigned_agent_id = assignments.realtor;
     if (assignments.cleanout_vendor) updateData.assigned_cleanout_vendor_id = assignments.cleanout_vendor;
     if (assignments.investor) updateData.assigned_investor_id = assignments.investor;

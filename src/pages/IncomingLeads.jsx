@@ -57,7 +57,7 @@ export default function IncomingLeads() {
       const leadsData = await base44.entities.Lead.filter({ intent: 'estate_sale' }, '-created_date');
       setLeads(leadsData);
 
-      // Load estate sale operators
+      // Load Estate Sale Company Owners
       const users = await base44.entities.User.list();
       const estateOperators = users.filter(u => 
         u.primary_account_type === 'estate_sale_operator' || 
@@ -223,7 +223,7 @@ export default function IncomingLeads() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Incoming Estate Sale Leads</h1>
-          <p className="text-slate-600">Manage and distribute leads to operators in their territories</p>
+          <p className="text-slate-600">Manage and distribute leads to Estate Sale Company Owners in their territories</p>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}
@@ -348,7 +348,7 @@ export default function IncomingLeads() {
                   {!lead.routed_to && !lead.converted && (
                     <Select onValueChange={(operatorId) => handleAssignLead(lead.id, operatorId)}>
                       <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Assign to operator..." />
+                        <SelectValue placeholder="Assign to Estate Sale Company Owner..." />
                       </SelectTrigger>
                       <SelectContent>
                         {operators.map(op => (

@@ -194,8 +194,8 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
             <DV label="County" value={fmt(listing.county)} />
             <DV label="Territory" value={listing.territory_name || 'Not matched'} />
             <DV label="Territory ID" value={fmt(listing.territory_id)} />
-            <DV label="Matched Operators" value={(listing.matched_operator_ids || []).length} />
-            <DV label="Assigned Operator ID" value={fmt(listing.assigned_operator_id)} />
+            <DV label="Matched Estate Sale Company Owners" value={(listing.matched_operator_ids || []).length} />
+            <DV label="Assigned Estate Sale Company Owner ID" value={fmt(listing.assigned_operator_id)} />
             <DV label="Assigned Agent ID" value={fmt(listing.assigned_agent_id)} />
             <DV label="APN" value={fmt(listing.apn)} />
             <DV label="Lat / Lng" value={listing.latitude ? `${listing.latitude}, ${listing.longitude}` : '—'} />
@@ -253,9 +253,9 @@ export default function PropstreamListingDrawer({ listing, onClose, onUpdate }) 
           )}
         </Section>
 
-        {/* Operator Message */}
+        {/* Estate Sale Company Owner Message */}
         {listing.operator_message_body && (
-          <Section title="Operator Message" icon={<CheckCircle className="w-4 h-4" />}>
+          <Section title="Estate Sale Company Owner Message" icon={<CheckCircle className="w-4 h-4" />}>
             <button onClick={() => setOpMsgOpen(!opMsgOpen)} className="text-xs text-blue-600 flex items-center gap-1 mb-2">
               {opMsgOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               {opMsgOpen ? 'Collapse' : 'View message'}

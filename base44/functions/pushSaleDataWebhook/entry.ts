@@ -5,7 +5,7 @@
  * Pushes updated data to each company's registered webhook URL.
  * 
  * Can also be triggered manually via the admin UI.
- * Body: { operator_id?: string } — if provided, only push for that operator.
+ * Body: { operator_id?: string } — if provided, only push for that Estate Sale Company Owner.
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const operatorId = apiKeyRecord.operator_id;
 
-    // Fetch all sales for this operator
+    // Fetch all sales for this Estate Sale Company Owner
     const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
     const saleIds = sales.map(s => s.id);
 

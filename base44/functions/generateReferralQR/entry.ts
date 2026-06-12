@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       referral_link: referralLink,
       user_id: user.id,
       user_name: user.full_name,
-      message: 'Share this QR code with operators to join your referral program'
+      message: 'Share this QR code with Estate Sale Company Owners to join your referral program'
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

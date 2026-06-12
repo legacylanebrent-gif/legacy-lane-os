@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       if (contractEndDate <= thirtyDaysFromNow && contractEndDate > today) {
         const daysUntilExpiration = Math.ceil((contractEndDate - today) / (1000 * 60 * 60 * 24));
 
-        // Send notification to operator
+        // Send notification to Estate Sale Company Owner
         await base44.asServiceRole.functions.invoke('sendNotification', {
           user_id: sale.operator_id,
           type: 'contract_expiration',

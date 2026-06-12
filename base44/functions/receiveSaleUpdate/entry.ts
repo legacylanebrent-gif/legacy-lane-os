@@ -6,7 +6,7 @@
  * 
  * Expected POST body:
  * {
- *   api_key: string,          // the operator's API key from CompanyApiKey
+ *   api_key: string,          // the Estate Sale Company Owner's API key from CompanyApiKey
  *   event: "item_status_update" | "item_sold" | "sale_update" | "sale_view",
  *
  *   // For item events:
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing item_id' }, { status: 400, headers });
     }
 
-    // Verify item belongs to this operator
+    // Verify item belongs to this Estate Sale Company Owner
     const items = await base44.asServiceRole.entities.Item.filter({ id: item_id });
     if (items.length === 0) {
       return Response.json({ error: 'Item not found' }, { status: 404, headers });
@@ -81,14 +81,14 @@ Deno.serve(async (req) => {
 
     const item = items[0];
 
-    // Confirm the item belongs to a sale owned by this operator
+    // Confirm the item belongs to a sale owned by this Estate Sale Company Owner
     if (item.estate_sale_id) {
       const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: item.estate_sale_id, operator_id: operatorId });
       if (sales.length === 0) {
-        return Response.json({ error: 'Unauthorized: item does not belong to your operator account' }, { status: 403, headers });
+        return Response.json({ error: 'Unauthorized: item does not belong to your Estate Sale Company Owner account' }, { status: 403, headers });
       }
     } else if (item.seller_id !== operatorId) {
-      return Response.json({ error: 'Unauthorized: item does not belong to your operator account' }, { status: 403, headers });
+      return Response.json({ error: 'Unauthorized: item does not belong to your Estate Sale Company Owner account' }, { status: 403, headers });
     }
 
     // Build update payload

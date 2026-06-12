@@ -5,7 +5,7 @@ const AUTOMATION_SCORES = [
   { label: 'Lead Capture', score: 100, color: 'bg-green-500' },
   { label: 'Lead Routing', score: 92, color: 'bg-green-500' },
   { label: 'Agent Outreach', score: 58, color: 'bg-yellow-400' },
-  { label: 'Operator Outreach', score: 71, color: 'bg-yellow-400' },
+  { label: 'Estate Sale Company Owner Outreach', score: 71, color: 'bg-yellow-400' },
   { label: 'Reseller Outreach', score: 65, color: 'bg-yellow-400' },
   { label: 'Cleanout Outreach', score: 62, color: 'bg-yellow-400' },
   { label: 'Social Media', score: 74, color: 'bg-yellow-400' },

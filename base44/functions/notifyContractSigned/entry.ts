@@ -12,9 +12,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'contract_id and operator_id required' }, { status: 400 });
     }
 
-    const operator = await base44.asServiceRole.entities.User.get(operatorId);
-    if (!operator) {
-      return Response.json({ error: 'Operator not found' }, { status: 404 });
+    const Estate Sale Company Owner = await base44.asServiceRole.entities.User.get(operatorId);
+    if (!Estate Sale Company Owner) {
+      return Response.json({ error: 'Estate Sale Company Owner not found' }, { status: 404 });
     }
 
     const prefs = await base44.asServiceRole.entities.NotificationPreference.filter({ user_id: operatorId });
@@ -43,10 +43,10 @@ Deno.serve(async (req) => {
     }
 
     // Email notification
-    if (pref?.sale_update_email && operator.email) {
+    if (pref?.sale_update_email && Estate Sale Company Owner.email) {
       const body = `
 <h2 style="color:#1e293b;font-family:Georgia,serif;">${title}</h2>
-<p style="color:#475569;">Hi ${operator.full_name || 'there'},</p>
+<p style="color:#475569;">Hi ${Estate Sale Company Owner.full_name || 'there'},</p>
 <p style="color:#475569;">${message}</p>
 <p style="margin:16px 0;">
   <a href="https://estatesalen.com/SaleContracts?id=${contractId}" style="background:#f97316;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;">View Contract</a>
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       `.trim();
 
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: operator.email,
+        to: Estate Sale Company Owner.email,
         subject: title,
         body
       });

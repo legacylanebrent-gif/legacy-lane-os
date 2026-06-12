@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     const offset = body.offset || 0;
     const stateFilter = body.state || null;
 
-    // Fetch all operators for this state (or all), then filter client-side
+    // Fetch all Estate Sale Company Owners for this state (or all), then filter client-side
     // because some records have no geocode_status field at all (missing vs 'not_geocoded')
     const filterQuery = stateFilter ? { state: stateFilter } : {};
 
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     const hasMore = page.length > batchSize;
 
     if (batch.length === 0 && !hasMore) {
-      return Response.json({ done: true, processed: 0, message: 'All operators already geocoded.' });
+      return Response.json({ done: true, processed: 0, message: 'All Estate Sale Company Owners already geocoded.' });
     }
     if (batch.length === 0 && hasMore) {
       return Response.json({

@@ -54,7 +54,7 @@ function saleSchema(data) {
     },
     organizer: {
       '@type': 'Organization',
-      name: sale.operator_name || 'Estate Sale Operator',
+      name: sale.operator_name || 'Estate Sale Company Owner',
     },
   };
   if (startDate) event.startDate = startDate;

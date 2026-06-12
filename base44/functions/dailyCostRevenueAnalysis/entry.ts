@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     }
 
     // Estimate daily revenue from subscriptions
-    // Pull active users with operator role as a rough revenue signal
+    // Pull active users with Estate Sale Company Owner role as a rough revenue signal
     let revenueBreakdown = { subscriptions: 0, marketplace: 0, referrals: 0, features: 0, other: 0 };
     let totalRevenue = 0;
 

@@ -158,14 +158,14 @@ export default function AdminLeadsSocialAds() {
                   {lead.estimated_value && (
                     <>
                       <div className="flex justify-between"><span className="text-slate-500">Platform Referral Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.70).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-500">Operator Referral Income:</span><span className="text-purple-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Estate Sale Company Owner Referral Income:</span><span className="text-purple-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
                     </>
                   )}
                 </div>
                 {!lead.routed_to && !lead.converted && (
                   <div className="mt-3" onClick={e => e.stopPropagation()}>
                     <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to operator..." /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to Estate Sale Company Owner..." /></SelectTrigger>
                       <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
@@ -201,9 +201,9 @@ export default function AdminLeadsSocialAds() {
               {selectedLead.property_address && <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg"><MapPin className="w-4 h-4 text-cyan-600 mt-0.5" /><span>{selectedLead.property_address}</span></div>}
               {selectedLead.notes && <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="font-medium mb-1">Notes</p><p className="text-slate-600">{selectedLead.notes}</p></div>}
               {!selectedLead.routed_to && !selectedLead.converted && (
-                <div><p className="text-sm font-medium mb-1">Assign to Operator</p>
+                <div><p className="text-sm font-medium mb-1">Assign to Estate Sale Company Owner</p>
                   <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
-                    <SelectTrigger><SelectValue placeholder="Select operator..." /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select Estate Sale Company Owner..." /></SelectTrigger>
                     <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>

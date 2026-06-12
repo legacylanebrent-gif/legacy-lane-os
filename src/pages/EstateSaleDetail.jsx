@@ -99,7 +99,7 @@ export default function EstateSaleDetail() {
 
       setSale(foundSale);
 
-      // Try to load operator info
+      // Try to load Estate Sale Company Owner info
       if (foundSale.operator_id) {
         try {
           const [users, authCheck] = await Promise.all([
@@ -119,7 +119,7 @@ export default function EstateSaleDetail() {
             setIsFollowingCompany(existing.length > 0);
           }
         } catch (error) {
-          console.log('Could not load operator info');
+          console.log('Could not load Estate Sale Company Owner info');
         }
       }
 
@@ -281,9 +281,9 @@ export default function EstateSaleDetail() {
         await base44.entities.CompanyFollow.create({
           consumer_user_id: currentUser.id,
           operator_id: sale.operator_id,
-          operator_name: operator?.company_name || operator?.full_name || sale.operator_name || '',
-          operator_city: operator?.address_city || operator?.city || '',
-          operator_state: operator?.address_state || operator?.state || '',
+          operator_name: Estate Sale Company Owner?.company_name || Estate Sale Company Owner?.full_name || sale.operator_name || '',
+          operator_city: Estate Sale Company Owner?.address_city || Estate Sale Company Owner?.city || '',
+          operator_state: Estate Sale Company Owner?.address_state || Estate Sale Company Owner?.state || '',
           notify_email: true,
           notify_sms: false,
           notify_inapp: true,
@@ -385,7 +385,7 @@ export default function EstateSaleDetail() {
     endDate: sale.sale_dates?.[sale.sale_dates.length - 1]?.date || undefined,
     organizer: {
       '@type': 'Organization',
-      name: operator?.company_name || sale.operator_name || 'Estate Sale Company',
+      name: Estate Sale Company Owner?.company_name || sale.operator_name || 'Estate Sale Company',
     },
     offers: {
       '@type': 'Offer',
@@ -802,7 +802,7 @@ export default function EstateSaleDetail() {
                   </div>
                 )}
 
-                {/* Estimated Value - Only visible to operator */}
+                {/* Estimated Value - Only visible to Estate Sale Company Owner */}
                 {sale.estimated_value && currentUser?.id === sale.operator_id && (
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
@@ -865,31 +865,31 @@ export default function EstateSaleDetail() {
                </Card>
              )}
 
-            {/* Operator Info */}
+            {/* Estate Sale Company Owner Info */}
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-slate-600" />
-                  {operator?.company_name || sale.operator_name || 'Estate Sale Operator'}
+                  {Estate Sale Company Owner?.company_name || sale.operator_name || 'Estate Sale Company Owner'}
                 </h3>
 
-                {operator?.company_description && (
-                  <p className="text-sm text-slate-600 mb-4">{operator.company_description}</p>
+                {Estate Sale Company Owner?.company_description && (
+                  <p className="text-sm text-slate-600 mb-4">{Estate Sale Company Owner.company_description}</p>
                 )}
 
                 <div className="space-y-3">
-                  {operator?.phone && (
+                  {Estate Sale Company Owner?.phone && (
                     <a
-                      href={`tel:${operator.phone}`}
+                      href={`tel:${Estate Sale Company Owner.phone}`}
                       className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                     >
                       <Phone className="w-4 h-4" />
-                      {operator.phone}
+                      {Estate Sale Company Owner.phone}
                     </a>
                   )}
-                  {operator?.company_website && (
+                  {Estate Sale Company Owner?.company_website && (
                     <a
-                      href={operator.company_website}
+                      href={Estate Sale Company Owner.company_website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-cyan-600 hover:text-cyan-700"
@@ -958,7 +958,7 @@ export default function EstateSaleDetail() {
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Operator' }}
+          recipient={Estate Sale Company Owner || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
           relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
           savedImages={savedImages}
           allImages={sale.images}

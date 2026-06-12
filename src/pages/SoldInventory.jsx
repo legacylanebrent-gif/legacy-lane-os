@@ -24,7 +24,7 @@ export default function SoldInventory() {
       const me = await base44.auth.me();
       setUser(me);
 
-      // Fetch sold items for this operator
+      // Fetch sold items for this Estate Sale Company Owner
       const soldItems = await base44.entities.Item.filter({
         seller_id: me.id,
         status: 'sold',

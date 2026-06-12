@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
         if (profiles[0]) consumerUserId = profiles[0].user_id;
       }
 
-      // Try to resolve sale → operator → territory if missing
+      // Try to resolve sale → Estate Sale Company Owner → territory if missing
       if (saleId && (!operatorId || !territoryId)) {
         const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: saleId }).catch(() => []);
         if (sales[0]) {
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
       if (normalizedType === 'email_unsubscribed' && email) {
         const profiles = await base44.asServiceRole.entities.ConsumerMarketingProfile.filter({ email }).catch(() => []);
         if (profiles[0]) {
-          // If no operator context, treat as global unsubscribe
+          // If no Estate Sale Company Owner context, treat as global unsubscribe
           if (!operatorId) {
             await base44.asServiceRole.entities.ConsumerMarketingProfile.update(profiles[0].id, {
               global_marketing_opt_in: false,
@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
               updated_at: new Date().toISOString(),
             });
           } else {
-            // Operator-scoped unsubscribe only
+            // Estate Sale Company Owner-scoped unsubscribe only
             const subs = await base44.asServiceRole.entities.OperatorFollowerSubscription.filter({ consumer_email: email, operator_id: operatorId }).catch(() => []);
             if (subs[0]) {
               await base44.asServiceRole.entities.OperatorFollowerSubscription.update(subs[0].id, {

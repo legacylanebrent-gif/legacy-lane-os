@@ -29,7 +29,7 @@ export default function AgentOperatorPortal() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Estate Sale Company Partners</h1>
-              <p className="text-slate-500 text-sm">Invite, connect, and manage your estate sale operator network</p>
+              <p className="text-slate-500 text-sm">Invite, connect, and manage your Estate Sale Company Owner network</p>
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function AgentOperatorPortal() {
         <Tabs defaultValue="invite" className="space-y-6">
           <TabsList className="bg-white border border-slate-200 p-1 rounded-xl h-auto gap-1 flex-wrap">
             <TabsTrigger value="invite" className="flex items-center gap-2 rounded-lg px-4 py-2.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-              <Send className="w-4 h-4" /> Invite Operators
+              <Send className="w-4 h-4" /> Invite Estate Sale Company Owners
             </TabsTrigger>
             <TabsTrigger value="partnerships" className="flex items-center gap-2 rounded-lg px-4 py-2.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <Users className="w-4 h-4" /> My Partnerships

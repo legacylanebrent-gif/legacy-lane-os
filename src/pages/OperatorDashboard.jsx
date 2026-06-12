@@ -28,11 +28,11 @@ export default function OperatorDashboard() {
       const userData = await base44.auth.me();
       setUser(userData);
 
-      // Fetch operator's estate sales
+      // Fetch Estate Sale Company Owner's estate sales
       const sales = await base44.entities.EstateSale.filter({ operator_id: userData.id }, '-created_date');
       setEstateData(sales);
 
-      // Fetch operator's items
+      // Fetch Estate Sale Company Owner's items
       const items = await base44.entities.Item.filter({ seller_id: userData.id }, '-created_date');
       setItemData(items);
 

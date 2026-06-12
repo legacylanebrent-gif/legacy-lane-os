@@ -33,7 +33,7 @@ export default function Leads() {
   const [activeTab, setActiveTab] = useState('leads');
   const [hasEnterprisePackage, setHasEnterprisePackage] = useState(false);
 
-  // Leads (assigned to this operator)
+  // Leads (assigned to this Estate Sale Company Owner)
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -43,7 +43,7 @@ export default function Leads() {
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [referralLead, setReferralLead] = useState(null);
 
-  // Pipeline (deals linked to this operator's leads)
+  // Pipeline (deals linked to this Estate Sale Company Owner's leads)
   const [deals, setDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
 
@@ -66,7 +66,7 @@ export default function Leads() {
 
   const loadLeads = async (userId) => {
     setLoading(true);
-    // Only leads assigned to this operator
+    // Only leads assigned to this Estate Sale Company Owner
     const data = await base44.entities.Lead.filter({ routed_to: userId }, '-created_date');
     setLeads(data);
     setLoading(false);

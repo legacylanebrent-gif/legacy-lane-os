@@ -72,7 +72,7 @@ export default function FavoriteCompanies() {
       const ops = allUsers.filter(u =>
         u.company_name ||
         u.primary_account_type === 'estate_sale_operator' ||
-        u.role === 'operator'
+        u.role === 'Estate Sale Company Owner'
       );
       setOperators(ops);
     } catch (err) {
@@ -104,16 +104,16 @@ export default function FavoriteCompanies() {
     }
   };
 
-  const handleFollow = async (operator) => {
+  const handleFollow = async (Estate Sale Company Owner) => {
     if (!currentUser) return;
-    setAddingId(operator.id);
+    setAddingId(Estate Sale Company Owner.id);
     try {
       const newFollow = await base44.entities.CompanyFollow.create({
         consumer_user_id: currentUser.id,
-        operator_id: operator.id,
-        operator_name: operator.company_name || operator.full_name,
-        operator_city: operator.city || '',
-        operator_state: operator.state || '',
+        operator_id: Estate Sale Company Owner.id,
+        operator_name: Estate Sale Company Owner.company_name || Estate Sale Company Owner.full_name,
+        operator_city: Estate Sale Company Owner.city || '',
+        operator_state: Estate Sale Company Owner.state || '',
         notify_email: true,
         notify_sms: false,
         notify_inapp: true,
@@ -129,7 +129,7 @@ export default function FavoriteCompanies() {
     }
   };
 
-  // Estimate operator location from city/state (use their lat/lng if stored, else skip distance filter)
+  // Estimate Estate Sale Company Owner location from city/state (use their lat/lng if stored, else skip distance filter)
   const getOperatorLocation = (op) => {
     if (op.location?.lat && op.location?.lng) return op.location;
     return null;
@@ -139,7 +139,7 @@ export default function FavoriteCompanies() {
     if (radiusMiles === 0) return true; // "All"
     if (!userLocation) return true; // Can't filter without user location
     const loc = getOperatorLocation(op);
-    if (!loc) return true; // No coords for operator, include them
+    if (!loc) return true; // No coords for Estate Sale Company Owner, include them
     return haversine(userLocation.lat, userLocation.lng, loc.lat, loc.lng) <= radiusMiles;
   };
 

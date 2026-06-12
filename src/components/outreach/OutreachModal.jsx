@@ -97,7 +97,7 @@ export default function OutreachModal({ open, onClose, selectedLeads }) {
             AI Outreach Sequence
           </DialogTitle>
           <DialogDescription>
-            Send personalized AI-generated emails to selected leads via Gmail to convert them into paid operators.
+            Send personalized AI-generated emails to selected leads via Gmail to convert them into paid Estate Sale Company Owners.
           </DialogDescription>
         </DialogHeader>
 
@@ -151,7 +151,7 @@ export default function OutreachModal({ open, onClose, selectedLeads }) {
               <Textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
-                placeholder="e.g. Focus on NJ operators who mentioned price..."
+                placeholder="e.g. Focus on NJ Estate Sale Company Owners who mentioned price..."
                 rows={2}
                 className="text-sm"
               />

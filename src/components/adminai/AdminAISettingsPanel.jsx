@@ -110,9 +110,9 @@ export default function AdminAISettingsPanel({ user }) {
               />
             </div>
 
-            {/* Operator Count */}
+            {/* Estate Sale Company Owner Count */}
             <div>
-              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Target Operator Count</label>
+              <label className="text-xs text-slate-500 uppercase tracking-widest block mb-1.5">Target Estate Sale Company Owner Count</label>
               <Input
                 type="number"
                 value={settings.target_operator_count}

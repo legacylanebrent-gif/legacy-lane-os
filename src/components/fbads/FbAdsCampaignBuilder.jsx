@@ -7,7 +7,7 @@ import { Loader2, Zap, AlertTriangle } from 'lucide-react';
 
 const LANDING_PAGE_OPTIONS = [
   { label: 'Legacy Lane OS Demo Page', url: 'https://legacylaneos.com/demo' },
-  { label: 'Legacy Lane OS Operator Sign-Up', url: 'https://legacylaneos.com/start' },
+  { label: 'Legacy Lane OS Estate Sale Company Owner Sign-Up', url: 'https://legacylaneos.com/start' },
   { label: 'Landing Page: Offer Close', url: '/LandingPageOfferClose' },
   { label: 'Landing Page: Profit Levers', url: '/LandingPageProfitLevers' },
   { label: 'Landing Page: Fit Finder', url: '/LandingPageFitFinder' },
@@ -17,8 +17,8 @@ const LANDING_PAGE_OPTIONS = [
 export default function FbAdsCampaignBuilder({ settings, onCampaignCreated }) {
   const [form, setForm] = useState({
     campaign_goal: 'Generate demo requests from estate sale company owners looking to grow their business.',
-    target_audience: 'Estate sale operators, estate liquidators, downsizing specialists in New Jersey. Ages 35-65, small business owners.',
-    offer: 'Free Legacy Lane OS demo — see how operators grow revenue and automate referrals.',
+    target_audience: 'Estate Sale Company Owners, estate liquidators, downsizing specialists in New Jersey. Ages 35-65, small business owners.',
+    offer: 'Free Legacy Lane OS demo — see how Estate Sale Company Owners grow revenue and automate referrals.',
     budget: settings?.default_daily_ad_budget || 25,
     start_date: '',
     end_date: '',

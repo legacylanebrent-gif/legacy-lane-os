@@ -88,7 +88,7 @@ export default function OperatorWalletDashboard() {
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Operator Wallet</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Estate Sale Company Owner Wallet</h1>
           <p className="text-slate-500 text-sm mt-1">Platform credits from referral deals — Not real estate commissions</p>
         </div>
 

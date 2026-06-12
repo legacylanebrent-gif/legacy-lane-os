@@ -513,7 +513,7 @@ export default function CreateItemModal({ open, onClose, onSuccess, item, saleId
           {/* Payment Methods */}
           <div className="border border-slate-200 rounded-lg p-4 space-y-3">
             <p className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Payment Methods Accepted</p>
-            <p className="text-xs text-slate-500">Leave blank to use your default operator payment settings.</p>
+            <p className="text-xs text-slate-500">Leave blank to use your default Estate Sale Company Owner payment settings.</p>
             <div className="grid grid-cols-2 gap-2">
               {PAYMENT_OPTIONS.map(opt => (
                 <label key={opt.value} className="flex items-center gap-2 cursor-pointer">

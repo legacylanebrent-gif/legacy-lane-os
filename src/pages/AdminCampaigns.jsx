@@ -233,7 +233,7 @@ export default function AdminCampaigns() {
     const accountType = user?.primary_account_type || user?.primary_role;
     
     const templatesByRole = {
-      estate_sale_operator: [
+      estate_sale_company_owner: [
         { name: 'New Sale Announcement', type: 'email', target: 'all', description: 'Notify your network about upcoming estate sales' },
         { name: 'VIP Early Access', type: 'email', target: 'all', description: 'Invite VIP customers to preview sales' },
         { name: 'Sale Reminder', type: 'sms', target: 'all', description: 'SMS reminder for sale dates' },
@@ -262,7 +262,7 @@ export default function AdminCampaigns() {
       ]
     };
 
-    return templatesByRole[accountType] || templatesByRole.estate_sale_operator;
+    return templatesByRole[accountType] || templatesByRole.estate_sale_company_owner;
   };
 
   if (loading) {

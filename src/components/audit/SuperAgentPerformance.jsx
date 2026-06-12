@@ -5,7 +5,7 @@ import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 const AGENTS = [
   { name: 'PropStream Outreach Agent', leads: 387, tasks: 41, emails: 41, responses: 7, conversion: 17, hoursSaved: 14.2, status: 'Needs Improvement' },
   { name: 'Agent Referral Agent', leads: 23, tasks: 23, emails: 23, responses: 5, conversion: 22, hoursSaved: 3.8, status: 'Healthy' },
-  { name: 'Operator Recruitment Agent', leads: 68, tasks: 12, emails: 12, responses: 4, conversion: 33, hoursSaved: 2.1, status: 'Needs Improvement' },
+  { name: 'Estate Sale Company Owner Recruitment Agent', leads: 68, tasks: 12, emails: 12, responses: 4, conversion: 33, hoursSaved: 2.1, status: 'Needs Improvement' },
   { name: 'Reseller Recruitment Agent', leads: 31, tasks: 28, emails: 28, responses: 9, conversion: 32, hoursSaved: 4.7, status: 'Healthy' },
   { name: 'Cleanout Recruitment Agent', leads: 12, tasks: 12, emails: 12, responses: 3, conversion: 25, hoursSaved: 2.0, status: 'Healthy' },
   { name: 'Marketing Agent', leads: 0, tasks: 24, emails: 0, responses: 0, conversion: 0, hoursSaved: 6.0, status: 'Healthy' },

@@ -11,7 +11,7 @@ const SAFE_ACTIONS = [
   'update_admin_ai_report', 'create_operator_scorecard', 'create_kpi_snapshot',
 ];
 
-const SYSTEM_PROMPT = `You are the Legacy Lane OS Admin Autonomous Operator. You help Brent Cramp and Legacy Lane leadership turn admin commands into structured execution plans and approved administrative actions. You are not a casual chatbot. You operate like a private COO, marketing operations manager, CRM analyst, campaign strategist, and execution planner.
+const SYSTEM_PROMPT = `You are the Legacy Lane OS Admin Autonomous Estate Sale Company Owner. You help Brent Cramp and Legacy Lane leadership turn admin commands into structured execution plans and approved administrative actions. You are not a casual chatbot. You operate like a private COO, marketing operations manager, CRM analyst, campaign strategist, and execution planner.
 
 You may only propose actions from this approved safe action list: ${SAFE_ACTIONS.join(', ')}.
 
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
   // Build context
   const ctx = {};
-  if (context_toggles.operators) { const d = await safeLoad(base44, 'OperatorTerritoryProfile'); ctx.operators = { count: d.length, sample: d.slice(0, 5).map(r => ({ company: r.company_name, counties: r.service_counties, status: r.status })) }; }
+  if (context_toggles.Estate Sale Company Owners) { const d = await safeLoad(base44, 'OperatorTerritoryProfile'); ctx.Estate Sale Company Owners = { count: d.length, sample: d.slice(0, 5).map(r => ({ company: r.company_name, counties: r.service_counties, status: r.status })) }; }
   if (context_toggles.leads) { const d = await safeLoad(base44, 'Lead'); ctx.leads = { count: d.length, by_source: d.reduce((a, r) => { a[r.source] = (a[r.source] || 0) + 1; return a; }, {}) }; }
 
   const userPrompt = `ADMIN COMMAND: ${command}

@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Operator receives 30% of amount due to Brent Cramp
+  // Estate Sale Company Owner receives 30% of amount due to Brent Cramp
   const operatorCredit = Math.round(referral_amount_due_to_brent * 0.30);
 
   // Calculate available_after (10 days from closing)
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     description: 'Platform credit (30% of referral amount) — pending 10-day hold'
   });
 
-  // Update or create operator wallet
+  // Update or create Estate Sale Company Owner wallet
   const wallets = await base44.asServiceRole.entities.OperatorWallet.filter({ operator_id });
   const now = new Date().toISOString();
 
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Notify operator of new pending credit
+  // Notify Estate Sale Company Owner of new pending credit
   try {
     const users = await base44.asServiceRole.entities.User.filter({ id: operator_id });
     const operatorUser = users[0];

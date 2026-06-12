@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const listing = allListings[0];
     if (!listing) return Response.json({ error: 'Listing not found' }, { status: 404 });
 
-    // Match territory / operators
+    // Match territory / Estate Sale Company Owners
     const matchedOps = listing.matched_operator_ids || [];
 
     // Create submission record
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       public_submission_source: 'Agent Landing Page'
     });
 
-    // Try to send operator notifications
+    // Try to send Estate Sale Company Owner notifications
     try {
       if (matchedOps.length > 0 && agent_info.permission_to_share) {
         await base44.asServiceRole.functions.invoke('notifyOperatorsOfAgentListingPoolSubmission', {

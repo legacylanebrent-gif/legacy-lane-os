@@ -48,7 +48,7 @@ export default function SystemHealthWidget() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <StatCard label="Total Users" value={stats.users} loading={loading} />
-        <StatCard label="Operators" value={stats.operators} loading={loading} />
+        <StatCard label="Estate Sale Company Owners" value={stats.operators} loading={loading} />
         <StatCard label="Total Sales" value={stats.sales} loading={loading} />
         <StatCard label="SEO Pages" value={stats.seoPages} loading={loading} />
         <StatCard label="Repository Records" value={stats.repository} loading={loading} />

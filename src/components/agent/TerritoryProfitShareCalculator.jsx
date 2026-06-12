@@ -60,11 +60,11 @@ export default function TerritoryProfitShareCalculator() {
           {totalOperators.toLocaleString()} potential estate sale companies in database
         </span>
       </div>
-      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each operator's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
+      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each Estate Sale Company Owner's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
 
       {/* Sliders */}
       <div className="space-y-5 mb-8">
-        {/* Operator count */}
+        {/* Estate Sale Company Owner count */}
         <div>
           <div className="flex justify-between mb-1">
             <label className="text-sm font-medium text-slate-700">Estate Sale Companies Recruited</label>
@@ -77,9 +77,9 @@ export default function TerritoryProfitShareCalculator() {
           />
         </div>
 
-        {/* Operator plan */}
+        {/* Estate Sale Company Owner plan */}
         <div>
-          <label className="text-sm font-medium text-slate-700 block mb-2">Operator Plan (avg)</label>
+          <label className="text-sm font-medium text-slate-700 block mb-2">Estate Sale Company Owner Plan (avg)</label>
           <div className="flex gap-2">
             {OPERATOR_PLANS.map((p, i) => (
               <button
@@ -145,9 +145,9 @@ export default function TerritoryProfitShareCalculator() {
       </div>
 
       <p className="text-slate-400 text-xs mt-4 text-center">
-        Based on real platform subscription prices: Operator Starter $49/mo · Professional $129/mo · Growth $197/mo · Elite $277/mo · Reseller Pro $47/mo.
-        Calculation: 35% operator expense margin deducted from gross subscription → 20% profit share applied to the remaining 65% net profit.
-        Example: $129/mo operator × 65% × 20% = ~$16.77/mo to you.
+        Based on real platform subscription prices: Estate Sale Company Owner Starter $49/mo · Professional $129/mo · Growth $197/mo · Elite $277/mo · Reseller Pro $47/mo.
+        Calculation: 35% Estate Sale Company Owner expense margin deducted from gross subscription → 20% profit share applied to the remaining 65% net profit.
+        Example: $129/mo Estate Sale Company Owner × 65% × 20% = ~$16.77/mo to you.
         Actual amounts subject to final agreement terms.
       </p>
     </div>

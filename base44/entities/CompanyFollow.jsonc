@@ -8,7 +8,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "ID of the operator/company being followed"
+      "description": "ID of the Estate Sale Company Owner/company being followed"
     },
     "operator_name": {
       "type": "string",

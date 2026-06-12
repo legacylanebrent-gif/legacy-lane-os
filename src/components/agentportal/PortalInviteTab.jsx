@@ -65,7 +65,7 @@ export default function PortalInviteTab({ user }) {
                 <Building2 className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900">Invite an Estate Sale Operator</h3>
+                <h3 className="font-bold text-slate-900">Invite an Estate Sale Company Owner</h3>
                 <p className="text-xs text-slate-500">They'll receive a personalized invitation email and be added to your pipeline.</p>
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function PortalInviteTab({ user }) {
                 <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div>
                   <p className="text-emerald-800 font-semibold text-sm">Invitation Sent!</p>
-                  <p className="text-emerald-700 text-xs">The operator has been emailed and added to your invite pipeline.</p>
+                  <p className="text-emerald-700 text-xs">The Estate Sale Company Owner has been emailed and added to your invite pipeline.</p>
                 </div>
               </div>
             )}
@@ -138,7 +138,7 @@ export default function PortalInviteTab({ user }) {
       <div className="md:col-span-2 space-y-4">
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="p-5">
-            <h4 className="font-bold text-orange-900 mb-2 text-sm">Why Invite Operators?</h4>
+            <h4 className="font-bold text-orange-900 mb-2 text-sm">Why Invite Estate Sale Company Owners?</h4>
             <ul className="space-y-2 text-xs text-orange-800 leading-relaxed">
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> They become your official referral partner on the platform</li>
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> You earn 20% of their monthly net profit as a Territory Owner</li>
@@ -152,7 +152,7 @@ export default function PortalInviteTab({ user }) {
           <CardContent className="p-5">
             <h4 className="font-bold text-slate-800 mb-2 text-sm">What Happens Next</h4>
             <ol className="space-y-2 text-xs text-slate-600 leading-relaxed">
-              <li className="flex gap-2"><span className="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0 text-xs">1</span> Operator receives a personalized invitation email</li>
+              <li className="flex gap-2"><span className="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0 text-xs">1</span> Estate Sale Company Owner receives a personalized invitation email</li>
               <li className="flex gap-2"><span className="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0 text-xs">2</span> They register and set up their company profile</li>
               <li className="flex gap-2"><span className="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0 text-xs">3</span> Platform links them to your agent account</li>
               <li className="flex gap-2"><span className="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0 text-xs">4</span> Referral pipeline and analytics activate automatically</li>

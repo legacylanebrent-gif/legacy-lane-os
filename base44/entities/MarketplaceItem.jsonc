@@ -8,7 +8,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "User ID of the operator/seller"
+      "description": "User ID of the Estate Sale Company Owner/seller"
     },
     "estate_sale_id": {
       "type": "string",
@@ -38,7 +38,7 @@
         "AUTO_BID",
         "SEALED_BID"
       ],
-      "description": "Auction model chosen by operator"
+      "description": "Auction model chosen by Estate Sale Company Owner"
     },
     "auction_start_date": {
       "type": "string",

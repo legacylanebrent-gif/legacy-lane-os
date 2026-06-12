@@ -14,9 +14,9 @@
       "type": "string",
       "enum": [
         "agent",
-        "operator"
+        "Estate Sale Company Owner"
       ],
-      "description": "Whether the signer is an agent or operator"
+      "description": "Whether the signer is an agent or Estate Sale Company Owner"
     },
     "signed_name": {
       "type": "string",

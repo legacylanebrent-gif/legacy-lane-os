@@ -125,21 +125,21 @@ Deno.serve(async (req) => {
       1000
     );
     
-    console.log(`Total MD operators in database: ${allOperators.length}`);
+    console.log(`Total MD Estate Sale Company Owners in database: ${allOperators.length}`);
 
     const phoneMap = new Map();
     const toDelete = [];
     
-    for (const operator of allOperators) {
-      const phone = operator.phone;
+    for (const Estate Sale Company Owner of allOperators) {
+      const phone = Estate Sale Company Owner.phone;
       
       if (!phone) continue;
       
       if (phoneMap.has(phone)) {
-        toDelete.push(operator.id);
-        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
+        toDelete.push(Estate Sale Company Owner.id);
+        console.log(`Duplicate: ${Estate Sale Company Owner.company_name} (${phone}) - will delete`);
       } else {
-        phoneMap.set(phone, operator);
+        phoneMap.set(phone, Estate Sale Company Owner);
       }
     }
 

@@ -237,7 +237,7 @@ export default function EstateSaleFinder() {
           <div className="mt-6 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input
-              placeholder="Search by location, operator, or keywords..."
+              placeholder="Search by location, Estate Sale Company Owner, or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12 text-lg"

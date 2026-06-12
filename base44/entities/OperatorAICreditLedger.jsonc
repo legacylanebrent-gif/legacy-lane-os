@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "request_id": {
       "type": "string",
@@ -50,7 +50,7 @@
     "credits_charged": {
       "type": "integer",
       "default": 0,
-      "description": "Platform credits deducted from the operator's account"
+      "description": "Platform credits deducted from the Estate Sale Company Owner's account"
     },
     "credit_reason": {
       "type": "string",

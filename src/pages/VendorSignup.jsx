@@ -48,7 +48,7 @@ export default function VendorSignup() {
 
   const features = [
     { icon: Briefcase, title: 'Service Listings', description: 'Showcase your services to estate professionals' },
-    { icon: Network, title: 'Network Access', description: 'Connect with estate sale operators and agents' },
+    { icon: Network, title: 'Network Access', description: 'Connect with Estate Sale Company Owners and agents' },
     { icon: Star, title: 'Review System', description: 'Build your reputation with verified reviews' },
     { icon: DollarSign, title: 'Lead Generation', description: 'Receive qualified service requests' }
   ];

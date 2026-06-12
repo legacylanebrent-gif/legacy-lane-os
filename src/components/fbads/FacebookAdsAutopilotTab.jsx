@@ -52,7 +52,7 @@ export default function FacebookAdsAutopilotTab({ user }) {
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-800">Facebook Ads Autopilot</h2>
-            <p className="text-xs text-slate-500">Build, review, and launch Meta ad campaigns targeting Future Operators</p>
+            <p className="text-xs text-slate-500">Build, review, and launch Meta ad campaigns targeting Future Estate Sale Company Owners</p>
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -79,7 +79,7 @@ export default function FacebookAdsAutopilotTab({ user }) {
             <Image className="w-3.5 h-3.5 mr-1.5" />Creative Builder
           </TabsTrigger>
           <TabsTrigger value="audience" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-500 text-xs">
-            <Users className="w-3.5 h-3.5 mr-1.5" />Future Operator Audience
+            <Users className="w-3.5 h-3.5 mr-1.5" />Future Estate Sale Company Owner Audience
           </TabsTrigger>
           <TabsTrigger value="meta" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-500 text-xs">
             <BarChart2 className="w-3.5 h-3.5 mr-1.5" />Meta Ads Manager Sync
@@ -105,7 +105,7 @@ export default function FacebookAdsAutopilotTab({ user }) {
 
         <TabsContent value="audience">
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-5 font-semibold">Future Operator Custom Audience</p>
+            <p className="text-xs text-slate-500 uppercase tracking-widest mb-5 font-semibold">Future Estate Sale Company Owner Custom Audience</p>
             <FbAdsAudiencePanel settings={settings} />
           </div>
         </TabsContent>

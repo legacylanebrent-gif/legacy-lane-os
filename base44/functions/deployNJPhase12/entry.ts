@@ -220,9 +220,9 @@ Deno.serve(async (req) => {
       all_saved_as_draft: true,
       auto_published: false,
       missing_provider_assignments: [
-        'No estate sale operators assigned to Monmouth County NJ',
-        'No estate sale operators assigned to Ocean County NJ',
-        'No estate sale operators assigned to Middlesex County NJ',
+        'No Estate Sale Company Owners assigned to Monmouth County NJ',
+        'No Estate Sale Company Owners assigned to Ocean County NJ',
+        'No Estate Sale Company Owners assigned to Middlesex County NJ',
         'No probate realtors assigned to Monmouth County NJ',
         'No probate realtors assigned to Ocean County NJ',
         'No probate realtors assigned to Middlesex County NJ',

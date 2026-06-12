@@ -16,7 +16,7 @@
     },
     "owner_id": {
       "type": "string",
-      "description": "Assigned agent/operator"
+      "description": "Assigned agent/Estate Sale Company Owner"
     },
     "deal_type": {
       "type": "string",

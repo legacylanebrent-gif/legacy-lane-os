@@ -63,7 +63,7 @@ export default function SEAdminRevenue({ leads, seoLogs }) {
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Estimated Revenue Attribution (Illustrative)</h3>
         <div className="grid sm:grid-cols-2 gap-4">
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Estate Sale Operator Referrals</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Estate Sale Company Owner Referrals</CardTitle></CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-amber-600">${estOperatorReferrals.toLocaleString()}</p>
               <p className="text-xs text-slate-500 mt-1">{needsEstateSale} leads × 15% est. close × $2,500 avg referral value</p>

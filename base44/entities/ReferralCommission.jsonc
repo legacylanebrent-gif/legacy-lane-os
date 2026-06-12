@@ -20,7 +20,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "referral_agent_name": {
       "type": "string",
@@ -36,11 +36,11 @@
     },
     "referral_percentage": {
       "type": "number",
-      "description": "Operator's referral percentage of the commission (e.g., 25 for 25%)"
+      "description": "Estate Sale Company Owner's referral percentage of the commission (e.g., 25 for 25%)"
     },
     "expected_referral_fee": {
       "type": "number",
-      "description": "Expected referral fee to operator based on estimates (in cents)"
+      "description": "Expected referral fee to Estate Sale Company Owner based on estimates (in cents)"
     },
     "actual_sale_price": {
       "type": "number",
@@ -52,7 +52,7 @@
     },
     "actual_referral_fee": {
       "type": "number",
-      "description": "Actual referral fee paid to operator (in cents)"
+      "description": "Actual referral fee paid to Estate Sale Company Owner (in cents)"
     },
     "status": {
       "type": "string",

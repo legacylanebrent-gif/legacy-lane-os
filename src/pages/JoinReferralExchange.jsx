@@ -36,7 +36,7 @@ export default function JoinReferralExchange() {
     await base44.entities.MasterReferralAgreement.create({
       agreement_id: agreementId,
       user_id: user.id,
-      user_type: user.primary_account_type === 'real_estate_agent' ? 'agent' : 'operator',
+      user_type: user.primary_account_type === 'real_estate_agent' ? 'agent' : 'Estate Sale Company Owner',
       signed_name,
       signed_email: user.email,
       signed_timestamp: now,

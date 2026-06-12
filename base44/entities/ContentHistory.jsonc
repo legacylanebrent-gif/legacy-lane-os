@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "sale_id": {
       "type": "string",
@@ -111,7 +111,7 @@
     },
     "notes": {
       "type": "string",
-      "description": "Operator notes about this content package"
+      "description": "Estate Sale Company Owner notes about this content package"
     }
   },
   "required": [

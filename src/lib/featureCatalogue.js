@@ -154,7 +154,7 @@ export const FEATURE_CATALOGUE = [
   },
   {
     key: 'operator_wallet',
-    label: 'Operator Wallet',
+    label: 'Estate Sale Company Owner Wallet',
     description: 'View and manage your platform wallet, commissions, and payouts.',
     page: 'OperatorWalletDashboard',
     category: 'Financial & Reporting',
@@ -236,7 +236,7 @@ export const FEATURE_CATALOGUE = [
   {
     key: 'ai_onboarding',
     label: 'AI Onboarding Recommendations',
-    description: 'AI-powered personalized setup recommendations for new operators.',
+    description: 'AI-powered personalized setup recommendations for new Estate Sale Company Owners.',
     category: 'AI & Automation',
   },
 
@@ -272,7 +272,7 @@ export const FEATURE_CATALOGUE = [
   },
   {
     key: 'operator_dashboard',
-    label: 'Operator Analytics Dashboard',
+    label: 'Estate Sale Company Owner Analytics Dashboard',
     description: 'View comprehensive business metrics and performance dashboard.',
     page: 'OperatorDashboard',
     category: 'SEO & Online Presence',
@@ -382,7 +382,7 @@ export const getPagesForFeatures = (featureKeys) => {
     .map(f => f.page);
 };
 
-// ── Starter defaults: core features every operator gets ───────────────
+// ── Starter defaults: core features every Estate Sale Company Owner gets ───────────────
 export const STARTER_DEFAULT_FEATURES = [
   'sale_create', 'sale_edit', 'sale_contracts', 'sale_tasks',
   'sale_statistics', 'sale_export', 'sale_signs', 'early_sign_in',

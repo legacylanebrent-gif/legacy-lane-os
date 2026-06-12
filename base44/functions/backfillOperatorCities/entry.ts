@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
     const hasMore = page.length > batchSize;
 
     if (batch.length === 0 && !hasMore) {
-      return Response.json({ done: true, processed: 0, message: 'All operators already resolved.' });
+      return Response.json({ done: true, processed: 0, message: 'All Estate Sale Company Owners already resolved.' });
     }
     if (batch.length === 0 && hasMore) {
       return Response.json({ done: false, offset, nextOffset: offset + batchSize, processed: 0, hasMore, geocoded: 0, failed: 0, skipped: 0 });

@@ -49,7 +49,7 @@ export default function AgentLeadsList({ application, userId }) {
           <div className="text-center py-10 space-y-2">
             <AlertCircle className="w-8 h-8 text-slate-300 mx-auto" />
             <p className="text-slate-400 text-sm">No leads assigned yet.</p>
-            <p className="text-slate-400 text-xs">Leads will appear here once operators or the platform routes them to you.</p>
+            <p className="text-slate-400 text-xs">Leads will appear here once Estate Sale Company Owners or the platform routes them to you.</p>
           </div>
         ) : (
           <div className="space-y-2 max-h-80 overflow-y-auto pr-1">

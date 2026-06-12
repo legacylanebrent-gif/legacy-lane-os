@@ -151,7 +151,7 @@ export default function AdminAICredits() {
   };
 
   const resetUsage = async (account) => {
-    if (!confirm(`Reset monthly usage for this operator? This cannot be undone.`)) return;
+    if (!confirm(`Reset monthly usage for this Estate Sale Company Owner? This cannot be undone.`)) return;
     await base44.entities.OperatorAICreditAccount.update(account.id, {
       monthly_credits_used: 0,
       status: 'active',
@@ -187,16 +187,16 @@ export default function AdminAICredits() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Credit Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage operator AI access, credit limits, and usage</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage Estate Sale Company Owner AI access, credit limits, and usage</p>
         </div>
         <Button onClick={() => { loadData(); loadPricingConfigs(); }} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
       </div>
 
-      <Tabs defaultValue="operators">
+      <Tabs defaultValue="Estate Sale Company Owners">
         <TabsList>
-          <TabsTrigger value="operators">Operator Accounts</TabsTrigger>
+          <TabsTrigger value="Estate Sale Company Owners">Estate Sale Company Owner Accounts</TabsTrigger>
           <TabsTrigger value="pricing">Request Pricing</TabsTrigger>
         </TabsList>
 
@@ -262,7 +262,7 @@ export default function AdminAICredits() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="operators" className="mt-4">
+        <TabsContent value="Estate Sale Company Owners" className="mt-4">
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -285,7 +285,7 @@ export default function AdminAICredits() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <Input
-          placeholder="Search operators by name or email..."
+          placeholder="Search Estate Sale Company Owners by name or email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-9"
@@ -302,7 +302,7 @@ export default function AdminAICredits() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-slate-50">
-                    <th className="text-left px-4 py-3 font-medium text-slate-600">Operator</th>
+                    <th className="text-left px-4 py-3 font-medium text-slate-600">Estate Sale Company Owner</th>
                     <th className="text-left px-4 py-3 font-medium text-slate-600">Tier</th>
                     <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
                     <th className="text-right px-4 py-3 font-medium text-slate-600">Limit</th>

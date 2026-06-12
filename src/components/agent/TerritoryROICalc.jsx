@@ -15,7 +15,7 @@ const STATE_MEDIAN_PRICES = {
   WI: 295000, WY: 375000
 };
 
-// 1 platform-generated estate sale lead/month per operator = 12/yr
+// 1 platform-generated estate sale lead/month per Estate Sale Company Owner = 12/yr
 const PLATFORM_LEADS_PER_OPERATOR_PER_YEAR = 12;
 // 10% of those estate sales result in a real estate listing
 const LEAD_TO_LISTING_PCT = 0.10;
@@ -39,7 +39,7 @@ export default function TerritoryROICalc() {
   const [commissionPct, setCommissionPct] = useState('');
   const [result, setResult] = useState(null);
 
-  // When state changes, load available counties from our operator DB
+  // When state changes, load available counties from our Estate Sale Company Owner DB
   useEffect(() => {
     if (!state) { setCounties([]); setCounty(''); setOperatorCount(null); setAvgSalePrice(''); setCommissionPct(''); setResult(null); return; }
     // Pre-fill state median immediately on state selection
@@ -76,7 +76,7 @@ export default function TerritoryROICalc() {
     load();
   }, [state]);
 
-  // When county changes, set operator count and pre-fill state median price
+  // When county changes, set Estate Sale Company Owner count and pre-fill state median price
   useEffect(() => {
     if (!county || !state) { setOperatorCount(null); setAvgSalePrice(''); setResult(null); return; }
 
@@ -92,7 +92,7 @@ export default function TerritoryROICalc() {
   const canCalc = county && avgSalePrice && commissionPct && operatorCount !== null;
 
   const calculate = () => {
-    // Step 1: platform generates 1 lead/month per operator = 12 estate sales/yr per operator
+    // Step 1: platform generates 1 lead/month per Estate Sale Company Owner = 12 estate sales/yr per Estate Sale Company Owner
     const platformLeadsPerYear = operatorCount * PLATFORM_LEADS_PER_OPERATOR_PER_YEAR;
     // Step 2: 20% of those estate sales result in a listing
     const estimatedListings = Math.round(platformLeadsPerYear * LEAD_TO_LISTING_PCT);
@@ -183,7 +183,7 @@ export default function TerritoryROICalc() {
           </div>
         )}
 
-        {/* Operator count pill */}
+        {/* Estate Sale Company Owner count pill */}
         {operatorCount !== null && county && (
           <div className="bg-orange-100 border border-orange-200 rounded-lg px-3 py-1.5 text-xs text-orange-800 flex justify-between">
             <span>Estate sale companies in territory:</span>
@@ -226,7 +226,7 @@ export default function TerritoryROICalc() {
           {/* Funnel breakdown */}
           <p className="text-orange-700 text-xs font-semibold uppercase tracking-wide pb-1">Opportunity Funnel</p>
           <div className="bg-white border border-orange-100 rounded-lg px-3 py-2 flex justify-between items-center">
-            <span className="text-slate-600 text-xs">Platform leads generated / yr <span className="text-slate-400">(1/mo per operator)</span></span>
+            <span className="text-slate-600 text-xs">Platform leads generated / yr <span className="text-slate-400">(1/mo per Estate Sale Company Owner)</span></span>
             <span className="font-bold text-slate-900 text-sm">{result.platformLeadsPerYear}</span>
           </div>
           <div className="bg-orange-100 border border-orange-300 rounded-lg px-3 py-2 flex justify-between items-center">
@@ -249,7 +249,7 @@ export default function TerritoryROICalc() {
             <span className="font-bold text-emerald-700 text-base">${result.netGCI.toLocaleString()}</span>
           </div>
           <p className="text-orange-500 text-xs leading-relaxed pt-1">
-            {operatorCount} operators × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
+            {operatorCount} Estate Sale Company Owners × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
           </p>
 
           {/* Territory Buy-In */}

@@ -139,7 +139,7 @@ export default function PortalAnalyticsTab({ user }) {
         <CardContent className="p-5">
           <h4 className="font-bold text-slate-800 mb-4 text-sm">Recent Referral Leads</h4>
           {leads.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">No referral leads yet. Leads routed from your operator partners will appear here.</p>
+            <p className="text-sm text-slate-400 text-center py-8">No referral leads yet. Leads routed from your Estate Sale Company Owner partners will appear here.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

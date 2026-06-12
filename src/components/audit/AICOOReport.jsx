@@ -6,18 +6,18 @@ import { Brain, Loader, RefreshCw, AlertTriangle, TrendingUp, Zap, Target } from
 
 const STATIC_ITEMS = [
   { type: 'warning', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50 border-red-200', text: 'You have 17 unassigned estate sale opportunities.', action: 'Route them now →' },
-  { type: 'warning', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50 border-red-200', text: 'You have 9 unclaimed operator listings in active territories.', action: 'View listings →' },
-  { type: 'opportunity', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50 border-orange-200', text: 'You have 46 operators receiving leads but not on a free trial.', action: 'Send trial offer →' },
+  { type: 'warning', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50 border-red-200', text: 'You have 9 unclaimed Estate Sale Company Owner listings in active territories.', action: 'View listings →' },
+  { type: 'opportunity', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50 border-orange-200', text: 'You have 46 Estate Sale Company Owners receiving leads but not on a free trial.', action: 'Send trial offer →' },
   { type: 'opportunity', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50 border-orange-200', text: 'You have 8 territories with no reseller coverage.', action: 'View territories →' },
   { type: 'warning', icon: AlertTriangle, color: 'text-yellow-500', bg: 'bg-yellow-50 border-yellow-200', text: 'You have 12 cleanout leads without vendor assignment.', action: 'Assign vendors →' },
   { type: 'high_value', icon: Target, color: 'text-purple-500', bg: 'bg-purple-50 border-purple-200', text: 'You have 31 PropStream listings with scores above 75 and no outreach activity.', action: 'Generate emails →' },
 ];
 
 const AGENT_SUGGESTIONS = [
-  { name: 'Operator Win-Back Agent', reason: '68 operators have not logged in for 30+ days.', impact: 'Recover 12–18 operators.', potential_mrr: '$2,400' },
+  { name: 'Estate Sale Company Owner Win-Back Agent', reason: '68 Estate Sale Company Owners have not logged in for 30+ days.', impact: 'Recover 12–18 Estate Sale Company Owners.', potential_mrr: '$2,400' },
   { name: 'Referral Closing Agent', reason: '21 referrals are awaiting closing updates.', impact: 'Increase referral collection rate.', potential_mrr: '$840' },
   { name: 'Agent Territory Recruiter', reason: '11 territories have no preferred agent.', impact: 'Increase lead conversion coverage.', potential_mrr: '$1,650' },
-  { name: 'Free Trial Activation Agent', reason: '46 operators have never started a trial despite receiving leads.', impact: 'Convert 20–30% to paid plans.', potential_mrr: '$3,220' },
+  { name: 'Free Trial Activation Agent', reason: '46 Estate Sale Company Owners have never started a trial despite receiving leads.', impact: 'Convert 20–30% to paid plans.', potential_mrr: '$3,220' },
 ];
 
 const ACTION_PLANS = {
@@ -28,10 +28,10 @@ Day 1–2: Agent Outreach Blitz
 • Target: 346 additional outreach opportunities
 • Estimated additional responses: 42–60
 
-Day 3–4: Operator Activation
-• Send win-back sequence to 68 inactive operators
-• Offer 14-day extended trial to 46 operators receiving leads
-• Target: 12–18 operator recoveries, 8–12 trial activations
+Day 3–4: Estate Sale Company Owner Activation
+• Send win-back sequence to 68 inactive Estate Sale Company Owners
+• Offer 14-day extended trial to 46 Estate Sale Company Owners receiving leads
+• Target: 12–18 Estate Sale Company Owner recoveries, 8–12 trial activations
 
 Day 5–6: Territory Coverage
 • Identify 8 uncovered reseller territories
@@ -46,18 +46,18 @@ Day 7: Audit & Adjustment
 **Expected 7-Day Impact:**
 +$2,400–$4,200 new MRR potential
 +62 outreach conversations opened
-12+ operators reactivated`,
+12+ Estate Sale Company Owners reactivated`,
 
   '30': `**30-Day Action Plan — Systematic Growth**
 
 Week 1: Outreach Automation
 • Fully automate PropStream agent email pipeline
-• Activate operator win-back sequences
+• Activate Estate Sale Company Owner win-back sequences
 • Deploy reseller territory recruitment
 
 Week 2: Lead Funnel Optimization
 • Add retargeting pixels to all 4 landing pages
-• Build thank-you page sequences for operator claim + reseller
+• Build thank-you page sequences for Estate Sale Company Owner claim + reseller
 • Activate email follow-up agent for cold leads (7-day + 14-day cadence)
 
 Week 3: Territory Coverage
@@ -66,7 +66,7 @@ Week 3: Territory Coverage
 • Activate agent territory recruiter for 11 uncovered areas
 
 Week 4: Conversion Optimization
-• A/B test operator trial messaging
+• A/B test Estate Sale Company Owner trial messaging
 • Optimize agent estate sale request form
 • Build non-converting lead re-engagement sequence
 
@@ -84,12 +84,12 @@ Month 1: Foundation
 
 Month 2: Conversion Engine
 • Multi-touch follow-up sequences for all lead types
-• Operator onboarding automation (Day 1, 3, 7, 14, 30)
+• Estate Sale Company Owner onboarding automation (Day 1, 3, 7, 14, 30)
 • Agent partnership recruitment in 25 priority territories
 
 Month 3: Revenue Optimization
 • Referral commission tracking automation
-• Upsell sequences for free/trial operators
+• Upsell sequences for free/trial Estate Sale Company Owners
 • National territory expansion beyond NJ pilot
 
 **Q4 Vision:**
@@ -109,7 +109,7 @@ export default function AICOOReport() {
     inactiveOperators: 68,
     inactiveAgents: 11,
     untappedTerritories: 8,
-    nextAction: 'Contact the 12 operators who claimed listings but never started a trial.',
+    nextAction: 'Contact the 12 Estate Sale Company Owners who claimed listings but never started a trial.',
     nextActionRevImpact: '$1,782 MRR',
     nextActionTime: '43 minutes',
   });
@@ -159,7 +159,7 @@ export default function AICOOReport() {
         <div className="grid md:grid-cols-2 gap-4">
           {[
             { priority: 'High', title: '387 PropStream listings imported this week', detail: 'Only 41 agent emails were generated.', rec: 'Activate automatic draft generation for listings with Estate Sale Score ≥ 60.', impact: '+346 additional outreach opportunities' },
-            { priority: 'High', title: '23 agent-submitted opportunities unrouted', detail: 'No operator assignment has been made.', rec: 'Activate automatic operator matching.', impact: '23 additional lead deliveries' },
+            { priority: 'High', title: '23 agent-submitted opportunities unrouted', detail: 'No Estate Sale Company Owner assignment has been made.', rec: 'Activate automatic Estate Sale Company Owner matching.', impact: '23 additional lead deliveries' },
             { priority: 'Medium', title: 'Email follow-up agent is inactive', detail: '143 leads received no follow-up this month.', rec: 'Activate 7-day and 14-day email sequences.', impact: 'Recover 18–30% of cold leads' },
             { priority: 'Medium', title: '8 territories have no reseller coverage', detail: 'Reseller leads in these territories cannot be matched.', rec: 'Launch reseller recruitment campaign.', impact: 'Coverage for 8 new markets' },
           ].map((r, i) => (

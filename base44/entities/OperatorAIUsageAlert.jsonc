@@ -4,7 +4,7 @@
   "properties": {
     "operator_id": {
       "type": "string",
-      "description": "User ID of the estate sale operator"
+      "description": "User ID of the Estate Sale Company Owner"
     },
     "alert_type": {
       "type": "string",
@@ -23,12 +23,12 @@
     },
     "message": {
       "type": "string",
-      "description": "Human-readable alert message shown to the operator"
+      "description": "Human-readable alert message shown to the Estate Sale Company Owner"
     },
     "was_shown": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the operator has seen this alert in the UI"
+      "description": "Whether the Estate Sale Company Owner has seen this alert in the UI"
     }
   },
   "required": [

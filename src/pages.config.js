@@ -199,7 +199,7 @@ export const PAGES = {
     "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
     "OperatorPackages": OperatorPackages,
-    "Operators": Operators,
+    "Estate Sale Company Owners": Estate Sale Company Owners,
     "Pipeline": Pipeline,
     "PlatformAnalytics": PlatformAnalytics,
     "PricingImport": PricingImport,

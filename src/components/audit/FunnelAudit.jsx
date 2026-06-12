@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 
 const DEFAULT_FUNNELS = [
   { landing_page: 'Agent Estate Sale Request', form_submission_connected: true, database_write_connected: true, superagent_trigger_connected: true, operator_notification_connected: true, email_notification_connected: true, thank_you_page_connected: true, status: 'Complete' },
-  { landing_page: 'Operator Claim Page', form_submission_connected: true, database_write_connected: true, superagent_trigger_connected: false, operator_notification_connected: true, email_notification_connected: false, thank_you_page_connected: false, status: 'Partial' },
+  { landing_page: 'Estate Sale Company Owner Claim Page', form_submission_connected: true, database_write_connected: true, superagent_trigger_connected: false, operator_notification_connected: true, email_notification_connected: false, thank_you_page_connected: false, status: 'Partial' },
   { landing_page: 'Reseller Network', form_submission_connected: true, database_write_connected: true, superagent_trigger_connected: false, operator_notification_connected: false, email_notification_connected: true, thank_you_page_connected: false, status: 'Partial' },
   { landing_page: 'Cleanout Network', form_submission_connected: true, database_write_connected: true, superagent_trigger_connected: false, operator_notification_connected: true, email_notification_connected: true, thank_you_page_connected: false, status: 'Partial' },
-  { landing_page: 'Operator Trial Page', form_submission_connected: false, database_write_connected: false, superagent_trigger_connected: false, operator_notification_connected: false, email_notification_connected: false, thank_you_page_connected: false, status: 'Missing' },
+  { landing_page: 'Estate Sale Company Owner Trial Page', form_submission_connected: false, database_write_connected: false, superagent_trigger_connected: false, operator_notification_connected: false, email_notification_connected: false, thank_you_page_connected: false, status: 'Missing' },
   { landing_page: 'Agent Referral Page', form_submission_connected: false, database_write_connected: false, superagent_trigger_connected: false, operator_notification_connected: false, email_notification_connected: false, thank_you_page_connected: false, status: 'Missing' },
 ];
 

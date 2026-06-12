@@ -572,7 +572,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-700">Allow Pre-Sale Selling</p>
-                <p className="text-xs text-slate-500">Operator agrees to sell items before the sale event</p>
+                <p className="text-xs text-slate-500">Estate Sale Company Owner agrees to sell items before the sale event</p>
               </div>
               <button
                 onClick={() => f('pre_sale_selling_enabled', !deal.pre_sale_selling_enabled)}
@@ -584,7 +584,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-700">Allow Post-Sale Selling</p>
-                <p className="text-xs text-slate-500">Operator agrees to sell remaining items after the event</p>
+                <p className="text-xs text-slate-500">Estate Sale Company Owner agrees to sell remaining items after the event</p>
               </div>
               <button
                 onClick={() => f('post_sale_selling_enabled', !deal.post_sale_selling_enabled)}

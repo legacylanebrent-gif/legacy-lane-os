@@ -106,7 +106,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
 
       const [tls, ops, allUsers] = await Promise.all([
         base44.entities.TerritoryLaunch.filter({ county: territory.county, state: stateVal }),
-        // All operators in this state — no claim_status filter needed
+        // All Estate Sale Company Owners in this state — no claim_status filter needed
         base44.entities.FutureEstateOperator.filter({ state: stateVal }, '-created_date', 300),
         // Get all CRM users — filter by role + state below
         base44.entities.User.list('-created_date', 500),
@@ -122,7 +122,7 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
         u.address?.state?.toUpperCase() === stateUpper
       );
 
-      // Normalize operators for display
+      // Normalize Estate Sale Company Owners for display
       const normalizedOps = ops.map(op => ({
         ...op,
         _label: decodeHtml(op.company_name || op.claim_contact_name || op.id),
@@ -261,12 +261,12 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
               </div>
             </div>
 
-            {/* Operators */}
+            {/* Estate Sale Company Owners */}
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-orange-500" />
-                  <span className="font-semibold text-slate-800 text-sm">Estate Sale Operators</span>
+                  <span className="font-semibold text-slate-800 text-sm">Estate Sale Company Owners</span>
                   <span className="text-xs text-slate-400">({operators.length} in {territory?.state})</span>
                 </div>
                 {form.assigned_operator_ids.length > 0 && (
@@ -274,14 +274,14 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
                 )}
               </div>
               <MultiSelectList
-                items={operators}
+                items={Estate Sale Company Owners}
                 selectedIds={form.assigned_operator_ids}
                 onToggle={toggleOperator}
                 labelKey="_label"
                 subLabelKey="_sub"
               />
               <SelectedChips
-                items={operators}
+                items={Estate Sale Company Owners}
                 selectedIds={form.assigned_operator_ids}
                 labelKey="_label"
                 onRemove={toggleOperator}

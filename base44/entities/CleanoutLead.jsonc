@@ -7,7 +7,7 @@
       "enum": [
         "agent",
         "homeowner",
-        "operator",
+        "Estate Sale Company Owner",
         "propstream"
       ],
       "default": "agent"

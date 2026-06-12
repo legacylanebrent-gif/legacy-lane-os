@@ -45,7 +45,7 @@ Location: ${location || 'Unknown'}
 Top Categories: ${topCategories.join(', ')}
 Notable Items: ${topItemNames || 'Various antiques and collectibles'}
 Total Revenue: ${totalRevenue ? '$' + totalRevenue.toLocaleString() : 'Not disclosed'}
-Operator: ${sale.operator_name || 'Unknown'}
+Estate Sale Company Owner: ${sale.operator_name || 'Unknown'}
 
 Write in a factual, archival tone. Mention the location, types of items, and any notable pieces. 
 This will be indexed by search engines as a historical record.`;

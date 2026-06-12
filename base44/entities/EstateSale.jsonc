@@ -31,7 +31,7 @@
     },
     "operator_id": {
       "type": "string",
-      "description": "Estate sale operator user ID"
+      "description": "Estate Sale Company Owner user ID"
     },
     "operator_name": {
       "type": "string"

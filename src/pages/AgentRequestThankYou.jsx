@@ -32,7 +32,7 @@ export default function AgentRequestThankYou() {
               Your Listing Has Been Submitted
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
-              Thank you. Your listing has been added to the EstateSalen operator opportunity pool.
+              Thank you. Your listing has been added to the EstateSalen Estate Sale Company Owner opportunity pool.
               If estate sale companies service the area and believe they may be able to help,
               they may contact you using your preferred contact method.
             </p>
@@ -42,9 +42,9 @@ export default function AgentRequestThankYou() {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-left space-y-4">
             <h2 className="text-lg font-semibold text-slate-800 mb-4">What Happens Next</h2>
             {[
-              { step: '1', text: 'EstateSalen matches your listing to local operators in the service area.' },
-              { step: '2', text: 'Operators review the opportunity and decide if they can help.' },
-              { step: '3', text: 'Interested operators may contact you directly using your preferred contact method.' },
+              { step: '1', text: 'EstateSalen matches your listing to local Estate Sale Company Owners in the service area.' },
+              { step: '2', text: 'Estate Sale Company Owners review the opportunity and decide if they can help.' },
+              { step: '3', text: 'Interested Estate Sale Company Owners may contact you directly using your preferred contact method.' },
               { step: '4', text: 'You decide whether the service is a fit for your seller. No obligation.' },
             ].map(({ step, text }) => (
               <div key={step} className="flex items-start gap-4">

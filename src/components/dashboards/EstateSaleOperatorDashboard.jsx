@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
-import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
-import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
+import OperatorSalesTable from '@/components/Estate Sale Company Owner/OperatorSalesTable';
+import OperatorMessagesWidget from '@/components/Estate Sale Company Owner/OperatorMessagesWidget';
 import {
   Home,
   DollarSign,
@@ -45,7 +45,7 @@ export default function EstateSaleOperatorDashboard({ user }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Load operator's estate sales
+      // Load Estate Sale Company Owner's estate sales
       const allSales = await base44.entities.EstateSale.list('-created_date', 200);
       const operatorSales = allSales.filter((s) => s.operator_id === user.id);
       setSales(operatorSales);

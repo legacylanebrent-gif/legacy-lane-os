@@ -481,7 +481,7 @@ export default function Attendance() {
                         <Users className="w-5 h-5 text-orange-600" />
                         <div>
                           <p className="font-semibold text-orange-800">Manual Count (Guests)</p>
-                          <p className="text-xs text-orange-600">Visitors counted by operator</p>
+                          <p className="text-xs text-orange-600">Visitors counted by Estate Sale Company Owner</p>
                         </div>
                       </div>
                       <div className="text-right">

@@ -138,7 +138,7 @@ export default function ClaimBusiness() {
           <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
             EstateSalen already includes over 7,700 estate sale companies across the United States.
             Claim your business profile, receive estate sale opportunities from local real estate agents,
-            and discover how EstateSalen helps operators grow faster while saving hours on every sale.
+            and discover how EstateSalen helps Estate Sale Company Owners grow faster while saving hours on every sale.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={openClaim} className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-xl text-lg transition-colors shadow-lg">
@@ -159,10 +159,10 @@ export default function ClaimBusiness() {
         </div>
       </section>
 
-      {/* Why Operators Are Joining */}
+      {/* Why Estate Sale Company Owners Are Joining */}
       <Section className="bg-white">
         <SectionInner>
-          <SectionTitle center>Why Operators Are Joining EstateSalen</SectionTitle>
+          <SectionTitle center>Why Estate Sale Company Owners Are Joining EstateSalen</SectionTitle>
           <p className="text-center text-slate-500 mb-8 max-w-2xl mx-auto">
             Most estate sale directories help people find your sales. EstateSalen helps people find your company. But that's only the beginning.
           </p>
@@ -180,7 +180,7 @@ export default function ClaimBusiness() {
             ))}
           </div>
           <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-            <p className="font-semibold text-slate-700 mb-3">EstateSalen was built to help estate sale operators:</p>
+            <p className="font-semibold text-slate-700 mb-3">EstateSalen was built to help operators:</p>
             <ul className="grid md:grid-cols-2 gap-2">
               {['Generate more seller opportunities', 'Receive referrals from real estate agents', 'Save time preparing sales', 'Price inventory faster', 'Create marketing automatically', 'Manage customer lists', 'Run VIP pre-sales', 'Process checkout and reporting', 'Build recurring business systems'].map(item => (
                 <Check key={item}>{item}</Check>
@@ -194,7 +194,7 @@ export default function ClaimBusiness() {
       {/* The Problem */}
       <Section className="bg-slate-50">
         <SectionInner>
-          <SectionTitle center>The Problem Most Operators Face</SectionTitle>
+          <SectionTitle center>The Problem Most Estate Sale Company Owners Face</SectionTitle>
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div className="bg-white rounded-2xl p-6 border border-slate-200">
               <p className="font-semibold text-slate-700 mb-4">You spend money on:</p>
@@ -207,7 +207,7 @@ export default function ClaimBusiness() {
               </ul>
             </div>
             <div className="bg-white rounded-2xl p-6 border border-slate-200">
-              <p className="font-semibold text-slate-700 mb-4">Yet most operators still rely heavily on:</p>
+              <p className="font-semibold text-slate-700 mb-4">Yet most Estate Sale Company Owners still rely heavily on:</p>
               <ul className="space-y-3">
                 {['Word of mouth', 'Referrals', 'Chance inquiries', 'Inconsistent lead flow'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-slate-600 font-medium">
@@ -231,7 +231,7 @@ export default function ClaimBusiness() {
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-8 mb-8">
             <p className="text-slate-300 leading-relaxed mb-4">
               Every day, EstateSalen imports newly listed homes and helps connect real estate agents with estate sale companies.
-              When agents believe their sellers may need help, those opportunities are routed to operators who service that territory.
+              When agents believe their sellers may need help, those opportunities are routed to Estate Sale Company Owners who service that territory.
             </p>
             <p className="text-white font-semibold text-lg">
               Instead of waiting for the homeowner to find you — EstateSalen helps put you in front of the agent first.
@@ -249,7 +249,7 @@ export default function ClaimBusiness() {
             <div className="bg-orange-50 rounded-2xl p-6">
               <h3 className="font-bold text-slate-800 mb-2">How It Reaches You</h3>
               <ol className="space-y-2 text-sm text-slate-600">
-                {['Agent submits active listing with seller details', 'EstateSalen matches to operators in that territory', 'Operator receives lead notification', 'Operator contacts agent directly', 'You earn the opportunity to help the seller'].map((s, i) => (
+                {['Agent submits active listing with seller details', 'EstateSalen matches to Estate Sale Company Owners in that territory', 'Estate Sale Company Owner receives lead notification', 'Estate Sale Company Owner contacts agent directly', 'You earn the opportunity to help the seller'].map((s, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
                     {s}
@@ -359,8 +359,8 @@ export default function ClaimBusiness() {
             {[
               { q: 'Do I have to subscribe?', a: 'No. You can simply claim your listing and receive lead opportunities at no cost.' },
               { q: 'How much does it cost to claim my business?', a: 'Claiming your directory profile is free.' },
-              { q: 'Can I upgrade later?', a: 'Yes. Operators can upgrade at any time from their dashboard.' },
-              { q: 'How are leads generated?', a: 'EstateSalen connects agents, homeowners, and estate sale operators through our nationwide platform and referral network.' },
+              { q: 'Can I upgrade later?', a: 'Yes. Estate Sale Company Owners can upgrade at any time from their dashboard.' },
+              { q: 'How are leads generated?', a: 'EstateSalen connects agents, homeowners, and Estate Sale Company Owners through our nationwide platform and referral network.' },
               { q: 'Am I obligated to accept every lead?', a: 'No. You decide which opportunities fit your business.' },
             ].map(({ q, a }) => (
               <details key={q} className="bg-slate-50 rounded-xl border border-slate-200 p-5 group">
@@ -388,7 +388,7 @@ export default function ClaimBusiness() {
                 START FREE TRIAL
               </button>
             </div>
-            <p className="text-slate-400 text-sm">No credit card required to claim your listing. Free trial available for qualified operators.</p>
+            <p className="text-slate-400 text-sm">No credit card required to claim your listing. Free trial available for qualified Estate Sale Company Owners.</p>
           </div>
         </SectionInner>
       </Section>

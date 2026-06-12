@@ -22,7 +22,7 @@ export default function HowToUse() {
     {
       icon: <Search className="w-8 h-8 text-orange-500" />,
       title: 'Find Estate Sales',
-      description: 'Search for estate sales near you by location, date, or category. Browse detailed listings with photos, descriptions, and operator information.',
+      description: 'Search for estate sales near you by location, date, or category. Browse detailed listings with photos, descriptions, and Estate Sale Company Owner information.',
       cta: 'Start Searching',
       link: createPageUrl('EstateSaleFinder')
     },

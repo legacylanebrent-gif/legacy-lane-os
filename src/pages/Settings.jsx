@@ -277,7 +277,7 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                       <div>
-                        <h4 className="font-semibold">Operator Pro</h4>
+                        <h4 className="font-semibold">Estate Sale Company Owner Pro</h4>
                         <p className="text-sm text-slate-600">$149/month</p>
                       </div>
                       <Button size="sm" variant="outline">Edit</Button>
@@ -390,7 +390,7 @@ export default function Settings() {
                     <div className="flex flex-wrap gap-2">
                       <Badge>Super Admin</Badge>
                       <Badge>Platform Ops</Badge>
-                      <Badge>Estate Sale Operator</Badge>
+                      <Badge>Estate Sale Company Owner</Badge>
                       <Badge>Real Estate Agent</Badge>
                       <Badge>Investor</Badge>
                       <Badge>Coach</Badge>

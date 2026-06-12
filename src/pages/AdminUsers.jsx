@@ -153,7 +153,7 @@ export default function AdminUsers() {
     const colors = {
       super_admin: 'bg-red-100 text-red-700',
       platform_ops: 'bg-purple-100 text-purple-700',
-      estate_sale_operator: 'bg-orange-100 text-orange-700',
+      estate_sale_company_owner: 'bg-orange-100 text-orange-700',
       real_estate_agent: 'bg-blue-100 text-blue-700',
       investor: 'bg-green-100 text-green-700',
       vendor: 'bg-cyan-100 text-cyan-700',
@@ -177,7 +177,7 @@ export default function AdminUsers() {
     { value: 'partnerships', label: 'Partnerships' },
     { value: 'education_admin', label: 'Education Admin' },
     { value: 'finance_admin', label: 'Finance Admin' },
-    { value: 'estate_sale_operator', label: 'Estate Sale Operator' },
+    { value: 'estate_sale_operator', label: 'Estate Sale Company Owner' },
     { value: 'real_estate_agent', label: 'Real Estate Agent' },
     { value: 'investor', label: 'Investor' },
     { value: 'vendor', label: 'Vendor' },

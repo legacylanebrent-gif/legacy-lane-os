@@ -345,7 +345,7 @@ Deno.serve(async (req) => {
       payload_json: sale,
     });
 
-    // Find eligible consumers: globally opted in + estate_sale_alerts + subscribed to this operator + not suppressed
+    // Find eligible consumers: globally opted in + estate_sale_alerts + subscribed to this Estate Sale Company Owner + not suppressed
     const subscribers = await base44.asServiceRole.entities.OperatorFollowerSubscription.filter({
       operator_id: sale.operator_id,
       subscription_status: 'active',

@@ -13,12 +13,12 @@ const OPPORTUNITIES = [
     impact: '+346 additional outreach opportunities from uncontacted PropStream listings',
   },
   {
-    task: 'Manual Lead-to-Operator Assignment',
+    task: 'Manual Lead-to-Estate Sale Company Owner Assignment',
     occurrences: 89,
     hours: 7.4,
     savings: 6.8,
     priority: 'High',
-    agent: 'Operator Matching SuperAgent',
+    agent: 'Estate Sale Company Owner Matching SuperAgent',
     impact: '23 agent-submitted opportunities currently unrouted',
   },
   {

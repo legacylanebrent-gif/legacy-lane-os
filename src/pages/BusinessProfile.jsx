@@ -55,14 +55,14 @@ export default function BusinessProfile() {
 
       setBusiness(businessUser);
 
-      // Load related estate sales - check for any operator role
+      // Load related estate sales - check for any Estate Sale Company Owner role
       const allSales = await base44.entities.EstateSale.list('-created_date', 100);
       const operatorSales = allSales.filter(s => s.operator_id === businessId);
       
       console.log('Loading sales for business:', businessId);
       console.log('Total sales found:', allSales.length);
-      console.log('Operator sales found:', operatorSales.length);
-      console.log('Operator sales:', operatorSales);
+      console.log('Estate Sale Company Owner sales found:', operatorSales.length);
+      console.log('Estate Sale Company Owner sales:', operatorSales);
       
       // Separate current and past sales
       const current = operatorSales.filter(s => 
@@ -86,7 +86,7 @@ export default function BusinessProfile() {
 
   const getAccountTypeLabel = (type) => {
     const labels = {
-      estate_sale_operator: 'Estate Sale Operator',
+      estate_sale_company_owner: 'Estate Sale Company Owner',
       real_estate_agent: 'Real Estate Agent',
       investor: 'Investor',
       vendor: 'Vendor',

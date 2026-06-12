@@ -347,7 +347,7 @@ export default function AdminDashboard() {
             </div>
             <Link to="/AdminAIOperator">
               <Button variant="outline" size="sm" className="w-full text-xs border-amber-200 text-amber-600 hover:bg-amber-50 gap-1.5">
-                <Brain className="w-3.5 h-3.5" />Open AI Operator <ArrowUpRight className="w-3.5 h-3.5" />
+                <Brain className="w-3.5 h-3.5" />Open AI Estate Sale Company Owner <ArrowUpRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </div>
@@ -371,14 +371,14 @@ export default function AdminDashboard() {
             <QuickLinkCard icon={Merge} label="Fut Oper Leads" sub="Enrich, geocode & outreach" href="/FutOperLeads" color="bg-indigo-100 text-indigo-600" badge={stats.totalLeads} />
             <QuickLinkCard icon={Send} label="Outreach Sequences" sub="AI email outreach via Gmail" href="/FutOperLeads" color="bg-violet-100 text-violet-600" badge={stats.outreachTotal} />
             <QuickLinkCard icon={Cpu} label="Autonomous Runs Dashboard" sub="Meta campaigns & agent runs" href="/AutonomousRunsDashboard" color="bg-blue-100 text-blue-600" badge={stats.campaignPending} />
-            <QuickLinkCard icon={Brain} label="Admin AI Operator" sub="Command autonomous agents" href="/AdminAIOperator" color="bg-amber-100 text-amber-600" badge={stats.runsPending} />
+            <QuickLinkCard icon={Brain} label="Admin AI Estate Sale Company Owner" sub="Command autonomous agents" href="/AdminAIOperator" color="bg-amber-100 text-amber-600" badge={stats.runsPending} />
             <QuickLinkCard icon={Shield} label="SuperAgent Command Center" sub="Manage all 10 SuperAgents" href="/SuperAgentCommandCenter" color="bg-emerald-100 text-emerald-600" />
             <QuickLinkCard icon={Cpu} label="SuperAgent Command Center" sub="Manage all 10 SuperAgents" href="/SuperAgentCommandCenter" color="bg-indigo-100 text-indigo-600" />
             <QuickLinkCard icon={Users} label="User Management" sub="Manage all platform users" href="/AdminUsers" color="bg-slate-100 text-slate-600" badge={stats.totalUsers} />
             <QuickLinkCard icon={BarChart3} label="Platform Analytics" sub="Full platform metrics" href="/PlatformAnalytics" color="bg-cyan-100 text-cyan-600" />
             <QuickLinkCard icon={DollarSign} label="Revenue Projections" sub="Growth & income forecasting" href="/Revenue" color="bg-green-100 text-green-600" />
             <QuickLinkCard icon={DollarSign} label="Comprehensive Revenue" sub="Full revenue breakdown" href="/ComprehensiveRevenue" color="bg-emerald-100 text-emerald-600" />
-            <QuickLinkCard icon={DollarSign} label="Future Ops Revenue" sub="Operator revenue analysis" href="/FutureOperatorsAnalytics" color="bg-teal-100 text-teal-600" />
+            <QuickLinkCard icon={DollarSign} label="Future Ops Revenue" sub="Estate Sale Company Owner revenue analysis" href="/FutureOperatorsAnalytics" color="bg-teal-100 text-teal-600" />
             <QuickLinkCard icon={Megaphone} label="FB Ads Autopilot" sub="Meta ad campaigns builder" href="/AdminAIOperator" color="bg-blue-100 text-blue-700" />
             <QuickLinkCard icon={Award} label="All Leads" sub="CRM lead management" href="/AdminLeads" color="bg-rose-100 text-rose-600" />
             <QuickLinkCard icon={Building2} label="Estate Sales" sub="Review & manage all sales" href="/AdminEstateSales" color="bg-orange-100 text-orange-600" />
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-black">Every enriched lead is a door you haven't knocked on yet.</h3>
               <p className="text-orange-100 text-sm mt-0.5">
                 You have <strong>{fmt((stats.leadsWithEmail || 0) - (stats.outreachTotal || 0))}</strong> leads with emails who haven't been contacted yet.
-                Your next paid operator is in that list.
+                Your next paid Estate Sale Company Owner is in that list.
               </p>
             </div>
             <Link to="/FutOperLeads" className="ml-auto shrink-0">

@@ -122,7 +122,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <DropdownMenuLabel className="text-xs text-orange-600 font-bold uppercase tracking-wide">Agent Tools</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
                           <Link to={createPageUrl('AgentOperatorPortal')} className="cursor-pointer">
-                            <Users className="w-4 h-4 mr-2" /> Operator Partnerships
+                            <Users className="w-4 h-4 mr-2" /> Estate Sale Company Owner Partnerships
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>

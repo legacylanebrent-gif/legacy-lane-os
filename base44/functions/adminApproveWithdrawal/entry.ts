@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Notify operator via email
+  // Notify Estate Sale Company Owner via email
   try {
     const users = await base44.asServiceRole.entities.User.filter({ id: txn.operator_id });
     const operatorUser = users[0];

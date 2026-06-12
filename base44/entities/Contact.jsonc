@@ -77,7 +77,7 @@
     },
     "assigned_to": {
       "type": "string",
-      "description": "Agent/operator user ID"
+      "description": "Agent/Estate Sale Company Owner user ID"
     },
     "status": {
       "type": "string",

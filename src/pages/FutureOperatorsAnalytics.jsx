@@ -47,7 +47,7 @@ export default function FutureOperatorsAnalytics() {
         }
       }
 
-      console.log(`Loaded ${allOperators.length} total operators`);
+      console.log(`Loaded ${allOperators.length} total Estate Sale Company Owners`);
       setOperators(allOperators);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -59,7 +59,7 @@ export default function FutureOperatorsAnalytics() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6 flex items-center justify-center">
-        <div className="animate-pulse text-slate-900 text-xl font-serif">Loading operators data...</div>
+        <div className="animate-pulse text-slate-900 text-xl font-serif">Loading Estate Sale Company Owners data...</div>
       </div>
     );
   }
@@ -113,11 +113,11 @@ export default function FutureOperatorsAnalytics() {
 
   const currentYearlyRevenue = currentMonthlyRevenue * 12;
 
-  // Operators with phone numbers (contactable)
+  // Estate Sale Company Owners with phone numbers (contactable)
   const contactableOperators = operators.filter(op => op.phone).length;
   const contactablePercent = ((contactableOperators / operators.length) * 100).toFixed(1);
 
-  // Operators with websites
+  // Estate Sale Company Owners with websites
   const operatorsWithWebsites = operators.filter(op => op.website).length;
   const websitePercent = ((operatorsWithWebsites / operators.length) * 100).toFixed(1);
 
@@ -162,7 +162,7 @@ export default function FutureOperatorsAnalytics() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Total Operators</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Total Estate Sale Company Owners</h1>
           <p className="text-slate-600">Current database overview and revenue potential analysis</p>
         </div>
 
@@ -171,7 +171,7 @@ export default function FutureOperatorsAnalytics() {
           <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium opacity-90">Total Operators</span>
+                <span className="text-sm font-medium opacity-90">Total Estate Sale Company Owners</span>
                 <Building2 className="w-5 h-5 opacity-75" />
               </div>
               <div className="text-3xl font-bold mb-1">{operators.length.toLocaleString()}</div>
@@ -254,7 +254,7 @@ export default function FutureOperatorsAnalytics() {
                     <div className="text-left sm:text-right pl-5 sm:pl-0">
                       <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                       <div className="text-xs text-slate-500">
-                        {pkg.value} operators
+                        {pkg.value} Estate Sale Company Owners
                         {pkg.name === 'Basic' && ' ($99/sale × 6 sales/yr)'}
                         {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
                       </div>
@@ -267,7 +267,7 @@ export default function FutureOperatorsAnalytics() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Top 20 States by Operator Count</CardTitle>
+              <CardTitle>Top 20 States by Estate Sale Company Owner Count</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
@@ -308,7 +308,7 @@ export default function FutureOperatorsAnalytics() {
                   </div>
                   <div className="text-sm text-slate-600 space-y-1">
                     <div className="flex justify-between">
-                      <span>Operators:</span>
+                      <span>operators:</span>
                       <span className="font-semibold">{state.count}</span>
                     </div>
                     <div className="flex justify-between">
@@ -368,7 +368,7 @@ export default function FutureOperatorsAnalytics() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-600">Contactable Operators</span>
+                <span className="text-sm font-medium text-slate-600">Contactable Estate Sale Company Owners</span>
                 <Users className="w-5 h-5 text-blue-600" />
               </div>
               <div className="text-3xl font-bold text-slate-900">{contactableOperators.toLocaleString()}</div>
@@ -379,7 +379,7 @@ export default function FutureOperatorsAnalytics() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-600">Operators with Websites</span>
+                <span className="text-sm font-medium text-slate-600">Estate Sale Company Owners with Websites</span>
                 <Building2 className="w-5 h-5 text-green-600" />
               </div>
               <div className="text-3xl font-bold text-slate-900">{operatorsWithWebsites.toLocaleString()}</div>
@@ -390,7 +390,7 @@ export default function FutureOperatorsAnalytics() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-600">Avg Revenue per Operator</span>
+                <span className="text-sm font-medium text-slate-600">Avg Revenue per Estate Sale Company Owner</span>
                 <DollarSign className="w-5 h-5 text-purple-600" />
               </div>
               <div className="text-3xl font-bold text-slate-900">${(currentMonthlyRevenue / operators.length).toFixed(0)}</div>

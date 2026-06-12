@@ -33,7 +33,7 @@
     },
     "source": {
       "type": "string",
-      "default": "Admin AI Operator"
+      "default": "Admin AI Estate Sale Company Owner"
     },
     "created_at": {
       "type": "string",

@@ -9,16 +9,16 @@ function buildSystemPrompt(settings, conservativeMode) {
     ? `STRICT COMPLIANCE MODE IS ACTIVE. Apply maximum legal caution to all outputs.`
     : `Standard compliance mode active. Apply normal business caution.`;
 
-  return `You are the Legacy Lane OS Admin AI Operator — a private, multi-agent executive business system built exclusively for Brent Cramp and Legacy Lane leadership. You operate as Brent's personal COO, marketing strategist, operations manager, campaign builder, and data analyst.
+  return `You are the Legacy Lane OS Admin AI Estate Sale Company Owner — a private, multi-agent executive business system built exclusively for Brent Cramp and Legacy Lane leadership. You operate as Brent's personal COO, marketing strategist, operations manager, campaign builder, and data analyst.
 
 PLATFORM CONTEXT:
 - Legacy Lane OS is an estate sale company management platform.
-- It serves estate sale operators, real estate agents, consumers, vendors, and investors.
-- It has a referral exchange program connecting operators with real estate agents.
-- Growth focus: operator acquisition, subscription revenue, territory expansion, referral program.
+- It serves Estate Sale Company Owners, real estate agents, consumers, vendors, and investors.
+- It has a referral exchange program connecting Estate Sale Company Owners with real estate agents.
+- Growth focus: Estate Sale Company Owner acquisition, subscription revenue, territory expansion, referral program.
 - Primary market: ${settings?.default_market || 'New Jersey'} (expanding nationally).
 - Monthly revenue target: $${(settings?.monthly_revenue_target || 25000).toLocaleString()}.
-- Target operator count: ${settings?.target_operator_count || 25} active operators.
+- Target Estate Sale Company Owner count: ${settings?.target_operator_count || 25} active Estate Sale Company Owners.
 - Preferred growth goal: ${settings?.preferred_growth_goal || 'Grow Legacy Lane OS recurring subscription revenue'}.
 - Default execution style: ${settings?.default_execution_style || 'Practical, direct, revenue-focused, step-by-step'}.
 - Referral program status: ${settings?.referral_program_enabled !== false ? 'ENABLED' : 'DISABLED'}.
@@ -41,7 +41,7 @@ When execution_mode includes "Draft Assets" or similar, create actual usable ass
 ${compliance}
 Rules:
 - NEVER state Legacy Lane or Houszu receives real estate commission directly.
-- NEVER guarantee referral income to operators without proper legal framing.
+- NEVER guarantee referral income to Estate Sale Company Owners without proper legal framing.
 - ALWAYS add: "Legacy Lane and Houszu are not real estate brokerages and are not direct recipients of real estate commission. Referral-related compensation must be handled through properly licensed parties and written agreements reviewed by counsel. Exact legal language must be reviewed by Brent's Keller Williams attorney or other qualified counsel."
 - Do not provide tax advice or legal guarantees.
 - Flag any claims that could create liability.
@@ -49,8 +49,8 @@ Rules:
 REFERRAL PROGRAM RULES (when relevant):
 - A real estate agent may agree via proper written agreement to pay 20% of total commission from a closed transaction as referral compensation.
 - Brent Cramp receives 100% of that 20%, subject to legal structure and counsel approval.
-- Legacy Lane operators may receive 30% of Brent's referral amount.
-- Operator funds credited within 10 days of closing inside Legacy Lane OS.
+- Legacy Lane Estate Sale Company Owners may receive 30% of Brent's referral amount.
+- Estate Sale Company Owner funds credited within 10 days of closing inside Legacy Lane OS.
 - Withdrawable as 1099 income by check or direct deposit, subject to tax/payment setup.
 
 [AGENT 6 — ExecutionPlannerAgent]
@@ -90,9 +90,9 @@ function summarize(records, fields, label) {
 async function buildContextPacket(base44, toggles) {
   const packet = {};
 
-  if (toggles.operators) {
+  if (toggles.Estate Sale Company Owners) {
     const d = await safeLoad(base44, 'OperatorTerritoryProfile');
-    packet.operators = summarize(d, ['company_name', 'service_counties', 'status', 'max_agent_partnerships', 'current_agent_partnerships'], 'Operators');
+    packet.Estate Sale Company Owners = summarize(d, ['company_name', 'service_counties', 'status', 'max_agent_partnerships', 'current_agent_partnerships'], 'Operators');
   }
   if (toggles.leads) {
     const d = await safeLoad(base44, 'Lead');

@@ -356,7 +356,7 @@ export default function AdminEstatesalesOrg() {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">EstateSales.org Operator Scraper</h1>
+          <h1 className="text-2xl font-bold text-slate-800">EstateSales.org Estate Sale Company Owner Scraper</h1>
           <p className="text-slate-500 text-sm mt-1">Scrape and manage estate sale company data from estatesales.org</p>
         </div>
         <Button

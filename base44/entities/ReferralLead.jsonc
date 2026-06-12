@@ -16,15 +16,15 @@
     },
     "source_user_id": {
       "type": "string",
-      "description": "User ID of the agent or operator who sourced/introduced the lead"
+      "description": "User ID of the agent or Estate Sale Company Owner who sourced/introduced the lead"
     },
     "source_type": {
       "type": "string",
       "enum": [
         "agent",
-        "operator"
+        "Estate Sale Company Owner"
       ],
-      "description": "Whether the lead was sourced by an agent or operator"
+      "description": "Whether the lead was sourced by an agent or Estate Sale Company Owner"
     },
     "assigned_agent_id": {
       "type": "string",
@@ -32,7 +32,7 @@
     },
     "assigned_operator_id": {
       "type": "string",
-      "description": "User ID of the assigned estate sale operator"
+      "description": "User ID of the assigned Estate Sale Company Owner"
     },
     "status": {
       "type": "string",

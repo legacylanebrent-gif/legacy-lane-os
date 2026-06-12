@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
       marketplaceId: 'EBAY_US',
       format: 'FIXED_PRICE',
       availableQuantity: item.quantity || 1,
-      categoryId: '99',  // Generic category — operator should update in eBay Seller Hub
+      categoryId: '99',  // Generic category — Estate Sale Company Owner should update in eBay Seller Hub
       listingDescription: item.description || item.title,
       pricingSummary: {
         price: {

@@ -245,7 +245,7 @@ export default function OperatorProfile() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900">Operator Profile</h1>
+          <h1 className="text-4xl font-serif font-bold text-slate-900">Estate Sale Company Owner Profile</h1>
           <p className="text-slate-600 mt-1">Manage your business profile, branding, and payment settings</p>
         </div>
         <Button

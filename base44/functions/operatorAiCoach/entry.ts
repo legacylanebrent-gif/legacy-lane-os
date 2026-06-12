@@ -93,7 +93,7 @@ async function recordUsage(base44, operatorId, account, { aiMode, modelUsed, inp
 
 // ── System prompt builder ─────────────────────────────────────────────────────
 
-function buildSystemPrompt({ user, operator, activeSale, aiMemory, screenContext, aiMode, requestedOutputType }) {
+function buildSystemPrompt({ user, Estate Sale Company Owner, activeSale, aiMemory, screenContext, aiMode, requestedOutputType }) {
   const outputInstruction = requestedOutputType === 'json'
     ? 'IMPORTANT: Your response MUST be valid JSON only. No markdown, no preamble.'
     : requestedOutputType === 'list'
@@ -122,12 +122,12 @@ Sale Dates: ${(activeSale.sale_dates || []).map(d => d.date).join(', ') || 'Not 
 Name: ${user.full_name || 'Operator'}
 Email: ${user.email}
 Account Type: ${user.primary_account_type || 'estate_sale_operator'}
-Company: ${operator.company_name || user.company_name || 'Not set'}
-Territory: ${operator.territory || user.territory || 'Not specified'}
-Brand Voice: ${operator.brand_voice || user.brand_voice || 'Professional and trustworthy'}
+Company: ${Estate Sale Company Owner.company_name || user.company_name || 'Not set'}
+Territory: ${Estate Sale Company Owner.territory || user.territory || 'Not specified'}
+Brand Voice: ${Estate Sale Company Owner.brand_voice || user.brand_voice || 'Professional and trustworthy'}
 
 == CURRENT SCREEN ==
-The operator is currently on: ${screenContext || 'the platform'}
+The Estate Sale Company Owner is currently on: ${screenContext || 'the platform'}
 AI Mode: ${aiMode || 'coach'}
 
 ${saleContext}
@@ -135,11 +135,11 @@ ${saleContext}
 ${aiMemory || 'No previous coaching history yet. This is a fresh start.'}
 
 == YOUR COACHING ROLE ==
-- Be deeply personalized — use the operator's name, company, and territory in your responses.
+- Be deeply personalized — use the Estate Sale Company Owner's name, company, and territory in your responses.
 - Coach on: marketing, lead generation, pricing strategy, team management, social media, Facebook Ads, business growth, client relationships, and operational efficiency.
 - Be encouraging, direct, and results-focused.
 - Reference their actual sale data and context when relevant.
-- Always end with 1–2 specific, actionable next steps the operator can take TODAY.
+- Always end with 1–2 specific, actionable next steps the Estate Sale Company Owner can take TODAY.
 
 == OUTPUT FORMAT ==
 ${outputInstruction}
@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
   }
 
   // 2. Confirm operator_id matches logged-in user
-  // Team members (operator_id field set) are also allowed to use their operator's coach
+  // Team members (operator_id field set) are also allowed to use their Estate Sale Company Owner's coach
   const effectiveOperatorId = operator_id || user.id;
   const isOwn = effectiveOperatorId === user.id;
   const isTeamMember = user.operator_id && user.operator_id === effectiveOperatorId;
@@ -181,14 +181,14 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Forbidden: operator_id does not match your account.' }, { status: 403 });
   }
 
-  // 3–6. Load operator profile data (from User entity — territory, brand_voice, ai_memory are stored there)
+  // 3–6. Load Estate Sale Company Owner profile data (from User entity — territory, brand_voice, ai_memory are stored there)
   let operatorUser = user;
   if (effectiveOperatorId !== user.id) {
     const operatorList = await base44.asServiceRole.entities.User.filter({ id: effectiveOperatorId });
     operatorUser = operatorList[0] || user;
   }
 
-  const operator = {
+  const Estate Sale Company Owner = {
     company_name: operatorUser.company_name || '',
     territory: operatorUser.territory || '',
     brand_voice: operatorUser.brand_voice || '',
@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
   // 10. Build system prompt
   const systemPrompt = buildSystemPrompt({
     user: operatorUser,
-    operator,
+    Estate Sale Company Owner,
     activeSale,
     aiMemory,
     screenContext: screen_context,

@@ -14,7 +14,7 @@ export default function AgentOperatorOutreach({ application }) {
     const load = async () => {
       if (!application?.license_state) { setLoading(false); return; }
 
-      // Get operators in the same state from FutureEstateOperator (outreach targets)
+      // Get Estate Sale Company Owners in the same state from FutureEstateOperator (outreach targets)
       const all = await base44.entities.FutureEstateOperator.filter({ state: application.license_state });
 
       // Filter to city matches if possible
@@ -43,7 +43,7 @@ export default function AgentOperatorOutreach({ application }) {
     ? application.cities_requested.split(',').map(c => c.trim().toLowerCase()).filter(Boolean)
     : [];
 
-  const visible = showAll ? operators : operators.slice(0, 8);
+  const visible = showAll ? operators: operators.slice(0, 8);
 
   return (
     <Card>
@@ -51,7 +51,7 @@ export default function AgentOperatorOutreach({ application }) {
         <div className="flex items-start justify-between">
           <CardTitle className="flex items-center gap-2 text-slate-800">
             <Building2 className="w-5 h-5 text-orange-500" />
-            Operators to Approach
+            Estate Sale Company Owners to Approach
           </CardTitle>
           {operators.length > 0 && (
             <Badge variant="outline" className="text-xs">{operators.length} in {application.license_state}</Badge>
@@ -68,7 +68,7 @@ export default function AgentOperatorOutreach({ application }) {
           </div>
         ) : operators.length === 0 ? (
           <div className="text-center py-10 text-slate-400 text-sm">
-            No estate sale operators found for {application.license_state} yet.
+            No Estate Sale Company Owners found for {application.license_state} yet.
           </div>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
@@ -132,7 +132,7 @@ export default function AgentOperatorOutreach({ application }) {
               >
                 {showAll
                   ? <><ChevronUp className="w-4 h-4 mr-1" /> Show Less</>
-                  : <><ChevronDown className="w-4 h-4 mr-1" /> Show All {operators.length} Operators</>
+                  : <><ChevronDown className="w-4 h-4 mr-1" /> Show All {operators.length} Estate Sale Company Owners</>
                 }
               </Button>
             )}

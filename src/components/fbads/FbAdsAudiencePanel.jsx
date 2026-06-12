@@ -102,7 +102,7 @@ export default function FbAdsAudiencePanel({ settings }) {
       {/* Add Lead Form */}
       {showAdd && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-widest">Add Future Operator Lead</p>
+          <p className="text-xs font-semibold text-slate-600 uppercase tracking-widest">Add Future Estate Sale Company Owner Lead</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               { key: 'owner_name', label: 'Owner Name' },
