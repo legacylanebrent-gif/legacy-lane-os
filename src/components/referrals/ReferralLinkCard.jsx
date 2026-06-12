@@ -151,7 +151,7 @@ export default function ReferralLinkCard({ user, isOperator }) {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-slate-700 mb-2">Share Your QR Code</p>
-                <p className="text-xs text-slate-500 mb-3">Estate Sale Company Owners can scan this at estate sales to join your referral program</p>
+                <p className="text-xs text-slate-500 mb-3">operators can scan this at estate sales to join your referral program</p>
                 <Button
                   onClick={downloadQR}
                   size="sm"

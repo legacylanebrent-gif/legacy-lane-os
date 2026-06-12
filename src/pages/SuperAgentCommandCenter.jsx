@@ -345,7 +345,7 @@ const AGENT_DESCRIPTIONS = {
     purpose: 'Optimizes lead routing and conversion workflows',
     responsibilities: [
       'Scores incoming leads based on fit and intent signals',
-      'Routes leads to optimal Estate Sale Company Owners or agents',
+      'Routes leads to optimal operators or agents',
       'Generates personalized outreach sequences',
       'Tracks conversion funnel performance',
       'Identifies bottlenecks in lead handling'

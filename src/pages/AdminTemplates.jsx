@@ -52,7 +52,7 @@ const TEMPLATE_CATEGORIES = {
 };
 
 const AVAILABLE_FIELDS = {
-  Estate Sale Company Owner: [
+  operator: [
     '{{operator_name}}', '{{company_name}}', '{{operator_email}}', 
     '{{operator_phone}}', '{{company_address}}', '{{company_website}}',
     '{{company_logo}}', '{{license_number}}'
@@ -100,7 +100,7 @@ Best regards,
 {{company_name}}
 {{operator_phone}}
 {{company_website}}`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user],
     description: 'Standard email announcement for upcoming estate sales',
     is_default: true
   },
@@ -170,7 +170,7 @@ SERVICE PROVIDER:                          CLIENT:
 ________________________              ________________________
 {{operator_name}}                           {{user_name}}
 Date: {{current_date}}                     Date: ____________`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
     description: 'Standard estate sale services contract',
     is_default: true
   },
@@ -189,7 +189,7 @@ Furniture • Antiques • Collectibles
 {{company_name}}
 {{operator_phone}}`,
     dimensions: { width: '18', height: '24', unit: 'inches' },
-    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.Estate Sale Company Owner],
+    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.operator],
     style_settings: {
       font_family: 'Arial Black',
       font_size: '48px',
@@ -211,7 +211,7 @@ Furniture • Antiques • Collectibles
 {{sale_date}}
 {{company_name}}`,
     dimensions: { width: '12', height: '18', unit: 'inches' },
-    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.Estate Sale Company Owner],
+    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.operator],
     style_settings: {
       font_family: 'Arial Black',
       font_size: '36px',
@@ -255,7 +255,7 @@ Description                    Amount
 Payment is due within 30 days.
 
 Thank you for your business!`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
     description: 'Professional invoice template',
     is_default: true
   },
@@ -280,7 +280,7 @@ Best regards,
 {{company_website}}
 
 Follow us on social media for updates!`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.user],
     description: 'Post-sale thank you email to attendees',
     is_default: false
   },
@@ -316,7 +316,7 @@ Consignor Signature: ________________  Date: ________
 
 Consignee Signature: ________________  Date: ________
 {{operator_name}}, {{company_name}}`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.user, ...AVAILABLE_FIELDS.general],
     description: 'Standard consignment agreement',
     is_default: true
   },
@@ -355,7 +355,7 @@ Both parties agree to the terms outlined above.
 
 Client Signature: ________________  Date: ________
 Vendor Signature: ________________  Date: ________`,
-    available_fields: [...AVAILABLE_FIELDS.Estate Sale Company Owner, ...AVAILABLE_FIELDS.vendor, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.general],
+    available_fields: [...AVAILABLE_FIELDS.operator, ...AVAILABLE_FIELDS.vendor, ...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.general],
     description: 'Agreement for vendor services',
     is_default: true
   },
@@ -376,7 +376,7 @@ Don't miss out on amazing finds! See you there!
 #EstateSale #{{sale_city}} #Treasures #Antiques #Furniture
 
 {{company_name}} | {{company_website}}`,
-    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.Estate Sale Company Owner],
+    available_fields: [...AVAILABLE_FIELDS.sale, ...AVAILABLE_FIELDS.operator],
     description: 'Social media announcement template',
     is_default: true
   }

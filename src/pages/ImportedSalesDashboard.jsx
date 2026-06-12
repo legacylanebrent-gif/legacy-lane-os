@@ -162,14 +162,14 @@ export default function ImportedSalesDashboard() {
           <TabsList className="mb-6">
             <TabsTrigger value="sales">Scraped Sales ({filteredSales.length})</TabsTrigger>
             <TabsTrigger value="territories">Territories ({territories.length})</TabsTrigger>
-            <TabsTrigger value="Estate Sale Company Owners">Estate Sale Company Owners ({operators.length})</TabsTrigger>
+            <TabsTrigger value="Estate Sale Company Owners">operators ({operators.length})</TabsTrigger>
           </TabsList>
 
           {/* SALES TAB */}
           <TabsContent value="sales">
             <div className="flex flex-wrap gap-3 mb-4">
               <Input
-                placeholder="Search title, Estate Sale Company Owner, city..."
+                placeholder="Search title, operator, city..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-64 bg-white"
@@ -221,7 +221,7 @@ export default function ImportedSalesDashboard() {
                             )}
                             {sale.operator_id && !sale.platform_operator_user_id && (
                               <Badge className="bg-blue-100 text-blue-700">
-                                <Link2 className="w-3 h-3 mr-1" /> Estate Sale Company Owner Linked
+                                <Link2 className="w-3 h-3 mr-1" /> operator Linked
                               </Badge>
                             )}
                           </div>
@@ -367,7 +367,7 @@ export default function ImportedSalesDashboard() {
               )}
 
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-slate-400 text-xs block">Estate Sale Company Owner</span>{selectedSale.operator_name_raw || '—'}</div>
+                <div><span className="text-slate-400 text-xs block">operator</span>{selectedSale.operator_name_raw || '—'}</div>
                 <div><span className="text-slate-400 text-xs block">Location</span>{selectedSale.address_partial || [selectedSale.city, selectedSale.state].filter(Boolean).join(', ')}</div>
                 <div><span className="text-slate-400 text-xs block">Start Date</span>{selectedSale.start_date || '—'}</div>
                 <div><span className="text-slate-400 text-xs block">End Date</span>{selectedSale.end_date || '—'}</div>

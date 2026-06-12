@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Gift, Mail, CheckCircle } from 'lucide-react';
 
 // Shared helper: log referral + award points
-export async function logReferral({ currentUser, Estate Sale Company Owner, contactEmail }) {
+export async function logReferral({ currentUser, operator, contactEmail }) {
   const referralCode = currentUser.id.slice(-8).toUpperCase();
   await base44.entities.Referral.create({
     referrer_id: currentUser.id,
@@ -14,7 +14,7 @@ export async function logReferral({ currentUser, Estate Sale Company Owner, cont
     referrer_email: currentUser.email,
     referral_code: referralCode,
     referred_email: contactEmail || '',
-    referred_company_name: Estate Sale Company Owner.company_name,
+    referred_company_name: operator.company_name,
     account_type: 'estate_sale_operator',
     status: 'pending',
     reward_amount: 25,
@@ -26,13 +26,13 @@ export async function logReferral({ currentUser, Estate Sale Company Owner, cont
     action_id: 'operator_referral_sent',
     action_name: 'Estate Sale Company Owner Referral Sent',
     points_earned: 100,
-    description: `Referred ${Estate Sale Company Owner.company_name} to join EstateSalen.com`,
+    description: `Referred ${operator.company_name} to join EstateSalen.com`,
     month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
   });
 }
 
 // Email modal — collects email address then sends
-export function ReferByEmailModal({ Estate Sale Company Owner, open, onClose, currentUser }) {
+export function ReferByEmailModal({ operator, open, onClose, currentUser }) {
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -44,12 +44,12 @@ export function ReferByEmailModal({ Estate Sale Company Owner, open, onClose, cu
   const senderName = currentUser?.full_name || 'Someone';
   const senderEmail = currentUser?.email || '';
   const senderPhone = currentUser?.phone || currentUser?.cell_phone || '';
-  const emailBody = `Hi ${Estate Sale Company Owner?.company_name || 'there'},\n\n${senderName} thought you'd be a great fit for EstateSalen.com — the platform helping estate sale companies grow their business with digital listings, marketing tools, and a national buyer network.\n\nSign up through their referral link and get started today:\n${referralLink}\n\nFeel free to reach out to ${senderName} directly:${senderEmail ? `\nEmail: ${senderEmail}` : ''}${senderPhone ? `\nCell: ${senderPhone}` : ''}\n\nBest,\nThe EstateSalen.com Team`;
+  const emailBody = `Hi ${operator?.company_name || 'there'},\n\n${senderName} thought you'd be a great fit for EstateSalen.com — the platform helping estate sale companies grow their business with digital listings, marketing tools, and a national buyer network.\n\nSign up through their referral link and get started today:\n${referralLink}\n\nFeel free to reach out to ${senderName} directly:${senderEmail ? `\nEmail: ${senderEmail}` : ''}${senderPhone ? `\nCell: ${senderPhone}` : ''}\n\nBest,\nThe EstateSalen.com Team`;
 
   const handleSend = async () => {
     if (!email.trim()) return;
     setSending(true);
-    await logReferral({ currentUser, Estate Sale Company Owner, contactEmail: email.trim() });
+    await logReferral({ currentUser, operator, contactEmail: email.trim() });
     await base44.integrations.Core.SendEmail({
       to: email.trim(),
       subject: emailSubject,
@@ -65,7 +65,7 @@ export function ReferByEmailModal({ Estate Sale Company Owner, open, onClose, cu
     onClose();
   };
 
-  if (!Estate Sale Company Owner) return null;
+  if (!operator) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -99,8 +99,8 @@ export function ReferByEmailModal({ Estate Sale Company Owner, open, onClose, cu
         ) : (
           <div className="space-y-4 w-full min-w-0">
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-              <p className="font-semibold text-slate-900 text-sm">{Estate Sale Company Owner.company_name}</p>
-              <p className="text-xs text-slate-500">{Estate Sale Company Owner.city}, {Estate Sale Company Owner.state}</p>
+              <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
+              <p className="text-xs text-slate-500">{operator.city}, {operator.state}</p>
             </div>
 
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-orange-700 space-y-1">

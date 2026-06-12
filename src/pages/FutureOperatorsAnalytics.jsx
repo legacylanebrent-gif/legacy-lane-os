@@ -47,7 +47,7 @@ export default function FutureOperatorsAnalytics() {
         }
       }
 
-      console.log(`Loaded ${allOperators.length} total Estate Sale Company Owners`);
+      console.log(`Loaded ${allOperators.length} total operators`);
       setOperators(allOperators);
     } catch (error) {
       console.error('Error loading operators:', error);
@@ -113,11 +113,11 @@ export default function FutureOperatorsAnalytics() {
 
   const currentYearlyRevenue = currentMonthlyRevenue * 12;
 
-  // Estate Sale Company Owners with phone numbers (contactable)
+  // operators with phone numbers (contactable)
   const contactableOperators = operators.filter(op => op.phone).length;
   const contactablePercent = ((contactableOperators / operators.length) * 100).toFixed(1);
 
-  // Estate Sale Company Owners with websites
+  // operators with websites
   const operatorsWithWebsites = operators.filter(op => op.website).length;
   const websitePercent = ((operatorsWithWebsites / operators.length) * 100).toFixed(1);
 
@@ -254,7 +254,7 @@ export default function FutureOperatorsAnalytics() {
                     <div className="text-left sm:text-right pl-5 sm:pl-0">
                       <div className="text-sm font-bold">${(pkg.revenue).toLocaleString()}/mo</div>
                       <div className="text-xs text-slate-500">
-                        {pkg.value} Estate Sale Company Owners
+                        {pkg.value} operators
                         {pkg.name === 'Basic' && ' ($99/sale × 6 sales/yr)'}
                         {pkg.name === 'Bronze' && ' ($35/mo + $64/sale × 1.25/mo)'}
                       </div>
@@ -267,7 +267,7 @@ export default function FutureOperatorsAnalytics() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Top 20 States by Estate Sale Company Owner Count</CardTitle>
+              <CardTitle>Top 20 States by operator Count</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
@@ -379,7 +379,7 @@ export default function FutureOperatorsAnalytics() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-600">Estate Sale Company Owners with Websites</span>
+                <span className="text-sm font-medium text-slate-600">operators with Websites</span>
                 <Building2 className="w-5 h-5 text-green-600" />
               </div>
               <div className="text-3xl font-bold text-slate-900">{operatorsWithWebsites.toLocaleString()}</div>

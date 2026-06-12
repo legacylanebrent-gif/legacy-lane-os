@@ -21,7 +21,7 @@ const SIGN_TEMPLATES = [
   { id: 'doors_open', label: 'Doors Open At' }
 ];
 
-export default function SignTemplateModal({ open, onClose, sale, Estate Sale Company Owner }) {
+export default function SignTemplateModal({ open, onClose, sale, operator }) {
   const templateRef = useRef(null);
   const [selectedTemplate, setSelectedTemplate] = useState('main');
 
@@ -148,9 +148,9 @@ export default function SignTemplateModal({ open, onClose, sale, Estate Sale Com
             <h1 className="text-6xl font-bold text-blue-600 mb-8">
               We Accept Venmo
             </h1>
-            {Estate Sale Company Owner?.venmo_qr_code ? (
+            {operator?.venmo_qr_code ? (
               <img 
-                src={Estate Sale Company Owner.venmo_qr_code} 
+                src={operator.venmo_qr_code} 
                 alt="Venmo QR Code"
                 className="mx-auto max-w-md max-h-96 object-contain"
               />
@@ -259,27 +259,27 @@ export default function SignTemplateModal({ open, onClose, sale, Estate Sale Com
                 style={{ maxWidth: '300px' }}
               >
                 <div className="space-y-1">
-                  {Estate Sale Company Owner?.company_logo && (
+                  {operator?.company_logo && (
                     <img 
-                      src={Estate Sale Company Owner.company_logo} 
+                      src={operator.company_logo} 
                       alt="Company Logo"
                       className="ml-auto mb-2 max-h-12 max-w-32 object-contain"
                     />
                   )}
-                  {Estate Sale Company Owner?.company_name && (
-                    <p className="font-semibold text-slate-900 text-sm">{Estate Sale Company Owner.company_name}</p>
+                  {operator?.company_name && (
+                    <p className="font-semibold text-slate-900 text-sm">{operator.company_name}</p>
                   )}
-                  {Estate Sale Company Owner?.company_address && (
-                    <p className="text-xs text-slate-700">{Estate Sale Company Owner.company_address}</p>
+                  {operator?.company_address && (
+                    <p className="text-xs text-slate-700">{operator.company_address}</p>
                   )}
-                  {Estate Sale Company Owner?.phone && (
-                    <p className="text-xs text-slate-700">{Estate Sale Company Owner.phone}</p>
+                  {operator?.phone && (
+                    <p className="text-xs text-slate-700">{operator.phone}</p>
                   )}
-                  {Estate Sale Company Owner?.email && (
-                    <p className="text-xs text-slate-700">{Estate Sale Company Owner.email}</p>
+                  {operator?.email && (
+                    <p className="text-xs text-slate-700">{operator.email}</p>
                   )}
-                  {Estate Sale Company Owner?.company_website && (
-                    <p className="text-xs text-slate-700">{Estate Sale Company Owner.company_website}</p>
+                  {operator?.company_website && (
+                    <p className="text-xs text-slate-700">{operator.company_website}</p>
                   )}
                 </div>
               </div>

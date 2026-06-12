@@ -249,7 +249,7 @@ export default function TerritoryROICalc() {
             <span className="font-bold text-emerald-700 text-base">${result.netGCI.toLocaleString()}</span>
           </div>
           <p className="text-orange-500 text-xs leading-relaxed pt-1">
-            {operatorCount} Estate Sale Company Owners × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
+            {operatorCount} operators × 1 platform lead/mo × 10% listing conversion × {result.commissionPct}% commission − 20% referral fee. Estimates only.
           </p>
 
           {/* Territory Buy-In */}

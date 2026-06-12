@@ -293,7 +293,7 @@ export default function MyProfile() {
   const isOperator = acct === 'estate_sale_operator' || isAgentOperator;
   const isAgent = acct === 'real_estate_agent' || isAgentOperator;
   const isVendor = acct === 'vendor';
-  // Estate Sale Company Owners on Professional or Elite tiers get reseller features included
+  // operators on Professional or Elite tiers get reseller features included
   const activeTierForReseller = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
   const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(activeTierForReseller);
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
@@ -443,7 +443,7 @@ export default function MyProfile() {
                     await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
                     alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
                   }}>
-                  <Users className="w-4 h-4" /> Upgrade to Agent + Estate Sale Company Owner
+                  <Users className="w-4 h-4" /> Upgrade to Agent + operator
                 </Button>
               </div>
             </div>
@@ -910,7 +910,7 @@ export default function MyProfile() {
                   <Link to="/AgentOperatorPortal">
                     <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                       <div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-cyan-600" /></div>
-                      <div><p className="font-semibold text-sm">Estate Sale Company Owner Partnerships</p><p className="text-xs text-slate-500">Connect with Estate Sale Company Owners</p></div>
+                      <div><p className="font-semibold text-sm">Estate Sale Company Owner Partnerships</p><p className="text-xs text-slate-500">Connect with operators</p></div>
                     </div>
                   </Link>
                   <Link to="/AgentPartnerships">
@@ -1123,7 +1123,7 @@ export default function MyProfile() {
                       <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-cyan-600" /></div>
                       <div className="flex-1">
                         <p className="font-semibold text-sm">Reseller Network</p>
-                        <p className="text-xs text-slate-500">Connect with Estate Sale Company Owners & explore inventory</p>
+                        <p className="text-xs text-slate-500">Connect with operators & explore inventory</p>
                       </div>
                       <ArrowRight className="w-4 h-4 text-slate-400" />
                     </div>
@@ -1233,7 +1233,7 @@ export default function MyProfile() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Estate Sale Tools</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Link to="/ResellerNetwork"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Reseller Network</p><p className="text-xs text-slate-500">Connect with Estate Sale Company Owners & find buyout lots</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
+                  <Link to="/ResellerNetwork"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-orange-50 hover:border-orange-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5 text-orange-600" /></div><div><p className="font-semibold text-sm">Reseller Network</p><p className="text-xs text-slate-500">Connect with operators & find buyout lots</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                   <Link to="/ResellerDashboard"><div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-cyan-50 hover:border-cyan-300 cursor-pointer transition-all"><div className="w-9 h-9 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0"><BarChart2 className="w-5 h-5 text-cyan-600" /></div><div><p className="font-semibold text-sm">Reseller Dashboard</p><p className="text-xs text-slate-500">Leads, lots & buyout opportunities</p></div><ArrowRight className="w-4 h-4 text-slate-400 ml-auto" /></div></Link>
                 </div>
               </CardContent>

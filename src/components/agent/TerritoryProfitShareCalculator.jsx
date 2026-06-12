@@ -60,7 +60,7 @@ export default function TerritoryProfitShareCalculator() {
           {totalOperators.toLocaleString()} potential estate sale companies in database
         </span>
       </div>
-      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each Estate Sale Company Owner's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
+      <p className="text-slate-500 text-sm mb-6">Adjust the sliders to estimate your monthly profit share. Each operator's subscription has a 35% expense margin — you earn 20% of the remaining net profit.</p>
 
       {/* Sliders */}
       <div className="space-y-5 mb-8">

@@ -419,7 +419,7 @@ export default function CompanyLanding() {
           <blockquote className="text-2xl md:text-3xl font-serif italic leading-relaxed mb-6">
             "EstateSalen.com completely transformed how we run our business. We doubled our revenue in the first 6 months — and the AI content tool alone saves us 10 hours a week."
           </blockquote>
-          <p className="text-orange-200 font-medium">— Estate Sale Company Owner, Nashville TN</p>
+          <p className="text-orange-200 font-medium">— operator, Nashville TN</p>
         </div>
       </section>
 

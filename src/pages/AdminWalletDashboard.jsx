@@ -100,7 +100,7 @@ export default function AdminWalletDashboard() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Admin Wallet Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage Estate Sale Company Owner wallets and approve withdrawals</p>
+          <p className="text-slate-500 text-sm mt-1">Manage operator wallets and approve withdrawals</p>
         </div>
 
         {/* Stats Cards */}
@@ -165,11 +165,11 @@ export default function AdminWalletDashboard() {
               </div>
             </div>
 
-            {/* Top Estate Sale Company Owners by Balance */}
+            {/* Top operators by Balance */}
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <Wallet className="w-5 h-5 text-orange-600" />
-                Top Estate Sale Company Owners by Balance
+                Top operators by Balance
               </h3>
               <div className="space-y-3">
                 {wallets
@@ -241,7 +241,7 @@ export default function AdminWalletDashboard() {
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <input
                 type="text"
-                placeholder="Search by transaction ID, Estate Sale Company Owner, or deal ID..."
+                placeholder="Search by transaction ID, operator, or deal ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"

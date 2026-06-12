@@ -29,8 +29,8 @@ Day 1–2: Agent Outreach Blitz
 • Estimated additional responses: 42–60
 
 Day 3–4: Estate Sale Company Owner Activation
-• Send win-back sequence to 68 inactive Estate Sale Company Owners
-• Offer 14-day extended trial to 46 Estate Sale Company Owners receiving leads
+• Send win-back sequence to 68 inactive operators
+• Offer 14-day extended trial to 46 operators receiving leads
 • Target: 12–18 Estate Sale Company Owner recoveries, 8–12 trial activations
 
 Day 5–6: Territory Coverage
@@ -46,13 +46,13 @@ Day 7: Audit & Adjustment
 **Expected 7-Day Impact:**
 +$2,400–$4,200 new MRR potential
 +62 outreach conversations opened
-12+ Estate Sale Company Owners reactivated`,
+12+ operators reactivated`,
 
   '30': `**30-Day Action Plan — Systematic Growth**
 
 Week 1: Outreach Automation
 • Fully automate PropStream agent email pipeline
-• Activate Estate Sale Company Owner win-back sequences
+• Activate operator win-back sequences
 • Deploy reseller territory recruitment
 
 Week 2: Lead Funnel Optimization
@@ -89,7 +89,7 @@ Month 2: Conversion Engine
 
 Month 3: Revenue Optimization
 • Referral commission tracking automation
-• Upsell sequences for free/trial Estate Sale Company Owners
+• Upsell sequences for free/trial operators
 • National territory expansion beyond NJ pilot
 
 **Q4 Vision:**

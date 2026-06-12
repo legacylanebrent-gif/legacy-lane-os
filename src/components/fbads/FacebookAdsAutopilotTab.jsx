@@ -105,7 +105,7 @@ export default function FacebookAdsAutopilotTab({ user }) {
 
         <TabsContent value="audience">
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-5 font-semibold">Future Estate Sale Company Owner Custom Audience</p>
+            <p className="text-xs text-slate-500 uppercase tracking-widest mb-5 font-semibold">Future operator Custom Audience</p>
             <FbAdsAudiencePanel settings={settings} />
           </div>
         </TabsContent>

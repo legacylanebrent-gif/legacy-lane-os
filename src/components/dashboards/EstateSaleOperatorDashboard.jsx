@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateEstateSaleModal from '@/components/estate/CreateEstateSaleModal';
-import OperatorSalesTable from '@/components/Estate Sale Company Owner/OperatorSalesTable';
-import OperatorMessagesWidget from '@/components/Estate Sale Company Owner/OperatorMessagesWidget';
+import OperatorSalesTable from '@/components/operator/OperatorSalesTable';
+import OperatorMessagesWidget from '@/components/operator/OperatorMessagesWidget';
 import {
   Home,
   DollarSign,

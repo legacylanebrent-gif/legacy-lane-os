@@ -74,7 +74,7 @@ export default function AdminPhase12Deploy() {
               {
                 step: 2,
                 label: 'Assign Providers to NJ Counties',
-                desc: 'Map Estate Sale Company Owners, probate realtors, cleanout vendors, and investors to Monmouth, Ocean, and Middlesex County.',
+                desc: 'Map operators, probate realtors, cleanout vendors, and investors to Monmouth, Ocean, and Middlesex County.',
                 link: '/AdminLifeTransitionEngine',
                 linkLabel: 'Open Territory Engine →',
                 icon: Users,

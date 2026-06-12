@@ -97,7 +97,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
         }));
       }
     } catch (error) {
-      console.error('Error loading Estate Sale Company Owner:', error);
+      console.error('Error loading operator:', error);
     }
   };
 
@@ -829,7 +829,7 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
           open={showSignTemplate}
           onClose={() => setShowSignTemplate(false)}
           sale={sale}
-          Estate Sale Company Owner={Estate Sale Company Owner}
+          operator={ operator }
         />
 
         <PhotoLabelingModal

@@ -143,7 +143,7 @@ export default function MarketingPreferences() {
 
           {isGloballyOptedOut && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-xs text-red-700 font-medium">You are currently opted out of all Legacy Lane marketing emails. Individual Estate Sale Company Owner alerts are paused.</p>
+              <p className="text-xs text-red-700 font-medium">You are currently opted out of all Legacy Lane marketing emails. Individual operator alerts are paused.</p>
             </div>
           )}
         </CardContent>

@@ -23,7 +23,7 @@ const CONTEXT_TOGGLES = [
 const QUICK_COMMANDS = [
   'Build and prepare a 14-day Estate Sale Company Owner acquisition campaign for New Jersey estate sale companies.',
   'Create a full agent referral recruiting email sequence for licensed NJ real estate agents.',
-  'Draft the KPI targets and admin tasks for Q3 growth — 25 Estate Sale Company Owners, $25k MRR.',
+  'Draft the KPI targets and admin tasks for Q3 growth — 25 operators, $25k MRR.',
   'Build a territory expansion plan for Bergen, Essex, and Middlesex County NJ.',
   'Create a 7-step Estate Sale Company Owner onboarding sequence with tasks and follow-up drafts.',
   'Generate a CRM cleanup and lead scoring action plan.',

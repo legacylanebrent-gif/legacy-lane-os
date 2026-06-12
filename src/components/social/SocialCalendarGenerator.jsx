@@ -7,9 +7,9 @@ import { Loader2, Sparkles, Calendar } from 'lucide-react';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PLATFORM_OPTIONS = ['Facebook','Instagram','LinkedIn','Twitter','TikTok'];
 const AUDIENCE_OPTIONS = [
-  'Estate Sale Company Owners and company owners',
+  'operators and company owners',
   'Real estate agents looking for referral partnerships',
-  'Estate Sale Company Owners + real estate agents',
+  'operators + real estate agents',
   'Estate liquidation business owners',
   'Home sellers and downsizers',
 ];

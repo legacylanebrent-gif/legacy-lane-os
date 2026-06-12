@@ -337,7 +337,7 @@ export default function BizInABox() {
               Smart Investment, Massive Returns
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              Transparent pricing with no hidden fees. Most Estate Sale Company Owners recover their initial investment within 6 months.
+              Transparent pricing with no hidden fees. Most operators recover their initial investment within 6 months.
             </p>
           </div>
 
@@ -461,7 +461,7 @@ export default function BizInABox() {
                   <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="font-semibold">Private Community Access</div>
-                    <div className="text-sm text-slate-600">Network with other Estate Sale Company Owners, share wins and challenges</div>
+                    <div className="text-sm text-slate-600">Network with other operators, share wins and challenges</div>
                   </div>
                 </div>
               </CardContent>

@@ -189,7 +189,7 @@ export default function ReferralIncomeSection() {
           <div className="bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-500/30 rounded-2xl p-6 space-y-4">
             <div className="space-y-2">
               <p className="text-white font-bold text-lg">What Could You Do With {fmt(annualIncome)}/Year?</p>
-              <p className="text-slate-300 text-sm leading-relaxed">That's real money hitting your account — money you're already leaving on the table. Here's what successful Estate Sale Company Owners are doing with their referral income:</p>
+              <p className="text-slate-300 text-sm leading-relaxed">That's real money hitting your account — money you're already leaving on the table. Here's what successful operators are doing with their referral income:</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-3 pt-2">
               {[

@@ -560,7 +560,7 @@ export default function Home() {
             connection_type: 'favorite',
             source: saleId
           };
-          setDebugMessage(`🔄 Creating connection... User: ${currentUser.id}, Estate Sale Company Owner: ${sale.operator_id}`);
+          setDebugMessage(`🔄 Creating connection... User: ${currentUser.id}, operator: ${sale.operator_id}`);
           await base44.entities.Connection.create(connectionData);
           setDebugMessage('✅ Connection created successfully!');
           setTimeout(() => setDebugMessage(''), 5000);

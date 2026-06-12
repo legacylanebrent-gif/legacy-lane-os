@@ -47,7 +47,7 @@ export default function Buyouts() {
         const buyouts = offers.filter(o => o.item_name?.startsWith('Buyout Offer') || o.full_name === 'Estate Buyout');
         setBuyoutOffers(buyouts);
       } else {
-        // Estate Sale Company Owners see buyout offers on their own sales
+        // operators see buyout offers on their own sales
         const salesData = await base44.entities.EstateSale.filter({ 
           operator_id: userData.id 
         }, '-created_date');

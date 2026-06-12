@@ -201,7 +201,7 @@ export default function AdminLeadsSocialAds() {
               {selectedLead.property_address && <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg"><MapPin className="w-4 h-4 text-cyan-600 mt-0.5" /><span>{selectedLead.property_address}</span></div>}
               {selectedLead.notes && <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="font-medium mb-1">Notes</p><p className="text-slate-600">{selectedLead.notes}</p></div>}
               {!selectedLead.routed_to && !selectedLead.converted && (
-                <div><p className="text-sm font-medium mb-1">Assign to Estate Sale Company Owner</p>
+                <div><p className="text-sm font-medium mb-1">Assign to operator</p>
                   <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
                     <SelectTrigger><SelectValue placeholder="Select Estate Sale Company Owner..." /></SelectTrigger>
                     <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>

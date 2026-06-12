@@ -36,7 +36,7 @@ const loadValue = (key, defaultValue) => {
 };
 
 export default function Revenue() {
-  const [activeTab, setActiveTab] = useState('Estate Sale Company Owners');
+  const [activeTab, setActiveTab] = useState('operators');
   const [savedOperators, setSavedOperators] = useState(() => loadValue('launchOperators', 100));
 
   // Estate Sale Company Owner Growth Inputs
@@ -113,7 +113,7 @@ export default function Revenue() {
   const getYearProjection = (projections, year) =>
     projections.slice(0, year * 12).reduce((s, v) => s + v, 0);
 
-  // Build Estate Sale Company Owner count curve: starts at launchOperators, grows at operatorGrowthRate% per month, capped at 12,000
+  // Build operator count curve: starts at launchOperators, grows at operatorGrowthRate% per month, capped at 12,000
   const operatorCounts = Array.from({ length: 120 }, (_, i) =>
     Math.min(12000, Math.round(launchOperators * Math.pow(1 + operatorGrowthRate / 100, i)))
   );
@@ -167,7 +167,7 @@ export default function Revenue() {
     return proj;
   })();
 
-  // Advertising: cities = Estate Sale Company Owners × citiesPerOperator
+  // Advertising: cities = operators × citiesPerOperator
   const adProjections = (() => {
     const proj = [];
     for (let i = 0; i < 120; i++) {
@@ -230,7 +230,7 @@ export default function Revenue() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Revenue Projections</h1>
-          <p className="text-slate-600">Launch-based growth model — starting from {launchOperators} Estate Sale Company Owners, all revenue streams included</p>
+          <p className="text-slate-600">Launch-based growth model — starting from {launchOperators} operators, all revenue streams included</p>
         </div>
 
         {/* Summary Cards */}
@@ -293,7 +293,7 @@ export default function Revenue() {
                 <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                 <Legend />
-                <Area type="monotone" dataKey="Estate Sale Company Owners" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
+                <Area type="monotone" dataKey="operators" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" />
                 <Area type="monotone" dataKey="Vendor Subs" stackId="1" stroke="#a78bfa" fill="#a78bfa" />
                 <Area type="monotone" dataKey="Marketplace" stackId="1" stroke="#10b981" fill="#10b981" />
                 <Area type="monotone" dataKey="Referrals" stackId="1" stroke="#f59e0b" fill="#f59e0b" />
@@ -334,10 +334,10 @@ export default function Revenue() {
             </CardContent>
           </Card>
 
-          {/* Estate Sale Company Owner Growth Curve */}
+          {/* operator Growth Curve */}
           <Card>
             <CardHeader>
-              <CardTitle>Estate Sale Company Owner Growth Curve (36 months)</CardTitle>
+              <CardTitle>operator Growth Curve (36 months)</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -357,9 +357,9 @@ export default function Revenue() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
             <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
-              <TabsTrigger value="Estate Sale Company Owners" className="whitespace-nowrap flex-shrink-0">
+              <TabsTrigger value="operators" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
-                Estate Sale Company Owners
+                operators
               </TabsTrigger>
               <TabsTrigger value="vendorSubs" className="whitespace-nowrap flex-shrink-0">
                 <Users className="w-4 h-4 mr-1" />
@@ -389,8 +389,8 @@ export default function Revenue() {
             </TabsList>
           </div>
 
-          {/* Estate Sale Company Owners Tab */}
-          <TabsContent value="Estate Sale Company Owners">
+          {/* operators Tab */}
+          <TabsContent value="operators">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -401,7 +401,7 @@ export default function Revenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Model:</strong> Start with {launchOperators} Estate Sale Company Owners at launch, grow {operatorGrowthRate}% per month (compounding).
+                    <strong>Model:</strong> Start with {launchOperators} operators at launch, grow {operatorGrowthRate}% per month (compounding).
                   </div>
                   <div className="text-sm text-slate-700">
                     <strong>Month 1 operators:</strong> {operatorCounts[0].toLocaleString()} &nbsp;→&nbsp;
@@ -410,7 +410,7 @@ export default function Revenue() {
                     <strong>Month 120:</strong> {operatorCounts[119].toLocaleString()}
                   </div>
                   <div className="text-sm font-semibold text-slate-800">
-                    <strong>Avg Monthly Revenue / Estate Sale Company Owner:</strong> ${avgMonthlyRevenuePerOp}/mo (blended package mix)
+                    <strong>Avg Monthly Revenue / operator:</strong> ${avgMonthlyRevenuePerOp}/mo (blended package mix)
                   </div>
                 </div>
 
@@ -432,7 +432,7 @@ export default function Revenue() {
                     <Input type="number" value={operatorGrowthRate} onChange={(e) => setOperatorGrowthRate(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Avg Revenue / Estate Sale Company Owner / Month ($)</Label>
+                    <Label>Avg Revenue / operator / Month ($)</Label>
                     <Input type="number" value={avgMonthlyRevenuePerOp} onChange={(e) => setAvgMonthlyRevenuePerOp(Number(e.target.value))} />
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export default function Revenue() {
                     <Input type="number" value={vendorSubPrice} onChange={(e) => setVendorSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Vendors Per Estate Sale Company Owner / Month</Label>
+                    <Label>Vendors Per operator / Month</Label>
                     <Input type="number" value={vendorPerOperator} onChange={(e) => setVendorPerOperator(Number(e.target.value))} />
                   </div>
                   <div>
@@ -711,7 +711,7 @@ export default function Revenue() {
                     <Input type="number" value={adPremiumPrice} onChange={(e) => setAdPremiumPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>Cities Per Estate Sale Company Owner</Label>
+                    <Label>Cities Per operator</Label>
                     <Input type="number" value={citiesPerOperator} onChange={(e) => setCitiesPerOperator(Number(e.target.value))} />
                   </div>
                 </div>

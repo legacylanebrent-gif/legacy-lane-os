@@ -74,7 +74,7 @@ export default function ProfitAnalysis({ sale, techCosts, operatorSubscription }
 
             {!sale.operator_id && (
               <div className="p-3 text-xs text-amber-600 bg-amber-50 border-b">
-                ⚠️ No Estate Sale Company Owner assigned to this sale. Please assign an Estate Sale Company Owner to see subscription revenue.
+                ⚠️ No Estate Sale Company Owner assigned to this sale. Please assign an operator to see subscription revenue.
               </div>
             )}
 

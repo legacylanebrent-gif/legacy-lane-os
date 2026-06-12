@@ -131,7 +131,7 @@ export default function AgentListingEstateSaleRequest() {
           <a href="#form-section" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl text-lg transition-colors shadow-lg">
             Add My Listing to the Estate Sale Company Owner Pool <ArrowRight className="w-5 h-5" />
           </a>
-          <p className="text-slate-400 text-sm">No cost to submit. No obligation. Local Estate Sale Company Owners may reach out if they service the area.</p>
+          <p className="text-slate-400 text-sm">No cost to submit. No obligation. Local operators may reach out if they service the area.</p>
         </div>
       </section>
 
@@ -189,7 +189,7 @@ export default function AgentListingEstateSaleRequest() {
             ))}
           </div>
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            <strong>Important:</strong> EstateSalen does not guarantee that every property will qualify for an estate sale or that every Estate Sale Company Owner will accept the opportunity. This simply places the listing into the Estate Sale Company Owner opportunity pool.
+            <strong>Important:</strong> EstateSalen does not guarantee that every property will qualify for an estate sale or that every Estate Sale Company Owner will accept the opportunity. This simply places the listing into the operator opportunity pool.
           </div>
         </div>
       </section>
@@ -300,7 +300,7 @@ export default function AgentListingEstateSaleRequest() {
                   {selectedListing.agent_submitted_to_pool && (
                     <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                      This listing has already been submitted to the Estate Sale Company Owner pool.
+                      This listing has already been submitted to the operator pool.
                     </div>
                   )}
                 </div>
@@ -448,7 +448,7 @@ export default function AgentListingEstateSaleRequest() {
                 </div>
 
                 <div>
-                  <Label className="mb-1 block">Notes for the Estate Sale Company Owner</Label>
+                  <Label className="mb-1 block">Notes for the operator</Label>
                   <textarea value={timelineInfo.notes} onChange={e => setTimelineInfo(t => ({ ...t, notes: e.target.value }))}
                     rows={3} placeholder="Any additional context that would help an Estate Sale Company Owner understand the opportunity…"
                     className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 resize-none" />
@@ -465,7 +465,7 @@ export default function AgentListingEstateSaleRequest() {
                 </div>
 
                 <p className="text-xs text-slate-400 text-center">
-                  By submitting, you agree to our terms. EstateSalen does not guarantee Estate Sale Company Owner response. No cost, no obligation.
+                  By submitting, you agree to our terms. EstateSalen does not guarantee operator response. No cost, no obligation.
                 </p>
               </div>
             )}

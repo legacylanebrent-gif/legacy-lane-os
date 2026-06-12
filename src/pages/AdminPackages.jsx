@@ -186,7 +186,7 @@ export default function AdminPackages() {
                       <li>• One-time territory buy-in (no monthly fee)</li>
                       <li>• Exclusive access to territory-generated leads</li>
                       <li>• 20% referral fee to EstateSalen on closed deals</li>
-                      <li>• Recruit Estate Sale Company Owners & resellers: earn 20% of net profit</li>
+                      <li>• Recruit operators & resellers: earn 20% of net profit</li>
                       <li>• Build passive income from territory subscriptions</li>
                     </ul>
                   </div>

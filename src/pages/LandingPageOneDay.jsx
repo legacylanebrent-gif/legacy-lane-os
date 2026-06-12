@@ -82,13 +82,13 @@ export default function LandingPageOneDay() {
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/40 text-orange-300 text-sm font-semibold px-4 py-1.5 rounded-full">
-            For Estate Sale Company Owners
+            For operators
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight">
             How I Got One Full Day Per Week Back
           </h1>
           <p className="text-xl text-slate-300 font-medium max-w-2xl mx-auto">
-            And Why Other Estate Sale Company Owners Wanted Access to What I Created
+            And Why Other operators Wanted Access to What I Created
           </p>
           <p className="text-lg text-orange-400 font-semibold">
             Save 8–10+ Hours Per Sale. Stay Organized. Market More Consistently. Grow Without Working More.
@@ -161,7 +161,7 @@ export default function LandingPageOneDay() {
       {/* Section 2: Built For Owners Not Tech People */}
       <section className="py-16 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-slate-900">EstateSalen.com Was Built For Estate Sale Company Owners, Not Tech People</h2>
+          <h2 className="text-3xl font-serif font-bold text-slate-900">EstateSalen.com Was Built For operators, Not Tech People</h2>
           <p className="text-lg text-slate-600">Let's be honest. We didn't get into this business because we love all the business sides of things.</p>
           <p className="text-slate-600">You got into this business because you enjoy helping families, organizing sales, pricing merchandise, and creating successful events.</p>
           <p className="text-slate-600">The problem is that every year there seems to be another app, another social media platform, another marketing system, and another piece of technology you're expected to learn.</p>

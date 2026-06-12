@@ -87,7 +87,7 @@ export default function AdminAICommandConsole({ onSubmit, loading }) {
         <Textarea
           value={command}
           onChange={e => setCommand(e.target.value)}
-          placeholder='Example: Build a 30-day plan to acquire 25 new Estate Sale Company Owners in New Jersey and create the campaigns, follow-up tasks, and KPIs.'
+          placeholder='Example: Build a 30-day plan to acquire 25 new operators in New Jersey and create the campaigns, follow-up tasks, and KPIs.'
           className="min-h-[120px] bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-amber-400 resize-none text-sm"
         />
       </div>

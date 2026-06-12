@@ -107,7 +107,7 @@ export default function TerritoryLaunchForm({ onSuccess, onCancel }) {
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Provider Assignments (optional)</p>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="text-xs">Estate Sale Company Owner Name</Label>
+            <Label className="text-xs">operator Name</Label>
             <Input value={form.assigned_operator_name} onChange={e => set('assigned_operator_name', e.target.value)} placeholder="Company name..." className="h-9 mt-1" />
           </div>
           <div>

@@ -75,7 +75,7 @@ export default function PortalInviteTab({ user }) {
                 <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div>
                   <p className="text-emerald-800 font-semibold text-sm">Invitation Sent!</p>
-                  <p className="text-emerald-700 text-xs">The Estate Sale Company Owner has been emailed and added to your invite pipeline.</p>
+                  <p className="text-emerald-700 text-xs">The operator has been emailed and added to your invite pipeline.</p>
                 </div>
               </div>
             )}
@@ -138,7 +138,7 @@ export default function PortalInviteTab({ user }) {
       <div className="md:col-span-2 space-y-4">
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="p-5">
-            <h4 className="font-bold text-orange-900 mb-2 text-sm">Why Invite Estate Sale Company Owners?</h4>
+            <h4 className="font-bold text-orange-900 mb-2 text-sm">Why Invite operators?</h4>
             <ul className="space-y-2 text-xs text-orange-800 leading-relaxed">
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> They become your official referral partner on the platform</li>
               <li className="flex gap-2"><span className="font-bold shrink-0">→</span> You earn 20% of their monthly net profit as a Territory Owner</li>

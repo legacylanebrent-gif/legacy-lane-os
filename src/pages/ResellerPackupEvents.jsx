@@ -153,7 +153,7 @@ export default function ResellerPackupEvents() {
                 <span className="text-purple-200 text-xs font-semibold uppercase tracking-wide">Reseller Network</span>
               </div>
               <p className="font-bold text-lg">Get access to exclusive post-sale inventory events</p>
-              <p className="text-purple-200 text-sm mt-1">Register as a reseller to RSVP for events, get early access to discounted estate sale inventory, and connect with Estate Sale Company Owners in your area.</p>
+              <p className="text-purple-200 text-sm mt-1">Register as a reseller to RSVP for events, get early access to discounted estate sale inventory, and connect with operators in your area.</p>
             </div>
             <div className="flex flex-col gap-2 flex-shrink-0">
               {!user
@@ -277,7 +277,7 @@ export default function ResellerPackupEvents() {
 
                 {/* CTA section */}
                 <div className="pt-2 border-t border-slate-100">
-                  {/* Estate Sale Company Owner owner */}
+                  {/* operator owner */}
                   {isOwner && (
                     <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/ResellerPackupEventEditor?eventId=${ev.id}`)}>
                       Manage This Event <ChevronRight className="w-4 h-4 ml-1" />

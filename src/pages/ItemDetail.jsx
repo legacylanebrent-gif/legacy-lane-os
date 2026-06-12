@@ -113,7 +113,7 @@ export default function ItemDetail() {
                 setOperator(operatorData[0]);
               }
             } catch (error) {
-              console.log('ItemDetail - Could not load Estate Sale Company Owner:', error);
+              console.log('ItemDetail - Could not load operator:', error);
             }
           }
 
@@ -431,7 +431,7 @@ export default function ItemDetail() {
             )}
 
             {/* Contact Seller */}
-            {Estate Sale Company Owner && (
+            {operator && (
               <Card className="bg-gradient-to-br from-orange-50 to-cyan-50 border-2 border-orange-200">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-4">Interested in this item?</h3>
@@ -454,13 +454,13 @@ export default function ItemDetail() {
                       </Button>
                     )}
 
-                    {Estate Sale Company Owner.phone && (
+                    {operator.phone && (
                       <a
-                        href={`tel:${Estate Sale Company Owner.phone}`}
+                        href={`tel:${operator.phone}`}
                         className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                       >
                         <Phone className="w-4 h-4" />
-                        {Estate Sale Company Owner.phone}
+                        {operator.phone}
                       </a>
                     )}
                   </div>
@@ -515,11 +515,11 @@ export default function ItemDetail() {
       </div>
 
       {/* Message Modal */}
-      {currentUser && Estate Sale Company Owner && (
-        <MessageModal
+      {currentUser && operator && (
+       <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={Estate Sale Company Owner}
+          recipient={ operator }
           relatedEntity={{ type: 'Item', id: item.id, title: item.title }}
         />
       )}

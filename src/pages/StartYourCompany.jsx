@@ -278,7 +278,7 @@ export default function StartYourCompany() {
               Success Stories
             </h2>
             <p className="text-xl text-slate-600">
-              Real results from EstateSalen.com Estate Sale Company Owners
+              Real results from EstateSalen.com operators
             </p>
           </div>
 
@@ -477,7 +477,7 @@ export default function StartYourCompany() {
                   Do I need previous experience in estate sales?
                 </h4>
                 <p className="text-slate-600">
-                  No! Our comprehensive training program covers everything from pricing and staging to marketing and client management. Many of our most successful Estate Sale Company Owners started with zero experience.
+                  No! Our comprehensive training program covers everything from pricing and staging to marketing and client management. Many of our most successful operators started with zero experience.
                 </p>
               </CardContent>
             </Card>
@@ -510,7 +510,7 @@ export default function StartYourCompany() {
                   What's the earning potential?
                 </h4>
                 <p className="text-slate-600">
-                  Most Estate Sale Company Owners charge 30-40% commission on sales. Typical estate sales range from $10,000 to $100,000+. With 2-4 sales per month, Estate Sale Company Owners can earn $50,000-$200,000+ annually.
+                  Most operators charge 30-40% commission on sales. Typical estate sales range from $10,000 to $100,000+. With 2-4 sales per month, operators can earn $50,000-$200,000+ annually.
                 </p>
               </CardContent>
             </Card>

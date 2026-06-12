@@ -73,7 +73,7 @@ export default function PortalPartnershipsTab({ user }) {
           <CardContent className="p-12 text-center">
             <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="font-semibold text-slate-500 mb-1">No Partnerships Yet</p>
-            <p className="text-sm text-slate-400">Use the Invite Estate Sale Company Owners tab to start building your network.</p>
+            <p className="text-sm text-slate-400">Use the Invite operators tab to start building your network.</p>
           </CardContent>
         </Card>
       ) : (

@@ -281,9 +281,9 @@ export default function EstateSaleDetail() {
         await base44.entities.CompanyFollow.create({
           consumer_user_id: currentUser.id,
           operator_id: sale.operator_id,
-          operator_name: Estate Sale Company Owner?.company_name || Estate Sale Company Owner?.full_name || sale.operator_name || '',
-          operator_city: Estate Sale Company Owner?.address_city || Estate Sale Company Owner?.city || '',
-          operator_state: Estate Sale Company Owner?.address_state || Estate Sale Company Owner?.state || '',
+          operator_name: operator?.company_name || operator?.full_name || sale.operator_name || '',
+          operator_city: operator?.address_city || operator?.city || '',
+          operator_state: operator?.address_state || operator?.state || '',
           notify_email: true,
           notify_sms: false,
           notify_inapp: true,
@@ -385,7 +385,7 @@ export default function EstateSaleDetail() {
     endDate: sale.sale_dates?.[sale.sale_dates.length - 1]?.date || undefined,
     organizer: {
       '@type': 'Organization',
-      name: Estate Sale Company Owner?.company_name || sale.operator_name || 'Estate Sale Company',
+      name: operator?.company_name || sale.operator_name || 'Estate Sale Company',
     },
     offers: {
       '@type': 'Offer',
@@ -870,26 +870,26 @@ export default function EstateSaleDetail() {
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-slate-600" />
-                  {Estate Sale Company Owner?.company_name || sale.operator_name || 'Estate Sale Company Owner'}
+                  {operator?.company_name || sale.operator_name || 'Estate Sale Company Owner'}
                 </h3>
 
-                {Estate Sale Company Owner?.company_description && (
-                  <p className="text-sm text-slate-600 mb-4">{Estate Sale Company Owner.company_description}</p>
+                {operator?.company_description && (
+                  <p className="text-sm text-slate-600 mb-4">{operator.company_description}</p>
                 )}
 
                 <div className="space-y-3">
-                  {Estate Sale Company Owner?.phone && (
+                  {operator?.phone && (
                     <a
-                      href={`tel:${Estate Sale Company Owner.phone}`}
+                      href={`tel:${operator.phone}`}
                       className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                     >
                       <Phone className="w-4 h-4" />
-                      {Estate Sale Company Owner.phone}
+                      {operator.phone}
                     </a>
                   )}
-                  {Estate Sale Company Owner?.company_website && (
+                  {operator?.company_website && (
                     <a
-                      href={Estate Sale Company Owner.company_website}
+                      href={operator.company_website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-cyan-600 hover:text-cyan-700"
@@ -958,7 +958,7 @@ export default function EstateSaleDetail() {
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={Estate Sale Company Owner || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
+          recipient={operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
           relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
           savedImages={savedImages}
           allImages={sale.images}

@@ -126,7 +126,7 @@ export default function CustomerIOReportingCenter() {
   const TABS = [
     { key: 'overview', label: 'Overview' },
     { key: 'events', label: `Events (${engagementLogs.length})` },
-    { key: 'Estate Sale Company Owners', label: `Estate Sale Company Owners (${operatorPerfs.length})` },
+    { key: 'Estate Sale Company Owners', label: `operators (${operatorPerfs.length})` },
     { key: 'sales', label: `Sales (${salePerfs.length})` },
     { key: 'suppressed', label: `Suppressed (${suppressedProfiles.length})` },
     { key: 'setup', label: 'Webhook Setup' },
@@ -201,7 +201,7 @@ export default function CustomerIOReportingCenter() {
             ))}
           </div>
 
-          {/* Top Estate Sale Company Owners */}
+          {/* Top operators */}
           {operatorPerfs.length > 0 && (
             <Card>
               <CardHeader className="pb-3"><CardTitle className="text-sm">Top Performing Estate Sale Company Owners</CardTitle></CardHeader>
@@ -285,7 +285,7 @@ export default function CustomerIOReportingCenter() {
       )}
 
       {/* ── OPERATORS TAB ── */}
-      {activeTab === 'Estate Sale Company Owners' && (
+      {activeTab === 'operators' && (
         <Card>
           <CardContent className="p-0">
             {operatorPerfs.length === 0 ? (

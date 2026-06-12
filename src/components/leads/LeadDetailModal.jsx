@@ -194,7 +194,7 @@ export default function LeadDetailModal({ lead, operators, onAssign, onMarkConve
             {/* Assignment */}
             {!lead.routed_to && !lead.converted && (
               <div className="border-t pt-3">
-                <p className="text-sm font-medium mb-1">Assign to Estate Sale Company Owner</p>
+                <p className="text-sm font-medium mb-1">Assign to operator</p>
                 <Select onValueChange={(opId) => onAssign(lead.id, opId)}>
                   <SelectTrigger><SelectValue placeholder="Select Estate Sale Company Owner..." /></SelectTrigger>
                   <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>

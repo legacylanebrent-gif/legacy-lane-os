@@ -325,7 +325,7 @@ export default function FutOperLeads() {
   };
 
   const handleNjStartBatch = async (offset = 0, cachedCompanies = null, cachedExisting = null, autoRun = false) => {
-    const fnName = getStateFn(stateFilter) || `scrape${stateFilter}Estate Sale Company Owners`;
+    const fnName = getStateFn(stateFilter) || `scrape${stateFilter}operators`;
     setNjBatchState(prev => ({ ...(prev || {}), running: true, autoRun }));
     try {
       const payload = { batch_offset: offset };
@@ -745,7 +745,7 @@ export default function FutOperLeads() {
       <Dialog open={!!editingOperator} onOpenChange={(open) => !open && setEditingOperator(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Estate Sale Company Owner</DialogTitle>
+            <DialogTitle>Edit operator</DialogTitle>
             <DialogDescription>{decodeHtml(editingOperator?.company_name || '')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">

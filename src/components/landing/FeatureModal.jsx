@@ -22,7 +22,7 @@ Return a JSON object with:
 - "headline": a punchy one-liner (max 10 words) that leads with the business benefit
 - "overview": 2-3 sentences explaining what this feature does and why it matters
 - "how_it_works": array of 3-4 short bullet strings describing how the feature works step by step
-- "time_saved": a specific, concrete statement about how much time or money this saves Estate Sale Company Owners (e.g. "Saves Estate Sale Company Owners 3–5 hours per sale")
+- "time_saved": a specific, concrete statement about how much time or money this saves operators (e.g. "Saves operators 3–5 hours per sale")
 - "business_impact": 2 sentences on the measurable business impact (more revenue, fewer mistakes, happier clients, etc.)
 
 Be specific, concrete, and enthusiastic but professional. Focus on Estate Sale Company Owners as the audience.`,

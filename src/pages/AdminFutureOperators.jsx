@@ -60,26 +60,26 @@ export default function AdminFutureOperators() {
 
   const decodeHtml = (str) => str ? str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'") : '';
 
-  const openEdit = (Estate Sale Company Owner) => {
-    setEditingOperator(Estate Sale Company Owner);
+  const openEdit = (operator) => {
+    setEditingOperator(operator);
     setEditForm({
-      company_name: decodeHtml(Estate Sale Company Owner.company_name || ''),
-      email: Estate Sale Company Owner.email || '',
-      phone: Estate Sale Company Owner.phone || '',
-      website: Estate Sale Company Owner.website || '',
-      website_url: Estate Sale Company Owner.website_url || '',
-      city: Estate Sale Company Owner.city || '',
-      state: Estate Sale Company Owner.state || '',
-      zip_code: Estate Sale Company Owner.zip_code || '',
-      county: Estate Sale Company Owner.county || '',
-      facebook: Estate Sale Company Owner.facebook || '',
-      instagram: Estate Sale Company Owner.instagram || '',
-      twitter: Estate Sale Company Owner.twitter || '',
-      youtube: Estate Sale Company Owner.youtube || '',
-      enrichment_notes: Estate Sale Company Owner.enrichment_notes || '',
-      alternate_emails_text: (Estate Sale Company Owner.alternate_emails || []).join(', '),
-      do_not_contact: Estate Sale Company Owner.do_not_contact || false,
-      unsubscribe_status: Estate Sale Company Owner.unsubscribe_status || false,
+      company_name: decodeHtml(operator.company_name || ''),
+      email: operator.email || '',
+      phone: operator.phone || '',
+      website: operator.website || '',
+      website_url: operator.website_url || '',
+      city: operator.city || '',
+      state: operator.state || '',
+      zip_code: operator.zip_code || '',
+      county: operator.county || '',
+      facebook: operator.facebook || '',
+      instagram: operator.instagram || '',
+      twitter: operator.twitter || '',
+      youtube: operator.youtube || '',
+      enrichment_notes: operator.enrichment_notes || '',
+      alternate_emails_text: (operator.alternate_emails || []).join(', '),
+      do_not_contact: operator.do_not_contact || false,
+      unsubscribe_status: operator.unsubscribe_status || false,
     });
   };
 
@@ -212,7 +212,7 @@ export default function AdminFutureOperators() {
   const getStateFunctions = (state) => {
     return allScrapeFunctions.filter(fn => {
       // Match functions that contain the state abbreviation (case-insensitive, after "scrape")
-      const body = fn.replace(/^scrape/, '').replace(/Estate Sale Company Owners.*$/, '');
+      const body = fn.replace(/^scrape/, '').replace(/Operators.*$/, '');
       return body.toUpperCase() === state.toUpperCase() || body.toUpperCase().startsWith(state.toUpperCase());
     });
   };
@@ -232,7 +232,7 @@ export default function AdminFutureOperators() {
   const handleNjStartBatch = async (offset = 0, cachedCompanies = null, cachedExisting = null, autoRun = false) => {
     setNjBatchState(prev => ({ ...(prev || {}), running: true, autoRun }));
     const fns = getStateFunctions(stateFilter);
-    const fnName = fns.length > 0 ? fns[0] : `scrape${stateFilter}Estate Sale Company Owners`;
+    const fnName = fns.length > 0 ? fns[0] : `scrape${stateFilter}operators`;
     try {
       const payload = { batch_offset: offset };
       if (cachedCompanies) payload.all_companies = cachedCompanies;
@@ -472,29 +472,29 @@ export default function AdminFutureOperators() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredOperators.map((Estate Sale Company Owner) => (
-              <Card key={Estate Sale Company Owner.id} className="hover:shadow-md transition-shadow">
+            {filteredOperators.map((operator) => (
+              <Card key={operator.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">
-                            {Estate Sale Company Owner.company_name?.replace(/&amp;/g, '&')}
+                            {operator.company_name?.replace(/&amp;/g, '&')}
                           </h3>
-                          {isNew(Estate Sale Company Owner) && (
+                          {isNew(operator) && (
                             <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs">New</Badge>
                           )}
                           {/* LL OS subscriber badge — visible to everyone */}
-                          {Estate Sale Company Owner.ll_os_subscriber && (
+                          {operator.ll_os_subscriber && (
                             <Badge className="bg-orange-100 text-orange-700 border border-orange-300 text-xs">
                               LL OS Member
                             </Badge>
                           )}
                           {/* Scraped EstateSales.net package label — admin only */}
-                          {Estate Sale Company Owner.package_type && currentUser?.role === 'admin' && (
-                            <Badge className={getPackageColor(Estate Sale Company Owner.package_type) + ' text-xs'} title="EstateSales.net package (admin only)">
-                              {Estate Sale Company Owner.package_type}
+                          {operator.package_type && currentUser?.role === 'admin' && (
+                            <Badge className={getPackageColor(operator.package_type) + ' text-xs'} title="EstateSales.net package (admin only)">
+                              {operator.package_type}
                             </Badge>
                           )}
                         </div>
@@ -504,16 +504,16 @@ export default function AdminFutureOperators() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openEdit(Estate Sale Company Owner)}
+                          onClick={() => openEdit(operator)}
                           className="border-slate-400 text-slate-700 hover:bg-slate-50"
                         >
                           <Pencil className="w-3 h-3 sm:mr-1" />
                           <span className="hidden sm:inline">Edit</span>
                         </Button>
 
-                        {Estate Sale Company Owner.source_url && (
+                        {operator.source_url && (
                           <Button variant="outline" size="sm" asChild className="flex-shrink-0">
-                            <a href={Estate Sale Company Owner.source_url} target="_blank" rel="noopener noreferrer">
+                            <a href={operator.source_url} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="w-3 h-3 sm:mr-1" />
                               <span className="hidden sm:inline">View Profile</span>
                             </a>
@@ -523,59 +523,59 @@ export default function AdminFutureOperators() {
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
-                      {(Estate Sale Company Owner.geocoded_city || Estate Sale Company Owner.city) && Estate Sale Company Owner.state && (
+                      {(operator.geocoded_city || operator.city) && operator.state && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
                           <span className="truncate">
-                            {Estate Sale Company Owner.geocoded_city || Estate Sale Company Owner.city}, {Estate Sale Company Owner.state} {Estate Sale Company Owner.geocoded_zip || Estate Sale Company Owner.zip_code}
-                            {Estate Sale Company Owner.geocoded_county && <span className="text-slate-400 ml-1">· {Estate Sale Company Owner.geocoded_county}</span>}
+                            {operator.geocoded_city || operator.city}, {operator.state} {operator.geocoded_zip || operator.zip_code}
+                            {operator.geocoded_county && <span className="text-slate-400 ml-1">· {operator.geocoded_county}</span>}
                           </span>
                         </div>
                       )}
                       
-                      {Estate Sale Company Owner.phone && (
+                      {operator.phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                          <a href={`tel:${Estate Sale Company Owner.phone}`} className="hover:underline truncate">
-                            {Estate Sale Company Owner.phone}
+                          <a href={`tel:${operator.phone}`} className="hover:underline truncate">
+                            {operator.phone}
                           </a>
                         </div>
                       )}
                       
-                      {Estate Sale Company Owner.website && (
+                      {operator.website && (
                         <div className="flex items-center gap-2 col-span-full">
                           <Globe className="w-4 h-4 text-green-600 flex-shrink-0" />
                           <a 
-                            href={Estate Sale Company Owner.website} 
+                            href={operator.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="hover:underline truncate"
                           >
-                            {Estate Sale Company Owner.website.replace(/https?:\/\/(www\.)?/, '')}
+                            {operator.website.replace(/https?:\/\/(www\.)?/, '')}
                           </a>
                         </div>
                       )}
                       
-                      {Estate Sale Company Owner.member_since && (
+                      {operator.member_since && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                          <span className="truncate">Member since {Estate Sale Company Owner.member_since}</span>
+                          <span className="truncate">Member since {operator.member_since}</span>
                         </div>
                       )}
 
-                      {Estate Sale Company Owner.email && (
+                      {operator.email && (
                         <div className="col-span-full space-y-1">
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            <a href={`mailto:${Estate Sale Company Owner.email}`} className="hover:underline truncate font-mono text-sm font-medium">
-                              {Estate Sale Company Owner.email}
+                            <a href={`mailto:${operator.email}`} className="hover:underline truncate font-mono text-sm font-medium">
+                              {operator.email}
                             </a>
                             <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
-                            {Estate Sale Company Owner.email_confidence_score != null && (
-                              <span className="text-xs text-slate-400">({Estate Sale Company Owner.email_confidence_score}%)</span>
+                            {operator.email_confidence_score != null && (
+                              <span className="text-xs text-slate-400">({operator.email_confidence_score}%)</span>
                             )}
                           </div>
-                          {Estate Sale Company Owner.alternate_emails?.length > 0 && Estate Sale Company Owner.alternate_emails.map((altEmail, idx) => (
+                          {operator.alternate_emails?.length > 0 && operator.alternate_emails.map((altEmail, idx) => (
                             <div key={idx} className="flex items-center gap-2 pl-6">
                               <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                               <a href={`mailto:${altEmail}`} className="hover:underline truncate font-mono text-xs text-slate-600">
@@ -588,11 +588,11 @@ export default function AdminFutureOperators() {
                       )}
                     </div>
 
-                    {(Estate Sale Company Owner.facebook || Estate Sale Company Owner.twitter || Estate Sale Company Owner.instagram || Estate Sale Company Owner.youtube || Estate Sale Company Owner.pinterest) && (
+                    {(operator.facebook || operator.twitter || operator.instagram || operator.youtube || operator.pinterest) && (
                       <div className="flex items-center gap-2 pt-2 border-t">
-                        {Estate Sale Company Owner.facebook && (
+                        {operator.facebook && (
                           <a 
-                            href={Estate Sale Company Owner.facebook} 
+                            href={operator.facebook} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-700"
@@ -600,9 +600,9 @@ export default function AdminFutureOperators() {
                             <Facebook className="w-4 h-4" />
                           </a>
                         )}
-                        {Estate Sale Company Owner.twitter && (
+                        {operator.twitter && (
                           <a 
-                            href={Estate Sale Company Owner.twitter} 
+                            href={operator.twitter} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-sky-500 hover:text-sky-600"
@@ -610,9 +610,9 @@ export default function AdminFutureOperators() {
                             <Twitter className="w-4 h-4" />
                           </a>
                         )}
-                        {Estate Sale Company Owner.instagram && (
+                        {operator.instagram && (
                           <a 
-                            href={Estate Sale Company Owner.instagram} 
+                            href={operator.instagram} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-pink-600 hover:text-pink-700"
@@ -620,9 +620,9 @@ export default function AdminFutureOperators() {
                             <Instagram className="w-4 h-4" />
                           </a>
                         )}
-                        {Estate Sale Company Owner.youtube && (
+                        {operator.youtube && (
                           <a 
-                            href={Estate Sale Company Owner.youtube} 
+                            href={operator.youtube} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-red-600 hover:text-red-700"

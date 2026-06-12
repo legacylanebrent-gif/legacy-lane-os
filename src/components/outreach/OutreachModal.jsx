@@ -97,7 +97,7 @@ export default function OutreachModal({ open, onClose, selectedLeads }) {
             AI Outreach Sequence
           </DialogTitle>
           <DialogDescription>
-            Send personalized AI-generated emails to selected leads via Gmail to convert them into paid Estate Sale Company Owners.
+            Send personalized AI-generated emails to selected leads via Gmail to convert them into paid operators.
           </DialogDescription>
         </DialogHeader>
 

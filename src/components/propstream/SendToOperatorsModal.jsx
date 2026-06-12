@@ -52,7 +52,7 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Send Lead to Estate Sale Company Owners</DialogTitle>
+          <DialogTitle>Send Lead to operators</DialogTitle>
         </DialogHeader>
 
         {done ? (
@@ -70,7 +70,7 @@ export default function SendToOperatorsModal({ open, listing, onClose, onSent })
               <p className="text-slate-500">Territory: {listing?.territory_name || 'Not matched'}</p>
             </div>
 
-            <p className="text-sm font-medium text-slate-700">Select Estate Sale Company Owners to notify:</p>
+            <p className="text-sm font-medium text-slate-700">Select operators to notify:</p>
 
             {loading ? (
               <div className="py-6 text-center"><Loader className="w-6 h-6 animate-spin mx-auto text-slate-400" /></div>

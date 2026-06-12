@@ -355,7 +355,7 @@ export default function AdminLeadsPropstream() {
       {/* Detail Modal */}
       <LeadDetailModal
         lead={selectedLead}
-        Estate Sale Company Owners={Estate Sale Company Owners}
+        operators={operators}
         onAssign={handleAssign}
         onMarkConverted={handleMarkConverted}
         open={showDetail}

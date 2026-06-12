@@ -17,8 +17,8 @@ const LANDING_PAGE_OPTIONS = [
 export default function FbAdsCampaignBuilder({ settings, onCampaignCreated }) {
   const [form, setForm] = useState({
     campaign_goal: 'Generate demo requests from estate sale company owners looking to grow their business.',
-    target_audience: 'Estate Sale Company Owners, estate liquidators, downsizing specialists in New Jersey. Ages 35-65, small business owners.',
-    offer: 'Free Legacy Lane OS demo — see how Estate Sale Company Owners grow revenue and automate referrals.',
+    target_audience: 'operators, estate liquidators, downsizing specialists in New Jersey. Ages 35-65, small business owners.',
+    offer: 'Free Legacy Lane OS demo — see how operators grow revenue and automate referrals.',
     budget: settings?.default_daily_ad_budget || 25,
     start_date: '',
     end_date: '',

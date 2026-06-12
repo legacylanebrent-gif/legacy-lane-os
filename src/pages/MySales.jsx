@@ -74,7 +74,7 @@ export default function MySales() {
       setUser(userData);
 
       const isTeamRole = ['team_admin', 'team_member', 'team_marketer'].includes(userData.primary_account_type);
-      // Team members see their Estate Sale Company Owner's sales; Estate Sale Company Owners see their own sales
+      // Team members see their Estate Sale Company Owner's sales; operators see their own sales
       const operatorId = isTeamRole ? userData.operator_id : userData.id;
       const salesData = operatorId
         ? await base44.entities.EstateSale.filter({ operator_id: operatorId }, '-created_date')

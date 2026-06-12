@@ -28,7 +28,7 @@ const testimonials = [
   }
 ];
 
-export default function Estate Sale Company Owners() {
+export default function Operators() {
   const [selectedState, setSelectedState] = useState('');
 
   const handleStateSearch = () => {

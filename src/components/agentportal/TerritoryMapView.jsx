@@ -176,21 +176,21 @@ export default function TerritoryMapView({ user }) {
       centerInfo.open(map, centerMarker);
       centerMarker.addListener('click', () => centerInfo.open(map, centerMarker));
 
-      // Load Estate Sale Company Owners in this county — filter by county directly to avoid 50-record cap
+      // Load operators in this county — filter by county directly to avoid 50-record cap
       // Normalize: strip existing "County" suffix then re-add with proper title case
       const countyNorm = county.replace(/\s+county$/i, '').trim();
       const countyWithSuffix = countyNorm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + ' County';
 
-      console.log('[TerritoryMap] Querying Estate Sale Company Owners for county:', countyWithSuffix, 'state:', state);
+      console.log('[TerritoryMap] Querying operators for county:', countyWithSuffix, 'state:', state);
 
       const [inCounty, liveOps] = await Promise.all([
         base44.entities.FutureEstateOperator.filter({ geocode_status: 'geocoded', state, geocoded_county: countyWithSuffix }, '-updated_date', 200),
         base44.entities.OperatorTerritoryProfile.filter({ territory_state: state }).catch(() => []),
       ]);
 
-      console.log('[TerritoryMap] Found', inCounty.length, 'future Estate Sale Company Owners,', liveOps.length, 'live ops');
+      console.log('[TerritoryMap] Found', inCounty.length, 'future operators,', liveOps.length, 'live ops');
 
-      // Filter live Estate Sale Company Owners to this county
+      // Filter live operators to this county
       const liveInCounty = liveOps.filter(op => {
         const opCounty = (op.territory_county || '').toLowerCase().replace(/\s+county$/i, '').trim();
         return opCounty === countyNorm;
@@ -200,7 +200,7 @@ export default function TerritoryMapView({ user }) {
 
       const sharedInfoWindow = new window.google.maps.InfoWindow();
 
-      // Plot future Estate Sale Company Owners (blue pins)
+      // Plot future operators (blue pins)
       inCounty.forEach(op => {
         if (!op.lat || !op.lng) return;
         const m = new window.google.maps.Marker({
@@ -311,11 +311,11 @@ export default function TerritoryMapView({ user }) {
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />
-            <span className="text-slate-600"><strong className="text-slate-900">{operatorCounts.future}</strong> Future Estate Sale Company Owners</span>
+            <span className="text-slate-600"><strong className="text-slate-900">{operatorCounts.future}</strong> Future operators</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
-            <span className="text-slate-600"><strong className="text-slate-900">{operatorCounts.live}</strong> Active Estate Sale Company Owners</span>
+            <span className="text-slate-600"><strong className="text-slate-900">{operatorCounts.live}</strong> Active operators</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3.5 h-3.5 rounded-full bg-orange-500 inline-block" />

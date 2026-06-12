@@ -151,7 +151,7 @@ export default function AdminAICredits() {
   };
 
   const resetUsage = async (account) => {
-    if (!confirm(`Reset monthly usage for this Estate Sale Company Owner? This cannot be undone.`)) return;
+    if (!confirm(`Reset monthly usage for this operator? This cannot be undone.`)) return;
     await base44.entities.OperatorAICreditAccount.update(account.id, {
       monthly_credits_used: 0,
       status: 'active',
@@ -187,16 +187,16 @@ export default function AdminAICredits() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Credit Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage Estate Sale Company Owner AI access, credit limits, and usage</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage operator AI access, credit limits, and usage</p>
         </div>
         <Button onClick={() => { loadData(); loadPricingConfigs(); }} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
       </div>
 
-      <Tabs defaultValue="Estate Sale Company Owners">
+      <Tabs defaultValue="operators">
         <TabsList>
-          <TabsTrigger value="Estate Sale Company Owners">Estate Sale Company Owner Accounts</TabsTrigger>
+          <TabsTrigger value="operators">Estate Sale Company Owner Accounts</TabsTrigger>
           <TabsTrigger value="pricing">Request Pricing</TabsTrigger>
         </TabsList>
 

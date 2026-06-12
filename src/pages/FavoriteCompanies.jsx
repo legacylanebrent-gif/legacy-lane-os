@@ -104,16 +104,16 @@ export default function FavoriteCompanies() {
     }
   };
 
-  const handleFollow = async (Estate Sale Company Owner) => {
+  const handleFollow = async (operator) => {
     if (!currentUser) return;
-    setAddingId(Estate Sale Company Owner.id);
+    setAddingId(operator.id);
     try {
       const newFollow = await base44.entities.CompanyFollow.create({
         consumer_user_id: currentUser.id,
-        operator_id: Estate Sale Company Owner.id,
-        operator_name: Estate Sale Company Owner.company_name || Estate Sale Company Owner.full_name,
-        operator_city: Estate Sale Company Owner.city || '',
-        operator_state: Estate Sale Company Owner.state || '',
+        operator_id: operator.id,
+        operator_name: operator.company_name || operator.full_name,
+        operator_city: operator.city || '',
+        operator_state: operator.state || '',
         notify_email: true,
         notify_sms: false,
         notify_inapp: true,
@@ -139,7 +139,7 @@ export default function FavoriteCompanies() {
     if (radiusMiles === 0) return true; // "All"
     if (!userLocation) return true; // Can't filter without user location
     const loc = getOperatorLocation(op);
-    if (!loc) return true; // No coords for Estate Sale Company Owner, include them
+    if (!loc) return true; // No coords for operator, include them
     return haversine(userLocation.lat, userLocation.lng, loc.lat, loc.lng) <= radiusMiles;
   };
 
