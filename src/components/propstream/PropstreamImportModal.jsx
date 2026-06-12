@@ -8,48 +8,110 @@ import { base44 } from '@/api/base44Client';
 
 // Common PropStream CSV column name mappings
 const FIELD_MAP = {
+  // ── Property Location ──
   property_address: ['address', 'property address', 'street address', 'situs address', 'prop address'],
+  unit_number: ['unit #', 'unit number', 'unit', 'apt', 'suite'],
   city: ['city', 'prop city', 'property city', 'situs city'],
   state: ['state', 'prop state', 'property state', 'situs state'],
   zip: ['zip', 'zip code', 'postal code', 'situs zip', 'prop zip'],
   county: ['county', 'prop county'],
+  fips_code: ['fips', 'fips code'],
+  apn: ['apn', 'assessor parcel number', 'parcel number'],
+  // ── Property Details ──
+  property_type: ['property type', 'prop type'],
+  property_status: ['property status', 'prop status'],
+  beds: ['beds', 'bedrooms', 'bed'],
+  baths: ['baths', 'bathrooms', 'bath', 'total bathrooms'],
+  square_feet: ['sqft', 'square feet', 'living sqft', 'gross living area', 'building sqft'],
+  lot_size: ['lot size', 'lot sqft', 'lot area', 'lot size sqft'],
+  year_built: ['year built', 'yr built'],
+  // ── Listing Info ──
   mls_number: ['mls number', 'mls#', 'mls id', 'listing id'],
   propstream_property_id: ['propstream id', 'property id', 'prop id', 'ps id'],
   listing_status: ['status', 'listing status', 'mls status'],
-  list_date: ['list date', 'listing date', 'status date'],
+  list_date: ['list date', 'listing date', 'mls date', 'status date'],
   days_on_market: ['days on market', 'dom', 'days listed'],
-  list_price: ['list price', 'listing price', 'price'],
-  estimated_value: ['estimated value', 'avm', 'estimated avm', 'estimated market value'],
-  beds: ['beds', 'bedrooms', 'bed'],
-  baths: ['baths', 'bathrooms', 'bath'],
-  square_feet: ['sqft', 'square feet', 'living sqft', 'gross living area'],
-  lot_size: ['lot size', 'lot sqft', 'lot area'],
-  year_built: ['year built', 'yr built'],
-  property_type: ['property type', 'prop type'],
-  listing_remarks: ['remarks', 'listing remarks', 'public remarks', 'description'],
+  list_price: ['list price', 'listing price', 'price', 'mls amount'],
+  listing_remarks: ['remarks', 'listing remarks', 'public remarks', 'description', 'notes'],
+  listing_url: ['listing url', 'mls url', 'url'],
+  // ── Owner Info ──
+  owner_1_first_name: ['owner 1 first name', 'owner first name', 'first name'],
+  owner_1_last_name: ['owner 1 last name', 'owner last name', 'last name'],
+  owner_2_first_name: ['owner 2 first name'],
+  owner_2_last_name: ['owner 2 last name'],
   owner_name: ['owner name', 'owner', 'owner 1 full name'],
+  // ── Owner Phone Numbers ──
+  phone_1: ['phone 1', 'phone'],
+  phone_1_type: ['phone 1 type'],
+  phone_1_dnc: ['phone 1 dnc'],
+  phone_2: ['phone 2'],
+  phone_2_type: ['phone 2 type'],
+  phone_2_dnc: ['phone 2 dnc'],
+  phone_3: ['phone 3'],
+  phone_3_type: ['phone 3 type'],
+  phone_3_dnc: ['phone 3 dnc'],
+  phone_4: ['phone 4'],
+  phone_4_type: ['phone 4 type'],
+  phone_4_dnc: ['phone 4 dnc'],
+  phone_5: ['phone 5'],
+  phone_5_type: ['phone 5 type'],
+  phone_5_dnc: ['phone 5 dnc'],
+  // ── Owner Emails ──
+  email_1: ['email 1', 'email'],
+  email_2: ['email 2'],
+  email_3: ['email 3'],
+  email_4: ['email 4'],
+  // ── Owner Mailing ──
+  mailing_care_of_name: ['mailing care of name', 'care of'],
   owner_mailing_address: ['mailing address', 'owner mailing address', 'mail address'],
+  owner_mailing_unit: ['mailing unit #', 'mailing unit', 'mail unit'],
   owner_mailing_city: ['mailing city', 'mail city'],
   owner_mailing_state: ['mailing state', 'mail state'],
   owner_mailing_zip: ['mailing zip', 'mail zip', 'mailing postal'],
-  ownership_length_years: ['ownership length', 'years owned', 'length of ownership', 'years of ownership'],
+  owner_mailing_county: ['mailing county', 'mail county'],
+  // ── Owner Indicators ──
+  owner_occupied: ['owner occupied'],
   absentee_owner: ['absentee', 'absentee owner'],
   vacant: ['vacant', 'vacancy'],
   senior_owner_indicator: ['senior', 'senior owner', 'senior indicator'],
+  deceased_owner: ['deceased owner', 'deceased'],
+  litigator: ['litigator'],
+  do_not_mail: ['do not mail', 'dnm'],
+  // ── Life Event Indicators ──
   probate_indicator: ['probate', 'in probate'],
   inherited_indicator: ['inherited', 'inheritance'],
   divorce_indicator: ['divorce', 'divorcing'],
+  divorce_date: ['divorce date'],
   preforeclosure_indicator: ['preforeclosure', 'pre-foreclosure', 'lis pendens'],
+  prefc_recording_date: ['pre-fc recording date', 'prefc recording date'],
+  prefc_doc_number: ['pre-fc doc number', 'prefc doc number'],
+  prefc_unpaid_balance: ['pre-fc unpaid balance', 'prefc unpaid balance'],
+  prefc_auction_date: ['pre-fc auction date', 'prefc auction date'],
   foreclosure_indicator: ['foreclosure', 'in foreclosure', 'reo'],
   lien_indicator: ['lien', 'has lien'],
+  lien_date: ['lien date'],
+  lien_amount: ['lien amount'],
   tax_delinquent_indicator: ['tax delinquent', 'delinquent taxes', 'tax lien'],
-  equity_estimate: ['equity', 'estimated equity', 'equity estimate'],
-  mortgage_balance: ['mortgage balance', 'loan balance', 'open loan balance'],
-  listing_agent_name: ['listing agent', 'agent name', 'list agent name', 'agent'],
-  listing_agent_email: ['agent email', 'listing agent email', 'list agent email'],
-  listing_agent_phone: ['agent phone', 'listing agent phone', 'list agent phone'],
-  listing_brokerage: ['brokerage', 'listing brokerage', 'broker name', 'list office name'],
-  listing_url: ['listing url', 'mls url', 'url'],
+  // ── Financials ──
+  estimated_value: ['estimated value', 'avm', 'estimated avm', 'estimated market value', 'est. value'],
+  estimated_ltv: ['est. loan-to-value', 'estimated ltv', 'loan-to-value', 'ltv'],
+  equity_estimate: ['equity', 'estimated equity', 'equity estimate', 'est. equity'],
+  mortgage_balance: ['mortgage balance', 'loan balance', 'open loan balance', 'est. remaining balance of open loans'],
+  total_open_loans: ['total open loans'],
+  last_sale_date: ['last sale date'],
+  last_sale_recording_date: ['last sale recording date'],
+  last_sale_amount: ['last sale amount'],
+  ownership_length_years: ['ownership length', 'years owned', 'length of ownership', 'years of ownership'],
+  // ── Listing Agent ──
+  listing_agent_name: ['listing agent', 'agent name', 'list agent name', 'agent', 'mls agent name'],
+  listing_agent_email: ['agent email', 'listing agent email', 'list agent email', 'mls agent e-mail'],
+  listing_agent_phone: ['agent phone', 'listing agent phone', 'list agent phone', 'mls agent phone'],
+  listing_brokerage: ['brokerage', 'listing brokerage', 'broker name', 'list office name', 'mls brokerage name'],
+  // ── Marketing / Misc ──
+  marketing_lists: ['marketing lists'],
+  skip_traces: ['skip traces'],
+  date_added_to_list: ['date added to list'],
+  method_of_add: ['method of add'],
 };
 
 function autoMap(headers) {
@@ -68,20 +130,33 @@ function parseBoolean(val) {
   return v === 'y' || v === 'yes' || v === 'true' || v === '1' || v === 'x';
 }
 
+const BOOLEAN_FIELDS = [
+  'absentee_owner', 'vacant', 'senior_owner_indicator', 'probate_indicator',
+  'inherited_indicator', 'divorce_indicator', 'preforeclosure_indicator',
+  'foreclosure_indicator', 'lien_indicator', 'tax_delinquent_indicator',
+  'owner_occupied', 'deceased_owner', 'litigator', 'do_not_mail',
+  'phone_1_dnc', 'phone_2_dnc', 'phone_3_dnc', 'phone_4_dnc', 'phone_5_dnc',
+];
+
+const NUMERIC_FIELDS = [
+  'list_price', 'estimated_value', 'equity_estimate', 'mortgage_balance',
+  'ownership_length_years', 'beds', 'baths', 'square_feet', 'days_on_market',
+  'total_open_loans', 'estimated_ltv', 'last_sale_amount', 'lien_amount',
+];
+
+const INTEGER_FIELDS = ['year_built'];
+
 function mapRow(row, mapping) {
   const mapped = {};
   for (const [field, csvCol] of Object.entries(mapping)) {
     if (csvCol && row[csvCol] !== undefined) {
       const val = row[csvCol];
-      if (['absentee_owner', 'vacant', 'senior_owner_indicator', 'probate_indicator',
-           'inherited_indicator', 'divorce_indicator', 'preforeclosure_indicator',
-           'foreclosure_indicator', 'lien_indicator', 'tax_delinquent_indicator'].includes(field)) {
+      if (BOOLEAN_FIELDS.includes(field)) {
         mapped[field] = parseBoolean(val);
-      } else if (['list_price', 'estimated_value', 'equity_estimate', 'mortgage_balance',
-                   'ownership_length_years', 'beds', 'baths', 'square_feet', 'days_on_market'].includes(field)) {
+      } else if (NUMERIC_FIELDS.includes(field)) {
         const n = parseFloat(String(val).replace(/[,$]/g, ''));
         mapped[field] = isNaN(n) ? undefined : n;
-      } else if (field === 'year_built') {
+      } else if (INTEGER_FIELDS.includes(field)) {
         const n = parseInt(String(val));
         mapped[field] = isNaN(n) ? undefined : n;
       } else {
@@ -161,7 +236,7 @@ export default function PropstreamImportModal({ open, onClose, onImportComplete 
             </div>
 
             <div className="max-h-80 overflow-y-auto space-y-2 border rounded-lg p-3">
-              {Object.entries(FIELD_MAP).slice(0, 20).map(([field, _aliases]) => (
+              {Object.entries(FIELD_MAP).map(([field, _aliases]) => (
                 <div key={field} className="flex items-center gap-3 text-sm">
                   <span className="w-44 text-slate-700 font-medium shrink-0">{field.replace(/_/g, ' ')}</span>
                   <select
