@@ -7,12 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import {
   Upload, Zap, Mail, Send, Eye, Building2, Users, Info, HelpCircle,
-  Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet,
+  Filter, ChevronDown, ChevronUp, Loader, RefreshCw, FileSpreadsheet, Share2,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import PropstreamImportModal from '@/components/propstream/PropstreamImportModal';
 import PropstreamListingDrawer from '@/components/propstream/PropstreamListingDrawer';
 import SendToOperatorsModal from '@/components/propstream/SendToOperatorsModal';
+import { exportREListingsToFacebookAudienceCSV } from '@/lib/facebookAudienceExportRE';
 
 const SCORE_COLORS = {
   Priority: 'bg-red-100 text-red-700 border-red-200',
@@ -197,6 +198,9 @@ export default function PropstreamREListings() {
               <Users className="w-4 h-4 mr-1" /> View Agent Leads
             </Button>
           </Link>
+          <Button onClick={() => exportREListingsToFacebookAudienceCSV(listings)} variant="outline" className="gap-2 text-blue-600 hover:text-blue-700">
+            <Share2 className="w-4 h-4" />Export FB Audience
+          </Button>
           <Button onClick={loadData} variant="ghost" size="icon"><RefreshCw className="w-4 h-4" /></Button>
         </div>
       </div>
