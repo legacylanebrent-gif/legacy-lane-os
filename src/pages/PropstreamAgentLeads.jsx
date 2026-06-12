@@ -887,23 +887,40 @@ export default function PropstreamAgentLeads() {
 
                 {selectedLead.property_addresses && selectedLead.property_addresses.length > 0 && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">Property Addresses & Prices</Label>
+                    <Label className="text-sm font-medium text-slate-700">Property Addresses, Prices & Territories</Label>
                     <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
                       {selectedLead.property_addresses.map((addr, idx) => {
-                        // Split address and price if format is "address - $price"
-                        const parts = addr.split(' - $');
-                        const address = parts[0];
-                        const price = parts[1];
+                        // Parse format: "address - $price (territory, state)"
+                        const addressAndPrice = addr.split(' - $');
+                        const address = addressAndPrice[0];
+                        const priceAndTerritory = addressAndPrice[1];
+                        let price = null;
+                        let territory = null;
+                        
+                        if (priceAndTerritory) {
+                          const priceParts = priceAndTerritory.split(' (');
+                          price = priceParts[0];
+                          territory = priceParts[1]?.replace(')', '');
+                        }
+                        
                         return (
-                          <div key={idx} className="flex justify-between items-start bg-slate-50 px-3 py-2 rounded border border-slate-200">
-                            <div className="text-sm text-slate-700 flex-1 pr-4">
+                          <div key={idx} className="bg-slate-50 px-3 py-2 rounded border border-slate-200">
+                            <div className="text-sm text-slate-700 mb-1">
                               {address}
                             </div>
-                            {price && (
-                              <div className="text-sm font-semibold text-slate-800 whitespace-nowrap">
-                                ${parseInt(price).toLocaleString()}
-                              </div>
-                            )}
+                            <div className="flex items-center gap-3 text-xs">
+                              {price && (
+                                <div className="font-semibold text-slate-800">
+                                  ${parseInt(price).toLocaleString()}
+                                </div>
+                              )}
+                              {territory && (
+                                <div className="text-slate-500 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {territory}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         );
                       })}

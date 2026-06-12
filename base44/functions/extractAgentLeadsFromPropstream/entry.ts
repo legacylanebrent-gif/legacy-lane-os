@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
       // Update existing agent record - aggregate all listings
       existing.listing_count += 1;
       existing.total_volume += listing.estimated_value || 0;
-      // Store full address with city, state, zip and price
+      // Store full address with city, state, zip, price, and territory
       const fullAddress = [
         listing.property_address,
         listing.city,
@@ -95,9 +95,10 @@ Deno.serve(async (req) => {
       ].filter(Boolean).join(', ');
       if (fullAddress) {
         const price = listing.list_price || listing.estimated_value || 0;
-        const addressWithPrice = `${fullAddress} - $${price.toLocaleString()}`;
-        if (!existing.property_addresses.includes(addressWithPrice)) {
-          existing.property_addresses.push(addressWithPrice);
+        const territory = listing.territory_name || listing.county ? `${listing.territory_name || listing.county}, ${listing.state}` : '';
+        const addressWithPriceAndTerritory = `${fullAddress} - $${price.toLocaleString()}${territory ? ` (${territory})` : ''}`;
+        if (!existing.property_addresses.includes(addressWithPriceAndTerritory)) {
+          existing.property_addresses.push(addressWithPriceAndTerritory);
         }
       }
       // Update contact info if we have better data
@@ -114,7 +115,8 @@ Deno.serve(async (req) => {
         listing.zip
       ].filter(Boolean).join(', ');
       const price = listing.list_price || listing.estimated_value || 0;
-      const addressWithPrice = fullAddress ? `${fullAddress} - $${price.toLocaleString()}` : '';
+      const territory = listing.territory_name || listing.county ? `${listing.territory_name || listing.county}, ${listing.state}` : '';
+      const addressWithPriceAndTerritory = fullAddress ? `${fullAddress} - $${price.toLocaleString()}${territory ? ` (${territory})` : ''}` : '';
       agentMap.set(agentKey, {
         agent_name: agentName,
         agent_email: agentEmail || null,
@@ -128,7 +130,7 @@ Deno.serve(async (req) => {
         county: listing.county || null,
         listing_count: 1,
         total_volume: listing.estimated_value || 0,
-        property_addresses: addressWithPrice ? [addressWithPrice] : [],
+        property_addresses: addressWithPriceAndTerritory ? [addressWithPriceAndTerritory] : [],
         lead_status: 'new',
         priority: 'medium',
         lead_score: 0,
