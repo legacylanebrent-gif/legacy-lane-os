@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import AppSidebar, { ALL_NAV_ITEMS } from '@/components/layout/AppSidebar';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
@@ -14,7 +14,7 @@ const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page); // includes FutOperLeads
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 
 // Pages that render without any chrome (public-facing)
-const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse'];
+const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse', 'OnboardingChat'];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
 const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller', 'real_estate_agent'];
@@ -53,6 +53,7 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [allowedPages, setAllowedPages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Set browser tab title immediately (synchronously) on every render when page changes
   const friendly = PAGE_TITLES[currentPageName] || currentPageName?.replace(/([A-Z])/g, ' $1').trim();
@@ -65,6 +66,15 @@ export default function Layout({ children, currentPageName }) {
     loadUserAndAccess();
   }, []);
 
+  // Check if user needs onboarding redirect
+  const needsOnboarding = (userData) => {
+    if (!userData) return false;
+    if (userData.onboarding_completed) return false;
+    if (userData.onboarding_dismissed_permanently) return false;
+    const shownCount = userData.onboarding_shown_count || 0;
+    return shownCount < 2; // show at most twice
+  };
+
   const loadUserAndAccess = async () => {
     try {
       const userData = await base44.auth.me();
@@ -73,6 +83,13 @@ export default function Layout({ children, currentPageName }) {
       // Default primary_account_type
       if (!userData.primary_account_type) userData.primary_account_type = 'consumer';
       setUser(userData);
+
+      // Redirect to onboarding if needed (skip if already on onboarding page)
+      if (needsOnboarding(userData) && currentPageName !== 'OnboardingChat') {
+        navigate('/onboarding');
+        setLoading(false);
+        return;
+      }
 
       const role = userData.primary_account_type;
 
