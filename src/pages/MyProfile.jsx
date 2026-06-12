@@ -24,6 +24,7 @@ import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
 import InteractiveTerritorySelector from '@/components/profile/InteractiveTerritorySelector';
+import LocationRequiredCard from '@/components/profile/LocationRequiredCard';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -364,9 +365,18 @@ export default function MyProfile() {
                 <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
                 <div><Label>ZIP Code</Label><Input value={form.address_zip} onChange={e => setForm(p => ({ ...p, address_zip: e.target.value }))} placeholder="12345" maxLength="5" /></div>
               </div>
-
             </CardContent>
           </Card>
+
+          {/* Location — required for non-consumer users to appear in searches */}
+          {!isConsumer && (!user?.location?.lat || !user?.location?.lng) && (
+            <LocationRequiredCard
+              user={user}
+              form={form}
+              setForm={setForm}
+              onLocationSaved={(loc) => setUser(prev => ({ ...prev, location: loc }))}
+            />
+          )}
 
           {/* Notifications */}
           <Card>
