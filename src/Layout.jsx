@@ -147,7 +147,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* Profile incomplete banner — non-consumer users only */}
-        {user && !CONSUMER_ROLES.includes(role) && !isProfileComplete(user) && !profileBannerDismissed && (
+        {user && !CONSUMER_ROLES.includes(role) && !ADMIN_ROLES.includes(role) && !isProfileComplete(user) && !profileBannerDismissed && (
           <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center gap-3">
             <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

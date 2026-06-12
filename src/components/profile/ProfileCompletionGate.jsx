@@ -13,7 +13,7 @@ export function getMissingFields(user) {
   const missing = [];
   if (!user) return ['all'];
   if (!(user.company_name || '').trim()) missing.push('company name');
-  if (!(user.location?.lat && user.location?.lng)) missing.push('location coordinates');
+  if (!(user.location?.lat && user.location?.lng)) missing.push('city + state');
   return missing;
 }
 
@@ -42,7 +42,7 @@ export default function ProfileCompletionGate({ user, actionLabel = 'create a sa
           {missing.includes('location coordinates') && (
             <li className="flex items-center gap-2 text-sm text-amber-800">
               <MapPin className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              Set your <strong className="mx-0.5">Location</strong> on the Account tab
+              Set your <strong className="mx-0.5">Area</strong> (city + state only, no address needed) on the Account tab
             </li>
           )}
         </ul>
