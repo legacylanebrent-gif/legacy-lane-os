@@ -144,6 +144,10 @@ export default function FavoriteCompanies() {
 
   const followedIds = new Set(follows.map(f => f.operator_id));
 
+  // Build operator lookup for current company names
+  const operatorMap = {};
+  operators.forEach(op => { operatorMap[op.id] = op; });
+
   // Browse results: exclude already-followed, apply radius + search
   const browseResults = operators.filter(op => {
     if (followedIds.has(op.id)) return false;
@@ -385,7 +389,9 @@ export default function FavoriteCompanies() {
                     <Building2 className="w-5 h-5 text-orange-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 truncate">{follow.operator_name}</p>
+                    <p className="font-semibold text-slate-900 truncate">{
+                      operatorMap[follow.operator_id]?.company_name || follow.operator_name
+                    }</p>
                     {(follow.operator_city || follow.operator_state) && (
                       <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3 h-3" />
