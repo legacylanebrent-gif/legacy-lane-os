@@ -11,6 +11,7 @@ import MessageModal from '@/components/messaging/MessageModal';
 
 import SharedFooter from '@/components/layout/SharedFooter';
 import SignTheListButton from '@/components/estate/SignTheListButton';
+import ShareModal from '@/components/share/ShareModal';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
   Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut, Eye, EyeOff, Search
@@ -52,6 +53,7 @@ export default function EstateSaleDetail() {
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [visibleThumbnails, setVisibleThumbnails] = useState(20);
   const [isFollowingCompany, setIsFollowingCompany] = useState(false);
@@ -224,27 +226,8 @@ export default function EstateSaleDetail() {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: sale.title,
-          text: `Check out this estate sale: ${sale.title}`,
-          url: window.location.href
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      }
-    } catch (error) {
-      // Fallback to clipboard if share fails
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-      } catch (clipboardError) {
-        console.log('Share cancelled or failed');
-      }
-    }
+  const handleShare = () => {
+    setShareModalOpen(true);
   };
 
   const convertTo24Hour = (time12h) => {
@@ -1059,6 +1042,14 @@ export default function EstateSaleDetail() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share Modal */}
+      <ShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        url={window.location.href}
+        title={sale.title}
+      />
 
       <SharedFooter />
     </div>
