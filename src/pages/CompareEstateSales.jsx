@@ -63,7 +63,7 @@ const CATEGORIES = [
       { feature: 'One-click push to all social media', us: true, them: false },
       { feature: 'Built-in email campaign tool', us: true, them: false },
       { feature: 'Built-in SMS campaign tool', us: true, them: false },
-      { feature: '20% off marketing tools (Gold tier)', us: true, them: true },
+
       { feature: 'Content calendar & scheduling', us: true, them: false },
       { feature: 'SEO boost per listing (AI-generated)', us: true, them: false },
       { feature: 'Facebook Ad campaign builder', us: true, them: false },
