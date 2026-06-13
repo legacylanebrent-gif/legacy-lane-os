@@ -151,7 +151,7 @@ const CATEGORIES = [
   {
     label: 'Autonomous SuperAgents & AI',
     rows: [
-      { feature: '10 AI SuperAgents working 24/7', us: true, them: false },
+      { feature: '10 AI Support SuperAgents working 24/7', us: true, them: false },
       { feature: 'Autonomous marketing agent — drafts & schedules campaigns', us: true, them: false },
       { feature: 'Lead conversion agent — scores & routes leads automatically', us: true, them: false },
       { feature: 'Content SEO agent — generates blog posts & SEO pages', us: true, them: false },
