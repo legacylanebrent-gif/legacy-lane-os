@@ -112,7 +112,7 @@ const CATEGORIES = [
     label: 'Business Operations',
     rows: [
       { feature: 'Team management & role-based access', us: true, them: false },
-      { feature: 'Digital contracts with expiration alerts', us: true, them: false },
+      { feature: 'Digital contracts with eSigning & expiration alerts', us: true, them: false },
       { feature: 'Revenue & commission analytics', us: true, them: false },
       { feature: 'Business expense tracking & cash flow', us: true, them: false },
       { feature: 'Custom branded company website', us: true, them: false },
