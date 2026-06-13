@@ -552,7 +552,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-9 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 operators
@@ -585,6 +585,10 @@ export default function ComprehensiveRevenue() {
               <TabsTrigger value="websites" className="whitespace-nowrap flex-shrink-0">
                 <Globe className="w-4 h-4 mr-1" />
                 Websites
+              </TabsTrigger>
+              <TabsTrigger value="dealerSubs" className="whitespace-nowrap flex-shrink-0">
+                <Package className="w-4 h-4 mr-1" />
+                Dealer Subs
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1144,6 +1148,74 @@ export default function ComprehensiveRevenue() {
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(websiteTotalProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Dealer Subs Tab */}
+          <TabsContent value="dealerSubs">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-yellow-600" />
+                  Collector Dealer Subscription Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-2">
+                  <div className="text-sm text-slate-700">
+                    <strong>US Market Estimates (13 dealer types):</strong> {totalUSDealers.toLocaleString()} total dealers nationwide
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Monthly Revenue:</strong> {totalUSDealers.toLocaleString()} dealers × 5% penetration × $147/mo = <strong>${dealerSubRevenue.toLocaleString()}/mo</strong>
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">
+                    <strong>Annual (Year 1):</strong> ${(dealerSubRevenue * 12 / 1000000).toFixed(2)}M &nbsp;·&nbsp; <strong>3-Year:</strong> ${(getYearProjection(dealerSubProjections, 3) / 1000000).toFixed(2)}M
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="text-sm font-semibold text-slate-700 mb-2">Dealer Categories & US Counts:</div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {DEALER_TYPES.map((dt) => (
+                      <div key={dt.name} className="p-2 bg-slate-50 border border-slate-200 rounded text-xs">
+                        <span className="font-medium">{dt.name}</span>
+                        <span className="text-slate-500 ml-1">{dt.count.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg mb-6 text-xs text-slate-600">
+                  <strong>Model:</strong> 5% market penetration × $147/mo subscription, growing at 3%/month
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(dealerSubProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(dealerSubProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(dealerSubProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(dealerSubProjections, 10) / 1000000).toFixed(2)}M
                     </div>
                   </div>
                 </div>
