@@ -205,7 +205,6 @@ export default function AdminLeadsPropstream() {
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">EstSale Rev</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Op Ref</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Equity</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Year</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Type</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Status</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Actions</th>
@@ -261,7 +260,6 @@ export default function AdminLeadsPropstream() {
                       <span className="text-purple-600 font-medium">${Number(lead.propstream_equity).toLocaleString()}</span>
                     ) : <span className="text-slate-400">—</span>}
                   </td>
-                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_year_built || '—'}</td>
                   <td className="p-3">
                     {lead.propstream_property_type ? (
                       <span className="text-xs text-slate-600 capitalize">{lead.propstream_property_type}</span>
