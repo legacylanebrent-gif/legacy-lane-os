@@ -16,7 +16,7 @@ const ALL_PAGE_NAMES = ALL_NAV_ITEMS.map(i => i.page); // includes FutOperLeads
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 
 // Pages that render without any chrome (public-facing)
-const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse', 'OnboardingChat'];
+const PUBLIC_PAGES = ['EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse', 'OnboardingChat'];
 
 // Pages that render with UniversalHeader only (no sidebar) for ALL roles
 // These are utility/consumer-style pages linked from the UniversalHeader dropdown
@@ -27,6 +27,8 @@ const NO_SIDEBAR_PAGES = [
   // Agent tools
   'AgentOperatorPortal', 'AgentPartnerships', 'ReferralDealPipeline',
   'ReferralDashboard', 'JoinReferralExchange',
+  // Public pages that need UniversalHeader
+  'EstateSaleDetail',
 ];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
