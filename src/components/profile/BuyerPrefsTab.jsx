@@ -352,7 +352,7 @@ export default function BuyerPrefsTab({ user }) {
                   />
                 </div>
                 <div>
-                  <Label>Brand / Maker</Label>
+                  <Label>Brand / Maker / Artist</Label>
                   <Input
                     value={wantedForm.brand}
                     onChange={e => setWantedForm(p => ({ ...p, brand: e.target.value }))}
