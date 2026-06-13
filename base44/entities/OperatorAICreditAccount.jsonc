@@ -10,12 +10,12 @@
       "type": "string",
       "enum": [
         "starter",
+        "growth",
         "professional",
-        "enterprise",
-        "unlimited"
+        "elite"
       ],
       "default": "starter",
-      "description": "Estate Sale Company Owner's subscription tier"
+      "description": "Estate Sale Company Owner's subscription tier (matches SubscriptionPackage.tier_level)"
     },
     "monthly_credit_limit": {
       "type": "integer",
