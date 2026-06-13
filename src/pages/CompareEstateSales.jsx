@@ -44,7 +44,7 @@ const CATEGORIES = [
       { feature: 'Fixed-price "Buy Now" listings', us: true, them: false },
       { feature: 'Auction functionality', us: true, them: false },
       { feature: 'Proxy / auto-bid auctions', us: true, them: false },
-      { feature: 'Shipping to buyers nationwide', us: true, them: false },
+      { feature: 'Shipping Quote Service to buyers nationwide', us: true, them: false },
       { feature: 'Item status synced across channels', us: true, them: false },
       { feature: '10,000+ pricing reference database', us: true, them: false },
       { feature: 'Post items to inventory with photos & descriptions', us: true, them: false },
