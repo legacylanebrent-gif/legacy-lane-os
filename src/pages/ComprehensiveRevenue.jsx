@@ -351,9 +351,11 @@ export default function ComprehensiveRevenue() {
   const RESELLER_TYPES = [
     { name: 'eBay Seller (Pro)', count: 50000 }, { name: 'Online Reseller', count: 75000 },
     { name: 'Auction Company', count: 5000 }, { name: 'Consignment Shop', count: 7000 },
+    { name: 'Antique Dealer', count: 8000 }, { name: 'Collectible Buyer', count: 5000 },
     { name: 'Liquidator', count: 3000 }, { name: 'Estate Buyer', count: 6000 },
     { name: 'Furniture Dealer', count: 8000 }, { name: 'Vintage Dealer', count: 12000 },
     { name: 'Buyout Company', count: 2000 }, { name: 'Cleanout Specialist', count: 4000 },
+    { name: 'Other', count: 10000 },
   ];
   const totalUSResellers = RESELLER_TYPES.reduce((s, t) => s + t.count, 0);
   const resellerSubRevenue = Math.round(totalUSResellers * 0.03 * 47);
@@ -1254,7 +1256,7 @@ export default function ComprehensiveRevenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
                   <div className="text-sm text-slate-700">
-                    <strong>US Market Estimates (10 reseller types):</strong> {totalUSResellers.toLocaleString()} total resellers nationwide
+                    <strong>US Market Estimates (13 reseller types):</strong> {totalUSResellers.toLocaleString()} total resellers nationwide
                   </div>
                   <div className="text-sm text-slate-700">
                     <strong>Monthly Revenue:</strong> {totalUSResellers.toLocaleString()} resellers × 3% penetration × $47/mo = <strong>${resellerSubRevenue.toLocaleString()}/mo</strong>
