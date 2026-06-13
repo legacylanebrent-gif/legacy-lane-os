@@ -5,7 +5,8 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe, Award, Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -19,7 +20,7 @@ const ROLE_OPTIONS = [
   },
   {
     id: 'estate_sale_operator',
-    label: 'Estate Sale Company Owner',
+    label: 'Estate Sale Company',
     description: 'I run an estate sale company and want to list sales, manage inventory, and grow my business',
     icon: Store,
     color: 'bg-cyan-100 text-cyan-600',
@@ -75,6 +76,10 @@ export default function OnboardingChat() {
   const [operatorCity, setOperatorCity] = useState('');
   const [operatorState, setOperatorState] = useState('');
   const [serviceStates, setServiceStates] = useState([]);
+  const [claimState, setClaimState] = useState('');
+  const [directoryCompanies, setDirectoryCompanies] = useState([]);
+  const [searchingDir, setSearchingDir] = useState(false);
+  const [claimedCompany, setClaimedCompany] = useState(null);
   const US_STATES = [
     'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'
   ];
@@ -114,7 +119,7 @@ export default function OnboardingChat() {
       // Estate Sale Company Owners → guided setup flow
       if (roleId === 'estate_sale_operator') {
         await base44.auth.updateMe({ primary_account_type: roleId });
-        setStep('operatorCompany');
+        setStep('operatorClaim');
         setSaving(false);
         return;
       }
@@ -152,6 +157,62 @@ export default function OnboardingChat() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // ── Operator: Claim Existing Business ──
+  const handleClaimStateSelect = async (state) => {
+    setClaimState(state);
+    setSearchingDir(true);
+    setDirectoryCompanies([]);
+    try {
+      const results = await base44.entities.FutureEstateOperator.filter({
+        state: state,
+        is_active: true
+      }, '-created_date', 50);
+      setDirectoryCompanies(results);
+    } catch (e) {
+      console.error('Directory search failed:', e);
+    } finally {
+      setSearchingDir(false);
+    }
+  };
+
+  const handleClaimCompany = async (company) => {
+    setSaving(true);
+    try {
+      await base44.functions.invoke('claimDirectoryListing', {
+        operator_id: company.id,
+        contact_name: user.full_name,
+        contact_email: user.email,
+        contact_phone: company.phone || '',
+        plan_choice: 'free_trial',
+        territories: [company.state]
+      });
+      // Auto-fill from the claimed company data
+      setCompanyName(company.company_name || '');
+      setOperatorCity(company.city || '');
+      setOperatorState(company.state || '');
+      if (company.zip) setOperatorZip(company.zip);
+      setClaimedCompany(company);
+      // Also save basic info to user
+      await base44.auth.updateMe({
+        company_name: company.company_name,
+        city: company.city || '',
+        state: company.state || '',
+        zip_code: company.zip || '',
+      });
+      // Skip ahead to location + services steps
+      setStep('operatorLocation');
+    } catch (e) {
+      console.error('Claim failed:', e);
+      alert('Could not claim this listing. Please try again or continue manually.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClaimDecline = () => {
+    setStep('operatorCompany');
   };
 
   // ── Operator: Company Name ──
@@ -398,6 +459,119 @@ export default function OnboardingChat() {
               Just browsing — continue as a shopper
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── OPERATOR: Claim Existing Business ──
+  if (step === 'operatorClaim') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 p-6">
+        <div className="max-w-2xl mx-auto pt-8 pb-16">
+          <motion.div {...fadeIn} className="text-center mb-6">
+            <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Award className="w-8 h-8 text-amber-600" />
+            </div>
+            <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Great choice!</h1>
+            <p className="text-slate-600 mb-4">
+              We already have <strong className="text-cyan-600">7,000+ estate sale companies</strong> in our directory. 
+              Pick your state and we'll show you if your business is already listed — you can claim it instantly.
+            </p>
+          </motion.div>
+
+          {/* State selector */}
+          <motion.div {...fadeIn} transition={{ delay: 0.1 }} className="mb-6">
+            <p className="text-sm font-medium text-slate-500 mb-3 text-center">Select your state:</p>
+            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+              {US_STATES.map(st => (
+                <button
+                  key={st}
+                  onClick={() => handleClaimStateSelect(st)}
+                  className={`py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    claimState === st
+                      ? 'bg-cyan-600 text-white shadow-md'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:border-cyan-300 hover:bg-cyan-50'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Results */}
+          {searchingDir && (
+            <div className="text-center py-8">
+              <Loader2 className="w-8 h-8 text-cyan-500 animate-spin mx-auto mb-3" />
+              <p className="text-slate-500">Searching {claimState} companies...</p>
+            </div>
+          )}
+
+          {!searchingDir && claimState && directoryCompanies.length > 0 && (
+            <motion.div {...fadeIn} className="space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-slate-600">
+                  {directoryCompanies.length} compan{directoryCompanies.length === 1 ? 'y' : 'ies'} in {claimState}
+                </p>
+                <Badge variant="outline" className="text-xs">{directoryCompanies.length} results</Badge>
+              </div>
+              <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
+                {directoryCompanies.map(company => (
+                  <div key={company.id} className="bg-white border border-slate-200 rounded-xl p-4 hover:border-cyan-300 hover:shadow-sm transition-all">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-slate-900 truncate">{company.company_name}</h3>
+                        <p className="text-sm text-slate-500 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> {company.city}{company.city && company.state ? ', ' : ''}{company.state}
+                        </p>
+                        {company.phone && (
+                          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3" /> {company.phone}
+                          </p>
+                        )}
+                        {company.website && (
+                          <p className="text-xs text-cyan-600 flex items-center gap-1 mt-0.5 truncate">
+                            <Globe className="w-3 h-3" /> {company.website}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleClaimCompany(company)}
+                        disabled={saving}
+                        className="bg-cyan-600 hover:bg-cyan-700 flex-shrink-0"
+                      >
+                        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Claim'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {!searchingDir && claimState && directoryCompanies.length === 0 && (
+            <motion.div {...fadeIn} className="text-center py-6 space-y-4">
+              <p className="text-slate-500">No companies found in {claimState}.</p>
+              <p className="text-sm text-slate-400">Try another state or continue below.</p>
+            </motion.div>
+          )}
+
+          {/* Manual continue */}
+          <motion.div {...fadeIn} transition={{ delay: 0.2 }} className="mt-8 pt-6 border-t border-slate-200">
+            <p className="text-sm text-slate-500 text-center mb-3">
+              Don't see your business? No problem — set it up manually:
+            </p>
+            <Button
+              onClick={handleClaimDecline}
+              variant="outline"
+              className="w-full h-12"
+            >
+              <Building2 className="w-4 h-4 mr-2" />
+              I'll Enter My Company Info
+            </Button>
+          </motion.div>
         </div>
       </div>
     );
