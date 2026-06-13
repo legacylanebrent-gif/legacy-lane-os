@@ -347,10 +347,22 @@ export default function ComprehensiveRevenue() {
   const dealerSubRevenue = Math.round(totalUSDealers * 0.05 * 147);
   const dealerSubProjections = calculateProjections(dealerSubRevenue, 3, 120);
 
+  // Reseller subs: based on US market estimates per type, with penetration rate
+  const RESELLER_TYPES = [
+    { name: 'eBay Seller (Pro)', count: 50000 }, { name: 'Online Reseller', count: 75000 },
+    { name: 'Auction Company', count: 5000 }, { name: 'Consignment Shop', count: 7000 },
+    { name: 'Liquidator', count: 3000 }, { name: 'Estate Buyer', count: 6000 },
+    { name: 'Furniture Dealer', count: 8000 }, { name: 'Vintage Dealer', count: 12000 },
+    { name: 'Buyout Company', count: 2000 }, { name: 'Cleanout Specialist', count: 4000 },
+  ];
+  const totalUSResellers = RESELLER_TYPES.reduce((s, t) => s + t.count, 0);
+  const resellerSubRevenue = Math.round(totalUSResellers * 0.03 * 47);
+  const resellerSubProjections = calculateProjections(resellerSubRevenue, 3, 120);
+
   const totalProjections = operatorProjections.map((_, i) => 
     operatorProjections[i] + vendorSubProjections[i] +
     marketplaceProjections[i] + agentTotalProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i] +
-    websiteTotalProjections[i] + dealerSubProjections[i]
+    websiteTotalProjections[i] + dealerSubProjections[i] + resellerSubProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -364,6 +376,7 @@ export default function ComprehensiveRevenue() {
     Advertising: Math.round(adProjections[i]),
     Websites: Math.round(websiteTotalProjections[i]),
     'Dealer Subs': Math.round(dealerSubProjections[i]),
+    'Reseller Subs': Math.round(resellerSubProjections[i]),
     Total: Math.round(totalProjections[i])
   }));
 
@@ -382,6 +395,7 @@ export default function ComprehensiveRevenue() {
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
     { name: 'Websites', value: getYearProjection(websiteTotalProjections, 3) },
     { name: 'Dealer Subs', value: getYearProjection(dealerSubProjections, 3) },
+    { name: 'Reseller Subs', value: getYearProjection(resellerSubProjections, 3) },
   ];
 
   const stateData = Object.entries(stateCounts)
@@ -477,6 +491,7 @@ export default function ComprehensiveRevenue() {
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
                 <Area type="monotone" dataKey="Websites" stackId="1" stroke="#6366f1" fill="#6366f1" />
                 <Area type="monotone" dataKey="Dealer Subs" stackId="1" stroke="#eab308" fill="#eab308" />
+                <Area type="monotone" dataKey="Reseller Subs" stackId="1" stroke="#f43f5e" fill="#f43f5e" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -552,7 +567,7 @@ export default function ComprehensiveRevenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-9 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-10 gap-1">
               <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 operators
@@ -589,6 +604,10 @@ export default function ComprehensiveRevenue() {
               <TabsTrigger value="dealerSubs" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 Dealer Subs
+              </TabsTrigger>
+              <TabsTrigger value="resellerSubs" className="whitespace-nowrap flex-shrink-0">
+                <Users className="w-4 h-4 mr-1" />
+                Reseller
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1216,6 +1235,74 @@ export default function ComprehensiveRevenue() {
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">
                       ${(getYearProjection(dealerSubProjections, 10) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reseller Subs Tab */}
+          <TabsContent value="resellerSubs">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-rose-600" />
+                  Reseller Subscription Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg space-y-2">
+                  <div className="text-sm text-slate-700">
+                    <strong>US Market Estimates (10 reseller types):</strong> {totalUSResellers.toLocaleString()} total resellers nationwide
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Monthly Revenue:</strong> {totalUSResellers.toLocaleString()} resellers × 3% penetration × $47/mo = <strong>${resellerSubRevenue.toLocaleString()}/mo</strong>
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">
+                    <strong>Annual (Year 1):</strong> ${(resellerSubRevenue * 12 / 1000000).toFixed(2)}M &nbsp;·&nbsp; <strong>3-Year:</strong> ${(getYearProjection(resellerSubProjections, 3) / 1000000).toFixed(2)}M
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="text-sm font-semibold text-slate-700 mb-2">Reseller Categories & US Counts:</div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {RESELLER_TYPES.map((rt) => (
+                      <div key={rt.name} className="p-2 bg-slate-50 border border-slate-200 rounded text-xs">
+                        <span className="font-medium">{rt.name}</span>
+                        <span className="text-slate-500 ml-1">{rt.count.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg mb-6 text-xs text-slate-600">
+                  <strong>Model:</strong> 3% market penetration × $47/mo subscription, growing at 3%/month
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      ${(getYearProjection(resellerSubProjections, 1) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      ${(getYearProjection(resellerSubProjections, 3) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      ${(getYearProjection(resellerSubProjections, 5) / 1000000).toFixed(2)}M
+                    </div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${(getYearProjection(resellerSubProjections, 10) / 1000000).toFixed(2)}M
                     </div>
                   </div>
                 </div>
