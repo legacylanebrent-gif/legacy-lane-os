@@ -281,7 +281,7 @@ export default function AdminCentralRepository() {
               <Badge className="bg-amber-100 text-amber-700 text-xs">⏳ Public Launch Pending</Badge>
             </div>
             <p className="text-slate-500 text-sm mt-1 max-w-2xl">
-              A private growing database of item intelligence created from sale uploads, reseller lookups, barcode scans, AI vision, SERPAPI results, marketplace items, and SEO item profiles.
+              A private growing database of item intelligence created from sale uploads, reseller lookups, barcode scans, AI vision, Google Lens API results, marketplace items, and SEO item profiles.
             </p>
           </div>
           <Button onClick={handleRunSnapshot} disabled={refreshing} variant="outline" size="sm">
@@ -305,8 +305,8 @@ export default function AdminCentralRepository() {
           <StatCard icon={DollarSign} label="Price History" value={(stats.total_price_history_records || 0).toLocaleString()} color="emerald" />
           <StatCard icon={TrendingUp} label="Demand Metrics" value={(stats.total_demand_metric_records || 0).toLocaleString()} color="blue" />
           <StatCard icon={BarChart3} label="Duplicate Match Rate" value={`${stats.duplicate_match_rate || 0}%`} color="slate" sub="Higher = better dedup" />
-          <StatCard icon={Zap} label="SERPAPI Avoided" value={(stats.serpapi_lookup_avoided_count || 0).toLocaleString()} color="emerald" sub="Matches saved lookups" />
-          <StatCard icon={DollarSign} label="Est. SERPAPI Savings" value={`$${(stats.estimated_serpapi_savings || 0).toFixed(2)}`} color="emerald" />
+          <StatCard icon={Zap} label="Google Lens Avoided" value={(stats.serpapi_lookup_avoided_count || 0).toLocaleString()} color="emerald" sub="Matches saved lookups" />
+          <StatCard icon={DollarSign} label="Est. Google Lens Savings" value={`$${(stats.estimated_serpapi_savings || 0).toFixed(2)}`} color="emerald" />
           <StatCard icon={BookOpen} label="Avg Identity Confidence" value={`${stats.avg_identity_confidence || 0}%`} color="blue" />
           <StatCard icon={DollarSign} label="Avg Pricing Confidence" value={`${stats.avg_pricing_confidence || 0}%`} color="slate" />
           <StatCard icon={Search} label="Avg SEO Confidence" value={`${stats.avg_seo_confidence || 0}%`} color="purple" />

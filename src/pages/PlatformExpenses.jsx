@@ -35,7 +35,7 @@ const SERVICE_COLORS = {
 };
 
 const DEFAULT_CONFIGS = [
-  { service_name: 'SerpAPI', service_key: 'serpapi', billing_model: 'per_call', cost_per_unit: 0.001, free_tier_units_per_month: 100, estimated_daily_units: 50, billing_url: 'https://serpapi.com/manage-api-key', is_active: true },
+  { service_name: 'Google Lens API', service_key: 'serpapi', billing_model: 'per_call', cost_per_unit: 0.001, free_tier_units_per_month: 100, estimated_daily_units: 50, billing_url: 'https://serpapi.com/manage-api-key', is_active: true },
   { service_name: 'Google Maps API', service_key: 'google_maps', billing_model: 'per_call', cost_per_unit: 0.005, free_tier_units_per_month: 200, estimated_daily_units: 100, billing_url: 'https://console.cloud.google.com/billing', is_active: true },
   { service_name: 'Base44 Platform', service_key: 'base44_platform', billing_model: 'monthly_flat', monthly_flat_cost: 99, billing_url: 'https://base44.com/billing', is_active: true },
   { service_name: 'OpenAI / AI Services', service_key: 'openai', billing_model: 'per_token', cost_per_unit: 0.000002, estimated_daily_units: 50000, billing_url: 'https://platform.openai.com/usage', is_active: true },
@@ -297,7 +297,7 @@ export default function PlatformExpenses() {
           <div>
             <p className="text-indigo-300 text-xs font-semibold uppercase tracking-widest mb-1">Admin — Finance</p>
             <h1 className="text-3xl font-black tracking-tight">Platform Expense Tracker</h1>
-            <p className="text-slate-400 mt-1 text-sm">Track daily API costs vs revenue · SerpAPI · Google Maps · Base44 · OpenAI · Meta</p>
+            <p className="text-slate-400 mt-1 text-sm">Track daily API costs vs revenue · Google Lens · Google Maps · Base44 · OpenAI · Meta</p>
           </div>
           <Button onClick={runAnalysis} disabled={running} className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
             <RefreshCw className={`w-4 h-4 ${running ? 'animate-spin' : ''}`} />

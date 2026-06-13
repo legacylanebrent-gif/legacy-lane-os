@@ -205,11 +205,11 @@ export default function OperatorPackages() {
               ? (pkgData.monthly_price * 12 - pkgData.annual_price).toFixed(0)
               : 0;
 
-            // Detect if SERPAPI is included in this package
-            const hasSerpApi = 
+            // Detect if Google Lens API is included in this package
+            const hasGoogleLensApi = 
               (pkgData.allowed_features || []).includes('serpapi') ||
               (pkgData.features || []).some(f => 
-                typeof f === 'string' && f.toLowerCase().includes('serp')
+                typeof f === 'string' && (f.toLowerCase().includes('serp') || f.toLowerCase().includes('google lens'))
               );
             const isFreeTier = (pkgData.tier_level === 'basic' || pkgData.tier_level === 'starter') && 
               (pkgData.monthly_price === 0 || pkgData.monthly_price == null);
@@ -292,8 +292,8 @@ export default function OperatorPackages() {
                     </div>
                   )}
 
-                  {/* SERPAPI limit notice */}
-                  {hasSerpApi && (
+                  {/* Google Lens API limit notice */}
+                  {hasGoogleLensApi && (
                     <div className={`mb-6 p-3 rounded-lg text-sm ${
                       isFreeTier 
                         ? 'bg-amber-50 border border-amber-200 text-amber-800' 
@@ -301,11 +301,11 @@ export default function OperatorPackages() {
                     }`}>
                       <p className="font-semibold flex items-center gap-1.5">
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        SERPAPI Searches: Limited to 50 per month
+                        Google Lens API Searches: Limited to 50 per month
                       </p>
                       {isFreeTier && (
                         <p className="mt-1 text-amber-700">
-                          On the free plan, SERP search is capped at 50 searches to keep things sustainable. 
+                          On the free plan, Google Lens search is capped at 50 searches to keep things sustainable. 
                           Upgrade anytime for higher limits.
                         </p>
                       )}

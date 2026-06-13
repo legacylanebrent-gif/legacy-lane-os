@@ -13,7 +13,7 @@ const TABS = [
   { id: 'onboarding', label: 'Onboarding', icon: Users },
   { id: 'sales', label: 'Sale Creation', icon: Building2 },
   { id: 'images', label: 'Image Pipeline', icon: ImageIcon },
-  { id: 'serp', label: 'SERP API', icon: Search },
+  { id: 'serp', label: 'Google Lens API', icon: Search },
   { id: 'ai', label: 'AI Research', icon: Brain },
   { id: 'seo', label: 'SEO Engine', icon: Globe },
   { id: 'repository', label: 'Repository', icon: Database },
@@ -192,10 +192,10 @@ export default function LaunchCommandCenter() {
             />
           </TabsContent>
 
-          {/* SERP API */}
+          {/* Google Lens API */}
           <TabsContent value="serp" className="mt-4">
             <AuditSection
-              title="SERP API Audit"
+              title="Google Lens API Audit"
               description="Credit usage, failure rates, and stress tests"
               sections={[
                 {

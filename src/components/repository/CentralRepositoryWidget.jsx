@@ -71,7 +71,7 @@ export default function CentralRepositoryWidget() {
               <Zap className="w-4 h-4 text-orange-500 shrink-0" />
               <div>
                 <div className="text-xs font-bold text-slate-700">{s.serpapi_lookup_avoided_count || 0} avoided</div>
-                <div className="text-xs text-slate-400">SERPAPI lookups saved</div>
+                <div className="text-xs text-slate-400">Google Lens lookups saved</div>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">

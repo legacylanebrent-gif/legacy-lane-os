@@ -3,7 +3,7 @@ import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 
 const ERROR_CATEGORIES = [
   { key: 'uploads', label: 'Failed Uploads', color: 'text-red-400', bgColor: 'bg-red-900/20 border-red-700' },
-  { key: 'serp', label: 'Failed SERP Searches', color: 'text-orange-400', bgColor: 'bg-orange-900/20 border-orange-700' },
+  { key: 'serp', label: 'Failed Google Lens Searches', color: 'text-orange-400', bgColor: 'bg-orange-900/20 border-orange-700' },
   { key: 'ai', label: 'Failed AI Jobs', color: 'text-yellow-400', bgColor: 'bg-yellow-900/20 border-yellow-700' },
   { key: 'seo', label: 'Failed SEO Jobs', color: 'text-amber-400', bgColor: 'bg-amber-900/20 border-amber-700' },
   { key: 'emails', label: 'Failed Emails', color: 'text-blue-400', bgColor: 'bg-blue-900/20 border-blue-700' },

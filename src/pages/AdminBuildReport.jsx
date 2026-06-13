@@ -322,7 +322,7 @@ const AUTOMATIONS_LIST = [
   { name: 'KE — Nightly Demand Score Recomputation', type: 'Scheduled Daily 2am', status: 'DONE', lastRun: 'Active' },
   { name: 'KE — Generate Sale Recap on Completion', type: 'Entity: EstateSale update', status: 'DONE', lastRun: 'Active' },
   { name: 'KE — Extract Demand Signals from Wanted Listings', type: 'Entity: WantedItem create', status: 'DONE', lastRun: 'Active' },
-  { name: 'KE — Extract Knowledge from SERP Pricing', type: 'Entity: SaleItemPricing create', status: 'DONE', lastRun: 'Active' },
+  { name: 'KE — Extract Knowledge from Google Lens Pricing', type: 'Entity: SaleItemPricing create', status: 'DONE', lastRun: 'Active' },
   { name: 'SEO Authority Engine — On Sale Published', type: 'Entity: EstateSale create/update', status: 'DONE', lastRun: 'Active' },
   { name: 'Internal Linking Engine — On SEOPage Publish', type: 'Entity: SEOPage create/update', status: 'DONE', lastRun: 'Success' },
   { name: 'Submit Sitemap When SEOPage Published', type: 'Entity: SEOPage create/update', status: 'FAILED', lastRun: 'submitSitemapToGSC not found' },

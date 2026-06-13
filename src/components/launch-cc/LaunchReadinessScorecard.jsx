@@ -6,7 +6,7 @@ const WEIGHTS = [
   { key: 'Estate Sale Company Owner', label: 'Estate Sale Company Owner Experience', weight: 15 },
   { key: 'sale', label: 'Sale Creation', weight: 15 },
   { key: 'image', label: 'Image Pipeline', weight: 15 },
-  { key: 'ai_serp', label: 'AI & SERP Systems', weight: 10 },
+  { key: 'ai_serp', label: 'AI & Google Lens Systems', weight: 10 },
   { key: 'seo', label: 'SEO Engine', weight: 10 },
   { key: 'referral', label: 'Referral System', weight: 10 },
   { key: 'pos', label: 'POS Accuracy', weight: 10 },
@@ -140,7 +140,7 @@ export default function LaunchReadinessScorecard() {
         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Final Launch Scorecard</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
           {[
-            'Estate Sale Company Owner Signup', 'Sale Creation', 'Upload Pipeline', 'SERP API', 'AI Research',
+            'Estate Sale Company Owner Signup', 'Sale Creation', 'Upload Pipeline', 'Google Lens API', 'AI Research',
             'SEO Engine', 'Repository', 'VIP Events', 'POS System', 'Referrals',
             'Email Automation', 'Social Automation', 'Security', 'Database Health', 'Load Testing'
           ].map((item, i) => {

@@ -437,7 +437,7 @@ export default function ResellerPackupEventEditor() {
               <div>
                 <h2 className="text-base font-semibold text-slate-900">Event Photos</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  These photos are stored separately from the original sale — no AI pricing, no titles, no SERP lookup.
+                  These photos are stored separately from the original sale — no AI pricing, no titles, no Google Lens lookup.
                 </p>
               </div>
               <Badge variant="outline">{photos.length} photo{photos.length !== 1 ? 's' : ''}</Badge>

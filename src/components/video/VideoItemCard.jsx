@@ -144,7 +144,7 @@ export default function VideoItemCard({ item, index, onRemove, onNotesChange, dr
               </div>
             )}
 
-            {/* SERP Sources */}
+            {/* Google Lens Sources */}
             {item.serpapi_sources?.length > 0 && (
               <div>
                 <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-2 flex items-center gap-1"><Award className="w-3 h-3" /> Market Sources</h4>
