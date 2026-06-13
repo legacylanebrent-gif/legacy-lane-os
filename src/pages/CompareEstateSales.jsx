@@ -86,7 +86,7 @@ const CATEGORIES = [
       { feature: 'Early access invites for VIP buyers', us: true, them: false },
       { feature: 'Post-sale VIP bonuses', us: true, them: false },
       { feature: 'Buyer purchase rewards & points', us: true, them: false },
-      { feature: 'Monthly prize drawings for active buyers', us: true, them: false },
+      { feature: 'Monthly prize drawings for active buyers (paid for by EstateSalen.com)', us: true, them: false },
       { feature: 'Sale QR check-in with reward points', us: true, them: false },
       { feature: 'Buyer watchlists & price alerts', us: true, them: false },
     ],
