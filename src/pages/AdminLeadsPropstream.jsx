@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet, Share2 } from 'lucide-react';
+import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet, Share2, Filter, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportToFacebookAudienceCSV } from '@/lib/facebookAudienceExport';
 import ProbateLeadBatchImporter from '@/components/propstream/ProbateLeadBatchImporter';
@@ -34,6 +34,13 @@ export default function AdminLeadsPropstream() {
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [scoring, setScoring] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [ownerTypeFilter, setOwnerTypeFilter] = useState('');
+  const [scoreRangeFilter, setScoreRangeFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [situationFilter, setSituationFilter] = useState('');
+  const [sortField, setSortField] = useState('score');
+  const [sortDir, setSortDir] = useState('desc');
   const [form, setForm] = useState({
     contact_name: '', contact_email: '', contact_phone: '',
     property_address: '', situation: '', timeline: '', estimated_value: '',
@@ -100,14 +107,43 @@ export default function AdminLeadsPropstream() {
   const assigned = leads.filter(l => l.routed_to && !l.converted).length;
   const converted = leads.filter(l => l.converted).length;
 
+  // Get unique states for filter
+  const uniqueStates = [...new Set(leads.map(l => l.property_state).filter(Boolean))].sort();
+
   const filtered = leads.filter(lead => {
     const q = search.toLowerCase();
     const match = !search || lead.contact_name?.toLowerCase().includes(q) || lead.contact_email?.toLowerCase().includes(q) || lead.property_address?.toLowerCase().includes(q) || lead.propstream_id?.toLowerCase().includes(q);
-    if (filter === 'unassigned') return match && !lead.routed_to && !lead.converted;
-    if (filter === 'assigned') return match && lead.routed_to && !lead.converted;
-    if (filter === 'converted') return match && lead.converted;
-    return match;
+    if (filter === 'unassigned' && (lead.routed_to || lead.converted)) return false;
+    if (filter === 'assigned' && (!lead.routed_to || lead.converted)) return false;
+    if (filter === 'converted' && !lead.converted) return false;
+    if (!match) return false;
+    // Additional filters
+    if (ownerTypeFilter && lead.propstream_owner_type !== ownerTypeFilter) return false;
+    if (scoreRangeFilter) {
+      const s = lead.score || 0;
+      if (scoreRangeFilter === 'high' && s < 70) return false;
+      if (scoreRangeFilter === 'medium' && (s < 40 || s >= 70)) return false;
+      if (scoreRangeFilter === 'low' && s >= 40) return false;
+    }
+    if (stateFilter && lead.property_state !== stateFilter) return false;
+    if (situationFilter && lead.situation !== situationFilter) return false;
+    return true;
+  }).sort((a, b) => {
+    const aVal = a[sortField] || 0;
+    const bVal = b[sortField] || 0;
+    return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
   });
+
+  const clearFilters = () => {
+    setOwnerTypeFilter('');
+    setScoreRangeFilter('');
+    setStateFilter('');
+    setSituationFilter('');
+    setSearch('');
+    setFilter('unassigned');
+  };
+
+  const hasActiveFilters = ownerTypeFilter || scoreRangeFilter || stateFilter || situationFilter;
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -155,20 +191,87 @@ export default function AdminLeadsPropstream() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-3 items-center">
-        <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList>
-            <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>
-            <TabsTrigger value="assigned">Assigned ({assigned})</TabsTrigger>
-            <TabsTrigger value="converted">Converted ({converted})</TabsTrigger>
-            <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <Input placeholder="Search by name, address, Propstream ID..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1" />
-        <Button onClick={handleScoreLeads} disabled={scoring} variant="outline" className="gap-2">
-          {scoring ? <Loader className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-          {scoring ? 'Scoring...' : 'Score Leads'}
-        </Button>
+      <div className="space-y-3">
+        <div className="flex flex-col md:flex-row gap-3 items-center">
+          <Tabs value={filter} onValueChange={setFilter}>
+            <TabsList>
+              <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>
+              <TabsTrigger value="assigned">Assigned ({assigned})</TabsTrigger>
+              <TabsTrigger value="converted">Converted ({converted})</TabsTrigger>
+              <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Input placeholder="Search by name, address, Propstream ID..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1" />
+          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={`gap-2 ${hasActiveFilters ? 'border-purple-400 bg-purple-50 text-purple-700' : ''}`}>
+            <Filter className="w-4 h-4" />
+            Filters
+            {hasActiveFilters && <span className="bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span>}
+          </Button>
+          <Button onClick={handleScoreLeads} disabled={scoring} variant="outline" className="gap-2">
+            {scoring ? <Loader className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+            {scoring ? 'Scoring...' : 'Score Leads'}
+          </Button>
+        </div>
+
+        {/* Advanced Filter Panel */}
+        {showFilters && (
+          <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Advanced Filters</p>
+              {hasActiveFilters && (
+                <Button size="sm" variant="ghost" onClick={clearFilters} className="h-7 text-xs text-red-600 hover:text-red-700 gap-1">
+                  <X className="w-3 h-3" /> Clear All
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <Label className="text-xs text-slate-500 mb-1">Owner Type</Label>
+                <Select value={ownerTypeFilter} onValueChange={v => setOwnerTypeFilter(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="All Types" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    {OWNER_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 mb-1">Score Range</Label>
+                <Select value={scoreRangeFilter} onValueChange={v => setScoreRangeFilter(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="All Scores" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Scores</SelectItem>
+                    <SelectItem value="high">High (70+)</SelectItem>
+                    <SelectItem value="medium">Medium (40-69)</SelectItem>
+                    <SelectItem value="low">Low (0-39)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 mb-1">State</Label>
+                <Select value={stateFilter} onValueChange={v => setStateFilter(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="All States" /></SelectTrigger>
+                  <SelectContent className="max-h-48">
+                    <SelectItem value="all">All States</SelectItem>
+                    {uniqueStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 mb-1">Situation</Label>
+                <Select value={situationFilter} onValueChange={v => setSituationFilter(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="All Situations" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Situations</SelectItem>
+                    {['probate','divorce','downsizing','relocation','foreclosure','investment','standard'].map(s => (
+                      <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Page Size */}
@@ -195,20 +298,26 @@ export default function AdminLeadsPropstream() {
           <p className="text-sm mt-1">Add leads manually or import from PropStream</p>
         </CardContent></Card>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <div className="overflow-auto rounded-lg border border-slate-200 max-h-[65vh]">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b">
+            <thead className="bg-slate-50 border-b sticky top-0 z-10">
               <tr className="text-left">
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Score</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide cursor-pointer hover:text-slate-700 select-none" onClick={() => { if (sortField === 'score') setSortDir(d => d === 'desc' ? 'asc' : 'desc'); else { setSortField('score'); setSortDir('desc'); }}}>
+                  Score {sortField === 'score' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+                </th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Owner</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Property Address</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">County</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Contact</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Owner Type</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Est. Value</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap cursor-pointer hover:text-slate-700 select-none" onClick={() => { if (sortField === 'estimated_value') setSortDir(d => d === 'desc' ? 'asc' : 'desc'); else { setSortField('estimated_value'); setSortDir('desc'); }}}>
+                  Est. Value {sortField === 'estimated_value' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+                </th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">EstSale Rev</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Op Ref</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Equity</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap cursor-pointer hover:text-slate-700 select-none" onClick={() => { if (sortField === 'propstream_equity') setSortDir(d => d === 'desc' ? 'asc' : 'desc'); else { setSortField('propstream_equity'); setSortDir('desc'); }}}>
+                  Equity {sortField === 'propstream_equity' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+                </th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Type</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Status</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Actions</th>
