@@ -203,6 +203,8 @@ export default function AdminLeadsPropstream() {
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Owner Type</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Situation</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Est. Value</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">EstSale Rev</th>
+                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Op Ref</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Equity</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Beds</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Baths</th>
@@ -256,6 +258,12 @@ export default function AdminLeadsPropstream() {
                   </td>
                   <td className="p-3 text-slate-700 whitespace-nowrap">
                     {lead.estimated_value ? `$${Number(lead.estimated_value).toLocaleString()}` : <span className="text-slate-400">—</span>}
+                  </td>
+                  <td className="p-3 text-green-700 font-medium whitespace-nowrap">
+                    {lead.estimated_value ? `$${Math.round(lead.estimated_value * 0.0035).toLocaleString()}` : <span className="text-slate-400">—</span>}
+                  </td>
+                  <td className="p-3 text-orange-700 font-medium whitespace-nowrap">
+                    {lead.estimated_value ? `$${Math.round(lead.estimated_value * 0.0015).toLocaleString()}` : <span className="text-slate-400">—</span>}
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     {lead.propstream_equity ? (
