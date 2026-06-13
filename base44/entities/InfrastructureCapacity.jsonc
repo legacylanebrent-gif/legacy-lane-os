@@ -1,0 +1,97 @@
+{
+  "name": "InfrastructureCapacity",
+  "type": "object",
+  "properties": {
+    "service_key": {
+      "type": "string",
+      "description": "Matches PlatformExpenseConfig.service_key (e.g. serpapi, openai, google_maps, meta_ads, email_service)"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Display name (e.g. SERP API, OpenAI, Google Maps)"
+    },
+    "plan_name": {
+      "type": "string",
+      "description": "Current pricing plan name for this service"
+    },
+    "monthly_call_limit": {
+      "type": "integer",
+      "description": "Max calls/units allowed per month by the current plan"
+    },
+    "current_month_usage": {
+      "type": "integer",
+      "default": 0,
+      "description": "Calls/units used so far this month"
+    },
+    "monthly_cost": {
+      "type": "number",
+      "description": "Current plan monthly cost in USD"
+    },
+    "overage_cost_per_unit": {
+      "type": "number",
+      "default": 0,
+      "description": "Cost per unit beyond the plan limit"
+    },
+    "required_by_tiers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Subscription tier_levels that require this service (starter, growth, professional, elite)"
+    },
+    "estimated_usage_per_subscriber": {
+      "type": "object",
+      "description": "Estimated API calls/units per subscriber per month, by tier",
+      "properties": {
+        "starter": {
+          "type": "integer"
+        },
+        "growth": {
+          "type": "integer"
+        },
+        "professional": {
+          "type": "integer"
+        },
+        "elite": {
+          "type": "integer"
+        }
+      }
+    },
+    "capacity_pct": {
+      "type": "integer",
+      "default": 0,
+      "description": "Current usage percentage (0-100)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "warning",
+        "critical"
+      ],
+      "default": "healthy",
+      "description": "healthy (<70%), warning (70-85%), critical (>85%)"
+    },
+    "upgrade_option": {
+      "type": "string",
+      "description": "Next tier plan name if upgrade is recommended"
+    },
+    "upgrade_cost": {
+      "type": "number",
+      "description": "Monthly cost of the upgrade option"
+    },
+    "upgrade_call_limit": {
+      "type": "integer",
+      "description": "Call limit of the upgrade option"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "service_key",
+    "service_name"
+  ]
+}
