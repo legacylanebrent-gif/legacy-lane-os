@@ -18,6 +18,17 @@ const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'm
 // Pages that render without any chrome (public-facing)
 const PUBLIC_PAGES = ['EstateSaleDetail', 'EstateSaleFinder', 'Home', 'ReferralLanding', 'SaleLanding', 'ItemDetail', 'StateCities', 'SearchByState', 'BrowseOperators', 'OperatorPackages', 'BrowseItems', 'HowToUse', 'OnboardingChat'];
 
+// Pages that render with UniversalHeader only (no sidebar) for ALL roles
+// These are utility/consumer-style pages linked from the UniversalHeader dropdown
+const NO_SIDEBAR_PAGES = [
+  'MyProfile', 'Favorites', 'RoutePlanner', 'MyEarlySignIns', 'RewardsCheckins',
+  'RecordPurchase', 'MyRewards', 'FavoriteCompanies', 'NotificationSettings',
+  'MyPurchases', 'MyTickets', 'MyReferrals', 'Notifications', 'Messages',
+  // Agent tools
+  'AgentOperatorPortal', 'AgentPartnerships', 'ReferralDealPipeline',
+  'ReferralDashboard', 'JoinReferralExchange',
+];
+
 // Consumer-type roles that get the consumer header instead of the sidebar
 const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller', 'real_estate_agent'];
 
@@ -116,12 +127,39 @@ export default function Layout({ children, currentPageName }) {
 
   const role = user?.primary_account_type || 'consumer';
   const isConsumer = CONSUMER_ROLES.includes(role);
+  const hideSidebar = isConsumer || NO_SIDEBAR_PAGES.includes(currentPageName);
 
-  // Consumer layout — top header only, no sidebar
-  if (isConsumer) {
+  // Consumer layout / sidebar-free pages — top header only, no sidebar
+  if (hideSidebar) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50">
         <UniversalHeader user={user} isAuthenticated={!!user} />
+        {/* Profile incomplete banner for business roles on sidebar-free pages */}
+        {user && !isConsumer && !ADMIN_ROLES.includes(role) && !isProfileComplete(user) && !profileBannerDismissed && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span className="text-amber-800 font-medium">Complete your profile to unlock all features</span>
+              <span className="text-amber-700 flex flex-wrap gap-x-3 gap-y-0.5">
+                {getMissingFields(user).map(f => (
+                  <span key={f} className="inline-flex items-center gap-1">
+                    {f === 'company name' ? <Building2 className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
+                    {f}
+                  </span>
+                ))}
+              </span>
+              <Link to="/MyProfile" className="inline-flex items-center gap-1 text-amber-700 font-semibold hover:text-amber-900 underline whitespace-nowrap">
+                Go to Profile <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <button
+              onClick={() => { localStorage.setItem('profileBannerDismissed', '1'); setProfileBannerDismissed(true); }}
+              className="text-amber-500 hover:text-amber-700 flex-shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         {children}
       </div>
     );
