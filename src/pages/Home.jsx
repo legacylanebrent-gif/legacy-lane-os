@@ -656,7 +656,8 @@ export default function Home() {
     const local = userLocation
       ? filterByDistance(visibleSales.filter(s => !s.national_featured && isLocalFeaturedActive(s)))
       : visibleSales.filter(s => !s.national_featured && isLocalFeaturedActive(s));
-    const regular = filterByDistance(visibleSales.filter(s => !s.national_featured && !isLocalFeaturedActive(s)));
+    // Locally featured sales also appear in the regular sales grid (they show in both sections)
+    const regular = filterByDistance(visibleSales.filter(s => !s.national_featured));
 
     setNationalFeatured(national);
     setLocalFeatured(local);
