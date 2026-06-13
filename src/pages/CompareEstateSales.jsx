@@ -95,7 +95,7 @@ const CATEGORIES = [
     label: 'Lead Generation & CRM',
     rows: [
       { feature: 'Lead capture from website, ads & finder', us: true, them: false },
-      { feature: 'Priority access to client leads (Gold tier)', us: true, them: true },
+      { feature: 'Priority access to client leads', us: true, them: true },
       { feature: 'Pre-probate territory leads', us: true, them: false },
       { feature: 'Facebook ads for lead generation (we pay)', us: true, them: false },
       { feature: 'Lead scoring & routing', us: true, them: false },
