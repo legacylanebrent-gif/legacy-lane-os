@@ -94,7 +94,7 @@ export default function ShareModal({ open, onClose, url, title }) {
 
           <div className="pt-3 border-t border-slate-200">
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600 truncate">
+              <div className="flex-1 min-w-0 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600 truncate">
                 {url}
               </div>
               <Button
