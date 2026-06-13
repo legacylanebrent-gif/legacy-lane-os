@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import {
   User, Building2, Bell, CreditCard, Save, Upload, Check,
   ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, ArrowRight,
-  ShoppingBag, Share2, MapPin, Globe, Shield, Star,
+  ShoppingBag, Share2, MapPin, Globe, Shield, Star, Crosshair,
   Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store,
   Users, FileText, BarChart2, Send
 } from 'lucide-react';
@@ -25,6 +25,7 @@ import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentialsTab';
 import InteractiveTerritorySelector from '@/components/profile/InteractiveTerritorySelector';
 import LocationRequiredCard from '@/components/profile/LocationRequiredCard';
+import BuyerPrefsTab from '@/components/profile/BuyerPrefsTab';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -322,6 +323,7 @@ export default function MyProfile() {
           {/* ── Universal tabs — all users ── */}
           <TabsTrigger value="account" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Account</TabsTrigger>
           <TabsTrigger value="estate_sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Estate Sales</TabsTrigger>
+          <TabsTrigger value="buyer_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buyer Prefs</TabsTrigger>
           {/* ── Role-specific tabs ── */}
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
             {isAgentOperator ? 'Business Profile' : isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
@@ -1275,6 +1277,11 @@ export default function MyProfile() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ─────────────── BUYER PREFS TAB ─────────────── */}
+        <TabsContent value="buyer_prefs" className="space-y-6">
+          <BuyerPrefsTab user={user} />
         </TabsContent>
 
         {/* ─────────────── SUBSCRIPTION TAB ─────────────── */}
