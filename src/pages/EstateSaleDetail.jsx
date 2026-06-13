@@ -13,7 +13,7 @@ import SharedFooter from '@/components/layout/SharedFooter';
 import SignTheListButton from '@/components/estate/SignTheListButton';
 import { 
   MapPin, Calendar, Clock, Heart, Share2, Phone, Globe,
-  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut, Eye, EyeOff
+  Building2, DollarSign, CreditCard, ArrowLeft, User, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, ShoppingBag, LogIn, LogOut, Eye, EyeOff, Search
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
@@ -56,6 +56,9 @@ export default function EstateSaleDetail() {
   const [visibleThumbnails, setVisibleThumbnails] = useState(20);
   const [isFollowingCompany, setIsFollowingCompany] = useState(false);
   const [followingCompany, setFollowingCompany] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     loadSaleData();
@@ -317,6 +320,32 @@ export default function EstateSaleDetail() {
     }
   };
 
+  const handleSearch = (e) => {
+    const q = e?.target?.value || '';
+    setSearchQuery(q);
+    if (!q.trim()) { setSearchResults([]); return; }
+    const term = q.toLowerCase();
+    const results = [];
+    // Search title & description
+    if (sale.title?.toLowerCase().includes(term)) results.push({ type: 'Title', text: sale.title });
+    if (sale.description?.toLowerCase().includes(term)) results.push({ type: 'Description', text: sale.description.slice(0, 200) + (sale.description.length > 200 ? '...' : '') });
+    // Search categories
+    (sale.categories || []).forEach(c => { if (c.toLowerCase().includes(term)) results.push({ type: 'Category', text: c }); });
+    // Search images (name & description)
+    (sale.images || []).forEach((img, i) => {
+      const name = typeof img === 'object' ? img.name : '';
+      const desc = typeof img === 'object' ? img.description : '';
+      if (name?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Name`, text: name });
+      if (desc?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Description`, text: desc });
+    });
+    // Search featured items
+    (sale.featured_items || []).forEach((item, i) => {
+      if (item.name?.toLowerCase().includes(term)) results.push({ type: `Featured Item ${i + 1}`, text: item.name });
+      if (item.description?.toLowerCase().includes(term)) results.push({ type: `Featured Item ${i + 1} Desc`, text: item.description });
+    });
+    setSearchResults(results);
+  };
+
   const toggleImageSave = (index) => {
     setSavedImages(prev => {
       const updated = prev.includes(index) 
@@ -444,6 +473,9 @@ export default function EstateSaleDetail() {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={() => { setSearchQuery(''); setSearchResults([]); setSearchOpen(true); }}>
+                    <Search className="w-5 h-5" />
+                  </Button>
                   <Button variant="outline" size="icon" onClick={handleShare}>
                     <Share2 className="w-5 h-5" />
                   </Button>
@@ -962,6 +994,36 @@ export default function EstateSaleDetail() {
           allImages={sale.images}
         />
       )}
+
+      {/* Search Modal */}
+      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <DialogContent className="max-w-lg">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900">Search This Sale</h3>
+            <input
+              type="text"
+              placeholder="Search titles, descriptions, categories..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm"
+              autoFocus
+            />
+            {searchQuery.trim() && searchResults.length === 0 && (
+              <p className="text-sm text-slate-500 text-center py-4">No results found for "{searchQuery}"</p>
+            )}
+            {searchResults.length > 0 && (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {searchResults.map((r, i) => (
+                  <div key={i} className="bg-slate-50 rounded-lg p-3">
+                    <Badge variant="secondary" className="mb-1 text-xs">{r.type}</Badge>
+                    <p className="text-sm text-slate-700">{r.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <SharedFooter />
     </div>
