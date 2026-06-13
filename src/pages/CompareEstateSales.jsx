@@ -157,7 +157,7 @@ const CATEGORIES = [
       { feature: 'Generates blog posts & SEO pages daily so your site ranks high', us: true, them: false },
       { feature: 'Customer success agent — monitors accounts', us: true, them: false },
       { feature: 'Inventory pricing agent — researches items in bulk', us: true, them: false },
-      { feature: 'Financial ops agent — tracks revenue & expenses', us: true, them: false },
+      { feature: 'Financial ops agent — helps you track revenue & expenses & makes savings suggestions', us: true, them: false },
       { feature: 'Relationship coach agent — nurtures client & partner connections', us: true, them: false },
       { feature: 'Admin ops agent — monitors infrastructure & sends reports', us: true, them: false },
       { feature: 'Quality assurance agent — audits content & listings', us: true, them: false },
