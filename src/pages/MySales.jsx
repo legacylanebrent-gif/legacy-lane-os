@@ -12,7 +12,7 @@ import BuyoutModal from '@/components/estate/BuyoutModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import {
@@ -64,6 +64,7 @@ export default function MySales() {
   const [showCompletedSection, setShowCompletedSection] = useState(false);
   const [isElite, setIsElite] = useState(false);
   const [featuringId, setFeaturingId] = useState(null);
+  const [matchingSaleId, setMatchingSaleId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -146,6 +147,23 @@ export default function MySales() {
       alert('Failed to update featured status');
     } finally {
       setFeaturingId(null);
+    }
+  };
+
+  const handleBuyerMatch = async (saleId) => {
+    setMatchingSaleId(saleId);
+    try {
+      const res = await base44.functions.invoke('notifyOperatorOfMatchingBuyers', { saleId });
+      if (res.data?.success) {
+        alert(res.data.matchCount > 0
+          ? `${res.data.matchCount} buyer${res.data.matchCount > 1 ? 's' : ''} matched! Check your notifications.`
+          : res.data.message || 'No matches found yet.'
+        );
+      }
+    } catch (e) {
+      alert('Failed to run buyer matching. Please try again.');
+    } finally {
+      setMatchingSaleId(null);
     }
   };
 
@@ -408,6 +426,18 @@ export default function MySales() {
                             >
                               <Pin className="w-3 h-3 mr-1" />
                               {featuringId === sale.id ? 'Updating...' : sale.local_featured ? '★ Local Featured' : 'Feature Locally'}
+                            </Button>
+                          )}
+                          {!isCompleted && isElite && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleBuyerMatch(sale.id)}
+                              disabled={matchingSaleId === sale.id}
+                              className="w-full text-black border-emerald-500 hover:bg-emerald-50"
+                            >
+                              <UserCheck className="w-3 h-3 mr-1" />
+                              {matchingSaleId === sale.id ? 'Matching...' : 'Buyer Match'}
                             </Button>
                           )}
                           {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-teal-500 text-black hover:bg-teal-50"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Worksheet</Link></Button>)}
