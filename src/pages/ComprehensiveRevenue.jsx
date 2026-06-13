@@ -334,9 +334,17 @@ export default function ComprehensiveRevenue() {
   // Create Estate Sale Company Owner projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
 
-  // Dealer subscription revenue: assume flat $147/mo per dealer account (use 5% of operator count as dealers)
-  const estimatedDealerCount = Math.round(totalOperators * 0.05);
-  const dealerSubRevenue = estimatedDealerCount * 147;
+  // Dealer subs: based on US market estimates per type, with penetration rate
+  const DEALER_TYPES = [
+    { name: 'Antique Store', count: 15000 }, { name: 'Art Gallery', count: 10000 },
+    { name: 'Estate Jewelry Buyer', count: 11500 }, { name: 'Coin Shop', count: 4500 },
+    { name: 'Sports Card Shop', count: 3750 }, { name: 'Comic Shop', count: 3250 },
+    { name: 'Vintage Furniture Dealer', count: 6000 }, { name: 'Architectural Salvage Dealer', count: 1000 },
+    { name: 'Record Store', count: 2250 }, { name: 'Book Dealer', count: 3000 },
+    { name: 'Collectible Shop', count: 7500 }, { name: 'Luxury Consignment Store', count: 3500 },
+  ];
+  const totalUSDealers = DEALER_TYPES.reduce((s, t) => s + t.count, 0);
+  const dealerSubRevenue = Math.round(totalUSDealers * 0.05 * 147);
   const dealerSubProjections = calculateProjections(dealerSubRevenue, 3, 120);
 
   const totalProjections = operatorProjections.map((_, i) => 

@@ -12,8 +12,10 @@ import {
 } from 'lucide-react';
 
 const DEALER_BUSINESS_TYPES = [
-  'Antique Dealer', 'Art Dealer', 'Collector Dealer', 'Gallery Owner',
-  'Auction House', 'Vintage Dealer', 'Estate Buyer', 'Other'
+  'Antique Store', 'Art Gallery', 'Estate Jewelry Buyer', 'Coin Shop',
+  'Sports Card Shop', 'Comic Shop', 'Vintage Furniture Dealer',
+  'Architectural Salvage Dealer', 'Record Store', 'Book Dealer',
+  'Collectible Shop', 'Luxury Consignment Store', 'Other'
 ];
 
 const DEALER_SPECIALTY_OPTIONS = [

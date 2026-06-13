@@ -198,10 +198,29 @@ export default function Revenue() {
   }
   const websiteTotalProjections = websiteSetupProjections.map((s, i) => s + websiteRecurringProjections[i]);
 
-  // Dealer subs: dealerPctOfOps% of operators × monthly dealer sub price, grows at dealerSubGrowth%
-  const dealerSubProjections = operatorCounts.map((count, i) => 
-    Math.round(count * (dealerPctOfOps / 100)) * dealerSubPrice * Math.pow(1 + dealerSubGrowth / 100, i)
-  );
+  // Dealer subs: based on US market estimates per type, with penetration rate
+  // Midpoint estimates: Antique 15K, Art Gallery 10K, Jewelry 11.5K, Coin 4.5K, Sports Card 3.75K,
+  // Comic 3.25K, Vintage Furniture 6K, Architectural Salvage 1K, Record 2.25K, Book 3K,
+  // Collectible 7.5K, Luxury Consignment 3.5K = ~71.25K total US locations
+  const DEALER_TYPES = [
+    { name: 'Antique Store', count: 15000, price: 147 },
+    { name: 'Art Gallery', count: 10000, price: 147 },
+    { name: 'Estate Jewelry Buyer', count: 11500, price: 147 },
+    { name: 'Coin Shop', count: 4500, price: 147 },
+    { name: 'Sports Card Shop', count: 3750, price: 147 },
+    { name: 'Comic Shop', count: 3250, price: 147 },
+    { name: 'Vintage Furniture Dealer', count: 6000, price: 147 },
+    { name: 'Architectural Salvage Dealer', count: 1000, price: 147 },
+    { name: 'Record Store', count: 2250, price: 147 },
+    { name: 'Book Dealer', count: 3000, price: 147 },
+    { name: 'Collectible Shop', count: 7500, price: 147 },
+    { name: 'Luxury Consignment Store', count: 3500, price: 147 },
+  ];
+  const totalUSDealers = DEALER_TYPES.reduce((s, t) => s + t.count, 0);
+  const dealerSubProjections = operatorCounts.map((_, i) => {
+    const penetration = Math.min(1, (dealerPctOfOps / 100) * Math.pow(1 + dealerSubGrowth / 100, i));
+    return Math.round(totalUSDealers * penetration * dealerSubPrice);
+  });
 
   // Total
   const totalProjections = operatorProjections.map((_, i) =>
@@ -774,14 +793,13 @@ export default function Revenue() {
               <CardContent>
                 <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-1">
                   <div className="text-sm text-slate-700">
-                    <strong>Model:</strong> {dealerPctOfOps}% of operators are also dealers, paying ${dealerSubPrice}/mo with {dealerSubGrowth}% monthly growth.
+                    <strong>Model:</strong> Based on ~{totalUSDealers.toLocaleString()} total US dealer locations across 12 categories. {dealerPctOfOps}% initial penetration, ${dealerSubPrice}/mo per dealer, {dealerSubGrowth}% monthly growth.
                   </div>
                   <div className="text-sm text-slate-700">
-                    <strong>Month 1 Dealers:</strong> {Math.round(operatorCounts[0] * (dealerPctOfOps / 100)).toLocaleString()} &nbsp;→&nbsp;
-                    <strong>Month 36:</strong> {Math.round(operatorCounts[35] * (dealerPctOfOps / 100)).toLocaleString()}
+                    <strong>Month 1 Subscribers:</strong> {Math.round(totalUSDealers * dealerPctOfOps / 100).toLocaleString()} dealers
                   </div>
                   <div className="text-sm font-semibold text-slate-800">
-                    <strong>Month 1 Revenue:</strong> ${Math.round(operatorCounts[0] * (dealerPctOfOps / 100) * dealerSubPrice).toLocaleString()}/mo
+                    <strong>Month 1 Revenue:</strong> ${Math.round(totalUSDealers * (dealerPctOfOps / 100) * dealerSubPrice).toLocaleString()}/mo
                   </div>
                 </div>
 
@@ -791,12 +809,27 @@ export default function Revenue() {
                     <Input type="number" value={dealerSubPrice} onChange={(e) => setDealerSubPrice(Number(e.target.value))} />
                   </div>
                   <div>
-                    <Label>% of Operators Who Are Dealers</Label>
+                    <Label>Initial Market Penetration (%)</Label>
                     <Input type="number" value={dealerPctOfOps} onChange={(e) => setDealerPctOfOps(Number(e.target.value))} />
                   </div>
                   <div>
                     <Label>Monthly Growth Rate (%)</Label>
                     <Input type="number" value={dealerSubGrowth} onChange={(e) => setDealerSubGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <Label className="mb-2 block">US Market Size by Dealer Type</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-xs">
+                    {DEALER_TYPES.map(t => (
+                      <div key={t.name} className="flex justify-between p-2 bg-slate-50 rounded border">
+                        <span className="text-slate-600">{t.name}</span>
+                        <span className="font-semibold text-slate-800">{t.count.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm font-semibold text-slate-700 mt-2 text-right">
+                    Total Addressable Market: {totalUSDealers.toLocaleString()} locations
                   </div>
                 </div>
 
