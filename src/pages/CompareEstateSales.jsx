@@ -295,6 +295,9 @@ export default function CompareEstateSales() {
             <span className="hidden sm:block text-orange-300">·</span>
             <span className="text-orange-200 text-sm">EstateSales.net lists your sales. EstateSalen.com runs your entire business.</span>
           </div>
+          <div className="flex justify-center mt-1">
+            <span className="text-orange-100 text-sm font-medium">At the same price you already pay ... or LOWER!</span>
+          </div>
         </div>
       </section>
 
