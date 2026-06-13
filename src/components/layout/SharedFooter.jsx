@@ -16,7 +16,7 @@ export default function SharedFooter() {
               </div>
             </div>
             <p className="text-slate-400 text-lg mb-6">
-              Discover amazing estate sales and find treasures near you. Connect with trusted estate sale companies nationwide.
+              Discover amazing estate sales, find treasures near you, and connect with trusted estate sale companies nationwide. Powered by AI SuperAgents, ISO Wanted Items™, Google Lens™, and a native mobile app.
             </p>
           </div>
           
@@ -28,6 +28,7 @@ export default function SharedFooter() {
               <li><Link to={createPageUrl('BrowseOperators')} className="text-white hover:text-orange-400 transition-colors">Browse Companies</Link></li>
               <li><Link to={createPageUrl('BrowseItems')} className="text-white hover:text-orange-400 transition-colors">Marketplace</Link></li>
               <li><Link to={createPageUrl('EstateSaleFinder')} className="text-white hover:text-orange-400 transition-colors">Find Sales</Link></li>
+              <li><Link to="/LandingPageConsumer" className="text-white hover:text-orange-400 transition-colors">For Shoppers</Link></li>
             </ul>
           </div>
 
@@ -35,7 +36,7 @@ export default function SharedFooter() {
             <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
             <ul className="space-y-2">
               <li><Link to={createPageUrl('OperatorPackages')} className="text-white hover:text-orange-400 transition-colors">List Your Company</Link></li>
-              <li><Link to={createPageUrl('AgentSignup')} className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
+              <li><Link to="/LandingPageAgent" className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
               <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
               <li><Link to={createPageUrl('DIYSaleSignup')} className="text-white hover:text-orange-400 transition-colors">Sell Your Items</Link></li>
               <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>

@@ -20,7 +20,7 @@ const NAV_LINKS = [
 const STATS = [
   { value: '10,000+', label: 'Companies Nationwide' },
   { value: '3x', label: 'Average Revenue Increase' },
-  { value: '50+', label: 'Built-In Features' },
+  { value: '70+', label: 'Built-In Features' },
   { value: '1 Month', label: 'Free Trial' },
 ];
 
@@ -37,6 +37,8 @@ const CUSTOMER_FEATURES = [
   { icon: Navigation, title: 'Multi-Sale GPS Routes', desc: 'Buyers plan optimized driving routes across multiple sales in one day — maximizing their experience.' },
   { icon: Bell, title: 'Multi-Company Text Alerts', desc: 'Buyers subscribe to alerts from multiple Estate Sale Company Owners and get SMS notifications the moment new sales go live.' },
   { icon: Star, title: 'VIP List Access', desc: 'Exclusive VIP buyers get early access before sales open and special post-sale bonuses — rewarding your best customers.' },
+  { icon: Target, title: 'ISO Wanted Items™', desc: 'Buyers create hunt lists of items they want. When your sale has matching items, they get instant alerts — driving targeted buyers directly to you.' },
+  { icon: Play, title: 'iOS & Android Mobile App', desc: 'Your buyers get a native mobile experience — browse sales, plan routes, check in via QR, and message you directly. All branded for your business.' },
 ];
 
 const BUSINESS_FEATURES = [
@@ -438,6 +440,7 @@ export default function CompanyLanding() {
             {[
               'Unlimited sale listings', 'AI content generation', 'Online marketplace access',
               'Team member seats', 'Email & SMS campaigns', 'Referral income tracking',
+              'ISO Wanted Items buyer matching', 'Mobile app (iOS/Android)', '10 AI SuperAgent ecosystem',
               'Analytics & reporting', 'Priority support',
             ].map(item => (
               <div key={item} className="flex items-center gap-3">

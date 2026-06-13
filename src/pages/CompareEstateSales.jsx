@@ -126,6 +126,48 @@ const CATEGORIES = [
     ],
   },
   {
+    label: 'Autonomous SuperAgents & AI',
+    rows: [
+      { feature: '10 AI SuperAgents working 24/7', us: true, them: false },
+      { feature: 'Autonomous marketing agent — drafts & schedules campaigns', us: true, them: false },
+      { feature: 'Lead conversion agent — scores & routes leads automatically', us: true, them: false },
+      { feature: 'Content SEO agent — generates blog posts & SEO pages', us: true, them: false },
+      { feature: 'Customer success agent — monitors accounts', us: true, them: false },
+      { feature: 'Inventory pricing agent — researches items in bulk', us: true, them: false },
+      { feature: 'Financial ops agent — tracks revenue & expenses', us: true, them: false },
+      { feature: 'Relationship coach agent — nurtures client & partner connections', us: true, them: false },
+      { feature: 'Admin ops agent — monitors infrastructure & sends reports', us: true, them: false },
+      { feature: 'Quality assurance agent — audits content & listings', us: true, them: false },
+      { feature: 'Central command center for all agent runs', us: true, them: false },
+    ],
+  },
+  {
+    label: 'Buyer Matching & ISO Wanted Items',
+    rows: [
+      { feature: 'ISO Wanted Items™ search matching', us: true, them: false },
+      { feature: 'Buyers create hunt lists of wanted items', us: true, them: false },
+      { feature: 'Automated matching — buyers notified instantly when items surface', us: true, them: false },
+      { feature: 'Daily batch matching at 5am ET', us: true, them: false },
+      { feature: 'Dealer contact gating (allow_dealer_contact preference)', us: true, them: false },
+      { feature: 'Buyer Match button on sale cards — trigger matching manually', us: true, them: false },
+      { feature: 'Elite-tier automatic buyer notifications', us: true, them: false },
+    ],
+  },
+  {
+    label: 'Mobile App (iOS & Android)',
+    rows: [
+      { feature: 'Native mobile app for consumers', us: true, them: false },
+      { feature: 'Browse upcoming sales with map view', us: true, them: 'partial' },
+      { feature: 'Real-time ISO Wanted Item matching alerts', us: true, them: false },
+      { feature: 'Multi-sale GPS route planner', us: true, them: false },
+      { feature: 'QR code sale check-in for rewards', us: true, them: false },
+      { feature: 'Early sign-in list for VIP access', us: true, them: false },
+      { feature: 'Favorite companies & sale tracking', us: true, them: false },
+      { feature: 'In-app messaging with sellers', us: true, them: false },
+      { feature: 'Dynamic unread badge counts on tab bar', us: true, them: false },
+    ],
+  },
+  {
     label: 'Pricing & Value',
     rows: [
       { feature: 'Free 1-month trial', us: true, them: false },
@@ -139,8 +181,8 @@ const CATEGORIES = [
 
 const HERO_STATS = [
   { us: '70+', them: '~5', label: 'Platform Features' },
-  { us: 'Yes', them: 'No', label: 'Online Marketplace' },
-  { us: 'Yes', them: 'No', label: 'AI Tools Built-In' },
+  { us: '10 Agents', them: 'None', label: 'AI SuperAgents' },
+  { us: 'Yes', them: 'No', label: 'Mobile App (iOS/Android)' },
   { us: '1 Month Free', them: 'None', label: 'Free Trial' },
 ];
 
