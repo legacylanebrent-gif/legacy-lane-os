@@ -14,7 +14,7 @@ import { createPageUrl } from '@/utils';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { Link } from 'react-router-dom';
 import {
-  User, Building2, Bell, CreditCard, Save, Upload, Check,
+  User, Building2, Bell, CreditCard, Save, Upload, Check, Target,
   ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, ArrowRight,
   ShoppingBag, Share2, MapPin, Globe, Shield, Star, Crosshair,
   Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store,
@@ -1279,8 +1279,24 @@ export default function MyProfile() {
           </Card>
         </TabsContent>
 
-        {/* ─────────────── BUYER PREFS TAB ─────────────── */}
+        {/* ─────────────── ISO WANTED ITEMS TAB ─────────────── */}
         <TabsContent value="buyer_prefs" className="space-y-6">
+          <Card className="bg-gradient-to-r from-orange-50 to-purple-50 border-orange-200">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Target className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-1">Tell us what you're hunting for</h3>
+                  <p className="text-sm text-slate-600">
+                    Add items to your wanted list below and we'll automatically match them against every new estate sale that gets published. 
+                    When a match is found, you'll get a notification — and the sale company will see that a motivated buyer is looking for their items.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <BuyerPrefsTab user={user} />
         </TabsContent>
 
