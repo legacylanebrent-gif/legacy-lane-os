@@ -8,7 +8,8 @@ const CATEGORIES = [
     label: 'Sale Creation & Management',
     rows: [
       { feature: 'Create & publish estate sale listings', us: true, them: true },
-      { feature: 'Unlimited sale listings', us: true, them: false },
+      { feature: 'Unlimited sale listings', us: true, them: true },
+      { feature: 'Unlimited free pictures per listing', us: true, them: true },
       { feature: 'Full sale dashboard with AI automation', us: true, them: false },
       { feature: 'Drag-and-drop photo management', us: true, them: false },
       { feature: 'Batch photo labeling & pricing', us: true, them: false },
@@ -19,6 +20,8 @@ const CATEGORIES = [
       { feature: 'Assign client to sale with permissions', us: true, them: false },
       { feature: 'Featured / premium listing upgrades', us: true, them: true },
       { feature: 'SEO-optimized sale pages (Google ranking)', us: true, them: 'partial' },
+      { feature: 'Company profile page', us: true, them: true },
+      { feature: 'Gold / verified account badge', us: true, them: true },
     ],
   },
   {
@@ -37,7 +40,7 @@ const CATEGORIES = [
   {
     label: 'Online Selling & Marketplace',
     rows: [
-      { feature: 'National online marketplace', us: true, them: false },
+      { feature: 'National online marketplace', us: true, them: true },
       { feature: 'Fixed-price "Buy Now" listings', us: true, them: false },
       { feature: 'Auction functionality', us: true, them: false },
       { feature: 'Proxy / auto-bid auctions', us: true, them: false },
@@ -60,6 +63,7 @@ const CATEGORIES = [
       { feature: 'One-click push to all social media', us: true, them: false },
       { feature: 'Built-in email campaign tool', us: true, them: false },
       { feature: 'Built-in SMS campaign tool', us: true, them: false },
+      { feature: '20% off marketing tools (Gold tier)', us: true, them: true },
       { feature: 'Content calendar & scheduling', us: true, them: false },
       { feature: 'SEO boost per listing (AI-generated)', us: true, them: false },
       { feature: 'Facebook Ad campaign builder', us: true, them: false },
@@ -77,6 +81,7 @@ const CATEGORIES = [
     label: 'VIP Events & Buyer Loyalty',
     rows: [
       { feature: 'VIP pre-sale events for top buyers', us: true, them: false },
+      { feature: 'Line Management / Early Sign-In system', us: true, them: true },
       { feature: 'Early access invites for VIP buyers', us: true, them: false },
       { feature: 'Post-sale VIP bonuses', us: true, them: false },
       { feature: 'Buyer purchase rewards & points', us: true, them: false },
@@ -89,6 +94,7 @@ const CATEGORIES = [
     label: 'Lead Generation & CRM',
     rows: [
       { feature: 'Lead capture from website, ads & finder', us: true, them: false },
+      { feature: 'Priority access to client leads (Gold tier)', us: true, them: true },
       { feature: 'Pre-probate territory leads', us: true, them: false },
       { feature: 'Facebook ads for lead generation (we pay)', us: true, them: false },
       { feature: 'Lead scoring & routing', us: true, them: false },
@@ -181,7 +187,7 @@ const CATEGORIES = [
 ];
 
 const HERO_STATS = [
-  { us: '70+', them: '~5', label: 'Platform Features' },
+  { us: '80+', them: '~15', label: 'Platform Features' },
   { us: '10 Agents', them: 'None', label: 'AI SuperAgents' },
   { us: 'Yes', them: 'No', label: 'Mobile App (iOS/Android)' },
   { us: '1 Month Free', them: 'None', label: 'Free Trial' },
@@ -285,7 +291,7 @@ export default function CompareEstateSales() {
             <span className="text-slate-400">EstateSales.net</span>
           </h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            EstateSales.net is a weekend listing directory. EstateSalen.com is a full business operating system with 70+ tools built for estate sale professionals. See every difference, side by side.
+            EstateSales.net is a weekend listing directory. EstateSalen.com is a full business operating system with 80+ tools built for estate sale professionals. See every difference, side by side.
           </p>
 
           {/* Quick stat cards */}
