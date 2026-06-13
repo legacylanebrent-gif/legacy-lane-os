@@ -13,7 +13,7 @@ import {
 
 const DEALER_BUSINESS_TYPES = [
   'Antique Store', 'Art Gallery', 'Estate Jewelry Buyer', 'Coin Shop',
-  'Sports Card Shop', 'Comic Shop', 'Vintage Furniture Dealer',
+  'Sports Card Shop', 'Comic Shop', 'Game Shop', 'Vintage Furniture Dealer',
   'Architectural Salvage Dealer', 'Record Store', 'Book Dealer',
   'Collectible Shop', 'Luxury Consignment Store', 'Other'
 ];

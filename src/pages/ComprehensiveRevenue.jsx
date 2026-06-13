@@ -338,7 +338,7 @@ export default function ComprehensiveRevenue() {
   const DEALER_TYPES = [
     { name: 'Antique Store', count: 15000 }, { name: 'Art Gallery', count: 10000 },
     { name: 'Estate Jewelry Buyer', count: 11500 }, { name: 'Coin Shop', count: 4500 },
-    { name: 'Sports Card Shop', count: 3750 }, { name: 'Comic Shop', count: 3250 },
+    { name: 'Sports Card Shop', count: 3750 }, { name: 'Comic Shop', count: 3250 }, { name: 'Game Shop', count: 4000 },
     { name: 'Vintage Furniture Dealer', count: 6000 }, { name: 'Architectural Salvage Dealer', count: 1000 },
     { name: 'Record Store', count: 2250 }, { name: 'Book Dealer', count: 3000 },
     { name: 'Collectible Shop', count: 7500 }, { name: 'Luxury Consignment Store', count: 3500 },
