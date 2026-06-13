@@ -689,18 +689,6 @@ export default function PropstreamAgentLeads() {
                       >
                         Priority <SortIcon column="priority" />
                       </th>
-                      <th 
-                        className="text-right py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
-                        onClick={() => handleSort('total_volume')}
-                      >
-                        EstSale Rev <SortIcon column="total_volume" />
-                      </th>
-                      <th 
-                        className="text-right py-3 px-4 text-sm font-semibold text-slate-700 cursor-pointer hover:bg-slate-100"
-                        onClick={() => handleSort('total_volume')}
-                      >
-                        Operator Ref <SortIcon column="total_volume" />
-                      </th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Actions</th>
                     </tr>
                   </thead>
@@ -739,16 +727,6 @@ export default function PropstreamAgentLeads() {
                           <Badge className={`text-xs ${PRIORITY_COLORS[lead.priority]}`}>
                             {lead.priority}
                           </Badge>
-                        </td>
-                        <td className="text-right py-3 px-4">
-                          <div className="text-sm font-medium text-green-700">
-                            ${((lead.total_volume || 0) * 0.0035).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                          </div>
-                        </td>
-                        <td className="text-right py-3 px-4">
-                          <div className="text-sm font-medium text-orange-700">
-                            ${((lead.total_volume || 0) * 0.0015).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                          </div>
                         </td>
                         <td className="text-right py-3 px-4">
                           <div className="flex justify-end gap-2">
