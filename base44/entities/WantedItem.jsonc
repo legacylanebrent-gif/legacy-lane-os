@@ -61,11 +61,6 @@
       "type": "boolean",
       "default": true
     },
-    "allow_dealer_contact": {
-      "type": "boolean",
-      "default": false,
-      "description": "If true, dealers/operators may contact this buyer about their search preference"
-    },
     "item_knowledge_id": {
       "type": "string",
       "description": "Link to ItemKnowledge if matched"

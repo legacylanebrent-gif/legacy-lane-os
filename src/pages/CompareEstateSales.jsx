@@ -171,7 +171,6 @@ const CATEGORIES = [
       { feature: 'Buyers create hunt lists of wanted items', us: true, them: false },
       { feature: 'Automated matching — buyers notified instantly when items in their list match your sale items', us: true, them: false },
       { feature: 'Daily batch matching at 5am ET', us: true, them: false },
-      { feature: 'Dealer contact gating (allow_dealer_contact preference)', us: true, them: false },
       { feature: 'Buyer Match button on sale cards — trigger matching manually', us: true, them: false },
       { feature: 'Elite-tier automatic buyer notifications', us: true, them: false },
     ],
