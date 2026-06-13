@@ -41,11 +41,16 @@ export default function ReferralLanding() {
 
       // If there's a referral code, try to find the referrer
       if (code) {
-        // The referral code is the first 8 chars of user ID
-        const users = await base44.asServiceRole.entities.User.list();
-        const referrerUser = users.find(u => u.id.slice(0, 8).toUpperCase() === code);
-        if (referrerUser) {
-          setReferrer(referrerUser);
+        try {
+          // The referral code is the first 8 chars of user ID
+          const users = await base44.asServiceRole.entities.User.list();
+          const referrerUser = users.find(u => u.id.slice(0, 8).toUpperCase() === code);
+          if (referrerUser) {
+            setReferrer(referrerUser);
+          }
+        } catch (e) {
+          // Service role may not be available on public pages — non-critical
+          console.log('Could not load referrer info');
         }
       }
     } catch (error) {

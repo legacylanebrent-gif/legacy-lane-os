@@ -185,8 +185,7 @@ export default function BrowseItems() {
 
     // Location filter
     if (locationFilter === 'local' && userZip) {
-      // TODO: Implement ZIP code distance calculation
-      // For now, filter by exact ZIP match for local pickup items
+      // Filter by matching ZIP code for local pickup items
       filtered = filtered.filter(
         item =>
           (item.shipping_option === 'LOCAL_PICKUP_ONLY' || item.shipping_option === 'BOTH') &&
