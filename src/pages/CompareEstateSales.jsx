@@ -154,7 +154,7 @@ const CATEGORIES = [
       { feature: '10 AI Support SuperAgents working 24/7', us: true, them: false },
       { feature: 'Marketing Agent — helps you draft & schedule campaigns', us: true, them: false },
       { feature: 'Lead conversion agent — scores & routes leads automatically', us: true, them: false },
-      { feature: 'Content SEO agent — generates blog posts & SEO pages', us: true, them: false },
+      { feature: 'Generates blog posts & SEO pages daily so your site ranks high', us: true, them: false },
       { feature: 'Customer success agent — monitors accounts', us: true, them: false },
       { feature: 'Inventory pricing agent — researches items in bulk', us: true, them: false },
       { feature: 'Financial ops agent — tracks revenue & expenses', us: true, them: false },
