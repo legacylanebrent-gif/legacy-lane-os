@@ -543,7 +543,7 @@ export default function BuyerPrefsTab({ user }) {
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-4 h-4 mr-1" /> Guided AI
+                        <Sparkles className="w-4 h-4 mr-1" /> Add from Past Purchases
                       </>
                     )}
                   </Button>
