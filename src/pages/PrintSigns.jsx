@@ -212,7 +212,7 @@ export default function PrintSigns() {
         </div>
       </div>
 
-      <Tabs defaultValue="qrcodes">
+      <Tabs defaultValue="signs">
         <TabsList>
           <TabsTrigger value="qrcodes" className="flex items-center gap-2">
             <QrCode className="w-4 h-4" />
