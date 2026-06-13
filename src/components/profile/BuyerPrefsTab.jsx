@@ -300,15 +300,37 @@ export default function BuyerPrefsTab({ user }) {
               <Target className="w-5 h-5" />
               Items I'm Hunting For
             </CardTitle>
-            {!showWantedForm && (
-              <Button
-                size="sm"
-                className="bg-orange-600 hover:bg-orange-700"
-                onClick={() => setShowWantedForm(true)}
-              >
-                <Plus className="w-4 h-4 mr-1" /> Add Item
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {!showWantedForm && (
+                <Button
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={() => setShowWantedForm(true)}
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Add Item
+                </Button>
+              )}
+              {purchases.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                  onClick={handleAiGuidedHunt}
+                  disabled={loadingAi}
+                >
+                  {loadingAi ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mr-1" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-1" /> Add from Past Purchases
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -524,31 +546,10 @@ export default function BuyerPrefsTab({ user }) {
             <div className="text-center py-8">
               <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-slate-500 text-sm mb-1">No wanted items yet</p>
-              <p className="text-xs text-slate-400 mb-4">Tell us what you're hunting for and we'll alert you when matches are found</p>
-              <div className="flex items-center justify-center gap-3">
-                <Button size="sm" variant="outline" onClick={() => setShowWantedForm(true)}>
-                  <Plus className="w-4 h-4 mr-1" /> Add Your First Item
-                </Button>
-                {purchases.length > 0 && (
-                  <Button
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700"
-                    onClick={handleAiGuidedHunt}
-                    disabled={loadingAi}
-                  >
-                    {loadingAi ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-1" /> Add from Past Purchases
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
+              <p className="text-xs text-slate-400 mb-3">Tell us what you're hunting for and we'll alert you when matches are found</p>
+              <Button size="sm" variant="outline" onClick={() => setShowWantedForm(true)}>
+                <Plus className="w-4 h-4 mr-1" /> Add Your First Item
+              </Button>
             </div>
           ) : null}
 
