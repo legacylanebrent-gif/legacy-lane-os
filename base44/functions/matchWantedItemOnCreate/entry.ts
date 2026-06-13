@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
         `• ${m.type === 'estate_sale' ? '🏠' : m.type === 'marketplace' ? '🛍️' : '📦'} ${m.title} (${m.score}% match)`
       ).join('\n');
 
-      // Create notification for the buyer
+      // 1. Create notification for the buyer
       await base44.asServiceRole.entities.Notification.create({
         user_id: wantedItem.buyer_id,
         type: 'system',
@@ -192,6 +192,44 @@ Deno.serve(async (req) => {
         related_entity_type: 'WantedItem',
         related_entity_id: wantedItem.id,
       });
+
+      // 2. Notify Elite operators of matched estate sales
+      const notifiedOperators = new Set();
+      const estateSaleMatches = topMatches.filter(m => m.type === 'estate_sale');
+
+      for (const esMatch of estateSaleMatches) {
+        try {
+          // Fetch the sale to get operator_id
+          const sale = await base44.asServiceRole.entities.EstateSale.get(esMatch.id);
+          if (!sale || !sale.operator_id) continue;
+          if (notifiedOperators.has(sale.operator_id)) continue;
+          notifiedOperators.add(sale.operator_id);
+
+          // Check if operator is on Elite tier
+          const subs = await base44.asServiceRole.entities.Subscription.filter({
+            user_id: sale.operator_id,
+            status: 'active',
+            tier: 'elite',
+          });
+          if (subs.length === 0) continue;
+
+          // Create operator notification
+          await base44.asServiceRole.entities.Notification.create({
+            user_id: sale.operator_id,
+            type: 'system',
+            title: `👤 Buyer Hunting: "${wantedItem.title}"`,
+            message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Contact the buyer to close a deal before your sale!`,
+            link_to_page: 'MySales',
+            link_params: `status=active`,
+            read: false,
+            related_entity_type: 'EstateSale',
+            related_entity_id: sale.id,
+          });
+          stats.operatorNotifications = (stats.operatorNotifications || 0) + 1;
+        } catch (_) {
+          // Skip failed operator notifications gracefully
+        }
+      }
 
       stats.matchesFound = topMatches.length;
       stats.notificationsCreated = 1;
