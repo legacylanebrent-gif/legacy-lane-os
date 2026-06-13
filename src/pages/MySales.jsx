@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateVIPEventModal from '@/components/vip/CreateVIPEventModal';
 import BuyoutModal from '@/components/estate/BuyoutModal';
+import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
@@ -65,6 +66,7 @@ export default function MySales() {
   const [isElite, setIsElite] = useState(false);
   const [featuringId, setFeaturingId] = useState(null);
   const [matchingSaleId, setMatchingSaleId] = useState(null);
+  const [buyerMatchData, setBuyerMatchData] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -155,13 +157,10 @@ export default function MySales() {
     try {
       const res = await base44.functions.invoke('notifyOperatorOfMatchingBuyers', { saleId });
       if (res.data?.success) {
-        alert(res.data.matchCount > 0
-          ? `${res.data.matchCount} buyer${res.data.matchCount > 1 ? 's' : ''} matched! Check your notifications.`
-          : res.data.message || 'No matches found yet.'
-        );
+        setBuyerMatchData(res.data);
       }
     } catch (e) {
-      alert('Failed to run buyer matching. Please try again.');
+      setBuyerMatchData({ matchCount: 0, message: 'Failed to run buyer matching. Please try again.' });
     } finally {
       setMatchingSaleId(null);
     }
@@ -263,6 +262,12 @@ export default function MySales() {
         }}
         sale={selectedSale}
         onSuccess={loadData}
+      />
+
+      <BuyerMatchModal
+        open={!!buyerMatchData}
+        onClose={() => setBuyerMatchData(null)}
+        matchData={buyerMatchData}
       />
 
       <BuyoutModal
