@@ -160,7 +160,7 @@ const CATEGORIES = [
       { feature: 'Financial ops agent — helps you track revenue & expenses & makes savings suggestions', us: true, them: false },
       { feature: 'Relationship coach agent — helps you nurture client & partner connections', us: true, them: false },
       { feature: 'Admin ops agent — monitors our system & avoid downtime issues', us: true, them: false },
-      { feature: 'Quality assurance agent — audits content & listings', us: true, them: false },
+      { feature: 'Quality assurance agent — audits content & listings for accuracy', us: true, them: false },
       { feature: 'Central command center for all agent runs', us: true, them: false },
     ],
   },
