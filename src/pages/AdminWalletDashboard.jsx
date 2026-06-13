@@ -33,7 +33,7 @@ export default function AdminWalletDashboard() {
     setUser(u);
 
     // Load all wallets
-    const allWallets = await base44.asServiceRole.entities.OperatorWallet.list('-updated_date', 100);
+    const allWallets = await base44.entities.OperatorWallet.list('-updated_date', 100);
     setWallets(allWallets);
 
     // Calculate stats
@@ -51,7 +51,7 @@ export default function AdminWalletDashboard() {
     });
 
     // Load all transactions
-    const allTxns = await base44.asServiceRole.entities.WalletTransaction.list('-created_date', 500);
+    const allTxns = await base44.entities.WalletTransaction.list('-created_date', 500);
     setAllTransactions(allTxns);
 
     const pendingWithdrawals = allTxns.filter(t => t.type === 'withdrawal' && t.status === 'pending').length;
