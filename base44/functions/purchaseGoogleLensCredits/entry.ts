@@ -1,9 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const CREDIT_PACKAGES = [
-  { id: 'lens_50', searches: 50, price: 25, label: '50 Extra Searches' },
-  { id: 'lens_100', searches: 100, price: 45, label: '100 Extra Searches' },
-  { id: 'lens_250', searches: 250, price: 99, label: '250 Extra Searches' },
+  { id: 'lens_500', searches: 500, price: 19, label: '500 Extra Searches' },
+  { id: 'lens_1500', searches: 1500, price: 49, label: '1,500 Extra Searches' },
+  { id: 'lens_5000', searches: 5000, price: 129, label: '5,000 Extra Searches' },
+  { id: 'lens_15000', searches: 15000, price: 299, label: '15,000 Extra Searches' },
 ];
 
 Deno.serve(async (req) => {
