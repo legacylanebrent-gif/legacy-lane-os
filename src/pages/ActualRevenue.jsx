@@ -127,7 +127,7 @@ export default function ActualRevenue() {
           </div>
           <div className="flex items-center gap-3">
             {saved && <span className="text-sm text-green-600 font-medium">✓ Saved</span>}
-            <Button onClick={handleSave} className="bg-gold-600 hover:bg-gold-700">
+            <Button onClick={handleSave} className="bg-gold-600 hover:bg-gold-700 text-white">
               <Save className="w-4 h-4 mr-2" />
               Save Month
             </Button>
