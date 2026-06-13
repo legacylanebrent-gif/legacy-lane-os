@@ -30,7 +30,7 @@ import SharedFooter from '@/components/layout/SharedFooter';
 import { t } from '@/components/terminology';
 import { 
   Search, MapPin, Calendar, Heart, User, LogIn, LogOut, MessageSquare, LayoutDashboard,
-  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings
+  TrendingUp, Home as HomeIcon, DollarSign, Navigation, Bookmark, ShoppingBag, Building2, QrCode, Receipt, ChevronDown, Bell, Settings, Package, Store, Gem
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
@@ -1344,7 +1344,7 @@ export default function Home() {
             <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Growing Network</h2>
             <p className="text-xl text-slate-600">Grow your business with EstateSalen.com</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8">
             <Link to={createPageUrl('OperatorPackages')}>
               <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
                 <div className="flex flex-col items-center text-center gap-4">
@@ -1411,6 +1411,42 @@ export default function Home() {
                     </h3>
                     <p className="text-green-100">
                       Join our network and grow your business
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link to="/reseller-network">
+              <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Package className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                      Resellers
+                    </h3>
+                    <p className="text-teal-100">
+                      Find inventory and grow your resale business
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link to={createPageUrl('CollectorDealerDashboard')}>
+              <div className="bg-gradient-to-br from-rose-600 to-rose-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Gem className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                      Dealers
+                    </h3>
+                    <p className="text-rose-100">
+                      Source inventory for your store or gallery
                     </p>
                   </div>
                 </div>
