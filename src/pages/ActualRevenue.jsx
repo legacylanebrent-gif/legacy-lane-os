@@ -21,13 +21,16 @@ import {
 
 const REVENUE_STREAMS = [
   { key: "subscriptions", label: "Estate Sale Company Owner Subscriptions", color: "#0891b2" },
+  { key: "vendor_subs", label: "Vendor Subscriptions", color: "#a78bfa" },
   { key: "marketplace", label: "Marketplace Fees", color: "#f97316" },
+  { key: "re_agents", label: "RE Agent Income", color: "#f43f5e" },
   { key: "referrals", label: "Referral Fees", color: "#22c55e" },
   { key: "advertisements", label: "Advertisements", color: "#8b5cf6" },
   { key: "features", label: "Featured Listings", color: "#ec4899" },
   { key: "email_sms", label: "Email/SMS Campaigns", color: "#14b8a6" },
   { key: "website_hosting", label: "Website Hosting", color: "#6366f1" },
   { key: "dealer_subs", label: "Collector Dealer Subscriptions", color: "#eab308" },
+  { key: "reseller_subs", label: "Reseller Subscriptions", color: "#f43f5e" },
   { key: "other", label: "Other", color: "#64748b" },
 ];
 
