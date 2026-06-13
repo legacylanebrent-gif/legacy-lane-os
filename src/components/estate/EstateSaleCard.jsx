@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import { createPageUrl } from '@/utils';
+import { getOptimizedImageUrl } from '@/utils/imageOptimizer';
 
 export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName, saved = false, onToggleSave }) {
   const navigateToDetail = () => {
@@ -45,9 +46,11 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={primaryImage}
+          src={getOptimizedImageUrl(primaryImage, 400)}
           alt={estate.title}
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute top-3 right-3">
           {(() => { const ds = getSaleDisplayStatus(estate); return <Badge className={getStatusColor(ds)}>{ds.charAt(0).toUpperCase() + ds.slice(1)}</Badge>; })()}
