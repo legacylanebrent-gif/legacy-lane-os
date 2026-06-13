@@ -15,13 +15,14 @@ import CategorySuggestions from '@/components/profile/CategorySuggestions';
 import AgentGuidedHunt from '@/components/profile/AgentGuidedHunt';
 
 const CATEGORIES = [
-  'Furniture', 'Jewelry', 'Art', 'Antiques', 'Collectibles', 'Electronics',
-  'Clothing & Accessories', 'Books & Media', 'China & Porcelain', 'Glassware',
-  'Tools & Hardware', 'Sporting Goods', 'Toys & Games', 'Musical Instruments',
-  'Coins & Currency', 'Rugs & Textiles', 'Kitchen & Dining', 'Lighting & Lamps',
-  'Mid-Century Modern', 'Garden & Outdoor', 'Vehicles', 'Firearms',
-  'Holiday & Seasonal', 'Victorian Era', 'Vintage Fashion', 'Watches',
-  'Cameras & Photography', 'Vinyl Records', 'Comics', 'Other'
+  'Antiques', 'Art', 'Books & Media', 'Cameras & Photography',
+  'China & Porcelain', 'Clothing & Accessories', 'Coins & Currency',
+  'Collectibles', 'Comics', 'Electronics', 'Firearms', 'Furniture',
+  'Garden & Outdoor', 'Glassware', 'Holiday & Seasonal', 'Jewelry',
+  'Kitchen & Dining', 'Lighting & Lamps', 'Mid-Century Modern',
+  'Musical Instruments', 'Other', 'Rugs & Textiles', 'Sporting Goods',
+  'Tools & Hardware', 'Toys & Games', 'Vehicles', 'Victorian Era',
+  'Vinyl Records', 'Vintage Fashion', 'Watches'
 ];
 
 const CONDITIONS = [
