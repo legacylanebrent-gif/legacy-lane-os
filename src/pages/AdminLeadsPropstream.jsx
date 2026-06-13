@@ -145,6 +145,12 @@ export default function AdminLeadsPropstream() {
 
   const hasActiveFilters = ownerTypeFilter || scoreRangeFilter || stateFilter || situationFilter;
 
+  // Revenue calculations based on filtered leads
+  const estatesalenRev = filtered.reduce((sum, l) => sum + (l.estimated_value ? Math.round(l.estimated_value * 0.0035) : 0), 0);
+  const operatorRev = filtered.reduce((sum, l) => sum + (l.estimated_value ? Math.round(l.estimated_value * 0.0015) : 0), 0);
+  const estatesalenRev10 = Math.round(estatesalenRev * 0.1);
+  const operatorRev10 = Math.round(operatorRev * 0.1);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -188,6 +194,36 @@ export default function AdminLeadsPropstream() {
         <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Unassigned</p><p className="text-3xl font-bold text-orange-600">{unassigned}</p></div><AlertCircle className="w-8 h-8 text-orange-200" /></CardContent></Card>
         <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Assigned</p><p className="text-3xl font-bold text-purple-600">{assigned}</p></div><User className="w-8 h-8 text-purple-200" /></CardContent></Card>
         <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{converted}</p></div><CheckCircle className="w-8 h-8 text-green-200" /></CardContent></Card>
+      </div>
+
+      {/* Referral Revenue — Row 1: Potential */}
+      <div>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Potential Referral Revenue</p>
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          <Card className="border-green-200 bg-green-50/50"><CardContent className="p-4 flex items-center justify-between">
+            <div><p className="text-xs text-slate-500 mb-1">EstateSalen (0.35% of value)</p><p className="text-2xl font-bold text-green-700">${estatesalenRev.toLocaleString()}</p></div>
+            <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-5 h-5 text-green-600" /></div>
+          </CardContent></Card>
+          <Card className="border-orange-200 bg-orange-50/50"><CardContent className="p-4 flex items-center justify-between">
+            <div><p className="text-xs text-slate-500 mb-1">Separate Operator (0.15%)</p><p className="text-2xl font-bold text-orange-700">${operatorRev.toLocaleString()}</p></div>
+            <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-orange-600" /></div>
+          </CardContent></Card>
+        </div>
+      </div>
+
+      {/* Referral Revenue — Row 2: 10% */}
+      <div>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">10% Conversion Estimate</p>
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          <Card className="border-green-200 bg-green-50/30"><CardContent className="p-4 flex items-center justify-between">
+            <div><p className="text-xs text-slate-500 mb-1">EstateSalen (10% of above)</p><p className="text-2xl font-bold text-green-800">${estatesalenRev10.toLocaleString()}</p></div>
+            <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div>
+          </CardContent></Card>
+          <Card className="border-orange-200 bg-orange-50/30"><CardContent className="p-4 flex items-center justify-between">
+            <div><p className="text-xs text-slate-500 mb-1">Operator (10% of above)</p><p className="text-2xl font-bold text-orange-800">${operatorRev10.toLocaleString()}</p></div>
+            <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center"><AlertCircle className="w-5 h-5 text-orange-600" /></div>
+          </CardContent></Card>
+        </div>
       </div>
 
       {/* Filters */}
