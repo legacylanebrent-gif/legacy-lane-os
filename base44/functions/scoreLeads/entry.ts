@@ -9,55 +9,60 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Get all unscored leads
-    const leads = await base44.entities.Lead.filter({ score: { $exists: false } });
-    
+    // Get leads that haven't been scored yet (score is missing or null)
+    const allLeads = await base44.entities.Lead.filter({}, '-created_date', 500);
+    const leads = allLeads.filter(l => !l.score || l.score === 0);
+
     if (leads.length === 0) {
       return Response.json({ scored: 0, message: 'No unscored leads found' });
     }
 
-    const updated = [];
+    // Score all leads in memory
+    const scored = [];
     for (const lead of leads) {
-      let score = 50; // baseline
+      let score = 50;
 
-      // Boost for property value
       if (lead.estimated_value) {
         if (lead.estimated_value > 500000) score += 15;
         else if (lead.estimated_value > 300000) score += 10;
         else if (lead.estimated_value > 100000) score += 5;
       }
 
-      // Boost for equity
       if (lead.propstream_equity) {
         if (lead.propstream_equity > 200000) score += 15;
         else if (lead.propstream_equity > 100000) score += 10;
         else if (lead.propstream_equity > 50000) score += 5;
       }
 
-      // Boost for owner type
       const distressedOwnerTypes = ['Distressed', 'Foreclosure', 'Pre-Foreclosure', 'Inherited'];
       if (lead.propstream_owner_type && distressedOwnerTypes.some(t => lead.propstream_owner_type.includes(t))) {
         score += 10;
       }
 
-      // Boost for situation
       const highPrioritySituations = ['probate', 'foreclosure', 'downsizing'];
       if (lead.situation && highPrioritySituations.includes(lead.situation)) {
         score += 10;
       }
 
-      // Boost for contact info
       if (lead.contact_email && lead.contact_phone) score += 5;
       else if (lead.contact_email || lead.contact_phone) score += 2;
 
-      // Cap at 100
       score = Math.min(score, 100);
-
-      await base44.entities.Lead.update(lead.id, { score });
-      updated.push(lead.id);
+      scored.push({ id: lead.id, score });
     }
 
-    return Response.json({ scored: updated.length, leadIds: updated });
+    // Sequential updates in small batches with delays
+    let updated = 0;
+    for (let i = 0; i < scored.length; i++) {
+      await base44.entities.Lead.update(scored[i].id, { score: scored[i].score });
+      updated++;
+      // Small delay between updates to avoid rate limits
+      if (i % 5 === 4) {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    return Response.json({ scored: updated });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
