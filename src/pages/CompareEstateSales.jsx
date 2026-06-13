@@ -104,6 +104,8 @@ const CATEGORIES = [
       { feature: 'Activity timeline per contact', us: true, them: false },
       { feature: 'Realtor referral income tracking', us: true, them: false },
       { feature: 'Referral program for buyers', us: true, them: false },
+      { feature: 'New Real Estate Listing Leads within 48 Hours of New to Market', us: true, them: false },
+      { feature: 'Get Paid when you Refer a Listing to a Realtor', us: true, them: false },
     ],
   },
   {
