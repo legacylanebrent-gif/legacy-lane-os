@@ -58,7 +58,7 @@ const CATEGORIES = [
       { feature: 'Instagram captions — auto-generated', us: true, them: false },
       { feature: 'Email blasts — auto-generated', us: true, them: false },
       { feature: 'SMS marketing — auto-generated', us: true, them: false },
-      { feature: 'Blog articles — auto-generated', us: true, them: false },
+      { feature: 'Blog articles creation from Estate Sale Items — auto-generated', us: true, them: false },
       { feature: 'Video scripts — auto-generated', us: true, them: false },
       { feature: 'One-click push to all social media', us: true, them: false },
       { feature: 'Built-in email campaign tool', us: true, them: false },
