@@ -201,13 +201,6 @@ const CATEGORIES = [
   },
 ];
 
-const HERO_STATS = [
-  { us: '80+', them: '~15', label: 'Platform Features' },
-  { us: '10 Agents', them: 'None', label: 'AI SuperAgents' },
-  { us: 'Yes', them: 'No', label: 'Mobile App (iOS/Android)' },
-  { us: '1 Month Free', them: 'None', label: 'Free Trial' },
-];
-
 function Cell({ value }) {
   if (value === true) return (
     <div className="flex justify-center">
@@ -288,25 +281,6 @@ export default function CompareEstateSales() {
             EstateSales.net is a weekend listing directory. EstateSalen.com is a full business operating system with 80+ tools built for estate sale professionals. See every difference, side by side.
           </p>
 
-          {/* Quick stat cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
-            {HERO_STATS.map(s => (
-              <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                <div className="text-xs text-slate-400 mb-2">{s.label}</div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-center flex-1">
-                    <div className="text-orange-400 font-bold text-sm">{s.us}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">EstateSalen.com</div>
-                  </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="text-center flex-1">
-                    <div className="text-slate-400 font-bold text-sm">{s.them}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">EstateSales.net</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
