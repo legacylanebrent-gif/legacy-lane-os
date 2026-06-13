@@ -120,8 +120,6 @@ const CATEGORIES = [
       { feature: 'Annual Income and Expenses Export for Taxes', us: true, them: false },
       { feature: 'AI business coach', us: true, them: false },
       { feature: 'Vendor network directory', us: true, them: false },
-      { feature: 'Multi-sale GPS route planner for buyers', us: true, them: false },
-      { feature: 'Multi-company SMS text alerts for buyers', us: true, them: false },
     ],
   },
   {
