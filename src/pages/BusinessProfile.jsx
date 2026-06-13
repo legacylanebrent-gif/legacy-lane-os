@@ -90,13 +90,18 @@ export default function BusinessProfile() {
 
   const getAccountTypeLabel = (type) => {
     const labels = {
-      estate_sale_company_owner: 'Estate Sale Company Owner',
+      estate_sale_operator: 'Estate Sale Company',
+      estate_sale_company_owner: 'Estate Sale Company',
       real_estate_agent: 'Real Estate Agent',
       investor: 'Investor',
       vendor: 'Vendor',
-      coach: 'Coach'
+      coach: 'Coach',
+      consignor: 'Consignor',
+      reseller: 'Reseller',
+      collector_dealer: 'Antique & Collector Dealer',
+      consumer: 'Shopper',
     };
-    return labels[type] || type;
+    return labels[type] || type?.replace(/_/g, ' ')?.replace(/\b\w/g, c => c.toUpperCase()) || 'Unknown';
   };
 
   if (loading) {
