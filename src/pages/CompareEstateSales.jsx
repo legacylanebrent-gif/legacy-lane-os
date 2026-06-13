@@ -142,7 +142,6 @@ const CATEGORIES = [
       { feature: 'GPS route planner for multi-sale weekends', us: true, them: false },
       { feature: 'Sale recap pages after event (photos + highlights)', us: true, them: false },
       { feature: 'Calendar sync for upcoming sale dates', us: true, them: false },
-      { feature: 'Rate & review sellers', us: true, them: false },
       { feature: 'Collector public profiles & collections', us: true, them: false },
       { feature: 'One-click share sale with friends', us: true, them: false },
       { feature: 'Trusted & verified seller profiles', us: true, them: 'partial' },
