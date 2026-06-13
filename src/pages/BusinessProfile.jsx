@@ -54,7 +54,7 @@ export default function BusinessProfile() {
       } catch (e) {
         // RLS blocks User.list() for guests — use backend function instead
         const res = await base44.functions.invoke('getOperatorsWithLocation', {});
-        const operators = res.data || [];
+        const operators = res.data?.operators || [];
         businessUser = operators.find(op => op.id === businessId);
       }
 
