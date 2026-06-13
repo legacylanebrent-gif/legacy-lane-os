@@ -7,6 +7,7 @@ import ErrorMonitorWidget from '@/components/launch-cc/ErrorMonitorWidget';
 import RepositoryStatsWidget from '@/components/launch-cc/RepositoryStatsWidget';
 import LaunchReadinessScorecard from '@/components/launch-cc/LaunchReadinessScorecard';
 import AuditSection from '@/components/launch-cc/AuditSection';
+import GoogleLensUsageWidget from '@/components/launch-cc/GoogleLensUsageWidget';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: Rocket },
@@ -194,32 +195,35 @@ export default function LaunchCommandCenter() {
 
           {/* Google Lens API */}
           <TabsContent value="serp" className="mt-4">
-            <AuditSection
-              title="Google Lens API Audit"
-              description="Credit usage, failure rates, and stress tests"
-              sections={[
-                {
-                  heading: 'Daily Tracking',
-                  checks: [
-                    { label: 'Daily Credits Used Tracked', status: 'pending' },
-                    { label: 'Failed Searches Logged', status: 'pending' },
-                    { label: 'Timeout Errors Logged', status: 'pending' },
-                    { label: 'Retry Attempts Tracked', status: 'pending' },
-                    { label: 'No Silent Failures', status: 'pending' },
-                  ]
-                },
-                {
-                  heading: 'Stress Tests',
-                  checks: [
-                    { label: '100 Searches — Success Rate', status: 'pending' },
-                    { label: '500 Searches — Success Rate', status: 'pending' },
-                    { label: '1,000 Searches — Success Rate', status: 'pending' },
-                    { label: '3,000 Searches — Success Rate', status: 'pending' },
-                  ]
-                }
-              ]}
-              weight={10}
-            />
+            <GoogleLensUsageWidget />
+            <div className="mt-4">
+              <AuditSection
+                title="Google Lens API Audit"
+                description="Credit usage, failure rates, and stress tests"
+                sections={[
+                  {
+                    heading: 'Daily Tracking',
+                    checks: [
+                      { label: 'Daily Credits Used Tracked', status: 'pending' },
+                      { label: 'Failed Searches Logged', status: 'pending' },
+                      { label: 'Timeout Errors Logged', status: 'pending' },
+                      { label: 'Retry Attempts Tracked', status: 'pending' },
+                      { label: 'No Silent Failures', status: 'pending' },
+                    ]
+                  },
+                  {
+                    heading: 'Stress Tests',
+                    checks: [
+                      { label: '100 Searches — Success Rate', status: 'pending' },
+                      { label: '500 Searches — Success Rate', status: 'pending' },
+                      { label: '1,000 Searches — Success Rate', status: 'pending' },
+                      { label: '3,000 Searches — Success Rate', status: 'pending' },
+                    ]
+                  }
+                ]}
+                weight={10}
+              />
+            </div>
           </TabsContent>
 
           {/* AI RESEARCH */}

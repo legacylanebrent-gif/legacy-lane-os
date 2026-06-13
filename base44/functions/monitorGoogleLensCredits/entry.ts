@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const LOW_THRESHOLD = 0.1;  // 10% remaining = warn
+const WARN_80_THRESHOLD = 0.2;  // 20% remaining = 80% used — send email
+const LOW_THRESHOLD = 0.1;      // 10% remaining = warn in-app
 const EXHAUSTED_THRESHOLD = 0;  // 0 remaining = exhausted
 
 Deno.serve(async (req) => {
@@ -19,7 +20,7 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date();
-    const alerts = { exhausted: [], low: [], healthy: 0 };
+    const alerts = { exhausted: [], low: [], warn80: [], healthy: 0 };
 
     for (const account of accounts) {
       const baseLimit = account.google_lens_searches_limit || 0;
@@ -75,6 +76,8 @@ Deno.serve(async (req) => {
         });
       } else if (totalRemaining <= totalLimit * LOW_THRESHOLD) {
         alerts.low.push(accountSummary);
+      } else if (totalRemaining <= totalLimit * WARN_80_THRESHOLD) {
+        alerts.warn80.push(accountSummary);
       } else {
         alerts.healthy++;
       }
@@ -82,6 +85,26 @@ Deno.serve(async (req) => {
 
     // Build notifications for admins
     const notifications = [];
+    const emailsToSend = [];
+
+    // 80% warning — email only (not in-app notification to avoid noise)
+    for (const warn of alerts.warn80) {
+      for (const admin of admins) {
+        if (admin.email) {
+          emailsToSend.push({
+            to: admin.email,
+            subject: `⚠️ 80% Used: ${warn.operator_name} Google Lens Credits`,
+            body: `${warn.operator_name} (${warn.subscription_tier} tier) has used ${warn.usage_pct}% of their Google Lens search credits.\n\n` +
+              `• Base limit: ${warn.base_limit}\n` +
+              `• Used: ${warn.base_used}\n` +
+              `• Purchased: ${warn.purchased} (${warn.purchased_used} used)\n` +
+              `• Remaining: ${warn.remaining}\n\n` +
+              `They have ${warn.remaining} searches left. Consider reaching out about a plan upgrade.\n\n` +
+              `— EstateSalen Platform`,
+          });
+        }
+      }
+    }
 
     for (const exhausted of alerts.exhausted) {
       for (const admin of admins) {
@@ -93,6 +116,16 @@ Deno.serve(async (req) => {
           read: false,
           link_to_page: 'AdminDashboard',
         });
+        if (admin.email) {
+          emailsToSend.push({
+            to: admin.email,
+            subject: `🚨 CREDITS EXHAUSTED: ${exhausted.operator_name}`,
+            body: `${exhausted.operator_name} (${exhausted.subscription_tier} tier) has exhausted ALL ${exhausted.base_limit} Google Lens search credits.\n\n` +
+              `They can no longer use Google Lens until upgraded or credit purchase.\n\n` +
+              `Action: Prompt a package upgrade or credit purchase immediately.\n\n` +
+              `— EstateSalen Platform`,
+          });
+        }
       }
     }
 
@@ -106,12 +139,36 @@ Deno.serve(async (req) => {
           read: false,
           link_to_page: 'AdminDashboard',
         });
+        if (admin.email) {
+          emailsToSend.push({
+            to: admin.email,
+            subject: `⚠️ ${low.usage_pct}% Used: ${low.operator_name} Running Low`,
+            body: `${low.operator_name} (${low.subscription_tier} tier) has used ${low.usage_pct}% of their Google Lens search credits.\n\n` +
+              `• Base limit: ${low.base_limit}\n` +
+              `• Used: ${low.base_used}\n` +
+              `• Remaining: ${low.remaining}\n\n` +
+              `Prompt a plan upgrade or credit purchase before they run out.\n\n` +
+              `— EstateSalen Platform`,
+          });
+        }
+      }
+    }
+
+    // Send emails
+    for (const email of emailsToSend) {
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: email.to,
+          subject: email.subject,
+          body: email.body,
+        });
+      } catch (e) {
+        console.error(`Failed to send email to ${email.to}:`, e.message);
       }
     }
 
     // Batch create all notifications
     if (notifications.length > 0) {
-      // Create in batches of 50 to avoid rate limits
       for (let i = 0; i < notifications.length; i += 50) {
         const batch = notifications.slice(i, i + 50);
         await base44.asServiceRole.entities.Notification.bulkCreate(batch);
@@ -123,8 +180,10 @@ Deno.serve(async (req) => {
       accounts_scanned: accounts.length,
       exhausted: alerts.exhausted.map(a => a.operator_name),
       low: alerts.low.map(a => a.operator_name),
+      warn80: alerts.warn80.map(a => a.operator_name),
       healthy: alerts.healthy,
       notifications_created: notifications.length,
+      emails_sent: emailsToSend.filter((_, i) => true).length,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
