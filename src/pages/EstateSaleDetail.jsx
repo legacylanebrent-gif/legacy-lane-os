@@ -335,8 +335,8 @@ export default function EstateSaleDetail() {
     (sale.images || []).forEach((img, i) => {
       const name = typeof img === 'object' ? img.name : '';
       const desc = typeof img === 'object' ? img.description : '';
-      if (name?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Name`, text: name });
-      if (desc?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Description`, text: desc });
+      if (name?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Name`, text: name, imageIndex: i });
+      if (desc?.toLowerCase().includes(term)) results.push({ type: `Photo ${i + 1} Description`, text: desc, imageIndex: i });
     });
     // Search featured items
     (sale.featured_items || []).forEach((item, i) => {
@@ -344,6 +344,16 @@ export default function EstateSaleDetail() {
       if (item.description?.toLowerCase().includes(term)) results.push({ type: `Featured Item ${i + 1} Desc`, text: item.description });
     });
     setSearchResults(results);
+  };
+
+  const handleSearchResultClick = (result) => {
+    if (result.imageIndex !== undefined) {
+      setSelectedImage(result.imageIndex);
+      setSearchOpen(false);
+      setModalOpen(true);
+    } else {
+      setSearchOpen(false);
+    }
   };
 
   const toggleImageSave = (index) => {
@@ -1014,10 +1024,17 @@ export default function EstateSaleDetail() {
             {searchResults.length > 0 && (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {searchResults.map((r, i) => (
-                  <div key={i} className="bg-slate-50 rounded-lg p-3">
+                  <button
+                    key={i}
+                    onClick={() => handleSearchResultClick(r)}
+                    className={`w-full text-left bg-slate-50 hover:bg-slate-100 rounded-lg p-3 transition-colors ${r.imageIndex !== undefined ? 'cursor-pointer' : ''}`}
+                  >
                     <Badge variant="secondary" className="mb-1 text-xs">{r.type}</Badge>
                     <p className="text-sm text-slate-700">{r.text}</p>
-                  </div>
+                    {r.imageIndex !== undefined && (
+                      <p className="text-xs text-orange-600 mt-1">Click to view photo →</p>
+                    )}
+                  </button>
                 ))}
               </div>
             )}
