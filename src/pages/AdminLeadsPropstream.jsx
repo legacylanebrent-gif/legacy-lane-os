@@ -201,14 +201,10 @@ export default function AdminLeadsPropstream() {
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">County</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide">Contact</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Owner Type</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Situation</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Est. Value</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">EstSale Rev</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Op Ref</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Equity</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Beds</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Baths</th>
-                <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Sq Ft</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Year</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Type</th>
                 <th className="p-3 text-xs text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Status</th>
@@ -251,11 +247,6 @@ export default function AdminLeadsPropstream() {
                       <Badge className="bg-purple-100 text-purple-700 text-xs whitespace-nowrap">{lead.propstream_owner_type}</Badge>
                     ) : <span className="text-slate-400 text-xs">—</span>}
                   </td>
-                  <td className="p-3">
-                    {lead.situation ? (
-                      <Badge className="bg-blue-100 text-blue-700 text-xs capitalize whitespace-nowrap">{lead.situation}</Badge>
-                    ) : <span className="text-slate-400 text-xs">—</span>}
-                  </td>
                   <td className="p-3 text-slate-700 whitespace-nowrap">
                     {lead.estimated_value ? `$${Number(lead.estimated_value).toLocaleString()}` : <span className="text-slate-400">—</span>}
                   </td>
@@ -270,9 +261,6 @@ export default function AdminLeadsPropstream() {
                       <span className="text-purple-600 font-medium">${Number(lead.propstream_equity).toLocaleString()}</span>
                     ) : <span className="text-slate-400">—</span>}
                   </td>
-                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_beds || '—'}</td>
-                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_baths || '—'}</td>
-                  <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_sqft ? Number(lead.propstream_sqft).toLocaleString() : '—'}</td>
                   <td className="p-3 text-slate-600 whitespace-nowrap">{lead.propstream_year_built || '—'}</td>
                   <td className="p-3">
                     {lead.propstream_property_type ? (
