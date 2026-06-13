@@ -111,6 +111,7 @@ import PropstreamREListings from './pages/PropstreamREListings';
 import PropstreamREListingImporter from './pages/PropstreamREListingImporter';
 import AgentListingEstateSaleRequest from './pages/AgentListingEstateSaleRequest';
 import ClaimBusiness from './pages/ClaimBusiness';
+import OnboardingChat from './pages/OnboardingChat';
 import ResellerNetwork from './pages/ResellerNetwork';
 import CleanoutNetwork from './pages/CleanoutNetwork';
 import AdminCleanoutLeads from './pages/AdminCleanoutLeads';
@@ -360,6 +361,7 @@ const AuthenticatedApp = () => {
       <Route path="/:lifeEventSlug/:stateSlug/:countySlug" element={<LifeEventCountyPage />} />
 
       {/* ── Mobile Consumer App Routes ── */}
+      <Route path="/OnboardingChat" element={<OnboardingChat />} />
       <Route path="/mobile" element={<MobileHome />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

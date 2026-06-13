@@ -91,7 +91,11 @@ export default function Layout({ children, currentPageName }) {
       if (!userData.primary_account_type) userData.primary_account_type = 'consumer';
       setUser(userData);
 
-      // Onboarding redirect removed — no /onboarding route exists
+      // Redirect new users without completed onboarding to the onboarding flow
+      if (!userData.onboarding_completed && currentPageName !== 'OnboardingChat') {
+        window.location.href = createPageUrl('OnboardingChat');
+        return;
+      }
 
       const role = userData.primary_account_type;
 
