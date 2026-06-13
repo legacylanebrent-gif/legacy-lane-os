@@ -128,6 +128,7 @@ import RelationshipsDashboard from './pages/RelationshipsDashboard';
 import SuperAgentCommandCenter from './pages/SuperAgentCommandCenter.jsx';
 import PropstreamAgentLeads from './pages/PropstreamAgentLeads';
 import MobileHome from './pages/MobileHome';
+import CollectorDealerDashboard from './pages/CollectorDealerDashboard';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -230,6 +231,7 @@ const AuthenticatedApp = () => {
       <Route path="/StorageManagement" element={<LayoutWrapper currentPageName="StorageManagement"><StorageManagement /></LayoutWrapper>} />
       <Route path="/ViewStorageContents" element={<LayoutWrapper currentPageName="ViewStorageContents"><ViewStorageContents /></LayoutWrapper>} />
       <Route path="/ResellerDashboard" element={<LayoutWrapper currentPageName="ResellerDashboard"><ResellerDashboard /></LayoutWrapper>} />
+      <Route path="/CollectorDealerDashboard" element={<LayoutWrapper currentPageName="CollectorDealerDashboard"><CollectorDealerDashboard /></LayoutWrapper>} />
       <Route path="/LandingPageSaleLeak" element={<LandingPageSaleLeak />} />
       <Route path="/LandingPageProfitLevers" element={<LandingPageProfitLevers />} />
       <Route path="/LandingPageScaleReady" element={<LandingPageScaleReady />} />

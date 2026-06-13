@@ -32,7 +32,7 @@ const NO_SIDEBAR_PAGES = [
 ];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
-const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller', 'real_estate_agent'];
+const CONSUMER_ROLES = ['consumer', 'executor', 'home_seller', 'buyer', 'downsizer', 'diy_seller', 'consignor', 'coach', 'reseller', 'real_estate_agent', 'collector_dealer'];
 
 // Friendly display names for browser tab titles
 const PAGE_TITLES = {

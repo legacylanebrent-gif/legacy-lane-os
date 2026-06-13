@@ -18,10 +18,11 @@
         "real_estate_agent",
         "vendor",
         "reseller",
-        "agent_operator"
+        "agent_operator",
+        "collector_dealer"
       ],
       "default": "consumer",
-      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role."
+      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role. 'collector_dealer' is Antique, Art & Collector Dealers."
     },
     "business_name": {
       "type": "string"
@@ -308,6 +309,34 @@
     "previous_account_type": {
       "type": "string",
       "description": "The role they held before upgrading to agent_operator"
+    },
+    "collector_dealer_business_type": {
+      "type": "string",
+      "description": "Type of dealer: Antique Dealer, Art Dealer, Collector Dealer, Gallery Owner, Auction House"
+    },
+    "collector_dealer_specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Dealer specialty categories"
+    },
+    "store_name": {
+      "type": "string",
+      "description": "Physical store / gallery name"
+    },
+    "store_address_geocoded": {
+      "type": "object",
+      "description": "Geocoded lat/lng from business address"
+    },
+    "dealer_application_submitted": {
+      "type": "boolean",
+      "default": false
+    },
+    "dealer_application_date": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": []

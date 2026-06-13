@@ -18,7 +18,7 @@ import {
   ArrowUpCircle, ArrowDownCircle, Home, Eye, Calendar, ArrowRight,
   ShoppingBag, Share2, MapPin, Globe, Shield, Star, Crosshair,
   Image as ImageIcon, X, Plus, Mail, MessageSquare, Megaphone, Store,
-  Users, FileText, BarChart2, Send
+  Users, FileText, BarChart2, Send, Landmark
 } from 'lucide-react';
 import SocialMediaTab from '@/components/profile/SocialMediaTab';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
@@ -101,7 +101,7 @@ export default function MyProfile() {
   const [saved, setSaved] = useState(false);
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabParam && ['account','buyer_prefs','estate_sales','business','territory','sales','payments','marketplace','agent_tools','vendor_services','vendor_leads','reseller_prefs','reseller_leads','subscription'].includes(tabParam) ? tabParam : 'account');
+  const [activeTab, setActiveTab] = useState(tabParam && ['account','buyer_prefs','estate_sales','business','territory','sales','payments','marketplace','agent_tools','vendor_services','vendor_leads','reseller_prefs','reseller_leads','dealer_profile','subscription'].includes(tabParam) ? tabParam : 'account');
   const [marketplaceTab, setMarketplaceTab] = useState('social');
   const [uploading, setUploading] = useState({});
   const [newCounty, setNewCounty] = useState('');
@@ -134,6 +134,9 @@ export default function MyProfile() {
     // reseller
     reseller_business_type: '', reseller_inventory_interests: [],
     reseller_min_purchase: '', reseller_max_purchase: '', reseller_buys_whole_house: false,
+    // collector dealer
+    collector_dealer_business_type: '', collector_dealer_specialties: [],
+    store_name: '', store_address_geocoded: null,
   });
 
   const [notifications, setNotifications] = useState({
@@ -182,6 +185,10 @@ export default function MyProfile() {
         reseller_min_purchase: u.reseller_min_purchase || '',
         reseller_max_purchase: u.reseller_max_purchase || '',
         reseller_buys_whole_house: u.reseller_buys_whole_house || false,
+        collector_dealer_business_type: u.collector_dealer_business_type || '',
+        collector_dealer_specialties: u.collector_dealer_specialties || [],
+        store_name: u.store_name || '',
+        store_address_geocoded: u.store_address_geocoded || null,
       }));
       if (u.notification_settings) setNotifications(prev => ({ ...prev, ...u.notification_settings }));
 
@@ -301,6 +308,23 @@ export default function MyProfile() {
   const activeTierForReseller = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
   const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(activeTierForReseller);
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
+  const isCollectorDealer = acct === 'collector_dealer';
+
+  // Collector dealer specialty options
+  const DEALER_SPECIALTY_OPTIONS = [
+    'Antiques', 'Fine Art', 'Paintings', 'Sculpture', 'Prints & Lithographs',
+    'Furniture', 'Jewelry', 'Watches', 'Silver & Silverware',
+    'China & Porcelain', 'Glassware & Crystal', 'Rugs & Textiles',
+    'Mid-Century Modern', 'Art Deco', 'Victorian Era',
+    'Coins & Currency', 'Stamps', 'Collectibles', 'Military Memorabilia',
+    'Books & Rare Manuscripts', 'Toys & Vintage Games', 'Musical Instruments',
+    'Lighting & Lamps', 'Clocks', 'Cameras & Photography', 'Wine & Spirits'
+  ];
+
+  const COLLECTOR_DEALER_TYPES = [
+    'Antique Dealer', 'Art Dealer', 'Collector Dealer', 'Gallery Owner',
+    'Auction House', 'Vintage Dealer', 'Estate Buyer', 'Other'
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -335,6 +359,7 @@ export default function MyProfile() {
           {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Reseller Buying</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
+          {isCollectorDealer && <TabsTrigger value="dealer_profile" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Dealer Profile</TabsTrigger>}
           {isOperator && <TabsTrigger value="payments" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Payments</TabsTrigger>}
           {isOperator && <TabsTrigger value="sales" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Sales</TabsTrigger>}
           {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
@@ -594,6 +619,90 @@ export default function MyProfile() {
             </Card>
           ) : null}
 
+          {/* Collector Dealer Application — for consumers */}
+          {acct === 'collector_dealer' ? (
+            <div className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+              <div className="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Landmark className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-purple-800 text-sm">Collector Dealer Account Active</p>
+                <p className="text-xs text-purple-600">You have full dealer access including ISO wanted item matching, estate sale discovery, and store profile.</p>
+              </div>
+              <Badge className="ml-auto bg-purple-600 text-white">Approved</Badge>
+            </div>
+          ) : isConsumer && user?.dealer_application_submitted ? (
+            <Card className="border-purple-200 bg-purple-50">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Landmark className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-purple-900">Collector Dealer Application</h3>
+                      <Badge className="bg-purple-500 text-white text-xs">Pending Review</Badge>
+                    </div>
+                    <p className="text-sm text-purple-700">
+                      Your application has been submitted and is currently under review. Our team will upgrade your account within 1–2 business days.
+                    </p>
+                    {user?.dealer_application_date && (
+                      <p className="text-xs text-purple-500 mt-2">Submitted {new Date(user.dealer_application_date).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : isConsumer ? (
+            <Card className="border-purple-200 bg-purple-50">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Landmark className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-purple-900 mb-1">Become a Collector Dealer</h3>
+                    <p className="text-sm text-purple-700 mb-3">
+                      Antique, art, and collector dealers get access to the ISO Wanted Items matching system — find exactly what you're hunting for across every estate sale. Plus: a store profile, geocoded address, and direct messaging with estate sale operators.
+                    </p>
+                    <Button
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
+                      onClick={async () => {
+                        const confirmed = window.confirm('Apply to become a Collector Dealer? Our team will review your application and upgrade your account within 1–2 business days.');
+                        if (!confirmed) return;
+                        try {
+                          await base44.auth.updateMe({ dealer_application_submitted: true, dealer_application_date: new Date().toISOString() });
+                          await base44.functions.invoke('notifyAdminsOfApplication', {
+                            applicant_user_id: user?.id,
+                            applicant_name: user?.full_name,
+                            applicant_email: user?.email,
+                            application_type: 'collector_dealer',
+                            details: null,
+                          });
+                          await base44.entities.Notification.create({
+                            user_id: user?.id,
+                            type: 'system',
+                            title: 'Collector Dealer Application Received',
+                            message: 'Your application to become a Collector Dealer has been submitted. Our team will review it and be in touch within 1–2 business days.',
+                            link_to_page: 'MyProfile',
+                            read: false,
+                          });
+                          setUser(prev => ({ ...prev, dealer_application_submitted: true, dealer_application_date: new Date().toISOString() }));
+                        } catch (e) {
+                          alert('Something went wrong. Please try again.');
+                        }
+                      }}
+                    >
+                      <Landmark className="w-4 h-4" />
+                      Apply to Become a Collector Dealer
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <SaveBtn label="Save Account" />
         </TabsContent>
 
@@ -719,6 +828,29 @@ export default function MyProfile() {
                   <div className="flex gap-6">
                     <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.insurance_verified} onCheckedChange={v => setForm(p => ({ ...p, insurance_verified: v }))} /><span className="text-sm font-medium">Insured</span></label>
                     <label className="flex items-center gap-2 cursor-pointer"><Checkbox checked={form.bonded} onCheckedChange={v => setForm(p => ({ ...p, bonded: v }))} /><span className="text-sm font-medium">Bonded / Licensed</span></label>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Collector Dealer-specific credentials */}
+            {isCollectorDealer && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5" />Dealer Business Details</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 mb-1 block">Store / Gallery Name</label>
+                      <Input value={form.store_name} onChange={e => setForm(p => ({ ...p, store_name: e.target.value }))} placeholder="Main Street Antiques" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 mb-1 block">Dealer Type</label>
+                      <select value={form.collector_dealer_business_type} onChange={e => setForm(p => ({ ...p, collector_dealer_business_type: e.target.value }))} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm">
+                        <option value="">Select type...</option>
+                        {COLLECTOR_DEALER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
                   </div>
                 </CardContent>
               </Card>
@@ -1280,6 +1412,84 @@ export default function MyProfile() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ─────────────── COLLECTOR DEALER PROFILE TAB ─────────────── */}
+        {isCollectorDealer && (
+          <TabsContent value="dealer_profile" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5" />Dealer Profile & Specialties</CardTitle>
+                <p className="text-sm text-slate-500">Tell buyers and estate sale operators what you specialize in. This helps match you with relevant sales.</p>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Store / Gallery Name</Label>
+                    <Input value={form.store_name} onChange={e => setForm(p => ({ ...p, store_name: e.target.value }))} placeholder="Main Street Antiques" />
+                  </div>
+                  <div>
+                    <Label>Dealer Type</Label>
+                    <select value={form.collector_dealer_business_type} onChange={e => setForm(p => ({ ...p, collector_dealer_business_type: e.target.value }))} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mt-1">
+                      <option value="">Select type...</option>
+                      {COLLECTOR_DEALER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="mb-2 block">Buying Specialties</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {DEALER_SPECIALTY_OPTIONS.map(s => (
+                      <label key={s} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${form.collector_dealer_specialties.includes(s) ? 'border-purple-500 bg-purple-50 font-medium' : 'border-slate-200 hover:border-slate-300'}`}>
+                        <Checkbox checked={form.collector_dealer_specialties.includes(s)} onCheckedChange={() => toggleArr('collector_dealer_specialties', s)} />
+                        {s}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Store Address Summary */}
+                <Card className="bg-slate-50 border-slate-200">
+                  <CardContent className="p-4">
+                    <p className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" /> Store Location
+                    </p>
+                    {form.business_address_street ? (
+                      <div className="space-y-1">
+                        <p className="text-sm text-slate-600">{form.business_address_street}</p>
+                        <p className="text-sm text-slate-600">{form.business_address_city}, {form.business_address_state} {form.business_address_zip}</p>
+                        {form.store_address_geocoded ? (
+                          <Badge className="bg-green-100 text-green-700 mt-1 gap-1">
+                            <MapPin className="w-3 h-3" /> Geocoded on map
+                          </Badge>
+                        ) : (
+                          <Button size="sm" variant="outline" className="mt-2 gap-1"
+                            onClick={async () => {
+                              try {
+                                const res = await base44.functions.invoke('geocodeDealerAddress', {
+                                  street: form.business_address_street,
+                                  city: form.business_address_city,
+                                  state: form.business_address_state,
+                                  zip: form.business_address_zip,
+                                });
+                                setForm(p => ({ ...p, store_address_geocoded: res.data }));
+                              } catch (e) { alert('Geocoding failed'); }
+                            }}>
+                            <MapPin className="w-3 h-3" /> Geocode Address
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">Set your business address in the Business tab above to appear on the map.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+
+            <SaveBtn label="Save Dealer Profile" />
+          </TabsContent>
+        )}
 
         {/* ─────────────── ISO WANTED ITEMS TAB ─────────────── */}
         <TabsContent value="buyer_prefs" className="space-y-6">
