@@ -161,7 +161,7 @@ const CATEGORIES = [
       { feature: 'Relationship coach agent — helps you nurture client & partner connections', us: true, them: false },
       { feature: 'Admin ops agent — monitors our system & avoid downtime issues', us: true, them: false },
       { feature: 'Quality assurance agent — audits content & listings for accuracy', us: true, them: false },
-      { feature: 'Central command center for all agent runs', us: true, them: false },
+      { feature: 'SPAM Assassin Agent — monitors message requests and filters out SPAM', us: true, them: false },
     ],
   },
   {
