@@ -58,6 +58,9 @@ export default function BuyerPrefsTab({ user }) {
   });
 
   const [suggestionsKey, setSuggestionsKey] = useState(0);
+  const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [selectedSuggestions, setSelectedSuggestions] = useState(new Set());
 
   useEffect(() => {
     loadData();
@@ -207,6 +210,59 @@ export default function BuyerPrefsTab({ user }) {
     } catch (e) {
       console.error('Error toggling visibility:', e);
     }
+  };
+
+  const handleAiGuidedHunt = async () => {
+    if (purchases.length === 0) return;
+    setLoadingAi(true);
+    setAiSuggestions(null);
+    try {
+      const response = await base44.functions.invoke('suggestItemsFromPurchases', {
+        purchases: purchases.map(p => ({ item_name: p.item_name })),
+      });
+      const suggestions = response.data.suggestions || [];
+      setAiSuggestions(suggestions);
+      setSelectedSuggestions(new Set(suggestions.map((_, i) => i)));
+    } catch (e) {
+      console.error('AI suggestion error:', e);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
+  const handleAddAiSuggestions = async () => {
+    if (selectedSuggestions.size === 0 || !aiSuggestions) return;
+    setSaving(true);
+    try {
+      const toAdd = aiSuggestions.filter((_, i) => selectedSuggestions.has(i));
+      for (const s of toAdd) {
+        await base44.entities.WantedItem.create({
+          buyer_id: user.id,
+          buyer_name: user.full_name || user.email,
+          title: s.title,
+          category: s.category,
+          subcategory: s.subcategory || '',
+          era: s.era || '',
+          status: 'active',
+        });
+      }
+      setAiSuggestions(null);
+      const wantedData = await base44.entities.WantedItem.filter({ buyer_id: user.id }, '-created_date', 50);
+      setWantedItems(wantedData);
+    } catch (e) {
+      console.error('Error adding AI suggestions:', e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleSuggestion = (index) => {
+    setSelectedSuggestions(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   };
 
   const formatCurrency = (val) => {
@@ -464,16 +520,91 @@ export default function BuyerPrefsTab({ user }) {
                 </div>
               ))}
             </div>
-          ) : !showWantedForm ? (
+          ) : !showWantedForm && !aiSuggestions ? (
             <div className="text-center py-8">
               <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-slate-500 text-sm mb-1">No wanted items yet</p>
-              <p className="text-xs text-slate-400 mb-3">Tell us what you're hunting for and we'll alert you when matches are found</p>
-              <Button size="sm" variant="outline" onClick={() => setShowWantedForm(true)}>
-                <Plus className="w-4 h-4 mr-1" /> Add Your First Item
-              </Button>
+              <p className="text-xs text-slate-400 mb-4">Tell us what you're hunting for and we'll alert you when matches are found</p>
+              <div className="flex items-center justify-center gap-3">
+                <Button size="sm" variant="outline" onClick={() => setShowWantedForm(true)}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Your First Item
+                </Button>
+                {purchases.length > 0 && (
+                  <Button
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700"
+                    onClick={handleAiGuidedHunt}
+                    disabled={loadingAi}
+                  >
+                    {loadingAi ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-1" /> Guided AI
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           ) : null}
+
+          {/* ── AI Suggestions Panel ── */}
+          {aiSuggestions && (
+            <div className="mb-6 p-5 bg-purple-50 rounded-xl border border-purple-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-purple-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  AI Suggestions Based on Your Purchases
+                </h3>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setAiSuggestions(null)}>
+                    Dismiss
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700"
+                    onClick={handleAddAiSuggestions}
+                    disabled={saving || selectedSuggestions.size === 0}
+                  >
+                    {saving ? 'Adding...' : `Add Selected (${selectedSuggestions.size})`}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {aiSuggestions.map((s, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedSuggestions.has(i)
+                        ? 'bg-white border-purple-300 shadow-sm'
+                        : 'bg-purple-50/50 border-purple-100 opacity-60'
+                    }`}
+                    onClick={() => handleToggleSuggestion(i)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSuggestions.has(i)}
+                      onChange={() => handleToggleSuggestion(i)}
+                      className="mt-0.5 rounded accent-purple-600"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-sm font-medium text-slate-800">{s.title}</p>
+                        <Badge className="bg-purple-100 text-purple-700 text-[10px]">{s.category}</Badge>
+                        {s.subcategory && <Badge variant="secondary" className="text-[10px]">{s.subcategory}</Badge>}
+                        {s.era && <Badge variant="outline" className="text-[10px]">{s.era}</Badge>}
+                      </div>
+                      <p className="text-xs text-slate-500">{s.reason}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
