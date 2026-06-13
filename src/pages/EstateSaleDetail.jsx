@@ -99,17 +99,20 @@ export default function EstateSaleDetail() {
 
       setSale(foundSale);
 
-      // Try to load Estate Sale Company Owner info
+      // Try to load Estate Sale Company Owner info and check follow status
       if (foundSale.operator_id) {
+        // Load operator info (may fail for non-admin users — that's fine)
         try {
-          const [users, authCheck] = await Promise.all([
-            base44.entities.User.list(),
-            base44.auth.isAuthenticated()
-          ]);
+          const users = await base44.entities.User.list();
           const operatorData = users.find(u => u.id === foundSale.operator_id);
           setOperator(operatorData);
+        } catch (error) {
+          console.log('Could not load Estate Sale Company Owner info');
+        }
 
-          // Check if user already follows this company
+        // Check if user already follows this company — separate from operator load
+        try {
+          const authCheck = await base44.auth.isAuthenticated();
           if (authCheck) {
             const me = await base44.auth.me();
             const existing = await base44.entities.CompanyFollow.filter({
@@ -119,7 +122,7 @@ export default function EstateSaleDetail() {
             setIsFollowingCompany(existing.length > 0);
           }
         } catch (error) {
-          console.log('Could not load Estate Sale Company Owner info');
+          console.log('Could not check follow status');
         }
       }
 
