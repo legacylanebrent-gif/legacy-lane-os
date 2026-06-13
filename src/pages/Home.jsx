@@ -1344,18 +1344,18 @@ export default function Home() {
             <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">Join Our Growing Network</h2>
             <p className="text-xl text-slate-600">Grow your business with EstateSalen.com</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8">
+          <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <Link to={createPageUrl('OperatorPackages')}>
-              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <HomeIcon className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <HomeIcon className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Estate Sale {t('Company')}
                     </h3>
-                    <p className="text-orange-100">
+                    <p className="text-orange-100 text-sm">
                       List, manage and market your sales
                     </p>
                   </div>
@@ -1364,16 +1364,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('DIYSaleSignup')}>
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ShoppingBag className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <ShoppingBag className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Sell Your Items
                     </h3>
-                    <p className="text-purple-100">
+                    <p className="text-purple-100 text-sm">
                       Sell on marketplace or host your own sale
                     </p>
                   </div>
@@ -1382,16 +1382,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('AgentSignup')}>
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Building2 className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Building2 className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Real Estate Agent
                     </h3>
-                    <p className="text-blue-100">
+                    <p className="text-blue-100 text-sm">
                       Get seller leads instantly
                     </p>
                   </div>
@@ -1400,16 +1400,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('VendorSignup')}>
-              <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <TrendingUp className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <TrendingUp className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Vendor Network
                     </h3>
-                    <p className="text-green-100">
+                    <p className="text-green-100 text-sm">
                       Join our network and grow your business
                     </p>
                   </div>
@@ -1418,16 +1418,16 @@ export default function Home() {
             </Link>
 
             <Link to="/reseller-network">
-              <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Package className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-teal-600 to-teal-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Package className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Resellers
                     </h3>
-                    <p className="text-teal-100">
+                    <p className="text-teal-100 text-sm">
                       Find inventory and grow your resale business
                     </p>
                   </div>
@@ -1436,16 +1436,16 @@ export default function Home() {
             </Link>
 
             <Link to={createPageUrl('CollectorDealerDashboard')}>
-              <div className="bg-gradient-to-br from-rose-600 to-rose-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all cursor-pointer group h-full hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Gem className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-rose-600 to-rose-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Gem className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                    <h3 className="text-xl font-serif font-bold text-white mb-1">
                       Dealers
                     </h3>
-                    <p className="text-rose-100">
+                    <p className="text-rose-100 text-sm">
                       Source inventory for your store or gallery
                     </p>
                   </div>
