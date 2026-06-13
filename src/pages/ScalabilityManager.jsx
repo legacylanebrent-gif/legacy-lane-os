@@ -11,6 +11,7 @@ export default function ScalabilityManager() {
   const [capacityRecords, setCapacityRecords] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [creditAccounts, setCreditAccounts] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [projectingNewSub, setProjectingNewSub] = useState(null);
   const [showSimulator, setShowSimulator] = useState(false);
@@ -22,25 +23,30 @@ export default function ScalabilityManager() {
     if (u?.role !== 'admin') { window.location.href = '/'; return; }
     setUser(u);
 
-    const [caps, subs, creditAccounts] = await Promise.all([
+    const [caps, subs, creditAccounts, users] = await Promise.all([
       base44.entities.InfrastructureCapacity.list(),
       base44.entities.SubscriptionPackage.filter({ is_active: true }),
-      base44.entities.OperatorAICreditAccount.filter({ status: 'active' })
+      base44.entities.OperatorAICreditAccount.filter({ status: 'active' }),
+      base44.entities.User.list()
     ]);
     setCapacityRecords(caps);
     setSubscriptions(subs);
     setCreditAccounts(creditAccounts);
+    setAllUsers(users);
     setLoading(false);
   };
 
   const subscriptionCounts = useMemo(() => {
-    const counts = { starter: 0, growth: 0, professional: 0, elite: 0 };
+    const counts = { consumer: 0, starter: 0, growth: 0, professional: 0, elite: 0 };
     creditAccounts.forEach(acct => {
       const tier = acct.subscription_tier;
       if (tier && counts[tier] !== undefined) counts[tier]++;
     });
+    // Count consumers: all users minus those with active OperatorAICreditAccount
+    const paidOperatorIds = new Set(creditAccounts.map(a => a.operator_id));
+    counts.consumer = allUsers.filter(u => !paidOperatorIds.has(u.id)).length;
     return counts;
-  }, [creditAccounts]);
+  }, [creditAccounts, allUsers]);
 
   const totalSubscribers = Object.values(subscriptionCounts).reduce((s, c) => s + c, 0);
 
@@ -167,7 +173,7 @@ export default function ScalabilityManager() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {['starter', 'growth', 'professional', 'elite'].map(tier => (
+                {['consumer', 'starter', 'growth', 'professional', 'elite'].map(tier => (
                   <Button
                     key={tier}
                     variant={projectingNewSub === tier ? 'default' : 'outline'}
@@ -197,7 +203,7 @@ export default function ScalabilityManager() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {Object.entries(subscriptionCounts).map(([tier, count]) => (
                 <div key={tier} className="bg-slate-50 rounded-lg p-3 border border-slate-200 text-center">
                   <p className="text-2xl font-bold text-slate-900">{count}</p>
