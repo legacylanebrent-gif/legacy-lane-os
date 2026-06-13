@@ -21,7 +21,7 @@ const CATEGORIES = [
       { feature: 'Featured / premium listing upgrades', us: true, them: true },
       { feature: 'SEO-optimized sale pages (Google ranking)', us: true, them: 'partial' },
       { feature: 'Company profile page', us: true, them: true },
-      { feature: 'Gold / verified account badge', us: true, them: true },
+      { feature: 'Verified account badge', us: true, them: true },
     ],
   },
   {
