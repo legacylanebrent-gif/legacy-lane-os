@@ -7,12 +7,32 @@ import { Bell, MessageSquare } from 'lucide-react';
 
 export default function MobileAppShell({ children, title, showHeader = true }) {
   const [user, setUser] = useState(null);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(authed => {
-      if (authed) base44.auth.me().then(setUser).catch(() => {});
+      if (authed) base44.auth.me().then(u => { setUser(u); loadCounts(u); }).catch(() => {});
     });
   }, []);
+
+  // Poll unread counts every 30s
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => loadCounts(user), 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const loadCounts = async (u) => {
+    try {
+      const [notifs, msgs] = await Promise.all([
+        base44.entities.Notification.filter({ user_id: u.id }, '-created_date', 100),
+        base44.entities.Message.filter({ recipient_id: u.id }, '-created_date', 100),
+      ]);
+      setUnreadNotifs(notifs.filter(n => !n.read).length);
+      setUnreadMessages(msgs.filter(m => !m.read).length);
+    } catch (e) { /* silent */ }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 pb-20">
@@ -28,11 +48,21 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
             <span className="text-sm font-serif font-bold text-slate-800">EstateSalen</span>
           </Link>
           <div className="flex items-center gap-1">
-            <Link to={createPageUrl('Messages')} className="p-1.5 text-slate-400 hover:text-slate-600">
+            <Link to={createPageUrl('Messages')} className="relative p-1.5 text-slate-400 hover:text-slate-600">
               <MessageSquare className="w-4 h-4" />
+              {unreadMessages > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
+                  {unreadMessages > 9 ? '9+' : unreadMessages}
+                </span>
+              )}
             </Link>
-            <Link to={createPageUrl('Notifications')} className="p-1.5 text-slate-400 hover:text-slate-600">
+            <Link to={createPageUrl('Notifications')} className="relative p-1.5 text-slate-400 hover:text-slate-600">
               <Bell className="w-4 h-4" />
+              {unreadNotifs > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
+                  {unreadNotifs > 9 ? '9+' : unreadNotifs}
+                </span>
+              )}
             </Link>
           </div>
         </header>
@@ -44,7 +74,7 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
       </main>
 
       {/* Bottom tab bar */}
-      <MobileTabBar />
+      <MobileTabBar unreadTotal={unreadNotifs + unreadMessages} />
     </div>
   );
 }

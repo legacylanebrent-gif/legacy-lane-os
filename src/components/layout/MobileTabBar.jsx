@@ -11,7 +11,7 @@ const tabs = [
   { label: 'Profile', icon: User, path: '/MyProfile' },
 ];
 
-export default function MobileTabBar() {
+export default function MobileTabBar({ unreadTotal = 0 }) {
   const location = useLocation();
 
   return (
@@ -29,6 +29,11 @@ export default function MobileTabBar() {
             >
               <tab.icon className={`w-5 h-5 ${isActive ? 'fill-orange-100' : ''}`} />
               <span className="text-[10px] font-medium">{tab.label}</span>
+              {tab.label === 'Profile' && unreadTotal > 0 && (
+                <span className="absolute -top-1 right-1/4 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
+                  {unreadTotal > 99 ? '99+' : unreadTotal}
+                </span>
+              )}
             </Link>
           );
         })}
