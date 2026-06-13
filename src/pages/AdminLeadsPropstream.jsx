@@ -53,8 +53,26 @@ export default function AdminLeadsPropstream() {
 
   const loadData = async () => {
     setLoading(true);
+    const PAGE_SIZE = 5000;
+
+    // Fetch all leads with pagination — API caps at 5000 per call
+    const fetchAllLeads = async () => {
+      let allLeads = [];
+      let skip = 0;
+      while (true) {
+        const batch = await base44.entities.Lead.filter({ source: 'propstream' }, '-created_date', PAGE_SIZE, skip);
+        if (batch.length === 0) break;
+        allLeads = [...allLeads, ...batch];
+        if (batch.length < PAGE_SIZE) break;
+        skip += PAGE_SIZE;
+        // Small delay between batches to avoid rate limits
+        await new Promise(r => setTimeout(r, 300));
+      }
+      return allLeads;
+    };
+
     const [leadsData, users] = await Promise.all([
-      base44.entities.Lead.filter({ source: 'propstream' }, '-created_date'),
+      fetchAllLeads(),
       base44.entities.User.list()
     ]);
     setLeads(leadsData);
