@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, ArrowRight, Users, Mail, Phone } from 'lucide-react';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 export default function AgentRequestThankYou() {
   return (
@@ -78,6 +79,7 @@ export default function AgentRequestThankYou() {
           </p>
         </div>
       </main>
+      <SharedFooter />
     </div>
   );
 }

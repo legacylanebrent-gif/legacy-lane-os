@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -393,9 +394,7 @@ export default function ClaimBusiness() {
         </SectionInner>
       </Section>
 
-      <footer className="bg-slate-900 text-slate-500 text-center py-6 text-sm border-t border-slate-800">
-        <p>© {new Date().getFullYear()} EstateSalen.com · <a href="/" className="underline hover:text-white">estatesalen.com</a></p>
-      </footer>
+      <SharedFooter />
 
       {/* CLAIM MODAL */}
       {showModal && (

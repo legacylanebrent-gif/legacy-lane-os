@@ -9,6 +9,7 @@ import {
   QrCode, Gift, Trophy, Navigation, Bell, Play
 } from 'lucide-react';
 import FeatureModal from '@/components/landing/FeatureModal';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const NAV_LINKS = [
   { label: 'For Your Customers', href: '#customers' },
@@ -477,38 +478,7 @@ export default function CompanyLanding() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-slate-900 text-white">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain mx-auto mb-6" />
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold mb-4">Start Growing Today</h2>
-          <p className="text-slate-400 mb-8 text-lg">Join thousands of estate sale companies already on EstateSalen.com.</p>
-          <Link
-            to="/OperatorPackages"
-            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white font-bold px-10 py-4 rounded-xl text-lg transition-colors"
-          >
-            Claim Your Free Month <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
-
-        {/* Footer links */}
-        <div className="border-t border-white/10">
-          <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm">© 2026 EstateSalen.com. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Features
-              </Link>
-              <Link to="/CompareEstateSales" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Compare vs EstateSales.net
-              </Link>
-              <Link to="/OperatorPackages" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Pricing
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, X, Minus, ArrowRight, Star, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const CATEGORIES = [
   {
@@ -401,25 +402,7 @@ export default function CompareEstateSales() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-slate-900 text-white">
-        <div className="border-t border-white/10">
-          <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm">© 2026 EstateSalen.com. All rights reserved. · Comparison based on publicly available information.</p>
-            <div className="flex items-center gap-6">
-              <Link to="/CompanyLanding" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Features
-              </Link>
-              <Link to="/CompareEstateSales" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Compare vs EstateSales.net
-              </Link>
-              <Link to="/OperatorPackages" className="text-slate-400 hover:text-orange-400 text-sm transition-colors">
-                Pricing
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
     </div>
   );
 }

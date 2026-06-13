@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -473,10 +474,7 @@ export default function AgentListingEstateSaleRequest() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-800 text-slate-400 text-center py-6 text-sm">
-        <p>© {new Date().getFullYear()} EstateSalen.com · <a href="/" className="underline hover:text-white">estatesalen.com</a></p>
-      </footer>
+      <SharedFooter />
     </div>
   );
 }
