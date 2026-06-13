@@ -37,7 +37,7 @@ export default function CollectorDealerDashboard() {
   const [saving, setSaving] = useState(false);
 
   const [dealerForm, setDealerForm] = useState({
-    collector_dealer_business_type: '',
+    collector_dealer_business_types: [],
     collector_dealer_specialties: [],
     store_name: '',
   });
@@ -49,7 +49,7 @@ export default function CollectorDealerDashboard() {
       const u = await base44.auth.me();
       setUser(u);
       setDealerForm({
-        collector_dealer_business_type: u.collector_dealer_business_type || '',
+        collector_dealer_business_types: u.collector_dealer_business_types || [],
         collector_dealer_specialties: u.collector_dealer_specialties || [],
         store_name: u.store_name || u.company_name || '',
       });
@@ -97,7 +97,7 @@ export default function CollectorDealerDashboard() {
     setSaving(true);
     try {
       await base44.auth.updateMe({
-        collector_dealer_business_type: dealerForm.collector_dealer_business_type,
+        collector_dealer_business_types: dealerForm.collector_dealer_business_types,
         collector_dealer_specialties: dealerForm.collector_dealer_specialties,
         store_name: dealerForm.store_name,
       });
@@ -212,17 +212,28 @@ export default function CollectorDealerDashboard() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1.5 block">Dealer Type</label>
-              <select
-                value={dealerForm.collector_dealer_business_type}
-                onChange={e => setDealerForm(p => ({ ...p, collector_dealer_business_type: e.target.value }))}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-              >
-                <option value="">Select type...</option>
+              <label className="text-sm font-medium text-slate-700 mb-1.5 block">Dealer Type(s)</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {DEALER_BUSINESS_TYPES.map(t => (
-                  <option key={t} value={t}>{t}</option>
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setDealerForm(p => ({
+                      ...p,
+                      collector_dealer_business_types: p.collector_dealer_business_types.includes(t)
+                        ? p.collector_dealer_business_types.filter(v => v !== t)
+                        : [...p.collector_dealer_business_types, t]
+                    }))}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all text-left ${
+                      dealerForm.collector_dealer_business_types.includes(t)
+                        ? 'border-purple-500 bg-purple-50 text-purple-800 font-medium'
+                        : 'border-slate-200 text-slate-600 hover:border-purple-300'
+                    }`}
+                  >
+                    {t}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
 
