@@ -353,7 +353,7 @@ export default function CompareEstateSales() {
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-4">
             More than Just a Sale Listing Directory.<br />
-            <span className="text-orange-600">Own Your Business.</span>
+            <span className="text-orange-600">Manage, Run &amp; Grow Your Business.</span>
           </h2>
           <p className="text-slate-500 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
             EstateSales.net lists your sales for the weekend. EstateSalen.com runs your entire company — AI marketing, POS checkout, CRM, VIP events, contracts, analytics, and more — all in one platform.
