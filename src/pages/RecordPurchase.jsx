@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Receipt, Calendar, DollarSign, Search, Info, MapPin } from 'lucide-react';
+import { Receipt, Calendar, DollarSign, Search, Info, MapPin, Crosshair } from 'lucide-react';
 
 export default function RecordPurchase() {
   const navigate = useNavigate();
@@ -25,6 +25,8 @@ export default function RecordPurchase() {
   const [searchingActive, setSearchingActive] = useState(false);
   const [activeSearchDone, setActiveSearchDone] = useState(false);
   const [showCustomLocation, setShowCustomLocation] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+  const [distanceFiltered, setDistanceFiltered] = useState(false);
   const [errorDetails, setErrorDetails] = useState(null);
   const [formData, setFormData] = useState({
     item_name: '',
@@ -35,10 +37,41 @@ export default function RecordPurchase() {
     notes: ''
   });
 
+  // Haversine distance in miles between two [lat, lng] points
+  const haversineDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 3959; // Earth radius in miles
+    const toRad = deg => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  // Resolve user coordinates from profile or notification preferences
+  const resolveUserCoords = async (userData) => {
+    // Try user profile location first
+    if (userData.location?.lat && userData.location?.lng) {
+      return { lat: userData.location.lat, lng: userData.location.lng };
+    }
+    // Try notification preference center point
+    try {
+      const prefs = await base44.entities.NotificationPreference.filter({ user_id: userData.id });
+      const pref = prefs[0];
+      if (pref?.sale_alert_lat && pref?.sale_alert_lng) {
+        return { lat: pref.sale_alert_lat, lng: pref.sale_alert_lng };
+      }
+    } catch {}
+    return null;
+  };
+
   useEffect(() => {
     const init = async () => {
       const userData = await base44.auth.me();
       setUser(userData);
+
+      const coords = await resolveUserCoords(userData);
+      setUserCoords(coords);
+
       await loadCheckinSales(userData);
 
       // Pre-fill sale location from URL param
@@ -89,7 +122,7 @@ export default function RecordPurchase() {
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-      const allSales = await base44.entities.EstateSale.list('-created_date', 200);
+      const allSales = await base44.entities.EstateSale.list('-created_date', 500);
       const eligible = allSales.filter(s => {
         if (s.status === 'active' || s.status === 'upcoming') return true;
         // Archived/completed but had a sale date within last 3 days
@@ -100,9 +133,21 @@ export default function RecordPurchase() {
         return false;
       });
 
+      // Filter by distance if user coordinates are available (25-mile radius)
+      let results = eligible;
+      setDistanceFiltered(false);
+      if (userCoords) {
+        results = eligible.filter(s => {
+          if (!s.location?.lat || !s.location?.lng) return false;
+          const dist = haversineDistance(userCoords.lat, userCoords.lng, s.location.lat, s.location.lng);
+          return dist <= 25;
+        });
+        setDistanceFiltered(true);
+      }
+
       // Exclude ones already in checkinSales
       const existing = new Set(checkinSales.map(s => s.id));
-      setActiveSales(eligible.filter(s => !existing.has(s.id)));
+      setActiveSales(results.filter(s => !existing.has(s.id)));
       setActiveSearchDone(true);
     } catch (error) {
       console.error('Error searching active sales:', error);
@@ -301,6 +346,19 @@ export default function RecordPurchase() {
                     {searchingActive ? 'Searching...' : 'Search Active & Recent Sales'}
                   </Button>
                 </div>
+
+                {userCoords && (
+                  <p className="text-xs text-cyan-700 flex items-center gap-1 mb-2">
+                    <Crosshair className="w-3 h-3" />
+                    Results are limited to 25 miles from your location.
+                  </p>
+                )}
+
+                {distanceFiltered && activeSales.length === 0 && activeSearchDone && (
+                  <p className="text-xs text-amber-700 mb-2">
+                    No active or recent sales found within 25 miles.
+                  </p>
+                )}
 
                 {checkinSales.length === 0 && !activeSearchDone && (
                   <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
