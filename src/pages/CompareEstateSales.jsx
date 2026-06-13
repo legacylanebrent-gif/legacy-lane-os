@@ -30,7 +30,7 @@ const CATEGORIES = [
       { feature: 'QR code in-person checkout (POS system)', us: true, them: false },
       { feature: 'Cart building with inventory suggestions', us: true, them: false },
       { feature: 'Pricing database suggestions at checkout', us: true, them: false },
-      { feature: 'No more lost price tags', us: true, them: false },
+
       { feature: 'Export sales sheet w/ commission breakdown', us: true, them: false },
       { feature: 'Offer management & communication', us: true, them: false },
       { feature: 'Buyout calculator', us: true, them: false },
