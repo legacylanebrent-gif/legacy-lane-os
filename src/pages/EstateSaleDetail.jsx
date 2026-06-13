@@ -50,7 +50,7 @@ export default function EstateSaleDetail() {
     const stored = localStorage.getItem(`savedImages_${saleId}`);
     return stored ? JSON.parse(stored) : [];
   });
-  const [showImageDescription, setShowImageDescription] = useState(false);
+  const [showImageDescription, setShowImageDescription] = useState(true);
   const [isInRoute, setIsInRoute] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
