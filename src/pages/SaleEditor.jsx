@@ -955,6 +955,13 @@ Be practical and realistic for an estate sale context.`,
         </>
 
       <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 space-y-6 w-full overflow-x-hidden">
+        <Tabs defaultValue="info" className="space-y-6">
+          <TabsList className="w-full max-w-md mx-auto">
+            <TabsTrigger value="info" className="flex-1 text-base font-semibold">Sale Info</TabsTrigger>
+            <TabsTrigger value="images" className="flex-1 text-base font-semibold">Images</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="space-y-6 mt-0">
         {/* Basic Information */}
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -1130,6 +1137,156 @@ Return ONLY the description text, no extra commentary.`
           </CardContent>
         </Card>
 
+        {/* Featured Items */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">Featured Items</h2>
+              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" onClick={handleGenerateFeaturedTags} disabled={generatingTags}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                {generatingTags ? 'Generating...' : 'AI Suggest'}
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="e.g., Antique furniture, Vintage jewelry..." className="flex-1" />
+              <Button variant="outline" size="icon"><Plus className="w-4 h-4" /></Button>
+            </div>
+            {formData.categories && formData.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.categories.map((category, index) => (
+                  <Badge key={index} variant="outline" className="px-3 py-1">
+                    {category}
+                    <button onClick={() => setFormData({ ...formData, categories: formData.categories.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Sale Clients - Permissions */}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-1">Sale Clients - Permissions</h2>
+                <p className="text-sm text-slate-600">Manage page access permissions for assigned clients</p>
+              </div>
+              {saleId && (
+                <Button variant="outline" size="sm" onClick={() => setShowPermissionsModal(true)} className="flex-shrink-0">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Manage
+                </Button>
+              )}
+            </div>
+            {!saleId ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="text-amber-600 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                </div>
+                <p className="text-sm text-amber-800">Save the sale first to assign clients and manage permissions.</p>
+              </div>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="text-blue-600 mt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                </div>
+                <p className="text-sm text-blue-800">Assign clients from your CRM connections and give them access to specific pages like inventory, statistics, and contracts.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Payment & Special Instructions */}
+        <Card>
+          <CardContent className="pt-6 space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Payment & Special Instructions</h2>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium text-slate-900 mb-2">Accepted Payment Methods</h3>
+                  <div className="flex gap-2 mb-3">
+                    <Input placeholder="e.g., Cash, Credit Card, Venmo..." value={paymentMethodInput} onChange={(e) => setPaymentMethodInput(e.target.value)} />
+                    <Button variant="outline" size="icon" onClick={() => {
+                      if (paymentMethodInput.trim()) {
+                        setFormData(prev => ({ ...prev, payment_methods: [...(prev.payment_methods || []), paymentMethodInput.trim()] }));
+                        setPaymentMethodInput('');
+                      }
+                    }}>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {formData.payment_methods && formData.payment_methods.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.payment_methods.map((method, index) => (
+                        <Badge key={index} variant="outline" className="px-3 py-1">
+                          {method}
+                          <button onClick={() => setFormData({ ...formData, payment_methods: formData.payment_methods.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium text-slate-900 mb-2">Special Instructions</h3>
+                  <Textarea placeholder="Parking info, entry requirements, etc..." value={formData.special_notes} onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })} rows={4} />
+                </div>
+                <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Feature Nationally</h3>
+                      <p className="text-sm text-slate-600">Display prominently on the national homepage</p>
+                    </div>
+                    <Switch checked={featuredNationally} onCheckedChange={setFeaturedNationally} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-slate-900">Feature Locally</h3>
+                      <p className="text-sm text-slate-600">Display prominently on local/regional pages</p>
+                    </div>
+                    <Switch checked={featuredLocally} onCheckedChange={setFeaturedLocally} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Post-Sale Actions */}
+        {saleId && (
+          <Card className="border-purple-200 bg-purple-50/40">
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-purple-600" />
+                <h2 className="text-base font-semibold text-slate-900">Post-Sale Actions</h2>
+              </div>
+              <p className="text-xs text-slate-500">After your sale completes, offer remaining inventory to registered resellers privately.</p>
+              <Button
+                variant="outline"
+                className="border-purple-400 text-purple-700 hover:bg-purple-100 w-full sm:w-auto"
+                onClick={() => navigate(`/ResellerPackupEventEditor?saleId=${saleId}`)}
+              >
+                <span className="mr-2">📦</span>
+                Create Reseller Pack-Up Event
+              </Button>
+              <p className="text-xs text-slate-400">This creates a private, invite-only event for resellers only. Not visible to the public.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Footer */}
+        <div className="flex gap-3 justify-end pb-8">
+          <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
+          <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button onClick={() => handleSave(true)} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
+            {saving ? 'Saving...' : 'Save & Close'}
+          </Button>
+        </div>
+          </TabsContent>
+
+          <TabsContent value="images" className="space-y-6 mt-0">
         {/* Photos */}
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -1694,154 +1851,8 @@ Return ONLY the description text, no extra commentary.`
             </Tabs>
           </CardContent>
         </Card>
-
-        {/* Featured Items */}
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">Featured Items</h2>
-              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" onClick={handleGenerateFeaturedTags} disabled={generatingTags}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                {generatingTags ? 'Generating...' : 'AI Suggest'}
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Input placeholder="e.g., Antique furniture, Vintage jewelry..." className="flex-1" />
-              <Button variant="outline" size="icon"><Plus className="w-4 h-4" /></Button>
-            </div>
-            {formData.categories && formData.categories.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.categories.map((category, index) => (
-                  <Badge key={index} variant="outline" className="px-3 py-1">
-                    {category}
-                    <button onClick={() => setFormData({ ...formData, categories: formData.categories.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Sale Clients - Permissions */}
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-1">Sale Clients - Permissions</h2>
-                <p className="text-sm text-slate-600">Manage page access permissions for assigned clients</p>
-              </div>
-              {saleId && (
-                <Button variant="outline" size="sm" onClick={() => setShowPermissionsModal(true)} className="flex-shrink-0">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Manage
-                </Button>
-              )}
-            </div>
-            {!saleId ? (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                <div className="text-amber-600 mt-0.5">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                </div>
-                <p className="text-sm text-amber-800">Save the sale first to assign clients and manage permissions.</p>
-              </div>
-            ) : (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                <div className="text-blue-600 mt-0.5">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                </div>
-                <p className="text-sm text-blue-800">Assign clients from your CRM connections and give them access to specific pages like inventory, statistics, and contracts.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Payment & Special Instructions */}
-        <Card>
-          <CardContent className="pt-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Payment & Special Instructions</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium text-slate-900 mb-2">Accepted Payment Methods</h3>
-                  <div className="flex gap-2 mb-3">
-                    <Input placeholder="e.g., Cash, Credit Card, Venmo..." value={paymentMethodInput} onChange={(e) => setPaymentMethodInput(e.target.value)} />
-                    <Button variant="outline" size="icon" onClick={() => {
-                      if (paymentMethodInput.trim()) {
-                        setFormData(prev => ({ ...prev, payment_methods: [...(prev.payment_methods || []), paymentMethodInput.trim()] }));
-                        setPaymentMethodInput('');
-                      }
-                    }}>
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {formData.payment_methods && formData.payment_methods.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.payment_methods.map((method, index) => (
-                        <Badge key={index} variant="outline" className="px-3 py-1">
-                          {method}
-                          <button onClick={() => setFormData({ ...formData, payment_methods: formData.payment_methods.filter((_, i) => i !== index) })} className="ml-2 text-slate-500 hover:text-slate-700">×</button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-medium text-slate-900 mb-2">Special Instructions</h3>
-                  <Textarea placeholder="Parking info, entry requirements, etc..." value={formData.special_notes} onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })} rows={4} />
-                </div>
-                <div className="space-y-4 pt-4 border-t border-slate-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Feature Nationally</h3>
-                      <p className="text-sm text-slate-600">Display prominently on the national homepage</p>
-                    </div>
-                    <Switch checked={featuredNationally} onCheckedChange={setFeaturedNationally} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">Feature Locally</h3>
-                      <p className="text-sm text-slate-600">Display prominently on local/regional pages</p>
-                    </div>
-                    <Switch checked={featuredLocally} onCheckedChange={setFeaturedLocally} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Post-Sale Actions */}
-        {saleId && (
-          <Card className="border-purple-200 bg-purple-50/40">
-            <CardContent className="pt-6 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-purple-600" />
-                <h2 className="text-base font-semibold text-slate-900">Post-Sale Actions</h2>
-              </div>
-              <p className="text-xs text-slate-500">After your sale completes, offer remaining inventory to registered resellers privately.</p>
-              <Button
-                variant="outline"
-                className="border-purple-400 text-purple-700 hover:bg-purple-100 w-full sm:w-auto"
-                onClick={() => navigate(`/ResellerPackupEventEditor?saleId=${saleId}`)}
-              >
-                <span className="mr-2">📦</span>
-                Create Reseller Pack-Up Event
-              </Button>
-              <p className="text-xs text-slate-400">This creates a private, invite-only event for resellers only. Not visible to the public.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Footer */}
-        <div className="flex gap-3 justify-end pb-8">
-          <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
-          <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
-          </Button>
-          <Button onClick={() => handleSave(true)} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
-            {saving ? 'Saving...' : 'Save & Close'}
-          </Button>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
