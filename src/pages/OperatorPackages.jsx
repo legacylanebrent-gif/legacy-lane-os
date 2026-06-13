@@ -246,7 +246,7 @@ export default function OperatorPackages() {
                   <div className="text-center mb-6 pb-6 border-b">
                     <div className="mb-2">
                       <Badge className="bg-green-600 text-white text-sm px-3 py-1">
-                        14-Day Free Trial
+                        14-Day Free Trial Available
                       </Badge>
                     </div>
                     <div className="flex items-baseline justify-center gap-1">
@@ -324,9 +324,22 @@ export default function OperatorPackages() {
                     </div>
                   )}
 
-                  {/* Sign Up Button */}
+                  {/* Start Free Trial Button */}
                   <Button
                     className={`w-full ${
+                      pkgData.featured 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : 'bg-green-600 hover:bg-green-700 text-white'
+                    }`}
+                    size="lg"
+                    onClick={() => handleSignUp(pkg)}
+                  >
+                    Start Free Trial
+                  </Button>
+                  
+                  {/* Sign Up Button */}
+                  <Button
+                    className={`w-full mt-3 ${
                       pkgData.featured 
                         ? 'bg-orange-600 hover:bg-orange-700 text-white' 
                         : 'bg-slate-800 hover:bg-slate-700 text-white'
