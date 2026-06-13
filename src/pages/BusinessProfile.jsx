@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
+import ContactFormModal from '@/components/company/ContactFormModal';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 
 export default function BusinessProfile() {
@@ -21,6 +22,7 @@ export default function BusinessProfile() {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [contactFormOpen, setContactFormOpen] = useState(false);
 
   useEffect(() => {
     loadBusinessData();
@@ -174,9 +176,13 @@ export default function BusinessProfile() {
                   {business.email && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <Mail className="w-4 h-4 text-orange-600" />
-                      <a href={`mailto:${business.email}`} className="hover:text-orange-600">
-                        {business.email}
-                      </a>
+                      <button
+                        onClick={() => setContactFormOpen(true)}
+                        className="hover:text-orange-600 cursor-pointer text-left"
+                      >
+                        <span className="underline underline-offset-2">Send Message</span>
+                        <span className="text-xs text-slate-400 ml-1">(via contact form)</span>
+                      </button>
                     </div>
                   )}
                   {business.phone && (
@@ -439,7 +445,7 @@ export default function BusinessProfile() {
               )}
               {business.email && (
                 <Button 
-                  onClick={() => window.location.href = `mailto:${business.email}`}
+                  onClick={() => setContactFormOpen(true)}
                   variant="outline"
                   className="gap-2"
                 >
@@ -452,12 +458,21 @@ export default function BusinessProfile() {
         </Card>
       </div>
 
-      {/* Message Modal */}
+      {/* Message Modal — for authenticated users */}
       {currentUser && business && (
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
           recipient={business}
+        />
+      )}
+
+      {/* Contact Form Modal — for guest visitors */}
+      {business && (
+        <ContactFormModal
+          open={contactFormOpen}
+          onClose={() => setContactFormOpen(false)}
+          business={business}
         />
       )}
     </div>
