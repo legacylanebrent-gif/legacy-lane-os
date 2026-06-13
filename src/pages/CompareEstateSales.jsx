@@ -53,6 +53,7 @@ const CATEGORIES = [
   {
     label: 'AI & Marketing Automation',
     rows: [
+      { feature: 'Weekend Sale Email Blasts', us: true, them: true },
       { feature: 'AI marketing content generator', us: true, them: false },
       { feature: 'Facebook posts — auto-generated', us: true, them: false },
       { feature: 'Instagram captions — auto-generated', us: true, them: false },
