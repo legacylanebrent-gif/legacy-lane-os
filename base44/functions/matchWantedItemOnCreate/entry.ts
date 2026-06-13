@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
             title: `👤 Buyer Hunting: "${wantedItem.title}"`,
             message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Contact the buyer to close a deal before your sale!`,
             link_to_page: 'EstateSaleDetail',
-            link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}`,
+            link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}&contactBuyerId=${wantedItem.buyer_id}&contactBuyerName=${encodeURIComponent(wantedItem.buyer_name || '')}`,
             read: false,
             related_entity_type: 'EstateSale',
             related_entity_id: sale.id,

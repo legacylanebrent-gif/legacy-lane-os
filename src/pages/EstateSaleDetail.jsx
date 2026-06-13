@@ -60,6 +60,7 @@ export default function EstateSaleDetail() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [wantedItemTitle, setWantedItemTitle] = useState('');
+  const [contactBuyer, setContactBuyer] = useState(null);
 
   useEffect(() => {
     loadSaleData();
@@ -132,8 +133,15 @@ export default function EstateSaleDetail() {
         // Auto-open message modal if coming from ISO match notification
         const autoMessage = urlParams.get('autoMessage');
         const wantedTitle = urlParams.get('wantedItemTitle');
-        if (autoMessage === '1' && wantedTitle && authUser) {
-          setWantedItemTitle(decodeURIComponent(wantedTitle));
+        const contactBuyerId = urlParams.get('contactBuyerId');
+        const contactBuyerName = urlParams.get('contactBuyerName');
+        if (autoMessage === '1' && authUser) {
+          if (wantedTitle) setWantedItemTitle(decodeURIComponent(wantedTitle));
+          if (contactBuyerId) {
+            // Operator clicking a buyer hunt notification — store buyer info for message modal
+            setWantedItemTitle(decodeURIComponent(contactBuyerName || 'Buyer'));
+            setContactBuyer({ id: contactBuyerId, full_name: decodeURIComponent(contactBuyerName || 'Buyer') });
+          }
           setMessageModalOpen(true);
         }
         }
@@ -1008,7 +1016,7 @@ export default function EstateSaleDetail() {
         <MessageModal
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
-          recipient={operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
+          recipient={contactBuyer || operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
           relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title, name: wantedItemTitle ? `Inquiry: ${wantedItemTitle} — ${sale.title}` : `Re: ${sale.title}` }}
           savedImages={savedImages}
           allImages={sale.images}
