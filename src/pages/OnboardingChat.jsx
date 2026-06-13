@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem } from 'lucide-react';
+import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -69,6 +69,16 @@ export default function OnboardingChat() {
   const [isoItem, setIsoItem] = useState({ title: '', category: '', budget: '' });
   const [isoCreated, setIsoCreated] = useState(false);
 
+  // Operator onboarding state
+  const [companyName, setCompanyName] = useState('');
+  const [operatorZip, setOperatorZip] = useState('');
+  const [operatorCity, setOperatorCity] = useState('');
+  const [operatorState, setOperatorState] = useState('');
+  const [serviceStates, setServiceStates] = useState([]);
+  const US_STATES = [
+    'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'
+  ];
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -101,13 +111,11 @@ export default function OnboardingChat() {
     setSelectedRole(roleId);
     setSaving(true);
     try {
-      // Estate Sale Company Owners → go to packages
+      // Estate Sale Company Owners → guided setup flow
       if (roleId === 'estate_sale_operator') {
-        await base44.auth.updateMe({
-          primary_account_type: roleId,
-          onboarding_completed: true,
-        });
-        navigate(createPageUrl('OperatorPackages'));
+        await base44.auth.updateMe({ primary_account_type: roleId });
+        setStep('operatorCompany');
+        setSaving(false);
         return;
       }
 
@@ -144,6 +152,77 @@ export default function OnboardingChat() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // ── Operator: Company Name ──
+  const handleOperatorCompany = () => {
+    if (!companyName.trim()) return;
+    setSaving(true);
+    base44.auth.updateMe({ company_name: companyName }).then(() => {
+      setStep('operatorLocation');
+    }).catch((e) => {
+      console.error(e);
+      alert('Something went wrong. Please try again.');
+    }).finally(() => setSaving(false));
+  };
+
+  const handleSkipOperatorCompany = () => setStep('operatorLocation');
+
+  // ── Operator: Location ──
+  const handleOperatorLocation = async () => {
+    if (!operatorZip || operatorZip.length < 5) {
+      setGeoError('Please enter a valid ZIP code');
+      return;
+    }
+    setSaving(true);
+    setGeoError('');
+    try {
+      const res = await base44.functions.invoke('geocodeZip', { zip: operatorZip });
+      const data = res.data;
+      if (data?.lat && data?.lng) {
+        await base44.auth.updateMe({
+          location: { lat: data.lat, lng: data.lng },
+          zip_code: operatorZip,
+          city: operatorCity || data.city || '',
+          state: operatorState || data.state || '',
+        });
+        setStep('operatorServices');
+      } else {
+        setGeoError('Could not find that ZIP code. Please try another.');
+      }
+    } catch (e) {
+      setGeoError('Could not verify location. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSkipOperatorLocation = () => setStep('operatorServices');
+
+  // ── Operator: Service States ──
+  const toggleState = (st) => {
+    setServiceStates(prev =>
+      prev.includes(st) ? prev.filter(s => s !== st) : [...prev, st]
+    );
+  };
+
+  const handleOperatorServices = async () => {
+    setSaving(true);
+    try {
+      await base44.auth.updateMe({ service_states: serviceStates });
+      setStep('operatorIntro');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSkipOperatorServices = () => setStep('operatorIntro');
+
+  // ── Operator: Platform Intro → Packages ──
+  const handleOperatorToPackages = async () => {
+    navigate(createPageUrl('OperatorPackages'));
   };
 
   // ── Consumer: Location ──
@@ -320,6 +399,168 @@ export default function OnboardingChat() {
             </button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // ── OPERATOR: Company Name ──
+  if (step === 'operatorCompany') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 flex items-center justify-center p-6">
+        <Card className="max-w-lg w-full shadow-xl border-0">
+          <CardContent className="p-8 space-y-6">
+            <motion.div {...fadeIn} className="text-center">
+              <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Building2 className="w-8 h-8 text-cyan-600" />
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">What's your company name?</h1>
+              <p className="text-slate-600">
+                This is how buyers and clients will find your estate sale business.
+              </p>
+            </motion.div>
+            <motion.div {...fadeIn} transition={{ delay: 0.15 }} className="space-y-3">
+              <Input
+                placeholder="e.g. Smith Estate Sales & Services"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="text-center text-lg h-12"
+              />
+              <Button
+                onClick={handleOperatorCompany}
+                disabled={saving || !companyName.trim()}
+                className="w-full bg-cyan-600 hover:bg-cyan-700 h-12 text-base"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <button onClick={handleSkipOperatorCompany} className="w-full text-sm text-slate-400 hover:text-slate-600">
+                I'll set it up later
+              </button>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // ── OPERATOR: Location ──
+  if (step === 'operatorLocation') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 flex items-center justify-center p-6">
+        <Card className="max-w-lg w-full shadow-xl border-0">
+          <CardContent className="p-8 space-y-6">
+            <motion.div {...fadeIn} className="text-center">
+              <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 text-cyan-600" />
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Where's your home base?</h1>
+              <p className="text-slate-600">
+                This helps match you with leads and sales in your area.
+              </p>
+            </motion.div>
+            <motion.div {...fadeIn} transition={{ delay: 0.15 }} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Input placeholder="ZIP code" value={operatorZip} onChange={(e) => { setOperatorZip(e.target.value); setGeoError(''); }} maxLength={5} className="h-12" />
+                <Input placeholder="City" value={operatorCity} onChange={(e) => setOperatorCity(e.target.value)} className="h-12" />
+              </div>
+              <Input placeholder="State (e.g. NJ)" value={operatorState} onChange={(e) => setOperatorState(e.target.value.toUpperCase())} maxLength={2} className="h-12" />
+              {geoError && <p className="text-red-500 text-sm text-center">{geoError}</p>}
+              <Button
+                onClick={handleOperatorLocation}
+                disabled={saving || operatorZip.length < 5}
+                className="w-full bg-cyan-600 hover:bg-cyan-700 h-12 text-base"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <MapPin className="w-4 h-4 mr-2" />}
+                Set Location
+              </Button>
+              <button onClick={handleSkipOperatorLocation} className="w-full text-sm text-slate-400 hover:text-slate-600">Skip for now</button>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // ── OPERATOR: Service States ──
+  if (step === 'operatorServices') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 p-6">
+        <div className="max-w-lg mx-auto pt-8 pb-16">
+          <motion.div {...fadeIn} className="text-center mb-6">
+            <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Globe className="w-8 h-8 text-cyan-600" />
+            </div>
+            <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Where do you operate?</h1>
+            <p className="text-slate-600">Select the states where you run estate sales. This helps us route local leads to you.</p>
+          </motion.div>
+          <motion.div {...fadeIn} transition={{ delay: 0.15 }} className="space-y-4">
+            <div className="grid grid-cols-5 sm:grid-cols-7 gap-2">
+              {US_STATES.map(st => (
+                <button
+                  key={st}
+                  onClick={() => toggleState(st)}
+                  className={`py-2 rounded-lg text-sm font-medium transition-all ${
+                    serviceStates.includes(st) ? 'bg-cyan-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-600 hover:border-cyan-300'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 text-center">
+              {serviceStates.length === 0 ? 'Select all that apply' : `${serviceStates.length} state${serviceStates.length > 1 ? 's' : ''} selected`}
+            </p>
+            <div className="flex gap-3">
+              <Button onClick={handleOperatorServices} disabled={saving} className="flex-1 bg-cyan-600 hover:bg-cyan-700 h-12 text-base">
+                Save & Continue <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button variant="outline" onClick={handleSkipOperatorServices} className="h-12">Skip</Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── OPERATOR: Platform Intro → Packages ──
+  if (step === 'operatorIntro') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 flex items-center justify-center p-6">
+        <Card className="max-w-lg w-full shadow-xl border-0">
+          <CardContent className="p-8 space-y-6">
+            <motion.div {...fadeIn} className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Store className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">
+                {companyName ? `${companyName} is ready to grow` : "You're ready to grow"}
+              </h1>
+              <p className="text-slate-600 mb-4">Next up: choose a plan that fits your business. Here's what you'll get:</p>
+            </motion.div>
+            <motion.div {...fadeIn} transition={{ delay: 0.15 }} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Store, label: 'List Your Sales', desc: 'Professional sale pages with photos' },
+                  { icon: Search, label: 'Get Found', desc: 'Appear on our marketplace & local search' },
+                  { icon: MapPin, label: 'Receive Leads', desc: 'Leads routed from your service area' },
+                  { icon: Camera, label: 'Market Your Sales', desc: 'Social ads, emails & buyer alerts' },
+                ].map((item) => (
+                  <div key={item.label} className="bg-slate-50 rounded-xl p-3 text-center">
+                    <item.icon className="w-5 h-5 text-cyan-600 mx-auto mb-1" />
+                    <p className="font-semibold text-xs text-slate-800">{item.label}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <Button onClick={handleOperatorToPackages} className="w-full bg-cyan-600 hover:bg-cyan-700 h-12 text-base">
+                View Plans & Pricing <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <p className="text-xs text-slate-400 text-center">
+                After picking a plan, we'll ask a few more questions to personalize your experience.
+              </p>
+            </motion.div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
