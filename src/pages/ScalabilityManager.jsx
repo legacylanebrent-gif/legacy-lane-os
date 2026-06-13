@@ -10,7 +10,7 @@ export default function ScalabilityManager() {
   const [user, setUser] = useState(null);
   const [capacityRecords, setCapacityRecords] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
-  const [operators, setOperators] = useState([]);
+  const [creditAccounts, setCreditAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [projectingNewSub, setProjectingNewSub] = useState(null);
   const [showSimulator, setShowSimulator] = useState(false);
@@ -22,25 +22,25 @@ export default function ScalabilityManager() {
     if (u?.role !== 'admin') { window.location.href = '/'; return; }
     setUser(u);
 
-    const [caps, subs, ops] = await Promise.all([
+    const [caps, subs, creditAccounts] = await Promise.all([
       base44.entities.InfrastructureCapacity.list(),
       base44.entities.SubscriptionPackage.filter({ is_active: true }),
-      base44.entities.User.list()
+      base44.entities.OperatorAICreditAccount.filter({ status: 'active' })
     ]);
     setCapacityRecords(caps);
     setSubscriptions(subs);
-    setOperators(ops);
+    setCreditAccounts(creditAccounts);
     setLoading(false);
   };
 
   const subscriptionCounts = useMemo(() => {
     const counts = { starter: 0, growth: 0, professional: 0, elite: 0 };
-    operators.forEach(op => {
-      const tier = op.subscription_tier || op.tier_level;
+    creditAccounts.forEach(acct => {
+      const tier = acct.subscription_tier;
       if (tier && counts[tier] !== undefined) counts[tier]++;
     });
     return counts;
-  }, [operators]);
+  }, [creditAccounts]);
 
   const totalSubscribers = Object.values(subscriptionCounts).reduce((s, c) => s + c, 0);
 
