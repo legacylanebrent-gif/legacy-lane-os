@@ -73,6 +73,7 @@ const CATEGORIES = [
     label: 'Sale Signage & Print',
     rows: [
       { feature: 'Printed price tags from Images w/Title &amp; Description', us: true, them: false },
+      { feature: 'More than 90 Ready to Print Signs w/Your Logo', us: true, them: false },
       { feature: 'Category signs & sale banners', us: true, them: false },
       { feature: 'Professional signage templates', us: true, them: false },
     ],
