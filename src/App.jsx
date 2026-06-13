@@ -227,7 +227,7 @@ const AuthenticatedApp = () => {
       <Route path="/CSVLeadImport" element={<LayoutWrapper currentPageName="CSVLeadImport"><CSVLeadImport /></LayoutWrapper>} />
       <Route path="/AdminLeadImporter" element={<LayoutWrapper currentPageName="AdminLeadImporter"><AdminLeadImporter /></LayoutWrapper>} />
       <Route path="/CompanyLanding" element={<CompanyLanding />} />
-      <Route path="/CompareEstateSales" element={<CompareEstateSales />} />
+      <Route path="/CompareEstateSales" element={<LayoutWrapper currentPageName="CompareEstateSales"><CompareEstateSales /></LayoutWrapper>} />
       <Route path="/ReferralDashboard" element={<LayoutWrapper currentPageName="ReferralDashboard"><ReferralDashboard /></LayoutWrapper>} />
       <Route path="/ReferralBatchInvite" element={<LayoutWrapper currentPageName="ReferralBatchInvite"><ReferralBatchInvite /></LayoutWrapper>} />
       <Route path="/OperatorProfile" element={<LayoutWrapper currentPageName="OperatorProfile"><OperatorProfile /></LayoutWrapper>} />

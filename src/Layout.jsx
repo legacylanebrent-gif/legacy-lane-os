@@ -29,6 +29,7 @@ const NO_SIDEBAR_PAGES = [
   'ReferralDashboard', 'JoinReferralExchange',
   // Public pages that need UniversalHeader
   'EstateSaleDetail',
+  'CompareEstateSales',
 ];
 
 // Consumer-type roles that get the consumer header instead of the sidebar
