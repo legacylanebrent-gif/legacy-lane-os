@@ -181,13 +181,13 @@ export default function LandingPageBizInABox() {
       {[
         {
           title: 'Legacy Lane OS Elite Included',
-          subtitle: 'Operate like a much larger company from day one.',
-          items: ['Sale Management', 'Inventory Management', 'AI Item Research', 'AI Pricing Assistance', 'AI Descriptions', 'QR Code System', 'VIP Presales', 'Customer Database', 'Marketing Automation', 'Team Management', 'POS Checkout System', 'Reporting & Analytics', 'Reseller Event Management', 'Buyout Event Management', 'Referral Tracking', 'Lead Management', 'Customer Follow-Up Systems']
+          subtitle: 'Operate like a much larger company from day one — backed by 10 autonomous SuperAgents.',
+          items: ['Sale Management', 'Inventory Management', 'Google Lens™ AI Item Research', 'AI Pricing Assistance', 'AI Descriptions', 'Smart QR Code System with Dynamic Pricing', 'VIP Presales', 'Customer Database', 'Marketing Automation', 'Team Management', 'POS Checkout System', 'Reporting & Analytics', 'ISO Wanted Items™ Buyer Matching', 'Reseller Event Management', 'Buyout Event Management', 'Referral Tracking', 'Lead Management', 'Customer Follow-Up Systems', '10-Agent SuperAgent Autonomous System']
         },
         {
           title: 'Your AI Marketing Department',
-          subtitle: 'Most operators spend hours creating content. Legacy Lane partners can create campaigns in minutes.',
-          items: ['Social Media Campaigns', 'AI Ad Copy', 'Facebook Campaign Assets', 'Instagram Campaign Assets', 'Email Campaigns', 'Text Campaigns', 'Featured Item Promotions', 'Sale Countdown Campaigns', 'VIP Event Promotions', 'Reseller Event Promotions', 'Cleanout Campaigns', 'Real Estate Referral Campaigns']
+          subtitle: '10 SuperAgents work autonomously 24/7 — drafting campaigns, generating ads, and managing outreach while you sleep.',
+          items: ['Meta (Facebook/Instagram) Ad Campaigns', 'AI Ad Copy & Creative Generation', 'Social Media Campaigns across all platforms', 'Email Campaigns (drafted & scheduled)', 'Text/SMS Campaigns', 'Featured Item Promotions', 'Sale Countdown Campaigns', 'VIP Event Promotions', 'Reseller Event Promotions', 'Cleanout Campaigns', 'Real Estate Referral Campaigns', 'Autonomous marketing pipeline from draft to publish']
         },
         {
           title: 'Free Coaching Included',
@@ -201,8 +201,8 @@ export default function LandingPageBizInABox() {
         },
         {
           title: 'EstateSalen.com Exposure',
-          subtitle: 'Every Founding Market Partner receives enhanced visibility within the EstateSalen ecosystem.',
-          items: ['Premium Directory Placement', 'Founding Partner Badge', 'Enhanced Consumer Visibility', 'Featured Profile Opportunities', 'Referral Opportunities', 'Future Lead Distribution Programs', 'Priority Consideration For New Programs', 'Early Access To New Features']
+          subtitle: 'Every Founding Market Partner receives enhanced visibility within the EstateSalen ecosystem — including our consumer mobile app.',
+          items: ['Premium Directory Placement', 'Founding Partner Badge', 'Enhanced Consumer Visibility', 'Featured Profile Opportunities', 'Referral Opportunities', 'Future Lead Distribution Programs', 'Priority Consideration For New Programs', 'Early Access To New Features', 'Featured in ISO Wanted Items matching results', 'Listed in consumer mobile app']
         },
         {
           title: 'Multiple Revenue Streams',

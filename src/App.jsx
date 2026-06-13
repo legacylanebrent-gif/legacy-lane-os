@@ -48,6 +48,8 @@ import LandingPageFitFinder from './pages/LandingPageFitFinder';
 import LandingPageReferralEngine from './pages/LandingPageReferralEngine';
 import LandingPageAIPlan from './pages/LandingPageAIPlan';
 import LandingPageRetarget from './pages/LandingPageRetarget';
+import LandingPageConsumer from './pages/LandingPageConsumer';
+import LandingPageAgent from './pages/LandingPageAgent';
 import AgentPartnerships from './pages/AgentPartnerships';
 import JoinReferralExchange from './pages/JoinReferralExchange';
 import ReferralDealPipeline from './pages/ReferralDealPipeline';
@@ -246,6 +248,8 @@ const AuthenticatedApp = () => {
       <Route path="/LandingPageAIPlan" element={<LandingPageAIPlan />} />
       <Route path="/LandingPageRetarget" element={<LandingPageRetarget />} />
       <Route path="/LandingPageBizInABox" element={<LandingPageBizInABox />} />
+      <Route path="/LandingPageConsumer" element={<LandingPageConsumer />} />
+      <Route path="/LandingPageAgent" element={<LandingPageAgent />} />
       <Route path="/AgentPartnerships" element={<LayoutWrapper currentPageName="AgentPartnerships"><AgentPartnerships /></LayoutWrapper>} />
       <Route path="/JoinReferralExchange" element={<LayoutWrapper currentPageName="JoinReferralExchange"><JoinReferralExchange /></LayoutWrapper>} />
       <Route path="/ReferralDealPipeline" element={<LayoutWrapper currentPageName="ReferralDealPipeline"><ReferralDealPipeline /></LayoutWrapper>} />

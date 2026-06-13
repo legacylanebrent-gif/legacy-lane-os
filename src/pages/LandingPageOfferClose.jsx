@@ -7,22 +7,29 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 const VALUE_ITEMS = [
-  'AI-assisted pricing support',
-  'Inventory organization system',
-  'Structured setup workflow',
-  'Clear team task assignments',
-  'Marketing support and item exposure tools',
-  'Sale-day management tools',
-  'Post-sale tracking and insights',
+  'Google Lens™ AI item identification & pricing',
+  '10-agent SuperAgent autonomous system',
+  'ISO Wanted Items™ buyer matching engine',
+  'Smart QR pricing with dynamic discounting',
+  'Automated social media & email marketing',
+  'Built-in POS checkout system for estate sales',
+  'Structured setup workflow with team task assignments',
+  'Referral revenue system (agent partnerships)',
+  'Full mobile experience (iOS & Android)',
+  'Real-time sale-day management & reporting',
+  'Route planner for buyers',
+  'Early sign-in & buyer check-in tools',
 ];
 
 const TRANSFORMATION_ITEMS = [
-  'Less time spent figuring things out',
-  'More confidence in pricing decisions',
-  'Clear direction for your team',
-  'More organized inventory',
-  'Better preparation before sale day',
-  'A smoother, more controlled sale experience',
+  'AI researches and prices items in seconds, not hours',
+  'Google Lens identifies items your team doesn\'t recognize',
+  'SuperAgents draft marketing emails and social posts automatically',
+  'Buyers find you through ISO Wanted Items matching',
+  'QR codes handle pricing changes across sale days automatically',
+  'Mobile app keeps your team coordinated in real time',
+  'Referral agreements turn client relationships into passive income',
+  'Real-time reporting replaces end-of-sale paperwork',
 ];
 
 // ==========================================
