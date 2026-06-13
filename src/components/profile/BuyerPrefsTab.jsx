@@ -9,8 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ShoppingBag, Target, Plus, X, Clock, DollarSign, MapPin,
-  Package, Search, Trash2, Edit3, Check, Eye, EyeOff
+  Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles
 } from 'lucide-react';
+import CategorySuggestions from '@/components/profile/CategorySuggestions';
 
 const CATEGORIES = [
   'Furniture', 'Jewelry', 'Art', 'Antiques', 'Collectibles', 'Electronics',
@@ -44,6 +45,8 @@ export default function BuyerPrefsTab({ user }) {
     description: '',
     brand: '',
     category: '',
+    subcategory: '',
+    era: '',
     budget_min: '',
     budget_max: '',
     condition: 'any',
@@ -52,6 +55,8 @@ export default function BuyerPrefsTab({ user }) {
     shipping_ok: true,
     public_visibility: true,
   });
+
+  const [suggestionsKey, setSuggestionsKey] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -79,6 +84,8 @@ export default function BuyerPrefsTab({ user }) {
       description: '',
       brand: '',
       category: '',
+      subcategory: '',
+      era: '',
       budget_min: '',
       budget_max: '',
       condition: 'any',
@@ -89,6 +96,7 @@ export default function BuyerPrefsTab({ user }) {
     });
     setEditingItem(null);
     setShowWantedForm(false);
+    setSuggestionsKey(k => k + 1);
   };
 
   const handleEditItem = (item) => {
@@ -98,6 +106,8 @@ export default function BuyerPrefsTab({ user }) {
       description: item.description || '',
       brand: item.brand || '',
       category: item.category || '',
+      subcategory: item.subcategory || '',
+      era: item.era || '',
       budget_min: item.budget_min?.toString() || '',
       budget_max: item.budget_max?.toString() || '',
       condition: item.condition || 'any',
@@ -107,6 +117,7 @@ export default function BuyerPrefsTab({ user }) {
       public_visibility: item.public_visibility !== false,
     });
     setShowWantedForm(true);
+    setSuggestionsKey(k => k + 1);
   };
 
   const handleSaveWantedItem = async () => {
@@ -120,6 +131,8 @@ export default function BuyerPrefsTab({ user }) {
         description: wantedForm.description.trim(),
         brand: wantedForm.brand.trim(),
         category: wantedForm.category,
+        subcategory: wantedForm.subcategory,
+        era: wantedForm.era,
         budget_min: wantedForm.budget_min ? parseFloat(wantedForm.budget_min) : null,
         budget_max: wantedForm.budget_max ? parseFloat(wantedForm.budget_max) : null,
         condition: wantedForm.condition,
@@ -299,6 +312,34 @@ export default function BuyerPrefsTab({ user }) {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* ── AI Category Suggestions ── */}
+                <div className="md:col-span-2">
+                  <CategorySuggestions
+                    key={suggestionsKey}
+                    category={wantedForm.category}
+                    onSelectSubcategory={(sc) => setWantedForm(p => ({ ...p, subcategory: sc }))}
+                    onSelectEra={(er) => setWantedForm(p => ({ ...p, era: er }))}
+                  />
+                </div>
+
+                <div>
+                  <Label>Subcategory</Label>
+                  <Input
+                    value={wantedForm.subcategory}
+                    onChange={e => setWantedForm(p => ({ ...p, subcategory: e.target.value }))}
+                    placeholder="e.g., Dining Tables, Brooches..."
+                  />
+                </div>
+                <div>
+                  <Label>Era / Period</Label>
+                  <Input
+                    value={wantedForm.era}
+                    onChange={e => setWantedForm(p => ({ ...p, era: e.target.value }))}
+                    placeholder="e.g., Victorian, Mid-Century..."
+                  />
+                </div>
+
                 <div className="md:col-span-2">
                   <Label>Description / Details</Label>
                   <Textarea
@@ -414,6 +455,8 @@ export default function BuyerPrefsTab({ user }) {
                     <div className="flex flex-wrap gap-3 text-xs text-slate-400">
                       {item.brand && <span className="flex items-center gap-1"><Package className="w-3 h-3" />{item.brand}</span>}
                       {item.category && <span>{item.category}</span>}
+                      {item.subcategory && <span className="text-amber-600">{item.subcategory}</span>}
+                      {item.era && <Badge variant="secondary" className="text-xs font-normal">{item.era}</Badge>}
                       {item.condition !== 'any' && <span className="capitalize">{item.condition?.replace(/_/g, ' ')}</span>}
                       {(item.budget_min || item.budget_max) && (
                         <span className="flex items-center gap-1 text-green-600 font-medium">
