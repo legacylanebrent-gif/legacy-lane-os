@@ -12,6 +12,7 @@ import {
   Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles
 } from 'lucide-react';
 import CategorySuggestions from '@/components/profile/CategorySuggestions';
+import AgentGuidedHunt from '@/components/profile/AgentGuidedHunt';
 
 const CATEGORIES = [
   'Furniture', 'Jewelry', 'Art', 'Antiques', 'Collectibles', 'Electronics',
@@ -258,6 +259,12 @@ export default function BuyerPrefsTab({ user }) {
           )}
         </CardContent>
       </Card>
+
+      {/* ── AI-Guided Hunt Builder ── */}
+      <AgentGuidedHunt
+        user={user}
+        onItemsAdded={loadData}
+      />
 
       {/* ── Wanted Items Section ── */}
       <Card>

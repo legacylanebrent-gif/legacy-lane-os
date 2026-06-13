@@ -1,0 +1,342 @@
+import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Sparkles, ArrowRight, Search, Check, Plus, Loader2,
+  ShoppingBag, ChevronRight, RotateCcw, X, ListFilter
+} from 'lucide-react';
+
+const CATEGORIES = [
+  'Furniture', 'Jewelry', 'Art', 'Antiques', 'Collectibles', 'Electronics',
+  'Clothing & Accessories', 'Books & Media', 'China & Porcelain', 'Glassware',
+  'Tools & Hardware', 'Sporting Goods', 'Toys & Games', 'Musical Instruments',
+  'Coins & Currency', 'Rugs & Textiles', 'Kitchen & Dining', 'Lighting & Lamps',
+  'Mid-Century Modern', 'Garden & Outdoor', 'Vehicles', 'Firearms',
+  'Holiday & Seasonal', 'Victorian Era', 'Vintage Fashion', 'Watches',
+  'Cameras & Photography', 'Vinyl Records', 'Comics', 'Other'
+];
+
+const STEPS = ['category', 'search', 'results'];
+
+export default function AgentGuidedHunt({ user, onItemsAdded }) {
+  const [step, setStep] = useState('category');
+  const [category, setCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [results, setResults] = useState(null);
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const reset = () => {
+    setStep('category');
+    setCategory('');
+    setSearchQuery('');
+    setResults(null);
+    setSelectedItems(new Set());
+    setError('');
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setGenerating(true);
+    setError('');
+    try {
+      const response = await base44.functions.invoke('generateItemList', {
+        category,
+        query: searchQuery.trim(),
+      });
+      setResults(response.data);
+      setStep('results');
+    } catch (e) {
+      setError('Could not generate items. Please try again.');
+      console.error('generateItemList error:', e);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const toggleItem = (idx) => {
+    const next = new Set(selectedItems);
+    if (next.has(idx)) {
+      next.delete(idx);
+    } else {
+      next.add(idx);
+    }
+    setSelectedItems(next);
+  };
+
+  const toggleAll = () => {
+    if (!results?.items) return;
+    if (selectedItems.size === results.items.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(results.items.map((_, i) => i)));
+    }
+  };
+
+  const handleSaveSelected = async () => {
+    if (selectedItems.size === 0) return;
+    setSaving(true);
+    try {
+      const itemsToSave = Array.from(selectedItems).map(idx => {
+        const item = results.items[idx];
+        return {
+          buyer_id: user.id,
+          buyer_name: user.full_name || user.email,
+          title: item.title,
+          description: item.description || '',
+          brand: item.brand || '',
+          category: category,
+          subcategory: item.subcategory || '',
+          era: item.era || '',
+          budget_min: item.estimated_value_min || null,
+          budget_max: item.estimated_value_max || null,
+          condition: 'any',
+          shipping_ok: true,
+          public_visibility: true,
+          status: 'active',
+        };
+      });
+
+      await base44.entities.WantedItem.bulkCreate(itemsToSave);
+      if (onItemsAdded) onItemsAdded();
+      reset();
+    } catch (e) {
+      console.error('Error saving items:', e);
+      setError('Could not save items. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const stepIndex = STEPS.indexOf(step);
+
+  return (
+    <Card className="border-orange-200 bg-gradient-to-br from-white via-orange-50/30 to-amber-50/30">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Sparkles className="w-5 h-5 text-orange-500" />
+          AI-Guided Hunt Builder
+        </CardTitle>
+        <p className="text-xs text-slate-500">
+          Pick a category, name what you're after, and we'll generate a complete hunt list
+        </p>
+      </CardHeader>
+      <CardContent>
+        {/* Step indicators */}
+        <div className="flex items-center gap-2 mb-5">
+          {STEPS.map((s, i) => (
+            <React.Fragment key={s}>
+              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                i < stepIndex ? 'bg-green-100 text-green-700' :
+                i === stepIndex ? 'bg-orange-100 text-orange-700' :
+                'bg-slate-100 text-slate-400'
+              }`}>
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                  i < stepIndex ? 'bg-green-500 text-white' :
+                  i === stepIndex ? 'bg-orange-500 text-white' :
+                  'bg-slate-300 text-white'
+                }`}>
+                  {i < stepIndex ? <Check className="w-2.5 h-2.5" /> : i + 1}
+                </span>
+                {s === 'category' ? 'Category' : s === 'search' ? 'Search' : 'Select'}
+              </div>
+              {i < STEPS.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Step 1: Category */}
+        {step === 'category' && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">What are you hunting for?</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a category..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {CATEGORIES.map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700 w-full"
+              disabled={!category}
+              onClick={() => setStep('search')}
+            >
+              Continue <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 2: Search query */}
+        {step === 'search' && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">
+                Describe what you're looking for in <span className="font-semibold text-orange-700">{category}</span>
+              </Label>
+              <p className="text-xs text-slate-400 mt-1 mb-2">
+                Be specific — an artist, brand, designer, style, or type of item
+              </p>
+              <Input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={`e.g., "Elvis", "Herman Miller", "Art Deco lamps", "Chinese porcelain"`}
+                className="mt-1"
+                autoFocus
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setStep('category')} className="flex-1">
+                Back
+              </Button>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700 flex-1"
+                disabled={!searchQuery.trim() || generating}
+                onClick={handleSearch}
+              >
+                {generating ? (
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Finding items...</>
+                ) : (
+                  <><Search className="w-4 h-4 mr-1" /> Find Items</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Results */}
+        {step === 'results' && results && (
+          <div className="space-y-4">
+            {error && (
+              <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg">{error}</div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-slate-800 text-sm">
+                  Found {results.items?.length || 0} items for "{searchQuery}"
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Check the ones you want to hunt for
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={toggleAll} className="text-xs">
+                  {selectedItems.size === results.items?.length ? 'Deselect All' : 'Select All'}
+                </Button>
+                <Badge variant="outline" className="text-orange-600 border-orange-300">
+                  {selectedItems.size} selected
+                </Badge>
+              </div>
+            </div>
+
+            {/* Items grid */}
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {results.items?.map((item, idx) => {
+                const isSelected = selectedItems.has(idx);
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => toggleItem(idx)}
+                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      isSelected
+                        ? 'border-orange-400 bg-orange-50 shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-orange-200'
+                    }`}
+                  >
+                    <div className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                      isSelected
+                        ? 'bg-orange-500 border-orange-500'
+                        : 'border-slate-300'
+                    }`}>
+                      {isSelected && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-slate-800">{item.title}</p>
+                      <p className="text-xs text-slate-500 line-clamp-1">{item.description}</p>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {item.brand && (
+                          <Badge variant="secondary" className="text-[10px]">{item.brand}</Badge>
+                        )}
+                        {item.subcategory && (
+                          <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">{item.subcategory}</Badge>
+                        )}
+                        {item.era && (
+                          <Badge variant="outline" className="text-[10px]">{item.era}</Badge>
+                        )}
+                        {(item.estimated_value_min || item.estimated_value_max) && (
+                          <span className="text-[10px] text-green-600 font-medium">
+                            ${item.estimated_value_min || 0}–${item.estimated_value_max || '?'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Related categories */}
+            {results.suggested_related_categories?.length > 0 && (
+              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <p className="text-xs font-medium text-amber-800 mb-2 flex items-center gap-1">
+                  <ListFilter className="w-3 h-3" /> You might also hunt for:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {results.suggested_related_categories.map((rc, i) => (
+                    <Button
+                      key={i}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-6 border-amber-300 text-amber-700 hover:bg-amber-100"
+                      onClick={() => {
+                        setCategory(rc);
+                        setSearchQuery('');
+                        setStep('search');
+                      }}
+                    >
+                      {rc} <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={reset} className="flex-1">
+                <RotateCcw className="w-4 h-4 mr-1" /> Start Over
+              </Button>
+              <Button variant="outline" onClick={() => setStep('search')} className="flex-1">
+                Refine Search
+              </Button>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700 flex-1"
+                disabled={selectedItems.size === 0 || saving}
+                onClick={handleSaveSelected}
+              >
+                {saving ? (
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Saving...</>
+                ) : (
+                  <><ShoppingBag className="w-4 h-4 mr-1" /> Add {selectedItems.size} to Hunt List</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
