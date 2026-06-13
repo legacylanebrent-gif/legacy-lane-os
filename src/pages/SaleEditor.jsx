@@ -719,12 +719,9 @@ Be practical and realistic for an estate sale context.`,
             </button>
             <div className="min-w-0">
               <h1 className="text-lg lg:text-xl font-serif font-bold text-slate-900 truncate">{saleId ? 'Edit Sale' : 'Create New Sale'}</h1>
-              <div className="flex items-center gap-4">
-                <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">
-                  {autoSaving ? '⏳ Auto-saving...' : 'Fill in the details for your estate sale'}
-                </p>
-                {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
-              </div>
+              <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">
+                {autoSaving ? '⏳ Auto-saving...' : 'Fill in the details for your estate sale'}
+              </p>
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
@@ -1128,6 +1125,7 @@ Return ONLY the description text, no extra commentary.`
         {/* Photos */}
         <Card>
           <CardContent className="pt-6 space-y-4">
+            {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
               <TabsList className="w-full">
                 <TabsTrigger value="thumbnails" className="flex-1 text-xs sm:text-sm">Thumbnails</TabsTrigger>
