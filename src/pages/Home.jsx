@@ -48,6 +48,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Custom purple dealer marker
+const dealerIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 // Component to update map view when userLocation changes
 function ChangeMapView({ center, zoom }) {
   const map = useMap();
@@ -88,6 +98,8 @@ export default function Home() {
   const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
   const [newLocation, setNewLocation] = useState(null);
   const [userZipCode, setUserZipCode] = useState('');
+  const [showDealers, setShowDealers] = useState(true);
+  const [dealerProfiles, setDealerProfiles] = useState([]);
 
   useSEO({
     title: 'EstateSalen.com — Find Estate Sales Near You',
@@ -305,6 +317,14 @@ export default function Home() {
         }
       } catch (error) {
         console.log('Could not load operators:', error);
+      }
+
+      // Load geocoded dealer profiles
+      try {
+        const profiles = await base44.entities.ResellerProfile.filter({ geocode_status: 'geocoded', is_active: true }, '-created_date', 200);
+        setDealerProfiles(profiles || []);
+      } catch (error) {
+        console.log('Could not load dealer profiles:', error);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -831,9 +851,22 @@ export default function Home() {
       {(localFeatured.length > 0 || regularSales.length > 0) && (
         <section className="py-8 sm:py-12 px-2 sm:px-4 bg-slate-50">
           <div className="max-w-7xl mx-auto px-2 sm:px-0">
-            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
-              🗺️ Sales Near {zipCode ? zipCode : 'You'}
-            </h3>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <h3 className="text-3xl font-serif font-bold text-slate-900 text-center">
+                🗺️ Sales Near {zipCode ? zipCode : 'You'}
+              </h3>
+              <button
+                onClick={() => setShowDealers(v => !v)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  showDealers 
+                    ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200' 
+                    : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${showDealers ? 'bg-purple-500' : 'bg-slate-400'}`}></span>
+                {showDealers ? 'Dealers: ON' : 'Dealers: OFF'}
+              </button>
+            </div>
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
               <MapContainer
                 center={userLocation ? [userLocation.lat, userLocation.lng] : [39.8283, -98.5795]}
@@ -880,7 +913,33 @@ export default function Home() {
                     </Marker>
                   )
                 )}
+                {/* Dealer locations — purple pins */}
+                {showDealers && dealerProfiles.map(profile =>
+                  profile.lat && profile.lng && (
+                    <Marker key={`dealer-${profile.id}`} position={[profile.lat, profile.lng]} icon={dealerIcon}>
+                      <Popup>
+                        <div className="text-sm">
+                          <p className="font-semibold text-purple-700">{profile.business_name}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{profile.city}, {profile.state}</p>
+                          {profile.business_type && (
+                            <p className="text-xs text-slate-500 mt-0.5 capitalize">{profile.business_type.replace(/_/g, ' ')}</p>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )
+                )}
               </MapContainer>
+              <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <img src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png" alt="" className="w-3.5 h-5 object-contain" />
+                  <span>Estate Sale</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png" alt="" className="w-3.5 h-5 object-contain" />
+                  <span>Dealer</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
