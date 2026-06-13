@@ -15,20 +15,26 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Category and query are required' }, { status: 400 });
         }
 
-        const prompt = `You are an expert cataloger for estate sale and antique items.
+        const prompt = `You are an expert estate sale and antiques discovery guide.
 
-A buyer is hunting for items in the category "${category}" and provided this search: "${query}".
+A buyer is hunting for items in the category "${category}" and searched: "${query}".
 
-Generate a list of 8-15 SPECIFIC, real items that match this search. For each item include:
-- title: the specific item name (e.g., "Elvis Presley - Blue Hawaii Original Soundtrack LP")
-- description: a brief 1-sentence description
-- brand: if applicable (e.g., "RCA Victor")
+Your job is to help them DISCOVER what to look for. Based on the search, suggest:
+- If the query is a medium/technique (e.g., "enamel on copper", "watercolor", "bronze"): suggest notable artists known for that medium, key styles, and what collectors look for
+- If the query is an artist name: list their most collectible/popular works and what typically appears at estate sales
+- If the query is a brand/designer: list their iconic pieces and hidden gems
+- If the query is a style/period: list key designers, notable pieces, and what to watch for
+
+For each suggestion include:
+- title: a descriptive label (e.g., "Artists who worked in enamel on copper", or "Eames Lounge Chair - Herman Miller")
+- description: 1-2 sentences explaining what makes this worth hunting for and what to look for
+- brand: if a specific brand/artist/designer is being referenced
 - subcategory: a more specific subcategory within ${category}
-- era: the decade or period the item is from
-- estimated_value_min: lowest expected price in dollars (number only)
-- estimated_value_max: highest expected price in dollars (number only)
+- era: the decade or period
+- estimated_value_min: typical low-end price seen at estate sales
+- estimated_value_max: typical high-end price
 
-Return as JSON with an "items" array. Make the items REAL and SPECIFIC — actual collectible items a person would hunt for at estate sales.`;
+Return as JSON with an "items" array of 8-15 suggestions. Focus on EDUCATIONAL DISCOVERY — help them build knowledge, not a shopping list. Include a mix of specific items, notable makers, and collecting tips.`;
 
         const result = await base44.integrations.Core.InvokeLLM({
             prompt,

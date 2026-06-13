@@ -33,6 +33,19 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [customTitle, setCustomTitle] = useState('');
+  const [customItems, setCustomItems] = useState([]);
+
+  const addCustomItem = () => {
+    const title = customTitle.trim();
+    if (!title) return;
+    setCustomItems(prev => [...prev, { title, description: '', brand: '', subcategory: '', era: '', estimated_value_min: null, estimated_value_max: null, isCustom: true }]);
+    setCustomTitle('');
+  };
+
+  const removeCustomItem = (idx) => {
+    setCustomItems(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const reset = () => {
     setStep('category');
@@ -40,6 +53,8 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
     setSearchQuery('');
     setResults(null);
     setSelectedItems(new Set());
+    setCustomItems([]);
+    setCustomTitle('');
     setError('');
   };
 
@@ -82,10 +97,10 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
   };
 
   const handleSaveSelected = async () => {
-    if (selectedItems.size === 0) return;
+    if (selectedItems.size === 0 && customItems.length === 0) return;
     setSaving(true);
     try {
-      const itemsToSave = Array.from(selectedItems).map(idx => {
+      const llmItems = Array.from(selectedItems).map(idx => {
         const item = results.items[idx];
         return {
           buyer_id: user.id,
@@ -105,7 +120,27 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
         };
       });
 
-      await base44.entities.WantedItem.bulkCreate(itemsToSave);
+      const manualItems = customItems.map(item => ({
+        buyer_id: user.id,
+        buyer_name: user.full_name || user.email,
+        title: item.title,
+        description: item.description || '',
+        brand: item.brand || '',
+        category: category,
+        subcategory: item.subcategory || '',
+        era: item.era || '',
+        budget_min: item.estimated_value_min || null,
+        budget_max: item.estimated_value_max || null,
+        condition: 'any',
+        shipping_ok: true,
+        public_visibility: true,
+        status: 'active',
+      }));
+
+      const itemsToSave = [...llmItems, ...manualItems];
+      if (itemsToSave.length > 0) {
+        await base44.entities.WantedItem.bulkCreate(itemsToSave);
+      }
       if (onItemsAdded) onItemsAdded();
       reset();
     } catch (e) {
@@ -239,7 +274,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                   {selectedItems.size === results.items?.length ? 'Deselect All' : 'Select All'}
                 </Button>
                 <Badge variant="outline" className="text-orange-600 border-orange-300">
-                  {selectedItems.size} selected
+                  {selectedItems.size + customItems.length} selected
                 </Badge>
               </div>
             </div>
@@ -290,6 +325,44 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
               })}
             </div>
 
+            {/* Custom item entry */}
+            <div className="p-3 bg-white rounded-lg border border-dashed border-slate-300">
+              <p className="text-xs font-medium text-slate-600 mb-2 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Not finding what you want? Add your own:
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={customTitle}
+                  onChange={e => setCustomTitle(e.target.value)}
+                  placeholder="Enter an exact item title..."
+                  className="text-sm h-9"
+                  onKeyDown={e => e.key === 'Enter' && addCustomItem()}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 border-orange-300 text-orange-700 hover:bg-orange-50 flex-shrink-0"
+                  onClick={addCustomItem}
+                  disabled={!customTitle.trim()}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add
+                </Button>
+              </div>
+              {customItems.length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  {customItems.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded bg-orange-50 border border-orange-200 text-sm">
+                      <ShoppingBag className="w-3 h-3 text-orange-500 flex-shrink-0" />
+                      <span className="flex-1 text-slate-700 truncate">{item.title}</span>
+                      <button onClick={() => removeCustomItem(i)} className="text-slate-400 hover:text-red-500">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Related categories */}
             {results.suggested_related_categories?.length > 0 && (
               <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
@@ -325,13 +398,13 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
               </Button>
               <Button
                 className="bg-orange-600 hover:bg-orange-700 flex-1"
-                disabled={selectedItems.size === 0 || saving}
+                disabled={(selectedItems.size === 0 && customItems.length === 0) || saving}
                 onClick={handleSaveSelected}
               >
                 {saving ? (
                   <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Saving...</>
                 ) : (
-                  <><ShoppingBag className="w-4 h-4 mr-1" /> Add {selectedItems.size} to Hunt List</>
+                  <><ShoppingBag className="w-4 h-4 mr-1" /> Add {selectedItems.size + customItems.length} to Hunt List</>
                 )}
               </Button>
             </div>
