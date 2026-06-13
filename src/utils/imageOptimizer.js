@@ -12,6 +12,8 @@ export const getOptimizedImageUrl = (imageUrl, size = 'thumbnail') => {
   // If it's already a Base44 file URL, we can add transformation params
   if (imageUrl.includes('base44.com') || imageUrl.includes('media.base44.com')) {
     const sizeParams = {
+      200: '?w=200&h=200&fit=min&auto=compress,format',
+      400: '?w=400&h=400&fit=min&auto=compress,format',
       thumbnail: '?w=300&h=300&fit=min&auto=compress,format',
       gallery: '?w=800&h=600&fit=max&auto=compress,format',
       medium: '?w=800&h=600&fit=max&auto=compress,format',
