@@ -6,7 +6,7 @@ export default function SharedFooter() {
   return (
     <footer className="bg-slate-900 text-white py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-5 gap-8 mb-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
@@ -42,6 +42,25 @@ export default function SharedFooter() {
               <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
               <li><Link to="/CompanyLanding" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Platform Features</Link></li>
               <li><Link to="/CompareEstateSales" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Compare vs EstateSales.net</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Life Transitions &amp; Guides</h4>
+            <ul className="space-y-2">
+              <li><Link to="/probate" className="text-white hover:text-orange-400 transition-colors">Probate Guide</Link></li>
+              <li><Link to="/pre-probate" className="text-white hover:text-orange-400 transition-colors">Pre-Probate Planning</Link></li>
+              <li><Link to="/inherited-property" className="text-white hover:text-orange-400 transition-colors">Inherited Property</Link></li>
+              <li><Link to="/executor-guide" className="text-white hover:text-orange-400 transition-colors">Executor Guide</Link></li>
+              <li><Link to="/trustee-guide" className="text-white hover:text-orange-400 transition-colors">Trustee Guide</Link></li>
+              <li><Link to="/heir-guide" className="text-white hover:text-orange-400 transition-colors">Heir Guide</Link></li>
+              <li><Link to="/senior-downsizing" className="text-white hover:text-orange-400 transition-colors">Senior Downsizing</Link></li>
+              <li><Link to="/assisted-living-transition" className="text-white hover:text-orange-400 transition-colors">Assisted Living</Link></li>
+              <li><Link to="/divorce-property-sale" className="text-white hover:text-orange-400 transition-colors">Divorce &amp; Property</Link></li>
+              <li><Link to="/foreclosure-cleanout" className="text-white hover:text-orange-400 transition-colors">Foreclosure Cleanout</Link></li>
+              <li><Link to="/estate-cleanout" className="text-white hover:text-orange-400 transition-colors">Estate Cleanout</Link></li>
+              <li><Link to="/moving-sale" className="text-white hover:text-orange-400 transition-colors">Moving Sale</Link></li>
+              <li><Link to="/estate-settlement-planner" className="text-white hover:text-orange-400 transition-colors">Settlement Planner</Link></li>
             </ul>
           </div>
         </div>
