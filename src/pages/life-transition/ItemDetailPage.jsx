@@ -14,6 +14,8 @@ export default function ItemDetailPage() {
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     base44.entities.ItemKnowledgeBase.filter({ item_slug: itemSlug })
       .then(results => { setItem(results[0] || null); setLoading(false); if (results[0]?.seo_title) document.title = results[0].seo_title; });

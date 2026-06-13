@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -269,6 +269,8 @@ export default function EstateSettlementPlanner() {
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [checkedItems, setCheckedItems] = useState({});
   const [started, setStarted] = useState(false);
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   // Build visible questions (skip conditionals)
   const visibleQuestions = QUESTIONS.filter(q => !q.skipIf || !q.skipIf(answers));

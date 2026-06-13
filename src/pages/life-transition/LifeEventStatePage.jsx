@@ -51,6 +51,8 @@ export default function LifeEventStatePage() {
   const eventLabel = SLUG_TO_LABEL[lifeEventSlug] || 'Guide';
   const stateName = stateSlug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     if (!stateSlug) return;
     Promise.all([

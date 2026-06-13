@@ -35,6 +35,8 @@ export default function LifeEventCountyPage() {
   const stateName = stateSlug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
   const countyName = countySlug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     base44.entities.CountyGuide.filter({ county_slug: countySlug, guide_type: guideType })
       .then(guides => {

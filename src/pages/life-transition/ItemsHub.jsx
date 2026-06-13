@@ -13,6 +13,8 @@ export default function ItemsHub() {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     base44.entities.ItemKnowledgeBase.filter({ status: 'published' }, '-created_date', 100).then(setItems);
   }, []);

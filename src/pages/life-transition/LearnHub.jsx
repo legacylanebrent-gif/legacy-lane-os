@@ -24,6 +24,8 @@ export default function LearnHub() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     if (articleSlug) {
       base44.entities.EstateSaleUniversityArticle.filter({ slug: articleSlug, status: 'published' })

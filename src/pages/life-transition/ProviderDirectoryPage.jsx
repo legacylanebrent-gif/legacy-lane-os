@@ -38,6 +38,8 @@ export default function ProviderDirectoryPage({ directoryType: directoryTypeProp
   const countyName = countySlug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '';
   const locationLabel = countyName ? `${countyName}, ${stateName}` : stateName || 'Your Area';
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     if (!stateSlug) { setLoading(false); return; }
     const filter = { provider_type: config.providerType, status: 'active', state: stateName };
