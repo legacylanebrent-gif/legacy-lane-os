@@ -951,13 +951,15 @@ export default function EstateSaleDetail() {
                     earlySignInEnabled={sale.early_sign_in_enabled !== false}
                   />
 
-                  <Button 
-                    onClick={() => window.location.href = createPageUrl('SaleLanding') + '?saleId=' + sale.id}
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 gap-2"
-                  >
-                    <ShoppingBag className="w-4 h-4" />
-                    View Inventory Items
-                  </Button>
+                  {sale.total_items > 0 && (
+                    <Button 
+                      onClick={() => window.location.href = createPageUrl('SaleLanding') + '?saleId=' + sale.id}
+                      className="w-full bg-cyan-600 hover:bg-cyan-700 gap-2"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      View Inventory Items
+                    </Button>
+                  )}
 
                   {sale.operator_id && (
                     <Button
