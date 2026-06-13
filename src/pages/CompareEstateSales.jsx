@@ -278,7 +278,7 @@ export default function CompareEstateSales() {
             <span className="text-slate-400">EstateSales.net</span>
           </h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            EstateSales.net is a weekend listing directory. EstateSalen.com is a full business operating system with 80+ tools built for estate sale professionals. See every difference, side by side.
+            EstateSales.net is a weekend sale listing directory. And quite honestly it's the best in the industry ... but the industry needed more! So we created it for our own business and it birthed EstateSalen.com. Our platform is all that EstateSales.net is plus a full business operating system with 115+ tools built for estate sale professionals to make you more efficient, benefit from FREE leads daily, manage your entire business and offer training to employees to possibly grow teams to expand your business. See every difference, side by side in the tables below.
           </p>
 
         </div>
