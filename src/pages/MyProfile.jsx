@@ -8,6 +8,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createPageUrl } from '@/utils';
@@ -106,6 +116,7 @@ export default function MyProfile() {
   const [uploading, setUploading] = useState({});
   const [newCounty, setNewCounty] = useState('');
   const [newCity, setNewCity] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
   const [form, setForm] = useState({
     // personal
@@ -476,12 +487,17 @@ export default function MyProfile() {
                 <h3 className="font-semibold text-slate-800 mb-1">Are you also a Real Estate Agent?</h3>
                 <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Estate Sale Company Owner</strong> role to unlock RE listing pipeline, referral deal management, agent partnerships, and a bundled subscription — all in one account.</p>
                 <Button size="sm" className="bg-gradient-to-r from-orange-500 to-cyan-600 hover:from-orange-600 hover:to-cyan-700 text-white gap-2"
-                  onClick={async () => {
-                    if (!window.confirm('Upgrade to the combined Agent + Estate Sale Company Owner role? This unlocks all features from both roles. Contact support to adjust pricing.')) return;
-                    await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
-                    await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
-                    alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
-                  }}>
+                  onClick={() => setConfirmModal({
+                    open: true,
+                    title: 'Upgrade to Agent + Operator?',
+                    message: 'This unlocks all features from both roles — RE listing pipeline, referral deal management, agent partnerships, and a bundled subscription. Contact support to adjust pricing.',
+                    onConfirm: async () => {
+                      setConfirmModal(p => ({ ...p, open: false }));
+                      await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                      await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
+                      alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
+                    }
+                  })}>
                   <Users className="w-4 h-4" /> Upgrade to Agent + operator
                 </Button>
               </div>
@@ -496,12 +512,17 @@ export default function MyProfile() {
                 <h3 className="font-semibold text-slate-800 mb-1">Do you also run an estate sale company?</h3>
                 <p className="text-sm text-slate-600 mb-3">Upgrade to the combined <strong>Agent + Estate Sale Company Owner</strong> role to run estate sales, manage inventory, accept bookings, and keep your agent tools — all under one subscription.</p>
                 <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-orange-600 hover:from-cyan-600 hover:to-orange-700 text-white gap-2"
-                  onClick={async () => {
-                    if (!window.confirm('Upgrade to the combined Agent + Estate Sale Company Owner role? This unlocks all Estate Sale Company Owner features while keeping your agent tools.')) return;
-                    await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
-                    await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
-                    alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
-                  }}>
+                  onClick={() => setConfirmModal({
+                    open: true,
+                    title: 'Upgrade to Agent + Operator?',
+                    message: 'This unlocks all Estate Sale Company Owner features — run estate sales, manage inventory, accept bookings — while keeping your agent tools under one subscription.',
+                    onConfirm: async () => {
+                      setConfirmModal(p => ({ ...p, open: false }));
+                      await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                      await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
+                      alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
+                    }
+                  })}>
                   <Building2 className="w-4 h-4" /> Upgrade to Agent + Estate Sale Company Owner
                 </Button>
               </div>
@@ -583,32 +604,36 @@ export default function MyProfile() {
                     <Button
                       size="sm"
                       className="bg-amber-600 hover:bg-amber-700 text-white gap-2"
-                      onClick={async () => {
-                        const confirmed = window.confirm('Apply to become a Reseller? Our team will review your application and upgrade your account within 1–2 business days.');
-                        if (!confirmed) return;
-                        try {
-                          await base44.auth.updateMe({ reseller_application_submitted: true, reseller_application_date: new Date().toISOString() });
-                          await base44.functions.invoke('notifyAdminsOfApplication', {
-                            applicant_user_id: user?.id,
-                            applicant_name: user?.full_name,
-                            applicant_email: user?.email,
-                            application_type: 'reseller',
-                            details: null,
-                          });
-                          await base44.entities.Notification.create({
-                            user_id: user?.id,
-                            type: 'system',
-                            title: '✅ Reseller Application Received',
-                            message: 'Your application to become a Reseller has been submitted. Our team will review it and be in touch within 1–2 business days.',
-                            link_to_page: 'MyProfile',
-                            read: false,
-                          });
-                          setUser(prev => ({ ...prev, reseller_application_submitted: true, reseller_application_date: new Date().toISOString() }));
-                          alert('✅ Application submitted! Our team will review it and be in touch within 1–2 business days.');
-                        } catch (e) {
-                          alert('Something went wrong. Please try again.');
+                      onClick={() => setConfirmModal({
+                        open: true,
+                        title: 'Apply to Become a Reseller?',
+                        message: 'Our team will review your application and upgrade your account within 1–2 business days.',
+                        onConfirm: async () => {
+                          setConfirmModal(p => ({ ...p, open: false }));
+                          try {
+                            await base44.auth.updateMe({ reseller_application_submitted: true, reseller_application_date: new Date().toISOString() });
+                            await base44.functions.invoke('notifyAdminsOfApplication', {
+                              applicant_user_id: user?.id,
+                              applicant_name: user?.full_name,
+                              applicant_email: user?.email,
+                              application_type: 'reseller',
+                              details: null,
+                            });
+                            await base44.entities.Notification.create({
+                              user_id: user?.id,
+                              type: 'system',
+                              title: '✅ Reseller Application Received',
+                              message: 'Your application to become a Reseller has been submitted. Our team will review it and be in touch within 1–2 business days.',
+                              link_to_page: 'MyProfile',
+                              read: false,
+                            });
+                            setUser(prev => ({ ...prev, reseller_application_submitted: true, reseller_application_date: new Date().toISOString() }));
+                            alert('✅ Application submitted! Our team will review it and be in touch within 1–2 business days.');
+                          } catch (e) {
+                            alert('Something went wrong. Please try again.');
+                          }
                         }
-                      }}
+                      })}
                     >
                       <Store className="w-4 h-4" />
                       Apply to Become a Reseller
@@ -668,31 +693,35 @@ export default function MyProfile() {
                     <Button
                       size="sm"
                       className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
-                      onClick={async () => {
-                        const confirmed = window.confirm('Apply to become a Collector Dealer? Our team will review your application and upgrade your account within 1–2 business days.');
-                        if (!confirmed) return;
-                        try {
-                          await base44.auth.updateMe({ dealer_application_submitted: true, dealer_application_date: new Date().toISOString() });
-                          await base44.functions.invoke('notifyAdminsOfApplication', {
-                            applicant_user_id: user?.id,
-                            applicant_name: user?.full_name,
-                            applicant_email: user?.email,
-                            application_type: 'collector_dealer',
-                            details: null,
-                          });
-                          await base44.entities.Notification.create({
-                            user_id: user?.id,
-                            type: 'system',
-                            title: 'Collector Dealer Application Received',
-                            message: 'Your application to become a Collector Dealer has been submitted. Our team will review it and be in touch within 1–2 business days.',
-                            link_to_page: 'MyProfile',
-                            read: false,
-                          });
-                          setUser(prev => ({ ...prev, dealer_application_submitted: true, dealer_application_date: new Date().toISOString() }));
-                        } catch (e) {
-                          alert('Something went wrong. Please try again.');
+                      onClick={() => setConfirmModal({
+                        open: true,
+                        title: 'Apply to Become a Collector Dealer?',
+                        message: 'Our team will review your application and upgrade your account within 1–2 business days.',
+                        onConfirm: async () => {
+                          setConfirmModal(p => ({ ...p, open: false }));
+                          try {
+                            await base44.auth.updateMe({ dealer_application_submitted: true, dealer_application_date: new Date().toISOString() });
+                            await base44.functions.invoke('notifyAdminsOfApplication', {
+                              applicant_user_id: user?.id,
+                              applicant_name: user?.full_name,
+                              applicant_email: user?.email,
+                              application_type: 'collector_dealer',
+                              details: null,
+                            });
+                            await base44.entities.Notification.create({
+                              user_id: user?.id,
+                              type: 'system',
+                              title: 'Collector Dealer Application Received',
+                              message: 'Your application to become a Collector Dealer has been submitted. Our team will review it and be in touch within 1–2 business days.',
+                              link_to_page: 'MyProfile',
+                              read: false,
+                            });
+                            setUser(prev => ({ ...prev, dealer_application_submitted: true, dealer_application_date: new Date().toISOString() }));
+                          } catch (e) {
+                            alert('Something went wrong. Please try again.');
+                          }
                         }
-                      }}
+                      })}
                     >
                       <Landmark className="w-4 h-4" />
                       Apply to Become a Collector Dealer
@@ -1652,6 +1681,21 @@ export default function MyProfile() {
         )}
       </Tabs>
       </div>
+
+      {/* Confirm Dialog */}
+      <AlertDialog open={confirmModal.open} onOpenChange={(open) => setConfirmModal(p => ({ ...p, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmModal.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmModal.message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmModal(p => ({ ...p, open: false }))}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmModal.onConfirm}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <SharedFooter />
     </div>
   );
