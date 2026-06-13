@@ -209,9 +209,9 @@ Deno.serve(async (req) => {
           const subs = await base44.asServiceRole.entities.Subscription.filter({
             user_id: sale.operator_id,
             status: 'active',
-            tier: 'elite',
           });
-          if (subs.length === 0) continue;
+          const isPremiumOrAbove = subs.some(s => ['premium', 'enterprise', 'elite'].includes(s.tier));
+          if (!isPremiumOrAbove) continue;
 
           // Create operator notification
           await base44.asServiceRole.entities.Notification.create({

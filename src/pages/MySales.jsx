@@ -85,7 +85,7 @@ export default function MySales() {
 
       // Check if user is on Elite subscription
       const subs = await base44.entities.Subscription.filter({ user_id: userData.id });
-      if (subs.length > 0 && subs[0].tier === 'elite') setIsElite(true);
+      if (subs.length > 0 && ['premium', 'enterprise', 'elite'].includes(subs[0].tier)) setIsElite(true);
     } catch (error) {
       console.error('Error loading sales:', error);
     } finally {
