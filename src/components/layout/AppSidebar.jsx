@@ -181,7 +181,7 @@ export const ALL_NAV_ITEMS = [
 // Subgroup ordering within Admin
 const ADMIN_SUBGROUP_ORDER = [
   '🖥 Command Center',
-  '👥 Users & Owners',
+  '👥 Users & Operators',
   '📋 Leads & CRM',
   '🏠 Sales & Territory',
   '🔍 SEO & Content',
