@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, AlertCircle, CheckCircle, User, TrendingUp, Database, Zap, Loader, ChevronLeft, ChevronRight, Eye, FileSpreadsheet, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { exportToFacebookAudienceCSV } from '@/lib/facebookAudienceExport';
 import ProbateLeadBatchImporter from '@/components/propstream/ProbateLeadBatchImporter';
 import LeadDetailModal from '@/components/leads/LeadDetailModal';
@@ -86,7 +87,10 @@ export default function AdminLeadsPropstream() {
     setScoring(true);
     try {
       const result = await base44.functions.invoke('scoreLeads', {});
+      toast.success(result?.data?.message || `${result?.data?.scored || 0} leads scored`);
       loadData();
+    } catch (err) {
+      toast.error('Scoring failed. Please try again.');
     } finally {
       setScoring(false);
     }
