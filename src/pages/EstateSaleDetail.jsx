@@ -8,9 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import MessageModal from '@/components/messaging/MessageModal';
-import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
-import ConsumerHeader from '@/components/layout/ConsumerHeader';
-import UniversalHeader from '@/components/layout/UniversalHeader';
+
 import SharedFooter from '@/components/layout/SharedFooter';
 import SignTheListButton from '@/components/estate/SignTheListButton';
 import { 
@@ -422,12 +420,6 @@ export default function EstateSaleDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      {isAuthenticated && currentUser ? (
-        <ConsumerHeader user={currentUser} />
-      ) : (
-        <UniversalHeader user={null} isAuthenticated={false} />
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content - Left Column */}
