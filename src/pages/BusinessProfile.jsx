@@ -33,7 +33,7 @@ export default function BusinessProfile() {
         const user = await base44.auth.me();
         setCurrentUser(user);
       } catch (error) {
-        // User not logged in
+        // User not logged in — guest visitor
       }
 
       const urlParams = new URLSearchParams(window.location.search);
@@ -44,36 +44,40 @@ export default function BusinessProfile() {
         return;
       }
 
-      // Load business user data
-      const users = await base44.entities.User.list();
-      const businessUser = users.find(u => u.id === businessId);
+      // Load business user data — fall back to getOperatorsWithLocation if User.list() fails (guest)
+      let businessUser = null;
+      try {
+        const users = await base44.entities.User.list();
+        businessUser = users.find(u => u.id === businessId);
+      } catch (e) {
+        // RLS blocks User.list() for guests — use backend function instead
+        const res = await base44.functions.invoke('getOperatorsWithLocation', {});
+        const operators = res.data || [];
+        businessUser = operators.find(op => op.id === businessId);
+      }
 
       if (!businessUser) {
-        window.location.href = createPageUrl('Home');
+        setLoading(false);
         return;
       }
 
       setBusiness(businessUser);
 
-      // Load related estate sales - check for any Estate Sale Company Owner role
-      const allSales = await base44.entities.EstateSale.list('-created_date', 100);
+      // Load related estate sales
+      let allSales = [];
+      try {
+        allSales = await base44.entities.EstateSale.list('-created_date', 100);
+      } catch (e) {
+        allSales = [];
+      }
       const operatorSales = allSales.filter(s => s.operator_id === businessId);
       
-      console.log('Loading sales for business:', businessId);
-      console.log('Total sales found:', allSales.length);
-      console.log('Estate Sale Company Owner sales found:', operatorSales.length);
-      console.log('Estate Sale Company Owner sales:', operatorSales);
-      
-      // Separate current and past sales
       const current = operatorSales.filter(s => 
         s.status === 'upcoming' || s.status === 'active' || s.status === 'draft'
       );
       const past = operatorSales.filter(s => 
         s.status === 'completed' || s.status === 'cancelled'
       );
-      
-      console.log('Current sales:', current.length);
-      console.log('Past sales:', past.length);
       
       setCurrentSales(current);
       setPastSales(past);
