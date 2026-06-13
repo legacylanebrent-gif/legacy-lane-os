@@ -1071,7 +1071,7 @@ export default function Home() {
             <div className="text-center mb-8 sm:mb-12">
               <Badge className="mb-4 bg-cyan-600 text-white text-sm px-4 py-1">Local Featured</Badge>
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-slate-900 mb-3">
-                📍 Nearby Treasures
+                📍 Locally Featured Sales{userZipCode ? ` near ${userZipCode}` : ''}
               </h3>
               <p className="text-lg sm:text-xl text-slate-600">Premium estate sales in your community</p>
             </div>
