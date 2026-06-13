@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+const CATEGORIES = [
+    'Furniture', 'Jewelry', 'Art', 'Antiques', 'Collectibles', 'Electronics',
+    'Clothing & Accessories', 'Books & Media', 'China & Porcelain', 'Glassware',
+    'Tools & Hardware', 'Sporting Goods', 'Toys & Games', 'Musical Instruments',
+    'Coins & Currency', 'Rugs & Textiles', 'Kitchen & Dining', 'Lighting & Lamps',
+    'Mid-Century Modern', 'Garden & Outdoor', 'Vehicles', 'Firearms',
+    'Holiday & Seasonal', 'Victorian Era', 'Vintage Fashion', 'Watches',
+    'Cameras & Photography', 'Vinyl Records', 'Comics', 'Other'
+];
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -18,19 +28,22 @@ Deno.serve(async (req) => {
             name: p.item_name || 'Unknown Item',
         })).slice(0, 30);
 
-        const prompt = `Analyze this buyer's past estate sale / marketplace purchase history and suggest 5-8 specific items or categories they should add to their hunt list. Base suggestions on patterns in what they've already bought — e.g. if they bought mid-century furniture, suggest other mid-century pieces or categories.
+        const prompt = `Analyze this buyer's past estate sale / marketplace purchase history and suggest 5-8 specific items or categories they should add to their hunt list. Base suggestions on patterns in what they've already bought.
 
 Past purchases:
 ${JSON.stringify(purchaseList, null, 2)}
 
+IMPORTANT: For the "category" field, you MUST use one of these exact values:
+${CATEGORIES.join(', ')}
+
 Return a JSON array of suggestions. Each suggestion has:
-- "title": short item name or category name (e.g. "Mid-Century Credenza", "Art Deco Jewelry", "Vintage Pyrex")
-- "category": high-level category (e.g. "Furniture", "Jewelry", "Glassware", "Art")
-- "reason": one short sentence explaining why based on their history (e.g. "You bought a mid-century dining table — a matching credenza would complement it")
+- "title": short item name or category name (e.g. "Mid-Century Credenza", "Art Deco Jewelry", "Vintage Pyrex", "Children's Classic Book Series")
+- "category": MUST be one of the categories listed above (e.g. for a book, use "Books & Media"; for a necklace, use "Jewelry")
+- "reason": one short sentence explaining why based on their history
 - "subcategory": optional more specific subcategory
 - "era": optional era like "Mid-Century", "Victorian", "Art Deco"
 
-Make suggestions specific and actionable, not generic.`;
+Make suggestions specific and actionable.`;
 
         const result = await base44.integrations.Core.InvokeLLM({
             prompt,
