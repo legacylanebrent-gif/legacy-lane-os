@@ -139,6 +139,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Revenue',                label: 'Revenue Projections',    icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',     icon: BarChart3,       group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'EstimatedPNL',          label: 'Estimated P&L',          icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'ScalabilityManager',   label: 'Scalability Manager',    icon: Shield,          group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'FutureOperatorsAnalytics', label: 'Future Ops Revenue',   icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'PlatformExpenses',       label: 'Platform Expenses',      icon: Banknote,        group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'OperatorPayoutWallet', label: 'Operator Payout Wallet',  icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
