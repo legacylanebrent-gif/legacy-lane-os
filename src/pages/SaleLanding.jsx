@@ -119,10 +119,10 @@ export default function SaleLanding() {
           <p className="text-slate-600 mb-6">
             This sale doesn't have any items listed in the marketplace yet.
           </p>
-          <Link to={createPageUrl('Home')}>
+          <Link to={sale ? (createPageUrl('EstateSaleDetail') + '?id=' + sale.id) : createPageUrl('Home')}>
             <Button className="bg-orange-600 hover:bg-orange-700">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Browse Other Sales
+              Back to Sale
             </Button>
           </Link>
         </Card>
