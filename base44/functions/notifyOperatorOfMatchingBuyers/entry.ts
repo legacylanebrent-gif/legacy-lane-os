@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
                 user_id: sale.operator_id,
                 type: 'system',
                 title: `👥 ${topMatches.length} Buyer${topMatches.length > 1 ? 's' : ''} Matched: "${sale.title}"`,
-                message: `We found ${topMatches.length} potential buyer${topMatches.length > 1 ? 's' : ''} actively hunting for items in your sale "${sale.title}".\n\nTop matches:\n${matchDetails}\n\nContact these buyers to close deals before the sale!`,
+                message: `We found ${topMatches.length} potential buyer${topMatches.length > 1 ? 's' : ''} actively hunting for items in your sale "${sale.title}".\n\nTop matches:\n${matchDetails}\n\nClick to message about this item.`,
                 link_to_page: 'MySales',
                 link_params: '',
                 read: false,

@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
             user_id: wantedItem.buyer_id,
             type: 'system',
             title: `🎯 Match Found: ${wantedItem.title}`,
-            message: `${previewText}\n\n${matchCount} potential match${matchCount > 1 ? 'es' : ''} found:\n${matchDetails}\n\nWe re-scan daily for new matches.`,
+            message: `${previewText}\n\n${matchCount} potential match${matchCount > 1 ? 'es' : ''} found:\n${matchDetails}\n\nClick to message about this item.`,
             link_to_page: bestMatch.type === 'marketplace' ? 'MarketplaceItemDetail' : bestMatch.type === 'estate_sale' ? 'EstateSaleDetail' : 'BrowseItems',
             link_params: bestMatch.type === 'estate_sale'
               ? `id=${bestMatch.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}`
@@ -237,7 +237,7 @@ Deno.serve(async (req) => {
                     user_id: sale.operator_id,
                     type: 'system',
                     title: `👤 Buyer Hunting: "${wantedItem.title}"`,
-                    message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Contact the buyer to close a deal before your sale!`,
+                    message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Click to message about this item.`,
                     link_to_page: 'EstateSaleDetail',
                     link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}&contactBuyerId=${wantedItem.buyer_id}&contactBuyerName=${encodeURIComponent(wantedItem.buyer_name || '')}`,
                     read: false,
