@@ -59,6 +59,7 @@ export default function EstateSaleDetail() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [wantedItemTitle, setWantedItemTitle] = useState('');
 
   useEffect(() => {
     loadSaleData();
@@ -75,13 +76,14 @@ export default function EstateSaleDetail() {
       }
 
       // Check authentication
+      let authUser = null;
       try {
         const authenticated = await base44.auth.isAuthenticated();
         setIsAuthenticated(authenticated);
         
         if (authenticated) {
-          const user = await base44.auth.me();
-          setCurrentUser(user);
+          authUser = await base44.auth.me();
+          setCurrentUser(authUser);
           
           // Check if sale is in route
           const route = JSON.parse(localStorage.getItem('estateRoute') || '[]');
@@ -126,7 +128,15 @@ export default function EstateSaleDetail() {
         } catch (error) {
           console.log('Could not check follow status');
         }
-      }
+
+        // Auto-open message modal if coming from ISO match notification
+        const autoMessage = urlParams.get('autoMessage');
+        const wantedTitle = urlParams.get('wantedItemTitle');
+        if (autoMessage === '1' && wantedTitle && authUser) {
+          setWantedItemTitle(decodeURIComponent(wantedTitle));
+          setMessageModalOpen(true);
+        }
+        }
 
       // Increment view count
       try {
@@ -999,7 +1009,7 @@ export default function EstateSaleDetail() {
           open={messageModalOpen}
           onClose={() => setMessageModalOpen(false)}
           recipient={operator || { id: sale.operator_id, full_name: sale.operator_name || 'Estate Sale Company Owner' }}
-          relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title }}
+          relatedEntity={{ type: 'EstateSale', id: sale.id, title: sale.title, name: wantedItemTitle ? `Inquiry: ${wantedItemTitle} — ${sale.title}` : `Re: ${sale.title}` }}
           savedImages={savedImages}
           allImages={sale.images}
         />

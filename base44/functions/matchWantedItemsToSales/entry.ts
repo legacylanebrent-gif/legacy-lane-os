@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
               title: sale.title,
               score,
               matchReasons,
-              url: `EstateSaleDetail?id=${sale.id}`,
+              url: `EstateSaleDetail?id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}`,
               city: sale.property_address?.city,
               state: sale.property_address?.state,
               saleDate: sale.sale_dates?.[0]?.date,
@@ -203,7 +203,9 @@ Deno.serve(async (req) => {
             title: `🎯 Match Found: ${wantedItem.title}`,
             message: `${previewText}\n\n${matchCount} potential match${matchCount > 1 ? 'es' : ''} found:\n${matchDetails}\n\nWe re-scan daily for new matches.`,
             link_to_page: bestMatch.type === 'marketplace' ? 'MarketplaceItemDetail' : bestMatch.type === 'estate_sale' ? 'EstateSaleDetail' : 'BrowseItems',
-            link_params: bestMatch.id ? `id=${bestMatch.id}` : '',
+            link_params: bestMatch.type === 'estate_sale'
+              ? `id=${bestMatch.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}`
+              : bestMatch.id ? `id=${bestMatch.id}` : '',
             read: false,
             related_entity_type: 'WantedItem',
             related_entity_id: wantedItem.id,
