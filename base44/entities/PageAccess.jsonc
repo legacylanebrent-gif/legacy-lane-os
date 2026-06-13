@@ -16,7 +16,8 @@
         "investor",
         "vendor",
         "consignor",
-        "consumer"
+        "consumer",
+        "collector_dealer"
       ],
       "description": "Account type this configuration applies to"
     },

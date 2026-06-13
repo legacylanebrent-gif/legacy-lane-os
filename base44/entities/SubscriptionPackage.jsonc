@@ -11,7 +11,8 @@
         "real_estate_agent",
         "estate_sale_operator",
         "biz_in_a_box",
-        "reseller"
+        "reseller",
+        "collector_dealer"
       ],
       "description": "Account type this package is for"
     },
