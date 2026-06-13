@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { STATE_REGIONS } from '@/components/data/StateRegions';
 import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { base44 } from '@/api/base44Client';
 import { ArrowLeft, MapPin, Building2 } from 'lucide-react';
 import { useSEO } from '@/hooks/useSEO';
@@ -170,6 +171,7 @@ export default function StateCities() {
           </Card>
         )}
       </div>
+      <SharedFooter />
     </div>
   );
 }

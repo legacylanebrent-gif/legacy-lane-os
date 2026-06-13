@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -418,14 +419,7 @@ export default function ReferralLanding() {
         </Card>
       </div>
 
-      {/* Footer */}
-      <div className="bg-slate-800 text-white py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-slate-400">
-            © 2024 Legacy Lane. All rights reserved.
-          </p>
-        </div>
-      </div>
+      <SharedFooter />
     </div>
   );
 }

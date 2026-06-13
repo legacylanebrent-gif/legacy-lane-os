@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import MessageModal from '@/components/messaging/MessageModal';
 import UniversalHeader from '@/components/layout/UniversalHeader';
+import SharedFooter from '@/components/layout/SharedFooter';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { format } from 'date-fns';
 
@@ -524,46 +525,7 @@ export default function ItemDetail() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <img src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png" alt="logo" className="h-14 w-14 object-contain" />
-                <div>
-                  <h3 className="text-2xl font-serif font-bold">EstateSalen.com</h3>
-                  <p className="text-sm text-orange-400">Estate Sale Finder</p>
-                </div>
-              </div>
-              <p className="text-slate-400 text-lg mb-6">
-                Discover amazing estate sales and find treasures near you. Connect with trusted estate sale companies nationwide.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><Link to={createPageUrl('Home')} className="text-slate-400 hover:text-white transition-colors">Find Sales</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
-              <ul className="space-y-2">
-                <li><Link to={createPageUrl('OperatorPackages')} className="text-slate-400 hover:text-white transition-colors">List Your Company</Link></li>
-                <li><Link to={createPageUrl('StartYourCompany')} className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-800 pt-8 text-center">
-            <p className="text-slate-500">
-              © {new Date().getFullYear()} Legacy Lane. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SharedFooter />
     </div>
   );
 }
