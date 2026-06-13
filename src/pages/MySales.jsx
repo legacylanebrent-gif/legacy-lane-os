@@ -445,7 +445,7 @@ export default function MySales() {
                               {matchingSaleId === sale.id ? 'Matching...' : 'Buyer Match'}
                             </Button>
                           )}
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-teal-500 text-black hover:bg-teal-50"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Worksheet</Link></Button>)}
+                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-teal-500 text-black hover:bg-teal-50"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Sale Transactions</Link></Button>)}
                           <Button variant="outline" size="sm" asChild className="w-full border-purple-500 text-black hover:bg-purple-50"><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1" />Inventory</Link></Button>
                           <Button variant="outline" size="sm" asChild className="w-full border-cyan-500 text-black hover:bg-cyan-50"><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1" />Attendance</Link></Button>
                           {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-amber-500 text-black hover:bg-amber-50"><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Tasks</Link></Button>)}
