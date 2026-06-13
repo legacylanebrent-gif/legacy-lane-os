@@ -26,6 +26,14 @@ import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDispla
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
+const formatTimeAMPM = (timeStr) => {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+};
+
 export default function SaleEditor() {
   const navigate = useNavigate();
   const [saleId, setSaleId] = useState(null);
@@ -1108,7 +1116,7 @@ Return ONLY the description text, no extra commentary.`
                       <div className="text-sm">
                         <p className="font-medium text-slate-900">{saleDate.date}</p>
                         {(saleDate.start_time || saleDate.end_time) && (
-                          <p className="text-slate-600">{saleDate.start_time} - {saleDate.end_time}</p>
+                          <p className="text-slate-600">{formatTimeAMPM(saleDate.start_time)} - {formatTimeAMPM(saleDate.end_time)}</p>
                         )}
                       </div>
                       <button onClick={() => handleRemoveDate(index)} className="text-red-600 hover:text-red-700 p-1">
