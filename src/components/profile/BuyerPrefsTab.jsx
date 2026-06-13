@@ -65,11 +65,41 @@ export default function BuyerPrefsTab({ user }) {
 
   const loadData = async () => {
     try {
-      const [purchasesData, wantedData] = await Promise.all([
+      const [txns, marketplacePurchases, wantedData] = await Promise.all([
         base44.entities.Transaction.filter({ created_by_id: user.id, sale_id: { $ne: 'user_purchase' } }, '-created_date', 50),
+        base44.entities.Purchase.filter({ buyer_id: user.id }, '-created_date', 50),
         base44.entities.WantedItem.filter({ buyer_id: user.id }, '-created_date', 50),
       ]);
-      setPurchases(purchasesData);
+
+      // Normalize Transaction → unified purchase shape
+      const unifiedTxns = txns.map(t => ({
+        id: t.id,
+        item_name: t.item_name || 'Item',
+        price: t.price || 0,
+        total: t.total || t.price || 0,
+        created_date: t.created_date,
+        source: 'Transaction',
+        payment_method: t.payment_method,
+        quantity: t.quantity || 1,
+      }));
+
+      // Normalize Purchase → unified purchase shape
+      const unifiedMp = marketplacePurchases.map(p => ({
+        id: p.id,
+        item_name: p.marketplace_item_id || 'Marketplace Item',
+        price: p.final_price || 0,
+        total: p.final_price || 0,
+        created_date: p.created_date,
+        source: 'Marketplace',
+        payment_method: null,
+        quantity: 1,
+      }));
+
+      const merged = [...unifiedTxns, ...unifiedMp].sort((a, b) =>
+        new Date(b.created_date) - new Date(a.created_date)
+      );
+
+      setPurchases(merged);
       setWantedItems(wantedData);
     } catch (e) {
       console.error('Error loading buyer prefs:', e);
@@ -484,7 +514,12 @@ export default function BuyerPrefsTab({ user }) {
                         <Package className="w-4 h-4 text-orange-600" />
                       </div>
                       <div>
+                      <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{p.item_name || 'Item'}</p>
+                        <Badge className={p.source === 'Marketplace' ? 'bg-purple-100 text-purple-700 text-[10px]' : 'bg-cyan-100 text-cyan-700 text-[10px]'}>
+                          {p.source === 'Marketplace' ? 'Marketplace' : 'Sale'}
+                        </Badge>
+                      </div>
                         <div className="flex items-center gap-2 text-xs text-slate-400">
                           <Clock className="w-3 h-3" />
                           {formatDate(p.created_date)}
