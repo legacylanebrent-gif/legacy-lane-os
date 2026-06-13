@@ -66,7 +66,7 @@ export default function BuyerPrefsTab({ user }) {
   const loadData = async () => {
     try {
       const [purchasesData, wantedData] = await Promise.all([
-        base44.entities.Purchase.filter({ buyer_id: user.id }, '-created_date', 50),
+        base44.entities.Transaction.filter({ created_by_id: user.id, sale_id: { $ne: 'user_purchase' } }, '-created_date', 50),
         base44.entities.WantedItem.filter({ buyer_id: user.id }, '-created_date', 50),
       ]);
       setPurchases(purchasesData);
@@ -200,66 +200,6 @@ export default function BuyerPrefsTab({ user }) {
 
   return (
     <div className="space-y-6">
-      {/* ── Past Purchases Directory ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5" />
-            Past Purchases
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {purchases.length > 0 ? (
-            <>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="text-center p-3 bg-orange-50 rounded-lg">
-                  <div className="text-xl font-bold text-orange-700">{purchases.length}</div>
-                  <div className="text-xs text-slate-500">Purchases</div>
-                </div>
-                <div className="text-center p-3 bg-cyan-50 rounded-lg">
-                  <div className="text-xl font-bold text-cyan-700">
-                    ${purchases.reduce((s, p) => s + (p.final_price || 0), 0).toLocaleString()}
-                  </div>
-                  <div className="text-xs text-slate-500">Total Spent</div>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <div className="text-xl font-bold text-purple-700">{purchases.length}</div>
-                  <div className="text-xs text-slate-500">Items</div>
-                </div>
-              </div>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
-                {purchases.map(p => (
-                  <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Package className="w-4 h-4 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{p.marketplace_item_id || 'Item'}</p>
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                          <Clock className="w-3 h-3" />
-                          {formatDate(p.created_date)}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600 text-sm">{formatCurrency(p.final_price)}</p>
-                      <p className="text-xs text-slate-400 capitalize">{(p.status || '').replace(/_/g, ' ').toLowerCase()}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8">
-              <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-500 text-sm">No purchases recorded yet</p>
-              <p className="text-xs text-slate-400 mt-1">Your estate sale and marketplace purchases will appear here</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* ── AI-Guided Hunt Builder ── */}
       <AgentGuidedHunt
         user={user}
@@ -504,6 +444,73 @@ export default function BuyerPrefsTab({ user }) {
               </Button>
             </div>
           ) : null}
+        </CardContent>
+      </Card>
+
+      {/* ── Past Purchases ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5" />
+            Past Purchases
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {purchases.length > 0 ? (
+            <>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-3 bg-orange-50 rounded-lg">
+                  <div className="text-xl font-bold text-orange-700">{purchases.length}</div>
+                  <div className="text-xs text-slate-500">Purchases</div>
+                </div>
+                <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                  <div className="text-xl font-bold text-cyan-700">
+                    ${purchases.reduce((s, p) => s + (p.total || p.price || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-slate-500">Total Spent</div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <div className="text-xl font-bold text-purple-700">
+                    {purchases.reduce((s, p) => s + (p.quantity || 1), 0)}
+                  </div>
+                  <div className="text-xs text-slate-500">Items</div>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {purchases.map(p => (
+                  <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Package className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{p.item_name || 'Item'}</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(p.created_date)}
+                          {p.payment_method && (
+                            <span className="text-slate-300">• {p.payment_method.replace('_', ' ')}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600 text-sm">{formatCurrency(p.total || p.price)}</p>
+                      {p.quantity > 1 && (
+                        <p className="text-xs text-slate-400">{p.quantity}x @ {formatCurrency(p.price)}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-slate-500 text-sm">No purchases recorded yet</p>
+              <p className="text-xs text-slate-400 mt-1">Your estate sale and marketplace purchases will appear here</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
