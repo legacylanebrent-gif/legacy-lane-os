@@ -97,7 +97,7 @@ const CATEGORIES = [
       { feature: 'Lead capture from website, ads & finder', us: true, them: false },
       { feature: 'Priority access to client leads', us: true, them: true },
       { feature: 'Pre-probate territory leads', us: true, them: false },
-      { feature: 'Facebook ads for lead generation (we pay)', us: true, them: false },
+      { feature: 'Facebook ads for lead generation (EstateSalen.com pays to promote)', us: true, them: false },
       { feature: 'Lead scoring & routing', us: true, them: false },
       { feature: 'Territory heatmap analytics', us: true, them: false },
       { feature: 'Full CRM (contacts, pipeline, referrals)', us: true, them: false },
