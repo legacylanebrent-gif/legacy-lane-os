@@ -27,6 +27,7 @@ const REVENUE_STREAMS = [
   { key: "features", label: "Featured Listings", color: "#ec4899" },
   { key: "email_sms", label: "Email/SMS Campaigns", color: "#14b8a6" },
   { key: "website_hosting", label: "Website Hosting", color: "#6366f1" },
+  { key: "dealer_subs", label: "Collector Dealer Subscriptions", color: "#eab308" },
   { key: "other", label: "Other", color: "#64748b" },
 ];
 

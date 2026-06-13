@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone, Globe } from 'lucide-react';
+import { Building2, MapPin, Package, TrendingUp, DollarSign, Users, ShoppingBag, Award, Sparkles, Megaphone, Globe, Store } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, LineChart, Line } from 'recharts';
 
 const COLORS = ['#0891b2', '#f97316', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#14b8a6'];
@@ -72,6 +72,11 @@ export default function Revenue() {
   const [websiteNewPerMonth, setWebsiteNewPerMonth] = useState(() => loadValue('websiteNewPerMonth', 10));
   const [websiteGrowthAfterY1, setWebsiteGrowthAfterY1] = useState(() => loadValue('websiteGrowthAfterY1', 5));
 
+  // Dealer Subscription Inputs
+  const [dealerSubPrice, setDealerSubPrice] = useState(() => loadValue('dealerSubPrice', 147));
+  const [dealerPctOfOps, setDealerPctOfOps] = useState(() => loadValue('dealerPctOfOps', 5)); // % of operators who are dealers
+  const [dealerSubGrowth, setDealerSubGrowth] = useState(() => loadValue('dealerSubGrowth', 3));
+
   // Advertising Inputs
   const [adBasicPrice, setAdBasicPrice] = useState(() => loadValue('adBasicPrice', 29));
   const [adProPrice, setAdProPrice] = useState(() => loadValue('adProPrice', 49));
@@ -94,6 +99,7 @@ export default function Revenue() {
       nationalFeaturePrice, localFeaturePrice, featureGrowth,
       websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1,
       adBasicPrice, adProPrice, adPremiumPrice, adGrowth, citiesPerOperator,
+      dealerSubPrice, dealerPctOfOps, dealerSubGrowth,
     };
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`revenue_proj_${key}`, JSON.stringify(value));
@@ -106,6 +112,7 @@ export default function Revenue() {
     nationalFeaturePrice, localFeaturePrice, featureGrowth,
     websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1,
     adBasicPrice, adProPrice, adPremiumPrice, adGrowth, citiesPerOperator,
+    dealerSubPrice, dealerPctOfOps, dealerSubGrowth,
   ]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -191,10 +198,16 @@ export default function Revenue() {
   }
   const websiteTotalProjections = websiteSetupProjections.map((s, i) => s + websiteRecurringProjections[i]);
 
+  // Dealer subs: dealerPctOfOps% of operators × monthly dealer sub price, grows at dealerSubGrowth%
+  const dealerSubProjections = operatorCounts.map((count, i) => 
+    Math.round(count * (dealerPctOfOps / 100)) * dealerSubPrice * Math.pow(1 + dealerSubGrowth / 100, i)
+  );
+
   // Total
   const totalProjections = operatorProjections.map((_, i) =>
     operatorProjections[i] + vendorSubProjections[i] + marketplaceProjections[i] +
-    referralProjections[i] + featureProjections[i] + adProjections[i] + websiteTotalProjections[i]
+    referralProjections[i] + featureProjections[i] + adProjections[i] + websiteTotalProjections[i] +
+    dealerSubProjections[i]
   );
 
   const year1Total = getYearProjection(totalProjections, 1);
@@ -211,6 +224,7 @@ export default function Revenue() {
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
     Websites: Math.round(websiteTotalProjections[i]),
+    'Dealer Subs': Math.round(dealerSubProjections[i]),
     Total: Math.round(totalProjections[i]),
     'Estate Sale Company Owner Count': operatorCounts[i],
   }));
@@ -223,6 +237,7 @@ export default function Revenue() {
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
     { name: 'Websites', value: getYearProjection(websiteTotalProjections, 3) },
+    { name: 'Dealer Subs', value: getYearProjection(dealerSubProjections, 3) },
   ];
 
   return (
@@ -300,6 +315,7 @@ export default function Revenue() {
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
                 <Area type="monotone" dataKey="Websites" stackId="1" stroke="#6366f1" fill="#6366f1" />
+                <Area type="monotone" dataKey="Dealer Subs" stackId="1" stroke="#eab308" fill="#eab308" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -356,7 +372,7 @@ export default function Revenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-7 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
               <TabsTrigger value="operators" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 operators
@@ -365,6 +381,10 @@ export default function Revenue() {
                 <Users className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Vendor Subs</span>
                 <span className="sm:hidden">Vendor</span>
+              </TabsTrigger>
+              <TabsTrigger value="dealerSubs" className="whitespace-nowrap flex-shrink-0">
+                <Store className="w-4 h-4 mr-1" />
+                Dealer Subs
               </TabsTrigger>
               <TabsTrigger value="marketplace" className="whitespace-nowrap flex-shrink-0">
                 <ShoppingBag className="w-4 h-4 mr-1" />
@@ -736,6 +756,66 @@ export default function Revenue() {
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">${(getYearProjection(adProjections, 10) / 1000000).toFixed(2)}M</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Dealer Subs Tab */}
+          <TabsContent value="dealerSubs">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Store className="w-5 h-5 text-yellow-600" />
+                  Collector Dealer Subscription Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-1">
+                  <div className="text-sm text-slate-700">
+                    <strong>Model:</strong> {dealerPctOfOps}% of operators are also dealers, paying ${dealerSubPrice}/mo with {dealerSubGrowth}% monthly growth.
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Month 1 Dealers:</strong> {Math.round(operatorCounts[0] * (dealerPctOfOps / 100)).toLocaleString()} &nbsp;→&nbsp;
+                    <strong>Month 36:</strong> {Math.round(operatorCounts[35] * (dealerPctOfOps / 100)).toLocaleString()}
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">
+                    <strong>Month 1 Revenue:</strong> ${Math.round(operatorCounts[0] * (dealerPctOfOps / 100) * dealerSubPrice).toLocaleString()}/mo
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>Dealer Monthly Price ($)</Label>
+                    <Input type="number" value={dealerSubPrice} onChange={(e) => setDealerSubPrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>% of Operators Who Are Dealers</Label>
+                    <Input type="number" value={dealerPctOfOps} onChange={(e) => setDealerPctOfOps(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={dealerSubGrowth} onChange={(e) => setDealerSubGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">${(getYearProjection(dealerSubProjections, 1) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">${(getYearProjection(dealerSubProjections, 3) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">${(getYearProjection(dealerSubProjections, 5) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">${(getYearProjection(dealerSubProjections, 10) / 1000000).toFixed(2)}M</div>
                   </div>
                 </div>
               </CardContent>

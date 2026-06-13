@@ -334,10 +334,15 @@ export default function ComprehensiveRevenue() {
   // Create Estate Sale Company Owner projections (assuming current base grows)
   const operatorProjections = Array(120).fill(currentOperatorMonthlyRevenue);
 
+  // Dealer subscription revenue: assume flat $147/mo per dealer account (use 5% of operator count as dealers)
+  const estimatedDealerCount = Math.round(totalOperators * 0.05);
+  const dealerSubRevenue = estimatedDealerCount * 147;
+  const dealerSubProjections = calculateProjections(dealerSubRevenue, 3, 120);
+
   const totalProjections = operatorProjections.map((_, i) => 
     operatorProjections[i] + vendorSubProjections[i] +
     marketplaceProjections[i] + agentTotalProjections[i] + referralProjections[i] + featureProjections[i] + adProjections[i] +
-    websiteTotalProjections[i]
+    websiteTotalProjections[i] + dealerSubProjections[i]
   );
 
   const chartData = Array.from({ length: 36 }, (_, i) => ({
@@ -350,6 +355,7 @@ export default function ComprehensiveRevenue() {
     Features: Math.round(featureProjections[i]),
     Advertising: Math.round(adProjections[i]),
     Websites: Math.round(websiteTotalProjections[i]),
+    'Dealer Subs': Math.round(dealerSubProjections[i]),
     Total: Math.round(totalProjections[i])
   }));
 
@@ -367,6 +373,7 @@ export default function ComprehensiveRevenue() {
     { name: 'Features', value: getYearProjection(featureProjections, 3) },
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
     { name: 'Websites', value: getYearProjection(websiteTotalProjections, 3) },
+    { name: 'Dealer Subs', value: getYearProjection(dealerSubProjections, 3) },
   ];
 
   const stateData = Object.entries(stateCounts)
@@ -461,6 +468,7 @@ export default function ComprehensiveRevenue() {
                 <Area type="monotone" dataKey="Features" stackId="1" stroke="#3b82f6" fill="#3b82f6" />
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
                 <Area type="monotone" dataKey="Websites" stackId="1" stroke="#6366f1" fill="#6366f1" />
+                <Area type="monotone" dataKey="Dealer Subs" stackId="1" stroke="#eab308" fill="#eab308" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
