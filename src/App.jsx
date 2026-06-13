@@ -88,6 +88,7 @@ import PlatformAds from './pages/PlatformAds';
 import PlatformSEODashboard from './pages/PlatformSEODashboard.jsx';
 import ActualRevenue from './pages/ActualRevenue';
 import EstimatedPNL from './pages/EstimatedPNL';
+import ScalabilityManager from './pages/ScalabilityManager';
 import MySalesGuide from './pages/MySalesGuide';
 import CityHubPage from './pages/CityHubPage';
 import CategoryHubPage from './pages/CategoryHubPage';
@@ -285,6 +286,7 @@ const AuthenticatedApp = () => {
       <Route path="/PlatformSEODashboard" element={<LayoutWrapper currentPageName="PlatformSEODashboard"><PlatformSEODashboard /></LayoutWrapper>} />
       <Route path="/ActualRevenue" element={<LayoutWrapper currentPageName="ActualRevenue"><ActualRevenue /></LayoutWrapper>} />
       <Route path="/EstimatedPNL" element={<LayoutWrapper currentPageName="EstimatedPNL"><EstimatedPNL /></LayoutWrapper>} />
+      <Route path="/ScalabilityManager" element={<LayoutWrapper currentPageName="ScalabilityManager"><ScalabilityManager /></LayoutWrapper>} />
       <Route path="/MySalesGuide" element={<LayoutWrapper currentPageName="MySalesGuide"><MySalesGuide /></LayoutWrapper>} />
 
       {/* ── Knowledge Graph Public Routes ── */}
