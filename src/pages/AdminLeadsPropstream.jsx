@@ -39,6 +39,7 @@ export default function AdminLeadsPropstream() {
   const [scoreRangeFilter, setScoreRangeFilter] = useState('');
   const [stateFilter, setStateFilter] = useState('');
   const [situationFilter, setSituationFilter] = useState('');
+  const [countyFilter, setCountyFilter] = useState('');
   const [sortField, setSortField] = useState('score');
   const [sortDir, setSortDir] = useState('desc');
   const [form, setForm] = useState({
@@ -107,8 +108,9 @@ export default function AdminLeadsPropstream() {
   const assigned = leads.filter(l => l.routed_to && !l.converted).length;
   const converted = leads.filter(l => l.converted).length;
 
-  // Get unique states for filter
+  // Get unique states and counties for filters
   const uniqueStates = [...new Set(leads.map(l => l.property_state).filter(Boolean))].sort();
+  const uniqueCounties = [...new Set(leads.map(l => l.property_county).filter(Boolean))].sort();
 
   const filtered = leads.filter(lead => {
     const q = search.toLowerCase();
@@ -126,6 +128,7 @@ export default function AdminLeadsPropstream() {
       if (scoreRangeFilter === 'low' && s >= 40) return false;
     }
     if (stateFilter && lead.property_state !== stateFilter) return false;
+    if (countyFilter && lead.property_county !== countyFilter) return false;
     if (situationFilter && lead.situation !== situationFilter) return false;
     return true;
   }).sort((a, b) => {
@@ -139,11 +142,12 @@ export default function AdminLeadsPropstream() {
     setScoreRangeFilter('');
     setStateFilter('');
     setSituationFilter('');
+    setCountyFilter('');
     setSearch('');
     setFilter('unassigned');
   };
 
-  const hasActiveFilters = ownerTypeFilter || scoreRangeFilter || stateFilter || situationFilter;
+  const hasActiveFilters = ownerTypeFilter || scoreRangeFilter || stateFilter || situationFilter || countyFilter;
 
   // Revenue calculations based on filtered leads
   const estatesalenRev = filtered.reduce((sum, l) => sum + (l.estimated_value ? Math.round(l.estimated_value * 0.0035) : 0), 0);
@@ -260,7 +264,7 @@ export default function AdminLeadsPropstream() {
                 </Button>
               )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div>
                 <Label className="text-xs text-slate-500 mb-1">Owner Type</Label>
                 <Select value={ownerTypeFilter} onValueChange={v => setOwnerTypeFilter(v === 'all' ? '' : v)}>
@@ -290,6 +294,16 @@ export default function AdminLeadsPropstream() {
                   <SelectContent className="max-h-48">
                     <SelectItem value="all">All States</SelectItem>
                     {uniqueStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 mb-1">County</Label>
+                <Select value={countyFilter} onValueChange={v => setCountyFilter(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="All Counties" /></SelectTrigger>
+                  <SelectContent className="max-h-48">
+                    <SelectItem value="all">All Counties</SelectItem>
+                    {uniqueCounties.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
