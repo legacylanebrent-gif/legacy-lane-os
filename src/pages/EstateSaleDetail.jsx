@@ -688,8 +688,8 @@ export default function EstateSaleDetail() {
               </Card>
             )}
 
-            {/* Map */}
-            {sale.location && sale.location.lat && sale.location.lng && (
+            {/* Map — only show when address is visible (24h before sale) */}
+            {sale.location && sale.location.lat && sale.location.lng && isSaleAddressVisible(sale) && (
               <Card>
                 <CardContent className="p-0">
                   <MapContainer
