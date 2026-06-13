@@ -90,6 +90,17 @@ export default function BusinessProfile() {
     }
   };
 
+  const formatTimeDisplay = (timeStr) => {
+    if (!timeStr) return null;
+    // If already in 12-hour format like "9:00 AM", return as-is
+    if (/am|pm/i.test(timeStr)) return timeStr;
+    // Convert 24-hour "HH:MM" or "HH:MM:SS" to 12-hour
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
   const getAccountTypeLabel = (type) => {
     const labels = {
       estate_sale_operator: 'Estate Sale Company',
@@ -290,7 +301,12 @@ export default function BusinessProfile() {
                               <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
                               <div>
                                 {sale.sale_dates.map((sd, i) => (
-                                  <span key={i} className="block">{format(new Date(sd.date), 'MMM d, yyyy')}</span>
+                                  <span key={i} className="block">
+                                    {format(new Date(sd.date), 'MMM d, yyyy')}
+                                    {sd.start_time && formatTimeDisplay(sd.start_time) && (
+                                      <> — {formatTimeDisplay(sd.start_time)}{sd.end_time && formatTimeDisplay(sd.end_time) ? ` - ${formatTimeDisplay(sd.end_time)}` : ''}</>
+                                    )}
+                                  </span>
                                 ))}
                               </div>
                             </div>
@@ -346,7 +362,12 @@ export default function BusinessProfile() {
                               <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
                               <div>
                                 {sale.sale_dates.map((sd, i) => (
-                                  <span key={i} className="block">{format(new Date(sd.date), 'MMM d, yyyy')}</span>
+                                  <span key={i} className="block">
+                                    {format(new Date(sd.date), 'MMM d, yyyy')}
+                                    {sd.start_time && formatTimeDisplay(sd.start_time) && (
+                                      <> — {formatTimeDisplay(sd.start_time)}{sd.end_time && formatTimeDisplay(sd.end_time) ? ` - ${formatTimeDisplay(sd.end_time)}` : ''}</>
+                                    )}
+                                  </span>
                                 ))}
                               </div>
                             </div>
