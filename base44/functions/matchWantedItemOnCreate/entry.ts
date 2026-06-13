@@ -85,6 +85,7 @@ Deno.serve(async (req) => {
         sale.special_notes,
         (sale.featured_items || []).map(fi => `${fi.name} ${fi.description}`).join(' '),
         (sale.categories || []).join(' '),
+        (sale.images || []).map(img => `${typeof img === 'object' ? img.name : ''} ${typeof img === 'object' ? img.description : ''}`).join(' '),
       ].filter(Boolean).join(' ');
 
       const { score, matchReasons } = computeRelevance(wantedItem, [saleText]);
