@@ -96,8 +96,15 @@ export default function EstateSaleDetail() {
         console.log('User not logged in');
       }
 
-      const saleData = await base44.entities.EstateSale.list();
-      const foundSale = saleData.find(s => s.id === saleId);
+      // Fetch this specific sale by ID
+      let foundSale = null;
+      try {
+        foundSale = await base44.entities.EstateSale.get(saleId);
+      } catch (e) {
+        console.error('Could not fetch sale by ID, falling back to list');
+        const saleData = await base44.entities.EstateSale.list();
+        foundSale = saleData.find(s => s.id === saleId);
+      }
 
       if (!foundSale) {
         window.location.href = createPageUrl('Home');

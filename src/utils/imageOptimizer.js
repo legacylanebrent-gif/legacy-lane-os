@@ -13,6 +13,7 @@ export const getOptimizedImageUrl = (imageUrl, size = 'thumbnail') => {
   if (imageUrl.includes('base44.com') || imageUrl.includes('media.base44.com')) {
     const sizeParams = {
       thumbnail: '?w=300&h=300&fit=min&auto=compress,format',
+      gallery: '?w=800&h=600&fit=max&auto=compress,format',
       medium: '?w=800&h=600&fit=max&auto=compress,format',
       large: '?w=1920&h=1080&fit=max&auto=compress,format'
     };
