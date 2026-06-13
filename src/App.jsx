@@ -53,7 +53,7 @@ import JoinReferralExchange from './pages/JoinReferralExchange';
 import ReferralDealPipeline from './pages/ReferralDealPipeline';
 import OperatorCommissions from './pages/OperatorCommissions';
 import OperatorWalletDashboard from './pages/OperatorWalletDashboard.jsx';
-import AdminWalletDashboard from './pages/AdminWalletDashboard.jsx';
+import OperatorPayoutWallet from './pages/OperatorPayoutWallet.jsx';
 import AdminAIOperator from './pages/AdminAIOperator.jsx';
 import MarketingPreferences from './pages/MarketingPreferences';
 import CustomerIODashboard from './pages/CustomerIODashboard';
@@ -250,7 +250,7 @@ const AuthenticatedApp = () => {
       <Route path="/ReferralDealPipeline" element={<LayoutWrapper currentPageName="ReferralDealPipeline"><ReferralDealPipeline /></LayoutWrapper>} />
       <Route path="/OperatorCommissions" element={<LayoutWrapper currentPageName="OperatorCommissions"><OperatorCommissions /></LayoutWrapper>} />
       <Route path="/OperatorWalletDashboard" element={<LayoutWrapper currentPageName="OperatorWalletDashboard"><OperatorWalletDashboard /></LayoutWrapper>} />
-      <Route path="/AdminWalletDashboard" element={<LayoutWrapper currentPageName="AdminWalletDashboard"><AdminWalletDashboard /></LayoutWrapper>} />
+      <Route path="/OperatorPayoutWallet" element={<LayoutWrapper currentPageName="OperatorPayoutWallet"><OperatorPayoutWallet /></LayoutWrapper>} />
       <Route path="/AdminAIOperator" element={<LayoutWrapper currentPageName="AdminAIOperator"><AdminAIOperator /></LayoutWrapper>} />
       <Route path="/MarketingPreferences" element={<LayoutWrapper currentPageName="MarketingPreferences"><MarketingPreferences /></LayoutWrapper>} />
       <Route path="/CustomerIODashboard" element={<LayoutWrapper currentPageName="CustomerIODashboard"><CustomerIODashboard /></LayoutWrapper>} />

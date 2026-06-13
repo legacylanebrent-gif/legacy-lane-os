@@ -141,7 +141,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'EstimatedPNL',          label: 'Estimated P&L',          icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'FutureOperatorsAnalytics', label: 'Future Ops Revenue',   icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
   { page: 'PlatformExpenses',       label: 'Platform Expenses',      icon: Banknote,        group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'AdminWalletDashboard',   label: 'Wallet Dashboard',       icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
+  { page: 'OperatorPayoutWallet', label: 'Operator Payout Wallet',  icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
 
   // Admin › Marketing & Ads
   { page: 'AdminCampaigns',         label: 'Campaigns',              icon: Zap,             group: 'Admin', subgroup: '📣 Marketing & Ads' },

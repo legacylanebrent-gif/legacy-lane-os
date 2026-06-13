@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Wallet, AlertTriangle, Lock, CheckCircle, Search } from 'lucide-react';
 
-export default function AdminWalletDashboard() {
+export default function OperatorPayoutWallet() {
   const [user, setUser] = useState(null);
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -99,8 +99,8 @@ export default function AdminWalletDashboard() {
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Admin Wallet Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage operator wallets and approve withdrawals</p>
+          <h1 className="text-3xl font-bold text-slate-900">Operator Payout Wallet</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage operator referral commission wallets and approve withdrawals</p>
         </div>
 
         {/* Stats Cards */}

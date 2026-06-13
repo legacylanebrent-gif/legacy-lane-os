@@ -295,7 +295,7 @@ const ADMIN_DASHBOARDS = [
   { name: 'AdminPhase12Deploy', label: 'Phase 12 NJ Deploy', status: 'DONE' },
   { name: 'PlatformSEODashboard', label: 'SEO Dashboard (GSC)', status: 'DONE' },
   { name: 'AdminTerritoryDashboard', label: 'Territory Dashboard', status: 'DONE' },
-  { name: 'AdminWalletDashboard', label: 'Wallet Dashboard', status: 'DONE' },
+  { name: 'OperatorPayoutWallet', label: 'Operator Payout Wallet', status: 'DONE' },
   { name: 'AdminAIOperator', label: 'AI Estate Sale Company Owner Console', status: 'DONE' },
   { name: 'AutonomousRunsDashboard', label: 'Autonomous Runs', status: 'DONE' },
   { name: 'AdminAgentApplications', label: 'Agent Applications', status: 'DONE' },
