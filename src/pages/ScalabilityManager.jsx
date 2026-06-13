@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CheckCircle, TrendingUp, Users, Zap, ArrowUpRight, Shield, BarChart3 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingUp, Users, Zap, ArrowUpRight, Shield, BarChart3, Pencil, Save, X } from 'lucide-react';
 
 export default function ScalabilityManager() {
   const [user, setUser] = useState(null);
@@ -15,6 +15,8 @@ export default function ScalabilityManager() {
   const [loading, setLoading] = useState(true);
   const [projectingNewSub, setProjectingNewSub] = useState(null);
   const [showSimulator, setShowSimulator] = useState(false);
+  const [editingUsageId, setEditingUsageId] = useState(null);
+  const [editingValue, setEditingValue] = useState('');
 
   useEffect(() => { loadData(); }, []);
 
@@ -94,6 +96,19 @@ export default function ScalabilityManager() {
   const criticalCount = simulatedData.filter(d => d.projectedPct >= 70).length;
 
   const formatNumber = (n) => n?.toLocaleString() || '0';
+
+  const startEditUsage = (cap) => {
+    setEditingUsageId(cap.id);
+    setEditingValue(String(cap.current_month_usage || 0));
+  };
+
+  const saveUsage = async (cap) => {
+    const val = parseInt(editingValue, 10);
+    if (isNaN(val) || val < 0) return;
+    await base44.entities.InfrastructureCapacity.update(cap.id, { current_month_usage: val });
+    setCapacityRecords(prev => prev.map(c => c.id === cap.id ? { ...c, current_month_usage: val } : c));
+    setEditingUsageId(null);
+  };
 
   if (loading) {
     return (
@@ -232,12 +247,18 @@ export default function ScalabilityManager() {
               <p className="text-slate-500 text-sm text-center py-8">No capacity records found. Seed InfrastructureCapacity data first.</p>
             ) : (
               simulatedData.map((cap) => {
-                const status = getStatusInfo(cap.projectedPct);
+                const actualUsage = cap.current_month_usage || 0;
+                const actualPct = cap.monthly_call_limit > 0 ? Math.round((actualUsage / cap.monthly_call_limit) * 100) : 0;
+                const projectedPct = cap.projectedPct;
+                // Use max of actual vs projected for status coloring
+                const displayPct = Math.max(actualPct, projectedPct);
+                const status = getStatusInfo(displayPct);
                 const StatusIcon = status.label === 'Healthy' ? CheckCircle : AlertTriangle;
-                const diff = projectingNewSub ? cap.projectedPct - cap.existingPct : 0;
+                const diff = projectingNewSub ? projectedPct - cap.existingPct : 0;
+                const isEditing = editingUsageId === cap.id;
 
                 return (
-                  <div key={cap.id} className={`p-4 rounded-xl border ${cap.projectedPct >= 85 ? 'border-red-300 bg-red-50/50' : cap.projectedPct >= 70 ? 'border-yellow-300 bg-yellow-50/50' : 'border-slate-200 bg-white'}`}>
+                  <div key={cap.id} className={`p-4 rounded-xl border ${displayPct >= 85 ? 'border-red-300 bg-red-50/50' : displayPct >= 70 ? 'border-yellow-300 bg-yellow-50/50' : 'border-slate-200 bg-white'}`}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-slate-900">{cap.service_name}</span>
@@ -249,7 +270,6 @@ export default function ScalabilityManager() {
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <span className="text-slate-500">{formatNumber(cap.projectedTotal)} / {formatNumber(cap.monthly_call_limit)} calls</span>
                         <Badge className={`${status.color} border`}>
                           <StatusIcon className="w-3 h-3 mr-1" />
                           {status.label}
@@ -257,22 +277,73 @@ export default function ScalabilityManager() {
                       </div>
                     </div>
 
-                    <div className="relative h-3 w-full rounded-full overflow-hidden bg-slate-100">
+                    {/* Actual Usage (editable) */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs font-medium text-slate-500 uppercase w-16">Actual:</span>
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={editingValue}
+                            onChange={e => setEditingValue(e.target.value)}
+                            className="w-28 px-2 py-0.5 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            autoFocus
+                            onKeyDown={e => { if (e.key === 'Enter') saveUsage(cap); if (e.key === 'Escape') setEditingUsageId(null); }}
+                          />
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => saveUsage(cap)}>
+                            <Save className="w-3 h-3 text-green-600" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingUsageId(null)}>
+                            <X className="w-3 h-3 text-slate-400" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-800">
+                            {formatNumber(actualUsage)}
+                          </span>
+                          <span className="text-xs text-slate-400">/ {formatNumber(cap.monthly_call_limit)} ({actualPct}%)</span>
+                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => startEditUsage(cap)}>
+                            <Pencil className="w-3 h-3 text-slate-400 hover:text-slate-600" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Projected bar */}
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className="text-xs font-medium text-slate-400 uppercase w-16">Projected:</span>
+                      <span className="text-xs text-slate-400">{formatNumber(cap.projectedTotal)} ({projectedPct}%)</span>
+                    </div>
+                    <div className="relative h-4 w-full rounded-full overflow-hidden bg-slate-100">
+                      {/* Actual bar (bottom layer, darker) */}
                       <div
-                        className={`h-full rounded-full transition-all ${status.barBg}`}
-                        style={{ width: `${Math.min(cap.projectedPct, 100)}%` }}
+                        className="absolute inset-y-0 left-0 h-full rounded-full transition-all opacity-50"
+                        style={{ width: `${Math.min(actualPct, 100)}%`, backgroundColor: '#94a3b8' }}
                       />
+                      {/* Projected bar (top layer) */}
+                      <div
+                        className={`absolute inset-y-0 left-0 h-full rounded-full transition-all ${status.barBg}`}
+                        style={{ width: `${Math.min(projectedPct, 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" /> Actual
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className={`w-2 h-2 rounded-full ${status.barBg} inline-block`} /> Projected
+                      </span>
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-4 text-xs text-slate-500">
                         <span>${cap.monthly_cost}/mo</span>
-                        <span>{cap.projectedPct}% utilized</span>
                         {cap.overage_cost_per_unit > 0 && (
                           <span>${cap.overage_cost_per_unit}/unit overage</span>
                         )}
                       </div>
-                      {cap.projectedPct >= 70 && cap.upgrade_option && (
+                      {displayPct >= 70 && cap.upgrade_option && (
                         <Button size="sm" variant="outline" className="text-xs gap-1 h-7 border-slate-300">
                           <ArrowUpRight className="w-3 h-3" />
                           Upgrade to {cap.upgrade_option} (${cap.upgrade_cost}/mo)
