@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Send, X, Image as ImageIcon } from 'lucide-react';
+import { Send, X, Image as ImageIcon, Flag } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function MessageModal({ open, onClose, recipient, relatedEntity, savedImages, allImages }) {
@@ -17,6 +17,7 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
   const [currentUser, setCurrentUser] = useState(null);
   const [conversationId, setConversationId] = useState(null);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [reportingMsgId, setReportingMsgId] = useState(null);
 
   useEffect(() => {
     if (open && recipient) {
@@ -82,6 +83,24 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
       }
     } catch (error) {
       console.error('Error loading conversation:', error);
+    }
+  };
+
+  const handleReportSpam = async (msg) => {
+    if (reportingMsgId) return;
+    setReportingMsgId(msg.id);
+    try {
+      await base44.entities.Message.update(msg.id, {
+        spam_flag: true,
+        spam_score: 100,
+        flagged_by: currentUser?.id || 'user_reported'
+      });
+      // Update local state
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, spam_flag: true, spam_score: 100 } : m));
+    } catch (error) {
+      console.error('Error reporting spam:', error);
+    } finally {
+      setReportingMsgId(null);
     }
   };
 
@@ -163,13 +182,36 @@ export default function MessageModal({ open, onClose, recipient, relatedEntity, 
                       className={`max-w-[70%] rounded-lg p-3 ${
                         msg.sender_id === currentUser?.id
                           ? 'bg-orange-600 text-white'
-                          : 'bg-slate-100 text-slate-900'
+                          : msg.spam_flag
+                            ? 'bg-red-50 border border-red-200 text-slate-500'
+                            : 'bg-slate-100 text-slate-900'
                       }`}
                     >
-                      <div className="text-xs opacity-75 mb-1">
-                        {msg.sender_name} • {format(new Date(msg.created_date), 'MMM d, h:mm a')}
+                      <div className="text-xs opacity-75 mb-1 flex items-center justify-between gap-2">
+                        <span>{msg.sender_name} • {format(new Date(msg.created_date), 'MMM d, h:mm a')}</span>
                       </div>
-                      <div className="whitespace-pre-wrap">{msg.message}</div>
+                      {msg.spam_flag ? (
+                        <div className="flex items-center gap-2 text-red-600 text-xs font-medium">
+                          <Flag className="w-3 h-3" />
+                          Reported as spam
+                        </div>
+                      ) : (
+                        <div className="whitespace-pre-wrap">{msg.message}</div>
+                      )}
+                      {/* Report spam button for received messages that aren't already flagged */}
+                      {msg.sender_id !== currentUser?.id && !msg.spam_flag && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReportSpam(msg);
+                          }}
+                          disabled={reportingMsgId === msg.id}
+                          className="mt-1.5 text-xs text-slate-400 hover:text-red-600 transition-colors flex items-center gap-1"
+                        >
+                          <Flag className="w-3 h-3" />
+                          {reportingMsgId === msg.id ? 'Reporting...' : 'Report spam'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

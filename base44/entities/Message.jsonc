@@ -36,6 +36,19 @@
     },
     "related_entity_id": {
       "type": "string"
+    },
+    "spam_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this message has been flagged as spam"
+    },
+    "spam_score": {
+      "type": "number",
+      "description": "0-100 spam likelihood score"
+    },
+    "flagged_by": {
+      "type": "string",
+      "description": "User ID who flagged this message as spam (or 'system' for auto-detection)"
     }
   },
   "required": [
