@@ -328,7 +328,7 @@ export default function MyProfile() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-1 p-6 lg:p-8 pb-32 max-w-5xl">
+      <div className="flex-1 p-6 lg:p-8 pb-32 w-full">
       <div className="mb-6">
         <h1 className="text-3xl font-serif font-bold text-slate-900">My Profile</h1>
         <p className="text-slate-500 mt-1">
