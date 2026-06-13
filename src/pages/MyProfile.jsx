@@ -99,7 +99,9 @@ export default function MyProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState('account');
+  const searchParams = new URLSearchParams(window.location.search);
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam && ['account','buyer_prefs','estate_sales','business','territory','sales','payments','marketplace','agent_tools','vendor_services','vendor_leads','reseller_prefs','reseller_leads','subscription'].includes(tabParam) ? tabParam : 'account');
   const [marketplaceTab, setMarketplaceTab] = useState('social');
   const [uploading, setUploading] = useState({});
   const [newCounty, setNewCounty] = useState('');
