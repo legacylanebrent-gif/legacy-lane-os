@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Calendar, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const FIXES = [
   {
@@ -406,6 +407,7 @@ export default function LandingPageRetarget() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

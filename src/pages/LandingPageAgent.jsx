@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Home, Users, TrendingUp, Target, Shield, BarChart3, Search, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const OPPORTUNITIES = [
   { icon: Home, title: 'Probate & Inherited Properties', desc: 'Families settling estates need both a sale company AND a realtor. Be the agent they trust when the home needs to sell.' },
@@ -169,6 +170,8 @@ export default function LandingPageAgent() {
           </div>
         </div>
       </section>
+
+      <SharedFooter />
     </div>
   );
 }

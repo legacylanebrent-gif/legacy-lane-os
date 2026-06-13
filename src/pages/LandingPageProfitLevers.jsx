@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, BarChart3, Clock, DollarSign, Eye, Percent, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const LEVERS = [
   {
@@ -442,6 +443,7 @@ export default function LandingPageProfitLevers() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

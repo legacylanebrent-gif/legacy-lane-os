@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Check, X, ChevronDown, ChevronUp } from 'lucide-react';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const CheckItem = ({ children }) => (
   <li className="flex items-start gap-2 text-slate-700 text-sm leading-relaxed">
@@ -306,6 +307,8 @@ export default function LandingPageBizInABox() {
           </div>
         </div>
       )}
+
+      <SharedFooter />
     </div>
   );
 }

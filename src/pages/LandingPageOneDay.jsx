@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import StageCard from '@/components/landing/StageCard';
 import ConsultationModal from '@/components/landing/ConsultationModal';
 import ReferralIncomeSection from '@/components/landing/ReferralIncomeSection';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const SALE_FLOW = [
   'A new lead comes in.',
@@ -789,6 +790,7 @@ export default function LandingPageOneDay() {
 
       <ConsultationModal open={showConsultation} onClose={() => setShowConsultation(false)} />
 
+      <SharedFooter />
     </div>
   );
 }

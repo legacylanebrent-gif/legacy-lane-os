@@ -3,6 +3,7 @@ import SaleLeakQuizModal from '@/components/landing/SaleLeakQuizModal';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, Clock, DollarSign, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const BEFORE_AFTER = [
   { before: 'Setup feels chaotic', after: 'Setup is faster' },
@@ -253,6 +254,8 @@ export default function LandingPageSaleLeak() {
           </Button>
         </div>
       </section>
+
+      <SharedFooter />
     </div>
   );
 }

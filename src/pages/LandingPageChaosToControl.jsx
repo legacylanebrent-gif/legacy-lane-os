@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const BEFORE_ITEMS = [
   'Setup takes hours longer than expected',
@@ -454,6 +455,7 @@ export default function LandingPageChaosToControl() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, Calendar, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const VALUE_ITEMS = [
   'Google Lens™ AI item identification & pricing',
@@ -298,6 +299,7 @@ export default function LandingPageOfferClose() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

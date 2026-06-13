@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, Sparkles, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const PLAN_ITEMS = [
   'Where your current sale process is leaking the most time',
@@ -380,6 +381,7 @@ export default function LandingPageAIPlan() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

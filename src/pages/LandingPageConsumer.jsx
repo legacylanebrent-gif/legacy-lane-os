@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Search, MapPin, Bell, Smartphone, ShoppingBag, Heart, Route, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const FEATURES = [
   {
@@ -226,6 +227,8 @@ export default function LandingPageConsumer() {
           </div>
         </div>
       </section>
+
+      <SharedFooter />
     </div>
   );
 }

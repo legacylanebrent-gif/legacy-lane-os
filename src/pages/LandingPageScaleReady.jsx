@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight, TrendingUp, Users, Repeat, BarChart3, Megaphone, Star, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const STUCK_PROBLEMS = [
   'The owner is involved in every small decision',
@@ -507,6 +508,7 @@ export default function LandingPageScaleReady() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

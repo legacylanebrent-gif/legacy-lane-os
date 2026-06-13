@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, Clock, DollarSign, BarChart3, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const LEAK_CATEGORIES = [
   {
@@ -508,6 +509,7 @@ export default function LandingPageCalculator() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

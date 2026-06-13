@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ChevronRight, ArrowRight, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const OPPORTUNITIES = [
   'Probate situations',
@@ -443,6 +444,7 @@ export default function LandingPageReferralEngine() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }

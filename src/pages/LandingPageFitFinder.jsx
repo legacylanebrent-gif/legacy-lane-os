@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import SharedFooter from '@/components/layout/SharedFooter';
 
 const FOR_ITEMS = [
   'Cut 3–10 hours off sale setup',
@@ -437,6 +438,7 @@ export default function LandingPageFitFinder() {
         </div>
       </section>
 
+      <SharedFooter />
     </div>
   );
 }
