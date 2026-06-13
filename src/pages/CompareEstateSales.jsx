@@ -352,7 +352,7 @@ export default function CompareEstateSales() {
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-4">
-            Stop Renting a Listing.<br />
+            More than Just a Sale Listing Directory.<br />
             <span className="text-orange-600">Own Your Business.</span>
           </h2>
           <p className="text-slate-500 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
