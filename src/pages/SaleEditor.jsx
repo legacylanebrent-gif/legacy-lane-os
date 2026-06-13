@@ -22,6 +22,7 @@ import StarterPublishFeeModal from '@/components/estate/StarterPublishFeeModal';
 import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
+import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -457,6 +458,19 @@ export default function SaleEditor() {
     if (!image.url) return;
     setSerpSearching(prev => ({ ...prev, [index]: true }));
     try {
+      // Check credits first
+      try {
+        const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
+        if (!creditCheck.data.allowed) {
+          alert(creditCheck.data.reason || 'No Google Lens searches remaining. Purchase more credits to continue.');
+          setSerpSearching(prev => ({ ...prev, [index]: false }));
+          return;
+        }
+      } catch (creditErr) {
+        // If check fails, proceed with the search (backward compatibility)
+        console.warn('Credit check failed, proceeding anyway:', creditErr.message);
+      }
+
       const res = await base44.functions.invoke('googleLensPricing', { image_url: image.url, sale_id: saleId });
       const data = res.data;
       setSerpResults(prev => ({ ...prev, [image.url]: data }));
@@ -705,9 +719,12 @@ Be practical and realistic for an estate sale context.`,
             </button>
             <div className="min-w-0">
               <h1 className="text-lg lg:text-xl font-serif font-bold text-slate-900 truncate">{saleId ? 'Edit Sale' : 'Create New Sale'}</h1>
-              <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">
-                {autoSaving ? '⏳ Auto-saving...' : 'Fill in the details for your estate sale'}
-              </p>
+              <div className="flex items-center gap-4">
+                <p className="text-xs lg:text-sm text-slate-500 hidden sm:block">
+                  {autoSaving ? '⏳ Auto-saving...' : 'Fill in the details for your estate sale'}
+                </p>
+                {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
+              </div>
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
@@ -1260,6 +1277,26 @@ Return ONLY the description text, no extra commentary.`
                             if (img.skip_serp_search === true || img.serp_search_status === "do_not_search" || img.serp_search_status !== "search_allowed") continue;
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
+                              // Check credits before each search
+                              try {
+                                const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
+                                if (!creditCheck.data.allowed) {
+                                  setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
+                                  setSerpSearching({});
+                                  setSerpBatchRunning(false);
+                                  setFormData(prev => {
+                                    if (saleId) {
+                                      base44.entities.EstateSale.update(saleId, { images: prev.images });
+                                    }
+                                    return prev;
+                                  });
+                                  alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
+                                  return;
+                                }
+                              } catch (creditErr) {
+                                console.warn('Credit check failed, proceeding anyway:', creditErr.message);
+                              }
+
                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
                               const data = res.data;
                               if (data.error) {

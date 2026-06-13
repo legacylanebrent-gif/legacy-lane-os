@@ -57,6 +57,36 @@
       ],
       "default": "active",
       "description": "Current account status"
+    },
+    "google_lens_searches_limit": {
+      "type": "integer",
+      "default": 0,
+      "description": "Base monthly Google Lens search limit from subscription plan"
+    },
+    "google_lens_searches_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Google Lens searches consumed in current period"
+    },
+    "google_lens_purchased_searches": {
+      "type": "integer",
+      "default": 0,
+      "description": "Extra Google Lens searches purchased (one-time, consumed before base limit)"
+    },
+    "google_lens_purchased_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Purchased Google Lens searches consumed this period"
+    },
+    "google_lens_period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of current Google Lens billing period"
+    },
+    "google_lens_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of current Google Lens billing period"
     }
   },
   "required": [
