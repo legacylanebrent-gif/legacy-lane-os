@@ -213,6 +213,43 @@ Deno.serve(async (req) => {
 
           stats.matchesFound += topMatches.length;
           stats.notificationsCreated++;
+
+          // If buyer opted into dealer contact, notify operators of matched estate sales
+          if (wantedItem.allow_dealer_contact === true) {
+            const notifiedOperators = new Set();
+            const estateSaleMatches = topMatches.filter(m => m.type === 'estate_sale');
+
+            for (const esMatch of estateSaleMatches) {
+              try {
+                const sale = await base44.asServiceRole.entities.EstateSale.get(esMatch.id);
+                if (!sale || !sale.operator_id) continue;
+                if (notifiedOperators.has(sale.operator_id)) continue;
+                notifiedOperators.add(sale.operator_id);
+
+                const subs = await base44.asServiceRole.entities.Subscription.filter({
+                  user_id: sale.operator_id,
+                  status: 'active',
+                });
+                const isPremiumOrAbove = subs.some(s => ['premium', 'enterprise', 'elite'].includes(s.tier));
+                if (!isPremiumOrAbove) continue;
+
+                await base44.asServiceRole.entities.Notification.create({
+                  user_id: sale.operator_id,
+                  type: 'system',
+                  title: `👤 Buyer Hunting: "${wantedItem.title}"`,
+                  message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Contact the buyer to close a deal before your sale!`,
+                  link_to_page: 'EstateSaleDetail',
+                  link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}`,
+                  read: false,
+                  related_entity_type: 'EstateSale',
+                  related_entity_id: sale.id,
+                });
+                stats.operatorNotifications = (stats.operatorNotifications || 0) + 1;
+              } catch (_) {
+                // Skip failed operator notifications gracefully
+              }
+            }
+          }
         }
       } catch (itemError) {
         console.error(`Error processing wanted item ${wantedItem.id}:`, itemError);
@@ -220,10 +257,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    const opNotifs = stats.operatorNotifications || 0;
     return Response.json({
       success: true,
       stats,
-      message: `Processed ${stats.wantedItems} wanted items, found ${stats.matchesFound} matches, created ${stats.notificationsCreated} notifications`,
+      message: `Processed ${stats.wantedItems} wanted items, found ${stats.matchesFound} matches, created ${stats.notificationsCreated} buyer notifications${opNotifs > 0 ? ` + ${opNotifs} operator notifications` : ''}`,
     });
   } catch (error) {
     console.error('matchWantedItemsToSales error:', error);
