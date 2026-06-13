@@ -209,7 +209,7 @@ export default function Revenue() {
     { name: 'Coin Shop', count: 4500, price: 147 },
     { name: 'Sports Card Shop', count: 3750, price: 147 },
     { name: 'Comic Shop', count: 3250, price: 147 },
-    { name: 'Game Shop', count: 4000, price: 147 },
+    { name: 'Game & Toy Shop', count: 6500, price: 147 },
     { name: 'Vintage Furniture Dealer', count: 6000, price: 147 },
     { name: 'Architectural Salvage Dealer', count: 1000, price: 147 },
     { name: 'Record Store', count: 2250, price: 147 },
