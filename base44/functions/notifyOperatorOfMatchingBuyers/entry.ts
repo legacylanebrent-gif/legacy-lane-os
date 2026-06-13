@@ -43,8 +43,9 @@ Deno.serve(async (req) => {
             ].filter(Boolean).join(' ')).join(' '),
         ].filter(Boolean).join(' ').toLowerCase();
 
-        // 4. Fetch all active wanted items
-        const wantedItems = await base44.asServiceRole.entities.WantedItem.filter({ status: 'active' });
+        // 4. Fetch all active wanted items — only those where buyer allows dealer contact
+        const allWanted = await base44.asServiceRole.entities.WantedItem.filter({ status: 'active' });
+        const wantedItems = allWanted.filter(wi => wi.allow_dealer_contact === true);
 
         // 5. Score each wanted item against the sale
         const matches = [];

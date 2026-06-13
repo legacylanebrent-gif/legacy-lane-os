@@ -214,38 +214,40 @@ Deno.serve(async (req) => {
           stats.matchesFound += topMatches.length;
           stats.notificationsCreated++;
 
-          // Notify operators of matched estate sales
-          const notifiedOperators = new Set();
-          const estateSaleMatches = topMatches.filter(m => m.type === 'estate_sale');
+          // If buyer opted into dealer contact, notify operators of matched estate sales
+          if (wantedItem.allow_dealer_contact === true) {
+            const notifiedOperators = new Set();
+            const estateSaleMatches = topMatches.filter(m => m.type === 'estate_sale');
 
-          for (const esMatch of estateSaleMatches) {
-            try {
-              const sale = await base44.asServiceRole.entities.EstateSale.get(esMatch.id);
-              if (!sale || !sale.operator_id) continue;
-              if (notifiedOperators.has(sale.operator_id)) continue;
-              notifiedOperators.add(sale.operator_id);
+            for (const esMatch of estateSaleMatches) {
+              try {
+                const sale = await base44.asServiceRole.entities.EstateSale.get(esMatch.id);
+                if (!sale || !sale.operator_id) continue;
+                if (notifiedOperators.has(sale.operator_id)) continue;
+                notifiedOperators.add(sale.operator_id);
 
-              const subs = await base44.asServiceRole.entities.Subscription.filter({
-                user_id: sale.operator_id,
-                status: 'active',
-              });
-              const isPremiumOrAbove = subs.some(s => ['premium', 'enterprise', 'elite'].includes(s.tier));
-              if (!isPremiumOrAbove) continue;
-
-              await base44.asServiceRole.entities.Notification.create({
+                const subs = await base44.asServiceRole.entities.Subscription.filter({
                   user_id: sale.operator_id,
-                  type: 'system',
-                  title: `👤 Buyer Hunting: "${wantedItem.title}"`,
-                  message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Click to message about this item.`,
-                  link_to_page: 'EstateSaleDetail',
-                  link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}&contactBuyerId=${wantedItem.buyer_id}&contactBuyerName=${encodeURIComponent(wantedItem.buyer_name || '')}`,
-                  read: false,
-                  related_entity_type: 'EstateSale',
-                  related_entity_id: sale.id,
+                  status: 'active',
                 });
-              stats.operatorNotifications = (stats.operatorNotifications || 0) + 1;
-            } catch (_) {
-              // Skip failed operator notifications gracefully
+                const isPremiumOrAbove = subs.some(s => ['premium', 'enterprise', 'elite'].includes(s.tier));
+                if (!isPremiumOrAbove) continue;
+
+                await base44.asServiceRole.entities.Notification.create({
+                    user_id: sale.operator_id,
+                    type: 'system',
+                    title: `👤 Buyer Hunting: "${wantedItem.title}"`,
+                    message: `A buyer is actively searching for "${wantedItem.title}"${wantedItem.brand ? ` (brand: ${wantedItem.brand})` : ''}${wantedItem.budget_max ? ` with a budget up to $${wantedItem.budget_max}` : ''}.\n\nThis matches your sale "${sale.title || 'Untitled'}". Click to message about this item.`,
+                    link_to_page: 'EstateSaleDetail',
+                    link_params: `id=${sale.id}&autoMessage=1&wantedItemTitle=${encodeURIComponent(wantedItem.title || '')}&contactBuyerId=${wantedItem.buyer_id}&contactBuyerName=${encodeURIComponent(wantedItem.buyer_name || '')}`,
+                    read: false,
+                    related_entity_type: 'EstateSale',
+                    related_entity_id: sale.id,
+                  });
+                stats.operatorNotifications = (stats.operatorNotifications || 0) + 1;
+              } catch (_) {
+                // Skip failed operator notifications gracefully
+              }
             }
           }
         }

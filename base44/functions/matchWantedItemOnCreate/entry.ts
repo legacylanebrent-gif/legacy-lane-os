@@ -196,7 +196,15 @@ Deno.serve(async (req) => {
         related_entity_id: wantedItem.id,
       });
 
-      // 2. Notify Elite operators of matched estate sales
+      // 2. Notify Elite operators of matched estate sales — only if buyer allows dealer contact
+      if (wantedItem.allow_dealer_contact !== true) {
+        return Response.json({
+          success: true,
+          stats: { ...stats, operatorNotifications: 0, reason: 'buyer_opted_out_of_dealer_contact' },
+          message: `Found ${stats.matchesFound} matches. Buyer has not opted into dealer contact — operators were not notified.`,
+        });
+      }
+
       const notifiedOperators = new Set();
       const estateSaleMatches = topMatches.filter(m => m.type === 'estate_sale');
 

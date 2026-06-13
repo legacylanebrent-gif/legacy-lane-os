@@ -56,6 +56,7 @@ export default function BuyerPrefsTab({ user }) {
     distance: 50,
     shipping_ok: true,
     public_visibility: true,
+    allow_dealer_contact: false,
   });
 
   const [suggestionsKey, setSuggestionsKey] = useState(0);
@@ -128,6 +129,7 @@ export default function BuyerPrefsTab({ user }) {
       distance: 50,
       shipping_ok: true,
       public_visibility: true,
+      allow_dealer_contact: false,
     });
     setEditingItem(null);
     setShowWantedForm(false);
@@ -150,6 +152,7 @@ export default function BuyerPrefsTab({ user }) {
       distance: item.distance || 50,
       shipping_ok: item.shipping_ok !== false,
       public_visibility: item.public_visibility !== false,
+      allow_dealer_contact: item.allow_dealer_contact === true,
     });
     setShowWantedForm(true);
     setSuggestionsKey(k => k + 1);
@@ -175,6 +178,7 @@ export default function BuyerPrefsTab({ user }) {
         distance: wantedForm.distance,
         shipping_ok: wantedForm.shipping_ok,
         public_visibility: wantedForm.public_visibility,
+        allow_dealer_contact: wantedForm.allow_dealer_contact,
         status: 'active',
       };
 
@@ -473,6 +477,15 @@ export default function BuyerPrefsTab({ user }) {
                   />
                   <span className="text-sm">Visible to estate sale companies</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wantedForm.allow_dealer_contact}
+                    onChange={e => setWantedForm(p => ({ ...p, allow_dealer_contact: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Allow dealers to contact me about this item</span>
+                </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-2 border-t">
@@ -526,6 +539,7 @@ export default function BuyerPrefsTab({ user }) {
                         </span>
                       )}
                       {item.shipping_ok && <Badge variant="secondary" className="text-xs">Shipping OK</Badge>}
+                      {item.allow_dealer_contact && <Badge className="bg-purple-100 text-purple-700 text-xs">Dealer Contact OK</Badge>}
                     </div>
                   </div>
 
