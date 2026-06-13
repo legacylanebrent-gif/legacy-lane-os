@@ -286,9 +286,13 @@ export default function BusinessProfile() {
                             <span>{sale.property_address?.city}, {sale.property_address?.state}</span>
                           </div>
                           {sale.sale_dates && sale.sale_dates.length > 0 && (
-                            <div className="flex items-center gap-2 text-slate-600">
-                              <Calendar className="w-4 h-4 text-orange-600" />
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                            <div className="flex items-start gap-2 text-slate-600">
+                              <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                              <div>
+                                {sale.sale_dates.map((sd, i) => (
+                                  <span key={i} className="block">{format(new Date(sd.date), 'MMM d, yyyy')}</span>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -338,9 +342,13 @@ export default function BusinessProfile() {
                             <span>{sale.property_address?.city}, {sale.property_address?.state}</span>
                           </div>
                           {sale.sale_dates && sale.sale_dates.length > 0 && (
-                            <div className="flex items-center gap-2 text-slate-600">
-                              <Calendar className="w-4 h-4 text-orange-600" />
-                              <span>{format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}</span>
+                            <div className="flex items-start gap-2 text-slate-600">
+                              <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                              <div>
+                                {sale.sale_dates.map((sd, i) => (
+                                  <span key={i} className="block">{format(new Date(sd.date), 'MMM d, yyyy')}</span>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
