@@ -585,7 +585,7 @@ export default function EstateSaleDetail() {
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                         {sale.images.slice(0, visibleThumbnails).map((image, index) => {
                           const imageUrl = typeof image === 'string' ? image : image?.url;
-                          const thumbnailUrl = getImageSrc(image, 'thumbnail');
+                          const thumbnailUrl = getImageSrc(image, 'thumbnail', { imageThumbnails: sale.image_thumbnails, index });
                           
                           return (
                             <div key={index} className="relative">
@@ -872,7 +872,7 @@ export default function EstateSaleDetail() {
                    <div className="grid grid-cols-2 gap-2">
                      {savedImages.map((imageIndex) => {
                        const imageUrl = typeof sale.images[imageIndex] === 'string' ? sale.images[imageIndex] : sale.images[imageIndex]?.url;
-                       const thumbnailUrl = getImageSrc(sale.images[imageIndex], 'thumbnail');
+                       const thumbnailUrl = getImageSrc(sale.images[imageIndex], 'thumbnail', { imageThumbnails: sale.image_thumbnails, index: imageIndex });
 
                        return (
                          <button

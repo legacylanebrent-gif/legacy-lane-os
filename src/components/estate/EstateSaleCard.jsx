@@ -46,7 +46,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={getImageSrc(estate.images?.[0] || primaryImage, 400)}
+          src={getImageSrc(estate.images?.[0] || primaryImage, 400, { imageThumbnails: estate.image_thumbnails, index: 0 })}
           alt={estate.title}
           className="w-full h-full object-cover"
           loading="lazy"

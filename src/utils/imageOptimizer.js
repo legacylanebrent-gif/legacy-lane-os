@@ -7,15 +7,22 @@ import { base44 } from '@/api/base44Client';
  * @param {number|string} size - 'thumbnail' (300), 'gallery' (800), 'large' (1920), or pixel number
  * @returns {string} Best image URL for the requested size
  */
-export const getImageSrc = (image, size = 'thumbnail') => {
+export const getImageSrc = (image, size = 'thumbnail', opts = {}) => {
   if (!image) return null;
 
   const sizePx = typeof size === 'number' ? size : { thumbnail: 300, gallery: 800, large: 1920 }[size] || 300;
   const imgObj = typeof image === 'string' ? { url: image } : image;
 
-  // For thumbnails (≤400px): use pre-generated thumbnail_url if available
-  if (sizePx <= 400 && imgObj.thumbnail_url) {
-    return imgObj.thumbnail_url;
+  // For small display sizes (≤400px): prefer pre-generated thumbnail from image_thumbnails map
+  if (sizePx <= 400) {
+    // Priority 1: pre-generated thumbnail_url on the image object itself
+    if (imgObj.thumbnail_url) return imgObj.thumbnail_url;
+    // Priority 2: image_thumbnails map by index
+    if (opts.imageThumbnails && opts.index != null) {
+      const key = String(opts.index);
+      const thumbUrl = opts.imageThumbnails[key];
+      if (thumbUrl) return thumbUrl;
+    }
   }
 
   // Fall back to full URL with CDN resize params
@@ -24,8 +31,8 @@ export const getImageSrc = (image, size = 'thumbnail') => {
 
   if (url.includes('base44.com') || url.includes('media.base44.com')) {
     const baseUrl = url.split('?')[0];
-    if (sizePx <= 200) return `${baseUrl}?w=200&h=200&fit=min&auto=compress,format`;
-    if (sizePx <= 400) return `${baseUrl}?w=400&h=400&fit=min&auto=compress,format`;
+    if (sizePx <= 200) return `${baseUrl}?width=200&auto=compress,format`;
+    if (sizePx <= 400) return `${baseUrl}?width=400&auto=compress,format`;
     if (sizePx <= 800) return `${baseUrl}?w=800&h=600&fit=max&auto=compress,format`;
     return `${baseUrl}?w=1920&h=1080&fit=max&auto=compress,format`;
   }
