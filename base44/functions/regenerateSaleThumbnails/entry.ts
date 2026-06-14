@@ -25,42 +25,31 @@ Deno.serve(async (req) => {
 
     const sale = sales[0];
     const images = sale.images || [];
+    const existingThumbs = sale.image_thumbnails || {};
     
-    // Only process the batch window
     const end = Math.min(startFrom + batchLimit, images.length);
     let updatedCount = 0;
 
     for (let i = startFrom; i < end; i++) {
       const img = typeof images[i] === 'string' ? { url: images[i] } : images[i];
+      const idx = String(i);
       
-      if (img.thumbnail_url) continue;
+      if (existingThumbs[idx]) continue;
       if (!img.url) continue;
 
-      try {
-        const response = await fetch(img.url);
-        if (!response.ok) {
-          console.log(`Failed to fetch image at index ${i}: ${response.status}`);
-          continue;
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const contentType = response.headers.get('content-type') || 'image/jpeg';
-
-        const file = new File([arrayBuffer], `sale_img_${i}.jpg`, { type: contentType });
-        const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file });
-        
-        if (uploadResult?.file_url) {
-          images[i] = { ...img, thumbnail_url: uploadResult.file_url };
-          updatedCount++;
-        }
-      } catch (e) {
-        console.log(`Error processing image ${i}:`, e.message);
+      // Don't download/re-upload — just use CDN resize params
+      // The CDN supports width=200 for thumbnail-sized images
+      if (img.url.includes('base44.app')) {
+        existingThumbs[idx] = img.url + (img.url.includes('?') ? '&' : '?') + 'width=200';
+      } else {
+        existingThumbs[idx] = img.url;
       }
+      updatedCount++;
     }
 
-    // Save updated images back to the sale
+    // Store thumbnails in the lightweight image_thumbnails field
     if (updatedCount > 0) {
-      await base44.asServiceRole.entities.EstateSale.update(sale_id, { images });
+      await base44.asServiceRole.entities.EstateSale.update(sale_id, { image_thumbnails: existingThumbs });
     }
 
     return Response.json({

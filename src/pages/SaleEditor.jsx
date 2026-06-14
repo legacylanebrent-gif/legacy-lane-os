@@ -78,6 +78,7 @@ export default function SaleEditor() {
   const [showQuickScanGuideModal, setShowQuickScanGuideModal] = useState(false);
   const [showDeepSearchGuideModal, setShowDeepSearchGuideModal] = useState(false);
   const [expandedCards, setExpandedCards] = useState({});
+  const [imageThumbnails, setImageThumbnails] = useState({});
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -218,6 +219,7 @@ export default function SaleEditor() {
       });
       setFeaturedNationally(saleData.national_featured || false);
       setFeaturedLocally(saleData.local_featured || false);
+      setImageThumbnails(saleData.image_thumbnails || {});
 
       const pricingData = await base44.entities.ItemPricing.filter({ sale_id: id });
       const pricingMap = {};
@@ -1411,7 +1413,7 @@ Return ONLY the description text, no extra commentary.`
           <CardContent className="pt-6 space-y-4">
             {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
             {(() => {
-              const missingThumbCount = formData.images.filter(img => img.url && !img.thumbnail_url).length;
+              const missingThumbCount = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
               const total = formData.images.length;
               return (
                 <>
@@ -1536,7 +1538,7 @@ Return ONLY the description text, no extra commentary.`
                       className="text-amber-700 border-amber-500 w-full"
                       onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
-                        const missingThumbs = formData.images.filter(img => img.url && !img.thumbnail_url).length;
+                        const missingThumbs = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
                         if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
                         if (!window.confirm(`Generate thumbnails for ${missingThumbs} images in batches of 20?`)) return;
                         setUploadingImages(true);

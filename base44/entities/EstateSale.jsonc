@@ -134,6 +134,14 @@
       "description": "Array of image objects with metadata",
       "default": []
     },
+    "image_thumbnails": {
+      "type": "object",
+      "description": "Lightweight map of image index to thumbnail URL (avoids payload issues with large images arrays)",
+      "default": {},
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "featured_items": {
       "type": "array",
       "items": {
