@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Bell, MessageSquare, Calendar, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 export default function NotificationsDropdown() {
   const [user, setUser] = useState(null);
@@ -105,8 +105,9 @@ export default function NotificationsDropdown() {
                   key={notif.id}
                   onClick={() => {
                     markAsRead(notif.id);
-                    if (notif.link) {
-                      window.location.href = notif.link;
+                    if (notif.link_to_page) {
+                      const url = `/${notif.link_to_page}${notif.link_params ? `?${notif.link_params}` : ''}`;
+                      window.location.href = url;
                     }
                   }}
                   className={`w-full text-left p-4 hover:bg-slate-50 transition-colors pointer-events-auto touch-manipulation ${
@@ -123,7 +124,7 @@ export default function NotificationsDropdown() {
                       )}
                       <div className="text-sm text-slate-700">{notif.message}</div>
                       <div className="text-xs text-slate-500 mt-1">
-                        {format(new Date(notif.created_date), 'MMM d, h:mm a')}
+                        {format(parseISO(notif.created_date), 'MMM d, h:mm a')}
                       </div>
                     </div>
                     {!notif.read && (
