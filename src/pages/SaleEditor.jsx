@@ -1425,21 +1425,31 @@ Return ONLY the description text, no extra commentary.`
                         variant="outline"
                         className="text-amber-700 border-amber-400 hover:bg-amber-100 h-7 text-xs"
                         onClick={async () => {
-                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s) via backend?`)) return;
+                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s) in batches of 20?`)) return;
                           setUploadingImages(true);
                           try {
-                            const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId });
-                            alert(res.data?.message || 'Thumbnails generated! Reloading page...');
+                            let start = 0;
+                            let totalDone = 0;
+                            const BATCH = 20;
+                            while (true) {
+                              setUploadProgress({ current: totalDone, total: missingThumbCount });
+                              const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
+                              totalDone += res.data.updated || 0;
+                              if (res.data.done) break;
+                              start = res.data.next_start;
+                            }
+                            alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
                             window.location.reload();
                           } catch (e) {
                             alert('Failed: ' + (e.message || 'Unknown error'));
                           } finally {
                             setUploadingImages(false);
+                            setUploadProgress({ current: 0, total: 0 });
                           }
                         }}
                         disabled={uploadingImages}
                       >
-                        {uploadingImages ? 'Processing...' : 'Fix Now'}
+                        {uploadingImages ? `${uploadProgress.current}/${uploadProgress.total}` : 'Fix Now'}
                       </Button>
                     </div>
                   )}
@@ -1526,22 +1536,34 @@ Return ONLY the description text, no extra commentary.`
                       className="text-amber-700 border-amber-500 w-full"
                       onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
-                        if (!window.confirm('Regenerate thumbnails for all images? This runs on the server.')) return;
+                        const missingThumbs = formData.images.filter(img => img.url && !img.thumbnail_url).length;
+                        if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
+                        if (!window.confirm(`Generate thumbnails for ${missingThumbs} images in batches of 20?`)) return;
                         setUploadingImages(true);
                         try {
-                          const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId });
-                          alert(res.data?.message || 'Thumbnails generated! Reloading page...');
+                          let start = 0;
+                          let totalDone = 0;
+                          const BATCH = 20;
+                          while (true) {
+                            setUploadProgress({ current: totalDone, total: missingThumbs });
+                            const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
+                            totalDone += res.data.updated || 0;
+                            if (res.data.done) break;
+                            start = res.data.next_start;
+                          }
+                          alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
                           window.location.reload();
                         } catch (e) {
                           alert('Failed: ' + (e.message || 'Unknown error'));
                         } finally {
                           setUploadingImages(false);
+                          setUploadProgress({ current: 0, total: 0 });
                         }
                       }}
                       disabled={uploadingImages}
                     >
                       <Camera className="w-4 h-4 mr-2" />
-                      {uploadingImages ? 'Processing...' : 'Regenerate Thumbnails'}
+                      {uploadingImages ? `${uploadProgress.current}/${uploadProgress.total}` : 'Regenerate Thumbnails'}
                     </Button>
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
