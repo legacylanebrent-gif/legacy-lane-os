@@ -719,6 +719,31 @@ Be practical and realistic for an estate sale context.`,
       const textStart = m + thumbSize + 2;
       const colW = (pgW - textStart - m) / 4;
 
+      // Preload all thumbnails in parallel using tiny CDN-resized images (60px)
+      const thumbDataUrls = {};
+      const loadThumb = async (img) => {
+        if (!img.url) return;
+        try {
+          const thumbUrl = getOptimizedImageUrl(img.url, 60);
+          const imageEl = new Image();
+          await new Promise((resolve, reject) => {
+            imageEl.onload = resolve;
+            imageEl.onerror = reject;
+            imageEl.src = thumbUrl;
+          });
+          const canvas = document.createElement('canvas');
+          canvas.width = thumbSize * 3;
+          canvas.height = thumbSize * 3;
+          canvas.getContext('2d').drawImage(imageEl, 0, 0, canvas.width, canvas.height);
+          thumbDataUrls[img.url] = canvas.toDataURL('image/jpeg', 0.5);
+        } catch (_) {}
+      };
+
+      // Load in parallel batches of 10
+      for (let i = 0; i < items.length; i += 10) {
+        await Promise.all(items.slice(i, i + 10).map(loadThumb));
+      }
+
       // Title header
       doc.setFontSize(12);
       doc.setTextColor(40, 40, 40);
@@ -746,22 +771,9 @@ Be practical and realistic for an estate sale context.`,
           doc.line(m, y - 1, pgW - m, y - 1);
         }
 
-        // Thumbnail
-        if (img.url) {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = thumbSize * 3;
-            canvas.height = thumbSize * 3;
-            const ctx = canvas.getContext('2d');
-            const imageEl = new Image();
-            await new Promise((resolve, reject) => {
-              imageEl.onload = resolve;
-              imageEl.onerror = reject;
-              imageEl.src = img.url;
-            });
-            ctx.drawImage(imageEl, 0, 0, canvas.width, canvas.height);
-            doc.addImage(canvas.toDataURL('image/jpeg', 0.6), 'JPEG', m, y, thumbSize, thumbSize);
-          } catch (_) { /* skip failed image */ }
+        // Add preloaded thumbnail
+        if (thumbDataUrls[img.url]) {
+          doc.addImage(thumbDataUrls[img.url], 'JPEG', m, y, thumbSize, thumbSize);
         }
 
         doc.setFontSize(7);
@@ -779,7 +791,6 @@ Be practical and realistic for an estate sale context.`,
         doc.setTextColor(0, 100, 0);
         doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 3, y + 3);
 
-        // Row separator
         doc.setDrawColor(235, 235, 235);
         doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
 
