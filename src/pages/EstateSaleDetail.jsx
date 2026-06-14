@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { getOptimizedImageUrl } from '@/utils/imageOptimizer';
+import { getImageSrc } from '@/utils/imageOptimizer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -537,7 +537,7 @@ export default function EstateSaleDetail() {
                       onClick={() => setModalOpen(true)}
                     >
                       <img
-                        src={getOptimizedImageUrl(typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url, 'gallery')}
+                        src={getImageSrc(sale.images[selectedImage], 'gallery')}
                         alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -585,7 +585,7 @@ export default function EstateSaleDetail() {
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                         {sale.images.slice(0, visibleThumbnails).map((image, index) => {
                           const imageUrl = typeof image === 'string' ? image : image?.url;
-                          const thumbnailUrl = getOptimizedImageUrl(imageUrl, 'thumbnail');
+                          const thumbnailUrl = getImageSrc(image, 'thumbnail');
                           
                           return (
                             <div key={index} className="relative">
@@ -635,7 +635,7 @@ export default function EstateSaleDetail() {
                 <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
                   <div className="relative flex items-center justify-center bg-black h-[70vh] sm:min-h-[85vh] group">
                     <img
-                      src={getOptimizedImageUrl(typeof sale.images[selectedImage] === 'string' ? sale.images[selectedImage] : sale.images[selectedImage]?.url, 'large')}
+                      src={getImageSrc(sale.images[selectedImage], 'large')}
                       alt={typeof sale.images[selectedImage] === 'object' && sale.images[selectedImage]?.name ? `${sale.images[selectedImage].name} — ${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}` : `${sale.title}${saleLocation ? ` estate sale in ${saleLocation}` : ''}`}
                       className="max-h-[70vh] sm:max-h-[85vh] max-w-full object-contain"
                       width="1920"
@@ -872,7 +872,7 @@ export default function EstateSaleDetail() {
                    <div className="grid grid-cols-2 gap-2">
                      {savedImages.map((imageIndex) => {
                        const imageUrl = typeof sale.images[imageIndex] === 'string' ? sale.images[imageIndex] : sale.images[imageIndex]?.url;
-                       const thumbnailUrl = getOptimizedImageUrl(imageUrl, 'thumbnail');
+                       const thumbnailUrl = getImageSrc(sale.images[imageIndex], 'thumbnail');
 
                        return (
                          <button

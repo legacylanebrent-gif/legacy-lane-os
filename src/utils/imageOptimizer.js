@@ -1,32 +1,77 @@
 import { base44 } from '@/api/base44Client';
 
 /**
- * Get optimized image URL for thumbnails
- * @param {string} imageUrl - Original image URL
- * @param {string} size - Size variant: 'thumbnail' (300x300), 'medium' (800x600), 'large' (1920x1080)
- * @returns {string} Optimized image URL
+ * Get the best image source from an image object.
+ * Prefers pre-generated thumbnail_url for small sizes, falls back to CDN params.
+ * @param {object|string} image - Image object with { url, thumbnail_url } or plain URL string
+ * @param {number|string} size - 'thumbnail' (300), 'gallery' (800), 'large' (1920), or pixel number
+ * @returns {string} Best image URL for the requested size
+ */
+export const getImageSrc = (image, size = 'thumbnail') => {
+  if (!image) return null;
+
+  const sizePx = typeof size === 'number' ? size : { thumbnail: 300, gallery: 800, large: 1920 }[size] || 300;
+  const imgObj = typeof image === 'string' ? { url: image } : image;
+
+  // For thumbnails (≤400px): use pre-generated thumbnail_url if available
+  if (sizePx <= 400 && imgObj.thumbnail_url) {
+    return imgObj.thumbnail_url;
+  }
+
+  // Fall back to full URL with CDN resize params
+  const url = imgObj.url || imgObj;
+  if (!url) return null;
+
+  if (url.includes('base44.com') || url.includes('media.base44.com')) {
+    const baseUrl = url.split('?')[0];
+    if (sizePx <= 200) return `${baseUrl}?w=200&h=200&fit=min&auto=compress,format`;
+    if (sizePx <= 400) return `${baseUrl}?w=400&h=400&fit=min&auto=compress,format`;
+    if (sizePx <= 800) return `${baseUrl}?w=800&h=600&fit=max&auto=compress,format`;
+    return `${baseUrl}?w=1920&h=1080&fit=max&auto=compress,format`;
+  }
+
+  return url;
+};
+
+/**
+ * Legacy alias — calls getImageSrc internally.
+ * @deprecated Use getImageSrc instead.
  */
 export const getOptimizedImageUrl = (imageUrl, size = 'thumbnail') => {
   if (!imageUrl) return null;
-  
-  // If it's already a Base44 file URL, we can add transformation params
-  if (imageUrl.includes('base44.com') || imageUrl.includes('media.base44.com')) {
-    const sizeParams = {
-      200: '?w=200&h=200&fit=min&auto=compress,format',
-      400: '?w=400&h=400&fit=min&auto=compress,format',
-      thumbnail: '?w=300&h=300&fit=min&auto=compress,format',
-      gallery: '?w=800&h=600&fit=max&auto=compress,format',
-      medium: '?w=800&h=600&fit=max&auto=compress,format',
-      large: '?w=1920&h=1080&fit=max&auto=compress,format'
+  if (typeof imageUrl === 'object' && imageUrl.thumbnail_url) return imageUrl.thumbnail_url;
+  return getImageSrc(imageUrl, size);
+};
+
+/**
+ * Generate a thumbnail data URL (JPEG, 300px max) from a File object.
+ * Used during image upload to create a pre-generated thumbnail.
+ * @param {File} file - The original image file
+ * @returns {Promise<string>} data URL of the thumbnail
+ */
+export const createThumbnailDataUrl = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSize = 300;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
+        else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
     };
-    
-    // Remove existing query params if any
-    const baseUrl = imageUrl.split('?')[0];
-    return `${baseUrl}${sizeParams[size]}`;
-  }
-  
-  // For external URLs (Unsplash, etc.), return as-is
-  return imageUrl;
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 };
 
 /**

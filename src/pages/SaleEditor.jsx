@@ -24,7 +24,7 @@ import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
-import { getOptimizedImageUrl } from '@/utils/imageOptimizer';
+import { getImageSrc, createThumbnailDataUrl } from '@/utils/imageOptimizer';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -301,9 +301,23 @@ export default function SaleEditor() {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         setUploadProgress({ current: i + 1, total: files.length });
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        newImages.push({ url: file_url, name: '', description: '' });
-        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Upload original and thumbnail in parallel
+        const thumbDataUrl = await createThumbnailDataUrl(file);
+        const thumbBlob = await (await fetch(thumbDataUrl)).blob();
+        const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
+
+        const [originalResult, thumbResult] = await Promise.all([
+          base44.integrations.Core.UploadFile({ file }),
+          base44.integrations.Core.UploadFile({ file: thumbFile })
+        ]);
+
+        newImages.push({
+          url: originalResult.file_url,
+          thumbnail_url: thumbResult.file_url,
+          name: '',
+          description: ''
+        });
       }
       setFormData(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
     } catch (error) {
@@ -719,17 +733,17 @@ Be practical and realistic for an estate sale context.`,
       const textStart = m + thumbSize + 2;
       const colW = (pgW - textStart - m) / 4;
 
-      // Preload all thumbnails in parallel using tiny CDN-resized images (60px)
+      // Preload all thumbnails in parallel using pre-generated thumbnail_url or CDN-resized images
       const thumbDataUrls = {};
       const loadThumb = async (img) => {
-        if (!img.url) return;
+        const src = img.thumbnail_url || (img.url ? getImageSrc(img, 200) : null);
+        if (!src) return;
         try {
-          const thumbUrl = getOptimizedImageUrl(img.url, 60);
           const imageEl = new Image();
           await new Promise((resolve, reject) => {
             imageEl.onload = resolve;
             imageEl.onerror = reject;
-            imageEl.src = thumbUrl;
+            imageEl.src = src;
           });
           const canvas = document.createElement('canvas');
           canvas.width = thumbSize * 3;
@@ -739,10 +753,8 @@ Be practical and realistic for an estate sale context.`,
         } catch (_) {}
       };
 
-      // Load in parallel batches of 10
-      for (let i = 0; i < items.length; i += 10) {
-        await Promise.all(items.slice(i, i + 10).map(loadThumb));
-      }
+      // Load all in parallel (thumbnails are tiny, so no batch limit needed)
+      await Promise.all(items.map(loadThumb));
 
       // Title header
       doc.setFontSize(12);
@@ -1426,7 +1438,7 @@ Return ONLY the description text, no extra commentary.`
                               <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                 {(provided) => (
                                   <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                    <img src={getOptimizedImageUrl(image.url, 200)} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                    <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                     <button
                                       onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
                                       className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1713,7 +1725,7 @@ Return ONLY the description text, no extra commentary.`
                          <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={getOptimizedImageUrl(image.url, 200)} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
+                              <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"

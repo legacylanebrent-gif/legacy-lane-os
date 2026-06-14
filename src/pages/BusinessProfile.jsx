@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
 import ContactFormModal from '@/components/company/ContactFormModal';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-import { getOptimizedImageUrl } from '@/utils/imageOptimizer';
+import { getImageSrc } from '@/utils/imageOptimizer';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -278,7 +278,7 @@ export default function BusinessProfile() {
                        {sale.images && sale.images.length > 0 && (
                          <div className="relative h-48 overflow-hidden">
                            <img
-                             src={getOptimizedImageUrl(typeof sale.images[0] === 'string' ? sale.images[0] : sale.images[0]?.url, 400)}
+                             src={getImageSrc(sale.images[0], 400)}
                              alt={sale.title}
                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                              loading="lazy"
