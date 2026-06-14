@@ -754,10 +754,11 @@ Be practical and realistic for an estate sale context.`,
       const thumbDataUrls = {};
       const loadThumb = async (img) => {
         if (pdfCancelRef.current) return;
-        const src = img.thumbnail_url || (img.url ? getImageSrc(img, 200, { imageThumbnails, index: img._origIdx }) : null);
+        const src = img.url ? getImageSrc(img, 200, { imageThumbnails, index: img._origIdx }) : null;
         if (!src) return;
         try {
           const imageEl = new Image();
+          imageEl.crossOrigin = 'anonymous';
           await new Promise((resolve, reject) => {
             imageEl.onload = resolve;
             imageEl.onerror = reject;
