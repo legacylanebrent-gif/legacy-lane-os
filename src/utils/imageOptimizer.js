@@ -25,17 +25,9 @@ export const getImageSrc = (image, size = 'thumbnail', opts = {}) => {
     }
   }
 
-  // Fall back to full URL with CDN resize params
-  const url = imgObj.url || imgObj;
+  // Fall back to raw URL (CDN params stripped to avoid mobile rendering issues)
+  const url = typeof imgObj.url === 'string' ? imgObj.url : (typeof imgObj === 'string' ? imgObj : null);
   if (!url) return null;
-
-  if (url.includes('base44.com') || url.includes('media.base44.com')) {
-    const baseUrl = url.split('?')[0];
-    if (sizePx <= 200) return `${baseUrl}?width=200&auto=compress,format`;
-    if (sizePx <= 400) return `${baseUrl}?width=400&auto=compress,format`;
-    if (sizePx <= 800) return `${baseUrl}?w=800&h=600&fit=max&auto=compress,format`;
-    return `${baseUrl}?w=1920&h=1080&fit=max&auto=compress,format`;
-  }
 
   return url;
 };
