@@ -1634,7 +1634,7 @@ Return ONLY the description text, no extra commentary.`
                                   {(provided) => (
                                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
                                       <img
-                                        src={getImageSrc(image, 200, { imageThumbnails, index })}
+                                        src={typeof image === 'string' ? image : image.url}
                                         alt={`Photo ${index + 1}`}
                                         className="w-full h-full object-cover"
                                         width="200" height="200" loading="eager"
