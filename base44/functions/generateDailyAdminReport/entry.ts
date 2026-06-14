@@ -30,9 +30,30 @@ Deno.serve(async (req) => {
     // 4. Open Tickets
     const openTickets = await base44.asServiceRole.entities.Ticket.filter({ status: 'open' });
 
-    // 5. New Leads (last 24h)
-    const newLeads = await base44.asServiceRole.entities.Lead.filter({});
-    const recentLeads = newLeads.filter(l => new Date(l.created_date) >= twentyFourHoursAgo);
+    // 5. New Leads (last 24h) — paginate to bypass 5k cap
+    // Sorted newest-first, so we can stop once a batch falls entirely outside the 24h window
+    const PAGE_SIZE = 5000;
+    const recentLeads = [];
+    let skip = 0;
+    while (true) {
+      const batch = await base44.asServiceRole.entities.Lead.filter({}, '-created_date', PAGE_SIZE, skip);
+      if (batch.length === 0) break;
+
+      // Count leads from this batch that are within the 24h window
+      for (const lead of batch) {
+        if (new Date(lead.created_date) >= twentyFourHoursAgo) {
+          recentLeads.push(lead);
+        }
+      }
+
+      // If the OLDEST lead in this batch (last item, sorted desc) is already older than 24h,
+      // all subsequent batches will also be outside the window — stop early
+      const oldestInBatch = new Date(batch[batch.length - 1].created_date);
+      if (oldestInBatch < twentyFourHoursAgo) break;
+
+      if (batch.length < PAGE_SIZE) break;
+      skip += PAGE_SIZE;
+    }
 
     // 6. Credit Accounts
     const creditAccounts = await base44.asServiceRole.entities.OperatorAICreditAccount.filter({ status: 'active' });
