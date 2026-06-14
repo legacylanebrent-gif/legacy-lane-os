@@ -1576,25 +1576,27 @@ Return ONLY the description text, no extra commentary.`
                       items.splice(result.destination.index, 0, reordered);
                       setFormData({ ...formData, images: items });
                     }}>
-                      <Droppable droppableId="images" direction="horizontal">
+                      <Droppable droppableId="images">
                         {(provided) => (
-                          <div {...provided.droppableProps} ref={provided.innerRef} className="grid grid-cols-3 lg:grid-cols-5 gap-3">
-                            {formData.images.map((image, index) => (
-                              <Draggable key={index} draggableId={`image-${index}`} index={index}>
-                                {(provided) => (
-                                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                    <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="eager" />
-                                    <button
-                                      onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
-                                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
+                          <div ref={provided.innerRef} {...provided.droppableProps}>
+                            <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+                              {formData.images.map((image, index) => (
+                                <Draggable key={index} draggableId={`image-${index}`} index={index}>
+                                  {(provided) => (
+                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
+                                      <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="eager" />
+                                      <button
+                                        onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
                           </div>
                         )}
                       </Droppable>
