@@ -652,7 +652,7 @@ export default function EstateSaleDetail() {
                       </button>
                     )}
                     {/* Toggle Description Button */}
-                    {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                    {typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description || sale.images[selectedImage]?.price) && (
                       <button
                         onClick={() => setShowImageDescription(!showImageDescription)}
                         className="absolute top-4 left-16 bg-white/90 rounded-full p-2 shadow-lg hover:bg-white transition-colors z-10"
@@ -683,10 +683,13 @@ export default function EstateSaleDetail() {
                      )}
 
                     {/* Description Overlay */}
-                    {showImageDescription && typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description) && (
+                    {showImageDescription && typeof sale.images[selectedImage] === 'object' && (sale.images[selectedImage]?.name || sale.images[selectedImage]?.description || sale.images[selectedImage]?.price) && (
                       <div className="absolute bottom-16 left-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto">
                         {sale.images[selectedImage]?.name && (
                           <h4 className="text-white font-semibold text-xl mb-2">{sale.images[selectedImage].name}</h4>
+                        )}
+                        {sale.images[selectedImage]?.price > 0 && (
+                          <p className="text-green-400 font-bold text-lg mb-2">${sale.images[selectedImage].price}</p>
                         )}
                         {sale.images[selectedImage]?.description && (
                           <p className="text-white/90 text-sm">{sale.images[selectedImage].description}</p>
