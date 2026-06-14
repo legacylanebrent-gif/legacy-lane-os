@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -723,144 +723,175 @@ Be practical and realistic for an estate sale context.`,
     }
   };
 
-  const handleExportPDF = async () => {
-    // Map filtered items to include their original index in formData.images for thumbnail lookup
+  // Shared PDF builder - returns { doc, itemsWithIndex, thumbDataUrls }
+  const buildPdfData = async (reportProgress = false) => {
     const itemsWithIndex = formData.images
       .map((img, origIdx) => ({ ...img, _origIdx: origIdx }))
       .filter(img => img.name || img.description || img.price || img.ai_first_search_price);
 
     if (itemsWithIndex.length === 0) {
       alert('No items with data to export. Add titles, descriptions, or prices first.');
-      return;
+      return null;
     }
 
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pgW = doc.internal.pageSize.getWidth();
+    const pgH = doc.internal.pageSize.getHeight();
+    const m = 8;
+    const usableH = pgH - m * 2;
+    const rowH = usableH / 40;
+    const thumbSize = rowH - 1;
+    const textStart = m + thumbSize + 2;
+    const colW = (pgW - textStart - m) / 4;
+
+    // Preload thumbnails
+    const thumbDataUrls = {};
+    const loadThumb = async (img) => {
+      if (pdfCancelRef.current) return;
+      const src = img.url ? getImageSrc(img, 200, { imageThumbnails, index: img._origIdx }) : null;
+      if (!src) return;
+      try {
+        const imageEl = new Image();
+        imageEl.crossOrigin = 'anonymous';
+        await new Promise((resolve, reject) => {
+          imageEl.onload = resolve;
+          imageEl.onerror = reject;
+          imageEl.src = src;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = thumbSize * 3;
+        canvas.height = thumbSize * 3;
+        canvas.getContext('2d').drawImage(imageEl, 0, 0, canvas.width, canvas.height);
+        thumbDataUrls[img.url] = canvas.toDataURL('image/jpeg', 0.5);
+      } catch (_) {}
+    };
+
+    let loaded = 0;
+    const total = itemsWithIndex.length;
+    const chunkSize = 10;
+    for (let i = 0; i < itemsWithIndex.length; i += chunkSize) {
+      if (pdfCancelRef.current) return null;
+      const chunk = itemsWithIndex.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(loadThumb));
+      loaded = Math.min(i + chunkSize, total);
+      if (reportProgress) setPdfProgress(Math.round((loaded / total) * 40));
+    }
+
+    if (pdfCancelRef.current) return null;
+
+    // Title header
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text((formData.title || 'Estate Sale Items').substring(0, 50), m, m + 6);
+
+    // Column headers
+    const headerY = m + 12;
+    doc.setFontSize(6);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Name', textStart, headerY);
+    doc.text('Description', textStart + colW, headerY);
+    doc.text('AI Price', textStart + colW * 2, headerY);
+    doc.text('Price', textStart + colW * 3, headerY);
+    doc.setDrawColor(220, 220, 220);
+    doc.line(m, headerY + 1, pgW - m, headerY + 1);
+
+    let y = headerY + 4;
+    let count = 0;
+
+    for (const img of itemsWithIndex) {
+      if (pdfCancelRef.current) return null;
+
+      if (count > 0 && count % 40 === 0) {
+        doc.addPage();
+        y = m + 4;
+        doc.setDrawColor(220, 220, 220);
+        doc.line(m, y - 1, pgW - m, y - 1);
+      }
+
+      if (thumbDataUrls[img.url]) {
+        doc.addImage(thumbDataUrls[img.url], 'JPEG', m, y, thumbSize, thumbSize);
+      }
+
+      doc.setFontSize(7);
+      doc.setTextColor(30, 30, 30);
+      doc.text((img.name || '').substring(0, 25), textStart, y + 3);
+      doc.setFontSize(6);
+      doc.setTextColor(80, 80, 80);
+      doc.text((img.description || '').substring(0, 35), textStart + colW, y + 3);
+
+      doc.setFontSize(7);
+      const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
+      doc.setTextColor(120, 0, 120);
+      doc.text(aiPrice ? `$${aiPrice}` : '-', textStart + colW * 2, y + 3);
+
+      doc.setTextColor(0, 100, 0);
+      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 3, y + 3);
+
+      doc.setDrawColor(235, 235, 235);
+      doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
+
+      y += rowH;
+      count++;
+
+      if (reportProgress && count % 5 === 0) {
+        setPdfProgress(40 + Math.round((count / itemsWithIndex.length) * 60));
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    return { doc, itemsWithIndex, thumbDataUrls };
+  };
+
+  const handleExportPDF = async () => {
     pdfCancelRef.current = false;
     setPdfModalOpen(true);
     setPdfStatus('loading');
     setPdfProgress(0);
 
     try {
-      const doc = new jsPDF('p', 'mm', 'a4');
-      const pgW = doc.internal.pageSize.getWidth();
-      const pgH = doc.internal.pageSize.getHeight();
-      const m = 8;
-      const usableH = pgH - m * 2;
-      const rowH = usableH / 40;
-      const thumbSize = rowH - 1;
-      const textStart = m + thumbSize + 2;
-      const colW = (pgW - textStart - m) / 4;
-
-      // Preload all thumbnails using pre-generated thumbnail URLs (use original index)
-      const thumbDataUrls = {};
-      const loadThumb = async (img) => {
-        if (pdfCancelRef.current) return;
-        const src = img.url ? getImageSrc(img, 200, { imageThumbnails, index: img._origIdx }) : null;
-        if (!src) return;
-        try {
-          const imageEl = new Image();
-          imageEl.crossOrigin = 'anonymous';
-          await new Promise((resolve, reject) => {
-            imageEl.onload = resolve;
-            imageEl.onerror = reject;
-            imageEl.src = src;
-          });
-          const canvas = document.createElement('canvas');
-          canvas.width = thumbSize * 3;
-          canvas.height = thumbSize * 3;
-          canvas.getContext('2d').drawImage(imageEl, 0, 0, canvas.width, canvas.height);
-          thumbDataUrls[img.url] = canvas.toDataURL('image/jpeg', 0.5);
-        } catch (_) {}
-      };
-
-      // Load all in parallel with progress updates
-      let loaded = 0;
-      const total = itemsWithIndex.length;
-      const chunkSize = 10;
-      for (let i = 0; i < itemsWithIndex.length; i += chunkSize) {
-        if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
-        const chunk = itemsWithIndex.slice(i, i + chunkSize);
-        await Promise.all(chunk.map(loadThumb));
-        loaded = Math.min(i + chunkSize, total);
-        setPdfProgress(Math.round((loaded / total) * 40));
-      }
-
-      if (pdfCancelRef.current) { setPdfModalOpen(false); return;
-      }
+      const result = await buildPdfData(true);
+      if (!result) { setPdfModalOpen(false); return; }
 
       setPdfStatus('building');
-
-      // Title header
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text((formData.title || 'Estate Sale Items').substring(0, 50), m, m + 6);
-
-      // Column headers
-      const headerY = m + 12;
-      doc.setFontSize(6);
-      doc.setTextColor(120, 120, 120);
-      doc.text('Name', textStart, headerY);
-      doc.text('Description', textStart + colW, headerY);
-      doc.text('AI Price', textStart + colW * 2, headerY);
-      doc.text('Price', textStart + colW * 3, headerY);
-      doc.setDrawColor(220, 220, 220);
-      doc.line(m, headerY + 1, pgW - m, headerY + 1);
-
-      let y = headerY + 4;
-      let count = 0;
-
-      for (const img of itemsWithIndex) {
-        if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
-
-        if (count > 0 && count % 40 === 0) {
-          doc.addPage();
-          y = m + 4;
-          doc.setDrawColor(220, 220, 220);
-          doc.line(m, y - 1, pgW - m, y - 1);
-        }
-
-        // Add preloaded thumbnail
-        if (thumbDataUrls[img.url]) {
-          doc.addImage(thumbDataUrls[img.url], 'JPEG', m, y, thumbSize, thumbSize);
-        }
-
-        doc.setFontSize(7);
-        doc.setTextColor(30, 30, 30);
-        doc.text((img.name || '').substring(0, 25), textStart, y + 3);
-        doc.setFontSize(6);
-        doc.setTextColor(80, 80, 80);
-        doc.text((img.description || '').substring(0, 35), textStart + colW, y + 3);
-
-        doc.setFontSize(7);
-        const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
-        doc.setTextColor(120, 0, 120);
-        doc.text(aiPrice ? `$${aiPrice}` : '-', textStart + colW * 2, y + 3);
-
-        doc.setTextColor(0, 100, 0);
-        doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 3, y + 3);
-
-        doc.setDrawColor(235, 235, 235);
-        doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
-
-        y += rowH;
-        count++;
-
-        // Update progress every 5 items
-        if (count % 5 === 0) {
-          setPdfProgress(40 + Math.round((count / itemsWithIndex.length) * 60));
-          await new Promise(r => setTimeout(r, 0)); // let React re-render
-        }
-      }
-
       setPdfProgress(100);
       setPdfStatus('done');
 
-      // Short delay so user sees "Ready!" then auto-download
       setTimeout(() => {
-        doc.save(`${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-items.pdf`);
+        const filename = `${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-pricing.pdf`;
+        result.doc.save(filename);
         setPdfModalOpen(false);
       }, 600);
     } catch (err) {
       console.error('PDF export error:', err);
+      alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
+      setPdfModalOpen(false);
+    }
+  };
+
+  const handlePrintPDF = async () => {
+    pdfCancelRef.current = false;
+    setPdfModalOpen(true);
+    setPdfStatus('loading');
+    setPdfProgress(0);
+
+    try {
+      const result = await buildPdfData(true);
+      if (!result) { setPdfModalOpen(false); return; }
+
+      setPdfStatus('building');
+      setPdfProgress(100);
+      setPdfStatus('done');
+
+      setTimeout(() => {
+        const blobUrl = result.doc.output('bloburl');
+        const printWindow = window.open(blobUrl, '_blank');
+        if (printWindow) {
+          printWindow.onload = () => printWindow.print();
+        }
+        setPdfModalOpen(false);
+      }, 600);
+    } catch (err) {
+      console.error('PDF print error:', err);
       alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
       setPdfModalOpen(false);
     }
@@ -1582,10 +1613,16 @@ Return ONLY the description text, no extra commentary.`
                 ) : (
                   <div className="space-y-4">
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" size="sm" className="text-green-700 border-green-600 w-full" onClick={handleExportPDF}>
-                      <FileDown className="w-4 h-4 mr-2" />
-                      Export Items to PDF
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="text-green-700 border-green-600 flex-1" onClick={handleExportPDF}>
+                        <FileDown className="w-4 h-4 mr-2" />
+                        Export Pricing Sheet
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-blue-700 border-blue-600 flex-1" onClick={handlePrintPDF}>
+                        <Printer className="w-4 h-4 mr-2" />
+                        Print Pricing Sheet
+                      </Button>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
