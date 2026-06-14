@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -894,6 +894,17 @@ Be practical and realistic for an estate sale context.`,
       console.error('PDF print error:', err);
       alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
       setPdfModalOpen(false);
+    }
+  };
+
+  const toggleAllCards = () => {
+    const allExpanded = formData.images.length > 0 && formData.images.every((_, i) => expandedCards[i]);
+    if (allExpanded) {
+      setExpandedCards({});
+    } else {
+      const all = {};
+      formData.images.forEach((_, i) => { all[i] = true; });
+      setExpandedCards(all);
     }
   };
 
@@ -1895,6 +1906,18 @@ Return ONLY the description text, no extra commentary.`
                     ) : null}
 
                     <div className={step1Completed ? "space-y-3" : "hidden"}>
+                     {formData.images.length > 1 && (
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         className="text-xs text-slate-500 hover:text-slate-700 w-full"
+                         onClick={toggleAllCards}
+                       >
+                         {formData.images.every((_, i) => expandedCards[i])
+                           ? <><ChevronsDownUp className="w-3.5 h-3.5 mr-1" /> Collapse All</>
+                           : <><ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand All</>}
+                       </Button>
+                     )}
                     {formData.images.map((image, index) => {
                        const isExpanded = expandedCards[index];
                        return (
