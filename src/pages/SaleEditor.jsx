@@ -1623,22 +1623,20 @@ Return ONLY the description text, no extra commentary.`
                   <p className="text-slate-500 text-center py-8">No photos added yet</p>
                 ) : (
                   <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="text-green-700 border-green-600 flex-1" onClick={handleExportPDF}>
-                        <FileDown className="w-4 h-4 mr-2" />
-                        Export Pricing Sheet
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-blue-700 border-blue-600 flex-1" onClick={handlePrintPDF}>
-                        <Printer className="w-4 h-4 mr-2" />
-                        Print Pricing Sheet
-                      </Button>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-amber-700 border-amber-500 w-full"
-                      onClick={async () => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                     <Button variant="outline" size="sm" className="text-green-700 border-green-600" onClick={handleExportPDF}>
+                       <FileDown className="w-4 h-4 mr-2" />
+                       Export Pricing Sheet
+                     </Button>
+                     <Button variant="outline" size="sm" className="text-blue-700 border-blue-600" onClick={handlePrintPDF}>
+                       <Printer className="w-4 h-4 mr-2" />
+                       Print Pricing Sheet
+                     </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     className="text-amber-700 border-amber-500"
+                     onClick={async () => {
                         if (!saleId) { alert('Save the sale first'); return; }
                         const missingThumbs = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
                         if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
@@ -1838,33 +1836,33 @@ Return ONLY the description text, no extra commentary.`
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
                         runBatchRef.current = runBatch;
                         return (
-                           <div className="flex flex-col gap-2">
-                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 w-full font-semibold" onClick={() => setShowSkipGuideModal(true)}>
+                           <>
+                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 font-semibold" onClick={() => setShowSkipGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
                                Flag Photos to Skip Search
                              </Button>
                              {step1Completed && (<>
-                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 w-full" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
+                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
                                {quickScanning
                                  ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
                                  : `Quick AI Scan${unscanned > 0 ? ` (${unscanned} to scan)` : ' All'}${multiItemCount > 0 ? ` · ${multiItemCount} multi-item flagged` : ''}`}
                              </Button>
-                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 w-full" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
+                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
                                <span className="mr-2 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
                                {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `Deep Search for Pricing & Descriptions${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
                              </Button>
                             {resumeIndex !== null && resumeIndex !== undefined && (
-                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 w-full" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
+                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
                                 <Scan className="w-4 h-4 mr-2" />
                                 Resume from image {resumeIndex + 1}
                               </Button>
                             )}
                             </>)}
-                          </div>
+                          </>
                         );
                       })()}
-                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full" onClick={async () => {
+                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600" onClick={async () => {
                         if (!window.confirm('Step 4: Regenerate descriptions for all items that have a title?')) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
