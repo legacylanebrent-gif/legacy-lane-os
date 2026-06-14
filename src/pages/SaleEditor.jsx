@@ -763,7 +763,7 @@ Be practical and realistic for an estate sale context.`,
     const pgH = doc.internal.pageSize.getHeight();
     const m = 8;
     const usableH = pgH - m * 2;
-    const rowH = usableH / 40;
+    const rowH = usableH / 20;
     const thumbSize = rowH - 1;
     const textStart = m + thumbSize + 2;
     const colW = (pgW - textStart - m) / 4;
@@ -825,7 +825,7 @@ Be practical and realistic for an estate sale context.`,
     for (const img of itemsWithIndex) {
       if (pdfCancelRef.current) return null;
 
-      if (count > 0 && count % 40 === 0) {
+      if (count > 0 && count % 20 === 0) {
         doc.addPage();
         y = m + 4;
         doc.setDrawColor(220, 220, 220);
