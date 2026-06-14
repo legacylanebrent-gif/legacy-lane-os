@@ -195,18 +195,27 @@ export default function SaleEditor() {
 
   useEffect(() => {
     const init = async () => {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      try {
+        const currentUser = await base44.auth.me();
+        if (!currentUser) {
+          base44.auth.redirectToLogin('/SaleEditor');
+          return;
+        }
+        setUser(currentUser);
 
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('saleId');
-      if (id) {
-        setSaleId(id);
-        await loadSale(id);
-      } else {
-        setLoading(false);
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('saleId');
+        if (id) {
+          setSaleId(id);
+          await loadSale(id);
+        } else {
+          setLoading(false);
+        }
+        setTimeout(() => { isInitialLoad.current = false; }, 500);
+      } catch (err) {
+        console.error('SaleEditor init error:', err);
+        base44.auth.redirectToLogin('/SaleEditor');
       }
-      setTimeout(() => { isInitialLoad.current = false; }, 500);
     };
     init();
   }, []);
