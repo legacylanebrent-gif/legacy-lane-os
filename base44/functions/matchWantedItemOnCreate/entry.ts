@@ -162,9 +162,24 @@ Deno.serve(async (req) => {
 
     // Sort and take top 5
     matches.sort((a, b) => b.score - a.score);
-    const topMatches = matches.slice(0, 5);
+    const allTopMatches = matches.slice(0, 5);
 
-    if (topMatches.length > 0) {
+    // Deduplicate: when called via entity automation (instant match on create),
+    // skip matches already notified (fresh items won't have any history anyway)
+    const alreadyNotified = new Set(wantedItem.notified_match_ids || []);
+    const newMatches = allTopMatches.filter(m => {
+      const key = `${m.type}:${m.id}`;
+      return !alreadyNotified.has(key);
+    });
+
+    if (newMatches.length > 0) {
+      const topMatches = newMatches;
+      const newMatchKeys = newMatches.map(m => `${m.type}:${m.id}`);
+
+      // Persist notified match IDs so future daily runs skip these
+      await base44.asServiceRole.entities.WantedItem.update(wantedItem.id, {
+        notified_match_ids: [...(wantedItem.notified_match_ids || []), ...newMatchKeys],
+      });
       const bestMatch = topMatches[0];
       const matchCount = topMatches.length;
 

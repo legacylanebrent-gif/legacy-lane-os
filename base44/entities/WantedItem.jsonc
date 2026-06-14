@@ -90,6 +90,14 @@
     "public_visibility": {
       "type": "boolean",
       "default": true
+    },
+    "notified_match_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Keys of already-notified matches (e.g. 'estate_sale:saleId', 'marketplace:itemId') to prevent duplicate notifications"
     }
   },
   "required": [

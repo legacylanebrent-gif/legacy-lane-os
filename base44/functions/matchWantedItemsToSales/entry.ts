@@ -178,7 +178,21 @@ Deno.serve(async (req) => {
         matches.sort((a, b) => b.score - a.score);
         const topMatches = matches.slice(0, 5);
 
-        if (topMatches.length > 0) {
+        // Deduplicate: skip matches that were already notified for this wanted item
+        const alreadyNotified = new Set(wantedItem.notified_match_ids || []);
+        const newMatches = topMatches.filter(m => {
+          const key = `${m.type}:${m.id}`;
+          return !alreadyNotified.has(key);
+        });
+
+        if (newMatches.length > 0) {
+          const topMatches = newMatches;
+          const newMatchKeys = newMatches.map(m => `${m.type}:${m.id}`);
+
+          // Update the wanted item with newly notified match IDs
+          await base44.asServiceRole.entities.WantedItem.update(wantedItem.id, {
+            notified_match_ids: [...(wantedItem.notified_match_ids || []), ...newMatchKeys],
+          });
           const bestMatch = topMatches[0];
           const matchCount = topMatches.length;
 
