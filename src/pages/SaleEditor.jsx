@@ -1912,8 +1912,8 @@ Return ONLY the description text, no extra commentary.`
                          onClick={toggleAllCards}
                        >
                          {formData.images.every((_, i) => expandedCards[i])
-                           ? <><ChevronsDownUp className="w-3.5 h-3.5 mr-1" /> Collapse All</>
-                           : <><ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand All</>}
+                           ? <><ChevronsDownUp className="w-3.5 h-3.5 mr-1" /> Collapse all Item Descriptions</>
+                           : <><ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand all Item Descriptions</>}
                        </Button>
                      )}
                     {formData.images.map((image, index) => {
