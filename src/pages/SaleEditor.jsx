@@ -77,6 +77,7 @@ export default function SaleEditor() {
   const [step1Completed, setStep1Completed] = useState(false);
   const [showQuickScanGuideModal, setShowQuickScanGuideModal] = useState(false);
   const [showDeepSearchGuideModal, setShowDeepSearchGuideModal] = useState(false);
+  const [expandedCards, setExpandedCards] = useState({});
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -1814,9 +1815,27 @@ Return ONLY the description text, no extra commentary.`
                       <p className="text-slate-500 text-sm py-4">Save the sale first to begin Step 1 photo review.</p>
                     ) : null}
 
-                    <div className={step1Completed ? "space-y-4" : "hidden"}>
-                    {formData.images.map((image, index) => (
-                       <Card key={index} className="p-4 overflow-hidden">
+                    <div className={step1Completed ? "space-y-3" : "hidden"}>
+                    {formData.images.map((image, index) => {
+                       const isExpanded = expandedCards[index];
+                       return (
+                       <Card key={index} className="overflow-hidden">
+                         <button
+                           type="button"
+                           onClick={() => setExpandedCards(prev => ({ ...prev, [index]: !prev[index] }))}
+                           className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
+                         >
+                           <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" decoding="async" />
+                           <span className="flex-1 text-sm font-medium text-slate-700 truncate">
+                             {image.name || `Photo ${index + 1}`}
+                           </span>
+                           {image.price > 0 && <span className="text-xs font-semibold text-green-700">${image.price}</span>}
+                           {image.skip_item && <Badge variant="outline" className="text-red-500 border-red-300 text-[10px]">Skipped</Badge>}
+                           {multiItemFlags[index] && <Badge variant="outline" className="text-teal-500 border-teal-300 text-[10px]">MULTI</Badge>}
+                           <span className="text-xs text-slate-400">{isExpanded ? '▲' : '▼'}</span>
+                         </button>
+                         {isExpanded && (
+                           <div className="px-3 pb-3">
                          <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
@@ -2058,8 +2077,10 @@ Return ONLY the description text, no extra commentary.`
                               </div>
                               </div>}
                               </div>
+                              </div>)}
                               </Card>
-                              ))}
+                       );
+                    })}
                     </div>
 
                   </div>
