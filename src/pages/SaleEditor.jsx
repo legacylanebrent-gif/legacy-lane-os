@@ -328,37 +328,53 @@ export default function SaleEditor() {
     if (files.length === 0) return;
     setUploadingImages(true);
     setUploadProgress({ current: 0, total: files.length });
+
+    const BATCH_SIZE = 10;
+    const DELAY_MS = 5000;
+
     try {
-      const newImages = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        setUploadProgress({ current: i + 1, total: files.length });
+      for (let batchStart = 0; batchStart < files.length; batchStart += BATCH_SIZE) {
+        const batchFiles = files.slice(batchStart, batchStart + BATCH_SIZE);
+        const batchImages = [];
 
-        // Resize original to max 800px and thumbnail to max 200px
-        const [resizedDataUrl, thumbDataUrl] = await Promise.all([
-          createResizedImageDataUrl(file, 800),
-          createThumbnailDataUrl(file)
-        ]);
-        const [resizedBlob, thumbBlob] = await Promise.all([
-          (await fetch(resizedDataUrl)).blob(),
-          (await fetch(thumbDataUrl)).blob()
-        ]);
-        const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-        const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
+        for (let j = 0; j < batchFiles.length; j++) {
+          const file = batchFiles[j];
+          const globalIndex = batchStart + j;
+          setUploadProgress({ current: globalIndex + 1, total: files.length });
 
-        const [originalResult, thumbResult] = await Promise.all([
-          base44.integrations.Core.UploadFile({ file: resizedFile }),
-          base44.integrations.Core.UploadFile({ file: thumbFile })
-        ]);
+          // Resize original to max 800px and thumbnail to max 200px
+          const [resizedDataUrl, thumbDataUrl] = await Promise.all([
+            createResizedImageDataUrl(file, 800),
+            createThumbnailDataUrl(file)
+          ]);
+          const [resizedBlob, thumbBlob] = await Promise.all([
+            (await fetch(resizedDataUrl)).blob(),
+            (await fetch(thumbDataUrl)).blob()
+          ]);
+          const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
+          const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
 
-        newImages.push({
-          url: originalResult.file_url,
-          thumbnail_url: thumbResult.file_url,
-          name: '',
-          description: ''
-        });
+          const [originalResult, thumbResult] = await Promise.all([
+            base44.integrations.Core.UploadFile({ file: resizedFile }),
+            base44.integrations.Core.UploadFile({ file: thumbFile })
+          ]);
+
+          batchImages.push({
+            url: originalResult.file_url,
+            thumbnail_url: thumbResult.file_url,
+            name: '',
+            description: ''
+          });
+        }
+
+        // Show thumbnails for this batch immediately
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...batchImages] }));
+
+        // Wait 5s between batches (skip delay after the last batch)
+        if (batchStart + BATCH_SIZE < files.length) {
+          await new Promise(r => setTimeout(r, DELAY_MS));
+        }
       }
-      setFormData(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
     } catch (error) {
       console.error('Error uploading images:', error);
       alert('Failed to upload images');
