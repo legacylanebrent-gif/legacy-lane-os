@@ -25,6 +25,7 @@ import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 import { getImageSrc, createThumbnailDataUrl } from '@/utils/imageOptimizer';
+import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -79,6 +80,10 @@ export default function SaleEditor() {
   const [showDeepSearchGuideModal, setShowDeepSearchGuideModal] = useState(false);
   const [expandedCards, setExpandedCards] = useState({});
   const [imageThumbnails, setImageThumbnails] = useState({});
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState('loading');
+  const [pdfProgress, setPdfProgress] = useState(0);
+  const pdfCancelRef = useRef(false);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
   const saleIdRef = useRef(null);
@@ -725,6 +730,11 @@ Be practical and realistic for an estate sale context.`,
       return;
     }
 
+    pdfCancelRef.current = false;
+    setPdfModalOpen(true);
+    setPdfStatus('loading');
+    setPdfProgress(0);
+
     try {
       const doc = new jsPDF('p', 'mm', 'a4');
       const pgW = doc.internal.pageSize.getWidth();
@@ -736,9 +746,10 @@ Be practical and realistic for an estate sale context.`,
       const textStart = m + thumbSize + 2;
       const colW = (pgW - textStart - m) / 4;
 
-      // Preload all thumbnails in parallel using pre-generated thumbnail_url or CDN-resized images
+      // Preload all thumbnails using pre-generated thumbnail URLs
       const thumbDataUrls = {};
       const loadThumb = async (img, idx) => {
+        if (pdfCancelRef.current) return;
         const src = img.thumbnail_url || (img.url ? getImageSrc(img, 200, { imageThumbnails, index: idx }) : null);
         if (!src) return;
         try {
@@ -756,8 +767,22 @@ Be practical and realistic for an estate sale context.`,
         } catch (_) {}
       };
 
-      // Load all in parallel (thumbnails are tiny, so no batch limit needed)
-      await Promise.all(items.map((img, idx) => loadThumb(img, idx)));
+      // Load all in parallel with progress updates
+      let loaded = 0;
+      const total = items.length;
+      const chunkSize = 10;
+      for (let i = 0; i < items.length; i += chunkSize) {
+        if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
+        const chunk = items.slice(i, i + chunkSize).map((img, relIdx) => loadThumb(img, i + relIdx));
+        await Promise.all(chunk);
+        loaded = Math.min(i + chunkSize, total);
+        setPdfProgress(Math.round((loaded / total) * 40));
+      }
+
+      if (pdfCancelRef.current) { setPdfModalOpen(false); return;
+      }
+
+      setPdfStatus('building');
 
       // Title header
       doc.setFontSize(12);
@@ -779,6 +804,8 @@ Be practical and realistic for an estate sale context.`,
       let count = 0;
 
       for (const img of items) {
+        if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
+
         if (count > 0 && count % 40 === 0) {
           doc.addPage();
           y = m + 4;
@@ -811,12 +838,26 @@ Be practical and realistic for an estate sale context.`,
 
         y += rowH;
         count++;
+
+        // Update progress every 5 items
+        if (count % 5 === 0) {
+          setPdfProgress(40 + Math.round((count / items.length) * 60));
+          await new Promise(r => setTimeout(r, 0)); // let React re-render
+        }
       }
 
-      doc.save(`${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-items.pdf`);
+      setPdfProgress(100);
+      setPdfStatus('done');
+
+      // Short delay so user sees "Ready!" then auto-download
+      setTimeout(() => {
+        doc.save(`${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-items.pdf`);
+        setPdfModalOpen(false);
+      }, 600);
     } catch (err) {
       console.error('PDF export error:', err);
       alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
+      setPdfModalOpen(false);
     }
   };
 
@@ -926,6 +967,14 @@ Be practical and realistic for an estate sale context.`,
           onClose={() => setSelectedPricingImage(null)}
           photoPricing={photoPricing}
           imageUrl={selectedPricingImage}
+        />
+
+        <PdfGenerationModal
+          open={pdfModalOpen}
+          onClose={() => { pdfCancelRef.current = true; setPdfModalOpen(false); }}
+          status={pdfStatus}
+          progress={pdfProgress}
+          onCancel={() => { pdfCancelRef.current = true; }}
         />
 
         <StarterPublishFeeModal
