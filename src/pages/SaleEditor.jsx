@@ -1973,9 +1973,11 @@ Return ONLY the description text, no extra commentary.`
                               onClick={async () => {
                                 const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
                                 const updatedImages = [...formData.images];
-                                updatedImages[index] = { ...updatedImages[index], name: '', description: '', price: null };
+                                updatedImages[index] = { ...updatedImages[index], name: '', description: '', price: null, ai_first_search_price: null };
                                 setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
                                 setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                setSerpResults(prev => { const next = { ...prev }; delete next[image.url]; return next; });
+                                setMultiItemResults(prev => { const next = { ...prev }; delete next[index]; return next; });
                                 setFormData(prev => ({ ...prev, images: updatedImages }));
                                 if (currentSaleId) {
                                   await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
