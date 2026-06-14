@@ -81,6 +81,9 @@ export default function SaleEditor() {
   const [expandedCards, setExpandedCards] = useState({});
   const [imageThumbnails, setImageThumbnails] = useState({});
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+  const [imageDebugInfo, setImageDebugInfo] = useState([]);
+  const [imageErrors, setImageErrors] = useState({});
   const [pdfStatus, setPdfStatus] = useState('loading');
   const [pdfProgress, setPdfProgress] = useState(0);
   const pdfCancelRef = useRef(false);
@@ -109,6 +112,18 @@ export default function SaleEditor() {
   useEffect(() => {
     saleIdRef.current = saleId;
   }, [saleId]);
+
+  // Debug: track image src info whenever images change
+  useEffect(() => {
+    const info = formData.images.slice(0, 5).map((img, i) => {
+      const src = getImageSrc(img, 200, { imageThumbnails, index: i });
+      const hasUrl = !!img.url;
+      const hasThumb = !!img.thumbnail_url;
+      const hasMapThumb = !!(imageThumbnails && imageThumbnails[String(i)]);
+      return { index: i, src: src ? `${src.substring(0, 80)}...` : 'NULL', hasUrl, hasThumb, hasMapThumb, urlType: typeof img.url };
+    });
+    setImageDebugInfo(info);
+  }, [formData.images, imageThumbnails]);
 
   // Keep formDataRef in sync so auto-save always writes the latest state
   useEffect(() => {
@@ -1566,6 +1581,31 @@ Return ONLY the description text, no extra commentary.`
                     <p className="text-xs text-slate-600 text-center">Uploading {uploadProgress.current} of {uploadProgress.total}...</p>
                   </div>
                 )}
+                {/* TEMPORARY DEBUG PANEL — remove after diagnosing mobile image issue */}
+                <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-xs font-mono space-y-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-yellow-800">🔍 Image Debug</span>
+                    <button onClick={() => setShowDebug(!showDebug)} className="text-yellow-600 text-[10px] underline">{showDebug ? 'Collapse' : 'Expand'}</button>
+                  </div>
+                  <p className="text-yellow-700">Total images: {formData.images.length} | Thumbnail map keys: {Object.keys(imageThumbnails).length}</p>
+                  <p className="text-yellow-700">UserAgent: {navigator.userAgent.substring(0, 60)}</p>
+                  {Object.keys(imageErrors).filter(k => imageErrors[k]).length > 0 && (
+                    <p className="text-red-600 font-bold">❌ Load errors: {Object.keys(imageErrors).filter(k => imageErrors[k]).length} images</p>
+                  )}
+                  {Object.entries(imageErrors).filter(([k, v]) => v).map(([idx, err]) => (
+                    <p key={idx} className="text-red-500 text-[10px]">Img {idx}: {err}</p>
+                  ))}
+                  {showDebug && imageDebugInfo.map((d, i) => (
+                    <div key={i} className="border-t border-yellow-300 pt-1 space-y-0.5">
+                      <p className="text-yellow-800"><b>Img {d.index}:</b> hasUrl={String(d.hasUrl)} hasThumb={String(d.hasThumb)} hasMapThumb={String(d.hasMapThumb)} urlType={d.urlType}</p>
+                      <p className="text-yellow-700 break-all">Src: {d.src}</p>
+                    </div>
+                  ))}
+                  {!showDebug && imageDebugInfo.length > 0 && (
+                    <p className="text-yellow-600">Img 0 src: {imageDebugInfo[0]?.src || 'NONE'} (click Expand for all)</p>
+                  )}
+                </div>
+                {/* END DEBUG PANEL */}
                 {formData.images.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
@@ -1584,7 +1624,17 @@ Return ONLY the description text, no extra commentary.`
                                 <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                   {(provided) => (
                                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                      <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="eager" />
+                                      <img
+                                        src={getImageSrc(image, 200, { imageThumbnails, index })}
+                                        alt={`Photo ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                        width="200" height="200" loading="eager"
+                                        onLoad={() => setImageErrors(prev => ({ ...prev, [index]: false }))}
+                                        onError={(e) => {
+                                          const errMsg = e.target.src ? `${e.target.src.substring(0, 60)}...` : 'empty src';
+                                          setImageErrors(prev => ({ ...prev, [index]: errMsg }));
+                                        }}
+                                      />
                                       <button
                                         onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
                                         className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
