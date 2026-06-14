@@ -1409,6 +1409,57 @@ Return ONLY the description text, no extra commentary.`
         <Card>
           <CardContent className="pt-6 space-y-4">
             {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
+            {(() => {
+              const missingThumbCount = formData.images.filter(img => img.url && !img.thumbnail_url).length;
+              const total = formData.images.length;
+              return (
+                <>
+                  {missingThumbCount > 0 && total > 0 && (
+                    <div className="flex items-center justify-between bg-amber-50 border border-amber-300 rounded-lg px-4 py-2 mb-2">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">{missingThumbCount} of {total}</span> images need thumbnails for fast loading
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-amber-700 border-amber-400 hover:bg-amber-100 h-7 text-xs"
+                        onClick={async () => {
+                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s)?`)) return;
+                          setUploadingImages(true);
+                          setUploadProgress({ current: 0, total: missingThumbCount });
+                          const updated = [...formData.images];
+                          let done = 0;
+                          for (let i = 0; i < formData.images.length; i++) {
+                            const img = formData.images[i];
+                            if (!img.url || img.thumbnail_url) continue;
+                            try {
+                              const resp = await fetch(img.url);
+                              const blob = await resp.blob();
+                              const file = new File([blob], `img_${i}.jpg`, { type: blob.type || 'image/jpeg' });
+                              const thumbDataUrl = await createThumbnailDataUrl(file);
+                              const thumbBlob = await (await fetch(thumbDataUrl)).blob();
+                              const thumbFile = new File([thumbBlob], `thumb_${i}.jpg`, { type: 'image/jpeg' });
+                              const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
+                              updated[i] = { ...updated[i], thumbnail_url: thumbResult.file_url };
+                              done++;
+                              setUploadProgress({ current: done, total: missingThumbCount });
+                            } catch (e) { console.error(e); }
+                          }
+                          setFormData(prev => ({ ...prev, images: updated }));
+                          if (saleId) await base44.entities.EstateSale.update(saleId, { images: updated });
+                          setUploadingImages(false);
+                          setUploadProgress({ current: 0, total: 0 });
+                          alert(`Done! ${done} thumbnails generated.`);
+                        }}
+                        disabled={uploadingImages}
+                      >
+                        {uploadingImages ? `...${uploadProgress.current}/${uploadProgress.total}` : 'Fix Now'}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
               <TabsList className="w-full">
                 <TabsTrigger value="thumbnails" className="flex-1 text-xs sm:text-sm">Thumbnails</TabsTrigger>
@@ -1438,7 +1489,7 @@ Return ONLY the description text, no extra commentary.`
                               <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                 {(provided) => (
                                   <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                    <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                    <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="lazy" decoding="async" />
                                     <button
                                       onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
                                       className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1769,7 +1820,7 @@ Return ONLY the description text, no extra commentary.`
                          <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
+                              <img src={getImageSrc(image, 200)} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="lazy" decoding="async" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
