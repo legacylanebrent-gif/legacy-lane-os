@@ -1483,6 +1483,50 @@ Return ONLY the description text, no extra commentary.`
                       <FileDown className="w-4 h-4 mr-2" />
                       Export Items to PDF
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-amber-700 border-amber-500 w-full"
+                      onClick={async () => {
+                        const missingThumbs = formData.images.filter(img => !img.thumbnail_url);
+                        if (missingThumbs.length === 0) {
+                          alert('All images already have thumbnails.');
+                          return;
+                        }
+                        if (!window.confirm(`Generate thumbnails for ${missingThumbs.length} image(s)? This will be fast.`)) return;
+                        setUploadingImages(true);
+                        setUploadProgress({ current: 0, total: missingThumbs.length });
+                        const updated = [...formData.images];
+                        let done = 0;
+                        for (let i = 0; i < formData.images.length; i++) {
+                          const img = formData.images[i];
+                          if (img.thumbnail_url) continue;
+                          try {
+                            const resp = await fetch(img.url);
+                            const blob = await resp.blob();
+                            const file = new File([blob], `img_${i}.${blob.type.split('/')[1] || 'jpg'}`, { type: blob.type });
+                            const thumbDataUrl = await createThumbnailDataUrl(file);
+                            const thumbBlob = await (await fetch(thumbDataUrl)).blob();
+                            const thumbFile = new File([thumbBlob], `thumb_${i}.jpg`, { type: 'image/jpeg' });
+                            const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
+                            updated[i] = { ...updated[i], thumbnail_url: thumbResult.file_url };
+                            done++;
+                            setUploadProgress({ current: done, total: missingThumbs.length });
+                          } catch (e) {
+                            console.error(`Thumbnail failed for image ${i}:`, e.message);
+                          }
+                        }
+                        setFormData(prev => ({ ...prev, images: updated }));
+                        if (saleId) await base44.entities.EstateSale.update(saleId, { images: updated });
+                        setUploadingImages(false);
+                        setUploadProgress({ current: 0, total: 0 });
+                        alert(`Thumbnails generated for ${done} image(s)!`);
+                      }}
+                      disabled={uploadingImages}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {uploadingImages ? `Processing... (${uploadProgress.current}/${uploadProgress.total})` : 'Regenerate Thumbnails'}
+                    </Button>
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
                       if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
