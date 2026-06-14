@@ -367,8 +367,16 @@ export default function SaleEditor() {
           });
         }
 
-        // Show thumbnails for this batch immediately
-        setFormData(prev => ({ ...prev, images: [...prev.images, ...batchImages] }));
+        // Update state and persist to DB so thumbnails appear immediately
+        setFormData(prev => {
+          const updated = { ...prev, images: [...prev.images, ...batchImages] };
+          // Save to database if the sale already exists
+          const currentSaleId = saleIdRef.current;
+          if (currentSaleId) {
+            base44.entities.EstateSale.update(currentSaleId, { images: updated.images });
+          }
+          return updated;
+        });
 
         // Wait 5s between batches (skip delay after the last batch)
         if (batchStart + BATCH_SIZE < files.length) {
