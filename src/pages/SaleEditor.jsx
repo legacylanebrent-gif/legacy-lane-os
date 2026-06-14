@@ -1583,7 +1583,7 @@ Return ONLY the description text, no extra commentary.`
                               <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                 {(provided) => (
                                   <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                    <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="lazy" decoding="async" />
+                                    <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" width="200" height="200" loading="eager" />
                                     <button
                                       onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
                                       className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1925,7 +1925,7 @@ Return ONLY the description text, no extra commentary.`
                            onClick={() => setExpandedCards(prev => prev[index] ? {} : { [index]: true })}
                            className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                          >
-                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" decoding="async" />
+                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="eager" />
                            <span className="flex-1 text-sm font-medium text-slate-700 truncate">
                              {image.name || `Photo ${index + 1}`}
                            </span>
@@ -1939,7 +1939,7 @@ Return ONLY the description text, no extra commentary.`
                          <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="lazy" decoding="async" />
+                              <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="eager" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"
