@@ -1968,6 +1968,23 @@ Return ONLY the description text, no extra commentary.`
                                 >
                                 {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
                             </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
+                                const updatedImages = [...formData.images];
+                                updatedImages[index] = { ...updatedImages[index], name: '', description: '', price: null };
+                                setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
+                                setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
+                                setFormData(prev => ({ ...prev, images: updatedImages }));
+                                if (currentSaleId) {
+                                  await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+                                }
+                              }}
+                              className="w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-500 hover:text-red-700"
+                            >
+                              ✕ Clear Item Data
+                            </button>
                           </div>
                           {step1Completed && <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
                             <div>
