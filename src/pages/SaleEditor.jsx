@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2 } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
@@ -700,6 +701,95 @@ Be practical and realistic for an estate sale context.`,
     }
   };
 
+  const handleExportPDF = async () => {
+    const items = formData.images.filter(img => img.name || img.description || img.price || img.ai_first_search_price);
+    if (items.length === 0) {
+      alert('No items with data to export. Add titles, descriptions, or prices first.');
+      return;
+    }
+
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pgW = doc.internal.pageSize.getWidth();
+    const pgH = doc.internal.pageSize.getHeight();
+    const m = 8;
+    const usableH = pgH - m * 2;
+    const rowH = usableH / 40;
+    const thumbSize = rowH - 1;
+    const textStart = m + thumbSize + 2;
+    const colW = (pgW - textStart - m) / 4;
+
+    // Title header
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text((formData.title || 'Estate Sale Items').substring(0, 50), m, m + 6);
+
+    // Column headers
+    const headerY = m + 12;
+    doc.setFontSize(6);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Name', textStart, headerY);
+    doc.text('Description', textStart + colW, headerY);
+    doc.text('AI Price', textStart + colW * 2, headerY);
+    doc.text('Price', textStart + colW * 3, headerY);
+    doc.setDrawColor(220, 220, 220);
+    doc.line(m, headerY + 1, pgW - m, headerY + 1);
+
+    let y = headerY + 4;
+    let count = 0;
+
+    for (const img of items) {
+      if (count > 0 && count % 40 === 0) {
+        doc.addPage();
+        y = m + 4;
+        doc.setDrawColor(220, 220, 220);
+        doc.line(m, y - 1, pgW - m, y - 1);
+      }
+
+      // Thumbnail
+      if (img.url) {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = thumbSize * 3;
+          canvas.height = thumbSize * 3;
+          const ctx = canvas.getContext('2d');
+          const imageEl = new Image();
+          imageEl.crossOrigin = 'anonymous';
+          await new Promise((resolve, reject) => {
+            imageEl.onload = resolve;
+            imageEl.onerror = reject;
+            imageEl.src = img.url;
+          });
+          ctx.drawImage(imageEl, 0, 0, canvas.width, canvas.height);
+          doc.addImage(canvas.toDataURL('image/jpeg', 0.6), 'JPEG', m, y, thumbSize, thumbSize);
+        } catch (_) { /* skip failed image */ }
+      }
+
+      doc.setFontSize(7);
+      doc.setTextColor(30, 30, 30);
+      doc.text((img.name || '').substring(0, 25), textStart, y + 3);
+      doc.setFontSize(6);
+      doc.setTextColor(80, 80, 80);
+      doc.text((img.description || '').substring(0, 35), textStart + colW, y + 3);
+
+      doc.setFontSize(7);
+      const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
+      doc.setTextColor(120, 0, 120);
+      doc.text(aiPrice ? `$${aiPrice}` : '-', textStart + colW * 2, y + 3);
+
+      doc.setTextColor(0, 100, 0);
+      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 3, y + 3);
+
+      // Row separator
+      doc.setDrawColor(235, 235, 235);
+      doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
+
+      y += rowH;
+      count++;
+    }
+
+    doc.save(`${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-items.pdf`);
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -1362,6 +1452,10 @@ Return ONLY the description text, no extra commentary.`
                 ) : (
                   <div className="space-y-4">
                   <div className="flex flex-col gap-2">
+                    <Button variant="outline" size="sm" className="text-green-700 border-green-600 w-full" onClick={handleExportPDF}>
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Export Items to PDF
+                    </Button>
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
                       if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
