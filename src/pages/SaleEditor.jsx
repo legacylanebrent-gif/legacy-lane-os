@@ -1922,7 +1922,7 @@ Return ONLY the description text, no extra commentary.`
                        <Card key={index} className="overflow-hidden">
                          <button
                            type="button"
-                           onClick={() => setExpandedCards(prev => ({ ...prev, [index]: !prev[index] }))}
+                           onClick={() => setExpandedCards(prev => prev[index] ? {} : { [index]: true })}
                            className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                          >
                            <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" decoding="async" />
