@@ -24,7 +24,7 @@ import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
-import { getImageSrc, createThumbnailDataUrl } from '@/utils/imageOptimizer';
+import { getImageSrc, createThumbnailDataUrl, createResizedImageDataUrl } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
@@ -334,13 +334,20 @@ export default function SaleEditor() {
         const file = files[i];
         setUploadProgress({ current: i + 1, total: files.length });
 
-        // Upload original and thumbnail in parallel
-        const thumbDataUrl = await createThumbnailDataUrl(file);
-        const thumbBlob = await (await fetch(thumbDataUrl)).blob();
+        // Resize original to max 800px and thumbnail to max 200px
+        const [resizedDataUrl, thumbDataUrl] = await Promise.all([
+          createResizedImageDataUrl(file, 800),
+          createThumbnailDataUrl(file)
+        ]);
+        const [resizedBlob, thumbBlob] = await Promise.all([
+          (await fetch(resizedDataUrl)).blob(),
+          (await fetch(thumbDataUrl)).blob()
+        ]);
+        const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
         const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
 
         const [originalResult, thumbResult] = await Promise.all([
-          base44.integrations.Core.UploadFile({ file }),
+          base44.integrations.Core.UploadFile({ file: resizedFile }),
           base44.integrations.Core.UploadFile({ file: thumbFile })
         ]);
 
@@ -1637,7 +1644,7 @@ Return ONLY the description text, no extra commentary.`
                                         src={typeof image === 'string' ? image : image.url}
                                         alt={`Photo ${index + 1}`}
                                         className="w-full h-full object-cover"
-                                        width="200" height="200" loading="eager"
+                                        width="200" height="200" loading="lazy"
                                         onLoad={() => setImageErrors(prev => ({ ...prev, [index]: false }))}
                                         onError={(e) => {
                                           const errMsg = e.target.src ? `${e.target.src.substring(0, 60)}...` : 'empty src';
@@ -1986,7 +1993,7 @@ Return ONLY the description text, no extra commentary.`
                            onClick={() => setExpandedCards(prev => prev[index] ? {} : { [index]: true })}
                            className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                          >
-                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="eager" />
+                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" />
                            <span className="flex-1 text-sm font-medium text-slate-700 truncate">
                              {image.name || `Photo ${index + 1}`}
                            </span>
@@ -2000,7 +2007,7 @@ Return ONLY the description text, no extra commentary.`
                          <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
                           <div className="flex-shrink-0 flex flex-col gap-1">
                             <div className="relative">
-                              <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="eager" />
+                              <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="lazy" />
                               {multiItemFlags[index] === true && (
                                 <button
                                   type="button"

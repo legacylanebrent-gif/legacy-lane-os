@@ -10,25 +10,26 @@ import { base44 } from '@/api/base44Client';
 export const getImageSrc = (image, size = 'thumbnail', opts = {}) => {
   if (!image) return null;
 
-  const sizePx = typeof size === 'number' ? size : { thumbnail: 300, gallery: 800, large: 1920 }[size] || 300;
+  const sizePx = typeof size === 'number' ? size : { thumbnail: 200, gallery: 800, large: 800 }[size] || 200;
   const imgObj = typeof image === 'string' ? { url: image } : image;
 
-  // For small display sizes (≤400px): prefer pre-generated thumbnail from image_thumbnails map
+  // For thumbnail sizes (≤400px): prefer pre-generated thumbnail
   if (sizePx <= 400) {
-    // Priority 1: pre-generated thumbnail_url on the image object itself
     if (imgObj.thumbnail_url) return imgObj.thumbnail_url;
-    // Priority 2: image_thumbnails map by index
     if (opts.imageThumbnails && opts.index != null) {
-      const key = String(opts.index);
-      const thumbUrl = opts.imageThumbnails[key];
+      const thumbUrl = opts.imageThumbnails[String(opts.index)];
       if (thumbUrl) return thumbUrl;
     }
   }
 
-  // Fall back to raw URL (CDN params stripped to avoid mobile rendering issues)
+  // Fall back to raw URL with CDN resizing params for performance
   const url = typeof imgObj.url === 'string' ? imgObj.url : (typeof imgObj === 'string' ? imgObj : null);
   if (!url) return null;
 
+  // Append CDN width param to limit served image size
+  if (url.includes('base44') || url.includes('media')) {
+    return `${url}?width=${sizePx}&auto=compress,format`;
+  }
   return url;
 };
 
@@ -54,7 +55,7 @@ export const createThumbnailDataUrl = (file) => {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const maxSize = 300;
+        const maxSize = 200;
         let w = img.width;
         let h = img.height;
         if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
@@ -89,12 +90,41 @@ export const preloadImages = (imageUrls) => {
  * @param {string} context - Where the image is displayed
  * @returns {object} Width and height attributes
  */
+export const createResizedImageDataUrl = (file, maxSize = 800) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
+        else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
+        // Skip resize if image is already small enough
+        if (img.width <= maxSize && img.height <= maxSize) {
+          resolve(reader.result);
+          return;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export const getImageDimensions = (context) => {
   const dimensions = {
-    thumbnail: { width: 300, height: 300 },
+    thumbnail: { width: 200, height: 200 },
     gallery: { width: 800, height: 600 },
-    modal: { width: 1920, height: 1080 },
-    full: { width: 2400, height: 1800 }
+    modal: { width: 800, height: 600 },
+    full: { width: 800, height: 600 }
   };
   
   return dimensions[context] || dimensions.thumbnail;
