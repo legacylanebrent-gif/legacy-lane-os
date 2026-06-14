@@ -1425,36 +1425,21 @@ Return ONLY the description text, no extra commentary.`
                         variant="outline"
                         className="text-amber-700 border-amber-400 hover:bg-amber-100 h-7 text-xs"
                         onClick={async () => {
-                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s)?`)) return;
+                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s) via backend?`)) return;
                           setUploadingImages(true);
-                          setUploadProgress({ current: 0, total: missingThumbCount });
-                          const updated = [...formData.images];
-                          let done = 0;
-                          for (let i = 0; i < formData.images.length; i++) {
-                            const img = formData.images[i];
-                            if (!img.url || img.thumbnail_url) continue;
-                            try {
-                              const resp = await fetch(img.url);
-                              const blob = await resp.blob();
-                              const file = new File([blob], `img_${i}.jpg`, { type: blob.type || 'image/jpeg' });
-                              const thumbDataUrl = await createThumbnailDataUrl(file);
-                              const thumbBlob = await (await fetch(thumbDataUrl)).blob();
-                              const thumbFile = new File([thumbBlob], `thumb_${i}.jpg`, { type: 'image/jpeg' });
-                              const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
-                              updated[i] = { ...updated[i], thumbnail_url: thumbResult.file_url };
-                              done++;
-                              setUploadProgress({ current: done, total: missingThumbCount });
-                            } catch (e) { console.error(e); }
+                          try {
+                            const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId });
+                            alert(res.data?.message || 'Thumbnails generated! Reloading page...');
+                            window.location.reload();
+                          } catch (e) {
+                            alert('Failed: ' + (e.message || 'Unknown error'));
+                          } finally {
+                            setUploadingImages(false);
                           }
-                          setFormData(prev => ({ ...prev, images: updated }));
-                          if (saleId) await base44.entities.EstateSale.update(saleId, { images: updated });
-                          setUploadingImages(false);
-                          setUploadProgress({ current: 0, total: 0 });
-                          alert(`Done! ${done} thumbnails generated.`);
                         }}
                         disabled={uploadingImages}
                       >
-                        {uploadingImages ? `...${uploadProgress.current}/${uploadProgress.total}` : 'Fix Now'}
+                        {uploadingImages ? 'Processing...' : 'Fix Now'}
                       </Button>
                     </div>
                   )}
@@ -1540,44 +1525,23 @@ Return ONLY the description text, no extra commentary.`
                       size="sm"
                       className="text-amber-700 border-amber-500 w-full"
                       onClick={async () => {
-                        const missingThumbs = formData.images.filter(img => !img.thumbnail_url);
-                        if (missingThumbs.length === 0) {
-                          alert('All images already have thumbnails.');
-                          return;
-                        }
-                        if (!window.confirm(`Generate thumbnails for ${missingThumbs.length} image(s)? This will be fast.`)) return;
+                        if (!saleId) { alert('Save the sale first'); return; }
+                        if (!window.confirm('Regenerate thumbnails for all images? This runs on the server.')) return;
                         setUploadingImages(true);
-                        setUploadProgress({ current: 0, total: missingThumbs.length });
-                        const updated = [...formData.images];
-                        let done = 0;
-                        for (let i = 0; i < formData.images.length; i++) {
-                          const img = formData.images[i];
-                          if (img.thumbnail_url) continue;
-                          try {
-                            const resp = await fetch(img.url);
-                            const blob = await resp.blob();
-                            const file = new File([blob], `img_${i}.${blob.type.split('/')[1] || 'jpg'}`, { type: blob.type });
-                            const thumbDataUrl = await createThumbnailDataUrl(file);
-                            const thumbBlob = await (await fetch(thumbDataUrl)).blob();
-                            const thumbFile = new File([thumbBlob], `thumb_${i}.jpg`, { type: 'image/jpeg' });
-                            const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
-                            updated[i] = { ...updated[i], thumbnail_url: thumbResult.file_url };
-                            done++;
-                            setUploadProgress({ current: done, total: missingThumbs.length });
-                          } catch (e) {
-                            console.error(`Thumbnail failed for image ${i}:`, e.message);
-                          }
+                        try {
+                          const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId });
+                          alert(res.data?.message || 'Thumbnails generated! Reloading page...');
+                          window.location.reload();
+                        } catch (e) {
+                          alert('Failed: ' + (e.message || 'Unknown error'));
+                        } finally {
+                          setUploadingImages(false);
                         }
-                        setFormData(prev => ({ ...prev, images: updated }));
-                        if (saleId) await base44.entities.EstateSale.update(saleId, { images: updated });
-                        setUploadingImages(false);
-                        setUploadProgress({ current: 0, total: 0 });
-                        alert(`Thumbnails generated for ${done} image(s)!`);
                       }}
                       disabled={uploadingImages}
                     >
                       <Camera className="w-4 h-4 mr-2" />
-                      {uploadingImages ? `Processing... (${uploadProgress.current}/${uploadProgress.total})` : 'Regenerate Thumbnails'}
+                      {uploadingImages ? 'Processing...' : 'Regenerate Thumbnails'}
                     </Button>
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
