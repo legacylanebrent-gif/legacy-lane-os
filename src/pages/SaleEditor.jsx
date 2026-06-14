@@ -724,8 +724,12 @@ Be practical and realistic for an estate sale context.`,
   };
 
   const handleExportPDF = async () => {
-    const items = formData.images.filter(img => img.name || img.description || img.price || img.ai_first_search_price);
-    if (items.length === 0) {
+    // Map filtered items to include their original index in formData.images for thumbnail lookup
+    const itemsWithIndex = formData.images
+      .map((img, origIdx) => ({ ...img, _origIdx: origIdx }))
+      .filter(img => img.name || img.description || img.price || img.ai_first_search_price);
+
+    if (itemsWithIndex.length === 0) {
       alert('No items with data to export. Add titles, descriptions, or prices first.');
       return;
     }
@@ -746,11 +750,11 @@ Be practical and realistic for an estate sale context.`,
       const textStart = m + thumbSize + 2;
       const colW = (pgW - textStart - m) / 4;
 
-      // Preload all thumbnails using pre-generated thumbnail URLs
+      // Preload all thumbnails using pre-generated thumbnail URLs (use original index)
       const thumbDataUrls = {};
-      const loadThumb = async (img, idx) => {
+      const loadThumb = async (img) => {
         if (pdfCancelRef.current) return;
-        const src = img.thumbnail_url || (img.url ? getImageSrc(img, 200, { imageThumbnails, index: idx }) : null);
+        const src = img.thumbnail_url || (img.url ? getImageSrc(img, 200, { imageThumbnails, index: img._origIdx }) : null);
         if (!src) return;
         try {
           const imageEl = new Image();
@@ -769,12 +773,12 @@ Be practical and realistic for an estate sale context.`,
 
       // Load all in parallel with progress updates
       let loaded = 0;
-      const total = items.length;
+      const total = itemsWithIndex.length;
       const chunkSize = 10;
-      for (let i = 0; i < items.length; i += chunkSize) {
+      for (let i = 0; i < itemsWithIndex.length; i += chunkSize) {
         if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
-        const chunk = items.slice(i, i + chunkSize).map((img, relIdx) => loadThumb(img, i + relIdx));
-        await Promise.all(chunk);
+        const chunk = itemsWithIndex.slice(i, i + chunkSize);
+        await Promise.all(chunk.map(loadThumb));
         loaded = Math.min(i + chunkSize, total);
         setPdfProgress(Math.round((loaded / total) * 40));
       }
@@ -803,7 +807,7 @@ Be practical and realistic for an estate sale context.`,
       let y = headerY + 4;
       let count = 0;
 
-      for (const img of items) {
+      for (const img of itemsWithIndex) {
         if (pdfCancelRef.current) { setPdfModalOpen(false); return; }
 
         if (count > 0 && count % 40 === 0) {
@@ -841,7 +845,7 @@ Be practical and realistic for an estate sale context.`,
 
         // Update progress every 5 items
         if (count % 5 === 0) {
-          setPdfProgress(40 + Math.round((count / items.length) * 60));
+          setPdfProgress(40 + Math.round((count / itemsWithIndex.length) * 60));
           await new Promise(r => setTimeout(r, 0)); // let React re-render
         }
       }
