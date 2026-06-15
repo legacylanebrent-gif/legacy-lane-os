@@ -372,16 +372,23 @@ export default function SaleEditor() {
           }
         }
 
-        // Update state and persist to DB so thumbnails appear immediately
+        // Update React state so thumbnails appear immediately
         setFormData(prev => {
           const updated = { ...prev, images: [...prev.images, ...batchImages] };
-          // Save to database if the sale already exists
-          const currentSaleId = saleIdRef.current;
-          if (currentSaleId) {
-            base44.entities.EstateSale.update(currentSaleId, { images: updated.images });
-          }
           return updated;
         });
+
+        // Persist to database — await fully so batches don't collide
+        const currentSaleId = saleIdRef.current;
+        if (currentSaleId) {
+          try {
+            await base44.entities.EstateSale.update(currentSaleId, {
+              images: [...formData.images, ...batchImages]
+            });
+          } catch (dbErr) {
+            console.error('DB save after batch failed:', dbErr.message);
+          }
+        }
 
         // Wait 5s between batches (skip delay after the last batch)
         if (batchStart + BATCH_SIZE < files.length) {
