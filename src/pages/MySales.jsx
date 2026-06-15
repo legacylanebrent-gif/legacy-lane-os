@@ -421,7 +421,7 @@ export default function MySales() {
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
                                className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
-                             ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Local ★' : 'Featured'}</Button>
+                             ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Featured ★' : 'Feature'}</Button>
                            )}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleBuyerMatch(sale.id)} disabled={matchingSaleId === sale.id}
