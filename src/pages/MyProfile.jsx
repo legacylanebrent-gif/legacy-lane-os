@@ -233,9 +233,23 @@ export default function MyProfile() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const wasPhoneEmpty = !user?.phone && !user?.phone_number;
       await base44.auth.updateMe({ ...form, notification_settings: notifications });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+
+      // Auto-award phone verification reward if phone was just added
+      if (wasPhoneEmpty && form.phone && form.phone.trim()) {
+        try {
+          const res = await base44.functions.invoke('completeRewardAction', {
+            action_id: 'phone_verified',
+            notes: 'Phone verified via profile',
+          });
+          if (res.data?.success) {
+            alert(res.data.message);
+          }
+        } catch (e) { /* silent — reward not critical */ }
+      }
     } catch (e) { alert('Failed to save: ' + e.message); }
     finally { setSaving(false); }
   };

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import SharedFooter from '@/components/layout/SharedFooter';
-import { ArrowLeft, Star, Trophy, Gift, Calendar, Heart, Share2, ShoppingBag, Users, DollarSign, Camera, MessageSquare, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Star, Trophy, Gift, Calendar, Heart, Share2, ShoppingBag, Users, DollarSign, Camera, MessageSquare, ThumbsUp, Phone, UserPlus, ShoppingCart, ExternalLink } from 'lucide-react';
 
 const CATEGORY_ICONS = {
   engagement: Heart,
@@ -33,6 +33,20 @@ const CATEGORY_LABELS = {
   referrals: 'Referrals',
   purchases: 'Purchases',
   content: 'Content',
+};
+
+// CTA button config per action_id
+const ACTION_CTAS = {
+  phone_verified: { label: 'Verify Phone Now', icon: Phone, page: 'MyProfile', param: '?tab=account' },
+  refer_user: { label: 'Refer a User', icon: UserPlus, page: 'ReferCompany' },
+  document_purchase: { label: 'Record a Purchase', icon: ShoppingCart, page: 'RecordPurchase' },
+  save_sale: { label: 'Browse Estate Sales', icon: Heart, page: '/' },
+  share_app: { label: 'Share the App', icon: Share2, page: null, action: 'share' },
+  create_wishlist: { label: 'Add Wanted Item', icon: Gift, page: 'MyProfile', param: '?tab=buyer_prefs' },
+  add_calendar: { label: 'Browse Sales', icon: Calendar, page: '/' },
+  rate_app: { label: 'Rate the App', icon: Star, page: null, action: 'rate' },
+  write_review: { label: 'Write a Review', icon: MessageSquare, page: '/' },
+  feedback_submit: { label: 'Submit Feedback', icon: MessageSquare, page: 'HowToUse' },
 };
 
 const REWARD_TIPS = {
@@ -194,6 +208,55 @@ export default function RewardDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {/* CTA Button */}
+        {(() => {
+          const cta = ACTION_CTAS[action.action_id];
+          if (!cta) return null;
+          const CtaIcon = cta.icon || ArrowLeft;
+          
+          if (cta.action === 'share') {
+            return (
+              <Button
+                onClick={() => {
+                  const shareData = { title: 'EstateSalen.com', text: 'Find estate sales near you — EstateSalen.com', url: window.location.origin };
+                  if (navigator.share) {
+                    navigator.share(shareData).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.origin);
+                    alert('Link copied! Share it with friends.');
+                  }
+                }}
+                className="w-full bg-orange-600 hover:bg-orange-700"
+              >
+                <CtaIcon className="w-4 h-4 mr-2" /> {cta.label}
+              </Button>
+            );
+          }
+          
+          if (cta.action === 'rate') {
+            return (
+              <Button
+                onClick={() => window.open('https://apps.apple.com/app/estatesalen', '_blank')}
+                className="w-full bg-orange-600 hover:bg-orange-700"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" /> {cta.label}
+              </Button>
+            );
+          }
+
+          const targetPage = cta.page || '/';
+          const targetUrl = cta.page ? createPageUrl(cta.page) + (cta.param || '') : targetPage;
+          
+          return (
+            <Button
+              onClick={() => navigate(targetUrl)}
+              className="w-full bg-orange-600 hover:bg-orange-700"
+            >
+              <CtaIcon className="w-4 h-4 mr-2" /> {cta.label}
+            </Button>
+          );
+        })()}
 
         <Button onClick={() => navigate(createPageUrl('MyRewards'))} variant="outline" className="w-full">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to All Rewards
