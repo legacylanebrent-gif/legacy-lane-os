@@ -1571,7 +1571,7 @@ Return ONLY the description text, no extra commentary.`
                         await base44.entities.EstateSale.update(currentSaleId, { images: items });
                       }
                     }}>
-                      <Droppable droppableId="images" direction="horizontal">
+                      <Droppable droppableId="images" direction="vertical">
                         {(provided) => (
                           <div ref={provided.innerRef} {...provided.droppableProps}>
                             <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
