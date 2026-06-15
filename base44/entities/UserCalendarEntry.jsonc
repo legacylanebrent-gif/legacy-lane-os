@@ -27,9 +27,16 @@
       "items": {
         "type": "object",
         "properties": {
-          "date": { "type": "string", "format": "date" },
-          "start_time": { "type": "string" },
-          "end_time": { "type": "string" }
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
         }
       },
       "default": [],
@@ -41,5 +48,8 @@
       "description": "When the user added this to their calendar"
     }
   },
-  "required": ["user_id", "sale_id"]
+  "required": [
+    "user_id",
+    "sale_id"
+  ]
 }
