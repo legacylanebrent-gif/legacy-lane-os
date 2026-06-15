@@ -370,101 +370,88 @@ export default function MySales() {
 
             const renderSaleCard = (sale) => (
               <Card key={sale.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col md:flex-row">
-                {sale.images && sale.images.length > 0 && (
-                  <div className="relative h-full md:w-44 overflow-hidden flex-shrink-0">
-                    <img
-                      src={typeof sale.images[0] === 'string' 
-                        ? sale.images[0] 
-                        : sale.images[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
-                      alt={sale.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-xs ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
-                  </div>
-                )}
-                <CardContent className="p-5 flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-slate-900 flex-1">{sale.title}</h3>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                        <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}><Eye className="w-4 h-4" /></Link>
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(sale.id)}>
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-4 text-slate-600 mb-3">
-                      {sale.property_address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-cyan-600" />
-                          <span>{sale.property_address.city}, {sale.property_address.state}</span>
-                        </div>
-                      )}
-                    </div>
-                    {sale.sale_dates && sale.sale_dates.length > 0 && (
-                      <div className="mb-3 flex flex-wrap gap-3">
-                        {sale.sale_dates.map((saleDate, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-slate-600">
-                            <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                            <span>{format(new Date(saleDate.date + 'T00:00:00'), 'MMM d')}</span>
-                            {(saleDate.start_time || saleDate.end_time) && (
-                              <span className="text-slate-500 text-xs">{formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {(() => {
-                      const isCompleted = getSaleDisplayStatus(sale) === 'completed';
-                      return (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className="w-full border-blue-500 text-black hover:bg-blue-50"><Edit className="w-3 h-3 mr-1" />Edit Sale</Button>)}
-                          {!isCompleted && isElite && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleToggleLocalFeatured(sale)}
-                              disabled={featuringId === sale.id}
-                              className={`w-full text-black ${sale.local_featured ? 'border-amber-500 bg-amber-50 hover:bg-amber-100' : 'border-amber-400 hover:bg-amber-50'}`}
-                            >
-                              <Pin className="w-3 h-3 mr-1" />
-                              {featuringId === sale.id ? 'Updating...' : sale.local_featured ? '★ Local Featured' : 'Feature Locally'}
-                            </Button>
-                          )}
-                          {!isCompleted && isElite && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleBuyerMatch(sale.id)}
-                              disabled={matchingSaleId === sale.id}
-                              className="w-full text-black border-emerald-500 hover:bg-emerald-50"
-                            >
-                              <UserCheck className="w-3 h-3 mr-1" />
-                              {matchingSaleId === sale.id ? 'Matching...' : 'Buyer Match'}
-                            </Button>
-                          )}
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-teal-500 text-black hover:bg-teal-50"><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1" />Sale Transactions</Link></Button>)}
-                          <Button variant="outline" size="sm" asChild className="w-full border-purple-500 text-black hover:bg-purple-50"><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1" />Inventory</Link></Button>
-                          <Button variant="outline" size="sm" asChild className="w-full border-cyan-500 text-black hover:bg-cyan-50"><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1" />Attendance</Link></Button>
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-amber-500 text-black hover:bg-amber-50"><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Tasks</Link></Button>)}
-                          <Button variant="outline" size="sm" asChild className="w-full border-indigo-500 text-black hover:bg-indigo-50"><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1" />Statistics</Link></Button>
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-red-500 text-black hover:bg-red-50"><Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1" />Signs</Link></Button>)}
-                          <Button variant="outline" size="sm" asChild className="w-full border-slate-500 text-black hover:bg-slate-50"><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1" />Export</Link></Button>
-                          {!isCompleted && (<Button variant="outline" size="sm" onClick={async () => { const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id }); if (events.length > 0) { window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id; } else { setSelectedSale(sale); setShowVIPModal(true); }}} className="w-full border-yellow-500 text-black hover:bg-yellow-50"><Star className="w-3 h-3 mr-1" />VIP Event</Button>)}
-                          {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setBuyoutSale(sale); setShowBuyoutModal(true); }} className="w-full border-orange-600 text-black hover:bg-orange-50"><Briefcase className="w-3 h-3 mr-1" />Buyout</Button>)}
-                          <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="w-full border-emerald-600 text-black hover:bg-emerald-50"><Receipt className="w-3 h-3 mr-1" />Expenses/Mileage</Button>
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-pink-500 text-black hover:bg-pink-50"><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1" />Marketing</Link></Button>)}
-                          <Button variant="outline" size="sm" asChild className="w-full border-blue-600 text-black hover:bg-blue-50"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
-                          {!isCompleted && (<Button variant="outline" size="sm" asChild className="w-full border-indigo-500 text-black hover:bg-indigo-50"><Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}><Users className="w-3 h-3 mr-1" />Early Sign In</Link></Button>)}
-                          {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className="w-full border-purple-500 text-black hover:bg-purple-50"><Sparkles className="w-3 h-3 mr-1" />Social Media Posts</Button>)}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </CardContent>
-              </Card>
+                 {sale.images && sale.images.length > 0 && (
+                   <div className="relative md:w-56 md:min-h-[240px] h-48 md:h-auto overflow-hidden flex-shrink-0">
+                     <img
+                       src={typeof sale.images[0] === 'string' 
+                         ? sale.images[0] 
+                         : sale.images[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
+                       alt={sale.title}
+                       className="w-full h-full object-cover"
+                     />
+                     {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-[10px] ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
+                   </div>
+                 )}
+                 <CardContent className="p-4 flex-1">
+                   <div className="flex items-start justify-between mb-2">
+                     <h3 className="text-base md:text-lg font-semibold text-slate-900 flex-1">{sale.title}</h3>
+                     <div className="flex gap-1">
+                       <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                         <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id}><Eye className="w-3.5 h-3.5" /></Link>
+                       </Button>
+                       <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600 hover:bg-red-50" onClick={() => handleDelete(sale.id)}>
+                         <Trash className="w-3.5 h-3.5" />
+                       </Button>
+                     </div>
+                   </div>
+                   <div className="space-y-1.5 text-sm">
+                     <div className="flex items-center gap-4 text-slate-600">
+                       {sale.property_address && (
+                         <div className="flex items-center gap-1.5">
+                           <MapPin className="w-3.5 h-3.5 text-cyan-600" />
+                           <span className="text-xs">{sale.property_address.city}, {sale.property_address.state}</span>
+                         </div>
+                       )}
+                     </div>
+                     {sale.sale_dates && sale.sale_dates.length > 0 && (
+                       <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+                         {sale.sale_dates.map((saleDate, idx) => (
+                           <div key={idx} className="flex items-center gap-1.5 text-slate-600 text-xs">
+                             <Calendar className="w-3 h-3 text-orange-600 flex-shrink-0" />
+                             <span>{format(new Date(saleDate.date + 'T00:00:00'), 'MMM d')}</span>
+                             {(saleDate.start_time || saleDate.end_time) && (
+                               <span className="text-slate-400">{formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}</span>
+                             )}
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                     {(() => {
+                       const isCompleted = getSaleDisplayStatus(sale) === 'completed';
+                       const btnClass = "h-7 text-[11px] px-2 py-0 w-full justify-start";
+                       return (
+                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 mt-2">
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
+                           {!isCompleted && isElite && (
+                             <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
+                               className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
+                             ><Pin className="w-3 h-3 mr-1 flex-shrink-0" />{featuringId === sale.id ? '...' : sale.local_featured ? 'Local ★' : 'Featured'}</Button>
+                           )}
+                           {!isCompleted && isElite && (
+                             <Button variant="outline" size="sm" onClick={() => handleBuyerMatch(sale.id)} disabled={matchingSaleId === sale.id}
+                               className={`${btnClass} border-emerald-500 hover:bg-emerald-50`}
+                             ><UserCheck className="w-3 h-3 mr-1 flex-shrink-0" />{matchingSaleId === sale.id ? '...' : 'Buyer Match'}</Button>
+                           )}
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-cyan-500 hover:bg-cyan-50`}><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1 flex-shrink-0" />Attendance</Link></Button>
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-amber-500 hover:bg-amber-50`}><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Tasks</Link></Button>)}
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('SaleStatistics') + '?saleId=' + sale.id}><BarChart3 className="w-3 h-3 mr-1 flex-shrink-0" />Statistics</Link></Button>
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-red-500 hover:bg-red-50`}><Link to={createPageUrl('PrintSigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Signs</Link></Button>)}
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-slate-500 hover:bg-slate-50`}><Link to={createPageUrl('SaleExport') + '?saleId=' + sale.id}><Download className="w-3 h-3 mr-1 flex-shrink-0" />Export</Link></Button>
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={async () => { const events = await base44.entities.VIPEvent.filter({ sale_id: sale.id }); if (events.length > 0) { window.location.href = createPageUrl('VIPEvent') + '?eventId=' + events[0].id; } else { setSelectedSale(sale); setShowVIPModal(true); }}} className={`${btnClass} border-yellow-500 hover:bg-yellow-50`}><Star className="w-3 h-3 mr-1 flex-shrink-0" />VIP Event</Button>)}
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setBuyoutSale(sale); setShowBuyoutModal(true); }} className={`${btnClass} border-orange-600 hover:bg-orange-50`}><Briefcase className="w-3 h-3 mr-1 flex-shrink-0" />Buyout</Button>)}
+                           <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className={`${btnClass} border-emerald-600 hover:bg-emerald-50`}><Receipt className="w-3 h-3 mr-1 flex-shrink-0" />Expenses</Button>
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-pink-500 hover:bg-pink-50`}><Link to={createPageUrl('SaleMarketingCampaigns') + '?saleId=' + sale.id}><Megaphone className="w-3 h-3 mr-1 flex-shrink-0" />Marketing</Link></Button>)}
+                           <Button variant="outline" size="sm" asChild className={`${btnClass} border-blue-600 hover:bg-blue-50`}><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Contracts</Link></Button>
+                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-indigo-500 hover:bg-indigo-50`}><Link to={createPageUrl('EarlySignIn') + '?saleId=' + sale.id}><Users className="w-3 h-3 mr-1 flex-shrink-0" />Early Sign In</Link></Button>)}
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => { setSocialSale(sale); setShowSocialModal(true); }} className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Sparkles className="w-3 h-3 mr-1 flex-shrink-0" />Social Posts</Button>)}
+                         </div>
+                       );
+                     })()}
+                   </div>
+                 </CardContent>
+               </Card>
             );
 
             if (filteredSales.length === 0) return (
