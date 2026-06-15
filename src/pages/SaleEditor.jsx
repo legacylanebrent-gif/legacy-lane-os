@@ -332,6 +332,9 @@ export default function SaleEditor() {
     const BATCH_SIZE = 10;
     const DELAY_MS = 5000;
 
+    // Track accumulated images in a local array so DB saves always have the real total
+    let accumulatedImages = [...formData.images];
+
     try {
       for (let batchStart = 0; batchStart < files.length; batchStart += BATCH_SIZE) {
         const batchFiles = files.slice(batchStart, batchStart + BATCH_SIZE);
@@ -367,23 +370,34 @@ export default function SaleEditor() {
               description: ''
             });
           } catch (imgError) {
-            console.warn(`Skipping image ${globalIndex + 1} (${file.name}):`, imgError.message);
-            // Continue to next image — don't block the batch
+            console.warn(`Resize failed for image ${globalIndex + 1} (${file.name}), uploading original instead:`, imgError.message);
+            try {
+              // Fallback: upload original file without resizing — use the same URL for both
+              const uploadResult = await base44.integrations.Core.UploadFile({ file });
+
+              batchImages.push({
+                url: uploadResult.file_url,
+                thumbnail_url: uploadResult.file_url,
+                name: '',
+                description: ''
+              });
+            } catch (fallbackError) {
+              console.warn(`Image ${globalIndex + 1} (${file.name}) failed even as original:`, fallbackError.message);
+              // Only truly skip if both resize and original fail
+            }
           }
         }
 
-        // Update React state so thumbnails appear immediately
-        setFormData(prev => {
-          const updated = { ...prev, images: [...prev.images, ...batchImages] };
-          return updated;
-        });
+        // Update accumulated images and React state
+        accumulatedImages = [...accumulatedImages, ...batchImages];
+        setFormData(prev => ({ ...prev, images: accumulatedImages }));
 
         // Persist to database — await fully so batches don't collide
         const currentSaleId = saleIdRef.current;
         if (currentSaleId) {
           try {
             await base44.entities.EstateSale.update(currentSaleId, {
-              images: [...formData.images, ...batchImages]
+              images: accumulatedImages
             });
           } catch (dbErr) {
             console.error('DB save after batch failed:', dbErr.message);
