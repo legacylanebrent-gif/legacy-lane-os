@@ -87,6 +87,7 @@ export default function SaleEditor() {
   const [showDeepSearchModal, setShowDeepSearchModal] = useState(false);
   const [deepSearchModalIndex, setDeepSearchModalIndex] = useState(0);
   const [regeneratingThumbs, setRegeneratingThumbs] = useState(false);
+  const [savingImageIndex, setSavingImageIndex] = useState(null);
   const [thumbProgress, setThumbProgress] = useState({ current: 0, total: 0 });
   const [pdfStatus, setPdfStatus] = useState('loading');
   const [pdfProgress, setPdfProgress] = useState(0);
@@ -671,6 +672,24 @@ Be practical and realistic for an estate sale context.`,
       console.error('Multi-item assess error:', e);
     } finally {
       setMultiItemAssessing(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleSaveImage = async (index) => {
+    const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
+    if (!currentSaleId) {
+      alert('Please save the sale first before saving image data.');
+      return;
+    }
+    setSavingImageIndex(index);
+    try {
+      await base44.entities.EstateSale.update(currentSaleId, { images: formData.images });
+    } catch (e) {
+      console.error('Failed to save image data:', e.message);
+      alert('Failed to save image data: ' + e.message);
+    } finally {
+      setSavingImageIndex(false);
+      setTimeout(() => setSavingImageIndex(null), 1500);
     }
   };
 
@@ -2239,6 +2258,15 @@ Return ONLY the description text, no extra commentary.`
                                 </Button>
                                 <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
                                   {regeneratingDesc[index] ? 'Generating...' : 'Regenerate Description'}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className="w-full text-xs bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => handleSaveImage(index)}
+                                  disabled={savingImageIndex === index}
+                                >
+                                  {savingImageIndex === index ? 'Saving...' : '💾 Save'}
                                 </Button>
 
                               </div>
