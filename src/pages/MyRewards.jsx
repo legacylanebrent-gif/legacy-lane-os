@@ -108,6 +108,14 @@ export default function MyRewards() {
     .filter(r => r.month && r.month.startsWith(currentYear))
     .reduce((sum, r) => sum + (r.points_earned || 0), 0);
 
+  // Last month's points
+  const lastMonthDate = new Date();
+  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+  const lastMonthKey = lastMonthDate.toISOString().slice(0, 7);
+  const lastMonthPoints = allTimeRewards
+    .filter(r => r.month === lastMonthKey)
+    .reduce((sum, r) => sum + (r.points_earned || 0), 0);
+
   // All-time completion counts (for true one-time-only actions)
   const allTimeCompletionCounts = allTimeRewards.reduce((acc, reward) => {
     acc[reward.action_id] = (acc[reward.action_id] || 0) + 1;
@@ -315,7 +323,7 @@ export default function MyRewards() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -335,6 +343,19 @@ export default function MyRewards() {
             </div>
             <div className="text-3xl font-bold text-green-600">{actionsCompleted}</div>
             <div className="text-xs text-slate-500 mt-1">Out of {actions.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-blue-600" />
+              <span className="text-sm text-slate-600">Last Month</span>
+            </div>
+            <div className="text-3xl font-bold text-blue-600">{lastMonthPoints}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {new Date(lastMonthKey + '-01').toLocaleDateString('en-US', { month: 'short' })} points
+            </div>
           </CardContent>
         </Card>
 
