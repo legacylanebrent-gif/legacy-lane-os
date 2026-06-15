@@ -1745,7 +1745,7 @@ Return ONLY the description text, no extra commentary.`
                          if (!saleId) { alert('Save the sale first'); return; }
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
                          const absIdx = startFromIndex + relIdx;
-                         const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined;
+                         const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined || img.serp_search_status === null;
                          return (!img.name || !img.description) && !multiItemFlags[absIdx] &&
                           img.skip_serp_search !== true && img.serp_search_status !== "do_not_search" && statusOk;
                          });
