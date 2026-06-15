@@ -1576,31 +1576,7 @@ Return ONLY the description text, no extra commentary.`
                 <TabsTrigger value="descriptions" className="flex-1 text-xs sm:text-sm">Descriptions & Pricing</TabsTrigger>
               </TabsList>
               <TabsContent value="thumbnails" className="space-y-4">
-                {/* TEMPORARY DEBUG PANEL — remove after diagnosing mobile image issue */}
-                <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-xs font-mono space-y-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-yellow-800">🔍 Image Debug</span>
-                    <button onClick={() => setShowDebug(!showDebug)} className="text-yellow-600 text-[10px] underline">{showDebug ? 'Collapse' : 'Expand'}</button>
-                  </div>
-                  <p className="text-yellow-700">Total images: {formData.images.length} | Thumbnail map keys: {Object.keys(imageThumbnails).length}</p>
-                  <p className="text-yellow-700">UserAgent: {navigator.userAgent.substring(0, 60)}</p>
-                  {Object.keys(imageErrors).filter(k => imageErrors[k]).length > 0 && (
-                    <p className="text-red-600 font-bold">❌ Load errors: {Object.keys(imageErrors).filter(k => imageErrors[k]).length} images</p>
-                  )}
-                  {Object.entries(imageErrors).filter(([k, v]) => v).map(([idx, err]) => (
-                    <p key={idx} className="text-red-500 text-[10px]">Img {idx}: {err}</p>
-                  ))}
-                  {showDebug && imageDebugInfo.map((d, i) => (
-                    <div key={i} className="border-t border-yellow-300 pt-1 space-y-0.5">
-                      <p className="text-yellow-800"><b>Img {d.index}:</b> hasUrl={String(d.hasUrl)} hasThumb={String(d.hasThumb)} hasMapThumb={String(d.hasMapThumb)} urlType={d.urlType}</p>
-                      <p className="text-yellow-700 break-all">Src: {d.src}</p>
-                    </div>
-                  ))}
-                  {!showDebug && imageDebugInfo.length > 0 && (
-                    <p className="text-yellow-600">Img 0 src: {imageDebugInfo[0]?.src || 'NONE'} (click Expand for all)</p>
-                  )}
-                </div>
-                {/* END DEBUG PANEL */}
+
                 {formData.images.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
