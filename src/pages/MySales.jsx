@@ -395,32 +395,28 @@ export default function MySales() {
                      </div>
                    </div>
                    <div className="space-y-1.5 text-sm">
-                     <div className="flex items-center gap-4 text-slate-600">
+                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-600">
                        {sale.property_address && (
                          <div className="flex items-center gap-1.5">
-                           <MapPin className="w-3.5 h-3.5 text-cyan-600" />
-                           <span className="text-xs">{sale.property_address.city}, {sale.property_address.state}</span>
+                           <MapPin className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
+                           <span className="text-xs">{sale.property_address.street ? sale.property_address.street + ', ' : ''}{sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}</span>
                          </div>
                        )}
+                       {sale.sale_dates && sale.sale_dates.length > 0 && sale.sale_dates.map((saleDate, idx) => (
+                         <div key={idx} className="flex items-center gap-1.5 text-xs">
+                           <Calendar className="w-3 h-3 text-orange-600 flex-shrink-0" />
+                           <span>{format(new Date(saleDate.date + 'T00:00:00'), 'MMM d')}</span>
+                           {(saleDate.start_time || saleDate.end_time) && (
+                             <span className="text-slate-400">{formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}</span>
+                           )}
+                         </div>
+                       ))}
                      </div>
-                     {sale.sale_dates && sale.sale_dates.length > 0 && (
-                       <div className="flex flex-wrap gap-x-4 gap-y-0.5">
-                         {sale.sale_dates.map((saleDate, idx) => (
-                           <div key={idx} className="flex items-center gap-1.5 text-slate-600 text-xs">
-                             <Calendar className="w-3 h-3 text-orange-600 flex-shrink-0" />
-                             <span>{format(new Date(saleDate.date + 'T00:00:00'), 'MMM d')}</span>
-                             {(saleDate.start_time || saleDate.end_time) && (
-                               <span className="text-slate-400">{formatTo12Hour(saleDate.start_time)} - {formatTo12Hour(saleDate.end_time)}</span>
-                             )}
-                           </div>
-                         ))}
-                       </div>
-                     )}
                      {(() => {
                        const isCompleted = getSaleDisplayStatus(sale) === 'completed';
                        const btnClass = "h-7 text-[11px] px-2 py-0 w-full justify-start";
                        return (
-                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 mt-2">
+                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
