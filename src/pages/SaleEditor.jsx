@@ -2189,19 +2189,19 @@ Return ONLY the description text, no extra commentary.`
                                   <Scan className="w-3 h-3 mr-1" />{serpSearching[index] ? '...' : 'AI Search'}
                                 </Button>
                               )}
+                              <Button type="button" size="sm" className="text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => handleSaveImage(index)} disabled={savingImageIndex === index}>
+                                {savingImageIndex === index ? 'Saving...' : '💾 Save'}
+                              </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
-                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'Multi-Assess'}
+                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'What is Multi-Assess?'}
                               </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
                                 Google Lens
                               </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
-                                {regeneratingDesc[index] ? '...' : 'Re-Describe'}
+                                {regeneratingDesc[index] ? '...' : 'AI Description'}
                               </Button>
                             </div>
-                            <Button type="button" size="sm" className="w-full text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => handleSaveImage(index)} disabled={savingImageIndex === index}>
-                              {savingImageIndex === index ? 'Saving...' : '💾 Save'}
-                            </Button>
                           </div>}
                           </div>
                           </div>)}
