@@ -1567,7 +1567,7 @@ Return ONLY the description text, no extra commentary.`
                       items.splice(result.destination.index, 0, reordered);
                       setFormData({ ...formData, images: items });
                     }}>
-                      <Droppable droppableId="images">
+                      <Droppable droppableId="images" direction="horizontal">
                         {(provided) => (
                           <div ref={provided.innerRef} {...provided.droppableProps}>
                             <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
