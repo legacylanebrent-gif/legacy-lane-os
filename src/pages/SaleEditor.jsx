@@ -1984,41 +1984,34 @@ Return ONLY the description text, no extra commentary.`
                          </button>
                          {isExpanded && (
                            <div className="px-3 pb-3">
-                         <div className={`w-full min-w-0 flex flex-col lg:flex-row gap-4`}>
-                          <div className="flex-shrink-0 flex flex-col gap-1">
-                            <div className="relative">
-                              <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-full lg:w-20 h-40 lg:h-20 object-cover rounded-lg bg-slate-200" width="80" height="160" loading="lazy" />
+                         <div className="flex flex-col lg:flex-row gap-4">
+                          {/* Left: Large thumbnail + compact action buttons */}
+                          <div className="flex-shrink-0 flex flex-row lg:flex-col gap-2 lg:w-40">
+                            <div className="relative w-28 h-28 lg:w-40 lg:h-40 flex-shrink-0">
+                              <img
+                                src={getImageSrc(image, 400, { imageThumbnails, index })}
+                                alt={`Photo ${index + 1}`}
+                                className="w-full h-full object-cover rounded-lg bg-slate-200"
+                                width="160" height="160" loading="lazy"
+                              />
                               {multiItemFlags[index] === true && (
-                                <button
-                                  type="button"
-                                  title="Flagged as multi-item — click to unflag and allow AI search"
+                                <button type="button" title="Flagged as multi-item"
                                   onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: false }))}
-                                  className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-700"
-                                >
-                                  MULTI
-                                </button>
+                                  className="absolute top-1 left-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded hover:bg-teal-700"
+                                >MULTI</button>
                               )}
                               {multiItemFlags[index] === false && (
-                                <button
-                                  type="button"
-                                  title="Flagged as single item — click to mark as multi-item"
+                                <button type="button" title="Flagged as single item"
                                   onClick={() => setMultiItemFlags(prev => ({ ...prev, [index]: true }))}
-                                  className="absolute top-1 left-1 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-tight hover:bg-teal-600"
-                                >
-                                  1x
-                                </button>
+                                  className="absolute top-1 left-1 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded hover:bg-teal-600"
+                                >1x</button>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handleToggleSkip(index)}
-                                className={`w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-50' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
-                                >
-                                {image.skip_item ? '↩ Search Item' : '⊘ Don\'t Search'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={async () => {
+                            <div className="flex lg:flex-col gap-1 flex-1 lg:flex-initial">
+                              <button type="button" onClick={() => handleToggleSkip(index)}
+                                className={`flex-1 lg:flex-initial py-1.5 px-2 rounded border text-[11px] font-medium transition-colors leading-tight ${image.skip_item ? 'bg-red-100 border-red-400 text-red-700' : 'bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-400 hover:text-red-600'}`}
+                              >{image.skip_item ? '↩ Search' : '⊘ Skip'}</button>
+                              <button type="button" onClick={async () => {
                                 const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
                                 const updatedImages = [...formData.images];
                                 updatedImages[index] = { ...updatedImages[index], name: '', description: '', synopsis: '', price: null, ai_first_search_price: null };
@@ -2030,46 +2023,64 @@ Return ONLY the description text, no extra commentary.`
                                 if (currentSaleId) {
                                   try {
                                     await base44.functions.invoke('toggleSaleImageSkip', {
-                                      sale_id: currentSaleId,
-                                      image_index: index,
-                                      skip_item: false,
-                                      skip_saved_name: '',
-                                      skip_saved_description: '',
-                                      clear_data: true,
+                                      sale_id: currentSaleId, image_index: index, skip_item: false,
+                                      skip_saved_name: '', skip_saved_description: '', clear_data: true,
                                     });
                                   } catch (e) {
-                                    console.error('Failed to persist clear:', e.message);
                                     await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
                                   }
                                 }
                               }}
-                              className="w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-500 hover:text-red-700"
-                            >
-                              ✕ Clear Item Data
-                            </button>
-                          </div>
-                          {step1Completed && <div className="flex-1 space-y-3 w-full min-w-0 overflow-hidden">
-                            <div>
-                              <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
-                              <Textarea
-                                id={`name-${index}`}
-                                placeholder="Item name"
-                                value={photoTitles[image.url] || image.name || ''}
-                                onChange={(e) => {
-                                  setPhotoTitles(prev => ({ ...prev, [image.url]: e.target.value }));
-                                  const updated = [...formData.images];
-                                  updated[index].name = e.target.value;
-                                  setFormData({ ...formData, images: updated });
-                                }}
-                                className="text-sm min-h-[48px] w-full max-w-full"
-                                rows={2}
-                              />
+                                className="flex-1 lg:flex-initial py-1.5 px-2 rounded border text-[11px] font-medium bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-500 hover:text-red-700"
+                              >✕ Clear</button>
                             </div>
+                          </div>
+
+                          {/* Right: Form fields in a more compact 2-col layout */}
+                          {step1Completed && <div className="flex-1 min-w-0 space-y-3">
+                            {/* Name + AI Price row */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor={`name-${index}`} className="text-xs">Name</Label>
+                                <Textarea
+                                  id={`name-${index}`} placeholder="Item name"
+                                  value={photoTitles[image.url] || image.name || ''}
+                                  onChange={(e) => {
+                                    setPhotoTitles(prev => ({ ...prev, [image.url]: e.target.value }));
+                                    const updated = [...formData.images];
+                                    updated[index].name = e.target.value;
+                                    setFormData({ ...formData, images: updated });
+                                  }}
+                                  className="text-sm min-h-[44px] w-full" rows={2}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor={`listing-price-${index}`} className="text-xs font-semibold text-slate-800">Listing Price</Label>
+                                <div className="flex gap-2 items-start">
+                                  <Input
+                                    id={`listing-price-${index}`} type="number" placeholder="$0"
+                                    value={image.price || ''}
+                                    onChange={(e) => {
+                                      const updated = [...formData.images];
+                                      updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
+                                      setFormData({ ...formData, images: updated });
+                                    }}
+                                    className="text-sm font-medium flex-1"
+                                  />
+                                  <div className="text-sm px-2 py-1.5 bg-purple-50 border border-purple-200 rounded-md text-purple-800 font-medium whitespace-nowrap text-xs">
+                                    {image.ai_first_search_price || serpResults[image.url]?.price_range?.avg
+                                      ? `AI: $${image.ai_first_search_price || serpResults[image.url]?.price_range?.avg}`
+                                      : <span className="text-purple-400 font-normal">No AI</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Description */}
                             <div>
                               <Label htmlFor={`desc-${index}`} className="text-xs">Description</Label>
                               <Textarea
-                                id={`desc-${index}`}
-                                placeholder="Item description"
+                                id={`desc-${index}`} placeholder="Item description"
                                 value={photoDescriptions[image.url] || image.description || ''}
                                 onChange={(e) => {
                                   setPhotoDescriptions(prev => ({ ...prev, [image.url]: e.target.value }));
@@ -2077,203 +2088,123 @@ Return ONLY the description text, no extra commentary.`
                                   updated[index].description = e.target.value;
                                   setFormData({ ...formData, images: updated });
                                 }}
-                                className="text-sm min-h-[120px] lg:min-h-[72px] w-full max-w-full"
+                                className="text-sm min-h-[56px] w-full" rows={2}
                               />
                             </div>
-                            <div>
-                              <Label className="text-xs text-purple-700">AI Suggested Price</Label>
-                              <div className="text-sm px-3 py-2 bg-purple-50 border border-purple-200 rounded-md text-purple-800 font-medium">
-                                {image.ai_first_search_price || serpResults[image.url]?.price_range?.avg
-                                  ? `$${image.ai_first_search_price || serpResults[image.url]?.price_range?.avg}`
-                                  : <span className="text-purple-400 font-normal">Not yet searched</span>}
-                              </div>
-                            </div>
+
+                            {/* Synopsis */}
                             {image.synopsis && (
                               <div>
-                                <Label className="text-xs text-indigo-700">AI Synopsis <span className="text-slate-400 font-normal">(operator only — not shown publicly)</span></Label>
-                                <div className="text-sm px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-md text-indigo-800 whitespace-pre-wrap break-words">
+                                <Label className="text-xs text-indigo-700">AI Synopsis <span className="text-slate-400 font-normal">(operator only)</span></Label>
+                                <div className="text-xs px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-md text-indigo-800 whitespace-pre-wrap break-words max-h-20 overflow-y-auto">
                                   {image.synopsis}
                                 </div>
                               </div>
                             )}
-                            <div>
-                              <Label htmlFor={`listing-price-${index}`} className="text-xs font-semibold text-slate-800">Listing Price <span className="text-slate-500 font-normal">(displayed online, QR codes & inventory)</span></Label>
-                              <Input
-                                id={`listing-price-${index}`}
-                                type="number"
-                                placeholder="Set the price for this item"
-                                value={image.price || ''}
-                                onChange={(e) => {
-                                  const updated = [...formData.images];
-                                  updated[index].price = e.target.value ? parseFloat(e.target.value) : null;
-                                  setFormData({ ...formData, images: updated });
-                                }}
-                                className="text-sm font-medium"
-                              />
-                            </div>
-                            <div>
-                              {regeneratingPrice[index] && (
-                                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
-                                  <div className="w-4 h-4 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-                                  <span className="text-xs text-blue-700">Searching market prices (up to 3 min)...</span>
-                                </div>
-                              )}
-                              {photoPricing[image.url] && (
-                                 <button
-                                   type="button"
-                                   onClick={() => setSelectedPricingImage(image.url)}
-                                   className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg w-full text-left hover:bg-orange-100 transition-colors"
-                                 >
-                                   <div className="flex justify-between items-center">
-                                     <div>
-                                       <p className="text-xs text-orange-600 font-medium">Deep Search Results</p>
-                                       <p className="text-sm font-semibold text-orange-700">Avg: ${photoPricing[image.url].average_price}</p>
-                                     </div>
-                                     <span className="text-xs text-orange-600 hover:text-orange-700">View Details →</span>
-                                   </div>
-                                 </button>
-                              )}
-                              <div className="mt-3 flex flex-col gap-2 w-full max-w-full overflow-hidden">
-                                {!(image.name && image.description) && !image.skip_item && (
-                                <Button type="button" variant="outline" size="sm" className="w-full text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
-                                  <Scan className="w-3 h-3 mr-1" />
-                                  {serpSearching[index] ? 'Searching...' : 'AI Search'}
-                                </Button>
-                                )}
-                                {serpResults[image.url] && !serpResults[image.url].error && (
-                                   <div className="mt-1 p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1 w-full overflow-hidden break-words">
-                                     <p className="font-semibold text-purple-800 break-words">{serpResults[image.url].item_title}</p>
-                                     {serpResults[image.url].price_range?.avg && (
-                                       <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
-                                         <span>Low: ${serpResults[image.url].price_range.min}</span>
-                                         <span className="font-bold text-purple-900">Avg: ${serpResults[image.url].price_range.avg}</span>
-                                         <span>High: ${serpResults[image.url].price_range.max}</span>
-                                       </div>
-                                     )}
-                                     {image.price > 0 && (
-                                       <div className="flex items-center gap-2 bg-green-100 border border-green-400 rounded px-2 py-1">
-                                         <span className="text-green-800 font-semibold text-sm">✓ Sets Listing Price to: ${image.price}</span>
-                                       </div>
-                                     )}
-                                     {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
-                                       <div className="border-t border-purple-200 pt-1 space-y-1">
-                                         <p className="text-purple-500 font-medium">👆 Tap a price to use it:</p>
-                                         {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => {
-                                           const rawPrice = match.price;
-                                           const numericPrice = typeof rawPrice === 'object'
-                                             ? (rawPrice?.extracted_value || null)
-                                             : parseFloat(String(rawPrice).replace(/[^0-9.]/g, ''));
-                                           const displayPrice = typeof rawPrice === 'object'
-                                             ? (rawPrice?.extracted_value ? `$${rawPrice.extracted_value}` : JSON.stringify(rawPrice))
-                                             : rawPrice;
-                                           const isSelected = image.price === numericPrice;
-                                           return (
-                                             <button
-                                               key={mi}
-                                               type="button"
-                                               onClick={() => {
-                                                 if (!numericPrice) return;
-                                                 const updated = [...formData.images];
-                                                 updated[index] = { ...updated[index], price: numericPrice };
-                                                 setFormData(prev => ({ ...prev, images: updated }));
-                                               }}
-                                               className={`w-full flex justify-between items-center gap-1 min-w-0 px-2 py-1 rounded transition-colors text-left ${
-                                                 isSelected
-                                                   ? 'bg-green-200 border border-green-500 text-green-900'
-                                                   : 'hover:bg-purple-100 border border-transparent'
-                                               }`}
-                                             >
-                                               <a
-                                                 href={match.link}
-                                                 target="_blank"
-                                                 rel="noopener noreferrer"
-                                                 onClick={e => e.stopPropagation()}
-                                                 className="text-purple-700 hover:underline truncate flex-1 min-w-0 max-w-[60%]"
-                                               >
-                                                 {match.source || match.title}
-                                               </a>
-                                               <span className={`font-bold flex-shrink-0 text-right ${isSelected ? 'text-green-800' : 'text-green-700'}`}>
-                                                 {isSelected ? '✓ ' : ''}{displayPrice}
-                                               </span>
-                                             </button>
-                                           );
-                                         })}
-                                       </div>
-                                     )}
-                                  </div>
-                                )}
-                                <Button type="button" variant="outline" size="sm" className="w-full text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
-                                  <Brain className="w-3 h-3 mr-1" />
-                                  {multiItemAssessing[index] ? 'Analyzing...' : 'Multi-Item AI Assess'}
-                                </Button>
-                                {multiItemResults[index] && (
-                                  <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg text-xs space-y-2">
-                                    <p className="font-semibold text-teal-800">{multiItemResults[index].scene_summary}</p>
-                                    <div className="space-y-1">
-                                      {(multiItemResults[index].items || []).map((item, ii) => (
-                                        <div key={ii} className="flex justify-between items-start gap-2">
-                                          <span className="text-teal-700 flex-1">{item.label}{item.notes ? ` — ${item.notes}` : ''}</span>
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              const updated = [...formData.images];
-                                              updated[index] = { ...updated[index], price: item.estate_sale_price };
-                                              setFormData(prev => ({ ...prev, images: updated }));
-                                            }}
-                                            className={`font-bold flex-shrink-0 px-2 py-0.5 rounded border transition-colors ${
-                                              image.price === item.estate_sale_price
-                                                ? 'bg-green-200 border-green-500 text-green-900'
-                                                : 'border-teal-400 text-teal-800 hover:bg-teal-100'
-                                            }`}
-                                          >
-                                            {image.price === item.estate_sale_price ? '✓ ' : ''}${item.estate_sale_price}
-                                          </button>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    {multiItemResults[index].lot_price && (
-                                      <div className="border-t border-teal-300 pt-2 flex justify-between items-center">
-                                        <span className="font-semibold text-teal-800">Lot Price (all together)</span>
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            const updated = [...formData.images];
-                                            updated[index] = { ...updated[index], price: multiItemResults[index].lot_price };
-                                            setFormData(prev => ({ ...prev, images: updated }));
-                                          }}
-                                          className={`font-bold px-2 py-0.5 rounded border transition-colors ${
-                                            image.price === multiItemResults[index].lot_price
-                                              ? 'bg-green-200 border-green-500 text-green-900'
-                                              : 'border-teal-400 text-teal-800 hover:bg-teal-100'
-                                          }`}
-                                        >
-                                          {image.price === multiItemResults[index].lot_price ? '✓ ' : ''}${multiItemResults[index].lot_price}
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                                <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
-                                  Use Google Lens
-                                </Button>
-                                <Button type="button" variant="outline" size="sm" className="w-full text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
-                                  {regeneratingDesc[index] ? 'Generating...' : 'Regenerate Description'}
-                                </Button>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  className="w-full text-xs bg-green-600 hover:bg-green-700 text-white"
-                                  onClick={() => handleSaveImage(index)}
-                                  disabled={savingImageIndex === index}
-                                >
-                                  {savingImageIndex === index ? 'Saving...' : '💾 Save'}
-                                </Button>
 
+                            {/* SERP Results (compact) */}
+                            {serpResults[image.url] && !serpResults[image.url].error && (
+                              <div className="p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs space-y-1">
+                                {serpResults[image.url].price_range?.avg && (
+                                  <div className="flex gap-3 text-purple-700 font-medium flex-wrap">
+                                    <span>Low: ${serpResults[image.url].price_range.min}</span>
+                                    <span className="font-bold text-purple-900">Avg: ${serpResults[image.url].price_range.avg}</span>
+                                    <span>High: ${serpResults[image.url].price_range.max}</span>
+                                  </div>
+                                )}
+                                {image.price > 0 && (
+                                  <div className="flex items-center gap-2 bg-green-100 border border-green-400 rounded px-2 py-1">
+                                    <span className="text-green-800 font-semibold">✓ Listed at: ${image.price}</span>
+                                  </div>
+                                )}
+                                {serpResults[image.url].matches?.filter(m => m.price).length > 0 && (
+                                  <div className="border-t border-purple-200 pt-1 flex flex-wrap gap-1">
+                                    {serpResults[image.url].matches.filter(m => m.price).map((match, mi) => {
+                                      const rawPrice = match.price;
+                                      const numericPrice = typeof rawPrice === 'object' ? (rawPrice?.extracted_value || null) : parseFloat(String(rawPrice).replace(/[^0-9.]/g, ''));
+                                      const displayPrice = typeof rawPrice === 'object' ? (rawPrice?.extracted_value ? `$${rawPrice.extracted_value}` : JSON.stringify(rawPrice)) : rawPrice;
+                                      const isSelected = image.price === numericPrice;
+                                      return (
+                                        <button key={mi} type="button"
+                                          onClick={() => { if (!numericPrice) return; const updated = [...formData.images]; updated[index] = { ...updated[index], price: numericPrice }; setFormData(prev => ({ ...prev, images: updated })); }}
+                                          className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${isSelected ? 'bg-green-200 border border-green-500 text-green-900' : 'hover:bg-purple-100 border border-transparent'}`}
+                                        >
+                                          <a href={match.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-purple-700 hover:underline max-w-[100px] truncate">{match.source || match.title}</a>
+                                          <span className={`font-bold ${isSelected ? 'text-green-800' : 'text-green-700'}`}>{isSelected ? '✓' : ''}{displayPrice}</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
                               </div>
+                            )}
+
+                            {/* Multi-Item results (compact) */}
+                            {multiItemResults[index] && (
+                              <div className="p-2 bg-teal-50 border border-teal-200 rounded-lg text-xs space-y-1">
+                                <div className="flex flex-wrap gap-2">
+                                  {(multiItemResults[index].items || []).map((item, ii) => (
+                                    <button key={ii} type="button"
+                                      onClick={() => { const updated = [...formData.images]; updated[index] = { ...updated[index], price: item.estate_sale_price }; setFormData(prev => ({ ...prev, images: updated })); }}
+                                      className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] transition-colors ${image.price === item.estate_sale_price ? 'bg-green-200 border-green-500 text-green-900' : 'border-teal-400 text-teal-800 hover:bg-teal-100'}`}
+                                    >
+                                      <span className="max-w-[120px] truncate">{item.label}</span>
+                                      <span className="font-bold">{image.price === item.estate_sale_price ? '✓' : ''}${item.estate_sale_price}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                                {multiItemResults[index].lot_price && (
+                                  <button type="button"
+                                    onClick={() => { const updated = [...formData.images]; updated[index] = { ...updated[index], price: multiItemResults[index].lot_price }; setFormData(prev => ({ ...prev, images: updated })); }}
+                                    className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] ${image.price === multiItemResults[index].lot_price ? 'bg-green-200 border-green-500 text-green-900' : 'border-teal-400 text-teal-800 hover:bg-teal-100'}`}
+                                  >Lot: {image.price === multiItemResults[index].lot_price ? '✓' : ''}${multiItemResults[index].lot_price}</button>
+                                )}
                               </div>
-                              </div>}
+                            )}
+
+                            {/* Loading indicator for deep price */}
+                            {regeneratingPrice[index] && (
+                              <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-xs">
+                                <div className="w-3 h-3 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+                                <span className="text-blue-700">Searching market prices...</span>
                               </div>
-                              </div>)}
+                            )}
+
+                            {/* Deep Search Results button */}
+                            {photoPricing[image.url] && (
+                              <button type="button" onClick={() => setSelectedPricingImage(image.url)}
+                                className="p-2 bg-orange-50 border border-orange-200 rounded-lg w-full text-left hover:bg-orange-100 text-xs"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="text-orange-600 font-medium">Deep Search: Avg ${photoPricing[image.url].average_price}</span>
+                                  <span className="text-orange-600">View →</span>
+                                </div>
+                              </button>
+                            )}
+
+                            {/* Action buttons — 2-col grid on mobile, 4-col on desktop */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                              {!(image.name && image.description) && !image.skip_item && (
+                                <Button type="button" variant="outline" size="sm" className="text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
+                                  <Scan className="w-3 h-3 mr-1" />{serpSearching[index] ? '...' : 'AI Search'}
+                                </Button>
+                              )}
+                              <Button type="button" variant="outline" size="sm" className="text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
+                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'Multi-Assess'}
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
+                                Google Lens
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
+                                {regeneratingDesc[index] ? '...' : 'Re-Describe'}
+                              </Button>
+                            </div>
+                            <Button type="button" size="sm" className="w-full text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => handleSaveImage(index)} disabled={savingImageIndex === index}>
+                              {savingImageIndex === index ? 'Saving...' : '💾 Save'}
+                            </Button>
+                          </div>}
+                          </div>
+                          </div>)}
                               </Card>
                        );
                     })}
