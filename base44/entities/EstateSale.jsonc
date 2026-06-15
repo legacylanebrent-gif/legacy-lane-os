@@ -128,6 +128,43 @@
               "type": "string"
             },
             "default": []
+          },
+          "skip_item": {
+            "type": "boolean",
+            "default": false,
+            "description": "Marked as 'Don't Search' by user"
+          },
+          "skip_saved_name": {
+            "type": "string",
+            "description": "Saved name before skip was toggled"
+          },
+          "skip_saved_description": {
+            "type": "string",
+            "description": "Saved description before skip was toggled"
+          },
+          "skip_updated_at": {
+            "type": "string",
+            "description": "Timestamp when skip was toggled"
+          },
+          "skip_serp_search": {
+            "type": "boolean",
+            "description": "Legacy skip search flag"
+          },
+          "serp_search_status": {
+            "type": "string",
+            "description": "Status from SalePhotoReviewStep (search_allowed, do_not_search, etc)"
+          },
+          "ai_first_search_price": {
+            "type": "number",
+            "description": "AI-suggested price from initial search"
+          },
+          "ai_deep_search_price": {
+            "type": "number",
+            "description": "AI-suggested price from deep search"
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "description": "Pre-generated thumbnail URL"
           }
         }
       },
