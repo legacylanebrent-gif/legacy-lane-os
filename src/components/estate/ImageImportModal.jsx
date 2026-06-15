@@ -52,7 +52,7 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
 
     // Sequential uploads with a small stagger to avoid rate limits
     const originalResult = await base44.integrations.Core.UploadFile({ file: resizedFile });
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
     const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
 
     return {
@@ -71,8 +71,8 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
       } catch (e) {
         lastError = e;
         if (attempt < maxRetries) {
-          // Exponential backoff: 3s, 8s, 20s
-          const delay = 3000 * Math.pow(2.5, attempt);
+          // Exponential backoff: 2s, 4s, 8s
+          const delay = 2000 * Math.pow(2, attempt);
           await new Promise(r => setTimeout(r, delay));
         }
       }
@@ -86,8 +86,8 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
     setErrors([]);
     abortRef.current = false;
 
-    const STAGGER_MS = 1500;  // between individual images
-    const BATCH_DELAY_MS = 10000;  // between batches of 10
+    const STAGGER_MS = 1000;  // between individual images
+    const BATCH_DELAY_MS = 7000;  // between batches of 10
     const BATCH_SIZE = 10;
     let accumulatedImages = [...(existingImages || [])];
     accumulatedRef.current = accumulatedImages;
@@ -137,8 +137,8 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
           setErrors(prev => prev.filter(e => !e.startsWith(`${file.name}:`)));
 
           try {
-            // Longer backoff before retry
-            await new Promise(r => setTimeout(r, 8000));
+            // Backoff before retry
+            await new Promise(r => setTimeout(r, 5000));
             const img = await uploadWithRetry(file, 3);
             accumulatedImages.push(img);
             accumulatedRef.current = [...accumulatedImages];
