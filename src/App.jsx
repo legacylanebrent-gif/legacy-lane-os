@@ -137,6 +137,7 @@ import CollectorDealerDashboard from './pages/CollectorDealerDashboard';
 import RewardDetail from './pages/RewardDetail';
 import ReferCompany from './pages/ReferCompany';
 import MyCalendar from './pages/MyCalendar';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -389,8 +390,10 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
+          <ErrorBoundary>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </ErrorBoundary>
         </Router>
         <Toaster />
         <VisualEditAgent />
