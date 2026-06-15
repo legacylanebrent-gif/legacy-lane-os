@@ -419,7 +419,7 @@ export default function MySales() {
                     {(() => {
                       const isCompleted = getSaleDisplayStatus(sale) === 'completed';
                       return (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className="w-full border-blue-500 text-black hover:bg-blue-50"><Edit className="w-3 h-3 mr-1" />Edit Sale</Button>)}
                           {!isCompleted && isElite && (
                             <Button
