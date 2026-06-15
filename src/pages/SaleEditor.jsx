@@ -1524,52 +1524,6 @@ Return ONLY the description text, no extra commentary.`
         <Card>
           <CardContent className="pt-6 space-y-4">
             {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
-            {(() => {
-              const missingThumbCount = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
-              const total = formData.images.length;
-              return (
-                <>
-                  {missingThumbCount > 0 && total > 0 && (
-                    <div className="flex items-center justify-between bg-amber-50 border border-amber-300 rounded-lg px-4 py-2 mb-2">
-                      <p className="text-sm text-amber-800">
-                        <span className="font-semibold">{missingThumbCount} of {total}</span> images need thumbnails for fast loading
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-amber-700 border-amber-400 hover:bg-amber-100 h-7 text-xs"
-                        onClick={async () => {
-                          if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s) in batches of 20?`)) return;
-                          setRegeneratingThumbs(true);
-                          try {
-                            let start = 0;
-                            let totalDone = 0;
-                            const BATCH = 20;
-                            while (true) {
-                              setThumbProgress({ current: totalDone, total: missingThumbCount });
-                              const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
-                              totalDone += res.data.updated || 0;
-                              if (res.data.done) break;
-                              start = res.data.next_start;
-                            }
-                            alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
-                            window.location.reload();
-                          } catch (e) {
-                            alert('Failed: ' + (e.message || 'Unknown error'));
-                          } finally {
-                            setRegeneratingThumbs(false);
-                            setThumbProgress({ current: 0, total: 0 });
-                          }
-                        }}
-                        disabled={regeneratingThumbs}
-                      >
-                        {regeneratingThumbs ? `${thumbProgress.current}/${thumbProgress.total}` : 'Fix Now'}
-                      </Button>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
               <TabsList className="w-full">
                 <TabsTrigger value="thumbnails" className="flex-1 text-xs sm:text-sm">Thumbnails</TabsTrigger>
