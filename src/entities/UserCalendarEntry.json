@@ -1,0 +1,45 @@
+{
+  "name": "UserCalendarEntry",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User who added the sale to their calendar"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "EstateSale ID"
+    },
+    "sale_title": {
+      "type": "string",
+      "description": "Cached sale title for display"
+    },
+    "sale_operator_name": {
+      "type": "string",
+      "description": "Cached operator/company name"
+    },
+    "sale_address": {
+      "type": "string",
+      "description": "Cached formatted address"
+    },
+    "sale_dates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "start_time": { "type": "string" },
+          "end_time": { "type": "string" }
+        }
+      },
+      "default": [],
+      "description": "Cached sale dates for offline display"
+    },
+    "added_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user added this to their calendar"
+    }
+  },
+  "required": ["user_id", "sale_id"]
+}

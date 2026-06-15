@@ -30,6 +30,7 @@ const NO_SIDEBAR_PAGES = [
   // Public pages that need UniversalHeader
   'EstateSaleDetail',
   'CompareEstateSales',
+  'MyCalendar',
 ];
 
 // Consumer-type roles that get the consumer header instead of the sidebar

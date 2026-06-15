@@ -136,6 +136,7 @@ import MobileHome from './pages/MobileHome';
 import CollectorDealerDashboard from './pages/CollectorDealerDashboard';
 import RewardDetail from './pages/RewardDetail';
 import ReferCompany from './pages/ReferCompany';
+import MyCalendar from './pages/MyCalendar';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -241,6 +242,7 @@ const AuthenticatedApp = () => {
       <Route path="/CollectorDealerDashboard" element={<LayoutWrapper currentPageName="CollectorDealerDashboard"><CollectorDealerDashboard /></LayoutWrapper>} />
       <Route path="/RewardDetail" element={<RewardDetail />} />
       <Route path="/ReferCompany" element={<LayoutWrapper currentPageName="ReferCompany"><ReferCompany /></LayoutWrapper>} />
+      <Route path="/MyCalendar" element={<LayoutWrapper currentPageName="MyCalendar"><MyCalendar /></LayoutWrapper>} />
       <Route path="/LandingPageSaleLeak" element={<LandingPageSaleLeak />} />
       <Route path="/LandingPageProfitLevers" element={<LandingPageProfitLevers />} />
       <Route path="/LandingPageScaleReady" element={<LandingPageScaleReady />} />

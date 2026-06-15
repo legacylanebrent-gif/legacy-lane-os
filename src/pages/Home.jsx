@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
+import { downloadSaleCalendar } from '@/utils/calendarUtils';
 import { format } from 'date-fns';
 import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -496,6 +497,29 @@ export default function Home() {
       const address = `${sale.property_address.street}, ${sale.property_address.city}, ${sale.property_address.state} ${sale.property_address.zip}`;
       window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(address)}`, '_blank');
     }
+  };
+
+  const handleAddToCalendar = async (e, sale) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) { base44.auth.redirectToLogin(window.location.href); return; }
+    downloadSaleCalendar(sale);
+    try {
+      const userData = await base44.auth.me();
+      const addr = sale.property_address ? `${sale.property_address.street || ''}, ${sale.property_address.city || ''}, ${sale.property_address.state || ''} ${sale.property_address.zip || ''}`.trim() : '';
+      const existing = await base44.entities.UserCalendarEntry.filter({ user_id: userData.id, sale_id: sale.id });
+      if (existing.length === 0) {
+        await base44.entities.UserCalendarEntry.create({
+          user_id: userData.id, sale_id: sale.id, sale_title: sale.title || '',
+          sale_operator_name: sale.operator_name || '', sale_address: addr,
+          sale_dates: sale.sale_dates || [], added_date: new Date().toISOString(),
+        });
+      }
+    } catch (e) { /* silent */ }
+    try {
+      const res = await base44.functions.invoke('completeRewardAction', { action_id: 'add_calendar', reference_id: sale.id, notes: `Added ${sale.title} to calendar` });
+      if (res.data?.success && res.data?.message) { setDebugMessage(res.data.message); setTimeout(() => setDebugMessage(''), 4000); }
+    } catch (e) { /* silent */ }
   };
 
   const handleSaveSale = async (e, saleId) => {
