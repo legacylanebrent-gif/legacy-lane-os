@@ -9,8 +9,12 @@ import { createPageUrl } from '@/utils';
 import { 
   Trophy, Star, Gift, TrendingUp, Calendar, CheckCircle, 
   Users, DollarSign, Heart, Share2, Camera, ShoppingBag,
-  MessageSquare, ThumbsUp, Award
+  MessageSquare, ThumbsUp, Award, ArrowRight, MapPin,
+  PlusCircle, ExternalLink, UserCheck, Send
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
+import { toast } from 'sonner';
 
 const CATEGORY_ICONS = {
   engagement: Heart,
@@ -38,6 +42,9 @@ export default function MyRewards() {
   const [userRewards, setUserRewards] = useState([]);
   const [monthlyDraws, setMonthlyDraws] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [recentCheckIns, setRecentCheckIns] = useState(0);
+  const [showRecordPurchase, setShowRecordPurchase] = useState(false);
+  const [showReferModal, setShowReferModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -64,6 +71,17 @@ export default function MyRewards() {
       // Load recent monthly draws
       const drawsData = await base44.entities.MonthlyDraw.list('-created_date', 3);
       setMonthlyDraws(drawsData);
+
+      // Load user context: recent check-ins (past 7 days)
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const allCheckInRewards = await base44.entities.UserReward.filter({
+        user_id: userData.id,
+        action_id: 'checkin_sale'
+      });
+      const recentCheckInCount = allCheckInRewards.filter(r => 
+        r.created_date && new Date(r.created_date) > new Date(weekAgo)
+      ).length;
+      setRecentCheckIns(recentCheckInCount);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -91,6 +109,120 @@ export default function MyRewards() {
     acc[reward.action_id] = (acc[reward.action_id] || 0) + 1;
     return acc;
   }, {});
+
+  // ── CTA Configuration per action ──
+  const getActionCTA = (action) => {
+    const ctaMap = {
+      spend_100: { 
+        label: 'Record Purchase', icon: DollarSign, 
+        onClick: () => setShowRecordPurchase(true),
+        context: `You have ${recentCheckIns} sales on your calendar this week — record your purchases to earn 75 points.` 
+      },
+      spend_500: { 
+        label: 'Record Purchase', icon: DollarSign, 
+        onClick: () => setShowRecordPurchase(true),
+        context: `You have ${recentCheckIns} sales on your calendar this week — document big spending for 200 points.` 
+      },
+      document_purchase: { 
+        label: 'Record Purchase', icon: Camera, 
+        onClick: () => setShowRecordPurchase(true),
+        context: 'Upload a photo and details of items you bought to earn 15 points.' 
+      },
+      checkin_sale: { 
+        label: 'Find Nearby Sales', icon: MapPin, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: `You've checked into ${recentCheckIns} sales this week. Find more to earn points!` 
+      },
+      first_checkin: { 
+        label: 'Find Your First Sale', icon: MapPin, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Find an estate sale near you and check in to earn 25 bonus points.' 
+      },
+      attend_3_sales: { 
+        label: 'Find Sales', icon: MapPin, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: `You've attended ${completionCounts.checkin_sale || 0} sales this month.` 
+      },
+      attend_5_sales: { 
+        label: 'Find Sales', icon: MapPin, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: `You've attended ${completionCounts.checkin_sale || 0} sales this month. Keep going!` 
+      },
+      add_calendar: { 
+        label: 'Browse Sales', icon: Calendar, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Find upcoming sales and add them to your calendar to earn points.' 
+      },
+      refer_user: { 
+        label: 'Refer a Friend', icon: Users, 
+        onClick: () => navigate(createPageUrl('ReferCompany')),
+        context: 'Share EstateSalen.com with friends — you both earn points!' 
+      },
+      refer_operator: { 
+        label: 'Refer an Operator', icon: Users, 
+        onClick: () => navigate(createPageUrl('ReferCompany')),
+        context: 'Get an estate sale company to join — earn 500 bonus points!' 
+      },
+      share_sale: { 
+        label: 'Share Sale', icon: Share2, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Browse sales and share your favorites to earn points.' 
+      },
+      share_app: { 
+        label: 'Share App', icon: Share2, 
+        onClick: async () => {
+          if (navigator.share) {
+            await navigator.share({ title: 'EstateSalen.com', text: 'Find estate sales near you!', url: window.location.origin });
+          } else {
+            await navigator.clipboard.writeText(window.location.origin);
+            toast.success('Link copied! Share it with friends.');
+          }
+        },
+        context: 'Share the app link with friends to earn 10 points.' 
+      },
+      profile_complete: { 
+        label: 'Complete Profile', icon: UserCheck, 
+        onClick: () => navigate(createPageUrl('MyProfile')),
+        context: 'Fill out your profile details to unlock rewards.' 
+      },
+      create_wishlist: { 
+        label: 'Create Wishlist', icon: Heart, 
+        onClick: () => navigate(createPageUrl('Favorites')),
+        context: 'Save items you\'re looking for — earn 15 points for your first wishlist.' 
+      },
+      save_sale: { 
+        label: 'Browse Sales', icon: Heart, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Browse sales and save your favorites to earn points.' 
+      },
+      write_review: { 
+        label: 'Write a Review', icon: MessageSquare, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Leave a review for a sale or item you loved.' 
+      },
+      upload_photo: { 
+        label: 'Upload Photo', icon: Camera, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Check in to a sale and upload a photo to earn points.' 
+      },
+      rate_app: { 
+        label: 'Rate the App', icon: Star, 
+        onClick: () => toast.success('Thanks! We\'d love your review in the app store.'),
+        context: 'Leave a rating in the app store to earn 25 points.' 
+      },
+      newsletter_signup: { 
+        label: 'Subscribe', icon: Send, 
+        onClick: () => toast.success('You\'re subscribed! Watch your inbox for updates.'),
+        context: 'Sign up for email updates to earn 15 points.' 
+      },
+      message_operator: { 
+        label: 'Message an Operator', icon: Send, 
+        onClick: () => navigate(createPageUrl('EstateSaleFinder')),
+        context: 'Find a sale and message the operator to earn points.' 
+      },
+    };
+    return ctaMap[action.action_id] || null;
+  };
 
   if (loading) {
     return (
@@ -221,48 +353,87 @@ export default function MyRewards() {
             (action.frequency === 'once' && timesCompleted === 0) ||
             (action.frequency === 'daily' && timesCompleted < 30) ||
             (action.frequency === 'weekly' && timesCompleted < 4);
+          const cta = getActionCTA(action);
 
           return (
-            <Card key={action.id} className={`${!canComplete ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow`} onClick={() => navigate(createPageUrl('RewardDetail') + '?actionId=' + action.action_id)}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${CATEGORY_COLORS[action.category]}`}>
-                      {Icon && <Icon className="w-5 h-5" />}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900 mb-1">
-                        {action.action_name}
-                      </h3>
-                      <p className="text-sm text-slate-600 mb-2">
-                        {action.action_description}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {action.frequency}
-                        </Badge>
-                        {timesCompleted > 0 && (
-                          <Badge className="bg-green-100 text-green-700 text-xs">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Done {timesCompleted}x
+            <Card 
+              key={action.id} 
+              className={`${!canComplete ? 'opacity-60' : ''} hover:shadow-md transition-shadow overflow-hidden`}
+            >
+              <CardContent className="p-0">
+                {/* Main card content */}
+                <div 
+                  className="p-4 cursor-pointer"
+                  onClick={() => navigate(createPageUrl('RewardDetail') + '?actionId=' + action.action_id)}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${CATEGORY_COLORS[action.category]}`}>
+                        {Icon && <Icon className="w-5 h-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-slate-900 mb-1">
+                          {action.action_name}
+                        </h3>
+                        <p className="text-sm text-slate-600 mb-2">
+                          {action.action_description}
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className="text-xs">
+                            {action.frequency}
                           </Badge>
-                        )}
+                          {timesCompleted > 0 && (
+                            <Badge className="bg-green-100 text-green-700 text-xs">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Done {timesCompleted}x
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-yellow-600">
-                      <Star className="w-5 h-5 fill-yellow-600" />
-                      <span className="text-2xl font-bold">{action.points}</span>
+                    <div className="text-right flex-shrink-0">
+                      <div className="flex items-center gap-1 text-yellow-600">
+                        <Star className="w-5 h-5 fill-yellow-600" />
+                        <span className="text-2xl font-bold">{action.points}</span>
+                      </div>
+                      <div className="text-xs text-slate-500">points</div>
                     </div>
-                    <div className="text-xs text-slate-500">points</div>
                   </div>
                 </div>
+
+                {/* CTA Footer — only if action is completable */}
+                {canComplete && cta && (
+                  <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-3">
+                    {cta.context && (
+                      <p className="text-xs text-slate-500 mb-2">{cta.context}</p>
+                    )}
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); cta.onClick(); }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-between border-slate-300 hover:bg-white hover:border-slate-400 text-slate-700"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        {cta.icon && <cta.icon className="w-3.5 h-3.5" />}
+                        {cta.label}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
         })}
       </div>
+
+      {/* Record Purchase Modal */}
+      {showRecordPurchase && (
+        <RecordPurchaseModal
+          open={showRecordPurchase}
+          onClose={() => setShowRecordPurchase(false)}
+        />
+      )}
 
       {/* Recent Activity */}
       {userRewards.length > 0 && (
