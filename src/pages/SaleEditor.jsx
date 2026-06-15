@@ -671,20 +671,33 @@ Be practical and realistic for an estate sale context.`,
 
   const handleToggleSkip = async (index) => {
     const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
-    const images = formData.images;
-    const img = images[index];
+    const img = formData.images[index];
     const newImg = img.skip_item
       ? { ...img, skip_item: false, name: img.skip_saved_name || '', description: img.skip_saved_description || '' }
-      : { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '' };
+      : { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '', skip_updated_at: new Date().toISOString() };
 
-    const newImages = images.map((im, i) => i === index ? newImg : im);
-
+    // Update local state
+    const newImages = [...formData.images];
+    newImages[index] = newImg;
     setPhotoTitles(prev => ({ ...prev, [img.url]: newImg.name || '' }));
     setPhotoDescriptions(prev => ({ ...prev, [img.url]: newImg.description || '' }));
     setFormData(prev => ({ ...prev, images: newImages }));
 
+    // Save only the changed image via backend to avoid payload-size errors with large image arrays
     if (currentSaleId) {
-      await base44.entities.EstateSale.update(currentSaleId, { images: newImages });
+      try {
+        await base44.functions.invoke('toggleSaleImageSkip', {
+          sale_id: currentSaleId,
+          image_index: index,
+          skip_item: newImg.skip_item,
+          skip_saved_name: newImg.skip_saved_name || '',
+          skip_saved_description: newImg.skip_saved_description || '',
+        });
+      } catch (e) {
+        console.error('Failed to persist skip toggle:', e.message);
+        // Fallback: try direct update
+        await base44.entities.EstateSale.update(currentSaleId, { images: newImages });
+      }
     }
   };
 
@@ -1939,7 +1952,19 @@ Return ONLY the description text, no extra commentary.`
                                 setMultiItemResults(prev => { const next = { ...prev }; delete next[index]; return next; });
                                 setFormData(prev => ({ ...prev, images: updatedImages }));
                                 if (currentSaleId) {
-                                  await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+                                  try {
+                                    await base44.functions.invoke('toggleSaleImageSkip', {
+                                      sale_id: currentSaleId,
+                                      image_index: index,
+                                      skip_item: false,
+                                      skip_saved_name: '',
+                                      skip_saved_description: '',
+                                      clear_data: true,
+                                    });
+                                  } catch (e) {
+                                    console.error('Failed to persist clear:', e.message);
+                                    await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+                                  }
                                 }
                               }}
                               className="w-full py-1 px-1 rounded border text-[10px] font-medium transition-colors leading-tight bg-slate-50 border-slate-300 text-slate-500 hover:bg-red-50 hover:border-red-500 hover:text-red-700"
