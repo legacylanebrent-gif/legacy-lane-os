@@ -1560,12 +1560,16 @@ Return ONLY the description text, no extra commentary.`
                 {formData.images.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
-                    <DragDropContext onDragEnd={(result) => {
+                    <DragDropContext onDragEnd={async (result) => {
                       if (!result.destination) return;
                       const items = Array.from(formData.images);
                       const [reordered] = items.splice(result.source.index, 1);
                       items.splice(result.destination.index, 0, reordered);
                       setFormData({ ...formData, images: items });
+                      const currentSaleId = saleIdRef.current;
+                      if (currentSaleId) {
+                        await base44.entities.EstateSale.update(currentSaleId, { images: items });
+                      }
                     }}>
                       <Droppable droppableId="images" direction="horizontal">
                         {(provided) => (
