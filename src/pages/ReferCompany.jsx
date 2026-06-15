@@ -59,9 +59,9 @@ export default function ReferCompany() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8 space-y-6 max-w-3xl mx-auto">
-        <button onClick={() => window.history.back()} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
+        <Link to={createPageUrl('MyRewards')} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+          <ArrowLeft className="w-5 h-5" /> Back to My Rewards
+        </Link>
 
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 text-sm font-semibold px-4 py-1.5 rounded-full">
