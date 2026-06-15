@@ -97,8 +97,8 @@ export default function EstateSaleDetail() {
       }
 
       // Fetch only this specific sale
-      const saleData = await base44.entities.EstateSale.list();
-      const foundSale = saleData.find(s => s.id === saleId);
+      const sales = await base44.entities.EstateSale.filter({ id: saleId }, undefined, 1);
+      const foundSale = sales[0];
 
       if (!foundSale) {
         window.location.href = createPageUrl('Home');
