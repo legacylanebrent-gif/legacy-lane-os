@@ -1739,14 +1739,14 @@ Return ONLY the description text, no extra commentary.`
                       Batch Deep Search Price
                     </Button>
                     {(() => {
-                        const unprocessed = formData.images.filter(img => !img.name || !img.description);
+                        const unprocessed = formData.images.filter(img => (!img.name || !img.description) && img.skip_item !== true);
                         const resumeIndex = serpBatchProgress.stoppedAt;
                         const runBatch = async (startFromIndex = 0) => {
                          if (!saleId) { alert('Save the sale first'); return; }
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
                          const absIdx = startFromIndex + relIdx;
                          const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined || img.serp_search_status === null;
-                         return (!img.name || !img.description) && !multiItemFlags[absIdx] &&
+                         return (!img.name || !img.description) && !multiItemFlags[absIdx] && img.skip_item !== true &&
                           img.skip_serp_search !== true && img.serp_search_status !== "do_not_search" && statusOk;
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
@@ -1760,6 +1760,7 @@ Return ONLY the description text, no extra commentary.`
                             const img = formData.images[i];
                             if (img.name && img.description) continue;
                             if (multiItemFlags[i]) continue;
+                            if (img.skip_item === true) continue;
                             // Safety check: never search images marked as do_not_search
                             if (img.skip_serp_search === true || img.serp_search_status === "do_not_search" || img.serp_search_status !== "search_allowed") continue;
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
