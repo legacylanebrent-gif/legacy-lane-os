@@ -16,7 +16,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
-  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays
+  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -45,6 +45,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
           <div className="flex items-center gap-3 sm:gap-4">
             {isAuthenticated && user ? (
               <>
+                <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
+                  <Home className="w-5 h-5" />
+                </Link>
                 <MessagesDropdown />
                 <NotificationsDropdown user={user} />
                 <DropdownMenu>
@@ -192,6 +195,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
               </>
             ) : (
               <>
+                <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
+                  <Home className="w-5 h-5" />
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"
