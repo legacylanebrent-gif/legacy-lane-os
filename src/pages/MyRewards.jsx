@@ -10,7 +10,7 @@ import {
   Trophy, Star, Gift, TrendingUp, Calendar, CheckCircle, 
   Users, DollarSign, Heart, Share2, Camera, ShoppingBag,
   MessageSquare, ThumbsUp, Award, ArrowRight, MapPin,
-  PlusCircle, ExternalLink, UserCheck, Send
+  PlusCircle, ExternalLink, UserCheck, Send, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
@@ -45,6 +45,7 @@ export default function MyRewards() {
   const [recentCheckIns, setRecentCheckIns] = useState(0);
   const [showRecordPurchase, setShowRecordPurchase] = useState(false);
   const [showReferModal, setShowReferModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -239,9 +240,25 @@ export default function MyRewards() {
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Rewards</h1>
-        <p className="text-slate-600">Earn points for actions and enter monthly prize draws</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Rewards</h1>
+          <p className="text-slate-600">Earn points for actions and enter monthly prize draws</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            setRefreshing(true);
+            await loadData();
+            setRefreshing(false);
+          }}
+          disabled={refreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Prize Banner */}
