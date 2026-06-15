@@ -54,7 +54,12 @@ export const createThumbnailDataUrl = (file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
+      const timeout = setTimeout(() => {
+        img.src = '';
+        reject(new Error('Image decode timed out — format may not be supported'));
+      }, 15000);
       img.onload = () => {
+        clearTimeout(timeout);
         const maxSize = 200;
         let w = img.width;
         let h = img.height;
@@ -66,7 +71,10 @@ export const createThumbnailDataUrl = (file) => {
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
-      img.onerror = reject;
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('Image decode failed — unsupported format'));
+      };
       img.src = e.target.result;
     };
     reader.onerror = reject;
@@ -95,7 +103,12 @@ export const createResizedImageDataUrl = (file, maxSize = 800) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
+      const timeout = setTimeout(() => {
+        img.src = '';
+        reject(new Error('Image decode timed out — format may not be supported'));
+      }, 15000);
       img.onload = () => {
+        clearTimeout(timeout);
         let w = img.width;
         let h = img.height;
         if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } }
@@ -111,7 +124,10 @@ export const createResizedImageDataUrl = (file, maxSize = 800) => {
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL('image/jpeg', 0.8));
       };
-      img.onerror = reject;
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('Image decode failed — unsupported format'));
+      };
       img.src = e.target.result;
     };
     reader.onerror = reject;

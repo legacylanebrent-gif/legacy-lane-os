@@ -342,29 +342,34 @@ export default function SaleEditor() {
           const globalIndex = batchStart + j;
           setUploadProgress({ current: globalIndex + 1, total: files.length });
 
-          // Resize original to max 800px and thumbnail to max 200px
-          const [resizedDataUrl, thumbDataUrl] = await Promise.all([
-            createResizedImageDataUrl(file, 800),
-            createThumbnailDataUrl(file)
-          ]);
-          const [resizedBlob, thumbBlob] = await Promise.all([
-            (await fetch(resizedDataUrl)).blob(),
-            (await fetch(thumbDataUrl)).blob()
-          ]);
-          const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-          const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
+          try {
+            // Resize original to max 800px and thumbnail to max 200px
+            const [resizedDataUrl, thumbDataUrl] = await Promise.all([
+              createResizedImageDataUrl(file, 800),
+              createThumbnailDataUrl(file)
+            ]);
+            const [resizedBlob, thumbBlob] = await Promise.all([
+              (await fetch(resizedDataUrl)).blob(),
+              (await fetch(thumbDataUrl)).blob()
+            ]);
+            const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
+            const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
 
-          const [originalResult, thumbResult] = await Promise.all([
-            base44.integrations.Core.UploadFile({ file: resizedFile }),
-            base44.integrations.Core.UploadFile({ file: thumbFile })
-          ]);
+            const [originalResult, thumbResult] = await Promise.all([
+              base44.integrations.Core.UploadFile({ file: resizedFile }),
+              base44.integrations.Core.UploadFile({ file: thumbFile })
+            ]);
 
-          batchImages.push({
-            url: originalResult.file_url,
-            thumbnail_url: thumbResult.file_url,
-            name: '',
-            description: ''
-          });
+            batchImages.push({
+              url: originalResult.file_url,
+              thumbnail_url: thumbResult.file_url,
+              name: '',
+              description: ''
+            });
+          } catch (imgError) {
+            console.warn(`Skipping image ${globalIndex + 1} (${file.name}):`, imgError.message);
+            // Continue to next image — don't block the batch
+          }
         }
 
         // Update state and persist to DB so thumbnails appear immediately
