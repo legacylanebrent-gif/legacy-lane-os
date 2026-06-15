@@ -1070,13 +1070,13 @@ export default function Home() {
                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
                          </Button>
                          <Button
-                           onClick={(e) => handleGetDirections(e, sale)}
+                           onClick={(e) => handleAddToCalendar(e, sale)}
                            variant="outline"
                            size="sm"
                            className="flex-1"
                          >
-                           <Navigation className="w-4 h-4 mr-1" />
-                           Directions
+                           <Calendar className="w-4 h-4 mr-1" />
+                           Calendar
                          </Button>
                        </div>
                       </div>
@@ -1194,13 +1194,13 @@ export default function Home() {
                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
                          </Button>
                          <Button
-                           onClick={(e) => handleGetDirections(e, sale)}
+                           onClick={(e) => handleAddToCalendar(e, sale)}
                            variant="outline"
                            size="sm"
                            className="flex-1"
                          >
-                           <Navigation className="w-4 h-4 mr-1" />
-                           Directions
+                           <Calendar className="w-4 h-4 mr-1" />
+                           Calendar
                          </Button>
                        </div>
                       </div>
@@ -1333,13 +1333,13 @@ export default function Home() {
                            {routeSales.includes(sale.id) ? 'In Route' : 'Add to Route'}
                          </Button>
                          <Button
-                           onClick={(e) => handleGetDirections(e, sale)}
+                           onClick={(e) => handleAddToCalendar(e, sale)}
                            variant="outline"
                            size="sm"
                            className="flex-1"
                          >
-                           <Navigation className="w-4 h-4 mr-1" />
-                           Directions
+                           <Calendar className="w-4 h-4 mr-1" />
+                           Calendar
                          </Button>
                        </div>
                       </div>

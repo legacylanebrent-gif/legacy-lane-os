@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Eye, Bookmark, Navigation, DollarSign, Package } from 'lucide-react';
+import { Calendar, MapPin, Eye, Bookmark, Navigation, DollarSign, Package, CalendarPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 import { createPageUrl } from '@/utils';
 import { getImageSrc } from '@/utils/imageOptimizer';
 
-export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName, saved = false, onToggleSave }) {
+export default function EstateSaleCard({ estate, onClick, expanded = false, operatorDisplayName, saved = false, onToggleSave, onAddToCalendar }) {
   const navigateToDetail = () => {
     if (estate?.id) {
       window.location.href = createPageUrl('EstateSaleDetail') + '?id=' + estate.id;
@@ -166,6 +166,12 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
             }}>
               Get Directions
             </Button>
+            {onAddToCalendar && (
+              <Button variant="outline" className="w-full" onClick={(e) => { e.stopPropagation(); onAddToCalendar(estate); }}>
+                <CalendarPlus className="w-4 h-4 mr-2" />
+                Add to Calendar
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
