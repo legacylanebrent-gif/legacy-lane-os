@@ -31,9 +31,15 @@ Deno.serve(async (req) => {
     }
     const existing = await base44.asServiceRole.entities.UserReward.filter(existingFilters);
 
-    // "once" frequency: block if any previous record exists at all
-    if (frequency === 'once' && existing.length > 0) {
-      return Response.json({ success: false, message: 'Already completed (once-only action)' });
+    // "once" frequency: block if any previous record exists across ALL months
+    if (frequency === 'once') {
+      const allTimeExisting = await base44.asServiceRole.entities.UserReward.filter({
+        user_id: user.id,
+        action_id,
+      });
+      if (allTimeExisting.length > 0) {
+        return Response.json({ success: false, message: 'Already completed (one-time-only action)' });
+      }
     }
 
     // For actions with a reference_id, block if already rewarded this month

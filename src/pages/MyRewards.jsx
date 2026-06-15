@@ -10,7 +10,7 @@ import {
   Trophy, Star, Gift, TrendingUp, Calendar, CheckCircle, 
   Users, DollarSign, Heart, Share2, Camera, ShoppingBag,
   MessageSquare, ThumbsUp, Award, ArrowRight, MapPin,
-  PlusCircle, ExternalLink, UserCheck, Send, RefreshCw
+  PlusCircle, ExternalLink, UserCheck, Send, RefreshCw, CalendarDays
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
@@ -40,6 +40,7 @@ export default function MyRewards() {
   const [loading, setLoading] = useState(true);
   const [actions, setActions] = useState([]);
   const [userRewards, setUserRewards] = useState([]);
+  const [allTimeRewards, setAllTimeRewards] = useState([]);
   const [monthlyDraws, setMonthlyDraws] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [recentCheckIns, setRecentCheckIns] = useState(0);
@@ -69,6 +70,13 @@ export default function MyRewards() {
       }, '-created_date');
       setUserRewards(rewardsData);
 
+      // Load all-time rewards for annual count and once-action dedup
+      const allYearPrefix = new Date().getFullYear().toString() + '-';
+      const allRewards = await base44.entities.UserReward.filter({ 
+        user_id: userData.id,
+      }, '-created_date', 5000);
+      setAllTimeRewards(allRewards);
+
       // Load recent monthly draws
       const drawsData = await base44.entities.MonthlyDraw.list('-created_date', 3);
       setMonthlyDraws(drawsData);
@@ -91,8 +99,20 @@ export default function MyRewards() {
   };
 
   const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentYear = new Date().getFullYear().toString();
   const totalPoints = userRewards.reduce((sum, r) => sum + (r.points_earned || 0), 0);
   const actionsCompleted = new Set(userRewards.map(r => r.action_id)).size;
+
+  // Annual points — all rewards in current calendar year
+  const annualPoints = allTimeRewards
+    .filter(r => r.month && r.month.startsWith(currentYear))
+    .reduce((sum, r) => sum + (r.points_earned || 0), 0);
+
+  // All-time completion counts (for true one-time-only actions)
+  const allTimeCompletionCounts = allTimeRewards.reduce((acc, reward) => {
+    acc[reward.action_id] = (acc[reward.action_id] || 0) + 1;
+    return acc;
+  }, {});
 
   // Group actions by category
   const actionsByCategory = actions.reduce((acc, action) => {
@@ -316,11 +336,11 @@ export default function MyRewards() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-slate-600">Rank</span>
+              <CalendarDays className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm text-slate-600">Annual Points</span>
             </div>
-            <div className="text-3xl font-bold text-blue-600">-</div>
-            <div className="text-xs text-slate-500 mt-1">Coming soon</div>
+            <div className="text-3xl font-bold text-emerald-600">{annualPoints}</div>
+            <div className="text-xs text-slate-500 mt-1">Year-end drawing entries</div>
           </CardContent>
         </Card>
 
@@ -366,8 +386,9 @@ export default function MyRewards() {
         {filteredActions.map((action) => {
           const Icon = CATEGORY_ICONS[action.category];
           const timesCompleted = completionCounts[action.action_id] || 0;
+          const allTimeCompleted = allTimeCompletionCounts[action.action_id] || 0;
           const canComplete = action.frequency === 'unlimited' || 
-            (action.frequency === 'once' && timesCompleted === 0) ||
+            (action.frequency === 'once' && allTimeCompleted === 0) ||
             (action.frequency === 'daily' && timesCompleted < 30) ||
             (action.frequency === 'weekly' && timesCompleted < 4);
           const cta = getActionCTA(action);
@@ -397,12 +418,18 @@ export default function MyRewards() {
                         </p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="outline" className="text-xs">
-                            {action.frequency}
+                            {action.frequency === 'once' ? 'one-time' : action.frequency}
                           </Badge>
                           {timesCompleted > 0 && (
                             <Badge className="bg-green-100 text-green-700 text-xs">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Done {timesCompleted}x
+                            </Badge>
+                          )}
+                          {action.frequency === 'once' && allTimeCompleted > 0 && timesCompleted === 0 && (
+                            <Badge className="bg-amber-100 text-amber-700 text-xs">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Completed previously
                             </Badge>
                           )}
                         </div>
