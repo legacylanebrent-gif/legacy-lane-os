@@ -10,6 +10,7 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
   const [step, setStep] = useState('select'); // select | uploading | done
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [errors, setErrors] = useState([]);
+  const [isRetrying, setIsRetrying] = useState(false);
   const accumulatedRef = useRef([]);
   const abortRef = useRef(false);
 
@@ -25,89 +26,126 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
     setErrors([]);
   };
 
+  const uploadSingleImage = async (file) => {
+    // HEIC files: upload raw
+    if (isHeic(file)) {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      return {
+        url: result.file_url,
+        thumbnail_url: result.file_url,
+        name: '',
+        description: ''
+      };
+    }
+
+    // Resize, then upload sequentially to avoid rate limits
+    const [resizedDataUrl, thumbDataUrl] = await Promise.all([
+      createResizedImageDataUrl(file, 800),
+      createThumbnailDataUrl(file)
+    ]);
+    const [resizedBlob, thumbBlob] = await Promise.all([
+      (await fetch(resizedDataUrl)).blob(),
+      (await fetch(thumbDataUrl)).blob()
+    ]);
+    const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
+    const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
+
+    // Sequential uploads with a small stagger to avoid rate limits
+    const originalResult = await base44.integrations.Core.UploadFile({ file: resizedFile });
+    await new Promise(r => setTimeout(r, 600));
+    const thumbResult = await base44.integrations.Core.UploadFile({ file: thumbFile });
+
+    return {
+      url: originalResult.file_url,
+      thumbnail_url: thumbResult.file_url,
+      name: '',
+      description: ''
+    };
+  };
+
+  const uploadWithRetry = async (file, maxRetries = 3) => {
+    let lastError = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await uploadSingleImage(file);
+      } catch (e) {
+        lastError = e;
+        if (attempt < maxRetries) {
+          // Exponential backoff: 3s, 8s, 20s
+          const delay = 3000 * Math.pow(2.5, attempt);
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
+    }
+    throw lastError;
+  };
+
   const handleStartUpload = async () => {
     if (files.length === 0) return;
     setStep('uploading');
     setErrors([]);
     abortRef.current = false;
 
+    const STAGGER_MS = 1500;  // between individual images
+    const BATCH_DELAY_MS = 10000;  // between batches of 10
     const BATCH_SIZE = 10;
-    const DELAY_MS = 5000;
     let accumulatedImages = [...(existingImages || [])];
     accumulatedRef.current = accumulatedImages;
+    const failedFiles = [];
+    setProgress({ current: 0, total: files.length });
 
     try {
-      for (let batchStart = 0; batchStart < files.length; batchStart += BATCH_SIZE) {
+      // First pass: upload all images with retry
+      for (let i = 0; i < files.length; i++) {
         if (abortRef.current) break;
-        const batchFiles = files.slice(batchStart, batchStart + BATCH_SIZE);
-        const batchImages = [];
+        const file = files[i];
+        setProgress({ current: i + 1, total: files.length });
 
-        for (let j = 0; j < batchFiles.length; j++) {
-          if (abortRef.current) break;
-          const file = batchFiles[j];
-          const globalIndex = batchStart + j;
-          setProgress({ current: globalIndex + 1, total: files.length });
-
-          // HEIC files: upload raw
-          if (isHeic(file)) {
-            try {
-              const result = await base44.integrations.Core.UploadFile({ file });
-              batchImages.push({
-                url: result.file_url,
-                thumbnail_url: result.file_url,
-                name: '',
-                description: ''
-              });
-            } catch (e) {
-              setErrors(prev => [...prev, `${file.name}: ${e.message}`]);
-            }
-            continue;
-          }
-
-          try {
-            const [resizedDataUrl, thumbDataUrl] = await Promise.all([
-              createResizedImageDataUrl(file, 800),
-              createThumbnailDataUrl(file)
-            ]);
-            const [resizedBlob, thumbBlob] = await Promise.all([
-              (await fetch(resizedDataUrl)).blob(),
-              (await fetch(thumbDataUrl)).blob()
-            ]);
-            const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-            const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
-
-            const [originalResult, thumbResult] = await Promise.all([
-              base44.integrations.Core.UploadFile({ file: resizedFile }),
-              base44.integrations.Core.UploadFile({ file: thumbFile })
-            ]);
-
-            batchImages.push({
-              url: originalResult.file_url,
-              thumbnail_url: thumbResult.file_url,
-              name: '',
-              description: ''
-            });
-          } catch (resizeErr) {
-            // Fallback: upload original
-            try {
-              const result = await base44.integrations.Core.UploadFile({ file });
-              batchImages.push({
-                url: result.file_url,
-                thumbnail_url: result.file_url,
-                name: '',
-                description: ''
-              });
-            } catch (fallbackErr) {
-              setErrors(prev => [...prev, `${file.name}: ${fallbackErr.message}`]);
-            }
-          }
+        try {
+          const img = await uploadWithRetry(file, 2);
+          accumulatedImages.push(img);
+          accumulatedRef.current = [...accumulatedImages];
+        } catch (e) {
+          failedFiles.push({ file, index: i });
+          setErrors(prev => [...prev, `${file.name}: ${e.message}`]);
         }
 
-        accumulatedImages = [...accumulatedImages, ...batchImages];
-        accumulatedRef.current = accumulatedImages;
+        // Stagger between images (skip last)
+        if (i < files.length - 1 && !abortRef.current) {
+          await new Promise(r => setTimeout(r, STAGGER_MS));
+        }
 
-        if (batchStart + BATCH_SIZE < files.length && !abortRef.current) {
-          await new Promise(r => setTimeout(r, DELAY_MS));
+        // Extra delay every batch
+        if ((i + 1) % BATCH_SIZE === 0 && i < files.length - 1 && !abortRef.current) {
+          await new Promise(r => setTimeout(r, BATCH_DELAY_MS));
+        }
+      }
+
+      // Second pass: retry failed files with longer backoff
+      if (failedFiles.length > 0 && !abortRef.current) {
+        setIsRetrying(true);
+        const retryTotal = failedFiles.length;
+        setProgress(prev => ({ ...prev, total: files.length + retryTotal }));
+        let retried = 0;
+
+        for (let r = 0; r < failedFiles.length; r++) {
+          if (abortRef.current) break;
+          const { file, index } = failedFiles[r];
+          setProgress({ current: files.length + r + 1, total: files.length + retryTotal });
+
+          // Remove the error for this file since we're retrying
+          setErrors(prev => prev.filter(e => !e.startsWith(`${file.name}:`)));
+
+          try {
+            // Longer backoff before retry
+            await new Promise(r => setTimeout(r, 8000));
+            const img = await uploadWithRetry(file, 3);
+            accumulatedImages.push(img);
+            accumulatedRef.current = [...accumulatedImages];
+            retried++;
+          } catch (finalErr) {
+            setErrors(prev => [...prev, `${file.name}: ${finalErr.message} (retry failed)`]);
+          }
         }
       }
 
@@ -124,6 +162,7 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
     setFiles([]);
     setStep('select');
     setErrors([]);
+    setIsRetrying(false);
     accumulatedRef.current = [];
   };
 
@@ -196,10 +235,12 @@ export default function ImageImportModal({ open, existingImages, onComplete }) {
               <div className="text-center">
                 <Progress value={(progress.current / progress.total) * 100} className="h-2" />
                 <p className="text-sm text-slate-600 mt-3">
-                  {progress.current} of {progress.total} photos uploaded
+                  {progress.current} of {progress.total} photos {isRetrying ? 'retried' : 'uploaded'}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  Please don't close this window — your photos are being processed in batches
+                  {isRetrying
+                    ? 'Retrying failed photos with longer delays...'
+                    : 'Please don\'t close this window — your photos are being processed in batches'}
                 </p>
               </div>
               {errors.length > 0 && (
