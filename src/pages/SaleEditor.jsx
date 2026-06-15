@@ -14,7 +14,6 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Switch } from '@/components/ui/switch';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
 import SaleClientPermissionsModal from '@/components/estate/SaleClientPermissionsModal';
@@ -88,6 +87,10 @@ export default function SaleEditor() {
   const [thumbProgress, setThumbProgress] = useState({ current: 0, total: 0 });
   const [pdfStatus, setPdfStatus] = useState('loading');
   const [pdfProgress, setPdfProgress] = useState(0);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const gridRef = useRef(null);
+  const pointerIdRef = useRef(null);
   const pdfCancelRef = useRef(false);
   const autoSaveTimer = useRef(null);
   const isInitialLoad = useRef(true);
@@ -933,6 +936,59 @@ Be practical and realistic for an estate sale context.`,
     return expanded;
   };
 
+  const handlePointerDown = (e, index) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointerIdRef.current = e.pointerId;
+    setDragIndex(index);
+    setDragOverIndex(index);
+  };
+
+  const handlePointerMove = (e) => {
+    if (dragIndex === null) return;
+    const container = gridRef.current;
+    if (!container) return;
+    const children = container.children;
+    let closest = dragIndex;
+    let closestDist = Infinity;
+    for (let i = 0; i < children.length; i++) {
+      const r = children[i].getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const d = Math.hypot(e.clientX - cx, e.clientY - cy);
+      if (d < closestDist) { closestDist = d; closest = i; }
+    }
+    if (closest !== dragOverIndex) setDragOverIndex(closest);
+  };
+
+  const handlePointerUp = async () => {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      const items = [...formData.images];
+      const [moved] = items.splice(dragIndex, 1);
+      items.splice(dragOverIndex, 0, moved);
+      setFormData(prev => ({ ...prev, images: items }));
+      const currentSaleId = saleIdRef.current;
+      if (currentSaleId) {
+        await base44.entities.EstateSale.update(currentSaleId, { images: items });
+      }
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+    pointerIdRef.current = null;
+  };
+
+  // Global pointer listeners when dragging
+  useEffect(() => {
+    if (dragIndex === null) return;
+    const onMove = (e) => handlePointerMove(e);
+    const onUp = () => handlePointerUp();
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, [dragIndex, dragOverIndex]);
+
   const toggleAllCards = () => {
     const allExpanded = formData.images.length > 0 && formData.images.every((_, i) => expandedCards[i]);
     if (allExpanded) {
@@ -1560,52 +1616,38 @@ Return ONLY the description text, no extra commentary.`
                 {formData.images.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
-                    <DragDropContext onDragEnd={async (result) => {
-                      if (!result.destination) return;
-                      const items = Array.from(formData.images);
-                      const [reordered] = items.splice(result.source.index, 1);
-                      items.splice(result.destination.index, 0, reordered);
-                      setFormData({ ...formData, images: items });
-                      const currentSaleId = saleIdRef.current;
-                      if (currentSaleId) {
-                        await base44.entities.EstateSale.update(currentSaleId, { images: items });
-                      }
-                    }}>
-                      <Droppable droppableId="images" direction="vertical">
-                        {(provided) => (
-                          <div ref={provided.innerRef} {...provided.droppableProps}>
-                            <div className="flex flex-wrap gap-3">
-                              {formData.images.map((image, index) => (
-                                <Draggable key={index} draggableId={`image-${index}`} index={index}>
-                                  {(provided) => (
-                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] lg:w-[calc((100%-3rem)/5)] relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
-                                      <img
-                                        src={typeof image === 'string' ? image : image.url}
-                                        alt={`Photo ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                        width="200" height="200" loading="lazy"
-                                        onLoad={() => setImageErrors(prev => ({ ...prev, [index]: false }))}
-                                        onError={(e) => {
-                                          const errMsg = e.target.src ? `${e.target.src.substring(0, 60)}...` : 'empty src';
-                                          setImageErrors(prev => ({ ...prev, [index]: errMsg }));
-                                        }}
-                                      />
-                                      <button
-                                        onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) })}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </button>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          </div>
-                        )}
-                      </Droppable>
-                    </DragDropContext>
+                    <div className="flex flex-wrap gap-3" ref={gridRef}>
+                      {formData.images.map((image, index) => (
+                        <div
+                          key={index}
+                          onPointerDown={(e) => handlePointerDown(e, index)}
+                          className={`w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] lg:w-[calc((100%-3rem)/5)] relative group rounded-lg overflow-hidden bg-slate-200 aspect-square cursor-grab active:cursor-grabbing touch-none select-none ${
+                            dragIndex === index ? 'opacity-40 scale-95 z-10' : ''
+                          } ${
+                            dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-blue-500 ring-offset-1 scale-105' : ''
+                          }`}
+                          style={{ transition: dragIndex !== null ? 'transform 0.15s ease, opacity 0.15s ease' : 'none' }}
+                        >
+                          <img
+                            src={typeof image === 'string' ? image : image.url}
+                            alt={`Photo ${index + 1}`}
+                            className="w-full h-full object-cover pointer-events-none"
+                            width="200" height="200" loading="lazy"
+                            onLoad={() => setImageErrors(prev => ({ ...prev, [index]: false }))}
+                            onError={(e) => {
+                              const errMsg = e.target.src ? `${e.target.src.substring(0, 60)}...` : 'empty src';
+                              setImageErrors(prev => ({ ...prev, [index]: errMsg }));
+                            }}
+                          />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) }); }}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
