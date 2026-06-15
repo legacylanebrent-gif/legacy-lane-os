@@ -26,7 +26,7 @@ const NO_SIDEBAR_PAGES = [
   'MyPurchases', 'MyTickets', 'MyReferrals', 'Notifications', 'Messages',
   // Agent tools
   'AgentOperatorPortal', 'AgentPartnerships', 'ReferralDealPipeline',
-  'ReferralDashboard', 'JoinReferralExchange',
+  'ReferralDashboard', 'JoinReferralExchange', 'ReferCompany',
   // Public pages that need UniversalHeader
   'EstateSaleDetail',
   'CompareEstateSales',
