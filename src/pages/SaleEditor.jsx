@@ -2193,7 +2193,7 @@ Return ONLY the description text, no extra commentary.`
                                 {savingImageIndex === index ? 'Saving...' : '💾 Save'}
                               </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
-                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'What is Multi-Assess?'}
+                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'AI Pricing Multi-Items'}
                               </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
                                 Google Lens
