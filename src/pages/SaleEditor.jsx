@@ -1672,7 +1672,7 @@ Return ONLY the description text, no extra commentary.`
                   <p className="text-slate-500 text-center py-8">No photos added yet</p>
                 ) : (
                   <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                      <Button variant="outline" size="sm" className="text-green-700 border-green-600" onClick={handleExportPDF}>
                        <FileDown className="w-4 h-4 mr-2" />
                        Export Pricing Sheet
