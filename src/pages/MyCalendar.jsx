@@ -201,7 +201,7 @@ export default function MyCalendar() {
                     <Card key={entry.id} className="overflow-hidden">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between gap-2">
-                          <Link to={`/EstateSaleDetail?saleId=${entry.sale_id}`} className="flex-1 min-w-0">
+                          <Link to={`/EstateSaleDetail?id=${entry.sale_id}`} className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm text-slate-800 truncate">{entry.sale_title}</h4>
                             {entry.sale_operator_name && (
                               <p className="text-xs text-orange-600 mt-0.5">{entry.sale_operator_name}</p>
@@ -262,7 +262,7 @@ export default function MyCalendar() {
                   <Card key={entry.id} className="overflow-hidden">
                     <CardContent className="p-3">
                       <div className="flex items-start justify-between gap-2">
-                        <Link to={`/EstateSaleDetail?saleId=${entry.sale_id}`} className="flex-1 min-w-0">
+                        <Link to={`/EstateSaleDetail?id=${entry.sale_id}`} className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold text-sm text-slate-800 truncate">{entry.sale_title}</h4>
                             {nextDate && (
