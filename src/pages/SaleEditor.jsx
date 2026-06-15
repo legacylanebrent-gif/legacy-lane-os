@@ -1574,11 +1574,11 @@ Return ONLY the description text, no extra commentary.`
                       <Droppable droppableId="images" direction="vertical">
                         {(provided) => (
                           <div ref={provided.innerRef} {...provided.droppableProps}>
-                            <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+                            <div className="flex flex-wrap gap-3">
                               {formData.images.map((image, index) => (
                                 <Draggable key={index} draggableId={`image-${index}`} index={index}>
                                   {(provided) => (
-                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
+                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] lg:w-[calc((100%-3rem)/5)] relative group rounded-lg overflow-hidden bg-slate-200 aspect-square">
                                       <img
                                         src={typeof image === 'string' ? image : image.url}
                                         alt={`Photo ${index + 1}`}
