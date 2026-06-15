@@ -24,8 +24,9 @@ import ZipAddressEntry from '@/components/estate/ZipAddressEntry';
 import SalePhotoReviewStep from '@/components/estate/SalePhotoReviewStep';
 import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/ProfileCompletionGate';
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
-import { getImageSrc, createThumbnailDataUrl, createResizedImageDataUrl } from '@/utils/imageOptimizer';
+import { getImageSrc } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
+import ImageImportModal from '@/components/estate/ImageImportModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -43,11 +44,10 @@ export default function SaleEditor() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingImages, setUploadingImages] = useState(false);
+  const [showImageImportModal, setShowImageImportModal] = useState(false);
   const [showGeneratorModal, setShowGeneratorModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [dateForm, setDateForm] = useState({ start_date: '', start_time: '09:00', end_time: '14:00' });
   const [paymentMethodInput, setPaymentMethodInput] = useState('');
   const [photoTab, setPhotoTab] = useState('thumbnails');
@@ -84,6 +84,8 @@ export default function SaleEditor() {
   const [showDebug, setShowDebug] = useState(false);
   const [imageDebugInfo, setImageDebugInfo] = useState([]);
   const [imageErrors, setImageErrors] = useState({});
+  const [regeneratingThumbs, setRegeneratingThumbs] = useState(false);
+  const [thumbProgress, setThumbProgress] = useState({ current: 0, total: 0 });
   const [pdfStatus, setPdfStatus] = useState('loading');
   const [pdfProgress, setPdfProgress] = useState(0);
   const pdfCancelRef = useRef(false);
@@ -323,121 +325,26 @@ export default function SaleEditor() {
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-    setUploadingImages(true);
-    setUploadProgress({ current: 0, total: files.length });
+  const handleOpenImageImport = () => {
+    setShowImageImportModal(true);
+  };
 
-    const BATCH_SIZE = 10;
-    const DELAY_MS = 5000;
+  const handleImageImportComplete = async (newImages) => {
+    setShowImageImportModal(false);
+    if (!newImages) return; // user cancelled
 
-    // HEIC/HEIF files can't be decoded by Canvas in most browsers — skip resize entirely
-    const isHeic = (file) => {
-      const ext = (file.name || '').split('.').pop().toLowerCase();
-      return ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif';
-    };
+    // Update local state
+    setFormData(prev => ({ ...prev, images: newImages }));
 
-    // Track accumulated images in a local array so DB saves always have the real total
-    let accumulatedImages = [...formData.images];
-
-    try {
-      for (let batchStart = 0; batchStart < files.length; batchStart += BATCH_SIZE) {
-        const batchFiles = files.slice(batchStart, batchStart + BATCH_SIZE);
-        const batchImages = [];
-
-        for (let j = 0; j < batchFiles.length; j++) {
-          const file = batchFiles[j];
-          const globalIndex = batchStart + j;
-          setUploadProgress({ current: globalIndex + 1, total: files.length });
-
-          // For HEIC files: upload raw — Canvas can't decode them on iOS
-          if (isHeic(file)) {
-            try {
-              const uploadResult = await base44.integrations.Core.UploadFile({ file });
-              batchImages.push({
-                url: uploadResult.file_url,
-                thumbnail_url: uploadResult.file_url,
-                name: '',
-                description: ''
-              });
-            } catch (heicError) {
-              console.warn(`HEIC upload failed for image ${globalIndex + 1} (${file.name}):`, heicError.message);
-            }
-            continue;
-          }
-
-          try {
-            // Resize original to max 800px and thumbnail to max 200px
-            const [resizedDataUrl, thumbDataUrl] = await Promise.all([
-              createResizedImageDataUrl(file, 800),
-              createThumbnailDataUrl(file)
-            ]);
-            const [resizedBlob, thumbBlob] = await Promise.all([
-              (await fetch(resizedDataUrl)).blob(),
-              (await fetch(thumbDataUrl)).blob()
-            ]);
-            const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-            const thumbFile = new File([thumbBlob], `thumb_${file.name}`, { type: 'image/jpeg' });
-
-            const [originalResult, thumbResult] = await Promise.all([
-              base44.integrations.Core.UploadFile({ file: resizedFile }),
-              base44.integrations.Core.UploadFile({ file: thumbFile })
-            ]);
-
-            batchImages.push({
-              url: originalResult.file_url,
-              thumbnail_url: thumbResult.file_url,
-              name: '',
-              description: ''
-            });
-          } catch (imgError) {
-            console.warn(`Resize failed for image ${globalIndex + 1} (${file.name}), uploading original instead:`, imgError.message);
-            try {
-              // Fallback: upload original file without resizing — use the same URL for both
-              const uploadResult = await base44.integrations.Core.UploadFile({ file });
-
-              batchImages.push({
-                url: uploadResult.file_url,
-                thumbnail_url: uploadResult.file_url,
-                name: '',
-                description: ''
-              });
-            } catch (fallbackError) {
-              console.warn(`Image ${globalIndex + 1} (${file.name}) failed even as original:`, fallbackError.message);
-              // Only truly skip if both resize and original fail
-            }
-          }
-        }
-
-        // Update accumulated images and React state
-        accumulatedImages = [...accumulatedImages, ...batchImages];
-        setFormData(prev => ({ ...prev, images: accumulatedImages }));
-
-        // Persist to database — await fully so batches don't collide
-        const currentSaleId = saleIdRef.current;
-        if (currentSaleId) {
-          try {
-            await base44.entities.EstateSale.update(currentSaleId, {
-              images: accumulatedImages
-            });
-          } catch (dbErr) {
-            console.error('DB save after batch failed:', dbErr.message);
-          }
-        }
-
-        // Wait 5s between batches (skip delay after the last batch)
-        if (batchStart + BATCH_SIZE < files.length) {
-          await new Promise(r => setTimeout(r, DELAY_MS));
-        }
+    // Save to DB in one shot
+    const currentSaleId = saleIdRef.current;
+    if (currentSaleId) {
+      try {
+        await base44.entities.EstateSale.update(currentSaleId, { images: newImages });
+      } catch (dbErr) {
+        console.error('DB save after import failed:', dbErr.message);
+        alert('Photos uploaded but save to sale failed. Please click Save manually.');
       }
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      alert('Failed to upload images');
-    } finally {
-      setUploadingImages(false);
-      setUploadProgress({ current: 0, total: 0 });
-      e.target.value = '';
     }
   };
 
@@ -1119,6 +1026,12 @@ Be practical and realistic for an estate sale context.`,
           imageUrl={selectedPricingImage}
         />
 
+        <ImageImportModal
+          open={showImageImportModal}
+          existingImages={formData.images}
+          onComplete={handleImageImportComplete}
+        />
+
         <PdfGenerationModal
           open={pdfModalOpen}
           onClose={() => { pdfCancelRef.current = true; setPdfModalOpen(false); }}
@@ -1627,13 +1540,13 @@ Return ONLY the description text, no extra commentary.`
                         className="text-amber-700 border-amber-400 hover:bg-amber-100 h-7 text-xs"
                         onClick={async () => {
                           if (!window.confirm(`Generate thumbnails for ${missingThumbCount} image(s) in batches of 20?`)) return;
-                          setUploadingImages(true);
+                          setRegeneratingThumbs(true);
                           try {
                             let start = 0;
                             let totalDone = 0;
                             const BATCH = 20;
                             while (true) {
-                              setUploadProgress({ current: totalDone, total: missingThumbCount });
+                              setThumbProgress({ current: totalDone, total: missingThumbCount });
                               const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
                               totalDone += res.data.updated || 0;
                               if (res.data.done) break;
@@ -1644,13 +1557,13 @@ Return ONLY the description text, no extra commentary.`
                           } catch (e) {
                             alert('Failed: ' + (e.message || 'Unknown error'));
                           } finally {
-                            setUploadingImages(false);
-                            setUploadProgress({ current: 0, total: 0 });
+                            setRegeneratingThumbs(false);
+                            setThumbProgress({ current: 0, total: 0 });
                           }
                         }}
-                        disabled={uploadingImages}
+                        disabled={regeneratingThumbs}
                       >
-                        {uploadingImages ? `${uploadProgress.current}/${uploadProgress.total}` : 'Fix Now'}
+                        {regeneratingThumbs ? `${thumbProgress.current}/${thumbProgress.total}` : 'Fix Now'}
                       </Button>
                     </div>
                   )}
@@ -1663,12 +1576,6 @@ Return ONLY the description text, no extra commentary.`
                 <TabsTrigger value="descriptions" className="flex-1 text-xs sm:text-sm">Descriptions & Pricing</TabsTrigger>
               </TabsList>
               <TabsContent value="thumbnails" className="space-y-4">
-                {uploadingImages && uploadProgress.total > 0 && (
-                  <div className="space-y-2 p-3 bg-slate-50 rounded-lg">
-                    <Progress value={(uploadProgress.current / uploadProgress.total) * 100} />
-                    <p className="text-xs text-slate-600 text-center">Uploading {uploadProgress.current} of {uploadProgress.total}...</p>
-                  </div>
-                )}
                 {/* TEMPORARY DEBUG PANEL — remove after diagnosing mobile image issue */}
                 <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-xs font-mono space-y-1">
                   <div className="flex items-center justify-between mb-1">
@@ -1742,20 +1649,22 @@ Return ONLY the description text, no extra commentary.`
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50">
-                    <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" id="camera-upload" disabled={uploadingImages} multiple />
-                    <label htmlFor="camera-upload" className="cursor-pointer block">
-                      <Camera className="w-10 h-10 text-blue-600 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-blue-900">Take Photos</p>
-                    </label>
-                  </div>
-                  <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50">
-                    <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" id="file-upload" disabled={uploadingImages} />
-                    <label htmlFor="file-upload" className="cursor-pointer block">
-                      <Plus className="w-10 h-10 text-green-600 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-green-900">Choose Files</p>
-                    </label>
-                  </div>
+                  <button
+                    onClick={handleOpenImageImport}
+                    className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    <Camera className="w-10 h-10 text-blue-600 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-blue-900">Take Photos</p>
+                    <p className="text-xs text-blue-600 mt-1">Opens camera + import modal</p>
+                  </button>
+                  <button
+                    onClick={handleOpenImageImport}
+                    className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50 hover:bg-green-100 transition-colors"
+                  >
+                    <Plus className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-green-900">Choose Files</p>
+                    <p className="text-xs text-green-600 mt-1">Opens file picker modal</p>
+                  </button>
                 </div>
               </TabsContent>
               <TabsContent value="descriptions" className="space-y-4">
@@ -1777,35 +1686,35 @@ Return ONLY the description text, no extra commentary.`
                      size="sm"
                      className="text-amber-700 border-amber-500"
                      onClick={async () => {
-                        if (!saleId) { alert('Save the sale first'); return; }
-                        const missingThumbs = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
-                        if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
-                        if (!window.confirm(`Generate thumbnails for ${missingThumbs} images in batches of 20?`)) return;
-                        setUploadingImages(true);
-                        try {
-                          let start = 0;
-                          let totalDone = 0;
-                          const BATCH = 20;
-                          while (true) {
-                            setUploadProgress({ current: totalDone, total: missingThumbs });
-                            const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
-                            totalDone += res.data.updated || 0;
-                            if (res.data.done) break;
-                            start = res.data.next_start;
-                          }
-                          alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
-                          window.location.reload();
-                        } catch (e) {
-                          alert('Failed: ' + (e.message || 'Unknown error'));
-                        } finally {
-                          setUploadingImages(false);
-                          setUploadProgress({ current: 0, total: 0 });
+                      if (!saleId) { alert('Save the sale first'); return; }
+                      const missingThumbs = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
+                      if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
+                      if (!window.confirm(`Generate thumbnails for ${missingThumbs} images in batches of 20?`)) return;
+                      setRegeneratingThumbs(true);
+                      try {
+                        let start = 0;
+                        let totalDone = 0;
+                        const BATCH = 20;
+                        while (true) {
+                          setThumbProgress({ current: totalDone, total: missingThumbs });
+                          const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
+                          totalDone += res.data.updated || 0;
+                          if (res.data.done) break;
+                          start = res.data.next_start;
                         }
-                      }}
-                      disabled={uploadingImages}
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      {uploadingImages ? `${uploadProgress.current}/${uploadProgress.total}` : 'Regenerate Thumbnails'}
+                        alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
+                        window.location.reload();
+                      } catch (e) {
+                        alert('Failed: ' + (e.message || 'Unknown error'));
+                      } finally {
+                        setRegeneratingThumbs(false);
+                        setThumbProgress({ current: 0, total: 0 });
+                      }
+                     }}
+                     disabled={regeneratingThumbs}
+                     >
+                     <Camera className="w-4 h-4 mr-2" />
+                     {regeneratingThumbs ? `${thumbProgress.current}/${thumbProgress.total}` : 'Regenerate Thumbnails'}
                     </Button>
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
