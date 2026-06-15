@@ -251,6 +251,7 @@ export default function SaleEditor() {
       setFeaturedNationally(saleData.national_featured || false);
       setFeaturedLocally(saleData.local_featured || false);
       setImageThumbnails(saleData.image_thumbnails || {});
+      setExpandedCards(computeDefaultExpanded(saleData.images || []));
 
       const pricingData = await base44.entities.ItemPricing.filter({ sale_id: id });
       const pricingMap = {};
@@ -335,6 +336,7 @@ export default function SaleEditor() {
 
     // Update local state
     setFormData(prev => ({ ...prev, images: newImages }));
+    setExpandedCards(computeDefaultExpanded(newImages));
 
     // Save to DB in one shot
     const currentSaleId = saleIdRef.current;
@@ -905,6 +907,17 @@ Be practical and realistic for an estate sale context.`,
       alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
       setPdfModalOpen(false);
     }
+  };
+
+  const computeDefaultExpanded = (images) => {
+    const expanded = {};
+    images.forEach((img, i) => {
+      // Expand by default if no name AND no price (nothing filled in yet)
+      if (!img.name && !img.price) {
+        expanded[i] = true;
+      }
+    });
+    return expanded;
   };
 
   const toggleAllCards = () => {
@@ -1611,41 +1624,7 @@ Return ONLY the description text, no extra commentary.`
                        <Printer className="w-4 h-4 mr-2" />
                        Print Pricing Sheet
                      </Button>
-                   <Button
-                     variant="outline"
-                     size="sm"
-                     className="text-amber-700 border-amber-500"
-                     onClick={async () => {
-                      if (!saleId) { alert('Save the sale first'); return; }
-                      const missingThumbs = formData.images.filter((img, i) => img.url && !img.thumbnail_url && !imageThumbnails[String(i)]).length;
-                      if (missingThumbs === 0) { alert('All images already have thumbnails.'); return; }
-                      if (!window.confirm(`Generate thumbnails for ${missingThumbs} images in batches of 20?`)) return;
-                      setRegeneratingThumbs(true);
-                      try {
-                        let start = 0;
-                        let totalDone = 0;
-                        const BATCH = 20;
-                        while (true) {
-                          setThumbProgress({ current: totalDone, total: missingThumbs });
-                          const res = await base44.functions.invoke('regenerateSaleThumbnails', { sale_id: saleId, start_index: start, batch_size: BATCH });
-                          totalDone += res.data.updated || 0;
-                          if (res.data.done) break;
-                          start = res.data.next_start;
-                        }
-                        alert(`Done! ${totalDone} thumbnails generated. Reloading...`);
-                        window.location.reload();
-                      } catch (e) {
-                        alert('Failed: ' + (e.message || 'Unknown error'));
-                      } finally {
-                        setRegeneratingThumbs(false);
-                        setThumbProgress({ current: 0, total: 0 });
-                      }
-                     }}
-                     disabled={regeneratingThumbs}
-                     >
-                     <Camera className="w-4 h-4 mr-2" />
-                     {regeneratingThumbs ? `${thumbProgress.current}/${thumbProgress.total}` : 'Regenerate Thumbnails'}
-                    </Button>
+
                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 w-full hidden" onClick={async () => {
                       const toProcess = formData.images.filter(img => img.name && img.description);
                       if (toProcess.length === 0) { alert('All images must have title and description first'); return; }
