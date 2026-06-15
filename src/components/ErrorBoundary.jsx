@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -35,14 +36,22 @@ export default class ErrorBoundary extends React.Component {
             <p className="text-slate-500 text-sm mb-6">
               Please give us a few moments and come back.
             </p>
-            <Button
-              onClick={this.handleRetry}
-              variant="outline"
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Try Again
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={this.handleRetry}
+                variant="outline"
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Try Again
+              </Button>
+              <Link to="/MyTickets">
+                <Button className="gap-2 bg-orange-600 hover:bg-orange-700">
+                  <MessageSquare className="w-4 h-4" />
+                  Create Support Ticket
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       );
