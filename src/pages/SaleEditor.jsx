@@ -1756,80 +1756,96 @@ Return ONLY the description text, no extra commentary.`
                           setSerpBatchRunning(true);
                           setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
                           let processed = 0;
-                          for (let i = startFromIndex; i < formData.images.length; i++) {
-                            const img = formData.images[i];
-                            if (img.name && img.description) continue;
-                            if (multiItemFlags[i]) continue;
-                            if (img.skip_item === true) continue;
-                            // Safety check: never search images marked as do_not_search
-                            if (img.skip_serp_search === true || img.serp_search_status === "do_not_search") continue;
-                            setSerpSearching(prev => ({ ...prev, [i]: true }));
-                            try {
-                              // Check credits before each search
-                              try {
-                                const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
-                                if (!creditCheck.data.allowed) {
-                                  setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
-                                  setSerpSearching({});
-                                  setSerpBatchRunning(false);
-                                  alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
-                                  return;
-                                }
-                              } catch (creditErr) {
-                                console.warn('Credit check failed, proceeding anyway:', creditErr.message);
-                              }
+                           let batchCount = 0;
+                           for (let i = startFromIndex; i < formData.images.length; i++) {
+                             const img = formData.images[i];
+                             if (img.name && img.description) continue;
+                             if (multiItemFlags[i]) continue;
+                             if (img.skip_item === true) continue;
+                             // Safety check: never search images marked as do_not_search
+                             if (img.skip_serp_search === true || img.serp_search_status === "do_not_search") continue;
+                             setSerpSearching(prev => ({ ...prev, [i]: true }));
+                             try {
+                               // Check credits before each search
+                               try {
+                                 const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
+                                 if (!creditCheck.data.allowed) {
+                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
+                                   setSerpSearching({});
+                                   setSerpBatchRunning(false);
+                                   alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
+                                   return;
+                                 }
+                               } catch (creditErr) {
+                                 console.warn('Credit check failed, proceeding anyway:', creditErr.message);
+                               }
 
-                              const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
-                              const data = res.data;
-                              if (data.error) {
-                                console.warn(`AI search skipped image ${i + 1}: ${data.error}`);
-                                setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
-                                if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
-                                  setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
-                                  setSerpSearching({});
-                                  setSerpBatchRunning(false);
-                                  alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
-                                  return;
-                                }
-                              } else {
-                                setSerpResults(prev => ({ ...prev, [img.url]: data }));
-                                setFormData(prev => {
-                                  const updated = [...prev.images];
-                                  const item = { ...updated[i] };
-                                  if (data.item_title && !item.name) {
-                                    const t = cleanTitle(data.item_title);
-                                    item.name = t;
-                                    setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
-                                  }
-                                  if (!item.description) {
-                                    const withPrices = (data.matches || []).filter(m => m.price && m.title);
-                                    const sources = withPrices.slice(0, 3);
-                                    const knownTitle = cleanTitle(data.item_title);
-                                    let desc = '';
-                                    if (knownTitle) desc += `${knownTitle}.`;
-                                    if (sources.length > 0) desc += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
-                                    if (data.price_range?.min && data.price_range?.max) desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
-                                    if (desc.trim()) {
-                                      item.description = desc.trim();
-                                      setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
-                                    }
-                                  }
-                                  if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
-                                  updated[i] = item;
-                                  return { ...prev, images: updated };
-                                });
-                                processed++;
-                                setSerpBatchProgress(prev => ({ ...prev, current: processed }));
-                              }
-                            } catch (e) {
-                             console.warn(`AI search skipped image ${i + 1}:`, e.message);
-                            }
-                            setSerpSearching(prev => ({ ...prev, [i]: false }));
-                            await new Promise(r => setTimeout(r, 1000));
-                          }
-                          setSerpBatchRunning(false);
-                          setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
-                          // Reminder: use manual Save to persist batch results
+                               const res = await base44.functions.invoke('googleLensPricing', { image_url: img.url, sale_id: saleId });
+                               const data = res.data;
+                               if (data.error) {
+                                 console.warn(`AI search skipped image ${i + 1}: ${data.error}`);
+                                 setSerpResults(prev => ({ ...prev, [img.url]: { error: data.error } }));
+                                 if (/run out|credits|quota|limit|payment|account/i.test(data.error)) {
+                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
+                                   setSerpSearching({});
+                                   setSerpBatchRunning(false);
+                                   alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
+                                   return;
+                                 }
+                               } else {
+                                 setSerpResults(prev => ({ ...prev, [img.url]: data }));
+                                 setFormData(prev => {
+                                   const updated = [...prev.images];
+                                   const item = { ...updated[i] };
+                                   if (data.item_title && !item.name) {
+                                     const t = cleanTitle(data.item_title);
+                                     item.name = t;
+                                     setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
+                                   }
+                                   if (!item.description) {
+                                     const withPrices = (data.matches || []).filter(m => m.price && m.title);
+                                     const sources = withPrices.slice(0, 3);
+                                     const knownTitle = cleanTitle(data.item_title);
+                                     let desc = '';
+                                     if (knownTitle) desc += `${knownTitle}.`;
+                                     if (sources.length > 0) desc += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
+                                     if (data.price_range?.min && data.price_range?.max) desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
+                                     if (desc.trim()) {
+                                       item.description = desc.trim();
+                                       setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
+                                     }
+                                   }
+                                   if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
+                                   updated[i] = item;
+                                   return { ...prev, images: updated };
+                                 });
+                                 processed++;
+                                 batchCount++;
+                                 setSerpBatchProgress(prev => ({ ...prev, current: processed }));
+                                 // Save to DB every 10 images
+                                 if (batchCount >= 10) {
+                                   try {
+                                     const latest = formDataRef.current;
+                                     await base44.entities.EstateSale.update(saleId, { images: latest.images });
+                                   } catch (_) {}
+                                   batchCount = 0;
+                                 }
+                               }
+                             } catch (e) {
+                              console.warn(`AI search skipped image ${i + 1}:`, e.message);
+                             }
+                             setSerpSearching(prev => ({ ...prev, [i]: false }));
+                             await new Promise(r => setTimeout(r, 1000));
+                           }
+                           // Save any remaining images
+                           if (batchCount > 0) {
+                             try {
+                               const latest = formDataRef.current;
+                               await base44.entities.EstateSale.update(saleId, { images: latest.images });
+                             } catch (_) {}
+                           }
+                           setSerpBatchRunning(false);
+                           setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
                         };
                         const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
