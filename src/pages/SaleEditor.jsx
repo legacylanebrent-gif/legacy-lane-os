@@ -332,6 +332,12 @@ export default function SaleEditor() {
     const BATCH_SIZE = 10;
     const DELAY_MS = 5000;
 
+    // HEIC/HEIF files can't be decoded by Canvas in most browsers — skip resize entirely
+    const isHeic = (file) => {
+      const ext = (file.name || '').split('.').pop().toLowerCase();
+      return ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif';
+    };
+
     // Track accumulated images in a local array so DB saves always have the real total
     let accumulatedImages = [...formData.images];
 
@@ -344,6 +350,22 @@ export default function SaleEditor() {
           const file = batchFiles[j];
           const globalIndex = batchStart + j;
           setUploadProgress({ current: globalIndex + 1, total: files.length });
+
+          // For HEIC files: upload raw — Canvas can't decode them on iOS
+          if (isHeic(file)) {
+            try {
+              const uploadResult = await base44.integrations.Core.UploadFile({ file });
+              batchImages.push({
+                url: uploadResult.file_url,
+                thumbnail_url: uploadResult.file_url,
+                name: '',
+                description: ''
+              });
+            } catch (heicError) {
+              console.warn(`HEIC upload failed for image ${globalIndex + 1} (${file.name}):`, heicError.message);
+            }
+            continue;
+          }
 
           try {
             // Resize original to max 800px and thumbnail to max 200px
