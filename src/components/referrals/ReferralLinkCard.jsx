@@ -69,9 +69,9 @@ export default function ReferralLinkCard({ user, isOperator }) {
     // Send an email invite
     await base44.integrations.Core.SendEmail({
       to: inviteEmail.trim(),
-      subject: `${user.full_name || 'A friend'} invited you to join Legacy Lane!`,
+      subject: `${user.full_name || 'A friend'} invited you to join EstateSalen.com!`,
       body: isOperator
-        ? `Hi there!\n\n${user.full_name || 'Someone'} thinks you'd love Legacy Lane OS — the all-in-one platform for estate sale companies.\n\nSign up using their referral link and both of you earn rewards:\n${referralLink}\n\nSee you inside!`
+        ? `Hi there!\n\n${user.full_name || 'Someone'} thinks you'd love EstateSalen.com — the all-in-one platform for estate sale companies.\n\nSign up using their referral link and both of you earn rewards:\n${referralLink}\n\nSee you inside!`
         : `Hi there!\n\n${user.full_name || 'A friend'} invited you to join EstateSalen.com to discover amazing estate sales near you!\n\nUse this link to sign up:\n${referralLink}\n\nSee you there!`,
     });
 
@@ -84,9 +84,9 @@ export default function ReferralLinkCard({ user, isOperator }) {
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: 'Join me on Legacy Lane!',
+        title: 'Join me on EstateSalen.com!',
         text: isOperator
-          ? 'Check out Legacy Lane OS — the platform for estate sale companies. Use my referral link:'
+          ? 'Check out EstateSalen.com — the platform for estate sale companies. Use my referral link:'
           : 'Join me on EstateSalen.com to find amazing estate sales near you!',
         url: referralLink,
       });
