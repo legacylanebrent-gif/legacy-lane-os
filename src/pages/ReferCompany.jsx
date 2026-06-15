@@ -27,8 +27,8 @@ export default function ReferCompany() {
       const userData = await base44.auth.me();
       setUser(userData);
 
-      // Generate referral link
-      const link = `${window.location.origin}/OperatorPackages?ref=${userData.id}`;
+      // Generate referral link — send to comparison page so they see value before pricing
+      const link = `${window.location.origin}/CompareEstateSales?ref=${userData.id}`;
       setReferralLink(link);
 
       // Generate QR code
