@@ -291,13 +291,18 @@ export default function MyRewards() {
             <div className="flex-1">
               <h3 className="text-2xl font-bold mb-2">Monthly Prize Draw</h3>
               <p className="text-purple-100 leading-relaxed mb-3">
-                All points you earn this month give you entries into our monthly prize draw. 
-                The more points you earn, the higher your chances of winning a Visa gift card or other prizes!
+                Earn points all month long. We draw winners on the last day of {new Date().toLocaleString('default', { month: 'long' })}, 
+                and points reset on the 1st so everyone starts fresh. The more points you earn, the higher your chances!
               </p>
               <div className="flex items-center gap-6 text-sm">
                 <div>
                   <span className="text-purple-200">Draw Date:</span>
-                  <span className="font-semibold ml-2">End of {new Date().toLocaleString('default', { month: 'long' })}</span>
+                  <span className="font-semibold ml-2">
+                    {(() => {
+                      const d = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+                      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                    })()}
+                  </span>
                 </div>
                 <div>
                   <span className="text-purple-200">Your Entries:</span>
@@ -318,7 +323,7 @@ export default function MyRewards() {
               <span className="text-sm text-slate-600">Total Points</span>
             </div>
             <div className="text-3xl font-bold text-yellow-600">{totalPoints}</div>
-            <div className="text-xs text-slate-500 mt-1">This month</div>
+            <div className="text-xs text-slate-500 mt-1">Resets on the 1st</div>
           </CardContent>
         </Card>
 
