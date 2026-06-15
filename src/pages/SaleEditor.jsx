@@ -26,6 +26,7 @@ import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDispla
 import { getImageSrc } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
 import ImageImportModal from '@/components/estate/ImageImportModal';
+import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -83,6 +84,8 @@ export default function SaleEditor() {
   const [showDebug, setShowDebug] = useState(false);
   const [imageDebugInfo, setImageDebugInfo] = useState([]);
   const [imageErrors, setImageErrors] = useState({});
+  const [showDeepSearchModal, setShowDeepSearchModal] = useState(false);
+  const [deepSearchModalIndex, setDeepSearchModalIndex] = useState(0);
   const [regeneratingThumbs, setRegeneratingThumbs] = useState(false);
   const [thumbProgress, setThumbProgress] = useState({ current: 0, total: 0 });
   const [pdfStatus, setPdfStatus] = useState('loading');
@@ -531,23 +534,22 @@ export default function SaleEditor() {
         setPhotoTitles(pt => ({ ...pt, [image.url]: cleanedTitle }));
       }
 
-      if (!img.description) {
+      if (!img.synopsis) {
         const withPrices = (data.matches || []).filter(m => m.price && m.title);
         const withTitles = (data.matches || []).filter(m => m.title);
         const sources = withPrices.slice(0, 3);
         const knownTitle = cleanTitle(data.item_title) || (withTitles[0] && cleanTitle(withTitles[0].title));
-        let desc = '';
-        if (knownTitle) desc += `${knownTitle}.`;
+        let syn = '';
+        if (knownTitle) syn += `${knownTitle}.`;
         if (sources.length > 0) {
           const priceList = sources.map(m => `${m.price} on ${m.source}`).join(', ');
-          desc += ` Currently listed for ${priceList}.`;
+          syn += ` Currently listed for ${priceList}.`;
         }
         if (data.price_range?.min && data.price_range?.max) {
-          desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
+          syn += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
         }
-        if (desc.trim()) {
-          img.description = desc.trim();
-          setPhotoDescriptions(pd => ({ ...pd, [image.url]: desc.trim() }));
+        if (syn.trim()) {
+          img.synopsis = syn.trim();
         }
       }
 
@@ -1114,6 +1116,14 @@ Be practical and realistic for an estate sale context.`,
           onComplete={handleImageImportComplete}
         />
 
+        <DeepSearchProgressModal
+          open={showDeepSearchModal}
+          currentIndex={deepSearchModalIndex}
+          totalCount={serpBatchProgress.total}
+          images={formData.images}
+          imageThumbnails={imageThumbnails}
+        />
+
         <PdfGenerationModal
           open={pdfModalOpen}
           onClose={() => { pdfCancelRef.current = true; setPdfModalOpen(false); }}
@@ -1196,7 +1206,7 @@ Be practical and realistic for an estate sale context.`,
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-500 mt-0.5 flex-shrink-0">📝</span>
-                  <span><strong>Description</strong> — built from real listing sources &amp; price ranges found online</span>
+                  <span><strong>AI Synopsis</strong> — internal research notes from real listing sources &amp; price ranges (operator-only, not public)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-500 mt-0.5 flex-shrink-0">💵</span>
@@ -1206,7 +1216,7 @@ Be practical and realistic for an estate sale context.`,
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 space-y-1 text-xs text-slate-600">
                 <p>⊘ <strong>Skipped photos</strong> (flagged in Step 1) are excluded.</p>
                 <p>⊛ <strong>Multi-item photos</strong> (flagged in Step 2) are skipped — use "Multi-Item AI Assess" on those.</p>
-                <p>✓ Only photos <strong>without a name or description</strong> are processed to avoid overwriting your work.</p>
+                <p>✓ Only photos <strong>without a name</strong> are processed to avoid overwriting your work.</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -1739,14 +1749,14 @@ Return ONLY the description text, no extra commentary.`
                       Batch Deep Search Price
                     </Button>
                     {(() => {
-                        const unprocessed = formData.images.filter(img => (!img.name || !img.description) && img.skip_item !== true);
+                        const unprocessed = formData.images.filter(img => !img.name && img.skip_item !== true);
                         const resumeIndex = serpBatchProgress.stoppedAt;
                         const runBatch = async (startFromIndex = 0) => {
                          if (!saleId) { alert('Save the sale first'); return; }
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
                          const absIdx = startFromIndex + relIdx;
                          const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined || img.serp_search_status === null;
-                         return (!img.name || !img.description) && !multiItemFlags[absIdx] && img.skip_item !== true &&
+                         return !img.name && !multiItemFlags[absIdx] && img.skip_item !== true &&
                           img.skip_serp_search !== true && img.serp_search_status !== "do_not_search" && statusOk;
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
@@ -1755,15 +1765,17 @@ Return ONLY the description text, no extra commentary.`
                          if (!window.confirm(msg)) return;
                           setSerpBatchRunning(true);
                           setSerpBatchProgress({ current: 0, total: remaining.length, stoppedAt: null });
+                          setShowDeepSearchModal(true);
                           let processed = 0;
                            let batchCount = 0;
                            for (let i = startFromIndex; i < formData.images.length; i++) {
                              const img = formData.images[i];
-                             if (img.name && img.description) continue;
+                             if (img.name) continue;
                              if (multiItemFlags[i]) continue;
                              if (img.skip_item === true) continue;
                              // Safety check: never search images marked as do_not_search
                              if (img.skip_serp_search === true || img.serp_search_status === "do_not_search") continue;
+                             setDeepSearchModalIndex(i);
                              setSerpSearching(prev => ({ ...prev, [i]: true }));
                              try {
                                // Check credits before each search
@@ -1773,6 +1785,7 @@ Return ONLY the description text, no extra commentary.`
                                    setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                    setSerpSearching({});
                                    setSerpBatchRunning(false);
+                                   setShowDeepSearchModal(false);
                                    alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
                                    return;
                                  }
@@ -1789,6 +1802,7 @@ Return ONLY the description text, no extra commentary.`
                                    setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                    setSerpSearching({});
                                    setSerpBatchRunning(false);
+                                   setShowDeepSearchModal(false);
                                    alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
                                    return;
                                  }
@@ -1802,17 +1816,16 @@ Return ONLY the description text, no extra commentary.`
                                      item.name = t;
                                      setPhotoTitles(pt => ({ ...pt, [img.url]: t }));
                                    }
-                                   if (!item.description) {
+                                   if (!item.synopsis) {
                                      const withPrices = (data.matches || []).filter(m => m.price && m.title);
                                      const sources = withPrices.slice(0, 3);
                                      const knownTitle = cleanTitle(data.item_title);
-                                     let desc = '';
-                                     if (knownTitle) desc += `${knownTitle}.`;
-                                     if (sources.length > 0) desc += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
-                                     if (data.price_range?.min && data.price_range?.max) desc += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
-                                     if (desc.trim()) {
-                                       item.description = desc.trim();
-                                       setPhotoDescriptions(pd => ({ ...pd, [img.url]: desc.trim() }));
+                                     let syn = '';
+                                     if (knownTitle) syn += `${knownTitle}.`;
+                                     if (sources.length > 0) syn += ` Currently listed for ${sources.map(m => `${m.price} on ${m.source}`).join(', ')}.`;
+                                     if (data.price_range?.min && data.price_range?.max) syn += ` Market price range: $${data.price_range.min}–$${data.price_range.max}.`;
+                                     if (syn.trim()) {
+                                       item.synopsis = syn.trim();
                                      }
                                    }
                                    if (data.price_range?.avg) item.ai_first_search_price = data.price_range.avg;
@@ -1845,6 +1858,7 @@ Return ONLY the description text, no extra commentary.`
                              } catch (_) {}
                            }
                            setSerpBatchRunning(false);
+                           setShowDeepSearchModal(false);
                            setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
                         };
                         const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
@@ -1988,7 +2002,7 @@ Return ONLY the description text, no extra commentary.`
                               onClick={async () => {
                                 const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
                                 const updatedImages = [...formData.images];
-                                updatedImages[index] = { ...updatedImages[index], name: '', description: '', price: null, ai_first_search_price: null };
+                                updatedImages[index] = { ...updatedImages[index], name: '', description: '', synopsis: '', price: null, ai_first_search_price: null };
                                 setPhotoTitles(prev => ({ ...prev, [image.url]: '' }));
                                 setPhotoDescriptions(prev => ({ ...prev, [image.url]: '' }));
                                 setSerpResults(prev => { const next = { ...prev }; delete next[image.url]; return next; });
@@ -2055,6 +2069,14 @@ Return ONLY the description text, no extra commentary.`
                                   : <span className="text-purple-400 font-normal">Not yet searched</span>}
                               </div>
                             </div>
+                            {image.synopsis && (
+                              <div>
+                                <Label className="text-xs text-indigo-700">AI Synopsis <span className="text-slate-400 font-normal">(operator only — not shown publicly)</span></Label>
+                                <div className="text-sm px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-md text-indigo-800 whitespace-pre-wrap break-words">
+                                  {image.synopsis}
+                                </div>
+                              </div>
+                            )}
                             <div>
                               <Label htmlFor={`listing-price-${index}`} className="text-xs font-semibold text-slate-800">Listing Price <span className="text-slate-500 font-normal">(displayed online, QR codes & inventory)</span></Label>
                               <Input

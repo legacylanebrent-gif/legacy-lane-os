@@ -115,6 +115,10 @@
           "description": {
             "type": "string"
           },
+          "synopsis": {
+            "type": "string",
+            "description": "AI-generated internal synopsis visible only to the operator. Not shown publicly."
+          },
           "rotation": {
             "type": "number",
             "default": 0
