@@ -42,7 +42,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
            </Link>
 
           {/* Right Side - User Options */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3 sm:gap-4">
             {isAuthenticated && user ? (
               <>
                 <MessagesDropdown />
