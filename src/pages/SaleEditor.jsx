@@ -1686,8 +1686,9 @@ Return ONLY the description text, no extra commentary.`
                          if (!saleId) { alert('Save the sale first'); return; }
                          const remaining = formData.images.slice(startFromIndex).filter((img, relIdx) => {
                          const absIdx = startFromIndex + relIdx;
+                         const statusOk = img.serp_search_status === "search_allowed" || img.serp_search_status === undefined;
                          return (!img.name || !img.description) && !multiItemFlags[absIdx] &&
-                           img.skip_serp_search !== true && img.serp_search_status === "search_allowed";
+                          img.skip_serp_search !== true && img.serp_search_status !== "do_not_search" && statusOk;
                          });
                          if (remaining.length === 0) { alert('All eligible images have already been processed. Multi-item images are skipped — use "Multi-Item AI Assess" on those.'); return; }
                          const flaggedCount = formData.images.slice(startFromIndex).filter((img, relIdx) => multiItemFlags[startFromIndex + relIdx]).length;
