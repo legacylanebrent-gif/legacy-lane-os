@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { createPageUrl } from '@/utils';
 import { 
   Trophy, Star, Gift, TrendingUp, Calendar, CheckCircle, 
   Users, DollarSign, Heart, Share2, Camera, ShoppingBag,
@@ -29,6 +31,7 @@ const CATEGORY_COLORS = {
 };
 
 export default function MyRewards() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actions, setActions] = useState([]);
@@ -220,7 +223,7 @@ export default function MyRewards() {
             (action.frequency === 'weekly' && timesCompleted < 4);
 
           return (
-            <Card key={action.id} className={`${!canComplete ? 'opacity-60' : ''}`}>
+            <Card key={action.id} className={`${!canComplete ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow`} onClick={() => navigate(createPageUrl('RewardDetail') + '?actionId=' + action.action_id)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3 flex-1">

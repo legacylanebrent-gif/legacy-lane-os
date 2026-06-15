@@ -16,7 +16,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
-  Users, FileText, BarChart2, Send, UserCircle, Target
+  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -119,6 +119,11 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
                         <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('ReferCompany')} className="cursor-pointer font-medium text-orange-600">
+                        <Send className="w-4 h-4 mr-2" /> Refer a Company
                       </Link>
                     </DropdownMenuItem>
                     {user?.primary_account_type === 'real_estate_agent' && (
