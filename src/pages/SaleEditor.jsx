@@ -1762,7 +1762,7 @@ Return ONLY the description text, no extra commentary.`
                             if (multiItemFlags[i]) continue;
                             if (img.skip_item === true) continue;
                             // Safety check: never search images marked as do_not_search
-                            if (img.skip_serp_search === true || img.serp_search_status === "do_not_search" || img.serp_search_status !== "search_allowed") continue;
+                            if (img.skip_serp_search === true || img.serp_search_status === "do_not_search") continue;
                             setSerpSearching(prev => ({ ...prev, [i]: true }));
                             try {
                               // Check credits before each search
@@ -1772,12 +1772,6 @@ Return ONLY the description text, no extra commentary.`
                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                   setSerpSearching({});
                                   setSerpBatchRunning(false);
-                                  setFormData(prev => {
-                                    if (saleId) {
-                                      base44.entities.EstateSale.update(saleId, { images: prev.images });
-                                    }
-                                    return prev;
-                                  });
                                   alert(`Google Lens credit limit reached after ${processed} image(s).\n\nPurchase more credits to continue.`);
                                   return;
                                 }
@@ -1794,13 +1788,6 @@ Return ONLY the description text, no extra commentary.`
                                   setSerpBatchProgress(prev => ({ ...prev, stoppedAt: i, current: processed }));
                                   setSerpSearching({});
                                   setSerpBatchRunning(false);
-                                  // Save partial progress before stopping
-                                  setFormData(prev => {
-                                    if (saleId) {
-                                      base44.entities.EstateSale.update(saleId, { images: prev.images });
-                                    }
-                                    return prev;
-                                  });
                                   alert(`AI search credits exhausted after ${processed} image(s).\n\nPlease contact support, then click "Resume from image ${i + 1}" to continue.`);
                                   return;
                                 }
@@ -1842,14 +1829,7 @@ Return ONLY the description text, no extra commentary.`
                           }
                           setSerpBatchRunning(false);
                           setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
-                          // Force save after batch completes so ai_first_search_price is persisted
-                          // (auto-save has a stale closure and may not capture batch updates)
-                          setFormData(prev => {
-                            if (saleId) {
-                              base44.entities.EstateSale.update(saleId, { images: prev.images });
-                            }
-                            return prev;
-                          });
+                          // Reminder: use manual Save to persist batch results
                         };
                         const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
