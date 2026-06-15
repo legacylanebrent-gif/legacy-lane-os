@@ -512,11 +512,12 @@ export default function Home() {
           sale_operator_name: sale.operator_name || '', sale_address: addr,
           sale_dates: sale.sale_dates || [], added_date: new Date().toISOString(),
         });
+        // Only award points on first add — not on re-clicking the same sale
+        try {
+          const res = await base44.functions.invoke('completeRewardAction', { action_id: 'add_calendar', reference_id: sale.id, notes: `Added ${sale.title} to calendar` });
+          if (res.data?.success && res.data?.message) { setDebugMessage(res.data.message); setTimeout(() => setDebugMessage(''), 4000); }
+        } catch (e) { /* silent */ }
       }
-    } catch (e) { /* silent */ }
-    try {
-      const res = await base44.functions.invoke('completeRewardAction', { action_id: 'add_calendar', reference_id: sale.id, notes: `Added ${sale.title} to calendar` });
-      if (res.data?.success && res.data?.message) { setDebugMessage(res.data.message); setTimeout(() => setDebugMessage(''), 4000); }
     } catch (e) { /* silent */ }
     window.location.href = createPageUrl('MyCalendar') + '?added=' + sale.id;
   };
