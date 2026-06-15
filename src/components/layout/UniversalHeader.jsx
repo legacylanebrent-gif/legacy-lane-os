@@ -88,7 +88,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('MyCalendar')} className="cursor-pointer">
-                        <CalendarDays className="w-4 h-4 mr-2" /> My Calendar
+                        <CalendarDays className="w-4 h-4 mr-2" /> My Sale Calendar
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
