@@ -48,6 +48,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                 <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
                   <Home className="w-5 h-5" />
                 </Link>
+                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
+                  <ShoppingBag className="w-5 h-5" />
+                </Link>
                 <MessagesDropdown />
                 <NotificationsDropdown user={user} />
                 <DropdownMenu>
@@ -197,6 +200,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
               <>
                 <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
                   <Home className="w-5 h-5" />
+                </Link>
+                <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
+                  <ShoppingBag className="w-5 h-5" />
                 </Link>
                 <Button
                   variant="ghost"
