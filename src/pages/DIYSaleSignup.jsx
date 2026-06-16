@@ -15,7 +15,7 @@ export default function DIYSaleSignup() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [packages, setPackages] = useState([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
-  const [billingCycle, setBillingCycle] = useState('monthly');
+
 
   useEffect(() => {
     checkAuth();
@@ -120,28 +120,7 @@ export default function DIYSaleSignup() {
           <h2 className="text-2xl font-serif font-bold text-slate-900 text-center mb-2">Choose Your Plan</h2>
           <p className="text-slate-500 text-center mb-6">Select the package that works best for your sale</p>
 
-          {/* Billing Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-slate-100 rounded-lg p-1">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  billingCycle === 'monthly' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${
-                  billingCycle === 'annual' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Annual
-                <Badge className="bg-green-100 text-green-700 text-xs ml-1">Save 20%</Badge>
-              </button>
-            </div>
-          </div>
+
 
           {/* Packages */}
           {loadingPackages ? (
@@ -155,10 +134,7 @@ export default function DIYSaleSignup() {
           ) : (
             <div className="grid md:grid-cols-3 gap-6">
               {packages.map((pkg, idx) => {
-                const price = billingCycle === 'annual'
-                  ? Math.round((pkg.annual_price || pkg.monthly_price * 12 * 0.8) / 12)
-                  : pkg.monthly_price || pkg.per_item_price || 47;
-                const annualTotal = billingCycle === 'annual' ? price * 12 : null;
+                const price = pkg.per_item_price || pkg.monthly_price || 47;
                 return (
                   <Card key={idx} className={`overflow-hidden ${pkg.featured ? 'border-2 border-purple-500 shadow-xl' : 'border-slate-200'}`}>
                     {pkg.featured && <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-1" />}
@@ -167,10 +143,7 @@ export default function DIYSaleSignup() {
                         {pkg.package_name || pkg.tier_level}
                       </Badge>
                       <div className="text-4xl font-bold text-slate-900 mb-1">${price}</div>
-                      <p className="text-sm text-slate-500 mb-1">per month</p>
-                      {annualTotal && (
-                        <p className="text-xs text-green-600 mb-4">${annualTotal}/year</p>
-                      )}
+                      <p className="text-sm text-slate-500 mb-4">one-time fee</p>
                       <p className="text-slate-600 text-sm mb-6">{pkg.description || ''}</p>
 
                       {/* Features */}
@@ -196,7 +169,7 @@ export default function DIYSaleSignup() {
 
                       {isAuthenticated ? (
                         <Button className={`w-full text-base py-6 ${pkg.featured ? 'bg-purple-600 hover:bg-purple-700' : ''}`} size="lg">
-                          Get Started — ${price}/mo
+                          Get Started — ${price}
                         </Button>
                       ) : (
                         <div>
