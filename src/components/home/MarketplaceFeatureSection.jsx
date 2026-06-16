@@ -35,7 +35,7 @@ export default function MarketplaceFeatureSection() {
       <section className="py-16 px-4 bg-[#f8f9fa]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#1a202c] mb-2">Marketplace</h2>
+            <h2 className="text-3xl font-bold text-[#1a202c] mb-2">National Online Marketplace</h2>
             <p className="text-lg text-[#4a5568]">Loading featured listings...</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -95,10 +95,10 @@ export default function MarketplaceFeatureSection() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-[32px] md:text-[36px] font-bold text-[#1a202c] mb-2">
-            Marketplace
+            National Online Marketplace
           </h2>
           <p className="text-lg text-[#4a5568]">
-            Featured items from our community marketplace
+            Featured items from our community of resellers, vendors, shops and estate sale companies. Buy direct from the vendor with Zero transaction fees.
           </p>
         </div>
 
