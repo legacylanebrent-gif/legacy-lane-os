@@ -190,7 +190,8 @@ export default function VendorProfile() {
                   )}
                 </div>
 
-                {/* Stats */}
+                {/* Stats — hidden until data is populated */}
+                {false && (
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">{vendorData.rating || 'N/A'}</div>
@@ -207,6 +208,7 @@ export default function VendorProfile() {
                     <div className="text-sm text-slate-600">Jobs Done</div>
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -282,7 +284,8 @@ export default function VendorProfile() {
                   </div>
                 )}
                 
-                {vendorData.response_time_hours && (
+                {/* Response time and average bid — hidden until real data exists */}
+                {false && vendorData.response_time_hours && (
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-orange-600" />
                     <div>
@@ -296,7 +299,7 @@ export default function VendorProfile() {
                   </div>
                 )}
 
-                {vendorData.average_bid && (
+                {false && vendorData.average_bid && (
                   <div className="flex items-center gap-3">
                     <TrendingUp className="w-5 h-5 text-green-600" />
                     <div>
