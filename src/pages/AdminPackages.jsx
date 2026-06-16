@@ -15,7 +15,7 @@ export default function AdminPackages() {
   const [showModal, setShowModal] = useState(false);
 
   const accountTypes = [
-    { value: 'estate_sale_operator', label: 'Estate Sale Company Owner' },
+    { value: 'estate_sale_operator', label: 'Estate Sale Co' },
     { value: 'real_estate_agent', label: 'Real Estate Agent' },
     { value: 'vendor', label: 'Vendor' },
     { value: 'consignor', label: 'Consignor' },
