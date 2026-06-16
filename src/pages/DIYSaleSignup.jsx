@@ -13,9 +13,13 @@ export default function DIYSaleSignup() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [packages, setPackages] = useState([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   useEffect(() => {
     checkAuth();
+    loadPackages();
   }, []);
 
   const checkAuth = async () => {
@@ -33,6 +37,17 @@ export default function DIYSaleSignup() {
     }
   };
 
+  const loadPackages = async () => {
+    try {
+      const res = await base44.functions.invoke('getPublicDIYSignupPackages', {});
+      setPackages(res.data.packages || []);
+    } catch (err) {
+      setPackages([]);
+    } finally {
+      setLoadingPackages(false);
+    }
+  };
+
   const packageFeatures = [
     { icon: Camera, title: 'Upload Photos', description: 'Up to 100 high-quality photos of your items' },
     { icon: DollarSign, title: 'Set Your Prices', description: 'Full control — you set every price yourself' },
@@ -40,14 +55,6 @@ export default function DIYSaleSignup() {
     { icon: MapPin, title: 'Choose Location', description: 'Host at your home or any venue you pick' },
     { icon: Image, title: 'Public Listing', description: 'Your sale appears on EstateSalen.com for shoppers' },
     { icon: Clock, title: 'One-Time Purchase', description: 'Pay once, post once. No subscriptions, no recurring fees' },
-  ];
-
-  const whatsIncluded = [
-    '1 estate sale listing on EstateSalen.com',
-    'Up to 100 photos per sale',
-    'Set your own item titles and prices',
-    'Choose your sale dates and times',
-    'Full address and location display',
   ];
 
   if (checkingAuth) {
@@ -107,46 +114,108 @@ export default function DIYSaleSignup() {
         </div>
       </section>
 
-      {/* Pricing Card */}
+      {/* Choose Your Plan */}
       <section className="py-8 px-4">
-        <div className="max-w-lg mx-auto">
-          <Card className="overflow-hidden border-2 border-purple-500 shadow-xl">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-1" />
-            <CardContent className="p-8 text-center">
-              <Badge className="bg-purple-100 text-purple-700 mb-3">One-Time Purchase</Badge>
-              <div className="text-5xl font-bold text-slate-900 mb-1">$47</div>
-              <p className="text-slate-500 mb-6">Single posting — no subscription, no recurring fees</p>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-serif font-bold text-slate-900 text-center mb-2">Choose Your Plan</h2>
+          <p className="text-slate-500 text-center mb-6">Select the package that works best for your sale</p>
 
-              <div className="space-y-3 mb-6 text-left">
-                <h4 className="font-semibold text-sm text-slate-900">What's Included:</h4>
-                {whatsIncluded.map((item, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-700">{item}</span>
-                  </div>
-                ))}
-              </div>
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex bg-slate-100 rounded-lg p-1">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  billingCycle === 'monthly' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('annual')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${
+                  billingCycle === 'annual' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Annual
+                <Badge className="bg-green-100 text-green-700 text-xs ml-1">Save 20%</Badge>
+              </button>
+            </div>
+          </div>
 
+          {/* Packages */}
+          {loadingPackages ? (
+            <div className="text-center py-8">
+              <div className="animate-pulse text-slate-400">Loading plans...</div>
+            </div>
+          ) : packages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400">No packages available at this time</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {packages.map((pkg, idx) => {
+                const price = billingCycle === 'annual'
+                  ? Math.round((pkg.annual_price || pkg.monthly_price * 12 * 0.8) / 12)
+                  : pkg.monthly_price || pkg.per_item_price || 47;
+                const annualTotal = billingCycle === 'annual' ? price * 12 : null;
+                return (
+                  <Card key={idx} className={`overflow-hidden ${pkg.featured ? 'border-2 border-purple-500 shadow-xl' : 'border-slate-200'}`}>
+                    {pkg.featured && <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-1" />}
+                    <CardContent className="p-6 text-center">
+                      <Badge className={`mb-3 ${pkg.featured ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {pkg.package_name || pkg.tier_level}
+                      </Badge>
+                      <div className="text-4xl font-bold text-slate-900 mb-1">${price}</div>
+                      <p className="text-sm text-slate-500 mb-1">per month</p>
+                      {annualTotal && (
+                        <p className="text-xs text-green-600 mb-4">${annualTotal}/year</p>
+                      )}
+                      <p className="text-slate-600 text-sm mb-6">{pkg.description || ''}</p>
 
+                      {/* Features */}
+                      {(pkg.features || pkg.allowed_features || []).length > 0 && (
+                        <div className="space-y-2 mb-6 text-left">
+                          {(pkg.features || pkg.allowed_features || []).slice(0, 6).map((f, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                              <span className="text-sm text-slate-700">{typeof f === 'string' ? f : f}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-              {isAuthenticated ? (
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base py-6" size="lg">
-                  Purchase — $47 One-Time
-                </Button>
-              ) : (
-                <div>
-                  <Button
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-base py-6 mb-3"
-                    size="lg"
-                    onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  >
-                    Sign In to Purchase
-                  </Button>
-                  <p className="text-xs text-slate-400">You'll need an account to post your sale</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      {/* Limits */}
+                      {pkg.limits && (
+                        <div className="text-xs text-slate-400 mb-4 space-y-0.5">
+                          {Object.entries(pkg.limits).map(([k, v]) => (
+                            <div key={k}>{k.replace('_', ' ')}: {v}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {isAuthenticated ? (
+                        <Button className={`w-full text-base py-6 ${pkg.featured ? 'bg-purple-600 hover:bg-purple-700' : ''}`} size="lg">
+                          Get Started — ${price}/mo
+                        </Button>
+                      ) : (
+                        <div>
+                          <Button
+                            className={`w-full text-base py-6 mb-3 ${pkg.featured ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                            size="lg"
+                            onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                          >
+                            Sign In to Purchase
+                          </Button>
+                          <p className="text-xs text-slate-400">You'll need an account to post your sale</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -156,7 +225,7 @@ export default function DIYSaleSignup() {
           <h2 className="text-2xl font-serif font-bold text-slate-900 mb-8">How It Works</h2>
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { step: '1', title: 'Purchase', desc: 'Pay the $47 one-time fee' },
+              { step: '1', title: 'Purchase', desc: 'Choose your plan and sign up' },
               { step: '2', title: 'Create Sale', desc: 'Add photos, prices, dates & location' },
               { step: '3', title: 'Go Live', desc: 'Your sale is listed for shoppers to find' },
             ].map((s, i) => (

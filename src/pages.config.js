@@ -81,7 +81,6 @@ import ContactDetail from './pages/ContactDetail';
 import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
 import Courses from './pages/Courses';
-import DIYSaleSignup from './pages/DIYSaleSignup';
 import Dashboard from './pages/Dashboard';
 import EstateSaleDetail from './pages/EstateSaleDetail';
 import EstateSaleFinder from './pages/EstateSaleFinder';
@@ -172,7 +171,6 @@ export const PAGES = {
     "CourseDetail": CourseDetail,
     "CourseLearning": CourseLearning,
     "Courses": Courses,
-    "DIYSaleSignup": DIYSaleSignup,
     "Dashboard": Dashboard,
     "EstateSaleDetail": EstateSaleDetail,
     "EstateSaleFinder": EstateSaleFinder,
