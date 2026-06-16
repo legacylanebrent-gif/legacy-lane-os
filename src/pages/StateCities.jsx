@@ -8,12 +8,14 @@ import { STATE_REGIONS } from '@/components/data/StateRegions';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, MapPin, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Landmark } from 'lucide-react';
 import { useSEO } from '@/hooks/useSEO';
 
 export default function StateCities() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [counties, setCounties] = useState([]);
+  const [loadingCounties, setLoadingCounties] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
   const stateCode = urlParams.get('state');
@@ -21,10 +23,10 @@ export default function StateCities() {
 
   useSEO({
     title: stateData
-      ? `Estate Sales in ${stateData.name} — Browse by City | EstateSalen.com`
+      ? `Estate Sales in ${stateData.name} — Browse by County | EstateSalen.com`
       : 'Estate Sales by State | EstateSalen.com',
     description: stateData
-      ? `Find estate sales across ${stateData.name}. Browse ${(stateData.largerCities?.length || 0) + (stateData.smallerCities?.length || 0)} cities with upcoming estate sales, antiques, furniture, and collectibles.`
+      ? `Find estate sales across ${stateData.name}. Browse counties with upcoming estate sales, antiques, furniture, and collectibles.`
       : 'Find estate sales in your state on EstateSalen.com.',
   });
 
@@ -34,6 +36,20 @@ export default function StateCities() {
       if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
     });
   }, []);
+
+  useEffect(() => {
+    if (!stateCode) { setLoadingCounties(false); return; }
+    setLoadingCounties(true);
+    base44.entities.HousioTerritory.filter({ state: stateCode, is_active: true })
+      .then(records => {
+        // Deduplicate by county name and sort alphabetically
+        const unique = [...new Map(records.map(r => [r.county, r])).values()]
+          .sort((a, b) => a.county.localeCompare(b.county));
+        setCounties(unique);
+      })
+      .catch(() => setCounties([]))
+      .finally(() => setLoadingCounties(false));
+  }, [stateCode]);
 
   if (!stateData) {
     return (
@@ -74,28 +90,32 @@ export default function StateCities() {
             </h1>
           </div>
           <p className="text-xl text-slate-600">
-            Find estate sales in cities across {stateData.name}
+            Find estate sales across counties in {stateData.name}
           </p>
         </div>
 
-        {/* Larger Cities */}
-        {stateData.largerCities && stateData.largerCities.length > 0 && (
-          <div className="mb-12">
+        {/* Counties / Territories */}
+        {loadingCounties ? (
+          <div className="flex justify-center py-16">
+            <div className="animate-pulse text-slate-500 text-lg">Loading counties...</div>
+          </div>
+        ) : counties.length > 0 ? (
+          <div>
             <div className="flex items-center gap-3 mb-6">
-              <Building2 className="w-6 h-6 text-cyan-600" />
+              <Landmark className="w-6 h-6 text-cyan-600" />
               <h2 className="text-3xl font-serif font-bold text-slate-900">
-                Larger Cities
+                Counties
               </h2>
               <Badge variant="secondary" className="text-lg py-1 px-3">
-                {stateData.largerCities.length}
+                {counties.length}
               </Badge>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stateData.largerCities.map((city, idx) => (
+              {counties.map((t, idx) => (
                 <Link
                   key={idx}
-                  to={createPageUrl('EstateSaleFinder') + `?state=${stateCode}&city=${encodeURIComponent(city)}`}
+                  to={createPageUrl('EstateSaleFinder') + `?state=${stateCode}&county=${encodeURIComponent(t.county)}`}
                 >
                   <Card className="hover:shadow-lg transition-all hover:border-cyan-600 cursor-pointer group">
                     <CardContent className="p-5">
@@ -104,9 +124,16 @@ export default function StateCities() {
                           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-100 to-cyan-200 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <MapPin className="w-5 h-5 text-cyan-700" />
                           </div>
-                          <h3 className="text-lg font-semibold text-slate-900 group-hover:text-cyan-600 transition-colors">
-                            {city}
-                          </h3>
+                          <div>
+                            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-cyan-600 transition-colors">
+                              {t.county} County
+                            </h3>
+                            {t.zip_codes_json && t.zip_codes_json.length > 0 && (
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {t.zip_codes_json.length} ZIP{t.zip_codes_json.length !== 1 ? 's' : ''}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <svg className="w-5 h-5 text-slate-400 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -118,56 +145,10 @@ export default function StateCities() {
               ))}
             </div>
           </div>
-        )}
-
-        {/* Smaller Cities */}
-        {stateData.smallerCities && stateData.smallerCities.length > 0 && (
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <Building2 className="w-6 h-6 text-orange-600" />
-              <h2 className="text-3xl font-serif font-bold text-slate-900">
-                Smaller Cities
-              </h2>
-              <Badge variant="secondary" className="text-lg py-1 px-3">
-                {stateData.smallerCities.length}
-              </Badge>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stateData.smallerCities.map((city, idx) => (
-                <Link
-                  key={idx}
-                  to={createPageUrl('EstateSaleFinder') + `?state=${stateCode}&city=${encodeURIComponent(city)}`}
-                >
-                  <Card className="hover:shadow-lg transition-all hover:border-orange-600 cursor-pointer group">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <MapPin className="w-5 h-5 text-orange-700" />
-                          </div>
-                          <h3 className="text-lg font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
-                            {city}
-                          </h3>
-                        </div>
-                        <svg className="w-5 h-5 text-slate-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* No cities message */}
-        {(!stateData.largerCities || stateData.largerCities.length === 0) && 
-         (!stateData.smallerCities || stateData.smallerCities.length === 0) && (
+        ) : (
           <Card className="p-12 text-center">
             <MapPin className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 text-lg">No cities available for this state yet.</p>
+            <p className="text-slate-500 text-lg">No counties available for this state yet.</p>
           </Card>
         )}
       </div>
