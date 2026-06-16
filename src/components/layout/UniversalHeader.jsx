@@ -16,7 +16,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
-  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home
+  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home, Search
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -50,6 +50,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                 </Link>
                 <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
+                </Link>
+                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Search Estate Sales">
+                  <Search className="w-5 h-5" />
                 </Link>
                 <MessagesDropdown />
                 <NotificationsDropdown user={user} />
@@ -203,6 +206,9 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                 </Link>
                 <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
+                </Link>
+                <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Search Estate Sales">
+                  <Search className="w-5 h-5" />
                 </Link>
                 <Button
                   variant="ghost"
