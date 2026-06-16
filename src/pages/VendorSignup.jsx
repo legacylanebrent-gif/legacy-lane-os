@@ -93,6 +93,34 @@ const VENDOR_CATEGORIES = [
     ],
   },
   {
+    key: 'specialty_contractors',
+    label: 'Specialty Contractors',
+    icon: HardHat,
+    color: 'bg-teal-50 text-teal-700 border-teal-200',
+    types: [
+      { value: 'general_contractor', label: 'General Contractor' },
+      { value: 'electrician', label: 'Electrician' },
+      { value: 'plumber', label: 'Plumber' },
+      { value: 'hvac_technician', label: 'HVAC Technician' },
+      { value: 'roofer', label: 'Roofer' },
+      { value: 'carpenter', label: 'Carpenter' },
+      { value: 'tile_installer', label: 'Tile Installer' },
+      { value: 'masonry_brick', label: 'Masonry & Brick' },
+      { value: 'window_door_installer', label: 'Window & Door Installer' },
+      { value: 'siding_contractor', label: 'Siding Contractor' },
+      { value: 'deck_patio_builder', label: 'Deck & Patio Builder' },
+      { value: 'kitchen_bath_remodeler', label: 'Kitchen & Bath Remodeler' },
+      { value: 'basement_attic_finisher', label: 'Basement & Attic Finisher' },
+      { value: 'foundation_repair', label: 'Foundation Repair' },
+      { value: 'mold_remediation', label: 'Mold Remediation' },
+      { value: 'water_damage_restoration', label: 'Water Damage Restoration' },
+      { value: 'fire_damage_restoration', label: 'Fire Damage Restoration' },
+      { value: 'fencing_contractor', label: 'Fencing Contractor' },
+      { value: 'gutter_installer', label: 'Gutter Installer' },
+      { value: 'chimney_sweep_repair', label: 'Chimney Sweep & Repair' },
+    ],
+  },
+  {
     key: 'buyer_facing',
     label: 'Buyers & Resellers',
     icon: ShoppingBag,
@@ -192,7 +220,7 @@ export default function VendorSignup() {
           </h1>
           <p className="text-xl text-slate-600 mb-4 max-w-2xl mx-auto">
             Connect with estate sale companies and families navigating life transitions. 
-            We cover {totalServiceTypes} service types across 8 categories.
+            We cover {totalServiceTypes} service types across 9 categories.
           </p>
           <div className="inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 px-4 py-2 rounded-full">
             <Users className="w-4 h-4" />
