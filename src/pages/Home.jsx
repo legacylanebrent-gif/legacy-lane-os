@@ -26,6 +26,7 @@ import SaleRequestModal from '@/components/leads/SaleRequestModal';
 import QRCodeScanner from '@/components/checkin/QRCodeScanner';
 import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
 import LocalVendorSection from '@/components/home/LocalVendorSection';
+import MarketplaceFeatureSection from '@/components/home/MarketplaceFeatureSection';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { t } from '@/components/terminology';
 import { 
@@ -1459,6 +1460,9 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+      {/* Marketplace Feature Section */}
+      <MarketplaceFeatureSection />
 
       {/* Sign Up CTAs */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
