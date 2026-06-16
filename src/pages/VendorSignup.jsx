@@ -153,10 +153,29 @@ export default function VendorSignup() {
   const [loading, setLoading] = useState(true);
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedCategory, setExpandedCategory] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    checkAuth();
     loadPackages();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const authenticated = await base44.auth.isAuthenticated();
+      setIsAuthenticated(authenticated);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      window.location.href = createPageUrl('VendorProfile');
+    } else {
+      base44.auth.redirectToLogin(createPageUrl('VendorSignup'));
+    }
+  };
 
   const loadPackages = async () => {
     try {
@@ -225,6 +244,15 @@ export default function VendorSignup() {
           <div className="inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 px-4 py-2 rounded-full">
             <Users className="w-4 h-4" />
             <span>Growing network of trusted professionals nationwide</span>
+          </div>
+          <div className="mt-8">
+            <Button
+              onClick={handleGetStarted}
+              size="lg"
+              className="bg-green-600 hover:bg-green-700 text-white text-lg px-10 py-6 rounded-xl shadow-lg"
+            >
+              Join the Network — Get Started
+            </Button>
           </div>
         </div>
       </section>
@@ -405,7 +433,10 @@ export default function VendorSignup() {
                           ))}
                         </div>
                       )}
-                      <Button className={`w-full mt-4 ${featured ? 'bg-green-600 hover:bg-green-700' : ''}`}>
+                      <Button
+                        onClick={handleGetStarted}
+                        className={`w-full mt-4 ${featured ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                      >
                         Get Started
                       </Button>
                     </CardContent>
