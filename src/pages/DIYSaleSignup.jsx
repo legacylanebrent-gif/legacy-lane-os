@@ -50,13 +50,6 @@ export default function DIYSaleSignup() {
     'Full address and location display',
   ];
 
-  const whatsNotIncluded = [
-    'AI pricing suggestions or SERP lookups',
-    'Marketing campaigns or email blasts',
-    'Buyer matching or hunt list features',
-    'Multi-sale management dashboard',
-  ];
-
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -134,15 +127,7 @@ export default function DIYSaleSignup() {
                 ))}
               </div>
 
-              <div className="space-y-3 mb-8 text-left bg-slate-50 rounded-lg p-4">
-                <h4 className="font-semibold text-sm text-slate-900">Not Included (available on higher plans):</h4>
-                {whatsNotIncluded.map((item, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <span className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5 text-slate-400">—</span>
-                    <span className="text-sm text-slate-500">{item}</span>
-                  </div>
-                ))}
-              </div>
+
 
               {isAuthenticated ? (
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base py-6" size="lg">
