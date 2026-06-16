@@ -171,7 +171,7 @@ export default function VendorSignup() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      window.location.href = createPageUrl('VendorProfile');
+      window.location.href = createPageUrl('MyProfile');
     } else {
       base44.auth.redirectToLogin(createPageUrl('VendorSignup'));
     }
