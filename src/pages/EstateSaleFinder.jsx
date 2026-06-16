@@ -45,15 +45,20 @@ export default function EstateSaleFinder() {
   const urlParams = new URLSearchParams(window.location.search);
   const cityParam = urlParams.get('city');
   const stateParam = urlParams.get('state');
+  const countyParam = urlParams.get('county');
   const searchParam = urlParams.get('search');
 
   useSEO({
-    title: cityParam
-      ? `Estate Sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''} | EstateSalen.com`
-      : 'Find Estate Sales Near You | EstateSalen.com',
-    description: cityParam
-      ? `Browse upcoming estate sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''}. Find antiques, furniture, collectibles, jewelry and more on EstateSalen.com.`
-      : 'Discover estate sales near you. Browse listings by location, find dates and photos, save favorites, and plan your route on EstateSalen.com.',
+    title: countyParam
+      ? `Estate Sales in ${decodeURIComponent(countyParam)}${stateParam ? `, ${stateParam}` : ''} | EstateSalen.com`
+      : cityParam
+        ? `Estate Sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''} | EstateSalen.com`
+        : 'Find Estate Sales Near You | EstateSalen.com',
+    description: countyParam
+      ? `Browse upcoming estate sales in ${decodeURIComponent(countyParam)}${stateParam ? `, ${stateParam}` : ''}. Find antiques, furniture, collectibles, jewelry and more on EstateSalen.com.`
+      : cityParam
+        ? `Browse upcoming estate sales in ${decodeURIComponent(cityParam)}${stateParam ? `, ${stateParam}` : ''}. Find antiques, furniture, collectibles, jewelry and more on EstateSalen.com.`
+        : 'Discover estate sales near you. Browse listings by location, find dates and photos, save favorites, and plan your route on EstateSalen.com.',
   });
 
   const [user, setUser] = useState(null);
@@ -95,12 +100,13 @@ export default function EstateSaleFinder() {
   }, [estates, searchQuery]);
 
   const getUserLocation = () => {
-    // Check if browsing by state/city - skip geocoding
+    // Check if browsing by state/city/county - skip geocoding
     const urlParams = new URLSearchParams(window.location.search);
     const stateParam = urlParams.get('state');
     const cityParam = urlParams.get('city');
+    const countyParam = urlParams.get('county');
     
-    if (stateParam && cityParam) {
+    if (stateParam && (cityParam || countyParam)) {
       loadEstates();
       return;
     }
@@ -142,10 +148,11 @@ export default function EstateSaleFinder() {
     try {
       setLoading(true);
       
-      // Check if coming from state/city selection
+      // Check if coming from state/city/county selection
       const urlParams = new URLSearchParams(window.location.search);
       const stateParam = urlParams.get('state');
       const cityParam = urlParams.get('city');
+      const countyParam = urlParams.get('county');
 
       const rawData = await base44.entities.EstateSale.list('-created_date', 100);
       
@@ -159,9 +166,57 @@ export default function EstateSaleFinder() {
         (users || []).forEach(u => { opMap[u.id] = u.company_name || u.full_name; });
         setOperators(opMap);
       } catch (e) { /* non-critical */ }
-      
-      // Filter by region if state and city are specified
-      if (stateParam && cityParam) {
+
+      // Filter by county if county and state are specified
+      if (stateParam && countyParam) {
+        setIsBrowsingByRegion(true);
+        const decodedCounty = decodeURIComponent(countyParam);
+        
+        // Look up HousioTerritory records for this county to get ZIP codes
+        let countyZips = [];
+        let geocodeResult = null;
+        try {
+          const territories = await base44.entities.HousioTerritory.filter({ 
+            state: stateParam, 
+            county: decodedCounty,
+            is_active: true 
+          });
+          countyZips = [...new Set(territories.flatMap(t => t.zip_codes_json || []))];
+          
+          // Geocode the county for map center
+          if (territories.length > 0 && territories[0].zip_codes_json?.length > 0) {
+            const geoResp = await base44.functions.invoke('geocodeCity', { 
+              city: decodedCounty.replace(/\s+County$/i, ''), 
+              state: stateParam 
+            });
+            if (geoResp.data?.lat && geoResp.data?.lng) {
+              geocodeResult = [geoResp.data.lat, geoResp.data.lng];
+            }
+          }
+        } catch (e) {
+          console.error('Error looking up county:', e);
+        }
+
+        // Filter estates by ZIP codes in this county, or fallback to state-only
+        const countyFiltered = data.filter(e => 
+          e.property_address?.state === stateParam && (
+            countyZips.length === 0 ||
+            countyZips.includes(e.property_address?.zip)
+          )
+        );
+        setEstates(countyFiltered);
+        
+        // Set map center to geocoded county location
+        if (geocodeResult) {
+          setMapCenter(geocodeResult);
+        }
+        
+        // Separate featured and regular sales
+        const featured = countyFiltered.filter(e => e.local_featured);
+        const regular = countyFiltered.filter(e => !e.local_featured);
+        setFeaturedEstates(featured);
+        setRegularEstates(regular);
+      } else if (stateParam && cityParam) {
         setIsBrowsingByRegion(true);
         const regionFiltered = data.filter(e => 
           e.property_address?.state === stateParam && 
@@ -227,6 +282,10 @@ export default function EstateSaleFinder() {
                 {(() => {
                   const urlParams = new URLSearchParams(window.location.search);
                   const cityParam = urlParams.get('city');
+                  const countyParam = urlParams.get('county');
+                  if (countyParam) {
+                    return `${estates.length} estate sales in ${decodeURIComponent(countyParam)}`;
+                  }
                   if (cityParam) {
                     return `${estates.length} estate sales in ${decodeURIComponent(cityParam)}`;
                   }
