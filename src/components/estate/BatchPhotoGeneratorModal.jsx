@@ -79,6 +79,12 @@ export default function BatchPhotoGeneratorModal({
               const aiTitle = responseData.title || '';
               const aiDescription = responseData.description || '';
 
+              // Skip items marked as skipped
+              if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
+               generatedResults.push({ index: actualIndex, photo: image, status: 'skipped' });
+               continue;
+              }
+
               // Only update empty/whitespace fields
               const title = (!image.name || !image.name.trim()) ? aiTitle : image.name;
               const description = (!image.description || !image.description.trim()) ? aiDescription : image.description;
@@ -111,12 +117,20 @@ export default function BatchPhotoGeneratorModal({
           const errorMsg = `Image ${i}: ${err.message || 'Unknown error'}`;
           console.error('Error generating for image', i, err);
           setError(errorMsg);
-          generatedResults.push({
-            index: actualIndex,
-            photo: image,
-            status: 'error',
-            error: err.message
-          });
+          if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
+           generatedResults.push({
+             index: actualIndex,
+             photo: image,
+             status: 'skipped'
+           });
+         } else {
+           generatedResults.push({
+             index: actualIndex,
+             photo: image,
+             status: 'error',
+             error: err.message
+           });
+         }
         }
 
         // Update results in real-time

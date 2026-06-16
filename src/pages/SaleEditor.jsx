@@ -462,6 +462,10 @@ export default function SaleEditor() {
   const handleRegenerateDescription = async (index) => {
     const image = formData.images[index];
     if (!image.name) return;
+    if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
+      alert('This image is marked as skipped. Un-skip it first.');
+      return;
+    }
     setRegeneratingDesc(prev => ({ ...prev, [index]: true }));
     try {
       const response = await base44.integrations.Core.InvokeLLM({
@@ -507,6 +511,10 @@ export default function SaleEditor() {
   const handleSerpSearch = async (index) => {
     const image = formData.images[index];
     if (!image.url) return;
+    if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
+      alert('This image is marked as skipped. Un-skip it first.');
+      return;
+    }
     setSerpSearching(prev => ({ ...prev, [index]: true }));
     try {
       // Check credits first
@@ -574,7 +582,7 @@ export default function SaleEditor() {
   const handleQuickScan = async () => {
     const toScan = formData.images
       .map((img, i) => ({ img, i }))
-      .filter(({ img, i }) => !img.name && !img.description && !img.skip_item && multiItemFlags[i] === undefined);
+      .filter(({ img, i }) => !img.name && !img.description && !img.skip_item && !img.skip_serp_search && img.serp_search_status !== 'do_not_search' && multiItemFlags[i] === undefined);
 
     if (toScan.length === 0) {
       alert('All images have already been scanned or processed.');
@@ -619,6 +627,10 @@ export default function SaleEditor() {
   const handleMultiItemAssess = async (index) => {
     const image = formData.images[index];
     if (!image.url) return;
+    if (image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search') {
+      alert('This image is marked as skipped. Un-skip it first.');
+      return;
+    }
     setMultiItemAssessing(prev => ({ ...prev, [index]: true }));
     try {
       const response = await base44.integrations.Core.InvokeLLM({
@@ -1915,6 +1927,7 @@ Return ONLY the description text, no extra commentary.`
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
                           if (!img.name) continue;
+                          if (img.skip_item || img.skip_serp_search || img.serp_search_status === 'do_not_search') continue;
                           setRegeneratingDesc(prev => ({ ...prev, [i]: true }));
                           try {
                             const response = await base44.integrations.Core.InvokeLLM({
@@ -2184,22 +2197,22 @@ Return ONLY the description text, no extra commentary.`
 
                             {/* Action buttons — 2-col grid on mobile, 4-col on desktop */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                              {!(image.name && image.description) && !image.skip_item && (
-                                <Button type="button" variant="outline" size="sm" className="text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
-                                  <Scan className="w-3 h-3 mr-1" />{serpSearching[index] ? '...' : 'AI Search'}
-                                </Button>
+                              {!(image.name && image.description) && !image.skip_item && !image.skip_serp_search && image.serp_search_status !== 'do_not_search' && (
+                               <Button type="button" variant="outline" size="sm" className="text-xs border-purple-400 text-purple-700 hover:bg-purple-50" onClick={() => handleSerpSearch(index)} disabled={serpSearching[index]}>
+                                 <Scan className="w-3 h-3 mr-1" />{serpSearching[index] ? '...' : 'AI Search'}
+                               </Button>
                               )}
                               <Button type="button" size="sm" className="text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => handleSaveImage(index)} disabled={savingImageIndex === index}>
                                 {savingImageIndex === index ? 'Saving...' : '💾 Save'}
                               </Button>
-                              <Button type="button" variant="outline" size="sm" className="text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index]}>
-                                <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'AI Pricing Multi-Items'}
+                              <Button type="button" variant="outline" size="sm" className="text-xs border-teal-500 text-teal-700 hover:bg-teal-50" onClick={() => handleMultiItemAssess(index)} disabled={multiItemAssessing[index] || image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search'}>
+                               <Brain className="w-3 h-3 mr-1" />{multiItemAssessing[index] ? '...' : 'AI Pricing Multi-Items'}
                               </Button>
                               <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => window.open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(image.url)}`, '_blank')}>
                                 Google Lens
                               </Button>
-                              <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index]}>
-                                {regeneratingDesc[index] ? '...' : 'AI Description'}
+                              <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => handleRegenerateDescription(index)} disabled={regeneratingDesc[index] || image.skip_item || image.skip_serp_search || image.serp_search_status === 'do_not_search'}>
+                               {regeneratingDesc[index] ? '...' : 'AI Description'}
                               </Button>
                             </div>
                           </div>}
