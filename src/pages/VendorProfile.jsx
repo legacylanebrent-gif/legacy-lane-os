@@ -26,14 +26,6 @@ export default function VendorProfile() {
 
   const loadVendorData = async () => {
     try {
-      // Check if user is logged in
-      try {
-        const user = await base44.auth.me();
-        setCurrentUser(user);
-      } catch (error) {
-        // User not logged in
-      }
-
       const urlParams = new URLSearchParams(window.location.search);
       const vendorId = urlParams.get('id');
 
@@ -42,8 +34,15 @@ export default function VendorProfile() {
         return;
       }
 
-      // Load vendor data
-      const vendors = await base44.entities.Vendor.filter({ id: vendorId });
+      // Fetch vendor and auth in parallel — auth is non-critical for display
+      const [vendorsResult] = await Promise.allSettled([
+        base44.entities.Vendor.filter({ id: vendorId }),
+      ]);
+      
+      // Check auth in background (doesn't block vendor display)
+      base44.auth.me().then(user => setCurrentUser(user)).catch(() => {});
+
+      const vendors = vendorsResult.status === 'fulfilled' ? vendorsResult.value : null;
       
       if (!vendors || vendors.length === 0) {
         window.location.href = createPageUrl('Home');
