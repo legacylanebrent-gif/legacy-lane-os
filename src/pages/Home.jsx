@@ -104,6 +104,9 @@ export default function Home() {
   const [showLocationChangeDialog, setShowLocationChangeDialog] = useState(false);
   const [newLocation, setNewLocation] = useState(null);
   const [userZipCode, setUserZipCode] = useState('');
+  const [searchRadius, setSearchRadius] = useState(() => {
+    return parseInt(localStorage.getItem('searchRadius') || '25');
+  });
   const [showDealers, setShowDealers] = useState(true);
   const [dealerProfiles, setDealerProfiles] = useState([]);
 
@@ -160,7 +163,7 @@ export default function Home() {
 
   useEffect(() => {
     organizeSales();
-  }, [searchQuery, sales, userLocation]);
+  }, [searchQuery, sales, userLocation, searchRadius]);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -646,7 +649,7 @@ export default function Home() {
     const filterByDistance = (salesList) => {
       if (userLocation) {
         const withDistance = salesList
-          .filter(s => s.distance !== null && s.distance < 25)
+          .filter(s => s.distance !== null && s.distance < searchRadius)
           .sort((a, b) => a.distance - b.distance);
         
         // Also include sales without location data if they match the zip code
@@ -871,7 +874,22 @@ export default function Home() {
 
             {userLocation && (
               <div className="text-sm text-slate-300 text-center bg-slate-800/50 rounded-lg py-2 px-4 backdrop-blur-sm">
-                📍 Showing sales within 25 miles of your location
+                📍 Showing sales within{' '}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="underline cursor-pointer hover:text-white font-semibold inline-flex items-center gap-1">
+                    {searchRadius} mi <ChevronDown className="w-3 h-3" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center">
+                    <DropdownMenuLabel>Search Radius</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {[5, 10, 15, 25, 50, 100].map(r => (
+                      <DropdownMenuItem key={r} onClick={() => { setSearchRadius(r); localStorage.setItem('searchRadius', String(r)); }}>
+                        {r} miles {r === 25 && '(default)'}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {' '}of your location
               </div>
             )}
           </div>
@@ -1230,7 +1248,22 @@ export default function Home() {
               </h3>
             </div>
             {userLocation ? (
-              <p className="text-lg sm:text-xl text-slate-600">Within 25 miles • {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
+              <p className="text-lg sm:text-xl text-slate-600">Within{' '}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="underline cursor-pointer hover:text-slate-900 font-semibold inline-flex items-center gap-1">
+                    {searchRadius} mi <ChevronDown className="w-3 h-3" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center">
+                    <DropdownMenuLabel>Search Radius</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {[5, 10, 15, 25, 50, 100].map(r => (
+                      <DropdownMenuItem key={r} onClick={() => { setSearchRadius(r); localStorage.setItem('searchRadius', String(r)); }}>
+                        {r} miles {r === 25 && '(default)'}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {' '}• {regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'}</p>
             ) : (
               <p className="text-lg sm:text-xl text-slate-600">{regularSales.length} active {regularSales.length === 1 ? 'sale' : 'sales'} nationwide</p>
             )}
