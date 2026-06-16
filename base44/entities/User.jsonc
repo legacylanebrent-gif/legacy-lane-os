@@ -14,6 +14,7 @@
       "type": "string",
       "enum": [
         "consumer",
+        "consumer_plus_sale",
         "estate_sale_operator",
         "real_estate_agent",
         "vendor",
@@ -22,7 +23,7 @@
         "collector_dealer"
       ],
       "default": "consumer",
-      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role. 'collector_dealer' is Antique, Art & Collector Dealers."
+      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role. 'collector_dealer' is Antique, Art & Collector Dealers. 'consumer_plus_sale' is a consumer who purchased a one-time DIY sale posting."
     },
     "business_name": {
       "type": "string"
