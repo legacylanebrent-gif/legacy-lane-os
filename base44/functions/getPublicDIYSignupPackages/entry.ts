@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     
     const packages = await base44.asServiceRole.entities.SubscriptionPackage.filter(
-      { is_active: true },
+      { is_active: true, account_type: 'consignor' },
       'tier_level',
       20
     );
