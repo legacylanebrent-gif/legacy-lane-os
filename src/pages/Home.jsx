@@ -1468,7 +1468,7 @@ export default function Home() {
             <p className="text-xl text-slate-600">Grow your business with EstateSalen.com</p>
           </div>
           <div className="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            <Link to={createPageUrl('OperatorPackages')}>
+            <Link to="/CompareEstateSales">
               <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
@@ -1479,7 +1479,7 @@ export default function Home() {
                       Estate Sale {t('Company')}
                     </h3>
                     <p className="text-orange-100 text-sm">
-                      List, manage and market your sales
+                      Compare platforms, pick the right one
                     </p>
                   </div>
                 </div>
