@@ -23,13 +23,14 @@ const DEFAULT_COSTS = {
   websites: { varPct: 35, label: "Website Services" },
   dealer_subs: { varPct: 10, label: "Collector Dealer Subs" },
   reseller_subs: { varPct: 10, label: "Reseller Subs" },
+  diy_sales: { varPct: 10, label: "DIY Sales" },
 };
 
 const STREAM_COLORS = {
   operator_subs: "#8b5cf6", vendor_subs: "#a78bfa", marketplace: "#10b981",
   re_agents: "#f43f5e", referrals: "#f59e0b", features: "#3b82f6",
   advertising: "#14b8a6", websites: "#6366f1", dealer_subs: "#eab308",
-  reseller_subs: "#ec4899",
+  reseller_subs: "#ec4899", diy_sales: "#f97316",
 };
 
 const PACKAGE_PRICES = { Gold: 299, Silver: 149, Bronze: 35, Platinum: 499, Basic: 0 };
@@ -109,6 +110,9 @@ export default function EstimatedPNL() {
   const [websiteMonthlyFee, setWebsiteMonthlyFee] = useState(() => loadValue("websiteMonthlyFee", 79));
   const [websiteNewPerMonth, setWebsiteNewPerMonth] = useState(() => loadValue("websiteNewPerMonth", 10));
   const [websiteGrowthAfterY1, setWebsiteGrowthAfterY1] = useState(() => loadValue("websiteGrowthAfterY1", 5));
+  const [diySalePrice, setDiySalePrice] = useState(() => loadValue("diySalePrice", 47));
+  const [diySalesPerWeekPerTerritory, setDiySalesPerWeekPerTerritory] = useState(() => loadValue("diySalesPerWeekPerTerritory", 2));
+  const [diyGrowth, setDiyGrowth] = useState(() => loadValue("diyGrowth", 3));
 
   const DEALER_TYPES = [
     { name: "Antique Store", count: 15000 }, { name: "Art Gallery", count: 10000 },
@@ -201,11 +205,17 @@ export default function EstimatedPNL() {
   const resBase = Math.round(RESELLER_TYPES.reduce((s, t) => s + t.count, 0) * 0.03 * 47);
   const resProj = calculateProjections(resBase, 3, 120);
 
+  const weeksPerMonth = 52 / 12;
+  const diyMonthlySales = totalTerritories * diySalesPerWeekPerTerritory * weeksPerMonth;
+  const diyBase = diyMonthlySales * diySalePrice;
+  const diyProj = calculateProjections(diyBase, diyGrowth, 120);
+
   // ── Stream projections map ──
   const streamProj = {
     operator_subs: opProj, vendor_subs: vendorProj, marketplace: mktProj,
     re_agents: agProj, referrals: refProj, features: featProj,
     advertising: adProj, websites: webProj, dealer_subs: dlrProj, reseller_subs: resProj,
+    diy_sales: diyProj,
   };
 
   // ── P&L Calculations ──

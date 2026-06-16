@@ -84,6 +84,11 @@ export default function Revenue() {
   const [adGrowth, setAdGrowth] = useState(() => loadValue('adGrowth', 3));
   const [citiesPerOperator, setCitiesPerOperator] = useState(() => loadValue('citiesPerOperator', 1));
 
+  // DIY Sales Inputs
+  const [diySalePrice, setDiySalePrice] = useState(() => loadValue('diySalePrice', 47));
+  const [diySalesPerWeekPerTerritory, setDiySalesPerWeekPerTerritory] = useState(() => loadValue('diySalesPerWeekPerTerritory', 2));
+  const [diyGrowth, setDiyGrowth] = useState(() => loadValue('diyGrowth', 3));
+
   const handleSaveOperators = () => {
     localStorage.setItem('revenue_proj_launchOperators', JSON.stringify(launchOperators));
     setSavedOperators(launchOperators);
@@ -100,6 +105,7 @@ export default function Revenue() {
       websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1,
       adBasicPrice, adProPrice, adPremiumPrice, adGrowth, citiesPerOperator,
       dealerSubPrice, dealerPctOfOps, dealerSubGrowth,
+      diySalePrice, diySalesPerWeekPerTerritory, diyGrowth,
     };
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`revenue_proj_${key}`, JSON.stringify(value));
@@ -113,6 +119,7 @@ export default function Revenue() {
     websiteSetupFee, websiteMonthlyFee, websiteNewPerMonth, websiteGrowthAfterY1,
     adBasicPrice, adProPrice, adPremiumPrice, adGrowth, citiesPerOperator,
     dealerSubPrice, dealerPctOfOps, dealerSubGrowth,
+    diySalePrice, diySalesPerWeekPerTerritory, diyGrowth,
   ]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -223,11 +230,24 @@ export default function Revenue() {
     return Math.round(totalUSDealers * penetration * dealerSubPrice);
   });
 
+  // DIY Sales: territories × sales/week/territory × weeks/year ÷ months × price, growing monthly
+  const diyProjections = (() => {
+    const proj = [];
+    const weeksPerMonth = 52 / 12;
+    for (let i = 0; i < 120; i++) {
+      const territories = operatorCounts[i] * citiesPerOperator;
+      const monthlySales = territories * diySalesPerWeekPerTerritory * weeksPerMonth;
+      const base = monthlySales * diySalePrice;
+      proj.push(base * Math.pow(1 + diyGrowth / 100, i));
+    }
+    return proj;
+  })();
+
   // Total
   const totalProjections = operatorProjections.map((_, i) =>
     operatorProjections[i] + vendorSubProjections[i] + marketplaceProjections[i] +
     referralProjections[i] + featureProjections[i] + adProjections[i] + websiteTotalProjections[i] +
-    dealerSubProjections[i]
+    dealerSubProjections[i] + diyProjections[i]
   );
 
   const year1Total = getYearProjection(totalProjections, 1);
@@ -245,6 +265,7 @@ export default function Revenue() {
     Advertising: Math.round(adProjections[i]),
     Websites: Math.round(websiteTotalProjections[i]),
     'Dealer Subs': Math.round(dealerSubProjections[i]),
+    'DIY Sales': Math.round(diyProjections[i]),
     Total: Math.round(totalProjections[i]),
     'Estate Sale Company Owner Count': operatorCounts[i],
   }));
@@ -258,6 +279,7 @@ export default function Revenue() {
     { name: 'Advertising', value: getYearProjection(adProjections, 3) },
     { name: 'Websites', value: getYearProjection(websiteTotalProjections, 3) },
     { name: 'Dealer Subs', value: getYearProjection(dealerSubProjections, 3) },
+    { name: 'DIY Sales', value: getYearProjection(diyProjections, 3) },
   ];
 
   return (
@@ -336,6 +358,7 @@ export default function Revenue() {
                 <Area type="monotone" dataKey="Advertising" stackId="1" stroke="#14b8a6" fill="#14b8a6" />
                 <Area type="monotone" dataKey="Websites" stackId="1" stroke="#6366f1" fill="#6366f1" />
                 <Area type="monotone" dataKey="Dealer Subs" stackId="1" stroke="#eab308" fill="#eab308" />
+                <Area type="monotone" dataKey="DIY Sales" stackId="1" stroke="#f97316" fill="#f97316" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -392,7 +415,7 @@ export default function Revenue() {
         {/* Detailed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="overflow-x-auto pb-2 -mx-6 px-6 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-8 gap-1">
+            <TabsList className="inline-flex w-max min-w-full lg:grid lg:grid-cols-9 gap-1">
               <TabsTrigger value="operators" className="whitespace-nowrap flex-shrink-0">
                 <Package className="w-4 h-4 mr-1" />
                 operators
@@ -421,6 +444,10 @@ export default function Revenue() {
               <TabsTrigger value="advertising" className="whitespace-nowrap flex-shrink-0">
                 <Megaphone className="w-4 h-4 mr-1" />
                 Ads
+              </TabsTrigger>
+              <TabsTrigger value="diySales" className="whitespace-nowrap flex-shrink-0">
+                <ShoppingBag className="w-4 h-4 mr-1" />
+                DIY Sales
               </TabsTrigger>
               <TabsTrigger value="websites" className="whitespace-nowrap flex-shrink-0">
                 <Globe className="w-4 h-4 mr-1" />
@@ -850,6 +877,62 @@ export default function Revenue() {
                   <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
                     <div className="text-2xl font-bold text-orange-600">${(getYearProjection(dealerSubProjections, 10) / 1000000).toFixed(2)}M</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* DIY Sales Tab */}
+          <TabsContent value="diySales">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-orange-600" />
+                  DIY Sale Calculator
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-1">
+                  <div className="text-sm text-slate-700">
+                    <strong>Model:</strong> {diySalesPerWeekPerTerritory} DIY sales/week per territory × {(diySalesPerWeekPerTerritory * 52 / 12).toFixed(1)} sales/month × ${diySalePrice}/sale
+                  </div>
+                  <div className="text-sm text-slate-700">
+                    <strong>Month 1 Territories:</strong> {(operatorCounts[0] * citiesPerOperator).toLocaleString()} → {(operatorCounts[0] * citiesPerOperator * diySalesPerWeekPerTerritory * 52/12).toFixed(0)} sales/mo → ${Math.round(operatorCounts[0] * citiesPerOperator * diySalesPerWeekPerTerritory * 52/12 * diySalePrice).toLocaleString()}/mo
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <Label>DIY Sale Price ($)</Label>
+                    <Input type="number" value={diySalePrice} onChange={(e) => setDiySalePrice(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Sales / Week / Territory</Label>
+                    <Input type="number" value={diySalesPerWeekPerTerritory} onChange={(e) => setDiySalesPerWeekPerTerritory(Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Monthly Growth Rate (%)</Label>
+                    <Input type="number" value={diyGrowth} onChange={(e) => setDiyGrowth(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-sm text-slate-600 mb-1">1-Year Total</div>
+                    <div className="text-2xl font-bold text-green-600">${(getYearProjection(diyProjections, 1) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                    <div className="text-sm text-slate-600 mb-1">3-Year Total</div>
+                    <div className="text-2xl font-bold text-cyan-600">${(getYearProjection(diyProjections, 3) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-sm text-slate-600 mb-1">5-Year Total</div>
+                    <div className="text-2xl font-bold text-purple-600">${(getYearProjection(diyProjections, 5) / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-slate-600 mb-1">10-Year Total</div>
+                    <div className="text-2xl font-bold text-orange-600">${(getYearProjection(diyProjections, 10) / 1000000).toFixed(2)}M</div>
                   </div>
                 </div>
               </CardContent>

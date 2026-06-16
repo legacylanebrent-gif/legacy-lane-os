@@ -21,6 +21,7 @@ const REVENUE_STREAMS = [
   { key: "websites", label: "Website Services", color: "#6366f1" },
   { key: "dealer_subs", label: "Collector Dealer Subscriptions", color: "#eab308" },
   { key: "reseller_subs", label: "Reseller Subscriptions", color: "#ec4899" },
+  { key: "diy_sales", label: "DIY Sales", color: "#f97316" },
 ];
 
 const COLORS = REVENUE_STREAMS.map((s) => s.color);
@@ -135,7 +136,7 @@ export default function ActualRevenue() {
         </div>
 
         {/* YTD Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
             <CardContent className="p-4">
               <div className="text-xs opacity-80">YTD Total</div>
@@ -164,6 +165,12 @@ export default function ActualRevenue() {
             <CardContent className="p-4">
               <div className="text-xs opacity-80">Resellers</div>
               <div className="text-xl font-bold">${(ytdByStream.reseller_subs || 0).toLocaleString()}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-orange-500 to-amber-600 text-white">
+            <CardContent className="p-4">
+              <div className="text-xs opacity-80">DIY Sales</div>
+              <div className="text-xl font-bold">${(ytdByStream.diy_sales || 0).toLocaleString()}</div>
             </CardContent>
           </Card>
         </div>
