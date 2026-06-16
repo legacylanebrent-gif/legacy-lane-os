@@ -186,7 +186,7 @@ export default function SaleRequestModal({ open, onClose }) {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-8">
           {submitted ? (
             <div className="text-center py-12">
               <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
@@ -308,8 +308,9 @@ export default function SaleRequestModal({ open, onClose }) {
                             {companyCount} Estate Sale {companyCount === 1 ? 'Company' : 'Companies'} Available
                           </h3>
                           <p className="text-slate-600 mb-6">
-                            There {companyCount === 1 ? 'is' : 'are'} <span className="font-semibold text-cyan-600">{companyCount}</span> estate sale 
-                            {companyCount === 1 ? 'company' : 'companies'} listed that may be able to help.
+                            There {companyCount === 1 ? 'is' : 'are'}{' '}
+                            <span className="font-semibold text-cyan-600">{companyCount}</span>{' '}
+                            estate sale {companyCount === 1 ? 'company' : 'companies'} listed that may be able to help.
                           </p>
                         </>
                       ) : (
