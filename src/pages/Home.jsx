@@ -69,6 +69,12 @@ function ChangeMapView({ center, zoom }) {
   return null;
 }
 
+  const getSaleGridCols = (count) => {
+    if (count > 20) return 'grid-cols-3 md:grid-cols-3 lg:grid-cols-3';
+    if (count > 5) return 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3';
+    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+  };
+
 export default function Home() {
   const [sales, setSales] = useState([]);
   const [nationalFeatured, setNationalFeatured] = useState([]);
@@ -987,7 +993,7 @@ export default function Home() {
               <p className="text-xl text-slate-600">Exceptional estate sales from across the country</p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid ${getSaleGridCols(nationalFeatured.length)} gap-4 sm:gap-6 lg:gap-8`}>
               {nationalFeatured.map(sale => (
                 <Link
                   key={sale.id}
@@ -1101,7 +1107,7 @@ export default function Home() {
               <p className="text-lg sm:text-xl text-slate-600">Premium estate sales in your community</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className={`grid ${getSaleGridCols(localFeatured.length)} gap-4 sm:gap-6 lg:gap-8`}>
               {localFeatured.map(sale => (
                 <Link
                   key={sale.id}
@@ -1243,7 +1249,7 @@ export default function Home() {
               </Button>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className={`grid ${getSaleGridCols(regularSales.length)} gap-4 sm:gap-6 lg:gap-8`}>
               {regularSales.map(sale => (
                 <Link
                   key={sale.id}
