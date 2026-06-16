@@ -137,9 +137,40 @@
     "website": {
       "type": "string"
     },
+    "service_territory_miles": {
+      "type": "number",
+      "description": "Service radius in miles"
+    },
     "revenue_share_rate": {
       "type": "number",
       "description": "Percentage"
+    },
+    "lat": {
+      "type": "number",
+      "description": "Latitude from geocoding"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Longitude from geocoding"
+    },
+    "geocoded_address": {
+      "type": "string",
+      "description": "Full formatted address returned by geocoder"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded",
+      "description": "Status of geocoding attempt"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "description": "Timestamp of last geocoding attempt"
     }
   },
   "required": [

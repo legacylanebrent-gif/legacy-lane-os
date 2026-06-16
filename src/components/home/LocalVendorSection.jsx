@@ -3,49 +3,68 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Building2, Scale, PiggyBank, Trash2, Sparkles, Truck, Camera, Wrench, 
-  Trees, Gavel, Home, User, Shield, Heart, Car, Package, Key, Phone,
-  Scissors, Bed, Smile, Utensils, Dribbble, ShoppingBag, Clock, Calendar
+  Trees, Gavel, Home, Shield, Heart, Package, ShoppingBag, ArrowRight, MapPin
 } from 'lucide-react';
 
-export default function LocalVendorSection({ userLocation }) {
+// Haversine distance (miles)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+export default function LocalVendorSection({ userLocation, userZipCode }) {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [radius, setRadius] = useState(() => parseInt(localStorage.getItem('searchRadius') || '25'));
 
   useEffect(() => {
     loadNearbyVendors();
-  }, []);
+  }, [userLocation, userZipCode]);
 
   const loadNearbyVendors = async () => {
     try {
       setLoading(true);
-      // Fetch all vendors
-      const allVendors = await base44.entities.Vendor.list();
+      const allVendors = await base44.entities.Vendor.filter({ geocode_status: 'geocoded' }, '-rating', 300);
       
       if (!allVendors || allVendors.length === 0) {
         setVendors([]);
         setLoading(false);
         return;
       }
-      
-      // Filter vendors that have service areas and sort by rating
-      const activeVendors = allVendors.filter(vendor => {
-        const vendorData = vendor.data || vendor;
-        const serviceAreas = vendorData.service_areas || [];
-        return serviceAreas.length > 0;
-      });
 
-      // Sort by rating (highest first) and take top 10
-      activeVendors.sort((a, b) => {
-        const dataA = a.data || a;
-        const dataB = b.data || b;
-        const ratingA = (dataA.rating || 0);
-        const ratingB = (dataB.rating || 0);
-        return ratingB - ratingA;
-      });
-      
-      setVendors(activeVendors.slice(0, 10));
+      // Only filter by distance if user location exists
+      if (userLocation && userLocation.lat && userLocation.lng) {
+        const withDistance = allVendors
+          .map(vendor => {
+            const data = vendor;
+            if (data.lat != null && data.lng != null) {
+              const dist = calculateDistance(userLocation.lat, userLocation.lng, data.lat, data.lng);
+              return { ...vendor, distance: dist };
+            }
+            return { ...vendor, distance: null };
+          })
+          .filter(v => v.distance !== null && v.distance <= radius)
+          .sort((a, b) => a.distance - b.distance);
+
+        setVendors(withDistance.slice(0, 10));
+      } else {
+        // No location — show top-rated vendors nationwide (legacy behavior)
+        const activeVendors = allVendors.filter(v => {
+          const data = v;
+          return (data.service_areas || []).length > 0;
+        });
+        setVendors(activeVendors.slice(0, 10));
+      }
     } catch (error) {
       console.error('Error loading vendors:', error);
       setVendors([]);
@@ -74,7 +93,7 @@ export default function LocalVendorSection({ userLocation }) {
   };
 
   const formatVendorType = (type) => {
-    return type ? type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Service Provider';
+    return type ? type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Service Provider';
   };
 
   const getVendorIcon = (vendorType) => {
@@ -125,8 +144,7 @@ export default function LocalVendorSection({ userLocation }) {
       cleaning: Sparkles,
       other: Building2
     };
-    const IconComponent = iconMap[vendorType] || Building2;
-    return IconComponent;
+    return iconMap[vendorType] || Building2;
   };
 
   if (loading) {
@@ -135,6 +153,7 @@ export default function LocalVendorSection({ userLocation }) {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-serif font-bold text-slate-900">Our Locally Featured Businesses</h3>
+            {userZipCode && <p className="text-slate-600 mt-1">Loading providers near {userZipCode}...</p>}
           </div>
           <div className="animate-pulse grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[...Array(10)].map((_, i) => (
@@ -150,19 +169,26 @@ export default function LocalVendorSection({ userLocation }) {
     return null;
   }
 
+  const sectionTitle = userLocation
+    ? userZipCode ? `Locally Featured Businesses Near ${userZipCode}` : 'Locally Featured Businesses Near You'
+    : 'Our Locally Featured Businesses';
+  const sectionSubtitle = userLocation
+    ? `Top-rated service providers within ${radius} miles`
+    : 'Trusted service providers in your area';
+
   return (
     <section className="py-8 px-4 bg-gradient-to-br from-slate-50 to-orange-50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h3 className="text-3xl font-serif font-bold text-slate-900 mb-2">
-            Our Locally Featured Businesses
+            {sectionTitle}
           </h3>
-          <p className="text-slate-600">Trusted service providers in your area</p>
+          <p className="text-slate-600">{sectionSubtitle}</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {vendors.map(vendor => {
-            const vendorData = vendor.data || vendor;
+            const vendorData = vendor;
             const companyName = vendorData.company_name || 'Unknown Vendor';
             const vendorType = vendorData.vendor_type || 'other';
             const IconComponent = getVendorIcon(vendorType);
@@ -183,10 +209,15 @@ export default function LocalVendorSection({ userLocation }) {
                     <h4 className="text-sm font-semibold text-slate-900 text-center mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                       {companyName}
                     </h4>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center gap-2 flex-wrap">
                       <Badge className={`${getCategoryBadgeColor(vendorType)} text-xs`}>
                         {formatVendorType(vendorType)}
                       </Badge>
+                      {vendorData.distance !== null && vendorData.distance !== undefined && (
+                        <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                          {vendorData.distance.toFixed(1)} mi
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -194,6 +225,19 @@ export default function LocalVendorSection({ userLocation }) {
             );
           })}
         </div>
+
+        {/* Show "View All" when there are more vendors beyond 10 */}
+        {vendors.length >= 10 && (
+          <div className="text-center mt-6">
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = createPageUrl('VendorSignup')}
+              className="gap-2"
+            >
+              View All Vendors <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

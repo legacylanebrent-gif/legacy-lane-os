@@ -1402,7 +1402,7 @@ export default function Home() {
           </section>
 
           {/* Locally Featured Vendors */}
-          <LocalVendorSection userLocation={userLocation} />
+          <LocalVendorSection userLocation={userLocation} userZipCode={userZipCode} />
 
           {/* National Advertising Panel */}
           <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
