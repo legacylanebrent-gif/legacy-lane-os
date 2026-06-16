@@ -132,7 +132,7 @@ export default function DIYSaleSignup() {
               <p className="text-slate-400">No packages available at this time</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="max-w-md mx-auto">
               {packages.map((pkg, idx) => {
                 const price = pkg.per_item_price || pkg.monthly_price || 47;
                 return (
