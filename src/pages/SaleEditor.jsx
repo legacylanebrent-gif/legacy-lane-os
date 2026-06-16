@@ -709,7 +709,7 @@ Be practical and realistic for an estate sale context.`,
     const currentSaleId = saleId || new URLSearchParams(window.location.search).get('saleId');
     const img = formData.images[index];
     const newImg = img.skip_item
-      ? { ...img, skip_item: false, name: img.skip_saved_name || '', description: img.skip_saved_description || '' }
+      ? { ...img, skip_item: false, name: '', description: '', synopsis: '', price: null, ai_first_search_price: null, ai_deep_search_price: null, skip_saved_name: '', skip_saved_description: '' }
       : { ...img, skip_item: true, skip_saved_name: img.name || '', skip_saved_description: img.description || '', name: '', description: '', skip_updated_at: new Date().toISOString() };
 
     // Update local state

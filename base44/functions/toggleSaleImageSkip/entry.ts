@@ -57,8 +57,15 @@ Deno.serve(async (req) => {
       images[idx].description = '';
       images[idx].skip_updated_at = new Date().toISOString();
     } else {
-      images[idx].name = skip_saved_name || images[idx].skip_saved_name || '';
-      images[idx].description = skip_saved_description || images[idx].skip_saved_description || '';
+      // NEVER restore old auto-generated data — un-skip always starts fresh
+      images[idx].name = '';
+      images[idx].description = '';
+      images[idx].synopsis = '';
+      images[idx].price = null;
+      images[idx].ai_first_search_price = null;
+      images[idx].ai_deep_search_price = null;
+      images[idx].skip_saved_name = '';
+      images[idx].skip_saved_description = '';
       delete images[idx].skip_updated_at;
     }
 
