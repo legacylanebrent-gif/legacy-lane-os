@@ -801,7 +801,7 @@ Be practical and realistic for an estate sale context.`,
     const pgH = doc.internal.pageSize.getHeight();
     const m = 8;
     const usableH = pgH - m * 2;
-    const rowH = usableH / 20;
+    const rowH = usableH / 40;
     const thumbSize = rowH - 1;
     const textStart = m + thumbSize + 2;
     const colW = (pgW - textStart - m) / 4;
@@ -842,13 +842,13 @@ Be practical and realistic for an estate sale context.`,
     if (pdfCancelRef.current) return null;
 
     // Title header
-    doc.setFontSize(12);
+    doc.setFontSize(9);
     doc.setTextColor(40, 40, 40);
-    doc.text((formData.title || 'Estate Sale Items').substring(0, 50), m, m + 6);
+    doc.text((formData.title || 'Estate Sale Items').substring(0, 50), m, m + 5);
 
     // Column headers
-    const headerY = m + 12;
-    doc.setFontSize(6);
+    const headerY = m + 8;
+    doc.setFontSize(5);
     doc.setTextColor(120, 120, 120);
     doc.text('Name', textStart, headerY);
     doc.text('Description', textStart + colW, headerY);
@@ -857,13 +857,13 @@ Be practical and realistic for an estate sale context.`,
     doc.setDrawColor(220, 220, 220);
     doc.line(m, headerY + 1, pgW - m, headerY + 1);
 
-    let y = headerY + 4;
+    let y = headerY + 1.5;
     let count = 0;
 
     for (const img of itemsWithIndex) {
       if (pdfCancelRef.current) return null;
 
-      if (count > 0 && count % 20 === 0) {
+      if (count > 0 && count % 40 === 0) {
         doc.addPage();
         y = m + 4;
         doc.setDrawColor(220, 220, 220);
@@ -874,14 +874,14 @@ Be practical and realistic for an estate sale context.`,
         doc.addImage(thumbDataUrls[img.url], 'JPEG', m, y, thumbSize, thumbSize);
       }
 
-      doc.setFontSize(7);
+      doc.setFontSize(5.5);
       doc.setTextColor(30, 30, 30);
-      doc.text((img.name || '').substring(0, 25), textStart, y + 3);
-      doc.setFontSize(6);
+      doc.text((img.name || '').substring(0, 25), textStart, y + 2.5);
+      doc.setFontSize(5);
       doc.setTextColor(80, 80, 80);
-      doc.text((img.description || '').substring(0, 35), textStart + colW, y + 3);
+      doc.text((img.description || '').substring(0, 35), textStart + colW, y + 2.5);
 
-      doc.setFontSize(7);
+      doc.setFontSize(5.5);
       const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
       doc.setTextColor(120, 0, 120);
       doc.text(aiPrice ? `$${aiPrice}` : '-', textStart + colW * 2, y + 3);
