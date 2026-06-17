@@ -801,7 +801,7 @@ Be practical and realistic for an estate sale context.`,
     const pgH = doc.internal.pageSize.getHeight();
     const m = 8;
     const usableH = pgH - m * 2;
-    const rowH = usableH / 30;
+    const rowH = usableH / 25;
     const thumbSize = rowH - 1;
     const textStart = m + thumbSize + 2;
     const colW = (pgW - textStart - m) / 3;
@@ -848,7 +848,7 @@ Be practical and realistic for an estate sale context.`,
 
     // Column headers
     const headerY = m + 10;
-    doc.setFontSize(6);
+    doc.setFontSize(7);
     doc.setTextColor(120, 120, 120);
     doc.text('Name', textStart, headerY);
     doc.text('Description', textStart + colW, headerY);
@@ -874,15 +874,16 @@ Be practical and realistic for an estate sale context.`,
         doc.addImage(thumbDataUrls[img.url], 'JPEG', m, y, thumbSize, thumbSize);
       }
 
-      doc.setFontSize(7);
+      doc.setFontSize(8);
       doc.setTextColor(30, 30, 30);
-      doc.text((img.name || '').substring(0, 30), textStart, y + 3);
-      doc.setFontSize(6);
+      doc.text((img.name || '').substring(0, 30), textStart, y + 4);
+      doc.setFontSize(7);
       doc.setTextColor(80, 80, 80);
-      doc.text((img.description || '').substring(0, 45), textStart + colW, y + 3);
+      doc.text((img.description || '').substring(0, 45), textStart + colW, y + 4);
 
+      doc.setFontSize(8);
       doc.setTextColor(0, 100, 0);
-      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 2, y + 3);
+      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 2, y + 4);
 
       doc.setDrawColor(235, 235, 235);
       doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
