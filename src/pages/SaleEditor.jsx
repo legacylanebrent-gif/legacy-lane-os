@@ -804,7 +804,7 @@ Be practical and realistic for an estate sale context.`,
     const rowH = usableH / 30;
     const thumbSize = rowH - 1;
     const textStart = m + thumbSize + 2;
-    const colW = (pgW - textStart - m) / 4;
+    const colW = (pgW - textStart - m) / 3;
 
     // Preload thumbnails
     const thumbDataUrls = {};
@@ -852,8 +852,7 @@ Be practical and realistic for an estate sale context.`,
     doc.setTextColor(120, 120, 120);
     doc.text('Name', textStart, headerY);
     doc.text('Description', textStart + colW, headerY);
-    doc.text('AI Price', textStart + colW * 2, headerY);
-    doc.text('Price', textStart + colW * 3, headerY);
+    doc.text('Price', textStart + colW * 2, headerY);
     doc.setDrawColor(220, 220, 220);
     doc.line(m, headerY + 1, pgW - m, headerY + 1);
 
@@ -876,18 +875,13 @@ Be practical and realistic for an estate sale context.`,
 
       doc.setFontSize(7);
       doc.setTextColor(30, 30, 30);
-      doc.text((img.name || '').substring(0, 25), textStart, y + 3);
+      doc.text((img.name || '').substring(0, 30), textStart, y + 3);
       doc.setFontSize(6);
       doc.setTextColor(80, 80, 80);
-      doc.text((img.description || '').substring(0, 35), textStart + colW, y + 3);
-
-      doc.setFontSize(7);
-      const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
-      doc.setTextColor(120, 0, 120);
-      doc.text(aiPrice ? `$${aiPrice}` : '-', textStart + colW * 2, y + 3);
+      doc.text((img.description || '').substring(0, 45), textStart + colW, y + 3);
 
       doc.setTextColor(0, 100, 0);
-      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 3, y + 3);
+      doc.text(img.price ? `$${img.price}` : '-', textStart + colW * 2, y + 3);
 
       doc.setDrawColor(235, 235, 235);
       doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
