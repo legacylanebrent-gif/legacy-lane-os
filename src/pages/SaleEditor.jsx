@@ -796,7 +796,7 @@ Be practical and realistic for an estate sale context.`,
       return null;
     }
 
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const doc = new jsPDF('p', 'mm', 'letter');
     const pgW = doc.internal.pageSize.getWidth();
     const pgH = doc.internal.pageSize.getHeight();
     const m = 8;
@@ -862,7 +862,8 @@ Be practical and realistic for an estate sale context.`,
     for (const img of itemsWithIndex) {
       if (pdfCancelRef.current) return null;
 
-      if (count > 0 && count % 30 === 0) {
+      // Hard page break: if next row overflows bottom margin, start new page
+      if (y + rowH > pgH - m) {
         doc.addPage();
         y = m + 4;
         doc.setDrawColor(220, 220, 220);
@@ -886,8 +887,8 @@ Be practical and realistic for an estate sale context.`,
       doc.setDrawColor(235, 235, 235);
       doc.line(m, y + rowH - 0.5, pgW - m, y + rowH - 0.5);
 
-      y += rowH;
       count++;
+      y += rowH;
 
       if (reportProgress && count % 5 === 0) {
         setPdfProgress(40 + Math.round((count / itemsWithIndex.length) * 60));
