@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import { Switch } from '@/components/ui/switch';
 import BatchPhotoGeneratorModal from '@/components/estate/BatchPhotoGeneratorModal';
 import BatchPricingModal from '@/components/estate/BatchPricingModal';
@@ -958,6 +959,52 @@ Be practical and realistic for an estate sale context.`,
     }
   };
 
+  const handleExportXLS = () => {
+    const itemsWithData = formData.images
+      .map((img, i) => ({ ...img, _idx: i }))
+      .filter(img => img.name || img.description || img.price || img.ai_first_search_price);
+
+    if (itemsWithData.length === 0) {
+      alert('No items with data to export. Add titles, descriptions, or prices first.');
+      return;
+    }
+
+    const rows = itemsWithData.map((img) => {
+      const aiPrice = img.ai_first_search_price || (serpResults[img.url]?.price_range?.avg);
+      return {
+        'Name': img.name || '',
+        'Description': img.description || '',
+        'AI Price': aiPrice ? `$${aiPrice}` : '',
+        'Listing Price': img.price ? `$${img.price}` : '',
+      };
+    });
+
+    // Add summary row
+    const totalListed = itemsWithData.filter(i => i.price).length;
+    const totalValue = itemsWithData.reduce((sum, i) => sum + (i.price || 0), 0);
+    rows.push({
+      'Name': '',
+      'Description': `${totalListed} items priced`,
+      'AI Price': '',
+      'Listing Price': totalValue > 0 ? `$${totalValue} total` : '',
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 35 },  // Name
+      { wch: 50 },  // Description
+      { wch: 14 },  // AI Price
+      { wch: 14 },  // Listing Price
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Pricing Sheet');
+
+    const filename = `${(formData.title || 'estate-sale').replace(/[^a-z0-9]/gi, '-').substring(0, 40)}-pricing.xlsx`;
+    XLSX.writeFile(wb, filename);
+  };
+
   const computeDefaultExpanded = (images) => {
     const expanded = {};
     images.forEach((img, i) => {
@@ -1716,7 +1763,7 @@ Return ONLY the description text, no extra commentary.`
                 ) : (
                   <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-2">
-                     <Button variant="outline" size="sm" className="text-green-700 border-green-600" onClick={handleExportPDF}>
+                     <Button variant="outline" size="sm" className="text-green-700 border-green-600" onClick={handleExportXLS}>
                        <FileDown className="w-4 h-4 mr-2" />
                        Export Pricing Sheet
                      </Button>
