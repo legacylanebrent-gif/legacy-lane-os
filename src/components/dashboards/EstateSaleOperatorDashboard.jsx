@@ -49,6 +49,9 @@ export default function EstateSaleOperatorDashboard({ user }) {
       // Load Estate Sale Company Owner's estate sales
       const allSales = await base44.entities.EstateSale.list('-created_date', 200);
       const operatorSales = allSales.filter((s) => s.operator_id === user.id);
+      // Sort: active/upcoming/draft first, completed/archived last
+      const statusPriority = { active: 0, upcoming: 0, draft: 1, completed: 2, archived: 2 };
+      operatorSales.sort((a, b) => (statusPriority[a.status] ?? 2) - (statusPriority[b.status] ?? 2));
       setSales(operatorSales);
 
       // Calculate stats
