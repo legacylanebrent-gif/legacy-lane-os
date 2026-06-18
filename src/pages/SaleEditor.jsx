@@ -1431,19 +1431,22 @@ Be practical and realistic for an estate sale context.`,
                           const state = formData.property_address?.state || '';
                           setGeneratingDesc(true);
                           try {
-                            const itemNames = items.map(img => img.name).join(', ');
-                            const itemList = items.map(img => `- ${img.name}: ${img.description}`).join('\n');
+                            // Randomly sample ~20% of items (min 3, max 8) for a natural-feeling description
+                            const sampleSize = Math.max(3, Math.min(8, Math.ceil(items.length * 0.2)));
+                            const shuffled = [...items].sort(() => Math.random() - 0.5);
+                            const sampledItems = shuffled.slice(0, sampleSize);
+                            const sampledNames = sampledItems.map(img => img.name).join(', ');
+                            const sampledList = sampledItems.map(img => `- ${img.name}: ${img.description}`).join('\n');
                             const response = await base44.integrations.Core.InvokeLLM({
                               prompt: `You are an expert estate sale copywriter and SEO specialist. Write a compelling, SEO-rich sale description for an estate sale in ${city}${state ? ', ' + state : ''}.
 
-The sale includes the following items (these are the ACTUAL items being sold — you MUST include them):
-${itemList}
+A sampling of items at this sale includes:
+${sampledList}
 
 Requirements:
 - Start with a strong hook mentioning the location (${city}${state ? ', ' + state : ''})
-- After the hook, INCLUDE a comma-separated list of key items directly in the prose. For example: "...featuring ${itemNames} and much more."
-- Make sure at least 4–6 specific item names appear in the body text — these are critical for SEO and attracting shoppers
-- Highlight the most noteworthy/valuable items with vivid descriptions
+- In the body, naturally weave in several of the specific item names listed above — mention them by name in the prose
+- Also hint that there are many more treasures beyond these, e.g. "...and countless more unique finds."
 - Keep it concise and easy to read (3–5 sentences max)
 - Sound warm and inviting to estate sale shoppers
 - Write as flowing prose — do NOT use bullet points
