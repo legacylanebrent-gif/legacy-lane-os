@@ -341,7 +341,8 @@ export default function MyProfile() {
   const isVendor = acct === 'vendor';
   // operators on Professional or Elite tiers get reseller features included
   const activeTierForReseller = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
-  const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(activeTierForReseller);
+  const normalizedResellerTier = activeTierForReseller === 'premium' || activeTierForReseller === 'enterprise' ? 'elite' : activeTierForReseller;
+  const operatorHasResellerAccess = isOperator && ['professional', 'elite', 'growth'].includes(normalizedResellerTier);
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
   const isCollectorDealer = acct === 'collector_dealer';
 
@@ -1618,8 +1619,16 @@ export default function MyProfile() {
             {/* Current Plan Banner — prefer user.subscription_tier as source of truth */}
             {(user?.subscription_tier || subscription) && (() => {
               const tier = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
-              const planName = subscription?.plan_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                || (tier ? tier.replace(/\b\w/g, c => c.toUpperCase()) + ' Plan' : 'Active Plan');
+              // Find matching package for proper display name and tier
+              const matchedPkg = packages.find(p => {
+                const d = p.data || p;
+                return (tier === 'premium' && d.tier_level === 'elite') ||
+                       d.tier_level === tier ||
+                       d.package_name?.toLowerCase() === tier;
+              });
+              const displayTier = matchedPkg?.tier_level || tier;
+              const planName = matchedPkg?.package_name || subscription?.plan_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Active Plan';
+              const displayPrice = matchedPkg?.monthly_price || subscription?.price;
               return (
                 <Card className="border-green-200 bg-green-50">
                   <CardContent className="p-5">
@@ -1630,11 +1639,11 @@ export default function MyProfile() {
                           <h3 className="text-lg font-bold text-green-900">{planName}</h3>
                           <Badge className="bg-green-600 text-white">active</Badge>
                         </div>
-                        {tier && <Badge className={getTierColor(tier)}>{tier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>}
+                        {displayTier && <Badge className={getTierColor(displayTier)}>{displayTier.replace(/\b\w/g, c => c.toUpperCase())} Tier</Badge>}
                       </div>
                       <div className="text-right">
-                        {subscription?.price > 0 && <>
-                          <div className="text-2xl font-bold text-green-900">${subscription.price}</div>
+                        {displayPrice > 0 && <>
+                          <div className="text-2xl font-bold text-green-900">${displayPrice}</div>
                           <div className="text-sm text-green-700">per {subscription?.billing_period === 'monthly' ? 'month' : 'year'}</div>
                         </>}
                         {subscription?.renewal_date && <p className="text-xs text-green-600 mt-1">Renews {new Date(subscription.renewal_date).toLocaleDateString()}</p>}
@@ -1654,11 +1663,12 @@ export default function MyProfile() {
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {packages.map(pkg => {
                     const pkgData = pkg.data || pkg;
-                    const tierOrder = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, elite: 3, premium: 3 };
+                    const tierOrder = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, elite: 3, premium: 3, enterprise: 3 };
                     const activeTier = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
-                    const currentTierNum = tierOrder[activeTier] ?? -1;
+                    const normalizedActiveTier = activeTier === 'premium' || activeTier === 'enterprise' ? 'elite' : activeTier;
+                    const currentTierNum = tierOrder[normalizedActiveTier] ?? -1;
                     const pkgTierNum = tierOrder[pkgData.tier_level] ?? 0;
-                    const isCurrent = activeTier === pkgData.tier_level;
+                    const isCurrent = normalizedActiveTier === pkgData.tier_level;
                     const isUpgrade = !isCurrent && pkgTierNum > currentTierNum;
                     const isDowngrade = !isCurrent && subscription && pkgTierNum < currentTierNum;
 
