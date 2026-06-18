@@ -6,19 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Printer, FileText, Download, QrCode, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, Printer, FileText, Download, QrCode, CheckSquare, Square, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import QRCode from 'qrcode';
-
-const SIGN_TEMPLATES = [
-  { id: 'welcome', name: 'Welcome Sign', description: 'Front door welcome sign' },
-  { id: 'pricing', name: 'Pricing Information', description: 'General pricing guidelines' },
-  { id: 'payment', name: 'Payment Methods', description: 'Accepted payment methods' },
-  { id: 'checkout', name: 'Checkout Area', description: 'Checkout/payment station sign' },
-  { id: 'sale-rules', name: 'Sale Rules', description: 'Rules and guidelines for shoppers' },
-  { id: 'parking', name: 'Parking Instructions', description: 'Parking location and rules' },
-  { id: 'restroom', name: 'Restroom', description: 'Restroom location sign' },
-  { id: 'no-entry', name: 'No Entry', description: 'Private/restricted areas' }
-];
+import { SIGN_TEMPLATES, SIGN_CATEGORIES } from '@/components/signs/signTemplatesData';
+import SignTemplateCard from '@/components/signs/SignTemplateCard';
 
 export default function PrintSigns() {
   const navigate = useNavigate();
@@ -27,6 +19,8 @@ export default function PrintSigns() {
   const [qrImages, setQrImages] = useState([]); // { image, qrDataUrl, selected }
   const [generatingQR, setGeneratingQR] = useState(false);
   const [selectedAll, setSelectedAll] = useState(false);
+  const [signSearch, setSignSearch] = useState('');
+  const [signCategoryFilter, setSignCategoryFilter] = useState('all');
 
   useEffect(() => {
     loadSale();
@@ -302,58 +296,158 @@ export default function PrintSigns() {
         </TabsContent>
 
         {/* Sign Templates Tab */}
-        <TabsContent value="signs">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Available Sign Templates
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600 mb-6">
-                Letter-size (8.5" x 11") professional signs for your estate sale. Each template includes your business logo and information.
-              </p>
+        <TabsContent value="signs" className="space-y-4">
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col sm:flex-row gap-3 bg-white border border-slate-200 rounded-lg p-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search signs..."
+                value={signSearch}
+                onChange={(e) => setSignSearch(e.target.value)}
+                className="pl-9 pr-8 text-sm"
+              />
+              {signSearch && (
+                <button onClick={() => setSignSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setSignCategoryFilter('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${signCategoryFilter === 'all' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+              >All ({SIGN_TEMPLATES.length})</button>
+              {SIGN_CATEGORIES.map(cat => {
+                const count = SIGN_TEMPLATES.filter(t => t.category === cat.id).length;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSignCategoryFilter(cat.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${signCategoryFilter === cat.id ? 'bg-slate-800 text-white border-slate-800' : `${cat.color} hover:opacity-80`}`}
+                  >{cat.name} ({count})</button>
+                );
+              })}
+            </div>
+          </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {SIGN_TEMPLATES.map(template => (
-                  <Card key={template.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FileText className="w-8 h-8 text-slate-400" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
-                          <p className="text-sm text-slate-600 mb-3">{template.description}</p>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1">
-                              <Printer className="w-3 h-3 mr-1" />
-                              Print
-                            </Button>
-                            <Button variant="outline" size="sm" className="flex-1">
-                              <Download className="w-3 h-3 mr-1" />
-                              Download
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+          {/* Signs Grid */}
+          {(() => {
+            const q = signSearch.toLowerCase();
+            const filtered = SIGN_TEMPLATES.filter(t => {
+              const matchesSearch = !q || t.name.toLowerCase().includes(q);
+              const matchesCat = signCategoryFilter === 'all' || t.category === signCategoryFilter;
+              return matchesSearch && matchesCat;
+            });
 
-              <div className="mt-8 p-6 bg-slate-50 rounded-lg text-center">
-                <Printer className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-600 mb-4">
-                  Sign templates with custom branding coming soon
-                </p>
-                <p className="text-sm text-slate-500">
-                  Templates will automatically include your company logo, contact information, and sale details
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            const handlePrintSign = (template) => {
+              const printWindow = window.open('', '', 'width=850,height=1100');
+              printWindow.document.write(`<html><head><title>${template.name}</title>
+                <style>
+                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; }
+                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
+                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
+                  @media print { body { padding: 20px; } }
+                </style></head><body>
+                <div class="sign">
+                  <h1>${template.name}</h1>
+                  <div class="content">${template.content || ''}</div>
+                </div>
+                <script>window.onload = () => window.print();</script>
+              </body></html>`);
+              printWindow.document.close();
+            };
+
+            const handleDownloadSign = (template) => {
+              const html = `<html><head><title>${template.name}</title>
+                <style>
+                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; }
+                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
+                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
+                </style></head><body>
+                <div class="sign">
+                  <h1>${template.name}</h1>
+                  <div class="content">${template.content || ''}</div>
+                </div>
+              </body></html>`;
+              const blob = new Blob([html], { type: 'text/html' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${template.name.replace(/[^a-z0-9]/gi, '-')}.html`;
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+
+            const handleViewSign = (template) => {
+              const viewWindow = window.open('', '', 'width=850,height=1100');
+              viewWindow.document.write(`<html><head><title>${template.name}</title>
+                <style>
+                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; background: #f8fafc; }
+                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; }
+                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
+                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
+                </style></head><body>
+                <div class="sign">
+                  <h1>${template.name}</h1>
+                  <div class="content">${template.content || ''}</div>
+                </div>
+              </body></html>`);
+              viewWindow.document.close();
+            };
+
+            const handleEditSign = (template) => {
+              alert(`Edit functionality for "${template.name}" — content will be added soon.`);
+            };
+
+            const getCategoryColor = (catId) => {
+              const cat = SIGN_CATEGORIES.find(c => c.id === catId);
+              return cat?.color || 'bg-slate-100 text-slate-500 border-slate-200';
+            };
+
+            if (filtered.length === 0) {
+              return (
+                <div className="text-center py-12 text-slate-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                  <p>No signs match your search.</p>
+                </div>
+              );
+            }
+
+            // Group by category
+            const grouped = {};
+            filtered.forEach(t => {
+              if (!grouped[t.category]) grouped[t.category] = [];
+              grouped[t.category].push(t);
+            });
+
+            return Object.entries(grouped).map(([catId, templates]) => {
+              const cat = SIGN_CATEGORIES.find(c => c.id === catId);
+              return (
+                <div key={catId} className="space-y-3">
+                  <h3 className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                    <span className={`inline-block w-2.5 h-2.5 rounded-full ${cat?.color?.split(' ')[0] || 'bg-slate-300'}`} />
+                    {cat?.name || catId} ({templates.length})
+                  </h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {templates.map(template => (
+                      <SignTemplateCard
+                        key={template.id}
+                        template={template}
+                        categoryColor={getCategoryColor(catId)}
+                        onView={handleViewSign}
+                        onEdit={handleEditSign}
+                        onPrint={handlePrintSign}
+                        onDownload={handleDownloadSign}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </TabsContent>
       </Tabs>
     </div>
