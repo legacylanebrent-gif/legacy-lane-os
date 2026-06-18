@@ -1765,12 +1765,12 @@ Return ONLY the description text, no extra commentary.`
                 ) : (
                   <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-2">
-                     <Button variant="outline" size="sm" className="text-green-700 border-green-600" onClick={handleExportXLS}>
-                       <FileDown className="w-4 h-4 mr-2" />
+                     <Button variant="outline" size="sm" className="text-green-700 border-green-600 text-xs h-auto py-2 px-2 leading-tight" onClick={handleExportXLS}>
+                       <FileDown className="w-3 h-3 mr-1 flex-shrink-0" />
                        Export Pricing Sheet
                      </Button>
-                     <Button variant="outline" size="sm" className="text-blue-700 border-blue-600" onClick={handlePrintPDF}>
-                       <Printer className="w-4 h-4 mr-2" />
+                     <Button variant="outline" size="sm" className="text-blue-700 border-blue-600 text-xs h-auto py-2 px-2 leading-tight" onClick={handlePrintPDF}>
+                       <Printer className="w-3 h-3 mr-1 flex-shrink-0" />
                        Print Pricing Sheet
                      </Button>
 
@@ -1946,32 +1946,32 @@ Return ONLY the description text, no extra commentary.`
                         runBatchRef.current = runBatch;
                         return (
                            <>
-                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 font-semibold" onClick={() => setShowSkipGuideModal(true)}>
-                               <span className="mr-2 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
-                               Flag Photos to Skip Search
+                             <Button variant="outline" size="sm" className="text-slate-700 border-slate-400 font-semibold text-xs h-auto py-2 leading-tight" onClick={() => setShowSkipGuideModal(true)}>
+                               <span className="mr-1.5 w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">1</span>
+                               <span className="whitespace-normal text-left">Flag Photos to Skip</span>
                              </Button>
                              {step1Completed && (<>
-                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
-                               <span className="mr-2 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
+                             <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" disabled={quickScanning || serpBatchRunning} onClick={() => setShowQuickScanGuideModal(true)}>
+                               <span className="mr-1.5 w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">2</span>
                                {quickScanning
                                  ? `Scanning... (${quickScanProgress.current}/${quickScanProgress.total})`
-                                 : `Quick AI Scan${unscanned > 0 ? ` (${unscanned} to scan)` : ' All'}${multiItemCount > 0 ? ` · ${multiItemCount} multi-item flagged` : ''}`}
+                                 : `Quick AI Scan${unscanned > 0 ? ` (${unscanned})` : ''}${multiItemCount > 0 ? ` · ${multiItemCount} multi` : ''}`}
                              </Button>
-                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
-                               <span className="mr-2 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
-                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `Deep Search for Pricing & Descriptions${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount} eligible)` : ''}`}
+                             <Button variant="outline" size="sm" className="text-purple-600 border-purple-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" disabled={serpBatchRunning || quickScanning} onClick={() => setShowDeepSearchGuideModal(true)}>
+                               <span className="mr-1.5 w-4 h-4 rounded-full bg-purple-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">3</span>
+                               {serpBatchRunning ? `Processing... (${serpBatchProgress.current}/${serpBatchProgress.total})` : `Deep Search${unprocessed.length > 0 ? ` (${unprocessed.length - multiItemCount})` : ''}`}
                              </Button>
                             {resumeIndex !== null && resumeIndex !== undefined && (
-                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
-                                <Scan className="w-4 h-4 mr-2" />
-                                Resume from image {resumeIndex + 1}
+                              <Button variant="outline" size="sm" className="text-orange-600 border-orange-600 text-xs h-auto py-2 leading-tight" disabled={serpBatchRunning} onClick={() => runBatch(resumeIndex)}>
+                                <Scan className="w-3 h-3 mr-1 flex-shrink-0" />
+                                Resume #{resumeIndex + 1}
                               </Button>
                             )}
                             </>)}
                           </>
                         );
                       })()}
-                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600" onClick={async () => {
+                      {step1Completed && <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 text-xs h-auto py-2 leading-tight whitespace-normal text-left" onClick={async () => {
                         if (!window.confirm('Step 4: Regenerate descriptions for all items that have a title?')) return;
                         for (let i = 0; i < formData.images.length; i++) {
                           const img = formData.images[i];
@@ -1994,8 +1994,8 @@ Return ONLY the description text, no extra commentary.`
                           await new Promise(r => setTimeout(r, 500));
                         }
                       }}>
-                        <span className="mr-2 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">4</span>
-                        Regenerate Item Descriptions
+                        <span className="mr-1.5 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold inline-flex items-center justify-center flex-shrink-0">4</span>
+                        Regenerate Descriptions
                         </Button>}
                     </div>
                     {!step1Completed && saleId ? (
