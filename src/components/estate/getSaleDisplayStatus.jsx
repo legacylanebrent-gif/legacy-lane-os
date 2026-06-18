@@ -77,6 +77,10 @@ export function getSaleDisplayStatus(sale) {
 
 // Determine if sale should be visible on frontend to public users
 export function shouldShowSaleOnFrontend(sale) {
+  // Explicitly-set status takes priority over date-based computation
+  if (sale.status === 'active' || sale.status === 'upcoming') return true;
+  if (sale.status === 'draft' || sale.status === 'completed' || sale.status === 'archived') return false;
+  // Fall back to date-based status
   const displayStatus = getSaleDisplayStatus(sale);
   return displayStatus === 'active' || displayStatus === 'upcoming';
 }
