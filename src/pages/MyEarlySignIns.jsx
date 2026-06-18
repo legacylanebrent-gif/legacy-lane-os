@@ -144,23 +144,26 @@ export default function MyEarlySignIns() {
                         <span>{sale.property_address.street}, {sale.property_address.city}, {sale.property_address.state} {sale.property_address.zip}</span>
                       </div>
                     )}
-                    {sale?.sale_dates && sale.sale_dates.length > 0 && (
-                      <div className="space-y-0.5 mt-1">
-                        {sale.sale_dates.map((d, i) => (
-                          <div key={i} className="flex items-center gap-1.5 text-sm text-slate-500">
-                            <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                            <span>{format(new Date(d.date + 'T00:00:00'), 'EEE, MMM d, yyyy')}</span>
-                            {(d.start_time || d.end_time) && (
-                              <>
-                                <span className="text-slate-300">·</span>
-                                <Clock className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
-                                <span>{formatTime(d.start_time)}{d.end_time ? ` – ${formatTime(d.end_time)}` : ''}</span>
-                              </>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {sale?.sale_dates && sale.sale_dates.length > 0 && (() => {
+                      const sorted = [...sale.sale_dates].sort((a, b) => a.date.localeCompare(b.date));
+                      const first = sorted[0];
+                      const last = sorted[sorted.length - 1];
+                      const dateFmt = (d) => format(new Date(d + 'T00:00:00'), 'MMM d');
+                      const sameDay = first.date === last.date;
+                      const dateStr = sameDay ? dateFmt(first.date) : `${dateFmt(first.date)} – ${dateFmt(last.date)}`;
+                      return (
+                        <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
+                          <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                          <span>{dateStr}</span>
+                          {!isCompleted && (first.start_time || first.end_time) && (
+                            <>
+                              <span className="text-slate-300">·</span>
+                              <span>{formatTime(first.start_time)}{first.end_time ? ` – ${formatTime(first.end_time)}` : ''}</span>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
                     <p className="text-xs text-slate-400">
                       Signed {record.signed_at ? format(new Date(record.signed_at), 'MMM d, yyyy h:mm a') : '—'}
                     </p>
