@@ -36,6 +36,14 @@ import {
 import { isSaleAddressVisible } from '@/utils/saleAddressUtils';
 import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
 import { format } from 'date-fns';
+
+const formatTime12h = (time) => {
+  if (!time) return '';
+  const [h, m] = time.split(':').map(Number);
+  const hour = h % 12 || 12;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+};
 import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -1203,7 +1211,7 @@ export default function Home() {
                                <div key={idx} className="flex items-center justify-between gap-2">
                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                  {d.start_time && (
-                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                   <span className="text-xs text-slate-500">{formatTime12h(d.start_time)}{d.end_time ? ` – ${formatTime12h(d.end_time)}` : ''}</span>
                                  )}
                                </div>
                              ))}
@@ -1357,7 +1365,7 @@ export default function Home() {
                                <div key={idx} className="flex items-center justify-between gap-2">
                                  <span>{format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                                  {d.start_time && (
-                                   <span className="text-xs text-slate-500">{d.start_time}{d.end_time ? ` – ${d.end_time}` : ''}</span>
+                                   <span className="text-xs text-slate-500">{formatTime12h(d.start_time)}{d.end_time ? ` – ${formatTime12h(d.end_time)}` : ''}</span>
                                  )}
                                </div>
                              ))}
