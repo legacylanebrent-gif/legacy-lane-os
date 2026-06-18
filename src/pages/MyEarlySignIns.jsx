@@ -41,6 +41,17 @@ export default function MyEarlySignIns() {
     }
   };
 
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '';
+    // Already has AM/PM
+    if (/am|pm/i.test(timeStr)) return timeStr.replace(/\s*/g, '');
+    // 24-hour format like "14:00" or "10:00"
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m || 0).padStart(2, '0')}${ampm}`;
+  };
+
   const getPosition = (record, allForSale) => {
     const sorted = [...allForSale].sort((a, b) => new Date(a.signed_at) - new Date(b.signed_at));
     const idx = sorted.findIndex(r => r.id === record.id);
@@ -134,18 +145,17 @@ export default function MyEarlySignIns() {
                       </div>
                     )}
                     {sale?.sale_dates && sale.sale_dates.length > 0 && (
-                      <div className="space-y-1 mt-1">
+                      <div className="space-y-0.5 mt-1">
                         {sale.sale_dates.map((d, i) => (
-                          <div key={i} className="flex items-center gap-3 text-sm text-slate-500">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                              <span>{format(new Date(d.date), 'EEE, MMM d, yyyy')}</span>
-                            </div>
+                          <div key={i} className="flex items-center gap-1.5 text-sm text-slate-500">
+                            <Calendar className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                            <span>{format(new Date(d.date + 'T00:00:00'), 'EEE, MMM d, yyyy')}</span>
                             {(d.start_time || d.end_time) && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                                <span>{d.start_time} – {d.end_time}</span>
-                              </div>
+                              <>
+                                <span className="text-slate-300">·</span>
+                                <Clock className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+                                <span>{formatTime(d.start_time)}{d.end_time ? ` – ${formatTime(d.end_time)}` : ''}</span>
+                              </>
                             )}
                           </div>
                         ))}
