@@ -754,6 +754,11 @@ export default function MyProfile() {
         {/* ─────────────── BUSINESS TAB ─────────────── */}
         {!isConsumer && (
           <TabsContent value="business" className="space-y-6">
+            {/* View Public Business Profile */}
+            <Link to={createPageUrl(`BusinessProfile?id=${user?.id}`)} target="_blank" className="inline-flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium">
+              <Eye className="w-4 h-4" /> View Your Public Business Page <ArrowRight className="w-3 h-3" />
+            </Link>
+
             {/* Branding */}
             <Card>
 
