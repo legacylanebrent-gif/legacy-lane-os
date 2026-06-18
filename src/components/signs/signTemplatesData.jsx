@@ -13,7 +13,7 @@ export const SIGN_CATEGORIES = [
 
 export const SIGN_TEMPLATES = [
   // ── General Signs ──
-  { id: 'garage-arrow', name: 'Garage w/ Arrow', category: 'general', content: '' },
+  { id: 'garage-arrow', name: 'Garage w/ Arrow', category: 'general', content: '<div style="display:flex;align-items:center;justify-content:center;gap:32px;flex:1;width:100%;"><h1 style="font-size:120px;font-weight:900;color:#1e293b;margin:0;text-transform:uppercase;letter-spacing:4px;">GARAGE</h1><svg width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0;"><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f97316"/></marker></defs><line x1="0" y1="60" x2="100" y2="60" stroke="#f97316" stroke-width="8" marker-end="url(#arrowhead)"/></svg></div>' },
   { id: 'clothing-cherry-tree', name: 'Clothing Cherry Tree', category: 'general', content: '' },
   { id: 'deck-furn-grill', name: 'Deck Furniture & Grill', category: 'general', content: '' },
   { id: 'do-not-enter-sm-4up', name: 'Do Not Enter - Sm 4 Up', category: 'general', content: '' },

@@ -16,6 +16,7 @@ export default function PrintSigns() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const [qrImages, setQrImages] = useState([]); // { image, qrDataUrl, selected }
   const [generatingQR, setGeneratingQR] = useState(false);
   const [selectedAll, setSelectedAll] = useState(false);
@@ -37,10 +38,13 @@ export default function PrintSigns() {
         return;
       }
 
-      const [saleData, itemsData] = await Promise.all([
+      const [userData, saleData, itemsData] = await Promise.all([
+        base44.auth.me(),
         base44.entities.EstateSale.filter({ id: saleId }),
         base44.entities.Item.filter({ estate_sale_id: saleId })
       ]);
+
+      setCurrentUser(userData);
 
       if (saleData.length === 0) {
         alert('Sale not found');
@@ -340,38 +344,64 @@ export default function PrintSigns() {
               return matchesSearch && matchesCat;
             });
 
+            const getOperatorLogo = () => {
+              return currentUser?.logo_dark || currentUser?.logo_light || currentUser?.company_logo_url || currentUser?.company_logo || '';
+            };
+
+            const generateSignHtml = (template, forView = false) => {
+              const logoUrl = getOperatorLogo();
+              const isGarage = template.id === 'garage-arrow';
+              const bg = forView ? 'background: #f8fafc;' : '';
+              const pageStyle = forView
+                ? `width: 816px; height: 1056px; margin: 20px auto; ${bg} box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;`
+                : 'width: 100%; height: 100%;';
+
+              return `<html><head><title>${template.name}</title>
+                <style>
+                  * { box-sizing: border-box; margin: 0; padding: 0; }
+                  html, body { height: 100%; display: flex; align-items: center; justify-content: center; font-family: Arial, Helvetica, sans-serif; ${bg} }
+                  .letter-page {
+                    ${pageStyle}
+                    border: 3px solid #1e293b;
+                    display: flex; flex-direction: column;
+                    padding: ${isGarage ? '40px' : '48px'};
+                  }
+                  .sign-content {
+                    flex: 1;
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                  }
+                  .sign-content h1 { font-size: ${isGarage ? '120px' : '72px'}; font-weight: 900; margin: 0 0 ${isGarage ? '0' : '24px'}; color: #1e293b; text-transform: uppercase; letter-spacing: 4px; }
+                  .sign-content .body { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
+                  .logo-footer {
+                    display: flex; justify-content: flex-end; align-items: flex-end;
+                    padding-top: 12px; width: 100%;
+                  }
+                  .logo-footer img {
+                    max-height: 64px; max-width: 200px; object-fit: contain;
+                  }
+                  @media print {
+                    html, body { margin: 0; padding: 0; ${!forView ? 'height: auto;' : ''} }
+                    .letter-page { ${forView ? '' : 'width: 8.5in; height: 11in;'} border: 3px solid #000; box-shadow: none; margin: 0; border-radius: 0; }
+                  }
+                </style></head><body>
+                <div class="letter-page">
+                  <div class="sign-content">
+                    ${isGarage ? template.content : `<h1>${template.name}</h1><div class="body">${template.content || ''}</div>`}
+                  </div>
+                  ${logoUrl ? `<div class="logo-footer"><img src="${logoUrl}" alt="Logo" /></div>` : ''}
+                </div>
+                ${forView ? '' : '<script>window.onload = () => window.print();</script>'}
+              </body></html>`;
+            };
+
             const handlePrintSign = (template) => {
               const printWindow = window.open('', '', 'width=850,height=1100');
-              printWindow.document.write(`<html><head><title>${template.name}</title>
-                <style>
-                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; }
-                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
-                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
-                  @media print { body { padding: 20px; } }
-                </style></head><body>
-                <div class="sign">
-                  <h1>${template.name}</h1>
-                  <div class="content">${template.content || ''}</div>
-                </div>
-                <script>window.onload = () => window.print();</script>
-              </body></html>`);
+              printWindow.document.write(generateSignHtml(template));
               printWindow.document.close();
             };
 
             const handleDownloadSign = (template) => {
-              const html = `<html><head><title>${template.name}</title>
-                <style>
-                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; }
-                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
-                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
-                </style></head><body>
-                <div class="sign">
-                  <h1>${template.name}</h1>
-                  <div class="content">${template.content || ''}</div>
-                </div>
-              </body></html>`;
+              const html = generateSignHtml(template);
               const blob = new Blob([html], { type: 'text/html' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -382,19 +412,8 @@ export default function PrintSigns() {
             };
 
             const handleViewSign = (template) => {
-              const viewWindow = window.open('', '', 'width=850,height=1100');
-              viewWindow.document.write(`<html><head><title>${template.name}</title>
-                <style>
-                  body { margin: 0; padding: 40px; font-family: Arial, Helvetica, sans-serif; background: #f8fafc; }
-                  .sign { border: 3px solid #1e293b; border-radius: 12px; padding: 48px; text-align: center; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; }
-                  .sign h1 { font-size: 72px; font-weight: bold; margin: 0 0 24px; color: #1e293b; }
-                  .sign .content { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
-                </style></head><body>
-                <div class="sign">
-                  <h1>${template.name}</h1>
-                  <div class="content">${template.content || ''}</div>
-                </div>
-              </body></html>`);
+              const viewWindow = window.open('', '', 'width=880,height=1140');
+              viewWindow.document.write(generateSignHtml(template, true));
               viewWindow.document.close();
             };
 
