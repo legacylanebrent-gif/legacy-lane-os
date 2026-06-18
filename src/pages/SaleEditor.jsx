@@ -94,6 +94,7 @@ export default function SaleEditor() {
   const [pdfProgress, setPdfProgress] = useState(0);
   const [dragIndex, setDragIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [pricingSearch, setPricingSearch] = useState('');
   const gridRef = useRef(null);
   const pointerIdRef = useRef(null);
   const pdfCancelRef = useRef(false);
@@ -2008,6 +2009,36 @@ Return ONLY the description text, no extra commentary.`
                     ) : null}
 
                     <div className={step1Completed ? "space-y-3" : "hidden"}>
+                     <div className="relative">
+                       <Input
+                         placeholder="Search items by name, description, or price..."
+                         value={pricingSearch}
+                         onChange={(e) => setPricingSearch(e.target.value)}
+                         className="pr-8 text-sm"
+                       />
+                       {pricingSearch && (
+                         <button
+                           onClick={() => setPricingSearch('')}
+                           className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                         >
+                           <X className="w-4 h-4" />
+                         </button>
+                       )}
+                     </div>
+                     {pricingSearch && (() => {
+                       const filtered = formData.images.filter((image) => {
+                         const q = pricingSearch.toLowerCase();
+                         return (
+                           (image.name || '').toLowerCase().includes(q) ||
+                           (image.description || '').toLowerCase().includes(q) ||
+                           (image.price != null && String(image.price).includes(q)) ||
+                           (image.synopsis || '').toLowerCase().includes(q)
+                         );
+                       });
+                       return (
+                         <p className="text-xs text-slate-500">Showing {filtered.length} of {formData.images.length} items</p>
+                       );
+                     })()}
                      {formData.images.length > 1 && (
                        <Button
                          variant="ghost"
@@ -2020,7 +2051,16 @@ Return ONLY the description text, no extra commentary.`
                            : <><ChevronsUpDown className="w-3.5 h-3.5 mr-1" /> Expand all Item Descriptions</>}
                        </Button>
                      )}
-                    {formData.images.map((image, index) => {
+                     {formData.images.filter((image) => {
+                       if (!pricingSearch.trim()) return true;
+                       const q = pricingSearch.toLowerCase();
+                       return (
+                         (image.name || '').toLowerCase().includes(q) ||
+                         (image.description || '').toLowerCase().includes(q) ||
+                         (image.price != null && String(image.price).includes(q)) ||
+                         (image.synopsis || '').toLowerCase().includes(q)
+                       );
+                     }).map((image, index) => {
                        const isExpanded = expandedCards[index];
                        return (
                        <Card key={index} className="overflow-hidden">
