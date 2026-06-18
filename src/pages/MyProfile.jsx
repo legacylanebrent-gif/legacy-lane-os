@@ -64,8 +64,8 @@ const SPECIALTY_OPTIONS = [
 const SERVICE_OPTIONS = [
   'Full Estate Sales','Online-Only Auctions','On-Site Auctions','Buyout / Cleanout',
   'Moving Sales','Estate Appraisals','Consignment','Donation Management',
-  'Photography & Catalog','Staging & Setup','Online Listing',
-  'Senior Transition Services','Business Liquidations','Storage Unit Sales'
+  'Staging & Setup','Online Listing',
+  'Senior Transition Services','Business Liquidations'
 ];
 
 // Vendor service specializations
