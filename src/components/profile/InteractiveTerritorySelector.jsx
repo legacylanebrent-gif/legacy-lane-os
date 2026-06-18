@@ -132,7 +132,7 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area</CardTitle>
+        <CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area (Estate Sales)</CardTitle>
         <p className="text-sm text-slate-500">Select a state → counties → micro-territories for each county</p>
       </CardHeader>
       <CardContent className="space-y-6">

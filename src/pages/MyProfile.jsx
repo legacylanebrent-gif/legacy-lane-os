@@ -381,7 +381,7 @@ export default function MyProfile() {
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
             {isAgentOperator ? 'Business Profile' : isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
           </TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Service Area</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isReseller ? 'Service Area' : 'Service Area (Estate Sales)'}</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">My Leads</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Reseller Buying</TabsTrigger>}
@@ -963,7 +963,27 @@ export default function MyProfile() {
 
         {/* ─────────────── SERVICE AREA TAB ─────────────── */}
         <TabsContent value="territory" className="space-y-6">
-          <InteractiveTerritorySelector form={form} setForm={setForm} />
+          {isReseller ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" />National Coverage</CardTitle>
+                <p className="text-sm text-slate-500">As a reseller, your buying reach is national — all estate sale operators across the country can see you and match you with opportunities. No geographic limits apply.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-800 text-sm">All 50 States + DC</p>
+                    <p className="text-xs text-green-600">Your profile is visible nationwide. Any estate sale company in any state can see and send you buyout or lot opportunities.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <InteractiveTerritorySelector form={form} setForm={setForm} />
+          )}
 
           {/* Max Radius */}
           <Card>
