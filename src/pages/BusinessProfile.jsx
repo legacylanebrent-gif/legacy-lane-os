@@ -145,9 +145,9 @@ export default function BusinessProfile() {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Logo/Image */}
               <div className="flex-shrink-0">
-                {(business.company_logo_url || business.company_logo) ? (
+                {(business.company_logo_url || business.company_logo || business.logo_dark || business.logo_light) ? (
                   <img
-                    src={business.company_logo_url || business.company_logo}
+                    src={business.company_logo_url || business.company_logo || business.logo_dark || business.logo_light}
                     alt={business.company_name || business.full_name}
                     className="w-32 h-32 rounded-lg object-cover border-2 border-slate-200"
                   />

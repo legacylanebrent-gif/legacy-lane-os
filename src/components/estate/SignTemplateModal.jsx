@@ -260,9 +260,9 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
                 style={{ maxWidth: '300px' }}
               >
                 <div className="space-y-1">
-                  {(operator?.company_logo_url || operator?.company_logo) && (
+                  {(operator?.company_logo_url || operator?.company_logo || operator?.logo_dark || operator?.logo_light) && (
                     <img 
-                      src={operator.company_logo_url || operator.company_logo} 
+                      src={operator.company_logo_url || operator.company_logo || operator.logo_dark || operator.logo_light} 
                       alt="Company Logo"
                       className="ml-auto mb-2 max-h-12 max-w-32 object-contain"
                     />

@@ -912,9 +912,9 @@ export default function EstateSaleDetail() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start gap-4 mb-4">
-                  {(operator?.company_logo_url || operator?.company_logo) ? (
+                  {(operator?.company_logo_url || operator?.company_logo || operator?.logo_dark || operator?.logo_light) ? (
                     <img
-                      src={operator.company_logo_url || operator.company_logo}
+                      src={operator.company_logo_url || operator.company_logo || operator.logo_dark || operator.logo_light}
                       alt={operator?.company_name || sale.operator_name || ''}
                       className="w-16 h-16 rounded-lg object-cover border border-slate-200 flex-shrink-0"
                     />
