@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Building2, CheckCircle, AlertCircle } from 'lucide-react';
+import { formatPhone } from '@/utils/formatPhone';
 
 export default function ClaimCompanyModal({ operator, open, onClose }) {
   const [step, setStep] = useState('form'); // 'form' | 'success' | 'login'
@@ -102,7 +103,7 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <p className="font-semibold text-slate-900">{operator.company_name}</p>
               <p className="text-sm text-slate-600">{operator.city}, {operator.state}</p>
-              {operator.phone && <p className="text-sm text-slate-500">{operator.phone}</p>}
+              {operator.phone && <p className="text-sm text-slate-500">{formatPhone(operator.phone)}</p>}
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">

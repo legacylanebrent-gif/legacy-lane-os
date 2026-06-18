@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, Phone, Mail, MapPin, Calendar, Edit, Plus } from 'lucide-react';
 import ActivityTimeline from '@/components/crm/ActivityTimeline';
+import { formatPhone } from '@/utils/formatPhone';
 
 export default function ContactDetail() {
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ export default function ContactDetail() {
                     <div className="flex items-center gap-3 text-sm">
                       <Phone className="w-4 h-4 text-slate-400" />
                       <a href={`tel:${contact.phone}`} className="text-blue-600 hover:underline">
-                        {contact.phone}
+                        {formatPhone(contact.phone)}
                       </a>
                     </div>
                   )}

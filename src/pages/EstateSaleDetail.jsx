@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { getImageSrc } from '@/utils/imageOptimizer';
+import { formatPhone } from '@/utils/formatPhone';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -926,7 +927,7 @@ export default function EstateSaleDetail() {
                       className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                     >
                       <Phone className="w-4 h-4" />
-                      {operator.phone}
+                      {formatPhone(operator.phone)}
                     </a>
                   )}
                   {operator?.company_website && (

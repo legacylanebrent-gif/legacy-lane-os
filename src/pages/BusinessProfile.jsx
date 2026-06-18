@@ -15,6 +15,7 @@ import MessageModal from '@/components/messaging/MessageModal';
 import ContactFormModal from '@/components/company/ContactFormModal';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import { getImageSrc } from '@/utils/imageOptimizer';
+import { formatPhone } from '@/utils/formatPhone';
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -200,7 +201,7 @@ export default function BusinessProfile() {
                     <div className="flex items-center gap-2 text-slate-600">
                       <Phone className="w-4 h-4 text-cyan-600" />
                       <a href={`tel:${business.phone}`} className="hover:text-cyan-600">
-                        {business.phone}
+                        {formatPhone(business.phone)}
                       </a>
                     </div>
                   )}

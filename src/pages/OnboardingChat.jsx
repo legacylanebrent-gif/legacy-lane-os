@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe, Award, Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatPhone } from '@/utils/formatPhone';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ROLE_OPTIONS = [
@@ -547,7 +548,7 @@ export default function OnboardingChat() {
                         </p>
                         {company.phone && (
                           <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3" /> {company.phone}
+                            <Phone className="w-3 h-3" /> {formatPhone(company.phone)}
                           </p>
                         )}
                         {company.website && (

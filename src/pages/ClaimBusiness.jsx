@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { formatPhone } from '@/utils/formatPhone';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -469,7 +470,7 @@ export default function ClaimBusiness() {
                       <div>
                         <p className="font-bold text-slate-900">{selectedOp.company_name}</p>
                         <p className="text-slate-600 text-sm">{selectedOp.city}, {selectedOp.state}{selectedOp.zip_code ? ` ${selectedOp.zip_code}` : ''}</p>
-                        {selectedOp.phone && <p className="text-slate-500 text-sm mt-1"><Phone className="w-3 h-3 inline mr-1" />{selectedOp.phone}</p>}
+                        {selectedOp.phone && <p className="text-slate-500 text-sm mt-1"><Phone className="w-3 h-3 inline mr-1" />{formatPhone(selectedOp.phone)}</p>}
                         {(selectedOp.website_url || selectedOp.website) && <p className="text-slate-500 text-sm"><Globe className="w-3 h-3 inline mr-1" />{selectedOp.website_url || selectedOp.website}</p>}
                         {selectedOp.claimed_listing && <Badge className="mt-2 bg-amber-100 text-amber-700 border-amber-200 text-xs">Already Claimed</Badge>}
                       </div>

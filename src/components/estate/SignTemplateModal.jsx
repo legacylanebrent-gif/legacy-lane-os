@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Download, Printer, ArrowRight, ArrowLeft } from 'lucide-react';
+import { formatPhone } from '@/utils/formatPhone';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -273,7 +274,7 @@ export default function SignTemplateModal({ open, onClose, sale, operator }) {
                     <p className="text-xs text-slate-700">{operator.company_address}</p>
                   )}
                   {operator?.phone && (
-                    <p className="text-xs text-slate-700">{operator.phone}</p>
+                    <p className="text-xs text-slate-700">{formatPhone(operator.phone)}</p>
                   )}
                   {operator?.email && (
                     <p className="text-xs text-slate-700">{operator.email}</p>

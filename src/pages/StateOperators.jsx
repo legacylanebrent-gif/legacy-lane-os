@@ -14,6 +14,7 @@ import L from 'leaflet';
 import { Search, MapPin, Building2, Phone, Globe, Star, ArrowLeft, Loader2 } from 'lucide-react';
 import { US_STATES } from '@/components/data/USStates';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { formatPhone } from '@/utils/formatPhone';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -294,7 +295,7 @@ export default function StateOperators() {
         <div className="space-y-1">
           {op.phone && (
             <a href={`tel:${stripHtml(op.phone)}`} className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-cyan-600 transition-colors">
-              <Phone className="w-3 h-3" /> {stripHtml(op.phone)}
+              <Phone className="w-3 h-3" /> {formatPhone(stripHtml(op.phone))}
             </a>
           )}
           {(op.website_url || op.website) && (
@@ -385,7 +386,7 @@ export default function StateOperators() {
                           <div className="text-sm">
                             <p className="font-bold text-slate-900">{stripHtml(op.company_name)}</p>
                             <p className="text-slate-500">{stripHtml(op.geocoded_city || op.city)}</p>
-                            {op.phone && <p className="text-cyan-700">{op.phone}</p>}
+                            {op.phone && <p className="text-cyan-700">{formatPhone(op.phone)}</p>}
                           </div>
                         </Popup>
                       </Marker>

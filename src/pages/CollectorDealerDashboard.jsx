@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { formatPhone } from '@/utils/formatPhone';
 import {
   Store, MapPin, Target, Search, ArrowRight, ShoppingBag, Heart,
   Building2, TrendingUp, Package, Bell, Compass, Phone, Globe
@@ -159,7 +160,7 @@ export default function CollectorDealerDashboard() {
                   {user.business_address_city}, {user.business_address_state} {user.business_address_zip}
                 </p>
                 {user?.company_email && <p className="text-sm text-slate-500 flex items-center gap-1"><Globe className="w-3 h-3" />{user.company_email}</p>}
-                {user?.phone && <p className="text-sm text-slate-500 flex items-center gap-1"><Phone className="w-3 h-3" />{user.phone}</p>}
+                {user?.phone && <p className="text-sm text-slate-500 flex items-center gap-1"><Phone className="w-3 h-3" />{formatPhone(user.phone)}</p>}
               </div>
               <div>
                 {hasStoreAddress ? (
