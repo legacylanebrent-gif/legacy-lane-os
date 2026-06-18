@@ -235,7 +235,10 @@ export default function BusinessProfile() {
                     <div className="text-2xl font-bold text-slate-900">
                       {business.primary_account_type === 'reseller' && business.reseller_founded_year
                         ? <>Since {business.reseller_founded_year}</>
-                        : <>{business.years_in_business || 0}+</>
+                        : (business.founded_year
+                          ? <>{new Date().getFullYear() - parseInt(business.founded_year)}+</>
+                          : <>—</>
+                        )
                       }
                     </div>
                     <div className="text-sm text-slate-600">
