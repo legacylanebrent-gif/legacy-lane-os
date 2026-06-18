@@ -69,7 +69,11 @@ export function getSaleDisplayStatus(sale) {
     }
 
     // If all sales have passed
-    if (pastSales.length === sale.sale_dates.length) return 'completed';
+    if (pastSales.length === sale.sale_dates.length) {
+      // Respect an explicitly-set active/upcoming status even when dates have passed
+      if (sale.status === 'active' || sale.status === 'upcoming') return sale.status;
+      return 'completed';
+    }
   }
 
   return sale.status || 'draft';
