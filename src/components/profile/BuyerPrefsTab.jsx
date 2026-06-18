@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ShoppingBag, Target, Plus, X, Clock, DollarSign, MapPin,
-  Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles
+  Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles, ArrowRight
 } from 'lucide-react';
 import CategorySuggestions from '@/components/profile/CategorySuggestions';
 import AgentGuidedHunt from '@/components/profile/AgentGuidedHunt';
@@ -627,10 +628,15 @@ export default function BuyerPrefsTab({ user }) {
       {/* ── Past Purchases ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5" />
-            Past Purchases
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5" />
+              Past Purchases
+            </CardTitle>
+            <Link to="/MyPurchases" className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 whitespace-nowrap">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           {purchases.length > 0 ? (
