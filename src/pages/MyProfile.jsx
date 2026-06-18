@@ -811,7 +811,7 @@ export default function MyProfile() {
                       <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="State license" /></div>
                       <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="10" /></div>
                       <div><Label>Year Founded</Label><Input type="number" value={form.founded_year} onChange={e => setForm(p => ({ ...p, founded_year: e.target.value }))} placeholder="2010" /></div>
-                      <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="35" /></div>
+                      <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="35" /><p className="text-xs text-slate-400 mt-1">Default commission applied to new sales unless overridden per sale.</p></div>
                       <div><Label>Min. Sale Value ($)</Label><Input type="number" value={form.minimum_sale_value} onChange={e => setForm(p => ({ ...p, minimum_sale_value: e.target.value }))} placeholder="5000" /></div>
                     </div>
                     <div className="flex gap-6">
