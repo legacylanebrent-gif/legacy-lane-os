@@ -170,15 +170,42 @@ export default function SaleConversionPipeline() {
     try {
       const freshSales = await base44.entities.EstateSale.filter({ operator_id: user.id });
       setSales(freshSales || []);
+
+      // Sync stages for already-linked deals
       const synced = syncDealStages(deals, freshSales || []);
-      // Persist any stage changes
       for (const deal of synced) {
         const orig = deals.find(d => d.id === deal.id);
         if (orig && orig.stage !== deal.stage && deal.estate_sale_id) {
           await base44.entities.SaleConversionPipeline.update(deal.id, { stage: deal.stage });
         }
       }
-      setDeals(synced);
+
+      // Auto-create pipeline deals for sales that aren't linked yet
+      const linkedSaleIds = new Set(synced.filter(d => d.estate_sale_id).map(d => d.estate_sale_id));
+      const unlinkedSales = (freshSales || []).filter(s => !linkedSaleIds.has(s.id));
+      for (const sale of unlinkedSales) {
+        const stage = SALE_STATUS_TO_STAGE[sale.status] || 'new_lead';
+        const city = sale.property_address?.city || '';
+        const state = sale.property_address?.state || '';
+        const address = sale.property_address?.formatted_address || sale.property_address?.street || '';
+        const saleDate = sale.sale_dates?.[0]?.date || '';
+        await base44.entities.SaleConversionPipeline.create({
+          operator_id: user.id,
+          estate_sale_id: sale.id,
+          client_name: sale.title || 'Unnamed Sale',
+          property_address: address,
+          property_city: city,
+          property_state: state,
+          stage,
+          estimated_value: sale.estimated_value || null,
+          estimated_sale_start_date: saleDate,
+          situation: 'standard',
+        });
+      }
+
+      // Reload all deals to show everything
+      const allDeals = await base44.entities.SaleConversionPipeline.filter({ operator_id: user.id }, '-created_date');
+      setDeals(allDeals || []);
     } catch (e) { console.error(e); }
     finally { setSyncing(false); }
   };
