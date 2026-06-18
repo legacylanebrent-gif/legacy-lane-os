@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Eye, Pencil, Printer, Download, FileText } from 'lucide-react';
 
 export default function SignTemplateCard({ template, categoryColor, onView, onEdit, onPrint, onDownload }) {
-  const hasContent = !!template.content;
-
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -15,11 +13,8 @@ export default function SignTemplateCard({ template, categoryColor, onView, onEd
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-slate-900 text-sm leading-tight mb-0.5 truncate">{template.name}</h3>
-            {!hasContent && (
-              <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">No content yet</span>
-            )}
             <div className="grid grid-cols-4 gap-1.5 mt-2">
-              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onView(template)} disabled={!hasContent}>
+              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onView(template)}>
                 <Eye className="w-3 h-3 mr-0.5" />
                 View
               </Button>
@@ -27,11 +22,11 @@ export default function SignTemplateCard({ template, categoryColor, onView, onEd
                 <Pencil className="w-3 h-3 mr-0.5" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onPrint(template)} disabled={!hasContent}>
+              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onPrint(template)}>
                 <Printer className="w-3 h-3 mr-0.5" />
                 Print
               </Button>
-              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onDownload(template)} disabled={!hasContent}>
+              <Button variant="outline" size="sm" className="text-xs h-7 px-1.5" onClick={() => onDownload(template)}>
                 <Download className="w-3 h-3 mr-0.5" />
                 Save
               </Button>

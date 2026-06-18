@@ -350,11 +350,14 @@ export default function PrintSigns() {
 
             const generateSignHtml = (template, forView = false) => {
               const logoUrl = getOperatorLogo();
-              const isGarage = template.id === 'garage-arrow';
               const bg = forView ? 'background: #f8fafc;' : '';
               const pageStyle = forView
                 ? `width: 816px; height: 1056px; margin: 20px auto; ${bg} box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;`
                 : 'width: 100%; height: 100%;';
+
+              // Dynamic font size: shorter text = bigger, up to 120px
+              const charCount = template.name.length;
+              const fontSize = charCount <= 10 ? 120 : charCount <= 16 ? 100 : charCount <= 24 ? 80 : charCount <= 36 ? 64 : 52;
 
               return `<html><head><title>${template.name}</title>
                 <style>
@@ -364,13 +367,18 @@ export default function PrintSigns() {
                     ${pageStyle}
                     border: 3px solid #1e293b;
                     display: flex; flex-direction: column;
-                    padding: ${isGarage ? '40px' : '48px'};
+                    padding: 48px;
                   }
                   .sign-content {
                     flex: 1;
                     display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    text-align: center;
                   }
-                  .sign-content h1 { font-size: ${isGarage ? '120px' : '72px'}; font-weight: 900; margin: 0 0 ${isGarage ? '0' : '24px'}; color: #1e293b; text-transform: uppercase; letter-spacing: 4px; }
+                  .sign-content h1 {
+                    font-size: ${fontSize}px; font-weight: 900; margin: 0; color: #1e293b;
+                    text-transform: uppercase; letter-spacing: 4px; line-height: 1.15;
+                    word-break: break-word; max-width: 100%;
+                  }
                   .sign-content .body { font-size: 28px; color: #334155; white-space: pre-line; line-height: 1.6; }
                   .logo-footer {
                     display: flex; justify-content: flex-end; align-items: flex-end;
@@ -386,7 +394,8 @@ export default function PrintSigns() {
                 </style></head><body>
                 <div class="letter-page">
                   <div class="sign-content">
-                    ${isGarage ? template.content : `<h1>${template.name}</h1><div class="body">${template.content || ''}</div>`}
+                    <h1>${template.name}</h1>
+                    ${template.content && template.id !== 'garage-arrow' ? `<div class="body">${template.content}</div>` : ''}
                   </div>
                   ${logoUrl ? `<div class="logo-footer"><img src="${logoUrl}" alt="Logo" /></div>` : ''}
                 </div>
