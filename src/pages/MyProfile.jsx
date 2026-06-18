@@ -904,7 +904,7 @@ export default function MyProfile() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Business Details</CardTitle>
-                  <p className="text-sm text-slate-500">Are you also a Reseller? Choose from the options below.</p>
+                  <p className="text-sm text-slate-500">Tell us about your reseller business. Choose from the options below.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
