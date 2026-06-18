@@ -300,12 +300,12 @@ export default function BuyerPrefsTab({ user }) {
       {/* ── Wanted Items Section ── */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="flex items-center gap-2">
               <Target className="w-5 h-5" />
               Items I'm Hunting For
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {!showWantedForm && (
                 <Button
                   size="sm"
@@ -319,7 +319,7 @@ export default function BuyerPrefsTab({ user }) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                  className="border-purple-300 text-purple-700 hover:bg-purple-50 whitespace-nowrap"
                   onClick={handleAiGuidedHunt}
                   disabled={loadingAi}
                 >
