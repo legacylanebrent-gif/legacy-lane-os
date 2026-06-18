@@ -127,9 +127,9 @@ export default function MyProfile() {
     phone_secondary: '', company_email: '', website_url: '',
     business_address_street: '', business_address_city: '',
     business_address_state: '', business_address_zip: '',
-    years_in_business: '', founded_year: '', license_number: '',
+    founded_year: '', license_number: '',
     insurance_verified: false, bonded: false,
-    commission_rate: '', minimum_sale_value: '',
+    commission_rate: '',
     // territory
     service_radius_miles: '', service_states: [],
     service_counties: [], service_cities: [],
@@ -175,10 +175,10 @@ export default function MyProfile() {
         business_address_city: u.business_address_city || '',
         business_address_state: u.business_address_state || '',
         business_address_zip: u.business_address_zip || '',
-        years_in_business: u.years_in_business || '', founded_year: u.founded_year || '',
+        founded_year: u.founded_year || '',
         license_number: u.license_number || '',
         insurance_verified: u.insurance_verified || false, bonded: u.bonded || false,
-        commission_rate: u.commission_rate || '', minimum_sale_value: u.minimum_sale_value || '',
+        commission_rate: u.commission_rate || '',
         service_radius_miles: u.service_radius_miles || '',
         service_states: u.service_states || [], service_counties: u.service_counties || [],
         service_cities: u.service_cities || [], specialties: u.specialties || [],
@@ -809,7 +809,6 @@ export default function MyProfile() {
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
                       <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} placeholder="State license" /></div>
-                      <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="10" /></div>
                       <div><Label>Year Founded</Label><Input type="number" value={form.founded_year} onChange={e => setForm(p => ({ ...p, founded_year: e.target.value }))} placeholder="2010" /></div>
                       <div><Label>Commission Rate (%)</Label><Input type="number" value={form.commission_rate} onChange={e => setForm(p => ({ ...p, commission_rate: e.target.value }))} placeholder="35" /><p className="text-xs text-slate-400 mt-1">Default commission applied to new sales unless overridden per sale.</p></div>
 
