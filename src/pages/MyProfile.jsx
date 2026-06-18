@@ -963,7 +963,7 @@ export default function MyProfile() {
 
         {/* ─────────────── SERVICE AREA TAB ─────────────── */}
         <TabsContent value="territory" className="space-y-6">
-          {isReseller ? (
+          {acct === 'reseller' ? (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" />National Coverage</CardTitle>
