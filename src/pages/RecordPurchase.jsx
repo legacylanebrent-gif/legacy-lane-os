@@ -228,7 +228,7 @@ export default function RecordPurchase() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-6 pb-32">
       <div className="max-w-2xl mx-auto">
         {errorDetails && (
           <Card className="mb-6 border-red-500 bg-red-50">
@@ -326,7 +326,7 @@ export default function RecordPurchase() {
                     type="date"
                     value={formData.purchase_date}
                     onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-                    className="pl-9"
+                    className="pl-9 w-full"
                   />
                 </div>
               </div>
