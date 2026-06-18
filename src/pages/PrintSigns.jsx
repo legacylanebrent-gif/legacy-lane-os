@@ -377,7 +377,7 @@ export default function PrintSigns() {
                     padding-top: 12px; width: 100%;
                   }
                   .logo-footer img {
-                    max-height: 64px; max-width: 200px; object-fit: contain;
+                    max-height: 192px; max-width: 600px; object-fit: contain;
                   }
                   @media print {
                     html, body { margin: 0; padding: 0; ${!forView ? 'height: auto;' : ''} }
