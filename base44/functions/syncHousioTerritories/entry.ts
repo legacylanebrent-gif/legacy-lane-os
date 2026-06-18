@@ -87,17 +87,43 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Write in chunks of 25 to avoid rate limits
+    // Deduplicate: check which records already exist, only create new ones
+    let newRecords = [];
     if (records.length > 0) {
       const entityName = batch_type === 'micro' ? 'HousioMicroTerritory' : 'HousioTerritory';
-      const CHUNK_SIZE = 25;
-      for (let i = 0; i < records.length; i += CHUNK_SIZE) {
-        const chunk = records.slice(i, i + CHUNK_SIZE);
-        await base44.asServiceRole.entities[entityName].bulkCreate(chunk);
-        if (i + CHUNK_SIZE < records.length) await new Promise(r => setTimeout(r, 1500));
+      const idField = batch_type === 'micro' ? 'micro_territory_id' : 'territory_id';
+      
+      // Collect unique IDs from records to check
+      const idsToCheck = [...new Set(records.map(r => r[idField]))];
+      
+      // Query existing IDs in batches
+      const existingIds = new Set();
+      for (let i = 0; i < idsToCheck.length; i += 500) {
+        const idBatch = idsToCheck.slice(i, i + 500);
+        const existing = await base44.asServiceRole.entities[entityName].filter(
+          { [idField]: { $in: idBatch } },
+          null,
+          500
+        );
+        existing.forEach(r => existingIds.add(r[idField]));
       }
-      console.log(`[syncHousioTerritories] Wrote ${records.length} ${entityName} records`);
+      
+      newRecords = records.filter(r => !existingIds.has(r[idField]));
+      const skipped = records.length - newRecords.length;
+      console.log(`[syncHousioTerritories] ${skipped} already exist, ${newRecords.length} new to create`);
+      
+      if (newRecords.length > 0) {
+        const CHUNK_SIZE = 25;
+        for (let i = 0; i < newRecords.length; i += CHUNK_SIZE) {
+          const chunk = newRecords.slice(i, i + CHUNK_SIZE);
+          await base44.asServiceRole.entities[entityName].bulkCreate(chunk);
+          if (i + CHUNK_SIZE < newRecords.length) await new Promise(r => setTimeout(r, 1500));
+        }
+        console.log(`[syncHousioTerritories] Wrote ${newRecords.length} ${entityName} records`);
+      }
     }
+
+    const insertedCount = newRecords.length;
 
     const nextWriteOffset = safeWriteOffset + records.length;
     const hasMore = nextWriteOffset < total;
@@ -105,7 +131,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       batch_type,
-      synced_count: records.length,
+      synced_count: insertedCount,
       total_available: total,
       write_offset: safeWriteOffset,
       next_write_offset: hasMore ? nextWriteOffset : null,
