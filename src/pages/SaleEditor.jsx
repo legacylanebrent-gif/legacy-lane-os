@@ -1431,8 +1431,8 @@ Be practical and realistic for an estate sale context.`,
                           const state = formData.property_address?.state || '';
                           setGeneratingDesc(true);
                           try {
-                            // Randomly sample ~20% of items (min 3, max 8) for a natural-feeling description
-                            const sampleSize = Math.max(3, Math.min(8, Math.ceil(items.length * 0.2)));
+                            // Randomly sample ~20% of items (min 3) for a natural-feeling description
+                            const sampleSize = Math.max(3, Math.ceil(items.length * 0.2));
                             const shuffled = [...items].sort(() => Math.random() - 0.5);
                             const sampledItems = shuffled.slice(0, sampleSize);
                             const sampledNames = sampledItems.map(img => img.name).join(', ');
