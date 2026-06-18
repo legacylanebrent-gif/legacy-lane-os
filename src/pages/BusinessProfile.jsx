@@ -233,9 +233,14 @@ export default function BusinessProfile() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">
-                      {business.years_in_business || 0}+
+                      {business.primary_account_type === 'reseller' && business.reseller_founded_year
+                        ? <>Since {business.reseller_founded_year}</>
+                        : <>{business.years_in_business || 0}+</>
+                      }
                     </div>
-                    <div className="text-sm text-slate-600">Years Experience</div>
+                    <div className="text-sm text-slate-600">
+                      {business.primary_account_type === 'reseller' ? 'Year Started' : 'Years Experience'}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-1">

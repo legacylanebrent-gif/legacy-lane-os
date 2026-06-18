@@ -23,7 +23,7 @@
         "collector_dealer"
       ],
       "default": "consumer",
-      "description": "Primary role. 'agent_operator' is the combined RE Agent + Estate Sale Company Owner role. 'collector_dealer' is Antique, Art & Collector Dealers. 'consumer_plus_sale' is a consumer who purchased a one-time DIY sale posting."
+      "description": "Primary role"
     },
     "business_name": {
       "type": "string"
@@ -82,6 +82,10 @@
     },
     "founded_year": {
       "type": "string"
+    },
+    "reseller_founded_year": {
+      "type": "string",
+      "description": "Year the reseller started their business (independent of operator/vendor founded_year)"
     },
     "license_number": {
       "type": "string"
@@ -235,38 +239,6 @@
       ],
       "default": "not_submitted"
     },
-    "service_territory_county_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "TerritoryLaunch IDs of master (county) territories this user services"
-    },
-    "service_territory_county_names": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "Human-readable county territory names"
-    },
-    "service_micro_territory_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "Housio micro-territory IDs this user services"
-    },
-    "service_micro_territory_names": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "Human-readable micro-territory names"
-    },
     "reseller_application_submitted": {
       "type": "boolean",
       "default": false
@@ -304,32 +276,26 @@
     },
     "agent_operator_upgrade_date": {
       "type": "string",
-      "format": "date-time",
-      "description": "When user upgraded to the combined agent+Estate Sale Company Owner role"
+      "format": "date-time"
     },
     "previous_account_type": {
-      "type": "string",
-      "description": "The role they held before upgrading to agent_operator"
+      "type": "string"
     },
     "collector_dealer_business_type": {
-      "type": "string",
-      "description": "Type of dealer: Antique Dealer, Art Dealer, Collector Dealer, Gallery Owner, Auction House"
+      "type": "string"
     },
     "collector_dealer_specialties": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "Dealer specialty categories"
+      "default": []
     },
     "store_name": {
-      "type": "string",
-      "description": "Physical store / gallery name"
+      "type": "string"
     },
     "store_address_geocoded": {
-      "type": "object",
-      "description": "Geocoded lat/lng from business address"
+      "type": "object"
     },
     "dealer_application_submitted": {
       "type": "boolean",
@@ -338,6 +304,34 @@
     "dealer_application_date": {
       "type": "string",
       "format": "date-time"
+    },
+    "service_territory_county_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_territory_county_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_micro_territory_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_micro_territory_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     }
   },
   "required": []

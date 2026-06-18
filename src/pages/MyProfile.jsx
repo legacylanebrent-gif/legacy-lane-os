@@ -145,6 +145,7 @@ export default function MyProfile() {
     // reseller
     reseller_business_type: [], reseller_inventory_interests: [],
     reseller_min_purchase: '', reseller_max_purchase: '', reseller_buys_whole_house: false,
+    reseller_founded_year: '',
     // collector dealer
     collector_dealer_business_type: '', collector_dealer_specialties: [],
     store_name: '', store_address_geocoded: null,
@@ -196,6 +197,7 @@ export default function MyProfile() {
         reseller_min_purchase: u.reseller_min_purchase || '',
         reseller_max_purchase: u.reseller_max_purchase || '',
         reseller_buys_whole_house: u.reseller_buys_whole_house || false,
+        reseller_founded_year: u.reseller_founded_year || '',
         collector_dealer_business_type: u.collector_dealer_business_type || '',
         collector_dealer_specialties: u.collector_dealer_specialties || [],
         store_name: u.store_name || '',
@@ -918,7 +920,7 @@ export default function MyProfile() {
                       ))}
                     </div>
                   </div>
-                  <div><Label>Year Started Reselling</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="2020" /></div>
+                  <div><Label>Year Started Reselling</Label><Input type="number" value={form.reseller_founded_year} onChange={e => setForm(p => ({ ...p, reseller_founded_year: e.target.value }))} placeholder="2020" /></div>
                 </CardContent>
               </Card>
             )}
