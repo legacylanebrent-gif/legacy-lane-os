@@ -216,12 +216,12 @@ export default function MySales() {
   return (
     <div className="p-6 lg:p-8 space-y-6 mt-4">
       {/* Header */}
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-3">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">My Estate Sales</h1>
-          <p className="text-slate-600">Manage your estate sale listings and track performance</p>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-1 md:mb-2">My Estate Sales</h1>
+          <p className="text-sm md:text-base text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 md:self-start">
           <Button
             variant="outline"
             onClick={() => navigate(createPageUrl('MySalesGuide'))}
