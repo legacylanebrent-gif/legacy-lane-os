@@ -226,7 +226,15 @@ export default function MyProfile() {
       const isOperatorAcct = acct === 'estate_sale_operator';
       if (!isConsumer) {
         const opId = isTeam ? u.operator_id : u.id;
-        if (opId && isOperatorAcct) setEstateSales(await base44.entities.EstateSale.filter({ operator_id: opId }));
+        if (opId && isOperatorAcct) {
+          const sales = await base44.entities.EstateSale.filter({ operator_id: opId });
+          sales.sort((a, b) => {
+            const dateA = a.sale_dates?.[0]?.date ? new Date(a.sale_dates[0].date).getTime() : 0;
+            const dateB = b.sale_dates?.[0]?.date ? new Date(b.sale_dates[0].date).getTime() : 0;
+            return dateB - dateA;
+          });
+          setEstateSales(sales);
+        }
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
