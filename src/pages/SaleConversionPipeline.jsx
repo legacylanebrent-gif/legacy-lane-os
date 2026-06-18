@@ -13,7 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Plus, MapPin, Phone, Mail, Calendar, DollarSign, Sparkles,
   ChevronRight, CheckCircle2, Circle, Clock, Loader2, ArrowRight,
-  User, FileText, AlertCircle, X, Edit2, CalendarDays, TrendingUp
+  User, FileText, AlertCircle, X, Edit2, CalendarDays, TrendingUp,
+  Search, RefreshCw, Home, Unlink
 } from 'lucide-react';
 import { format, addDays, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
 
@@ -29,6 +30,15 @@ const STAGES = [
 ];
 
 const STAGE_MAP = Object.fromEntries(STAGES.map(s => [s.key, s]));
+
+// Map EstateSale status to pipeline stage
+const SALE_STATUS_TO_STAGE = {
+  draft: null,        // don't auto-advance drafts
+  upcoming: 'sale_live',
+  active: 'sale_live',
+  completed: 'completed',
+  archived: 'completed',
+};
 
 const TASK_CATEGORIES = [
   { key: 'Pre-Consultation', color: 'bg-slate-100 text-slate-700' },
@@ -64,7 +74,9 @@ function dateLabel(dateStr) {
 export default function SaleConversionPipeline() {
   const [user, setUser] = useState(null);
   const [deals, setDeals] = useState([]);
+  const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [tab, setTab] = useState('kanban');
 
   // Modals
@@ -87,10 +99,29 @@ export default function SaleConversionPipeline() {
     try {
       const u = await base44.auth.me();
       setUser(u);
-      const data = await base44.entities.SaleConversionPipeline.filter({ operator_id: u.id }, '-created_date');
-      setDeals(data || []);
+      const [pipelineData, salesData] = await Promise.all([
+        base44.entities.SaleConversionPipeline.filter({ operator_id: u.id }, '-created_date'),
+        base44.entities.EstateSale.filter({ operator_id: u.id }, '-created_date'),
+      ]);
+      setSales(salesData || []);
+      // Auto-sync stages for linked deals
+      const synced = syncDealStages(pipelineData || [], salesData || []);
+      setDeals(synced);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const syncDealStages = (dealList, salesList) => {
+    const saleMap = {};
+    (salesList || []).forEach(s => { saleMap[s.id] = s; });
+    return (dealList || []).map(deal => {
+      if (!deal.estate_sale_id) return deal;
+      const sale = saleMap[deal.estate_sale_id];
+      if (!sale) return deal;
+      const newStage = SALE_STATUS_TO_STAGE[sale.status];
+      if (newStage && newStage !== deal.stage) return { ...deal, stage: newStage };
+      return deal;
+    });
   };
 
   // ─── CRUD ──────────────────────────────────────────────────────────────────
@@ -115,6 +146,41 @@ export default function SaleConversionPipeline() {
     await base44.entities.SaleConversionPipeline.update(dealId, { stage: newStage });
     setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
     if (selectedDeal?.id === dealId) setSelectedDeal(prev => ({ ...prev, stage: newStage }));
+  };
+
+  const handleLinkSale = async (dealId, saleId) => {
+    const sale = sales.find(s => s.id === saleId);
+    if (!sale) return;
+    const newStage = SALE_STATUS_TO_STAGE[sale.status];
+    const updateData = { estate_sale_id: saleId };
+    if (newStage) updateData.stage = newStage;
+    await base44.entities.SaleConversionPipeline.update(dealId, updateData);
+    setDeals(prev => prev.map(d => d.id === dealId ? { ...d, ...updateData, estate_sale_id: saleId } : d));
+    setSelectedDeal(prev => prev?.id === dealId ? { ...prev, ...updateData, estate_sale_id: saleId } : prev);
+  };
+
+  const handleUnlinkSale = async (dealId) => {
+    await base44.entities.SaleConversionPipeline.update(dealId, { estate_sale_id: null });
+    setDeals(prev => prev.map(d => d.id === dealId ? { ...d, estate_sale_id: null } : d));
+    setSelectedDeal(prev => prev?.id === dealId ? { ...prev, estate_sale_id: null } : prev);
+  };
+
+  const handleSyncAllDeals = async () => {
+    setSyncing(true);
+    try {
+      const freshSales = await base44.entities.EstateSale.filter({ operator_id: user.id });
+      setSales(freshSales || []);
+      const synced = syncDealStages(deals, freshSales || []);
+      // Persist any stage changes
+      for (const deal of synced) {
+        const orig = deals.find(d => d.id === deal.id);
+        if (orig && orig.stage !== deal.stage && deal.estate_sale_id) {
+          await base44.entities.SaleConversionPipeline.update(deal.id, { stage: deal.stage });
+        }
+      }
+      setDeals(synced);
+    } catch (e) { console.error(e); }
+    finally { setSyncing(false); }
   };
 
   const handleSaveDetail = async () => {
@@ -237,9 +303,15 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
           <h1 className="text-3xl font-serif font-bold text-slate-900">Sale Conversion Pipeline</h1>
           <p className="text-slate-500 text-sm mt-0.5">{activeCount} active deals · {deals.filter(d=>d.stage==='completed').length} completed</p>
         </div>
-        <Button onClick={() => setShowNewDeal(true)} className="bg-orange-600 hover:bg-orange-700 gap-2 self-start sm:self-auto">
-          <Plus className="w-4 h-4" /> New Deal
-        </Button>
+        <div className="flex gap-2 self-start sm:self-auto">
+          <Button variant="outline" onClick={handleSyncAllDeals} disabled={syncing} className="gap-2">
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            Sync
+          </Button>
+          <Button onClick={() => setShowNewDeal(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+            <Plus className="w-4 h-4" /> New Deal
+          </Button>
+        </div>
       </div>
 
       {/* ── Funnel Stats ── */}
@@ -424,6 +496,9 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
               onUpdateTask={handleUpdateTask}
               editingTaskId={editingTaskId}
               setEditingTaskId={setEditingTaskId}
+              sales={sales}
+              onLinkSale={(saleId) => handleLinkSale(selectedDeal.id, saleId)}
+              onUnlinkSale={() => handleUnlinkSale(selectedDeal.id)}
             />
           </DialogContent>
         </Dialog>
@@ -440,6 +515,11 @@ function DealCard({ deal, onOpen, onAdvance }) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={onOpen}>
       <div className="font-semibold text-slate-900 text-sm mb-1 leading-tight">{deal.client_name}</div>
+      {deal.estate_sale_id && (
+        <div className="text-xs text-orange-600 flex items-center gap-1 mb-1 font-medium">
+          <Home className="w-3 h-3" /> Linked to Sale
+        </div>
+      )}
       {deal.property_city && <div className="text-xs text-slate-400 flex items-center gap-1 mb-2"><MapPin className="w-3 h-3"/>{deal.property_city}, {deal.property_state}</div>}
       {deal.consultation_date && (
         <div className="text-xs text-blue-600 flex items-center gap-1 mb-1">
@@ -576,10 +656,26 @@ function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals })
 }
 
 // ─── Deal Detail Modal ────────────────────────────────────────────────────────
-function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId }) {
+function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTimeline, generatingTimeline, onUpdateTask, editingTaskId, setEditingTaskId, sales, onLinkSale, onUnlinkSale }) {
   const [detailTab, setDetailTab] = useState('overview');
+  const [saleSearch, setSaleSearch] = useState('');
+  const [saleResults, setSaleResults] = useState([]);
+  const [showSaleResults, setShowSaleResults] = useState(false);
   const stage = STAGE_MAP[deal.stage];
   const f = (k, v) => setDeal(prev => ({ ...prev, [k]: v }));
+
+  const linkedSale = deal.estate_sale_id ? (sales || []).find(s => s.id === deal.estate_sale_id) : null;
+
+  const handleSaleSearch = (value) => {
+    setSaleSearch(value);
+    if (value.trim().length < 2) { setSaleResults([]); setShowSaleResults(false); return; }
+    const q = value.toLowerCase();
+    const matches = (sales || [])
+      .filter(s => s.title && s.title.toLowerCase().includes(q) && s.id !== deal.estate_sale_id)
+      .slice(0, 5);
+    setSaleResults(matches);
+    setShowSaleResults(matches.length > 0);
+  };
 
   const tasks = deal.ai_timeline_tasks || [];
   const tasksByCategory = tasks.reduce((acc, t, i) => {
@@ -629,6 +725,64 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
             {deal.estimated_value && <div className="flex items-center gap-2 text-sm"><DollarSign className="w-4 h-4 text-green-500"/><span className="font-semibold text-green-700">${Number(deal.estimated_value).toLocaleString()} estimated · {deal.commission_rate}% comm.</span></div>}
             {deal.situation && <div className="flex items-center gap-2 text-sm"><User className="w-4 h-4 text-slate-400"/><span className="capitalize">{deal.situation}</span></div>}
           </div>
+
+          {/* Linked Estate Sale */}
+          <div className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50">
+            <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Home className="w-4 h-4 text-orange-500" /> Linked Estate Sale
+            </p>
+            {linkedSale ? (
+              <div className="flex items-center justify-between bg-white border border-orange-200 rounded-lg p-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{linkedSale.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {linkedSale.property_address?.city}, {linkedSale.property_address?.state} · Status: <Badge className="ml-1 text-xs">{linkedSale.status}</Badge>
+                  </p>
+                  {linkedSale.sale_dates?.[0]?.date && (
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Sale: {format(parseISO(linkedSale.sale_dates[0].date), 'MMM d, yyyy')}
+                    </p>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" onClick={onUnlinkSale} className="text-red-500 hover:text-red-700 hover:bg-red-50 gap-1">
+                  <Unlink className="w-3.5 h-3.5" /> Unlink
+                </Button>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <input
+                    value={saleSearch}
+                    onChange={e => handleSaleSearch(e.target.value)}
+                    onFocus={() => saleResults.length > 0 && setShowSaleResults(true)}
+                    onBlur={() => setTimeout(() => setShowSaleResults(false), 200)}
+                    placeholder="Search your sales to link..."
+                    className="w-full h-9 pl-9 pr-3 rounded-md border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                </div>
+                {showSaleResults && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {saleResults.map(sale => (
+                      <button
+                        key={sale.id}
+                        onMouseDown={() => { onLinkSale(sale.id); setSaleSearch(''); setShowSaleResults(false); }}
+                        className="w-full text-left px-3 py-2 hover:bg-orange-50 border-b border-slate-100 last:border-0"
+                      >
+                        <div className="text-sm font-medium text-slate-900 truncate">{sale.title}</div>
+                        <div className="text-xs text-slate-500">
+                          {sale.property_address?.city}, {sale.property_address?.state} · {sale.status}
+                          {sale.sale_dates?.[0]?.date && ` · ${format(parseISO(sale.sale_dates[0].date), 'MMM d')}`}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-slate-400 mt-1.5">Link an existing estate sale to auto-sync pipeline stages.</p>
+              </div>
+            )}
+          </div>
+
           <div>
             <Label className="text-sm">Notes</Label>
             <Textarea value={deal.notes||''} onChange={e=>f('notes',e.target.value)} rows={4} className="mt-1"/>
