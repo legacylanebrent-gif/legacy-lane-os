@@ -297,7 +297,7 @@ export default function Home() {
     try {
       console.log('Loading estate sales data...');
       // Load estate sales (public access)
-      const salesData = await base44.entities.EstateSale.list('-created_date', 50);
+      const salesData = await base44.entities.EstateSale.list('-created_date', 200);
       console.log('Raw sales data:', salesData);
       
       const today = new Date();
