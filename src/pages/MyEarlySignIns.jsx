@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ClipboardList, MapPin, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import { getSaleDisplayStatus } from '@/components/estate/getSaleDisplayStatus';
 
 export default function MyEarlySignIns() {
   const [signIns, setSignIns] = useState([]);
@@ -84,10 +85,30 @@ export default function MyEarlySignIns() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {signIns.map((record) => {
+          {signIns
+            .sort((a, b) => {
+              const saleA = sales[a.sale_id];
+              const saleB = sales[b.sale_id];
+              const getEarliestDate = (sale) => {
+                if (!sale?.sale_dates?.length) return new Date(0);
+                return sale.sale_dates.reduce((earliest, d) => {
+                  const [y, m, day] = d.date.split('-');
+                  const dt = new Date(parseInt(y), parseInt(m) - 1, parseInt(day),
+                    parseInt(d.start_time?.split(':')[0] || 0),
+                    parseInt(d.start_time?.split(':')[1] || 0));
+                  return dt < earliest ? dt : earliest;
+                }, new Date('2099-12-31'));
+              };
+              // Most recent first (closest to now)
+              return getEarliestDate(saleB) - getEarliestDate(saleA);
+            })
+            .map((record) => {
             const sale = sales[record.sale_id];
             const allForSale = saleGroups[record.sale_id] || [record];
             const position = getPosition(record, allForSale);
+            const displayStatus = sale ? getSaleDisplayStatus(sale) : null;
+            const isCompleted = displayStatus === 'completed';
+            const isActive = displayStatus === 'active' || displayStatus === 'upcoming' || displayStatus === 'starts_today' || displayStatus === 'starts_tomorrow';
 
             return (
               <Card key={record.id} className="hover:shadow-md transition-shadow">
@@ -97,9 +118,14 @@ export default function MyEarlySignIns() {
                       <h2 className="font-semibold text-slate-900 text-lg">
                         {record.sale_title || sale?.title || 'Estate Sale'}
                       </h2>
-                      <Link to={createPageUrl('EstateSaleDetail') + '?id=' + record.sale_id} className="text-xs text-cyan-600 hover:underline">
-                        View Sale →
-                      </Link>
+                      {isCompleted && (
+                        <Badge variant="outline" className="text-xs text-slate-500 border-slate-300">Completed</Badge>
+                      )}
+                      {isActive && (
+                        <Link to={createPageUrl('EstateSaleDetail') + '?id=' + record.sale_id} className="text-xs text-cyan-600 hover:underline">
+                          View Sale →
+                        </Link>
+                      )}
                     </div>
                     {sale?.property_address && (
                       <div className="flex items-center gap-1 text-sm text-slate-500">
