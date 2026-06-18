@@ -26,8 +26,13 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
   }, [selectedState]);
 
   useEffect(() => {
-    // On mount or when form changes, load municipalities for all pre-selected counties
-    if (form.service_states.length > 0) {
+    // On mount, auto-select the state from the user's business profile if no service states are set yet
+    if (form.service_states.length === 0 && form.business_address_state) {
+      const bizState = form.business_address_state.toUpperCase();
+      if (US_STATES.includes(bizState)) {
+        handleSelectState(bizState);
+      }
+    } else if (form.service_states.length > 0) {
       setSelectedState(form.service_states[0]);
       form.service_counties.forEach(county => {
         if (!municipalitiesMap[county]) {
