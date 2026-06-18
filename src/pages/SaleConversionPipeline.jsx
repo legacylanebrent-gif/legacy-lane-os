@@ -487,6 +487,15 @@ function NewDealForm({ form, setForm, onSave, onCancel, saving }) {
             </SelectContent>
           </Select>
         </div>
+        <div>
+          <Label>Deal Stage</Label>
+          <Select value={form.stage} onValueChange={v=>f('stage',v)}>
+            <SelectTrigger><SelectValue/></SelectTrigger>
+            <SelectContent>
+              {STAGES.filter(s => s.key !== 'lost').map(s=><SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
         <div><Label>Estimated Value ($)</Label><Input type="number" value={form.estimated_value} onChange={e=>f('estimated_value',e.target.value)} placeholder="25000"/></div>
         <div><Label>Consultation Date/Time</Label><Input type="datetime-local" value={form.consultation_date} onChange={e=>f('consultation_date',e.target.value)}/></div>
         <div><Label>Est. Sale Start Date</Label><Input type="date" value={form.estimated_sale_start_date} onChange={e=>f('estimated_sale_start_date',e.target.value)}/></div>
