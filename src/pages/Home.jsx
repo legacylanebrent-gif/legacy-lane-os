@@ -297,7 +297,12 @@ export default function Home() {
     try {
       console.log('Loading estate sales data...');
       // Load estate sales (public access)
-      const salesData = await base44.entities.EstateSale.list('-created_date', 200);
+      // Load active & upcoming sales only (not drafts/completed/archived)
+      const [activeData, upcomingData] = await Promise.all([
+        base44.entities.EstateSale.filter({status: 'active'}, '-created_date', 200),
+        base44.entities.EstateSale.filter({status: 'upcoming'}, '-created_date', 200),
+      ]);
+      const salesData = [...(activeData || []), ...(upcomingData || [])];
       console.log('Raw sales data:', salesData);
       
       const today = new Date();
