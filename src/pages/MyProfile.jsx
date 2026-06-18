@@ -820,7 +820,7 @@ export default function MyProfile() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5" />Early Sign-In Default</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5" />Early Sign In List Default</CardTitle></CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
                       <div>
