@@ -64,7 +64,7 @@ export default function OperatorCommissions() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Commission Tracker</h1>
-          <p className="text-slate-500 text-sm mt-1">Real-time view of your referral commissions from Houszu</p>
+          <p className="text-slate-500 text-sm mt-1">Real-time view of your platform credits and referral fees</p>
         </div>
 
         {/* Error Alert */}
@@ -164,7 +164,7 @@ export default function OperatorCommissions() {
 
         {/* Read-Only Notice */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center text-sm text-blue-700">
-          <p>This is a read-only view of commissions tracked by Houszu. Data is updated automatically when deals close.</p>
+          <p>Platform credits earned from referral deals. Credits become available 10 days after deal closing.</p>
         </div>
       </div>
     </div>
