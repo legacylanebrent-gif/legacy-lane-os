@@ -405,7 +405,7 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
       <Dialog open={showNewDeal} onOpenChange={setShowNewDeal}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Add New Deal</DialogTitle></DialogHeader>
-          <NewDealForm form={form} setForm={setForm} onSave={handleCreateDeal} onCancel={() => setShowNewDeal(false)} saving={saving} />
+          <NewDealForm form={form} setForm={setForm} onSave={handleCreateDeal} onCancel={() => setShowNewDeal(false)} saving={saving} existingDeals={deals} />
         </DialogContent>
       </Dialog>
 
@@ -467,10 +467,72 @@ function DealCard({ deal, onOpen, onAdvance }) {
 }
 
 // ─── New Deal Form ────────────────────────────────────────────────────────────
-function NewDealForm({ form, setForm, onSave, onCancel, saving }) {
+function NewDealForm({ form, setForm, onSave, onCancel, saving, existingDeals }) {
+  const [search, setSearch] = useState('');
+  const [results, setResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const handleSearch = (value) => {
+    setSearch(value);
+    if (value.trim().length < 2) { setResults([]); setShowResults(false); return; }
+    const q = value.toLowerCase();
+    const matches = (existingDeals || [])
+      .filter(d => d.client_name && d.client_name.toLowerCase().includes(q))
+      .slice(0, 5);
+    setResults(matches);
+    setShowResults(matches.length > 0);
+  };
+
+  const handleSelect = (deal) => {
+    f('client_name', deal.client_name || '');
+    f('client_email', deal.client_email || '');
+    f('client_phone', deal.client_phone || '');
+    f('property_address', deal.property_address || '');
+    f('property_city', deal.property_city || '');
+    f('property_state', deal.property_state || '');
+    f('situation', deal.situation || 'standard');
+    f('estimated_value', deal.estimated_value || '');
+    setSearch('');
+    setShowResults(false);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Client search */}
+      <div className="relative">
+        <Label>Search Existing Clients</Label>
+        <div className="relative">
+          <Input
+            value={search}
+            onChange={e => handleSearch(e.target.value)}
+            onFocus={() => results.length > 0 && setShowResults(true)}
+            onBlur={() => setTimeout(() => setShowResults(false), 200)}
+            placeholder="Type client name to auto-fill..."
+            className="pr-8"
+          />
+          {search && (
+            <button onClick={() => { setSearch(''); setShowResults(false); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {showResults && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            {results.map(deal => (
+              <button
+                key={deal.id}
+                onMouseDown={() => handleSelect(deal)}
+                className="w-full text-left px-3 py-2 hover:bg-orange-50 border-b border-slate-100 last:border-0"
+              >
+                <div className="text-sm font-medium text-slate-900">{deal.client_name}</div>
+                {deal.property_city && <div className="text-xs text-slate-500">{deal.property_city}, {deal.property_state} · {STAGE_MAP[deal.stage]?.label || deal.stage}</div>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="grid sm:grid-cols-2 gap-4">
         <div><Label>Client Name *</Label><Input value={form.client_name} onChange={e=>f('client_name',e.target.value)} placeholder="Jane Smith"/></div>
         <div><Label>Phone</Label><Input value={form.client_phone} onChange={e=>f('client_phone',e.target.value)} placeholder="(555) 123-4567"/></div>
