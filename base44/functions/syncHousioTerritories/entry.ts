@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       for (let i = 0; i < records.length; i += CHUNK_SIZE) {
         const chunk = records.slice(i, i + CHUNK_SIZE);
         await base44.asServiceRole.entities[entityName].bulkCreate(chunk);
-        if (i + CHUNK_SIZE < records.length) await new Promise(r => setTimeout(r, 200));
+        if (i + CHUNK_SIZE < records.length) await new Promise(r => setTimeout(r, 1500));
       }
       console.log(`[syncHousioTerritories] Wrote ${records.length} ${entityName} records`);
     }
