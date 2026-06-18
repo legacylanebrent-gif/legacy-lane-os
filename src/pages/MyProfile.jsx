@@ -918,7 +918,7 @@ export default function MyProfile() {
                       ))}
                     </div>
                   </div>
-                  <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
+                  <div><Label>Year Started Reselling</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="2020" /></div>
                 </CardContent>
               </Card>
             )}
