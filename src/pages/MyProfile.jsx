@@ -143,7 +143,7 @@ export default function MyProfile() {
     // vendor
     vendor_service_categories: [],
     // reseller
-    reseller_business_type: '', reseller_inventory_interests: [],
+    reseller_business_type: [], reseller_inventory_interests: [],
     reseller_min_purchase: '', reseller_max_purchase: '', reseller_buys_whole_house: false,
     // collector dealer
     collector_dealer_business_type: '', collector_dealer_specialties: [],
@@ -191,7 +191,7 @@ export default function MyProfile() {
         logo_dark: u.logo_dark || '', logo_light: u.logo_light || '',
         profile_image_url: u.profile_image_url || '', venmo_qr_code: u.venmo_qr_code || '',
         vendor_service_categories: u.vendor_service_categories || [],
-        reseller_business_type: u.reseller_business_type || '',
+        reseller_business_type: u.reseller_business_type || [],
         reseller_inventory_interests: u.reseller_inventory_interests || [],
         reseller_min_purchase: u.reseller_min_purchase || '',
         reseller_max_purchase: u.reseller_max_purchase || '',
@@ -902,18 +902,23 @@ export default function MyProfile() {
             {/* Reseller-specific credentials */}
             {isReseller && (
               <Card>
-                <CardHeader><CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Business Details</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />Reseller Business Details</CardTitle>
+                  <p className="text-sm text-slate-500">Are you also a Reseller? Choose from the options below.</p>
+                </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Business Type</Label>
-                      <select value={form.reseller_business_type} onChange={e => setForm(p => ({ ...p, reseller_business_type: e.target.value }))} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mt-1">
-                        <option value="">Select type...</option>
-                        {RESELLER_BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
+                  <div>
+                    <Label className="mb-2 block">Business Type (select all that apply)</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {RESELLER_BUSINESS_TYPES.map(t => (
+                        <label key={t} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${(form.reseller_business_type || []).includes(t) ? 'border-orange-500 bg-orange-50 font-medium' : 'border-slate-200 hover:border-slate-300'}`}>
+                          <Checkbox checked={(form.reseller_business_type || []).includes(t)} onCheckedChange={() => toggleArr('reseller_business_type', t)} />
+                          {t}
+                        </label>
+                      ))}
                     </div>
-                    <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
                   </div>
+                  <div><Label>Years in Business</Label><Input type="number" value={form.years_in_business} onChange={e => setForm(p => ({ ...p, years_in_business: e.target.value }))} placeholder="5" /></div>
                 </CardContent>
               </Card>
             )}
