@@ -319,14 +319,14 @@ export default function RecordPurchase() {
 
               <div>
                 <Label htmlFor="purchase_date">Purchase Date</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                  <Input
+                <div className="flex items-center border border-input rounded-md bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring h-9">
+                  <Calendar className="ml-3 text-slate-400 w-4 h-4 flex-shrink-0" />
+                  <input
                     id="purchase_date"
                     type="date"
                     value={formData.purchase_date}
                     onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-                    className="pl-9 w-full min-w-0"
+                    className="flex-1 min-w-0 bg-transparent border-0 px-3 py-1 text-sm focus:outline-none"
                   />
                 </div>
               </div>
