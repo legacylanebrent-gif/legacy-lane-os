@@ -120,11 +120,11 @@ export default function MyProfile() {
 
   const [form, setForm] = useState({
     // personal
-    full_name: '', email: '', phone: '', address_zip: '',
+    full_name: '', email: '', phone: '', business_phone: '', address_zip: '',
     early_sign_in_default: true,
     // business / branding
     company_name: '', company_tagline: '', company_description: '',
-    phone_secondary: '', company_email: '', website_url: '',
+    phone_secondary: '', business_phone_2: '', company_email: '', website_url: '',
     business_address_street: '', business_address_city: '',
     business_address_state: '', business_address_zip: '',
     founded_year: '', license_number: '',
@@ -166,11 +166,11 @@ export default function MyProfile() {
       setForm(prev => ({
         ...prev,
         full_name: u.full_name || '', email: u.email || '',
-        phone: u.phone || '', address_zip: u.address_zip || '',
+        phone: u.phone || '', business_phone: u.business_phone || u.phone || '', address_zip: u.address_zip || '',
         early_sign_in_default: u.early_sign_in_default !== false,
         company_name: u.company_name || '', company_tagline: u.company_tagline || '',
         company_description: u.company_description || '',
-        phone_secondary: u.phone_secondary || '',         company_email: u.company_email || u.email || '',
+        phone_secondary: u.phone_secondary || '', business_phone_2: u.business_phone_2 || u.phone_secondary || '',         company_email: u.company_email || u.email || '',
         website_url: u.website_url || u.company_website || '',
         business_address_street: u.business_address_street || '',
         business_address_city: u.business_address_city || '',
@@ -418,7 +418,7 @@ export default function MyProfile() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} /></div>
                 <div><Label>Email</Label><Input value={form.email} disabled className="bg-slate-50" /></div>
-                <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
+                <div><Label>Personal Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
                 <div><Label>ZIP Code</Label><Input value={form.address_zip} onChange={e => setForm(p => ({ ...p, address_zip: e.target.value }))} placeholder="12345" maxLength="5" /></div>
               </div>
             </CardContent>
@@ -785,8 +785,8 @@ export default function MyProfile() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" />Contact & Address</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div><Label>Primary Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
-                  <div><Label>Secondary Phone</Label><Input value={form.phone_secondary} onChange={e => setForm(p => ({ ...p, phone_secondary: e.target.value }))} placeholder="(555) 987-6543" /></div>
+                  <div><Label>Business Phone</Label><Input value={form.business_phone} onChange={e => setForm(p => ({ ...p, business_phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
+                  <div><Label>Alternate Business Phone</Label><Input value={form.business_phone_2} onChange={e => setForm(p => ({ ...p, business_phone_2: e.target.value }))} placeholder="(555) 987-6543" /></div>
                   <div><Label>Business Email <span className="text-slate-400 font-normal">(shown publicly)</span></Label><Input value={form.company_email} onChange={e => setForm(p => ({ ...p, company_email: e.target.value }))} placeholder="info@company.com" type="email" /></div>
                   <div><Label>Website</Label><Input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))} placeholder="https://yourcompany.com" /></div>
                 </div>
