@@ -297,10 +297,10 @@ export default function Home() {
     try {
       console.log('Loading estate sales data...');
       // Load estate sales (public access)
-      // Load active & upcoming sales only (not drafts/completed/archived)
+      // Load ALL active & upcoming sales directly from server (no limit — filter by status only)
       const [activeData, upcomingData] = await Promise.all([
-        base44.entities.EstateSale.filter({status: 'active'}, '-created_date', 200),
-        base44.entities.EstateSale.filter({status: 'upcoming'}, '-created_date', 200),
+        base44.entities.EstateSale.filter({status: 'active'}, '-created_date'),
+        base44.entities.EstateSale.filter({status: 'upcoming'}, '-created_date'),
       ]);
       const salesData = [...(activeData || []), ...(upcomingData || [])];
       console.log('Raw sales data:', salesData);
