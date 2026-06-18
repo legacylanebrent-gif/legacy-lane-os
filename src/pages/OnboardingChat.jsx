@@ -80,6 +80,7 @@ export default function OnboardingChat() {
   const [directoryCompanies, setDirectoryCompanies] = useState([]);
   const [searchingDir, setSearchingDir] = useState(false);
   const [claimedCompany, setClaimedCompany] = useState(null);
+  const [companySearch, setCompanySearch] = useState('');
   const US_STATES = [
     'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'
   ];
@@ -164,6 +165,7 @@ export default function OnboardingChat() {
     setClaimState(state);
     setSearchingDir(true);
     setDirectoryCompanies([]);
+    setCompanySearch('');
     try {
       const results = await base44.entities.FutureEstateOperator.filter({
         state: state,
@@ -508,16 +510,34 @@ export default function OnboardingChat() {
             </div>
           )}
 
-          {!searchingDir && claimState && directoryCompanies.length > 0 && (
+          {!searchingDir && claimState && directoryCompanies.length > 0 && (() => {
+            const filtered = companySearch.trim()
+              ? directoryCompanies.filter(c => (c.company_name || '').toLowerCase().includes(companySearch.toLowerCase()))
+              : directoryCompanies;
+            return (
             <motion.div {...fadeIn} className="space-y-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-slate-600">
                   {directoryCompanies.length} compan{directoryCompanies.length === 1 ? 'y' : 'ies'} in {claimState}
+                  {companySearch.trim() && filtered.length !== directoryCompanies.length && (
+                    <span className="text-cyan-600"> · {filtered.length} match{filtered.length !== 1 ? 'es' : ''}</span>
+                  )}
                 </p>
                 <Badge variant="outline" className="text-xs">{directoryCompanies.length} results</Badge>
               </div>
+              <div className="relative mb-3">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Type your company name to find it faster..."
+                  value={companySearch}
+                  onChange={(e) => setCompanySearch(e.target.value)}
+                  className="pl-9 h-10"
+                />
+              </div>
               <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
-                {directoryCompanies.map(company => (
+                {filtered.length === 0 ? (
+                  <p className="text-center text-slate-400 py-4 text-sm">No companies match "{companySearch}" — try a different spelling or continue below.</p>
+                ) : filtered.map(company => (
                   <div key={company.id} className="bg-white border border-slate-200 rounded-xl p-4 hover:border-cyan-300 hover:shadow-sm transition-all">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
@@ -549,7 +569,8 @@ export default function OnboardingChat() {
                 ))}
               </div>
             </motion.div>
-          )}
+            );
+          })()}
 
           {!searchingDir && claimState && directoryCompanies.length === 0 && (
             <motion.div {...fadeIn} className="text-center py-6 space-y-4">
