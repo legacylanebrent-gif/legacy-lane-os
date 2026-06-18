@@ -169,7 +169,7 @@ export default function MyProfile() {
         early_sign_in_default: u.early_sign_in_default !== false,
         company_name: u.company_name || '', company_tagline: u.company_tagline || '',
         company_description: u.company_description || '',
-        phone_secondary: u.phone_secondary || '', company_email: u.company_email || '',
+        phone_secondary: u.phone_secondary || '',         company_email: u.company_email || u.email || '',
         website_url: u.website_url || u.company_website || '',
         business_address_street: u.business_address_street || '',
         business_address_city: u.business_address_city || '',
@@ -780,7 +780,7 @@ export default function MyProfile() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div><Label>Primary Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
                   <div><Label>Secondary Phone</Label><Input value={form.phone_secondary} onChange={e => setForm(p => ({ ...p, phone_secondary: e.target.value }))} placeholder="(555) 987-6543" /></div>
-                  <div><Label>Business Email</Label><Input value={form.company_email} onChange={e => setForm(p => ({ ...p, company_email: e.target.value }))} placeholder="info@company.com" type="email" /></div>
+                  <div><Label>Business Email <span className="text-slate-400 font-normal">(shown publicly)</span></Label><Input value={form.company_email} onChange={e => setForm(p => ({ ...p, company_email: e.target.value }))} placeholder="info@company.com" type="email" /></div>
                   <div><Label>Website</Label><Input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))} placeholder="https://yourcompany.com" /></div>
                 </div>
                 <div className="pt-2 border-t">
