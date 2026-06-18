@@ -1431,21 +1431,23 @@ Be practical and realistic for an estate sale context.`,
                           const state = formData.property_address?.state || '';
                           setGeneratingDesc(true);
                           try {
+                            const itemNames = items.map(img => img.name).join(', ');
                             const itemList = items.map(img => `- ${img.name}: ${img.description}`).join('\n');
                             const response = await base44.integrations.Core.InvokeLLM({
                               prompt: `You are an expert estate sale copywriter and SEO specialist. Write a compelling, SEO-rich sale description for an estate sale in ${city}${state ? ', ' + state : ''}.
 
-The sale includes the following items:
+The sale includes the following items (these are the ACTUAL items being sold — you MUST include them):
 ${itemList}
 
 Requirements:
 - Start with a strong hook mentioning the location (${city}${state ? ', ' + state : ''})
-- Naturally weave in key item names and categories for SEO
+- After the hook, INCLUDE a comma-separated list of key items directly in the prose. For example: "...featuring ${itemNames} and much more."
+- Make sure at least 4–6 specific item names appear in the body text — these are critical for SEO and attracting shoppers
+- Highlight the most noteworthy/valuable items with vivid descriptions
 - Keep it concise and easy to read (3–5 sentences max)
-- Highlight the most noteworthy/valuable items
 - Sound warm and inviting to estate sale shoppers
-- Do NOT use bullet points — write as flowing prose
-- This description will be prominently indexed by search engines, so make it count
+- Write as flowing prose — do NOT use bullet points
+- This description will be prominently indexed by search engines, so make every keyword count
 
 Return ONLY the description text, no extra commentary.`
                             });
