@@ -925,6 +925,38 @@ export default function MyProfile() {
               </Card>
             )}
 
+            {/* Services + Specialties — Estate Sale Company Owner only */}
+            {isOperator && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {SERVICE_OPTIONS.map(s => (
+                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                          <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
+                          <span className="text-sm">{s}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {SPECIALTY_OPTIONS.map(s => (
+                        <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
+                          <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
+                          <span className="text-sm">{s}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             <SaveBtn label="Save Business Profile" />
           </TabsContent>
         )}
@@ -940,38 +972,6 @@ export default function MyProfile() {
               <Input type="number" className="max-w-xs mt-1" value={form.service_radius_miles} onChange={e => setForm(p => ({ ...p, service_radius_miles: e.target.value }))} placeholder="50" />
             </CardContent>
           </Card>
-
-          {/* Services + Specialties — Estate Sale Company Owner only */}
-          {isOperator && (
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader><CardTitle className="text-base">Services Offered</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5">
-                    {SERVICE_OPTIONS.map(s => (
-                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                        <Checkbox checked={form.services_offered.includes(s)} onCheckedChange={() => toggleArr('services_offered', s)} />
-                        <span className="text-sm">{s}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5">
-                    {SPECIALTY_OPTIONS.map(s => (
-                      <label key={s} className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-slate-50">
-                        <Checkbox checked={form.specialties.includes(s)} onCheckedChange={() => toggleArr('specialties', s)} />
-                        <span className="text-sm">{s}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
 
           <SaveBtn label="Save Service Area" />
         </TabsContent>
