@@ -22,6 +22,14 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
     const interval = setInterval(() => setRefresh(prev => prev + 1), 60000);
     return () => clearInterval(interval);
   }, []);
+  const formatTime12h = (time) => {
+    if (!time) return '';
+    const [h, m] = time.split(':').map(Number);
+    const hour = h % 12 || 12;
+    const ampm = h < 12 ? 'AM' : 'PM';
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'upcoming': return 'bg-blue-100 text-blue-800';
@@ -95,7 +103,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
               {estate.sale_dates.map((d, idx) => (
                 <div key={idx}>
                   {format(new Date(d.date + 'T00:00:00'), 'EEEE, MMM d, yyyy')}
-                  {d.start_time && ` • ${d.start_time}${d.end_time ? ` – ${d.end_time}` : ''}`}
+                  {d.start_time && ` • ${formatTime12h(d.start_time)}${d.end_time ? ` – ${formatTime12h(d.end_time)}` : ''}`}
                 </div>
               ))}
             </div>
