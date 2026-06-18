@@ -92,7 +92,7 @@ export default function ProviderDirectoryPage({ directoryType: directoryTypeProp
                         {p.description && <p className="text-sm text-slate-600 mb-2">{p.description}</p>}
                         <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                           {p.state && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{p.state}</span>}
-                          {p.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{formatPhone(p.phone)}</span>}
+                          {(p.business_phone || p.phone) && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{formatPhone(p.business_phone || p.phone)}</span>}
                           {p.website && <a href={p.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline"><Globe className="w-3 h-3" />Website</a>}
                         </div>
                         {p.specialties_json?.length > 0 && (

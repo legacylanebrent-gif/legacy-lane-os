@@ -9,6 +9,11 @@
     "business_phone_2": {
       "type": "string",
       "description": "An alternate business phone number."
+    },
+    "use_personal_phone_as_business": {
+      "type": "boolean",
+      "default": false,
+      "description": "When checked, falls back to the user's personal phone as the business number if no business phone is set."
     }
   }
 }

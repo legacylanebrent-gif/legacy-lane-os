@@ -197,11 +197,11 @@ export default function BusinessProfile() {
                       </button>
                     </div>
                   )}
-                  {business.phone && (
+                  {(business.business_phone || business.phone) && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <Phone className="w-4 h-4 text-cyan-600" />
-                      <a href={`tel:${business.phone}`} className="hover:text-cyan-600">
-                        {formatPhone(business.phone)}
+                      <a href={`tel:${business.business_phone || business.phone}`} className="hover:text-cyan-600">
+                        {formatPhone(business.business_phone || business.phone)}
                       </a>
                     </div>
                   )}
@@ -474,9 +474,9 @@ export default function BusinessProfile() {
                   Message Company
                 </Button>
               )}
-              {business.phone && (
+              {(business.business_phone || business.phone) && (
                 <Button 
-                  onClick={() => window.location.href = `tel:${business.phone}`}
+                  onClick={() => window.location.href = `tel:${business.business_phone || business.phone}`}
                   className="bg-orange-600 hover:bg-orange-700 gap-2"
                 >
                   <Phone className="w-4 h-4" />

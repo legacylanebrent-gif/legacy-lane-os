@@ -120,7 +120,7 @@ export default function MyProfile() {
 
   const [form, setForm] = useState({
     // personal
-    full_name: '', email: '', phone: '', business_phone: '', address_zip: '',
+    full_name: '', email: '', phone: '', business_phone: '', use_personal_phone_as_business: false, address_zip: '',
     early_sign_in_default: true,
     // business / branding
     company_name: '', company_tagline: '', company_description: '',
@@ -166,7 +166,7 @@ export default function MyProfile() {
       setForm(prev => ({
         ...prev,
         full_name: u.full_name || '', email: u.email || '',
-        phone: u.phone || '', business_phone: u.business_phone || u.phone || '', address_zip: u.address_zip || '',
+        phone: u.phone || '', business_phone: u.business_phone || (u.use_personal_phone_as_business ? u.phone : '') || '', use_personal_phone_as_business: u.use_personal_phone_as_business || false, address_zip: u.address_zip || '',
         early_sign_in_default: u.early_sign_in_default !== false,
         company_name: u.company_name || '', company_tagline: u.company_tagline || '',
         company_description: u.company_description || '',
@@ -789,6 +789,10 @@ export default function MyProfile() {
                   <div><Label>Alternate Business Phone</Label><Input value={form.business_phone_2} onChange={e => setForm(p => ({ ...p, business_phone_2: e.target.value }))} placeholder="(555) 987-6543" /></div>
                   <div><Label>Business Email <span className="text-slate-400 font-normal">(shown publicly)</span></Label><Input value={form.company_email} onChange={e => setForm(p => ({ ...p, company_email: e.target.value }))} placeholder="info@company.com" type="email" /></div>
                   <div><Label>Website</Label><Input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))} placeholder="https://yourcompany.com" /></div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Checkbox id="use_personal_phone" checked={form.use_personal_phone_as_business} onCheckedChange={v => setForm(p => ({ ...p, use_personal_phone_as_business: v }))} />
+                    <Label htmlFor="use_personal_phone" className="text-sm font-normal">Use personal phone as default business phone</Label>
+                  </div>
                 </div>
                 <div className="pt-2 border-t">
                   <Label className="text-slate-600 text-xs uppercase tracking-wide mb-1 block">Business Address</Label>

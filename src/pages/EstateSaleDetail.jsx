@@ -921,13 +921,13 @@ export default function EstateSaleDetail() {
                 )}
 
                 <div className="space-y-3">
-                  {operator?.phone && (
+                  {(operator?.business_phone || operator?.phone) && (
                     <a
-                      href={`tel:${operator.phone}`}
+                      href={`tel:${operator.business_phone || operator.phone}`}
                       className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700"
                     >
                       <Phone className="w-4 h-4" />
-                      {formatPhone(operator.phone)}
+                      {formatPhone(operator.business_phone || operator.phone)}
                     </a>
                   )}
                   {operator?.company_website && (

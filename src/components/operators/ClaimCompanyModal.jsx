@@ -39,7 +39,7 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
       company_name: operator.company_name,
       company_city: operator.city,
       company_state: operator.state,
-      company_phone: operator.phone || formData.phone,
+      company_phone: operator.business_phone || operator.phone || formData.phone,
     });
 
     // Mark the FutureEstateOperator as claimed
@@ -103,7 +103,7 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <p className="font-semibold text-slate-900">{operator.company_name}</p>
               <p className="text-sm text-slate-600">{operator.city}, {operator.state}</p>
-              {operator.phone && <p className="text-sm text-slate-500">{formatPhone(operator.phone)}</p>}
+              {(operator.business_phone || operator.phone) && <p className="text-sm text-slate-500">{formatPhone(operator.business_phone || operator.phone)}</p>}
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
@@ -133,7 +133,7 @@ export default function ClaimCompanyModal({ operator, open, onClose }) {
                   placeholder="jane@yourcompany.com"
                 />
               </div>
-              {!operator.phone && (
+              {!operator.business_phone && !operator.phone && (
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1">Company Phone *</label>
                   <Input
