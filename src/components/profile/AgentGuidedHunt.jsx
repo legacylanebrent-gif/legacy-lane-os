@@ -158,7 +158,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="w-5 h-5 text-orange-500" />
-          AI-Guided Hunt Builder
+          AI guided item hunter
         </CardTitle>
         <p className="text-xs text-slate-500">
           Pick a category, name what you're after, and we'll generate a complete hunt list
