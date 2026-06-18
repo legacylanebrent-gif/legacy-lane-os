@@ -911,14 +911,27 @@ export default function EstateSaleDetail() {
             {/* Estate Sale Company Owner Info */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-slate-600" />
-                  {operator?.company_name || sale.operator_name || 'Estate Sale Company Owner'}
-                </h3>
-
-                {operator?.company_description && (
-                  <p className="text-sm text-slate-600 mb-4">{operator.company_description}</p>
-                )}
+                <div className="flex items-start gap-4 mb-4">
+                  {(operator?.company_logo_url || operator?.company_logo) ? (
+                    <img
+                      src={operator.company_logo_url || operator.company_logo}
+                      alt={operator?.company_name || sale.operator_name || ''}
+                      className="w-16 h-16 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-8 h-8 text-white" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {operator?.company_name || sale.operator_name || 'Estate Sale Company Owner'}
+                    </h3>
+                    {operator?.company_description && (
+                      <p className="text-sm text-slate-600 mt-1">{operator.company_description}</p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="space-y-3">
                   {(operator?.business_phone || operator?.phone) && (
