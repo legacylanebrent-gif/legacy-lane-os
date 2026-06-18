@@ -784,7 +784,8 @@ export default function MyProfile() {
                   <div><Label>Website</Label><Input value={form.website_url} onChange={e => setForm(p => ({ ...p, website_url: e.target.value }))} placeholder="https://yourcompany.com" /></div>
                 </div>
                 <div className="pt-2 border-t">
-                  <Label className="text-slate-600 text-xs uppercase tracking-wide mb-3 block">Business Address</Label>
+                  <Label className="text-slate-600 text-xs uppercase tracking-wide mb-1 block">Business Address</Label>
+                  <p className="text-xs text-slate-400 mb-3">Street address is optional — city, state, and ZIP are used for Google Maps linking.</p>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="md:col-span-4"><Input value={form.business_address_street} onChange={e => setForm(p => ({ ...p, business_address_street: e.target.value }))} placeholder="Street Address" /></div>
                     <div className="md:col-span-2"><Input value={form.business_address_city} onChange={e => setForm(p => ({ ...p, business_address_city: e.target.value }))} placeholder="City" /></div>
