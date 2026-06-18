@@ -942,7 +942,21 @@ export default function MyProfile() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader><CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle></CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-1"><Star className="w-4 h-4" />Specialties</CardTitle>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      onClick={() => {
+                        const allChecked = SPECIALTY_OPTIONS.every(s => form.specialties.includes(s));
+                        setForm(p => ({ ...p, specialties: allChecked ? [] : [...SPECIALTY_OPTIONS] }));
+                      }}
+                    >
+                      {SPECIALTY_OPTIONS.every(s => form.specialties.includes(s)) ? 'Uncheck All' : 'Check All'}
+                    </Button>
+                  </CardHeader>
                   <CardContent>
                     <div className="space-y-1.5">
                       {SPECIALTY_OPTIONS.map(s => (
