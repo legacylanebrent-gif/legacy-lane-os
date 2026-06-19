@@ -74,6 +74,11 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <p className="text-xs text-slate-500">{user?.email}</p>
                       </div>
                     </DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
+                        <HelpCircle className="w-4 h-4 mr-2" /> How to Use
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('MyProfile')} className="cursor-pointer font-medium">
@@ -159,17 +164,14 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         </DropdownMenuItem>
                       </>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
-                        <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
-                        <HelpCircle className="w-4 h-4 mr-2" /> How to Use
-                      </Link>
-                    </DropdownMenuItem>
+                    <div className="bg-slate-50 -mx-1 px-1 py-2">
+                      <div className="px-2 py-1 flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">Quick Links</div>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
+                          <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
