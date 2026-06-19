@@ -198,113 +198,128 @@ function appendInternalLinks(article, topic, sale, relatedItems) {
   return article + links;
 }
 
+// ─── Process a single sale ────────────────────────────────────────────────────
+async function processSale(base44, saleId) {
+  const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: saleId });
+  const sale = sales[0];
+  if (!sale) return { error: 'Sale not found', sale_id: saleId };
+
+  if (!['upcoming', 'active'].includes(sale.status)) {
+    return { message: 'Sale not published — skipping', sale_id: saleId, status: sale.status };
+  }
+
+  const items = await base44.asServiceRole.entities.SEOItemProfile.filter({ sale_id: saleId });
+  if (items.length === 0) {
+    return { message: 'No item profiles — skipping', sale_id: saleId };
+  }
+
+  const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
+
+  const topics = await selectBlogTopics(openai, sale, items);
+  if (!topics.length) return { message: 'No blog topics identified', sale_id: saleId };
+
+  const results = [];
+
+  for (const topic of topics) {
+    const slug = `/blog/${toSlug(topic.slug || topic.title)}`;
+
+    const existingPages = await base44.asServiceRole.entities.SEOPage.filter({ slug });
+    if (existingPages.length > 0) {
+      results.push({ slug, status: 'skipped_exists' });
+      continue;
+    }
+
+    const relevantItems = items.filter(i =>
+      topic.related_brands?.includes(i.brand_name) ||
+      topic.related_categories?.includes(i.category_name)
+    ).slice(0, 15);
+    const fallbackItems = relevantItems.length > 0 ? relevantItems : items.slice(0, 10);
+    const soldExamples = fallbackItems.filter(i => i.sold_status === 'sold').slice(0, 5);
+
+    const rawArticle = await writeArticle(openai, topic, sale, fallbackItems, soldExamples);
+    const meta = await generateBlogMeta(openai, topic.title, topic.target_keyword, rawArticle);
+    const fullArticle = appendInternalLinks(rawArticle, topic, sale, fallbackItems);
+
+    const publishedAt = new Date().toISOString();
+    const isHighConfidence = (topic.confidence_score || 0) >= 80;
+    const pageStatus = isHighConfidence ? 'published' : 'draft';
+
+    const schema = buildBlogSchema(meta.seo_title || topic.title, slug, meta.meta_description || '', publishedAt);
+
+    await base44.asServiceRole.entities.SEOPage.create({
+      page_type: 'blog',
+      entity_id: saleId,
+      slug,
+      title: meta.seo_title || topic.title,
+      meta_description: meta.meta_description || '',
+      h1: meta.h1 || topic.title,
+      intro_content: topic.reasoning || '',
+      main_content: fullArticle,
+      faq_json: [],
+      schema_json: schema,
+      canonical_url: `https://estatesalen.com${slug}`,
+      status: pageStatus,
+      indexed_status: 'not_submitted',
+      published_at: isHighConfidence ? publishedAt : null,
+    });
+
+    results.push({
+      slug,
+      title: topic.title,
+      confidence_score: topic.confidence_score,
+      status: pageStatus,
+      word_count: fullArticle.split(/\s+/).length,
+    });
+  }
+
+  return {
+    sale_id: saleId,
+    sale_title: sale.title,
+    topics_evaluated: topics.length,
+    posts_created: results.filter(r => r.status !== 'skipped_exists').length,
+    auto_published: results.filter(r => r.status === 'published').length,
+    saved_as_draft: results.filter(r => r.status === 'draft').length,
+    skipped: results.filter(r => r.status === 'skipped_exists').length,
+    posts: results,
+  };
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
-    // Accept direct call { sale_id } or entity automation payload
     const saleId = body?.sale_id || body?.data?.id || body?.event?.entity_id;
 
-    if (!saleId) return Response.json({ error: 'sale_id is required' }, { status: 400 });
+    // Batch mode: process all active/upcoming sales
+    if (!saleId) {
+      const allSales = await base44.asServiceRole.entities.EstateSale.filter(
+        { status: { $in: ['upcoming', 'active'] } },
+        '-created_date',
+        50
+      );
 
-    // Load the sale
-    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: saleId });
-    const sale = sales[0];
-    if (!sale) return Response.json({ error: 'Sale not found' }, { status: 404 });
-
-    // Only run for published sales
-    if (!['upcoming', 'active'].includes(sale.status)) {
-      return Response.json({ message: 'Sale is not published — skipping blog generation', status: sale.status });
-    }
-
-    // Load SEOItemProfiles for this sale
-    const items = await base44.asServiceRole.entities.SEOItemProfile.filter({ sale_id: saleId });
-    if (items.length === 0) {
-      return Response.json({ message: 'No item profiles found for this sale — skipping', sale_id: saleId });
-    }
-
-    const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
-
-    // Step 1: Select blog topics
-    const topics = await selectBlogTopics(openai, sale, items);
-    if (!topics.length) return Response.json({ message: 'No blog topics identified', sale_id: saleId });
-
-    const results = [];
-
-    for (const topic of topics) {
-      const slug = `/blog/${toSlug(topic.slug || topic.title)}`;
-
-      // Skip if this exact slug already exists
-      const existingPages = await base44.asServiceRole.entities.SEOPage.filter({ slug });
-      if (existingPages.length > 0) {
-        results.push({ slug, status: 'skipped_exists' });
-        continue;
+      const batchResults = [];
+      for (const sale of allSales) {
+        try {
+          const result = await processSale(base44, sale.id);
+          batchResults.push(result);
+        } catch (err) {
+          batchResults.push({ sale_id: sale.id, error: err.message });
+        }
       }
 
-      // Find relevant items for this topic
-      const relevantItems = items.filter(i =>
-        topic.related_brands?.includes(i.brand_name) ||
-        topic.related_categories?.includes(i.category_name)
-      ).slice(0, 15);
-      const fallbackItems = relevantItems.length > 0 ? relevantItems : items.slice(0, 10);
-      const soldExamples = fallbackItems.filter(i => i.sold_status === 'sold').slice(0, 5);
-
-      // Step 2: Write article
-      const rawArticle = await writeArticle(openai, topic, sale, fallbackItems, soldExamples);
-
-      // Step 3: Meta data
-      const meta = await generateBlogMeta(openai, topic.title, topic.target_keyword, rawArticle);
-
-      // Append internal links
-      const fullArticle = appendInternalLinks(rawArticle, topic, sale, fallbackItems);
-
-      const publishedAt = new Date().toISOString();
-      const isHighConfidence = (topic.confidence_score || 0) >= 80;
-      const pageStatus = isHighConfidence ? 'published' : 'draft';
-
-      const schema = buildBlogSchema(meta.seo_title || topic.title, slug, meta.meta_description || '', publishedAt);
-
-      const pageData = {
-        page_type: 'blog',
-        entity_id: saleId,
-        slug,
-        title: meta.seo_title || topic.title,
-        meta_description: meta.meta_description || '',
-        h1: meta.h1 || topic.title,
-        intro_content: topic.reasoning || '',
-        main_content: fullArticle,
-        faq_json: [],
-        schema_json: schema,
-        canonical_url: `https://estatesalen.com${slug}`,
-        status: pageStatus,
-        indexed_status: 'not_submitted',
-        published_at: isHighConfidence ? publishedAt : null,
-      };
-
-      await base44.asServiceRole.entities.SEOPage.create(pageData);
-
-      results.push({
-        slug,
-        title: topic.title,
-        confidence_score: topic.confidence_score,
-        status: pageStatus,
-        word_count: fullArticle.split(/\s+/).length,
+      return Response.json({
+        message: `Batch blog generation complete — processed ${allSales.length} sales`,
+        sales_processed: allSales.length,
+        results: batchResults,
       });
     }
 
-    return Response.json({
-      message: 'Blog post generation complete',
-      sale_id: saleId,
-      sale_title: sale.title,
-      topics_evaluated: topics.length,
-      posts_created: results.filter(r => r.status !== 'skipped_exists').length,
-      auto_published: results.filter(r => r.status === 'published').length,
-      saved_as_draft: results.filter(r => r.status === 'draft').length,
-      skipped: results.filter(r => r.status === 'skipped_exists').length,
-      posts: results,
-    });
+    // Single sale mode
+    const result = await processSale(base44, saleId);
+    return Response.json({ message: 'Blog post generation complete', ...result });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
