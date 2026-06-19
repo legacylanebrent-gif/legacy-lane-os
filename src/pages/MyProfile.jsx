@@ -117,6 +117,7 @@ export default function MyProfile() {
   const [newCounty, setNewCounty] = useState('');
   const [newCity, setNewCity] = useState('');
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [expandedFeatures, setExpandedFeatures] = useState({});
 
   const [form, setForm] = useState({
     // personal
@@ -1719,13 +1720,20 @@ export default function MyProfile() {
 
                           {/* Features */}
                           <div className="space-y-1.5 flex-1 mb-4">
-                            {pkgData.features?.slice(0, 6).map((f, i) => (
+                            {(expandedFeatures[pkg.id] ? pkgData.features : pkgData.features?.slice(0, 6))?.map((f, i) => (
                               <div key={i} className="flex gap-2 text-xs">
                                 <Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" />
                                 <span className="text-slate-600">{f}</span>
                               </div>
                             ))}
-                            {pkgData.features?.length > 6 && <p className="text-xs text-slate-400 pl-5">+{pkgData.features.length - 6} more features</p>}
+                            {pkgData.features?.length > 6 && (
+                              <button
+                                onClick={() => setExpandedFeatures(prev => ({ ...prev, [pkg.id]: !prev[pkg.id] }))}
+                                className="text-xs text-orange-600 hover:text-orange-700 font-medium pl-5 transition-colors"
+                              >
+                                {expandedFeatures[pkg.id] ? 'Show less' : `+${pkgData.features.length - 6} more features`}
+                              </button>
+                            )}
                           </div>
 
                           {/* Limits */}
