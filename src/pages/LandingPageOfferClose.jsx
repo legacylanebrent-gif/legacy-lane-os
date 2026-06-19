@@ -20,6 +20,7 @@ const VALUE_ITEMS = [
   'Real-time sale-day management & reporting',
   'Route planner for buyers',
   'Early sign-in & buyer check-in tools',
+  'Auto-generated sale preview blog posts (Elite tier) — featured items get indexed by Google before sale day',
 ];
 
 const TRANSFORMATION_ITEMS = [

@@ -25,6 +25,7 @@ const SCALE_HABITS = [
   'They give helpers clear tasks',
   'They capture buyer interest before sale day',
   'They use technology to make every sale easier than the last',
+  'They get their items indexed on Google before doors open — auto-generated preview blogs',
 ];
 
 const QUESTIONS = [
