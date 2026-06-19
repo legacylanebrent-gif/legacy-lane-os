@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { base44 } from '@/api/base44Client';
-import { Search, MapPin, Heart, Navigation, QrCode, Star, ShoppingBag, Bell } from 'lucide-react';
+import { Search, MapPin, Heart, Navigation, QrCode, Star, ShoppingBag, Bell, Target, CalendarDays, ClipboardList, Send, Smartphone, Wrench, Building2 } from 'lucide-react';
 
 export default function HowToUse() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -74,6 +74,41 @@ export default function HowToUse() {
       description: 'Customize alerts for new sales in your area, favorite companies, and items you\'re watching. Never miss an opportunity again.',
       cta: 'Manage Settings',
       link: createPageUrl('NotificationSettings')
+    },
+    {
+      icon: <Target className="w-8 h-8 text-orange-500" />,
+      title: 'ISO Wanted Items',
+      description: 'Create your personal hunt list of items you\'re searching for. Get automatically matched when an estate sale has what you want.',
+      cta: 'Set Up Hunt List',
+      link: createPageUrl('MyProfile') + '?tab=buyer_prefs'
+    },
+    {
+      icon: <CalendarDays className="w-8 h-8 text-orange-500" />,
+      title: 'My Sale Calendar',
+      description: 'Track all the sales you plan to attend in one view. See dates, times, and locations at a glance. Add sales to your phone calendar.',
+      cta: 'View Calendar',
+      link: createPageUrl('MyCalendar')
+    },
+    {
+      icon: <ClipboardList className="w-8 h-8 text-orange-500" />,
+      title: 'Early Sign-Ins',
+      description: 'Sign in ahead of time for popular sales. Secure your spot in line and get early access notifications before doors open.',
+      cta: 'Sign In Early',
+      link: createPageUrl('MyEarlySignIns')
+    },
+    {
+      icon: <Send className="w-8 h-8 text-orange-500" />,
+      title: 'Refer a Company',
+      description: 'Know a great estate sale company not yet on our platform? Refer them and earn rewards when they join EstateSalen.com.',
+      cta: 'Make a Referral',
+      link: createPageUrl('ReferCompany')
+    },
+    {
+      icon: <Smartphone className="w-8 h-8 text-orange-500" />,
+      title: 'Mobile App',
+      description: 'Take EstateSalen.com on the go. Browse sales, scan QR codes, and get directions — all optimized for your phone.',
+      cta: 'Open Mobile App',
+      link: '/mobile'
     }
   ];
 
@@ -183,15 +218,15 @@ export default function HowToUse() {
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-600 text-white font-bold">
-                    6
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900 mb-1">Redeem Rewards</h3>
-                  <p className="text-slate-600">Use your points for discounts and exclusive benefits on the platform.</p>
-                </div>
+               <div className="flex-shrink-0">
+                 <div className="flex items-center justify-center h-10 w-10 rounded-full bg-orange-600 text-white font-bold">
+                   6
+                 </div>
+               </div>
+               <div>
+                 <h3 className="font-semibold text-slate-900 mb-1">Set Up a Hunt List</h3>
+                 <p className="text-slate-600">Tell us what you're looking for — our system auto-matches items from upcoming sales.</p>
+               </div>
               </div>
             </div>
           </div>
@@ -228,6 +263,56 @@ export default function HowToUse() {
                 <p className="text-slate-700"><span className="font-semibold text-orange-600">Use the Marketplace:</span> Don't miss great finds—browse our marketplace for items from completed sales.</p>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-slate-700"><span className="font-semibold text-orange-600">Create a Hunt List:</span> Set up your ISO Wanted Items and get instant matches when sales have what you're looking for. The more specific, the better.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-slate-700"><span className="font-semibold text-orange-600">Go Mobile:</span> Use the mobile app version for on-the-go access, QR scanning at sales, and turn-by-turn directions to your next stop.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Local Vendors & Services */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-serif font-bold text-slate-900 mb-8 text-center">Local Vendors & Services</h2>
+          <p className="text-slate-600 text-center mb-8 max-w-2xl mx-auto">
+            Estate transitions require more than just finding a sale. Connect with trusted local professionals
+            for cleanouts, moving, appraisals, and more.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link to={createPageUrl('CleanoutNetwork')}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full border-slate-200">
+                <CardContent className="pt-6 text-center">
+                  <Wrench className="w-10 h-10 text-orange-500 mx-auto mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-2">Cleanout Crews</h3>
+                  <p className="text-sm text-slate-600">Junk removal, dumpster rental, and estate cleanout specialists near you.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to={createPageUrl('ResellerNetwork')}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full border-slate-200">
+                <CardContent className="pt-6 text-center">
+                  <ShoppingBag className="w-10 h-10 text-orange-500 mx-auto mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-2">Reseller Network</h3>
+                  <p className="text-sm text-slate-600">Connect with resellers who buy in bulk and handle leftover inventory.</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to={createPageUrl('VendorSignup')}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full border-slate-200">
+                <CardContent className="pt-6 text-center">
+                  <Building2 className="w-10 h-10 text-orange-500 mx-auto mb-3" />
+                  <h3 className="font-semibold text-slate-900 mb-2">Become a Vendor</h3>
+                  <p className="text-sm text-slate-600">Offer your services to thousands of estate sale shoppers and companies.</p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>
