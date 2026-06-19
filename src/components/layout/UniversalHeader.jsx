@@ -124,12 +124,6 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
-                        <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
                       <Link to={createPageUrl('ReferCompany')} className="cursor-pointer font-medium text-orange-600">
                         <Send className="w-4 h-4 mr-2" /> Refer a Company
                       </Link>
@@ -166,6 +160,11 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </>
                     )}
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('BrowseItems')} className="cursor-pointer">
+                        <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
                         <HelpCircle className="w-4 h-4 mr-2" /> How to Use
