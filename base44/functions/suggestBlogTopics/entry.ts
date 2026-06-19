@@ -182,6 +182,21 @@ Deno.serve(async (req) => {
           ? `https://estatesalen.com/company/${operatorId}`
           : 'https://estatesalen.com';
 
+        // Look up operator's subscription tier
+        let subscriptionTier = 'unknown';
+        if (operatorId) {
+          try {
+            const subs = await base44.asServiceRole.entities.Subscription.filter(
+              { user_id: operatorId, status: 'active' },
+              '-created_date',
+              1
+            );
+            if (subs.length > 0) {
+              subscriptionTier = subs[0].tier || 'unknown';
+            }
+          } catch { /* ignore — tier lookup failure is non-critical */ }
+        }
+
         const topics = await selectBlogTopics(openai, sale, companyName, companyCity, items);
         if (!topics.length) continue;
 
@@ -198,6 +213,7 @@ Deno.serve(async (req) => {
             company_city: companyCity,
             company_state: companyState,
             company_profile_url: companyProfileUrl,
+            subscription_tier: subscriptionTier,
             title: topic.title,
             slug: topic.slug,
             angle: topic.angle || '',

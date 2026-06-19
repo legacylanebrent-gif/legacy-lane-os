@@ -86,6 +86,7 @@ export default function AdminBlogSelector() {
     if (filter === 'duplicates') filtered = filtered.filter(s => s.duplicate_of_title);
     if (filter === 'unique') filtered = filtered.filter(s => !s.duplicate_of_title);
     if (filter === 'high_confidence') filtered = filtered.filter(s => s.confidence_score >= 80);
+    if (filter === 'elite') filtered = filtered.filter(s => s.subscription_tier === 'premium' || s.subscription_tier === 'enterprise');
     return filtered;
   };
 
@@ -93,6 +94,7 @@ export default function AdminBlogSelector() {
   const pendingCount = suggestions.filter(s => s.status === 'pending').length;
   const createdCount = suggestions.filter(s => s.status === 'created').length;
   const dupCount = suggestions.filter(s => s.duplicate_of_title).length;
+  const eliteCount = suggestions.filter(s => s.subscription_tier === 'premium' || s.subscription_tier === 'enterprise').length;
 
   const batches = [...new Set(suggestions.map(s => s.batch_id).filter(Boolean))];
 
@@ -143,6 +145,12 @@ export default function AdminBlogSelector() {
         </Card>
         <Card className="flex-1 min-w-[120px]">
           <CardContent className="p-3 text-center">
+            <div className="text-2xl font-bold text-purple-600">{eliteCount}</div>
+            <div className="text-xs text-slate-500">Elite</div>
+          </CardContent>
+        </Card>
+        <Card className="flex-1 min-w-[120px]">
+          <CardContent className="p-3 text-center">
             <div className="text-2xl font-bold text-blue-600">{batches.length}</div>
             <div className="text-xs text-slate-500">Batches</div>
           </CardContent>
@@ -163,6 +171,7 @@ export default function AdminBlogSelector() {
             <SelectItem value="duplicates">Potential Duplicates</SelectItem>
             <SelectItem value="unique">Unique Only</SelectItem>
             <SelectItem value="high_confidence">High Confidence (80+)</SelectItem>
+            <SelectItem value="elite">Elite Tier Only</SelectItem>
           </SelectContent>
         </Select>
 
@@ -213,6 +222,7 @@ export default function AdminBlogSelector() {
                 </th>
                 <th className="p-3 text-left font-medium text-slate-600">Title</th>
                 <th className="p-3 text-left font-medium text-slate-600 hidden md:table-cell">Company</th>
+                <th className="p-3 text-center font-medium text-slate-600 hidden lg:table-cell w-20">Tier</th>
                 <th className="p-3 text-left font-medium text-slate-600 hidden lg:table-cell">Keyword</th>
                 <th className="p-3 text-center font-medium text-slate-600 w-20">Score</th>
                 <th className="p-3 text-left font-medium text-slate-600 hidden xl:table-cell">Duplicate</th>
@@ -252,6 +262,19 @@ export default function AdminBlogSelector() {
                     <td className="p-3 text-slate-600 hidden md:table-cell">
                       <div>{s.company_name}</div>
                       <div className="text-xs text-slate-400">{s.company_city}{s.company_state ? ', ' + s.company_state : ''}</div>
+                    </td>
+                    <td className="p-3 text-center hidden lg:table-cell">
+                      {s.subscription_tier === 'enterprise' ? (
+                        <Badge className="bg-purple-100 text-purple-700 text-xs font-semibold">Elite</Badge>
+                      ) : s.subscription_tier === 'premium' ? (
+                        <Badge className="bg-purple-100 text-purple-700 text-xs font-semibold">Elite</Badge>
+                      ) : s.subscription_tier === 'pro' ? (
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">Pro</Badge>
+                      ) : s.subscription_tier === 'basic' ? (
+                        <Badge className="bg-slate-100 text-slate-600 text-xs">Starter</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-slate-400">—</Badge>
+                      )}
                     </td>
                     <td className="p-3 hidden lg:table-cell">
                       <Badge variant="outline" className="text-xs">{s.target_keyword}</Badge>

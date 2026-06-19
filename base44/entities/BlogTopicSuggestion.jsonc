@@ -22,6 +22,10 @@
       "type": "string",
       "description": "URL to company profile on EstateSalen"
     },
+    "subscription_tier": {
+      "type": "string",
+      "description": "Operator's subscription tier (from Subscription entity)"
+    },
     "title": {
       "type": "string",
       "description": "Suggested blog post title"
