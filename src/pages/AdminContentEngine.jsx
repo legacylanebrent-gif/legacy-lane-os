@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { RefreshCw, MapPin, Globe, Layers, ClipboardList, Package, Building2 } from 'lucide-react';
+import { RefreshCw, MapPin, Globe, Layers, ClipboardList, Package, Building2, FileText } from 'lucide-react';
 
 import StateContentGenerator from '@/components/content-engine/StateContentGenerator';
 import CountyContentGenerator from '@/components/content-engine/CountyContentGenerator';
@@ -11,6 +11,7 @@ import LifeEventContentGenerator from '@/components/content-engine/LifeEventCont
 import ChecklistContentGenerator from '@/components/content-engine/ChecklistContentGenerator';
 import ItemContentGenerator from '@/components/content-engine/ItemContentGenerator';
 import ProviderPageGenerator from '@/components/content-engine/ProviderPageGenerator';
+import BlogContentGenerator from '@/components/content-engine/BlogContentGenerator';
 
 export default function AdminContentEngine() {
   const [tab, setTab] = useState('state');
@@ -19,6 +20,7 @@ export default function AdminContentEngine() {
   const [countyGuides, setCountyGuides] = useState([]);
   const [hubs, setHubs] = useState([]);
   const [items, setItems] = useState([]);
+  const [blogCount, setBlogCount] = useState({ drafts: 0, published: 0 });
 
   useEffect(() => { loadAll(); }, []);
 
@@ -31,6 +33,9 @@ export default function AdminContentEngine() {
       base44.entities.ItemKnowledgeBase.list('-created_date', 200),
     ]);
     setStateGuides(sg); setCountyGuides(cg); setHubs(h); setItems(i);
+    // Load blog counts in background
+    base44.entities.SEOPage.filter({ page_type: 'blog', status: 'draft' }).then(d => setBlogCount(prev => ({ ...prev, drafts: d.length })));
+    base44.entities.SEOPage.filter({ page_type: 'blog', status: 'published' }).then(p => setBlogCount(prev => ({ ...prev, published: p.length })));
     setLoading(false);
   };
 
@@ -64,6 +69,7 @@ export default function AdminContentEngine() {
           { label: 'County Guides', draft: statsDraft.countyGuides, live: statsDraft.countyGuidesLive, total: countyGuides.length },
           { label: 'Event Hubs', draft: statsDraft.hubs, live: statsDraft.hubsLive, total: hubs.length },
           { label: 'Item Guides', draft: statsDraft.items, live: statsDraft.itemsLive, total: items.length },
+          { label: 'Blog Posts', draft: blogCount.drafts, live: blogCount.published, total: blogCount.drafts + blogCount.published },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4">
@@ -91,6 +97,7 @@ export default function AdminContentEngine() {
           <TabsTrigger value="checklist" className="gap-1.5 text-xs"><ClipboardList className="w-3.5 h-3.5" />Checklist Content</TabsTrigger>
           <TabsTrigger value="items" className="gap-1.5 text-xs"><Package className="w-3.5 h-3.5" />Item Content</TabsTrigger>
           <TabsTrigger value="providers" className="gap-1.5 text-xs"><Building2 className="w-3.5 h-3.5" />Provider Pages</TabsTrigger>
+          <TabsTrigger value="blogs" className="gap-1.5 text-xs"><FileText className="w-3.5 h-3.5" />Blogs</TabsTrigger>
         </TabsList>
 
         <div className="bg-white border border-slate-200 rounded-xl p-6">
@@ -111,6 +118,9 @@ export default function AdminContentEngine() {
           </TabsContent>
           <TabsContent value="providers">
             <ProviderPageGenerator onRefresh={loadAll} />
+          </TabsContent>
+          <TabsContent value="blogs">
+            <BlogContentGenerator onRefresh={loadAll} />
           </TabsContent>
         </div>
       </Tabs>
