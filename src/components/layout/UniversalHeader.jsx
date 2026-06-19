@@ -171,11 +171,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <HelpCircle className="w-4 h-4 mr-2" /> How to Use
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                        <Bell className="w-4 h-4 mr-2" /> Notification Settings
-                      </Link>
-                    </DropdownMenuItem>
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
                       <LogOut className="w-4 h-4 mr-2" /> Logout
