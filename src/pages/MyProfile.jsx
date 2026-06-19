@@ -1673,8 +1673,8 @@ export default function MyProfile() {
                     const isDowngrade = !isCurrent && subscription && pkgTierNum < currentTierNum;
 
                     return (
-                      <Card key={pkg.id} className={`relative flex flex-col ${isCurrent ? 'border-2 border-orange-500' : ''} ${pkgData.featured ? 'ring-2 ring-orange-300' : ''}`}>
-                        {isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="bg-orange-600 text-white text-xs px-3">Current Plan</Badge></div>}
+                      <Card key={pkg.id} className={`relative flex flex-col ${isCurrent ? 'border-2 border-green-500 bg-green-50/60' : ''} ${pkgData.featured ? 'ring-2 ring-orange-300' : ''}`}>
+                        {isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="bg-green-600 text-white text-xs px-3">Current Plan</Badge></div>}
                         {pkgData.featured && !isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><Badge className="bg-slate-800 text-white text-xs px-3">Recommended</Badge></div>}
                         <CardContent className="p-5 flex flex-col flex-1">
                           {/* Header */}
