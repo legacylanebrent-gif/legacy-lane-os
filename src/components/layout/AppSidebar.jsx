@@ -128,6 +128,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminProbateEngine',     label: 'Probate SEO Engine',     icon: Scale,           group: 'Admin', subgroup: '🔍 SEO & Content' },
   { page: 'AdminContentEngine',     label: 'Content Engine',         icon: FileText,        group: 'Admin', subgroup: '🔍 SEO & Content' },
   { page: 'AdminPhase12Deploy',     label: 'Phase 12 Deploy (NJ)',   icon: Rocket,          group: 'Admin', subgroup: '🔍 SEO & Content' },
+  { page: 'AdminBlogSelector',       label: 'Blog Topic Approval',    icon: FileText,        group: 'Admin', subgroup: '🔍 SEO & Content' },
   { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intel',    icon: Film,            group: 'Admin', subgroup: '🔍 SEO & Content' },
 
   // Admin › Repository & AI
