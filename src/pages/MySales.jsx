@@ -228,7 +228,7 @@ export default function MySales() {
             className="border-slate-300 text-slate-700 hover:bg-slate-50"
           >
             <BookOpen className="w-4 h-4 mr-2" />
-            How to Use
+            EstateSalen 411
           </Button>
           <Button 
             onClick={() => {

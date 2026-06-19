@@ -120,7 +120,7 @@ export default function HowToUse() {
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-16 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
-            How to Use EstateSalen.com
+            EstateSalen 411
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Discover the top features and learn how to get the most out of your estate sale hunting experience.

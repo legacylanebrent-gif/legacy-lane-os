@@ -137,7 +137,7 @@ export default function ConsumerHeader({ user }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to={createPageUrl('HowToUse')} className="cursor-pointer">
-                    <Heart className="w-4 h-4 mr-2" /> How to Use
+                    <Heart className="w-4 h-4 mr-2" /> EstateSalen 411
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
