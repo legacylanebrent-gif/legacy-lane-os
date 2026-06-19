@@ -399,11 +399,15 @@ export default function EstateSaleDetail() {
       return {
         '@type': 'ImageObject',
         contentUrl: url,
+        url: url,
         name: name || `${sale.title}${saleLocation ? ` — ${saleLocation}` : ''} estate sale item`,
         description: desc || `Estate sale item from ${sale.title}${saleLocation ? ` in ${saleLocation}` : ''}. ${(sale.categories || []).slice(0, 3).join(', ')}.`,
         representativeOfPage: false,
       };
     });
+
+  const sellerOrgName = operator?.company_name || sale.operator_name || 'Estate Sale Company';
+  const sellerOrgUrl = operator?.company_website || window.location.origin;
 
   // JSON-LD Event schema for sale pages — Google rich results
   const jsonLd = sale ? {
@@ -429,7 +433,13 @@ export default function EstateSaleDetail() {
     endDate: sale.sale_dates?.[sale.sale_dates.length - 1]?.date || undefined,
     organizer: {
       '@type': 'Organization',
-      name: operator?.company_name || sale.operator_name || 'Estate Sale Company',
+      name: sellerOrgName,
+      url: sellerOrgUrl,
+    },
+    performer: {
+      '@type': 'Organization',
+      name: sellerOrgName,
+      url: sellerOrgUrl,
     },
     offers: {
       '@type': 'Offer',
@@ -437,6 +447,7 @@ export default function EstateSaleDetail() {
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
       url: window.location.href,
+      validFrom: sale.sale_dates?.[0]?.date || new Date().toISOString().split('T')[0],
     },
     keywords: sale.categories?.join(', ') || 'estate sale, antiques, furniture, collectibles',
   } : null;
