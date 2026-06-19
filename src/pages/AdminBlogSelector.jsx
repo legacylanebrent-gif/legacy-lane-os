@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, RefreshCw, Sparkles, ExternalLink, AlertTriangle, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
+import { Loader2, RefreshCw, Sparkles, ExternalLink, AlertTriangle, CheckCircle2, X, Image as ImageIcon, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function AdminBlogSelector() {
   const [suggestions, setSuggestions] = useState([]);
@@ -15,6 +16,7 @@ export default function AdminBlogSelector() {
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState('all');
   const [result, setResult] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const loadSuggestions = async () => {
     setLoading(true);
@@ -251,10 +253,13 @@ export default function AdminBlogSelector() {
                         {s.image_url && (
                           <img src={s.image_url} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0 hidden sm:block" />
                         )}
-                        <div>
-                          <div className={`font-medium ${isDup ? 'text-amber-700' : 'text-slate-800'}`}>
+                        <div className="flex-1 min-w-0">
+                          <button
+                            onClick={() => setPreview(s)}
+                            className={`font-medium text-left hover:text-orange-600 transition-colors ${isDup ? 'text-amber-700' : 'text-slate-800'}`}
+                          >
                             {s.title}
-                          </div>
+                          </button>
                           <div className="text-xs text-slate-400 mt-0.5">{s.angle}</div>
                         </div>
                       </div>
@@ -318,7 +323,106 @@ export default function AdminBlogSelector() {
             </tbody>
           </table>
         </div>
-      )}
-    </div>
-  );
-}
+        )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!preview} onOpenChange={() => setPreview(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {preview && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-lg">{preview.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 text-sm">
+                {preview.image_url && (
+                  <img src={preview.image_url} alt="" className="w-full max-h-64 rounded-lg object-cover" />
+                )}
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <span className="font-medium text-slate-500">Company</span>
+                    <p>{preview.company_name}</p>
+                    <p className="text-xs text-slate-400">{preview.company_city}{preview.company_state ? ', ' + preview.company_state : ''}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-500">Target Keyword</span>
+                    <p><Badge variant="outline" className="text-xs">{preview.target_keyword}</Badge></p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-500">Confidence Score</span>
+                    <p className="font-bold">{preview.confidence_score}/100</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-500">Subscription Tier</span>
+                    <p className="capitalize">{preview.subscription_tier || 'standard'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-500">Word Count Target</span>
+                    <p>{preview.word_count_target || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-500">Slug</span>
+                    <p className="text-xs text-slate-400 truncate">{preview.slug}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="font-medium text-slate-500">Editorial Angle</span>
+                  <p className="text-slate-700 mt-0.5">{preview.angle}</p>
+                </div>
+
+                <div>
+                  <span className="font-medium text-slate-500">SEO Reasoning</span>
+                  <p className="text-slate-700 mt-0.5">{preview.reasoning}</p>
+                </div>
+
+                {preview.related_brands?.length > 0 && (
+                  <div>
+                    <span className="font-medium text-slate-500">Related Brands</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {preview.related_brands.map(b => (
+                        <Badge key={b} variant="secondary" className="text-xs">{b}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {preview.related_categories?.length > 0 && (
+                  <div>
+                    <span className="font-medium text-slate-500">Related Categories</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {preview.related_categories.map(c => (
+                        <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {preview.duplicate_of_title && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <span className="font-medium text-amber-700 flex items-center gap-1">
+                      <AlertTriangle className="w-4 h-4" /> Potential Duplicate ({preview.duplicate_similarity_pct}% match)
+                    </span>
+                    <p className="text-amber-600 mt-1">{preview.duplicate_of_title}</p>
+                  </div>
+                )}
+
+                {preview.company_profile_url && (
+                  <a
+                    href={preview.company_profile_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 text-sm"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> View Company Profile
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+        </Dialog>
+
+        </div>
+        );
+        }
