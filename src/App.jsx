@@ -97,6 +97,7 @@ import CityHubPage from './pages/CityHubPage';
 import CategoryHubPage from './pages/CategoryHubPage';
 import BrandHubPage from './pages/BrandHubPage';
 import BlogPost from './pages/BlogPost';
+import AdminBlogSelector from './pages/AdminBlogSelector';
 import BlogIndex from './pages/BlogIndex';
 import CompanyProfilePage from './pages/CompanyProfilePage';
 import SaleRecapPage from './pages/SaleRecapPage';
@@ -316,6 +317,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminProbateEngine" element={<LayoutWrapper currentPageName="AdminProbateEngine"><AdminProbateEngine /></LayoutWrapper>} />
       <Route path="/AdminLifeTransitionEngine" element={<LayoutWrapper currentPageName="AdminLifeTransitionEngine"><AdminLifeTransitionEngine /></LayoutWrapper>} />
       <Route path="/AdminContentEngine" element={<LayoutWrapper currentPageName="AdminContentEngine"><AdminContentEngine /></LayoutWrapper>} />
+      <Route path="/AdminBlogSelector" element={<LayoutWrapper currentPageName="AdminBlogSelector"><AdminBlogSelector /></LayoutWrapper>} />
       <Route path="/AdminPhase12Deploy" element={<LayoutWrapper currentPageName="AdminPhase12Deploy"><AdminPhase12Deploy /></LayoutWrapper>} />
       <Route path="/AdminBuildReport" element={<LayoutWrapper currentPageName="AdminBuildReport"><AdminBuildReport /></LayoutWrapper>} />
       <Route path="/PropstreamREListings" element={<LayoutWrapper currentPageName="PropstreamREListings"><PropstreamREListings /></LayoutWrapper>} />

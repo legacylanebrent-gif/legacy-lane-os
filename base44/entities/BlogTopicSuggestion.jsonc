@@ -1,0 +1,100 @@
+{
+  "name": "BlogTopicSuggestion",
+  "type": "object",
+  "properties": {
+    "sale_id": {
+      "type": "string",
+      "description": "Source estate sale ID"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Operator/company name"
+    },
+    "company_city": {
+      "type": "string",
+      "description": "City of the estate sale"
+    },
+    "company_state": {
+      "type": "string",
+      "description": "State of the estate sale"
+    },
+    "company_profile_url": {
+      "type": "string",
+      "description": "URL to company profile on EstateSalen"
+    },
+    "title": {
+      "type": "string",
+      "description": "Suggested blog post title"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Proposed URL slug"
+    },
+    "angle": {
+      "type": "string",
+      "description": "Editorial angle"
+    },
+    "target_keyword": {
+      "type": "string",
+      "description": "Primary SEO keyword"
+    },
+    "confidence_score": {
+      "type": "integer",
+      "description": "0-100 confidence score"
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "SEO reasoning for this topic"
+    },
+    "related_brands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "related_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "word_count_target": {
+      "type": "integer",
+      "description": "Target word count"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Featured item image URL"
+    },
+    "duplicate_of_title": {
+      "type": "string",
+      "description": "Title of existing similar blog post, if found"
+    },
+    "duplicate_similarity_pct": {
+      "type": "integer",
+      "description": "0-100 keyword overlap percentage with existing post"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "Batch identifier tying suggestions from the same run together"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "created",
+        "dismissed"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "sale_id",
+    "title",
+    "slug",
+    "batch_id"
+  ]
+}
