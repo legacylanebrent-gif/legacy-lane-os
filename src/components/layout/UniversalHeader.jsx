@@ -15,7 +15,7 @@ import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
-  Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, Settings, HelpCircle,
+  Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, HelpCircle,
   Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home, Search
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -85,6 +85,13 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <Target className="w-4 h-4 mr-2 text-orange-500" /> ISO Wanted Items 🔥
                       </Link>
                     </DropdownMenuItem>
+                    {user?.role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/AdminDashboard" className="cursor-pointer font-medium text-orange-600">
+                          <LayoutDashboard className="w-4 h-4 mr-2" /> Business Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
                         <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
@@ -182,16 +189,6 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <Bell className="w-4 h-4 mr-2" /> Notification Settings
                       </Link>
                     </DropdownMenuItem>
-                    {user?.role === 'admin' && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link to="/AdminDashboard" className="cursor-pointer font-medium text-orange-600">
-                            <Settings className="w-4 h-4 mr-2" /> Admin Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 hover:text-red-700">
                       <LogOut className="w-4 h-4 mr-2" /> Logout
