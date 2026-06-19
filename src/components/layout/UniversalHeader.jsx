@@ -117,16 +117,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <ClipboardList className="w-4 h-4 mr-2" /> My Early Sign-Ins
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('RewardsCheckins')} className="cursor-pointer">
-                        <QrCode className="w-4 h-4 mr-2" /> Sale Checkin
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('RecordPurchase')} className="cursor-pointer">
-                        <Receipt className="w-4 h-4 mr-2" /> Record Purchase
-                      </Link>
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('MyRewards')} className="cursor-pointer">
                         <Star className="w-4 h-4 mr-2" /> My Rewards
@@ -137,11 +128,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <ShoppingBag className="w-4 h-4 mr-2" /> Browse Marketplace
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('FavoriteCompanies')} className="cursor-pointer">
-                        <Building2 className="w-4 h-4 mr-2" /> Favorite Companies
-                      </Link>
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('ReferCompany')} className="cursor-pointer font-medium text-orange-600">
                         <Send className="w-4 h-4 mr-2" /> Refer a Company
