@@ -7,7 +7,7 @@ function toSlug(str) {
 }
 
 // ─── Step 1: Analyze inventory and pick best blog topics ─────────────────────
-async function selectBlogTopics(openai, sale, items) {
+async function selectBlogTopics(openai, sale, companyName, companyCity, items) {
   const itemSummary = items.slice(0, 40).map(i =>
     [i.item_name, i.brand_name, i.category_name, i.style, i.estimated_age].filter(Boolean).join(' | ')
   ).join('\n');
@@ -17,10 +17,10 @@ async function selectBlogTopics(openai, sale, items) {
 
   const prompt = `You are an SEO content strategist for EstateSalen.com, an estate sale marketplace.
 
-Analyze this estate sale inventory and identify the 3-10 strongest SEO blog post opportunities.
+Analyze this estate sale company's inventory and identify the 3-10 strongest SEO blog post opportunities.
 
-SALE: ${sale.title}
-LOCATION: ${sale.property_address?.city || ''}, ${sale.property_address?.state || ''}
+COMPANY: ${companyName}
+LOCATION: ${companyCity}${sale.property_address?.state ? ', ' + sale.property_address.state : ''}
 CATEGORIES: ${categories.join(', ')}
 BRANDS: ${brands.join(', ')}
 ITEMS (sample):
@@ -72,16 +72,14 @@ Rules:
 }
 
 // ─── Step 2: Write the full blog article ─────────────────────────────────────
-async function writeArticle(openai, topic, sale, relevantItems, soldExamples) {
+async function writeArticle(openai, topic, companyName, companyCity, companyState, companyProfileUrl, relevantItems, soldExamples) {
   const itemExamples = relevantItems.slice(0, 10).map(i => {
     const parts = [i.item_name, i.brand_name, i.style, i.estimated_age, i.condition_summary];
     const price = i.sold_price ? `sold $${i.sold_price}` : (i.value_low ? `est. $${i.value_low}–$${i.value_high}` : '');
     return parts.filter(Boolean).join(', ') + (price ? ` (${price})` : '');
   }).join('\n');
 
-  const saleCity = sale.property_address?.city || '';
-  const saleState = sale.property_address?.state || '';
-  const saleLink = sale.seo_slug ? `https://estatesalen.com${sale.seo_slug}` : `https://estatesalen.com/sales/${sale.id}`;
+  const locationStr = [companyCity, companyState].filter(Boolean).join(', ');
 
   const prompt = `You are an expert estate sale content writer for EstateSalen.com.
 
@@ -92,23 +90,25 @@ TARGET KEYWORD: ${topic.target_keyword}
 ANGLE: ${topic.angle}
 WORD COUNT TARGET: ${topic.word_count_target || 1500} words
 
+COMPANY FEATURED: ${companyName} — based in ${locationStr}
+COMPANY PROFILE: ${companyProfileUrl}
+
 REAL INVENTORY EXAMPLES TO REFERENCE:
 ${itemExamples || 'Various estate sale items'}
-
-SALE TO LINK TO:
-"${sale.title}" in ${saleCity}${saleState ? ', ' + saleState : ''} — ${saleLink}
 
 Write a complete blog post in markdown. Requirements:
 1. Use the exact title as H1
 2. Include a compelling intro (2-3 paragraphs)
 3. Use H2 and H3 subheadings throughout
 4. Cover: what buyers look for, how to identify, value ranges, condition factors, where to find, tips
-5. Naturally reference the real items from the inventory above as examples
-6. Include a section linking to the estate sale: "See These Items at ${sale.title}"
-7. End with a strong conclusion and CTA to browse estate sales
-8. Write in an authoritative, helpful tone — not salesy
-9. Aim for exactly ${topic.word_count_target || 1500} words
-10. Do NOT include the slug or meta data in the output — only the markdown article body`;
+5. Naturally reference the real items from the inventory above as examples — mention they were part of an estate handled by ${companyName} in ${locationStr}
+6. Include a section near the end: "Items Like These Available at ${companyName}" which links to their company profile at ${companyProfileUrl}
+7. Include a contact CTA: "Have questions about a specific item? Contact ${companyName} through their EstateSalen.com profile: ${companyProfileUrl}"
+8. End with a strong conclusion and CTA to browse estate sales on EstateSalen.com
+9. Write in an authoritative, helpful tone — not salesy
+10. Aim for exactly ${topic.word_count_target || 1500} words
+11. Do NOT include the slug or meta data in the output — only the markdown article body
+12. Do NOT reference specific estate sale names or dates — the sales will be completed and unavailable`;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o',
@@ -153,7 +153,7 @@ Rules:
 }
 
 // ─── Build schema ─────────────────────────────────────────────────────────────
-function buildBlogSchema(title, slug, metaDesc, publishedAt) {
+function buildBlogSchema(title, slug, metaDesc, publishedAt, imageUrl) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -162,18 +162,18 @@ function buildBlogSchema(title, slug, metaDesc, publishedAt) {
     url: `https://estatesalen.com${slug}`,
     datePublished: publishedAt,
     dateModified: publishedAt,
+    ...(imageUrl ? { image: imageUrl } : {}),
     publisher: { '@type': 'Organization', name: 'EstateSalen.com', url: 'https://estatesalen.com' },
     author: { '@type': 'Organization', name: 'EstateSalen.com' },
   };
 }
 
 // ─── Append internal links to article ────────────────────────────────────────
-function appendInternalLinks(article, topic, sale, relatedItems) {
+function appendInternalLinks(article, topic, companyName, companyProfileUrl, relatedItems) {
   let links = '\n\n---\n\n## Related Resources\n\n';
 
-  // Sale link
-  const saleSlug = sale.seo_slug || `/sales/${sale.id}`;
-  links += `- [**${sale.title}** — Browse this estate sale](${saleSlug})\n`;
+  // Company profile link
+  links += `- [**${companyName}** — View their EstateSalen.com profile](${companyProfileUrl})\n`;
 
   // Brand links
   if (topic.related_brands?.length) {
@@ -189,13 +189,32 @@ function appendInternalLinks(article, topic, sale, relatedItems) {
     });
   }
 
-  // Item links
-  relatedItems.filter(i => i.slug).slice(0, 4).forEach(item => {
-    links += `- [${item.item_name || 'View Item'}](/items/${item.slug})\n`;
-  });
-
-  links += `\n[Find more estate sales near you](/estate-sales/finder)\n`;
+  links += `\n[Find estate sales near you](/estate-sales/finder)\n`;
   return article + links;
+}
+
+// ─── Find the best item image for a topic ────────────────────────────────────
+function findTopicImage(items, topic) {
+  // First: find items matching the topic's brands or categories
+  const matching = items.filter(i =>
+    (topic.related_brands?.includes(i.brand_name)) ||
+    (topic.related_categories?.includes(i.category_name)) ||
+    (topic.title && i.item_name && topic.title.toLowerCase().split(' ').some(w =>
+      w.length > 3 && i.item_name.toLowerCase().includes(w)
+    ))
+  );
+
+  // Return the first matching item with an image
+  for (const item of matching) {
+    if (item.image_url) return item.image_url;
+  }
+
+  // Fallback: first item with any image
+  for (const item of items) {
+    if (item.image_url) return item.image_url;
+  }
+
+  return null;
 }
 
 // ─── Process a single sale ────────────────────────────────────────────────────
@@ -213,9 +232,17 @@ async function processSale(base44, saleId) {
     return { message: 'No item profiles — skipping', sale_id: saleId };
   }
 
+  // Get company/operator info
+  const companyName = sale.operator_name || 'Estate Sale Company';
+  const companyCity = sale.property_address?.city || '';
+  const companyState = sale.property_address?.state || '';
+  const companyProfileUrl = sale.operator_id
+    ? `https://estatesalen.com/company/${sale.operator_id}`
+    : `https://estatesalen.com`;
+
   const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
-  const topics = await selectBlogTopics(openai, sale, items);
+  const topics = await selectBlogTopics(openai, sale, companyName, companyCity, items);
   if (!topics.length) return { message: 'No blog topics identified', sale_id: saleId };
 
   const results = [];
@@ -236,17 +263,20 @@ async function processSale(base44, saleId) {
     const fallbackItems = relevantItems.length > 0 ? relevantItems : items.slice(0, 10);
     const soldExamples = fallbackItems.filter(i => i.sold_status === 'sold').slice(0, 5);
 
-    const rawArticle = await writeArticle(openai, topic, sale, fallbackItems, soldExamples);
+    // Find the best image for this topic
+    const topicImageUrl = findTopicImage(items, topic);
+
+    const rawArticle = await writeArticle(openai, topic, companyName, companyCity, companyState, companyProfileUrl, fallbackItems, soldExamples);
     const meta = await generateBlogMeta(openai, topic.title, topic.target_keyword, rawArticle);
-    const fullArticle = appendInternalLinks(rawArticle, topic, sale, fallbackItems);
+    const fullArticle = appendInternalLinks(rawArticle, topic, companyName, companyProfileUrl, fallbackItems);
 
     const publishedAt = new Date().toISOString();
     const isHighConfidence = (topic.confidence_score || 0) >= 80;
     const pageStatus = isHighConfidence ? 'published' : 'draft';
 
-    const schema = buildBlogSchema(meta.seo_title || topic.title, slug, meta.meta_description || '', publishedAt);
+    const schema = buildBlogSchema(meta.seo_title || topic.title, slug, meta.meta_description || '', publishedAt, topicImageUrl);
 
-    await base44.asServiceRole.entities.SEOPage.create({
+    const pageData = {
       page_type: 'blog',
       entity_id: saleId,
       slug,
@@ -255,19 +285,23 @@ async function processSale(base44, saleId) {
       h1: meta.h1 || topic.title,
       intro_content: topic.reasoning || '',
       main_content: fullArticle,
+      image_url: topicImageUrl || '',
       faq_json: [],
       schema_json: schema,
       canonical_url: `https://estatesalen.com${slug}`,
       status: pageStatus,
       indexed_status: 'not_submitted',
       published_at: isHighConfidence ? publishedAt : null,
-    });
+    };
+
+    await base44.asServiceRole.entities.SEOPage.create(pageData);
 
     results.push({
       slug,
       title: topic.title,
       confidence_score: topic.confidence_score,
       status: pageStatus,
+      image_url: topicImageUrl,
       word_count: fullArticle.split(/\s+/).length,
     });
   }
@@ -275,6 +309,7 @@ async function processSale(base44, saleId) {
   return {
     sale_id: saleId,
     sale_title: sale.title,
+    company_name: companyName,
     topics_evaluated: topics.length,
     posts_created: results.filter(r => r.status !== 'skipped_exists').length,
     auto_published: results.filter(r => r.status === 'published').length,

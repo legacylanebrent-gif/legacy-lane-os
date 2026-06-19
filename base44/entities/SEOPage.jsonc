@@ -45,6 +45,10 @@
     "main_content": {
       "type": "string"
     },
+    "image_url": {
+      "type": "string",
+      "description": "Featured image URL for the blog post (from the inventory item that inspired it)"
+    },
     "faq_json": {
       "type": "array",
       "items": {

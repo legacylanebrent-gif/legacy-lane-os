@@ -57,7 +57,12 @@ export default function BlogIndex() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map(post => (
               <Link key={post.id} to={`/blog-post?slug=${encodeURIComponent(post.slug)}`}>
-                <Card className="h-full hover:shadow-xl transition-shadow group">
+                <Card className="h-full hover:shadow-xl transition-shadow group overflow-hidden">
+                  {post.image_url && (
+                    <div className="h-40 overflow-hidden">
+                      <img src={post.image_url} alt={post.h1 || post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                  )}
                   <CardContent className="p-5 flex flex-col h-full">
                     <h2 className="font-serif font-bold text-slate-900 text-lg mb-2 line-clamp-3 group-hover:text-orange-600 transition-colors">
                       {post.h1 || post.title}

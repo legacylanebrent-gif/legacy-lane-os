@@ -78,9 +78,15 @@ export default function RecentBlogPosts() {
               className="block group"
             >
               <Card className="h-full overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 border border-slate-200">
-                <div className="h-40 bg-gradient-to-br from-orange-100 via-cyan-100 to-slate-100 flex items-center justify-center">
-                  <BookOpen className="w-10 h-10 text-slate-300" />
-                </div>
+                {post.image_url ? (
+                  <div className="h-40 overflow-hidden">
+                    <img src={post.image_url} alt={post.h1 || post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                ) : (
+                  <div className="h-40 bg-gradient-to-br from-orange-100 via-cyan-100 to-slate-100 flex items-center justify-center">
+                    <BookOpen className="w-10 h-10 text-slate-300" />
+                  </div>
+                )}
                 <CardContent className="p-5">
                   <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">
                     {post.h1 || post.title}

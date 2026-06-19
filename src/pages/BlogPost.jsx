@@ -77,6 +77,16 @@ export default function BlogPost() {
           </p>
         )}
 
+        {page.image_url && (
+          <div className="mb-8 rounded-2xl overflow-hidden">
+            <img
+              src={page.image_url}
+              alt={page.h1 || page.title}
+              className="w-full max-h-96 object-cover"
+            />
+          </div>
+        )}
+
         <article className="prose prose-slate prose-lg max-w-none">
           <ReactMarkdown
             components={{
