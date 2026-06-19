@@ -94,7 +94,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     )}
                     <DropdownMenuItem asChild>
                       <Link to={createPageUrl('Dashboard')} className="cursor-pointer">
-                        <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                        <LayoutDashboard className="w-4 h-4 mr-2" /> Consumer Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
