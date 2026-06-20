@@ -29,6 +29,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Notifications',          label: 'Notifications',          icon: Bell,            group: 'Main' },
   { page: 'Messages',               label: 'Messages',               icon: MessageSquare,   group: 'Main' },
   { page: 'BrowseItems',            label: 'Marketplace',            icon: ShoppingBag,     group: 'Main' },
+  { page: 'MyPurchases',           label: 'My Purchases',           icon: ShoppingBag,     group: 'Main' },
 
   // ── AGENT + OWNER (combined role) ────────────────────────────────────────────
   { page: 'OperatorDashboard',      label: 'Owner Dashboard',        icon: BarChart2,       group: 'Agent + Owner' },
@@ -70,7 +71,6 @@ export const ALL_NAV_ITEMS = [
   // ── RESELLER ──────────────────────────────────────────────────────────────────
   { page: 'ResellerDashboard',      label: 'My Dashboard',           icon: LayoutDashboard, group: 'Reseller' },
   { page: 'Inventory',              label: 'My Inventory',           icon: Package,         group: 'Reseller' },
-  { page: 'MyPurchases',           label: 'My Purchases',           icon: ShoppingBag,     group: 'Reseller' },
   { page: 'ResellerNetwork',        label: 'Reseller Network',       icon: Users,           group: 'Reseller' },
   { page: 'ResellerPackupEvents',   label: 'Packup Events',          icon: Calendar,        group: 'Reseller' },
 
