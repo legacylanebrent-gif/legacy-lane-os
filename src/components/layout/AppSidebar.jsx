@@ -34,10 +34,10 @@ export const ALL_NAV_ITEMS = [
   // ── AGENT + OWNER (combined role) ────────────────────────────────────────────
   { page: 'OperatorDashboard',      label: 'Owner Dashboard',        icon: BarChart2,       group: 'Agent + Owner' },
   { page: 'AgentDashboard',         label: 'Agent Dashboard',        icon: Award,           group: 'Agent + Owner' },
-  { page: 'AgentOperatorPortal',    label: 'Owner Partnerships',     icon: Briefcase,       group: 'Agent + Owner' },
-  { page: 'AgentPartnerships',      label: 'Agent Partnerships',     icon: Users,           group: 'Agent + Owner' },
   { page: 'ReferralDealPipeline',   label: 'Referral Pipeline',      icon: GitBranch,       group: 'Agent + Owner' },
   { page: 'OperatorCommissions',    label: 'Commissions',            icon: DollarSign,      group: 'Agent + Owner' },
+  { page: 'AgentOperatorPortal',    label: 'Owner Partnerships',     icon: Briefcase,       group: 'Agent + Owner' },
+  { page: 'AgentPartnerships',      label: 'Agent Partnerships',     icon: Users,           group: 'Agent + Owner' },
 
   // ── ESTATE SALES (operator-facing) ──────────────────────────────────────────
   { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },
