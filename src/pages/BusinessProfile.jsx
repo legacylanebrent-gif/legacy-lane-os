@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   MapPin, Phone, Mail, Globe, Star, Calendar, Building2, 
-  ArrowLeft, CheckCircle, TrendingUp, Home as HomeIcon, MessageSquare
+  ArrowLeft, CheckCircle, TrendingUp, Home as HomeIcon, MessageSquare,
+  BookOpen, ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import MessageModal from '@/components/messaging/MessageModal';
@@ -25,6 +26,7 @@ export default function BusinessProfile() {
   const [currentUser, setCurrentUser] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [contactFormOpen, setContactFormOpen] = useState(false);
+  const [blogPosts, setBlogPosts] = useState([]);
 
   useEffect(() => {
     loadBusinessData();
@@ -84,6 +86,23 @@ export default function BusinessProfile() {
       
       setCurrentSales(current);
       setPastSales(past);
+
+      // Load blog posts linked to this operator's sales
+      const saleIds = operatorSales.map(s => s.id);
+      if (saleIds.length > 0) {
+        try {
+          // Fetch all published blogs and filter by operator's sales
+          const allBlogs = await base44.entities.SEOPage.filter(
+            { page_type: 'blog', status: 'published' },
+            '-published_at',
+            200
+          );
+          const operatorBlogs = allBlogs.filter(b => saleIds.includes(b.entity_id));
+          setBlogPosts(operatorBlogs);
+        } catch (e) {
+          setBlogPosts([]);
+        }
+      }
     } catch (error) {
       console.error('Error loading business:', error);
     } finally {
@@ -261,9 +280,10 @@ export default function BusinessProfile() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="current" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-3xl">
             <TabsTrigger value="current">Current Sales</TabsTrigger>
             <TabsTrigger value="past">Past Sales</TabsTrigger>
+            <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
           </TabsList>
@@ -383,6 +403,55 @@ export default function BusinessProfile() {
                               </div>
                             </div>
                           )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Blog Tab */}
+          <TabsContent value="blog" className="space-y-4">
+            {blogPosts.length === 0 ? (
+              <Card className="p-12 text-center">
+                <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-500 text-lg">No blog posts yet</p>
+              </Card>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {blogPosts.map(post => (
+                  <Link
+                    key={post.id}
+                    to={`/blog-post?slug=${encodeURIComponent(post.slug)}`}
+                    className="block group"
+                  >
+                    <Card className="h-full hover:shadow-xl transition-shadow overflow-hidden">
+                      {post.image_url && (
+                        <div className="h-40 overflow-hidden">
+                          <img
+                            src={post.image_url}
+                            alt={post.h1 || post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-5 flex flex-col h-full">
+                        <h4 className="font-serif font-bold text-slate-900 text-base mb-2 line-clamp-3 group-hover:text-orange-600 transition-colors">
+                          {post.h1 || post.title}
+                        </h4>
+                        {post.meta_description && (
+                          <p className="text-sm text-slate-600 line-clamp-2 flex-1 mb-3">{post.meta_description}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-auto">
+                          {post.published_at && (
+                            <><Calendar className="w-3 h-3" /><span>{format(new Date(post.published_at), 'MMM d, yyyy')}</span></>
+                          )}
+                          <span className="ml-auto flex items-center gap-1 text-orange-600 font-semibold">
+                            Read <ChevronRight className="w-3 h-3" />
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
