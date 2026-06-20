@@ -119,6 +119,7 @@ import AgentListingEstateSaleRequest from './pages/AgentListingEstateSaleRequest
 import ClaimBusiness from './pages/ClaimBusiness';
 import OnboardingChat from './pages/OnboardingChat';
 import ResellerNetwork from './pages/ResellerNetwork';
+import MyResellerLeads from './pages/MyResellerLeads';
 import CleanoutNetwork from './pages/CleanoutNetwork';
 import AdminCleanoutLeads from './pages/AdminCleanoutLeads';
 import AgentRequestThankYou from './pages/AgentRequestThankYou';
@@ -325,6 +326,7 @@ const AuthenticatedApp = () => {
       <Route path="/agent-listing-estate-sale-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/claim-business" element={<ClaimBusiness />} />
       <Route path="/ResellerNetwork" element={<ResellerNetwork />} />
+      <Route path="/MyResellerLeads" element={<LayoutWrapper currentPageName="MyResellerLeads"><MyResellerLeads /></LayoutWrapper>} />
       <Route path="/cleanout-network" element={<CleanoutNetwork />} />
       <Route path="/AdminCleanoutLeads" element={<LayoutWrapper currentPageName="AdminCleanoutLeads"><AdminCleanoutLeads /></LayoutWrapper>} />
       <Route path="/LaunchAuditCenter" element={<LayoutWrapper currentPageName="LaunchAuditCenter"><LaunchAuditCenter /></LayoutWrapper>} />

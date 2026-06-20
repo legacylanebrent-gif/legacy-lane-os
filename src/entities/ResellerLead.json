@@ -1,0 +1,110 @@
+{
+  "name": "ResellerLead",
+  "type": "object",
+  "properties": {
+    "homeowner_name": {
+      "type": "string",
+      "description": "Full name of the homeowner/seller"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address of the homeowner"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number of the homeowner"
+    },
+    "property_address": {
+      "type": "object",
+      "properties": {
+        "street": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "zip": { "type": "string" },
+        "formatted_address": { "type": "string" }
+      }
+    },
+    "lead_type": {
+      "type": "string",
+      "enum": ["buyout", "reseller", "cleanout", "both"],
+      "default": "reseller",
+      "description": "Type of lead: buyout (company buys everything), reseller (individual resells), or both"
+    },
+    "situation": {
+      "type": "string",
+      "enum": ["probate", "divorce", "downsizing", "relocation", "foreclosure", "hoarder", "standard"],
+      "description": "Life situation of the seller"
+    },
+    "estate_size": {
+      "type": "string",
+      "enum": ["small", "medium", "large", "whole_house"],
+      "default": "medium",
+      "description": "Estimated size of the estate"
+    },
+    "high_value_items": {
+      "type": "string",
+      "description": "Description of any high-value items mentioned"
+    },
+    "timeline": {
+      "type": "string",
+      "enum": ["immediate", "within_2_weeks", "within_30_days", "within_60_days", "flexible"],
+      "default": "within_30_days",
+      "description": "When the seller needs to move forward"
+    },
+    "budget_range": {
+      "type": "string",
+      "description": "Budget or price expectations"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["website_form", "referral", "agent_referral", "estate_sale_decline", "phone_call", "social_media", "other"],
+      "default": "website_form",
+      "description": "How the lead was acquired"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "contacted", "qualified", "scheduled", "in_progress", "completed", "declined", "lost"],
+      "default": "new",
+      "description": "Current status of the lead"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "urgent"],
+      "default": "medium",
+      "description": "Priority level"
+    },
+    "assigned_reseller_id": {
+      "type": "string",
+      "description": "User ID of the assigned reseller"
+    },
+    "assigned_reseller_name": {
+      "type": "string",
+      "description": "Name of the assigned reseller"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes about this lead"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next follow-up date"
+    },
+    "last_contacted": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the lead was last contacted"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Estimated total value of the estate"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Tags for categorizing leads"
+    }
+  },
+  "required": ["homeowner_name"]
+}

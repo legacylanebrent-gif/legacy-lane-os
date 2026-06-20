@@ -70,6 +70,7 @@ export const ALL_NAV_ITEMS = [
 
   // ── RESELLER ──────────────────────────────────────────────────────────────────
   { page: 'ResellerDashboard',      label: 'My Dashboard',           icon: LayoutDashboard, group: 'Reseller' },
+  { page: 'MyResellerLeads',        label: 'My Leads',               icon: Award,           group: 'Reseller' },
   { page: 'Inventory',              label: 'My Inventory',           icon: Package,         group: 'Reseller' },
   { page: 'ResellerPackupEvents',   label: 'Packup Events',          icon: Calendar,        group: 'Reseller' },
 
