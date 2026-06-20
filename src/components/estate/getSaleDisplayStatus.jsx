@@ -82,7 +82,23 @@ export function getSaleDisplayStatus(sale) {
 // Determine if sale should be visible on frontend to public users
 export function shouldShowSaleOnFrontend(sale) {
   // Explicitly-set status takes priority over date-based computation
-  if (sale.status === 'active' || sale.status === 'upcoming') return true;
+  if (sale.status === 'active' || sale.status === 'upcoming') {
+    // Even with active/upcoming status, hide if all dates have passed in user's local timezone
+    const now = new Date();
+    if (sale.sale_dates && sale.sale_dates.length > 0) {
+      const allPast = sale.sale_dates.every(saleDate => {
+        const [year, month, day] = saleDate.date.split('-');
+        const saleEnd = new Date(
+          parseInt(year), parseInt(month) - 1, parseInt(day),
+          parseInt(saleDate.end_time?.split(':')[0] ?? 23),
+          parseInt(saleDate.end_time?.split(':')[1] ?? 59)
+        );
+        return now > saleEnd;
+      });
+      if (allPast) return false;
+    }
+    return true;
+  }
   if (sale.status === 'draft' || sale.status === 'completed' || sale.status === 'archived') return false;
   // Fall back to date-based status
   const displayStatus = getSaleDisplayStatus(sale);
