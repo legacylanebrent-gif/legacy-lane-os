@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
-            <Button onClick={loadStats} disabled={refreshing} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white gap-2">
+            <Button onClick={loadStats} disabled={refreshing} variant="outline" className="border-orange-400/60 text-white hover:bg-orange-600 hover:border-orange-500 gap-2">
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
