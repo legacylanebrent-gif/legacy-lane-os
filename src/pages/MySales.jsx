@@ -68,7 +68,8 @@ export default function MySales() {
   const [featuringId, setFeaturingId] = useState(null);
   const [matchingSaleId, setMatchingSaleId] = useState(null);
   const [buyerMatchData, setBuyerMatchData] = useState(null);
-  const [liquidationModal, setLiquidationModal] = useState({ open: false, step: 'details', error: null });
+  const [liquidationModal, setLiquidationModal] = useState({ open: false, step: 'confirm', error: null });
+  const [liquidationSale, setLiquidationSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -180,8 +181,14 @@ export default function MySales() {
     }
   };
 
-  const handleLiquidation = async (sale) => {
-    if (!confirm('Launch a Liquidation Event from this sale? All photos, titles, and descriptions will be copied into a new draft sale for new dates.')) return;
+  const handleLiquidationStart = (sale) => {
+    setLiquidationSale(sale);
+    setLiquidationModal({ open: true, step: 'confirm', error: null });
+  };
+
+  const handleLiquidationConfirm = async () => {
+    const sale = liquidationSale;
+    if (!sale) return;
 
     setLiquidationModal({ open: true, step: 'details', error: null });
 
@@ -229,9 +236,10 @@ export default function MySales() {
       setLiquidationModal(prev => ({ ...prev, step: 'done' }));
 
       setTimeout(() => {
-        setLiquidationModal({ open: false, step: 'details', error: null });
+        setLiquidationModal({ open: false, step: 'confirm', error: null });
+        setLiquidationSale(null);
         navigate(createPageUrl('SaleEditor') + '?saleId=' + newSale.id);
-      }, 800);
+      }, 1200);
     } catch (error) {
       console.error('Error launching liquidation event:', error);
       setLiquidationModal(prev => ({ ...prev, error: error.message || 'Failed to duplicate sale' }));
@@ -363,6 +371,12 @@ export default function MySales() {
         open={liquidationModal.open}
         currentStep={liquidationModal.step}
         error={liquidationModal.error}
+        saleTitle={liquidationSale?.title}
+        onCancel={() => {
+          setLiquidationModal({ open: false, step: 'confirm', error: null });
+          setLiquidationSale(null);
+        }}
+        onConfirm={handleLiquidationConfirm}
       />
 
       {/* Stats Cards */}
@@ -484,7 +498,7 @@ export default function MySales() {
                        return (
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
-                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidation(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Launch Liquidation</Button>)}
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Launch Liquidation</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
                                className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
