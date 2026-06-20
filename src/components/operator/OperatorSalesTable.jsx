@@ -24,7 +24,8 @@ export default function OperatorSalesTable({ sales, onEdit, onDelete }) {
       completed: 'bg-slate-400 text-white',
       cancelled: 'bg-red-100 text-red-700',
     };
-    return <Badge className={variants[status] || ''}>{status}</Badge>;
+    const label = status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    return <Badge className={variants[status] || ''}>{label}</Badge>;
   };
 
   return (

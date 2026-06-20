@@ -61,7 +61,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           decoding="async"
         />
         <div className="absolute top-3 right-3">
-          {(() => { const ds = getSaleDisplayStatus(estate); return <Badge className={getStatusColor(ds)}>{ds.charAt(0).toUpperCase() + ds.slice(1)}</Badge>; })()}
+          {(() => { const ds = getSaleDisplayStatus(estate); const label = ds.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); return <Badge className={getStatusColor(ds)}>{label}</Badge>; })()}
         </div>
         {estate.premium_listing && (
           <div className="absolute top-3 left-3">

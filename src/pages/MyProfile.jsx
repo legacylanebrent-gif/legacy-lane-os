@@ -1108,7 +1108,7 @@ export default function MyProfile() {
                               <span><Eye className="w-3 h-3 inline mr-0.5" />{sale.views || 0}</span>
                             </div>
                           </div>
-                          {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={ds === 'active' ? 'bg-green-100 text-green-700' : ds === 'upcoming' ? 'bg-blue-100 text-blue-700' : ds === 'completed' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}>{ds}</Badge>; })()}
+                          {(() => { const ds = getSaleDisplayStatus(sale); const label = ds.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); return <Badge className={ds === 'active' ? 'bg-green-100 text-green-700' : ds === 'upcoming' ? 'bg-blue-100 text-blue-700' : ds === 'completed' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}>{label}</Badge>; })()}
                         </Link>
                       ))}
                     </div>
