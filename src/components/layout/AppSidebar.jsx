@@ -40,8 +40,8 @@ export const ALL_NAV_ITEMS = [
   { page: 'ManageTeam',             label: 'Manage Team',            icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'My Inventory',            icon: Package,         group: 'Estate Sales' },
   { page: 'StorageManagement',      label: 'Storage Management',     icon: Warehouse,       group: 'Estate Sales' },
-  { page: 'Buyouts',                label: 'Buyouts',                icon: HandCoins,       group: 'Estate Sales' },
   { page: 'MyListings',             label: 'Marketplace Listings',   icon: ShoppingBag,     group: 'Estate Sales' },
+  { page: 'Buyouts',                label: 'Buyouts',                icon: HandCoins,       group: 'Estate Sales' },
 
   // ── CRM & LEADS ─────────────────────────────────────────────────────────────
   { page: 'CRM',                    label: 'CRM',                    icon: Users,           group: 'CRM & Leads' },
