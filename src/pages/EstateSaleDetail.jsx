@@ -406,7 +406,7 @@ export default function EstateSaleDetail() {
       };
     });
 
-  const sellerOrgName = operator?.company_name || sale.operator_name || 'Estate Sale Company';
+  const sellerOrgName = operator?.company_name || sale?.operator_name || 'Estate Sale Company';
   const sellerOrgUrl = operator?.company_website || window.location.origin;
 
   // JSON-LD Event schema for sale pages — Google rich results
