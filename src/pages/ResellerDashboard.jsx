@@ -112,9 +112,13 @@ export default function ResellerDashboard() {
   return (
     <>
       <div className="p-6 lg:p-8 space-y-8">
-        {/* CTA Button */}
-        <div className="flex justify-end">
-          <Button className="bg-orange-600 hover:bg-orange-700 text-white w-fit gap-2">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Reseller Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-1">Track your inventory, sales, and monthly performance</p>
+          </div>
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white gap-2">
             <Plus className="w-4 h-4" />
             List New Item
           </Button>
