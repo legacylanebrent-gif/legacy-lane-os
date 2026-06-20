@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket } from 'lucide-react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { Switch } from '@/components/ui/switch';
@@ -357,6 +357,67 @@ export default function SaleEditor() {
         alert('Photos uploaded but save to sale failed. Please click Save manually.');
       }
     }
+  };
+
+  const handlePublish = async () => {
+    // Determine proper status from sale dates
+    let newStatus = 'upcoming';
+    if (formData.sale_dates && formData.sale_dates.length > 0) {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const hasActiveDay = formData.sale_dates.some(d => d.date <= today);
+      if (hasActiveDay) {
+        // Check if any day is currently in progress or starts today
+        const hasToday = formData.sale_dates.some(d => d.date === today);
+        newStatus = hasToday ? 'active' : 'upcoming';
+      }
+    }
+
+    setFormData(prev => ({ ...prev, status: newStatus }));
+
+    // Use a microtask to ensure state is updated before saving
+    setTimeout(async () => {
+      setSaving(true);
+      try {
+        const user = await base44.auth.me();
+        const saveData = {
+          title: formData.title,
+          description: formData.description,
+          sale_type: formData.sale_type,
+          status: newStatus,
+          property_address: {
+            ...formData.property_address,
+            formatted_address: `${formData.property_address.street}, ${formData.property_address.city}, ${formData.property_address.state} ${formData.property_address.zip}`
+          },
+          location: formData.location,
+          sale_dates: formData.sale_dates,
+          commission_rate: formData.commission_rate ? parseFloat(formData.commission_rate) : null,
+          categories: formData.categories,
+          special_notes: formData.special_notes,
+          payment_methods: formData.payment_methods,
+          national_featured: featuredNationally,
+          local_featured: featuredLocally,
+        };
+        if (saleId) {
+          await base44.entities.EstateSale.update(saleId, saveData);
+        } else {
+          const newSale = await base44.entities.EstateSale.create({
+            ...saveData,
+            operator_id: user.id,
+            operator_name: user.full_name,
+            images: formData.images.map(img => ({ ...img })),
+          });
+          setSaleId(newSale.id);
+        }
+        alert(`Sale published as "${newStatus}"`);
+        navigate(createPageUrl('MySales'));
+      } catch (error) {
+        console.error('Error publishing sale:', error);
+        alert('Failed to publish sale: ' + error.message);
+      } finally {
+        setSaving(false);
+      }
+    }, 100);
   };
 
   const handleSave = async (publish = false, skipFeeCheck = false) => {
@@ -1115,6 +1176,10 @@ Be practical and realistic for an estate sale context.`,
             <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} size="sm" className="text-xs lg:text-sm">
               {saving ? 'Saving...' : 'Save'}
             </Button>
+            <Button onClick={handlePublish} disabled={saving} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs lg:text-sm">
+              <Rocket className="w-3 h-3 mr-1" />
+              {saving ? 'Publishing...' : 'Publish Sale'}
+            </Button>
             <Button onClick={() => handleSave(true)} disabled={saving} size="sm" className="bg-orange-600 hover:bg-orange-700 text-xs lg:text-sm">
               {saving ? 'Saving...' : 'Done'}
             </Button>
@@ -1684,6 +1749,10 @@ Return ONLY the description text, no extra commentary.`
           <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))}>Cancel</Button>
           <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
             {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button onClick={handlePublish} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Rocket className="w-4 h-4 mr-2" />
+            {saving ? 'Publishing...' : 'Publish Sale'}
           </Button>
           <Button onClick={() => handleSave(true)} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
             {saving ? 'Saving...' : 'Save & Close'}

@@ -13,7 +13,7 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import {
@@ -175,6 +175,34 @@ export default function MySales() {
     } catch (error) {
       console.error('Error deleting sale:', error);
       alert('Failed to delete sale');
+    }
+  };
+
+  const handleLiquidation = async (sale) => {
+    if (!confirm('Launch a Liquidation Event from this sale? All photos, titles, and descriptions will be copied into a new draft sale for new dates.')) return;
+
+    try {
+      const newSale = await base44.entities.EstateSale.create({
+        title: sale.title + ' — Liquidation Event',
+        description: sale.description || '',
+        sale_type: sale.sale_type || '',
+        status: 'draft',
+        property_address: sale.property_address ? { ...sale.property_address } : { street: '', city: '', state: '', zip: '' },
+        location: sale.location ? { ...sale.location } : null,
+        sale_dates: [],
+        images: (sale.images || []).map(img => (typeof img === 'string' ? { url: img, name: '', description: '' } : { ...img, price: null, ai_first_search_price: null, ai_deep_search_price: null, synopsis: '', skip_item: false, skip_serp_search: false, serp_search_status: null, categories: [] })),
+        categories: sale.categories ? [...sale.categories] : [],
+        commission_rate: sale.commission_rate || null,
+        special_notes: sale.special_notes || '',
+        payment_methods: sale.payment_methods ? [...sale.payment_methods] : [],
+        operator_id: user.id,
+        operator_name: user.full_name || user.company_name || '',
+      });
+
+      navigate(createPageUrl('SaleEditor') + '?saleId=' + newSale.id);
+    } catch (error) {
+      console.error('Error launching liquidation event:', error);
+      alert('Failed to launch liquidation event: ' + error.message);
     }
   };
 
@@ -418,6 +446,7 @@ export default function MySales() {
                        return (
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
+                           {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidation(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Launch Liquidation</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
                                className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
