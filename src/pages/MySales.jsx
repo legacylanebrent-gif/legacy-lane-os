@@ -16,6 +16,7 @@ import {
         Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
+import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,6 +68,7 @@ export default function MySales() {
   const [featuringId, setFeaturingId] = useState(null);
   const [matchingSaleId, setMatchingSaleId] = useState(null);
   const [buyerMatchData, setBuyerMatchData] = useState(null);
+  const [liquidationModal, setLiquidationModal] = useState({ open: false, step: 'details', error: null });
 
   useEffect(() => {
     loadData();
@@ -181,7 +183,32 @@ export default function MySales() {
   const handleLiquidation = async (sale) => {
     if (!confirm('Launch a Liquidation Event from this sale? All photos, titles, and descriptions will be copied into a new draft sale for new dates.')) return;
 
+    setLiquidationModal({ open: true, step: 'details', error: null });
+
+    const advance = (step) => {
+      return new Promise(resolve => {
+        setLiquidationModal(prev => ({ ...prev, step }));
+        setTimeout(resolve, 400); // Brief pause so the UI updates visibly
+      });
+    };
+
     try {
+      await advance('details');
+
+      await advance('location');
+
+      const copiedImages = (sale.images || []).map(img =>
+        typeof img === 'string'
+          ? { url: img, name: '', description: '' }
+          : { ...img, price: null, ai_first_search_price: null, ai_deep_search_price: null, synopsis: '', skip_item: false, skip_serp_search: false, serp_search_status: null, categories: [] }
+      );
+
+      await advance('images');
+
+      await advance('categories');
+
+      await advance('creating');
+
       const newSale = await base44.entities.EstateSale.create({
         title: sale.title + ' — Liquidation Event',
         description: sale.description || '',
@@ -190,7 +217,7 @@ export default function MySales() {
         property_address: sale.property_address ? { ...sale.property_address } : { street: '', city: '', state: '', zip: '' },
         location: sale.location ? { ...sale.location } : null,
         sale_dates: [],
-        images: (sale.images || []).map(img => (typeof img === 'string' ? { url: img, name: '', description: '' } : { ...img, price: null, ai_first_search_price: null, ai_deep_search_price: null, synopsis: '', skip_item: false, skip_serp_search: false, serp_search_status: null, categories: [] })),
+        images: copiedImages,
         categories: sale.categories ? [...sale.categories] : [],
         commission_rate: sale.commission_rate || null,
         special_notes: sale.special_notes || '',
@@ -199,10 +226,15 @@ export default function MySales() {
         operator_name: user.full_name || user.company_name || '',
       });
 
-      navigate(createPageUrl('SaleEditor') + '?saleId=' + newSale.id);
+      setLiquidationModal(prev => ({ ...prev, step: 'done' }));
+
+      setTimeout(() => {
+        setLiquidationModal({ open: false, step: 'details', error: null });
+        navigate(createPageUrl('SaleEditor') + '?saleId=' + newSale.id);
+      }, 800);
     } catch (error) {
       console.error('Error launching liquidation event:', error);
-      alert('Failed to launch liquidation event: ' + error.message);
+      setLiquidationModal(prev => ({ ...prev, error: error.message || 'Failed to duplicate sale' }));
     }
   };
 
@@ -325,6 +357,12 @@ export default function MySales() {
         }}
         sale={socialSale}
         user={user}
+      />
+
+      <LiquidationProgressModal
+        open={liquidationModal.open}
+        currentStep={liquidationModal.step}
+        error={liquidationModal.error}
       />
 
       {/* Stats Cards */}
