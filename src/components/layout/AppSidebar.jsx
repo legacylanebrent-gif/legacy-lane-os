@@ -30,6 +30,10 @@ export const ALL_NAV_ITEMS = [
   { page: 'Messages',               label: 'Messages',               icon: MessageSquare,   group: 'Main' },
   { page: 'BrowseItems',            label: 'Marketplace',            icon: ShoppingBag,     group: 'Main' },
   { page: 'MyPurchases',           label: 'My Purchases',           icon: ShoppingBag,     group: 'Main' },
+  { page: 'RewardsCheckins',        label: 'Check-ins & Rewards',    icon: Star,            group: 'Main' },
+  { page: 'Favorites',              label: 'Favorites',              icon: Heart,           group: 'Main' },
+  { page: 'MyReferrals',            label: 'My Referrals',           icon: Users,           group: 'Main' },
+  { page: 'MyTickets',              label: 'Support',                icon: MessageSquare,   group: 'Main' },
 
   // ── AGENT + OWNER (combined role) ────────────────────────────────────────────
   { page: 'OperatorDashboard',      label: 'Owner Dashboard',        icon: BarChart2,       group: 'Agent + Owner' },
@@ -73,12 +77,6 @@ export const ALL_NAV_ITEMS = [
   { page: 'MyResellerLeads',        label: 'My Leads',               icon: Award,           group: 'Reseller' },
   { page: 'Inventory',              label: 'My Inventory',           icon: Package,         group: 'Reseller' },
   { page: 'ResellerPackupEvents',   label: 'Packup Events',          icon: Calendar,        group: 'Reseller' },
-
-  // ── CONSUMER (available to all roles) ───────────────────────────────────────
-  { page: 'RewardsCheckins',        label: 'Check-ins & Rewards',    icon: Star,            group: 'Consumer' },
-  { page: 'Favorites',              label: 'Favorites',              icon: Heart,           group: 'Consumer' },
-  { page: 'MyReferrals',            label: 'My Referrals',           icon: Users,           group: 'Consumer' },
-  { page: 'MyTickets',              label: 'Support',                icon: MessageSquare,   group: 'Consumer' },
 
   // ── DIRECTORY ───────────────────────────────────────────────────────────────
   { page: 'Vendors',                label: 'Vendors',                icon: Briefcase,       group: 'Directory' },
@@ -202,7 +200,7 @@ const ADMIN_SUBGROUP_ORDER = [
   '⚙️ Platform Config',
 ];
 
-const TOP_GROUP_ORDER = ['Main', 'Estate Sales', 'CRM & Leads', 'Marketing', 'Agent + Owner', 'Finance', 'Education', 'Reseller', 'Consumer', 'Directory', 'Admin', 'Landing Pages'];
+const TOP_GROUP_ORDER = ['Main', 'Estate Sales', 'CRM & Leads', 'Marketing', 'Agent + Owner', 'Finance', 'Education', 'Reseller', 'Directory', 'Admin', 'Landing Pages'];
 
 // ─── Collapsible subgroup component ──────────────────────────────────────────
 function SubGroup({ label, items, currentPageName, defaultOpen }) {
