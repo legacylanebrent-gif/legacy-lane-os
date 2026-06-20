@@ -26,14 +26,6 @@ export const ALL_NAV_ITEMS = [
   // ── MAIN ────────────────────────────────────────────────────────────────────
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
   { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
-  { page: 'Notifications',          label: 'Notifications',          icon: Bell,            group: 'Main' },
-  { page: 'Messages',               label: 'Messages',               icon: MessageSquare,   group: 'Main' },
-  { page: 'BrowseItems',            label: 'Marketplace',            icon: ShoppingBag,     group: 'Main' },
-  { page: 'MyPurchases',           label: 'My Purchases',           icon: ShoppingBag,     group: 'Main' },
-  { page: 'RewardsCheckins',        label: 'Check-ins & Rewards',    icon: Star,            group: 'Main' },
-  { page: 'Favorites',              label: 'Favorites',              icon: Heart,           group: 'Main' },
-  { page: 'MyReferrals',            label: 'My Referrals',           icon: Users,           group: 'Main' },
-  { page: 'MyTickets',              label: 'Support',                icon: MessageSquare,   group: 'Main' },
 
   // ── AGENT + OWNER (combined role) ────────────────────────────────────────────
   { page: 'OperatorDashboard',      label: 'Owner Dashboard',        icon: BarChart2,       group: 'Agent + Owner' },
