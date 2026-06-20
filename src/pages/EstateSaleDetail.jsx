@@ -376,7 +376,7 @@ export default function EstateSaleDetail() {
   const firstImage = sale?.images?.[0];
   const firstImageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url;
   const saleCategories = sale?.categories?.join(', ');
-  const saleDates = sale?.sale_dates?.map(d => format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy')).join(', ');
+  const saleDates = sale?.sale_dates?.map(d => format(new Date(d.date + 'T00:00:00'), 'MMM d, yyyy'))?.join(', ') || '';
 
   const seoTitle = sale
     ? `${sale.title}${saleLocation ? ` — Estate Sale in ${saleLocation}` : ''} | EstateSalen.com`
