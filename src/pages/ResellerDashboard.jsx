@@ -147,29 +147,6 @@ export default function ResellerDashboard() {
         </Select>
       </div>
 
-      {/* Fee Summary */}
-      <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
-        <CardHeader>
-          <CardTitle className="text-orange-900">Monthly Fees for {selectedMonth}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
-              <p className="text-sm text-slate-600 mb-1">Subscription Fee</p>
-              <p className="text-2xl font-bold text-orange-600">${SUBSCRIPTION_FEE}</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
-              <p className="text-sm text-slate-600 mb-1">Items ({monthItems.length} × ${PER_ITEM_FEE})</p>
-              <p className="text-2xl font-bold text-cyan-600">${monthlyItemFee}</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
-              <p className="text-sm text-slate-600 mb-1">Total Monthly Fee</p>
-              <p className="text-2xl font-bold text-slate-900">${totalMonthlyFee}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* KPI Cards */}
       <div className="grid md:grid-cols-4 gap-4">
         <Card>
@@ -345,6 +322,29 @@ export default function ResellerDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Fee Summary */}
+      <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+        <CardHeader>
+          <CardTitle className="text-orange-900">Monthly Fees for {selectedMonth}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-orange-100">
+              <p className="text-sm text-slate-600 mb-1">Subscription Fee</p>
+              <p className="text-2xl font-bold text-orange-600">${SUBSCRIPTION_FEE}</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-orange-100">
+              <p className="text-sm text-slate-600 mb-1">Items ({monthItems.length} × ${PER_ITEM_FEE})</p>
+              <p className="text-2xl font-bold text-cyan-600">${monthlyItemFee}</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-orange-100">
+              <p className="text-sm text-slate-600 mb-1">Total Monthly Fee</p>
+              <p className="text-2xl font-bold text-slate-900">${totalMonthlyFee}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
         <SharedFooter />
       </div>
