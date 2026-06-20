@@ -373,7 +373,7 @@ export default function AdminDashboard() {
             <QuickLinkCard icon={Cpu} label="Autonomous Runs Dashboard" sub="Meta campaigns & agent runs" href="/AutonomousRunsDashboard" color="bg-blue-100 text-blue-600" badge={stats.campaignPending} />
             <QuickLinkCard icon={Brain} label="Admin AI Estate Sale Company Owner" sub="Command autonomous agents" href="/AdminAIOperator" color="bg-amber-100 text-amber-600" badge={stats.runsPending} />
             <QuickLinkCard icon={Shield} label="SuperAgent Command Center" sub="Manage all 10 SuperAgents" href="/SuperAgentCommandCenter" color="bg-emerald-100 text-emerald-600" />
-            <QuickLinkCard icon={Cpu} label="SuperAgent Command Center" sub="Manage all 10 SuperAgents" href="/SuperAgentCommandCenter" color="bg-indigo-100 text-indigo-600" />
+
             <QuickLinkCard icon={Users} label="User Management" sub="Manage all platform users" href="/AdminUsers" color="bg-slate-100 text-slate-600" badge={stats.totalUsers} />
             <QuickLinkCard icon={BarChart3} label="Platform Analytics" sub="Full platform metrics" href="/PlatformAnalytics" color="bg-cyan-100 text-cyan-600" />
             <QuickLinkCard icon={DollarSign} label="Revenue Projections" sub="Growth & income forecasting" href="/Revenue" color="bg-green-100 text-green-600" />
