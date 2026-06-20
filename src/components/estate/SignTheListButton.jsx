@@ -10,15 +10,45 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format, isBefore } from 'date-fns';
 
+function getDayTimes(d) {
+  if (!d.date) return null;
+  const [y, m, day] = d.date.split('-').map(Number);
+  const startParts = (d.start_time || '00:00').split(':').map(Number);
+  const endParts = (d.end_time || '23:59').split(':').map(Number);
+  return {
+    start: new Date(y, m - 1, day, ...startParts),
+    end: new Date(y, m - 1, day, ...endParts),
+  };
+}
+
+function isInProgress(d, now) {
+  const times = getDayTimes(d);
+  if (!times) return false;
+  return now >= times.start && now <= times.end;
+}
+
 function getAvailableSaleDays(saleDates) {
   if (!saleDates?.length) return [];
   const now = new Date();
-  return saleDates.filter(d => {
+  const sorted = [...saleDates].sort((a, b) => a.date.localeCompare(b.date));
+
+  // Filter out days that are currently in progress (between start and end time)
+  return sorted.filter(d => {
     if (!d.date) return false;
-    const [y, m, day] = d.date.split('-').map(Number);
-    const startDt = new Date(y, m - 1, day, ...(d.start_time || '00:00').split(':').map(Number));
-    return !isBefore(startDt, now); // day hasn't started yet
-  }).sort((a, b) => a.date.localeCompare(b.date));
+    const times = getDayTimes(d);
+    if (!times) return false;
+    // Day hasn't started yet → available
+    if (now < times.start) return true;
+    // Day is in progress → NOT available
+    if (now <= times.end) return false;
+    // Day has ended → available ONLY if there's a future day after this one
+    const hasFutureDay = sorted.some(fd => {
+      if (!fd.date || fd.date <= d.date) return false;
+      const ft = getDayTimes(fd);
+      return ft && now < ft.end;
+    });
+    return hasFutureDay;
+  });
 }
 
 export default function SignTheListButton({ saleId, saleTitle, saleDates, user, onSuccess, earlySignInEnabled = true }) {
@@ -110,10 +140,15 @@ export default function SignTheListButton({ saleId, saleTitle, saleDates, user, 
   }
 
   if (availableDays.length === 0) {
+    const now = new Date();
+    const activeDay = (saleDates || []).find(d => isInProgress(d, now));
+    const msg = activeDay
+      ? `Sale In Progress — Check Back After ${format(activeDay.end_time ? new Date(activeDay.date + 'T' + activeDay.end_time) : new Date(), 'h:mm a')}`
+      : 'Sign-in List Closed';
     return (
       <Button disabled className="w-full bg-slate-400 gap-2 cursor-not-allowed">
         <ClipboardList className="w-4 h-4" />
-        Sign-in List Closed (Sale Has Started)
+        {msg}
       </Button>
     );
   }

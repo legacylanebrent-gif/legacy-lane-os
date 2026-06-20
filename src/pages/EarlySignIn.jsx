@@ -116,13 +116,19 @@ export default function EarlySignIn() {
 
   const sortedDays = Object.keys(signersByDay).sort((a, b) => a.localeCompare(b));
 
-  const isDayExpired = (dateStr) => {
-    if (!sale?.sale_dates) return false;
+  const getDayStatus = (dateStr) => {
+    if (!sale?.sale_dates) return 'open';
     const dayInfo = sale.sale_dates.find(d => d.date === dateStr);
-    if (!dayInfo) return false;
+    if (!dayInfo) return 'open';
     const [y, m, day] = dateStr.split('-').map(Number);
-    const startDt = new Date(y, m - 1, day, ...(dayInfo.start_time || '00:00').split(':').map(Number));
-    return new Date() >= startDt;
+    const startParts = (dayInfo.start_time || '00:00').split(':').map(Number);
+    const endParts = (dayInfo.end_time || '23:59').split(':').map(Number);
+    const startDt = new Date(y, m - 1, day, ...startParts);
+    const endDt = new Date(y, m - 1, day, ...endParts);
+    const now = new Date();
+    if (now < startDt) return 'open';
+    if (now <= endDt) return 'in_progress';
+    return 'closed';
   };
 
   return (
@@ -194,14 +200,24 @@ export default function EarlySignIn() {
       {sortedDays.map(date => {
         const daySigners = signersByDay[date];
         const expanded = expandedDays[date] !== false;
-        const expired = isDayExpired(date);
+        const status = getDayStatus(date);
         const dayLabel = format(new Date(date + 'T00:00:00'), 'EEEE, MMMM d, yyyy');
 
         // Find sale day info for time display
         const dayInfo = sale?.sale_dates?.find(d => d.date === date);
 
+        const statusBadge = status === 'open'
+          ? <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Open</span>
+          : status === 'in_progress'
+          ? <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Sale In Progress</span>
+          : <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Closed</span>;
+
+        const cardBorder = status === 'in_progress' ? 'border-amber-200 bg-amber-50/30' 
+          : status === 'closed' ? 'border-red-200 bg-red-50/30' 
+          : '';
+
         return (
-          <Card key={date} className={expired ? 'border-red-200 bg-red-50/30' : ''}>
+          <Card key={date} className={cardBorder}>
             <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleDay(date)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -209,16 +225,7 @@ export default function EarlySignIn() {
                     <Calendar className="w-5 h-5 text-orange-600" />
                     {dayLabel}
                   </CardTitle>
-                  {expired && (
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                      List Closed
-                    </span>
-                  )}
-                  {!expired && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                      Open
-                    </span>
-                  )}
+                  {statusBadge}
                 </div>
                 <div className="flex items-center gap-3">
                   {dayInfo && (
