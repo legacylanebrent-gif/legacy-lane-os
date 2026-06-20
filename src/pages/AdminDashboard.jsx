@@ -394,23 +394,34 @@ export default function AdminDashboard() {
         <CentralRepositoryWidget />
 
         {/* ── Motivational Footer ── */}
-        <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-              <Rocket className="w-6 h-6" />
+        <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 text-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="flex flex-col md:flex-row">
+            {/* Left: Message */}
+            <div className="flex-1 p-6 md:p-8">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 bg-white/15 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-sm">
+                  <Rocket className="w-7 h-7" />
+                </div>
+                <div className="space-y-3">
+                  <h3 className="text-xl md:text-2xl font-black leading-tight">Every enriched lead is a door you haven't knocked on yet.</h3>
+                  <p className="text-orange-50 text-sm md:text-base leading-relaxed">
+                    You have <strong className="text-white">{fmt((stats.leadsWithEmail || 0) - (stats.outreachTotal || 0))}</strong> leads with emails who haven't been contacted yet. Your next paid Estate Sale Company Owner is in that list.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-black">Every enriched lead is a door you haven't knocked on yet.</h3>
-              <p className="text-orange-100 text-sm mt-0.5">
-                You have <strong>{fmt((stats.leadsWithEmail || 0) - (stats.outreachTotal || 0))}</strong> leads with emails who haven't been contacted yet.
-                Your next paid Estate Sale Company Owner is in that list.
-              </p>
+            {/* Right: CTA */}
+            <div className="md:w-56 bg-white/10 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-6 md:p-8">
+              <div className="text-center">
+                <div className="text-4xl font-black text-white">{fmt((stats.leadsWithEmail || 0) - (stats.outreachTotal || 0))}</div>
+                <div className="text-xs text-orange-100 uppercase tracking-wider font-semibold">Untapped Leads</div>
+              </div>
+              <Link to="/FutOperLeads" className="w-full">
+                <Button className="w-full bg-white text-orange-600 hover:bg-orange-50 font-bold text-sm gap-2">
+                  Start Outreach <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
-            <Link to="/FutOperLeads" className="ml-auto shrink-0">
-              <Button className="bg-white text-orange-600 hover:bg-orange-50 font-bold text-sm gap-2 whitespace-nowrap">
-                Start Outreach <ArrowUpRight className="w-4 h-4" />
-              </Button>
-            </Link>
           </div>
         </div>
 
