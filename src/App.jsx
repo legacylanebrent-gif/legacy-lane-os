@@ -324,7 +324,7 @@ const AuthenticatedApp = () => {
       <Route path="/PropstreamREListingImporter" element={<LayoutWrapper currentPageName="PropstreamREListingImporter"><PropstreamREListingImporter /></LayoutWrapper>} />
       <Route path="/agent-listing-estate-sale-request" element={<AgentListingEstateSaleRequest />} />
       <Route path="/claim-business" element={<ClaimBusiness />} />
-      <Route path="/reseller-network" element={<ResellerNetwork />} />
+      <Route path="/ResellerNetwork" element={<ResellerNetwork />} />
       <Route path="/cleanout-network" element={<CleanoutNetwork />} />
       <Route path="/AdminCleanoutLeads" element={<LayoutWrapper currentPageName="AdminCleanoutLeads"><AdminCleanoutLeads /></LayoutWrapper>} />
       <Route path="/LaunchAuditCenter" element={<LayoutWrapper currentPageName="LaunchAuditCenter"><LaunchAuditCenter /></LayoutWrapper>} />
