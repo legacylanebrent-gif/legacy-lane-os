@@ -58,11 +58,17 @@ export default function MyEarlySignIns() {
     return idx !== -1 ? idx + 1 : null;
   };
 
-  // Group sign-ins by sale and compute positions
+  const getDayLabel = (record) => {
+    if (!record.sale_date) return null;
+    return format(new Date(record.sale_date + 'T00:00:00'), 'EEE, MMM d');
+  };
+
+  // Group sign-ins by sale+day and compute per-day positions
   const saleGroups = {};
   signIns.forEach(r => {
-    if (!saleGroups[r.sale_id]) saleGroups[r.sale_id] = [];
-    saleGroups[r.sale_id].push(r);
+    const key = `${r.sale_id}||${r.sale_date || 'legacy'}`;
+    if (!saleGroups[key]) saleGroups[key] = [];
+    saleGroups[key].push(r);
   });
 
   if (loading) {
@@ -115,8 +121,10 @@ export default function MyEarlySignIns() {
             })
             .map((record) => {
             const sale = sales[record.sale_id];
-            const allForSale = saleGroups[record.sale_id] || [record];
+            const groupKey = `${record.sale_id}||${record.sale_date || 'legacy'}`;
+            const allForSale = saleGroups[groupKey] || [record];
             const position = getPosition(record, allForSale);
+            const dayLabel = getDayLabel(record);
             const displayStatus = sale ? getSaleDisplayStatus(sale) : null;
             const isCompleted = displayStatus === 'completed';
             const isActive = displayStatus === 'active' || displayStatus === 'upcoming' || displayStatus === 'starts_today' || displayStatus === 'starts_tomorrow';
@@ -165,6 +173,9 @@ export default function MyEarlySignIns() {
                       );
                     })()}
                     <p className="text-xs text-slate-400">
+                      {dayLabel && (
+                        <span className="text-cyan-600 font-medium">Day: {dayLabel} · </span>
+                      )}
                       Signed {record.signed_at ? format(new Date(record.signed_at), 'MMM d, yyyy h:mm a') : '—'}
                     </p>
                   </div>

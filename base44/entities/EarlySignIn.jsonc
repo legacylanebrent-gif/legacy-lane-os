@@ -4,30 +4,32 @@
   "properties": {
     "sale_id": {
       "type": "string",
-      "description": "Estate sale ID"
+      "description": "EstateSale ID"
     },
     "sale_title": {
       "type": "string",
-      "description": "Estate sale title for quick reference"
+      "description": "Cached sale title"
+    },
+    "sale_date": {
+      "type": "string",
+      "description": "ISO date (YYYY-MM-DD) for which day the user signed up"
     },
     "user_email": {
       "type": "string",
-      "description": "Email of the user who signed the list"
+      "description": "Email of the user who signed"
     },
     "user_name": {
       "type": "string",
-      "description": "Full name of the user who signed the list"
+      "description": "Name of the user who signed"
     },
     "signed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the user signed the list"
+      "description": "When the user signed"
     }
   },
   "required": [
     "sale_id",
-    "sale_title",
-    "user_email",
-    "user_name"
+    "user_email"
   ]
 }

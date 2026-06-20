@@ -971,6 +971,7 @@ export default function EstateSaleDetail() {
                   <SignTheListButton
                     saleId={sale.id}
                     saleTitle={sale.title}
+                    saleDates={sale.sale_dates}
                     user={currentUser}
                     onSuccess={() => {}}
                     earlySignInEnabled={sale.early_sign_in_enabled !== false}

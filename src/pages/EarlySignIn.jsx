@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Download, Loader2, ClipboardList, Trash2 } from 'lucide-react';
+import { ArrowLeft, Users, Download, Loader2, ClipboardList, Trash2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 export default function EarlySignIn() {
@@ -12,6 +13,7 @@ export default function EarlySignIn() {
   const [sale, setSale] = useState(null);
   const [signers, setSigners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedDays, setExpandedDays] = useState({});
 
   useEffect(() => {
     loadData();
@@ -37,9 +39,14 @@ export default function EarlySignIn() {
 
       setSale(saleData[0]);
 
-      // Load early sign-ins for this sale
       const signInData = await base44.entities.EarlySignIn.filter({ sale_id: saleId }, '-signed_at', 500);
       setSigners(signInData);
+
+      // Auto-expand the first day
+      const days = [...new Set(signInData.map(s => s.sale_date))].filter(Boolean).sort();
+      if (days.length > 0) {
+        setExpandedDays({ [days[0]]: true });
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -63,8 +70,9 @@ export default function EarlySignIn() {
       return;
     }
 
-    const headers = ['Name', 'Email', 'Signed At'];
+    const headers = ['Day', 'Name', 'Email', 'Signed At'];
     const rows = signers.map(s => [
+      s.sale_date ? format(new Date(s.sale_date + 'T00:00:00'), 'MMM d, yyyy (EEE)') : '—',
       s.user_name,
       s.user_email,
       s.signed_at ? format(new Date(s.signed_at), 'MMM d, yyyy h:mm a') : '—'
@@ -79,6 +87,10 @@ export default function EarlySignIn() {
     a.click();
   };
 
+  const toggleDay = (date) => {
+    setExpandedDays(prev => ({ ...prev, [date]: !prev[date] }));
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -89,6 +101,29 @@ export default function EarlySignIn() {
       </div>
     );
   }
+
+  // Group signers by sale_date
+  const signersByDay = {};
+  const noDateSigners = [];
+  signers.forEach(s => {
+    if (s.sale_date) {
+      if (!signersByDay[s.sale_date]) signersByDay[s.sale_date] = [];
+      signersByDay[s.sale_date].push(s);
+    } else {
+      noDateSigners.push(s);
+    }
+  });
+
+  const sortedDays = Object.keys(signersByDay).sort((a, b) => a.localeCompare(b));
+
+  const isDayExpired = (dateStr) => {
+    if (!sale?.sale_dates) return false;
+    const dayInfo = sale.sale_dates.find(d => d.date === dateStr);
+    if (!dayInfo) return false;
+    const [y, m, day] = dateStr.split('-').map(Number);
+    const startDt = new Date(y, m - 1, day, ...(dayInfo.start_time || '00:00').split(':').map(Number));
+    return new Date() >= startDt;
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -101,13 +136,13 @@ export default function EarlySignIn() {
           </Button>
           <div>
             <h1 className="text-4xl font-serif font-bold text-slate-900">{sale?.title}</h1>
-            <p className="text-slate-600">Early Sign In List</p>
+            <p className="text-slate-600">Early Sign In Lists</p>
           </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-slate-600 mb-1">Total Signers</div>
@@ -116,78 +151,143 @@ export default function EarlySignIn() {
         </Card>
         <Card>
           <CardContent className="p-4">
+            <div className="text-sm text-slate-600 mb-1">Days with Lists</div>
+            <div className="text-3xl font-bold text-orange-600">{sortedDays.length + (noDateSigners.length > 0 ? 1 : 0)}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
             <div className="text-sm text-slate-600 mb-1">Sale Title</div>
-            <div className="text-lg font-semibold text-slate-900">{sale?.title}</div>
+            <div className="text-lg font-semibold text-slate-900 truncate">{sale?.title}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Signers List */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="w-5 h-5" />
-              Early Sign In Records ({signers.length})
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCSV}
-              disabled={signers.length === 0}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {signers.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
-              <Users className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-              <p>No early sign-ins yet</p>
-              <p className="text-sm mt-2">
-                Users can sign the list from the sale page
-              </p>
+      {/* Legacy signers without a date */}
+      {noDateSigners.length > 0 && (
+        <Card className="border-amber-300">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardList className="w-5 h-5 text-amber-600" />
+                Legacy Sign-Ins (No Day Assigned) — {noDateSigners.length}
+              </CardTitle>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-left">
-                    <th className="pb-2 px-2 text-slate-500 font-medium">#</th>
-                    <th className="pb-2 px-2 text-slate-500 font-medium">Name</th>
-                    <th className="pb-2 px-2 text-slate-500 font-medium">Email</th>
-                    <th className="pb-2 px-2 text-slate-500 font-medium">Signed At</th>
-                    <th className="pb-2 px-2 text-slate-500 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {signers.map((signer, idx) => (
-                    <tr key={signer.id || idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                      <td className="py-3 px-2 text-slate-400">{signers.length - idx}</td>
-                      <td className="py-3 px-2 font-medium text-slate-800">{signer.user_name}</td>
-                      <td className="py-3 px-2 text-slate-600">{signer.user_email}</td>
-                      <td className="py-3 px-2 text-slate-500 text-xs">
-                        {signer.signed_at ? format(new Date(signer.signed_at), 'MMM d, yyyy h:mm a') : '—'}
-                      </td>
-                      <td className="py-3 px-2">
-                        <button
-                          onClick={() => handleDelete(signer.id)}
-                          className="text-red-400 hover:text-red-600 transition-colors"
-                          title="Remove from list"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <SignersTable signers={noDateSigners} onDelete={handleDelete} startIndex={1} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Day-by-day lists */}
+      {sortedDays.length === 0 && noDateSigners.length === 0 && (
+        <Card>
+          <CardContent className="py-16 text-center text-slate-500">
+            <Users className="w-16 h-16 text-slate-300 mx-auto mb-3" />
+            <p>No early sign-ins yet</p>
+            <p className="text-sm mt-2">Users can sign the list from the sale page</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {sortedDays.map(date => {
+        const daySigners = signersByDay[date];
+        const expanded = expandedDays[date] !== false;
+        const expired = isDayExpired(date);
+        const dayLabel = format(new Date(date + 'T00:00:00'), 'EEEE, MMMM d, yyyy');
+
+        // Find sale day info for time display
+        const dayInfo = sale?.sale_dates?.find(d => d.date === date);
+
+        return (
+          <Card key={date} className={expired ? 'border-red-200 bg-red-50/30' : ''}>
+            <CardHeader className="pb-2 cursor-pointer" onClick={() => toggleDay(date)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Calendar className="w-5 h-5 text-orange-600" />
+                    {dayLabel}
+                  </CardTitle>
+                  {expired && (
+                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                      List Closed
+                    </span>
+                  )}
+                  {!expired && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Open
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {dayInfo && (
+                    <span className="text-sm text-slate-500">
+                      {format(new Date(date + 'T00:00:00'), 'h:mm a')} — {format(new Date(`${date}T${dayInfo.end_time || '17:00'}`), 'h:mm a')}
+                    </span>
+                  )}
+                  <Badge variant="secondary" className="text-sm">{daySigners.length} signed</Badge>
+                  {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </div>
+              </div>
+            </CardHeader>
+            {expanded && (
+              <CardContent>
+                <SignersTable signers={daySigners} onDelete={handleDelete} startIndex={1} />
+              </CardContent>
+            )}
+          </Card>
+        );
+      })}
+
+      {/* Export button */}
+      {signers.length > 0 && (
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={handleExportCSV}>
+            <Download className="w-4 h-4 mr-2" />
+            Export All to CSV
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SignersTable({ signers, onDelete, startIndex }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-slate-200 text-left">
+            <th className="pb-2 px-2 text-slate-500 font-medium">#</th>
+            <th className="pb-2 px-2 text-slate-500 font-medium">Name</th>
+            <th className="pb-2 px-2 text-slate-500 font-medium">Email</th>
+            <th className="pb-2 px-2 text-slate-500 font-medium">Signed At</th>
+            <th className="pb-2 px-2 text-slate-500 font-medium"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {signers.map((signer, idx) => (
+            <tr key={signer.id || idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+              <td className="py-3 px-2 text-slate-400 font-medium">{startIndex + idx}</td>
+              <td className="py-3 px-2 font-medium text-slate-800">{signer.user_name}</td>
+              <td className="py-3 px-2 text-slate-600">{signer.user_email}</td>
+              <td className="py-3 px-2 text-slate-500 text-xs">
+                {signer.signed_at ? format(new Date(signer.signed_at), 'MMM d, yyyy h:mm a') : '—'}
+              </td>
+              <td className="py-3 px-2">
+                <button
+                  onClick={() => onDelete(signer.id)}
+                  className="text-red-400 hover:text-red-600 transition-colors"
+                  title="Remove from list"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
