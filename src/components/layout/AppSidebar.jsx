@@ -71,7 +71,6 @@ export const ALL_NAV_ITEMS = [
   // ── RESELLER ──────────────────────────────────────────────────────────────────
   { page: 'ResellerDashboard',      label: 'My Dashboard',           icon: LayoutDashboard, group: 'Reseller' },
   { page: 'Inventory',              label: 'My Inventory',           icon: Package,         group: 'Reseller' },
-  { page: 'ResellerNetwork',        label: 'Reseller Network',       icon: Users,           group: 'Reseller' },
   { page: 'ResellerPackupEvents',   label: 'Packup Events',          icon: Calendar,        group: 'Reseller' },
 
   // ── CONSUMER (available to all roles) ───────────────────────────────────────
