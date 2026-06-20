@@ -180,8 +180,12 @@ export default function MyPurchases() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <ShoppingBag className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600">
+                          {purchase.image_url ? (
+                            <img src={purchase.image_url} alt={purchase.item_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <ShoppingBag className="w-6 h-6 text-white" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xl font-semibold text-slate-900 mb-2">
