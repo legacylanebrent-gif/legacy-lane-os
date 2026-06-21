@@ -133,7 +133,7 @@ export default function EstateSaleFinder() {
       setLoading(true);
       const { data } = await base44.functions.invoke('searchNearbyEstateSales', { lat, lng, radius: 50000 });
       if (data.success) {
-        setEstates(data.estates);
+        setEstates((data.estates || []).filter(s => shouldShowSaleOnFrontend(s)));
       }
     } catch (error) {
       console.error('Error searching nearby:', error);
