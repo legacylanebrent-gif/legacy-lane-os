@@ -80,10 +80,36 @@ Deno.serve(async (req) => {
         `${i + 1}. [${item.category}] ${item.task}\n   ${item.description || ''}`
       ).join('\n\n');
 
+      const checklistHtml = items.map((item, i) =>
+        `<tr>
+          <td style="padding:8px 12px;vertical-align:top;font-size:13px;color:#f97316;font-weight:700;">${i + 1}.</td>
+          <td style="padding:8px 12px;vertical-align:top;font-size:13px;color:#475569;"><strong>${(item.category || '').replace(/&/g,'&amp;')}</strong> — ${(item.task || '').replace(/&/g,'&amp;')}</td>
+        </tr>`
+      ).join('');
+
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: email,
         subject: magnet.email_subject,
-        body: `Hi ${first_name},\n\n${magnet.email_body}\n\n---\n\nYOUR CHECKLIST:\n\n${checklistText}\n\n---\n\nIMPORTANT DISCLAIMER: This checklist is for educational purposes only. EstateSalen does not provide legal, tax, or financial advice. Always confirm requirements with your local court or a licensed attorney.\n\nWarm regards,\nThe EstateSalen Team\nhttps://www.estatesalen.com`,
+        body: `Hi ${first_name},\n\n${magnet.email_body}\n\n---\n\nYOUR CHECKLIST:\n\n${checklistText}\n\n---\n\nIMPORTANT DISCLAIMER: This checklist is for educational purposes only. EstateSalen does not provide legal, tax, or financial advice.\n\n— The EstateSalen Team`,
+        html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+  <div style="background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;">
+    <h1 style="margin:0;color:#fff;font-size:20px;font-weight:700;">EstateSalen</h1>
+  </div>
+  <div style="background:#fff;border-radius:12px;padding:24px 28px;border:1px solid #e2e8f0;">
+    <p style="margin:0 0 16px;color:#475569;font-size:15px;">Hi ${(first_name || 'there').replace(/&/g,'&amp;')},</p>
+    <p style="margin:0 0 16px;color:#475569;font-size:15px;line-height:1.7;">${(magnet.email_body || '').replace(/&/g,'&amp;')}</p>
+    <h3 style="margin:24px 0 12px;font-size:16px;color:#1e293b;">Your Checklist</h3>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">${checklistHtml}</table>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px 18px;margin:20px 0;">
+      <p style="margin:0;color:#991b1b;font-size:13px;"><strong>Disclaimer:</strong> This checklist is for educational purposes only. EstateSalen does not provide legal, tax, or financial advice.</p>
+    </div>
+    <div style="text-align:center;margin:24px 0 0;">
+      <a href="https://www.estatesalen.com/estate-checklist" style="display:inline-block;background:#f97316;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Visit EstateSalen.com</a>
+    </div>
+  </div>
+</div></body></html>`
       });
     }
 

@@ -88,11 +88,23 @@ Deno.serve(async (req) => {
     for (const reseller of targetResellers) {
       // --- Free: Email notification ---
       try {
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: reseller.email,
-          subject: `🗂️ New Reseller Event Near You: ${event.event_title}`,
-          body: `Hi ${reseller.contact_name || reseller.business_name},\n\nA new reseller pack-up event has just been published near you!\n\nEvent: ${event.event_title}\nType: ${eventTypeLabel}\nDate: ${eventDateStr}\nTime: ${event.start_time || 'TBD'}${event.end_time ? ' – ' + event.end_time : ''}\nLocation: ${locationDisplay}\n\n${event.event_notes ? 'Notes: ' + event.event_notes + '\n\n' : ''}Register now to claim your spot.\n\n—EstateSalen Reseller Network`
-        });
+      const name = reseller.contact_name || reseller.business_name || 'there';
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: reseller.email,
+        subject: `🗂️ New Reseller Event Near You: ${event.event_title}`,
+        body: `Hi ${name},\n\nA new reseller pack-up event has just been published near you!\n\nEvent: ${event.event_title}\nType: ${eventTypeLabel}\nDate: ${eventDateStr}\nTime: ${event.start_time || 'TBD'}${event.end_time ? ' – ' + event.end_time : ''}\nLocation: ${locationDisplay}\n\n${event.event_notes ? 'Notes: ' + event.event_notes + '\n\n' : ''}Register now to claim your spot.\n\n—EstateSalen Reseller Network`,
+        html: `<p>Hi ${name.replace(/&/g,'&amp;').replace(/</g,'&lt;')},</p>
+      <p>A new reseller pack-up event has just been published near you!</p>
+      <div style="background:#f8fafc;border-left:4px solid #f97316;padding:16px 20px;border-radius:6px;margin:16px 0;">
+      <h3 style="margin:0 0 8px;color:#1e293b;">${event.event_title.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</h3>
+      <p style="margin:4px 0;color:#64748b;">📅 ${eventDateStr}${event.start_time ? ' at ' + event.start_time : ''}${event.end_time ? ' – ' + event.end_time : ''}</p>
+      <p style="margin:4px 0;color:#64748b;">📍 ${locationDisplay}</p>
+      <p style="margin:4px 0;color:#64748b;">🎯 ${eventTypeLabel}</p>
+      ${event.event_notes ? `<p style="margin:8px 0 0;color:#475569;">${event.event_notes.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p>` : ''}
+      </div>
+      <p style="margin:16px 0;"><a href="https://estatesalen.com/ResellerPackupEvents" style="background:#f97316;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Register Now</a></p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px;">— EstateSalen Reseller Network</p>`
+      });
         emailsSent++;
       } catch { /* non-blocking */ }
 

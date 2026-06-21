@@ -62,37 +62,24 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: vendor.email,
             subject: `New Cleanout Opportunity In Your Service Area — EstateSalen`,
-            body: `Hi ${firstName},
-
-A new property cleanout opportunity has been submitted in your service area through EstateSalen.
-
-PROPERTY
-${property_address}
-${city}, ${state} ${zip}
-
-TIMELINE
-${timeline || 'Not specified'}
-
-PROPERTY CONDITION
-${property_condition || 'Not specified'}
-
-CLEANOUT TYPE
-${cleanout_type || 'Not specified'}
-
-${agent_name ? `SUBMITTED BY\n${agent_name}${brokerage ? ` · ${brokerage}` : ''}\n${agent_email || ''}${agent_phone ? `\n${agent_phone}` : ''}` : ''}
-
-NOTES
-${notes || 'None'}
-
----
-SUGGESTED NEXT STEP
-Contact the agent and schedule an on-site estimate.
-
-Suggested opener:
-"Hi ${agent_name?.split(' ')[0] || 'there'}, I saw that you submitted ${property_address} through EstateSalen for cleanout assistance. I service that area and would love to schedule an estimate."
-
-—
-EstateSalen Cleanout Network`
+            body: `Hi ${firstName},\n\nA new property cleanout opportunity has been submitted in your service area through EstateSalen.\n\nPROPERTY\n${property_address}\n${city}, ${state} ${zip}\n\nTIMELINE\n${timeline || 'Not specified'}\n\nPROPERTY CONDITION\n${property_condition || 'Not specified'}\n\nCLEANOUT TYPE\n${cleanout_type || 'Not specified'}\n\n${agent_name ? 'SUBMITTED BY\n' + agent_name + (brokerage ? ' · ' + brokerage : '') + '\n' + (agent_email || '') + (agent_phone ? '\n' + agent_phone : '') + '\n\n' : ''}NOTES\n${notes || 'None'}\n\nSUGGESTED NEXT STEP: Contact the agent and schedule an on-site estimate.\n\nSuggested opener: "Hi ${agent_name?.split(' ')[0] || 'there'}, I saw that you submitted ${property_address} through EstateSalen for cleanout assistance. I service that area and would love to schedule an estimate."\n\n— EstateSalen Cleanout Network`,
+            html: `<p>Hi ${firstName.replace(/&/g,'&amp;').replace(/</g,'&lt;')},</p>
+<p>A new property cleanout opportunity has been submitted in your service area through EstateSalen.</p>
+<div style="background:#f8fafc;border-left:4px solid #0891b2;padding:16px 20px;border-radius:6px;margin:16px 0;">
+  <h3 style="margin:0 0 8px;color:#1e293b;">${typeof property_address === 'string' ? property_address.replace(/&/g,'&amp;').replace(/</g,'&lt;') : 'Property'}</h3>
+  <p style="margin:4px 0;color:#64748b;">📍 ${typeof city === 'string' ? city.replace(/&/g,'&amp;') : ''}, ${typeof state === 'string' ? state.replace(/&/g,'&amp;') : ''} ${typeof zip === 'string' ? zip : ''}</p>
+  <p style="margin:4px 0;color:#64748b;">📅 Timeline: ${typeof timeline === 'string' ? timeline.replace(/&/g,'&amp;') || 'Not specified' : 'Not specified'}</p>
+  <p style="margin:4px 0;color:#64748b;">🏠 Condition: ${typeof property_condition === 'string' ? property_condition.replace(/&/g,'&amp;') || 'Not specified' : 'Not specified'}</p>
+  <p style="margin:4px 0;color:#64748b;">🧹 Type: ${typeof cleanout_type === 'string' ? cleanout_type.replace(/&/g,'&amp;') || 'Not specified' : 'Not specified'}</p>
+</div>
+${agent_name ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:14px 18px;margin:12px 0;">
+  <p style="margin:0;color:#1e40af;font-size:13px;"><strong>Submitted by:</strong> ${typeof agent_name === 'string' ? agent_name.replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''}${brokerage ? ' · ' + (typeof brokerage === 'string' ? brokerage.replace(/&/g,'&amp;').replace(/</g,'&lt;') : '') : ''}</p>
+</div>` : ''}
+${notes ? `<p style="margin:8px 0;color:#475569;"><strong>Notes:</strong> ${typeof notes === 'string' ? notes.replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''}</p>` : ''}
+<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:14px 18px;margin:16px 0;">
+  <p style="margin:0;color:#166534;font-size:14px;"><strong>Suggested next step:</strong> Contact the agent and schedule an on-site estimate.</p>
+</div>
+<p style="color:#94a3b8;font-size:12px;margin-top:24px;">— EstateSalen Cleanout Network</p>`
           });
           notified++;
         } catch { /* non-blocking */ }

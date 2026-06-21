@@ -68,36 +68,24 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: reseller.email,
           subject: `New ${typeLabel} in Your Area — EstateSalen Reseller Network`,
-          body: `Hi ${firstName},
-
-A new ${typeLabel.toLowerCase()} has been submitted in your service area through the EstateSalen Reseller Network.
-
-PROPERTY
-${property_address}
-${city}, ${state} ${zip}
-
-OPPORTUNITY TYPE
-${resolvedLeadType.replace('_', ' ').toUpperCase()}
-
-${agent_name ? `SUBMITTED BY\n${agent_name}${agent_email ? `\n${agent_email}` : ''}${agent_phone ? `\n${agent_phone}` : ''}` : ''}
-
-TIMELINE
-${seller_timeline || 'Not specified'}
-
-CONTENTS
-${home_contents_level || 'Not specified'}
-
-SITUATION
-${seller_situation || 'Not specified'}
-
-NOTES
-${notes || 'None'}
-
----
-To respond to this opportunity, log in to your EstateSalen dashboard or reply to the submitting agent directly.
-
-—
-EstateSalen Reseller Network`
+          body: `Hi ${firstName},\n\nA new ${typeLabel.toLowerCase()} has been submitted in your service area through the EstateSalen Reseller Network.\n\nPROPERTY\n${property_address}\n${city}, ${state} ${zip}\n\nOPPORTUNITY TYPE\n${resolvedLeadType.replace('_', ' ').toUpperCase()}\n\n${agent_name ? 'SUBMITTED BY\n' + agent_name + (agent_email ? '\n' + agent_email : '') + (agent_phone ? '\n' + agent_phone : '') + '\n\n' : ''}TIMELINE\n${seller_timeline || 'Not specified'}\n\nCONTENTS\n${home_contents_level || 'Not specified'}\n\nSITUATION\n${seller_situation || 'Not specified'}\n\nNOTES\n${notes || 'None'}\n\nTo respond to this opportunity, log in to your EstateSalen dashboard or reply to the submitting agent directly.\n\n— EstateSalen Reseller Network`,
+          html: `<p>Hi ${firstName.replace(/&/g,'&amp;').replace(/</g,'&lt;')},</p>
+<p>A new ${typeLabel.toLowerCase()} has been submitted in your service area through the EstateSalen Reseller Network.</p>
+<div style="background:#f8fafc;border-left:4px solid #f97316;padding:16px 20px;border-radius:6px;margin:16px 0;">
+  <h3 style="margin:0 0 8px;color:#1e293b;">${typeof property_address === 'string' ? property_address.replace(/&/g,'&amp;').replace(/</g,'&lt;') : 'Property'}</h3>
+  <p style="margin:4px 0;color:#64748b;">📍 ${typeof city === 'string' ? city.replace(/&/g,'&amp;') : ''}, ${typeof state === 'string' ? state.replace(/&/g,'&amp;') : ''} ${typeof zip === 'string' ? zip : ''}</p>
+  <p style="margin:4px 0;color:#64748b;">🎯 ${resolvedLeadType.replace('_', ' ').toUpperCase()}</p>
+  <p style="margin:4px 0;color:#64748b;">📅 Timeline: ${typeof seller_timeline === 'string' ? seller_timeline.replace(/&/g,'&amp;') || 'Not specified' : 'Not specified'}</p>
+  <p style="margin:4px 0;color:#64748b;">📦 Contents: ${typeof home_contents_level === 'string' ? home_contents_level.replace(/&/g,'&amp;') || 'Not specified' : 'Not specified'}</p>
+</div>
+${agent_name ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:14px 18px;margin:12px 0;">
+  <p style="margin:0;color:#1e40af;font-size:13px;"><strong>Submitted by:</strong> ${typeof agent_name === 'string' ? agent_name.replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''}</p>
+</div>` : ''}
+${notes ? `<p style="margin:8px 0;color:#475569;"><strong>Notes:</strong> ${typeof notes === 'string' ? notes.replace(/&/g,'&amp;').replace(/</g,'&lt;') : ''}</p>` : ''}
+<div style="text-align:center;margin:20px 0;">
+  <a href="https://estatesalen.com/MyResellerLeads" style="display:inline-block;background:#f97316;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">View in Dashboard</a>
+</div>
+<p style="color:#94a3b8;font-size:12px;margin-top:24px;">— EstateSalen Reseller Network</p>`
         });
         notified++;
       } catch { /* non-blocking */ }
