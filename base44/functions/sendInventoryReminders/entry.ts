@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       const sellerData = userMap[sellerId];
       if (!sellerData || !sellerData.email) continue;
 
-      const itemList = sellerItems.map(i => `\u2022 ${i.title} (${i.category || 'no category'}) \u2014 $${((i.price || 0) / 100).toFixed(2)}`).join('\n');
+      const itemList = sellerItems.map(i => `\u2022 ${i.title} (${i.category || 'no category'}) \u2014 $${(i.price || 0).toLocaleString()}`).join('\n');
       const itemIds = sellerItems.map(i => i.id);
       const itemCount = sellerItems.length;
 
