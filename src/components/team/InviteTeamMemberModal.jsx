@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ function generateInviteCode() {
 }
 
 export default function InviteTeamMemberModal({ open, onClose, operator, initialInviteType = null, onSuccess }) {
-  const [inviteType, setInviteType] = useState(initialInviteType); // null = choice screen, 'email' | 'text'
+  const [inviteType, setInviteType] = useState(initialInviteType);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState('team_member');
@@ -34,6 +34,22 @@ export default function InviteTeamMemberModal({ open, onClose, operator, initial
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Reset form whenever the modal opens
+  useEffect(() => {
+    if (open) {
+      setInviteType(initialInviteType);
+      setEmail('');
+      setPhone('');
+      setRole('team_member');
+      setPersonalNote(defaultNote);
+      setStep('form');
+      setResult(null);
+      setSending(false);
+      setDone(false);
+      setCopied(false);
+    }
+  }, [open]);
 
   const buildSmsMessage = () => {
     const roleLabel = ROLE_OPTIONS.find(r => r.value === role)?.label || role;
