@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe, Award, Phone, Mail } from 'lucide-react';
+import { ArrowRight, Sparkles, Store, Home, Briefcase, ShoppingBag, Search, MapPin, Heart, Star, Camera, Gift, CheckCircle2, Loader2, Gem, Building2, Globe, Award, Phone, Mail, Users, KeyRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatPhone } from '@/utils/formatPhone';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +48,13 @@ const ROLE_OPTIONS = [
     icon: Briefcase,
     color: 'bg-green-100 text-green-600',
   },
+  {
+    id: 'team_member',
+    label: 'Team Member',
+    description: 'I was invited by my company to join their team on EstateSalen.com',
+    icon: Users,
+    color: 'bg-indigo-100 text-indigo-600',
+  },
 ];
 
 const CONSUMER_STEPS = [
@@ -82,6 +90,13 @@ export default function OnboardingChat() {
   const [searchingDir, setSearchingDir] = useState(false);
   const [claimedCompany, setClaimedCompany] = useState(null);
   const [companySearch, setCompanySearch] = useState('');
+
+  // Team member onboarding state
+  const [inviteCode, setInviteCode] = useState('');
+  const [inviteError, setInviteError] = useState('');
+  const [inviteLookup, setInviteLookup] = useState(null); // PendingTeamInvite record
+  const [linkingTeam, setLinkingTeam] = useState(false);
+
   const US_STATES = [
     'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'
   ];
@@ -122,6 +137,14 @@ export default function OnboardingChat() {
       if (roleId === 'estate_sale_operator') {
         await base44.auth.updateMe({ primary_account_type: roleId });
         setStep('operatorClaim');
+        setSaving(false);
+        return;
+      }
+
+      // Team members → invite code flow
+      if (roleId === 'team_member') {
+        await base44.auth.updateMe({ primary_account_type: roleId });
+        setStep('teamMemberInviteCode');
         setSaving(false);
         return;
       }
@@ -362,6 +385,72 @@ export default function OnboardingChat() {
       navigate(createPageUrl('Dashboard'));
     } catch (e) {
       console.error('Failed to complete:', e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Team Member: Look up invite code ──
+  const handleInviteCodeLookup = async () => {
+    if (!inviteCode.trim()) {
+      setInviteError('Please enter your invite code');
+      return;
+    }
+    setSaving(true);
+    setInviteError('');
+    try {
+      const invites = await base44.entities.PendingTeamInvite.filter({
+        invite_code: inviteCode.trim().toUpperCase(),
+        status: 'pending'
+      }, '-created_date', 1);
+      if (invites.length === 0) {
+        setInviteError('Invite code not found. Please check and try again.');
+        setSaving(false);
+        return;
+      }
+      setInviteLookup(invites[0]);
+    } catch (e) {
+      console.error('Invite lookup failed:', e);
+      setInviteError('Something went wrong. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Team Member: Link to team ──
+  const handleLinkToTeam = async () => {
+    if (!inviteLookup) return;
+    setLinkingTeam(true);
+    try {
+      const invite = inviteLookup;
+      await base44.auth.updateMe({
+        primary_account_type: invite.role,
+        operator_id: invite.operator_id,
+        onboarding_completed: true,
+      });
+
+      // Mark invite as accepted
+      await base44.entities.PendingTeamInvite.update(invite.id, {
+        status: 'accepted',
+        invited_user_id: user.id,
+      });
+
+      navigate(createPageUrl('Dashboard'));
+    } catch (e) {
+      console.error('Failed to link team member:', e);
+      alert('Something went wrong linking your account. Please try again.');
+    } finally {
+      setLinkingTeam(false);
+    }
+  };
+
+  const handleSkipInviteCode = async () => {
+    setSaving(true);
+    try {
+      await base44.auth.updateMe({ onboarding_completed: true });
+      navigate(createPageUrl('Dashboard'));
+    } catch (e) {
+      console.error(e);
     } finally {
       setSaving(false);
     }
@@ -974,6 +1063,95 @@ export default function OnboardingChat() {
                 Finish Setup <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // ── TEAM MEMBER: Invite Code ──
+  if (step === 'teamMemberInviteCode') {
+    const inviteCompany = inviteLookup?.company_name || 'your company';
+    const inviteRole = inviteLookup?.role?.replace(/_/g, ' ') || 'team member';
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 flex items-center justify-center p-6">
+        <Card className="max-w-lg w-full shadow-xl border-0">
+          <CardContent className="p-8 space-y-6">
+            <motion.div {...fadeIn} className="text-center">
+              <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-indigo-600" />
+              </div>
+              <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Join Your Team</h1>
+              <p className="text-slate-600">
+                Enter the invite code your team leader sent you to get linked to your company's account.
+              </p>
+            </motion.div>
+
+            {!inviteLookup ? (
+              <motion.div {...fadeIn} transition={{ delay: 0.15 }} className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-slate-700">Invite Code</Label>
+                  <div className="relative mt-1">
+                    <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      placeholder="e.g. TEAMINV-A1B2C3D4"
+                      value={inviteCode}
+                      onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setInviteError(''); }}
+                      className="pl-9 text-center text-lg h-12 font-mono tracking-wider"
+                    />
+                  </div>
+                  {inviteError && (
+                    <p className="text-red-500 text-sm mt-2 text-center">{inviteError}</p>
+                  )}
+                </div>
+
+                <Button
+                  onClick={handleInviteCodeLookup}
+                  disabled={saving || !inviteCode.trim()}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 h-12 text-base"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <KeyRound className="w-4 h-4 mr-2" />}
+                  Verify Code
+                </Button>
+
+                <button onClick={handleSkipInviteCode} disabled={saving} className="w-full text-sm text-slate-400 hover:text-slate-600">
+                  I don't have a code — continue to dashboard
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div {...fadeIn} className="space-y-4">
+                <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                    <span className="font-semibold text-indigo-800">Invite Found!</span>
+                  </div>
+                  <div className="text-sm text-indigo-700 space-y-1">
+                    <p><strong>Company:</strong> {inviteCompany}</p>
+                    <p><strong>Role:</strong> {inviteRole}</p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-slate-600 text-center">
+                  Click below to join {inviteCompany} as a {inviteRole}. You'll get instant access to your team's dashboard and tools.
+                </p>
+
+                <Button
+                  onClick={handleLinkToTeam}
+                  disabled={linkingTeam}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 h-12 text-base"
+                >
+                  {linkingTeam ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" />Linking...</>
+                  ) : (
+                    <><Users className="w-4 h-4 mr-2" />Join {inviteCompany}</>
+                  )}
+                </Button>
+
+                <button onClick={() => { setInviteLookup(null); setInviteCode(''); }} className="w-full text-sm text-slate-400 hover:text-slate-600">
+                  Use a different code
+                </button>
+              </motion.div>
+            )}
           </CardContent>
         </Card>
       </div>
