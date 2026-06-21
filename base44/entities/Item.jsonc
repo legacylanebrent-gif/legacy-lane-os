@@ -318,6 +318,21 @@
     "last_synced_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "inventory_reminder_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 14-day inventory reminder was last sent for this item"
+    },
+    "inventory_reminder_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of times the 14-day reminder has been sent"
+    },
+    "inventory_renewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the operator last renewed this item for another 14 days"
     }
   },
   "required": [
