@@ -125,7 +125,7 @@ export default function TeamPermissionsModal({ open, onClose, teamMember, onSucc
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-orange-600" />
@@ -137,7 +137,7 @@ export default function TeamPermissionsModal({ open, onClose, teamMember, onSucc
           </div>
         </DialogHeader>
 
-        <div className="space-y-2 mt-2">
+        <div className="flex-1 overflow-y-auto space-y-2 mt-2">
           <div className="flex gap-2 justify-end">
             <Button variant="outline" size="sm" onClick={() => toggleAll(false)}>Disable All</Button>
             <Button variant="outline" size="sm" onClick={() => toggleAll(true)}>Enable All</Button>
@@ -167,7 +167,7 @@ export default function TeamPermissionsModal({ open, onClose, teamMember, onSucc
           ))}
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t mt-4">
+        <div className="flex justify-end gap-2 pt-4 border-t mt-4 shrink-0">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700">
             <Save className="w-4 h-4 mr-2" />
