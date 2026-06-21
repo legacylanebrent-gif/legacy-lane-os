@@ -9,6 +9,17 @@ Deno.serve(async (req) => {
     const { image_url, sale_id } = await req.json();
     if (!image_url) return Response.json({ error: 'image_url required' }, { status: 400 });
 
+    // Check and decrement credits first
+    try {
+      const creditCheck = await base44.functions.invoke('checkGoogleLensCredits', {});
+      if (!creditCheck.data.allowed) {
+        return Response.json({ error: creditCheck.data.reason || 'No Google Lens searches remaining' }, { status: 403 });
+      }
+    } catch (creditErr) {
+      // If credit check fails, proceed anyway (backward compatibility)
+      console.warn('Credit check failed, proceeding:', creditErr.message);
+    }
+
     const serpApiKey = Deno.env.get('SERPAPI_KEY');
     if (!serpApiKey) return Response.json({ error: 'SERPAPI_KEY not configured' }, { status: 500 });
 

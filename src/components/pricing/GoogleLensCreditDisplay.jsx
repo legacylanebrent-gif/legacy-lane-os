@@ -19,7 +19,7 @@ const CREDIT_PACKAGES = [
   { id: 'lens_15000', searches: 15000, price: 299, label: '15,000 Extra Searches', bestValue: true },
 ];
 
-export default function GoogleLensCreditDisplay({ operatorId, compact = false }) {
+export default function GoogleLensCreditDisplay({ operatorId, compact = false, refreshTrigger = null }) {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -43,6 +43,13 @@ export default function GoogleLensCreditDisplay({ operatorId, compact = false })
   useEffect(() => {
     if (operatorId) loadAccount();
   }, [operatorId, loadAccount]);
+
+  // Refresh when refreshTrigger changes (used by parent to force reload after searches)
+  useEffect(() => {
+    if (refreshTrigger !== null && operatorId) {
+      loadAccount();
+    }
+  }, [refreshTrigger, operatorId, loadAccount]);
 
   const handlePurchase = async (pkg) => {
     setSelectedPackage(pkg.id);

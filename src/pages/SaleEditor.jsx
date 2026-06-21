@@ -95,6 +95,7 @@ export default function SaleEditor() {
   const [dragIndex, setDragIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [pricingSearch, setPricingSearch] = useState('');
+  const [creditRefreshTrigger, setCreditRefreshTrigger] = useState(0);
   const gridRef = useRef(null);
   const pointerIdRef = useRef(null);
   const pdfCancelRef = useRef(false);
@@ -1173,11 +1174,6 @@ Be practical and realistic for an estate sale context.`,
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden w-full max-w-full">
-      {!profileOk && (
-        <div className="max-w-5xl mx-auto px-4 lg:px-6 pt-6">
-          <ProfileCompletionGate user={user} actionLabel="create a sale" />
-        </div>
-      )}
       <div className="bg-white border-b border-slate-200">
         <div className="px-4 lg:px-6 py-3 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
           {/* Title row */}
