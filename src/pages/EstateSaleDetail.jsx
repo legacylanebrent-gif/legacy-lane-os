@@ -555,6 +555,7 @@ export default function EstateSaleDetail() {
                         loading="lazy"
                         width="800"
                         height="600"
+                        style={{ transform: `rotate(${typeof sale.images[selectedImage]?.rotation === 'number' ? sale.images[selectedImage].rotation : 0}deg)` }}
                       />
                       {currentUser && (
                         <button
@@ -617,6 +618,7 @@ export default function EstateSaleDetail() {
                                   loading="lazy"
                                   width="300"
                                   height="300"
+                                  style={{ transform: `rotate(${typeof image?.rotation === 'number' ? image.rotation : 0}deg)` }}
                                 />
                               </button>
                               {currentUser && savedImages.includes(index) && (
@@ -652,6 +654,7 @@ export default function EstateSaleDetail() {
                       className="max-h-[70vh] sm:max-h-[85vh] max-w-full object-contain"
                       width="1920"
                       height="1080"
+                      style={{ transform: `rotate(${typeof sale.images[selectedImage]?.rotation === 'number' ? sale.images[selectedImage].rotation : 0}deg)` }}
                     />
                     {currentUser && (
                       <button
@@ -902,6 +905,7 @@ export default function EstateSaleDetail() {
                              width="300"
                              height="300"
                              loading="lazy"
+                             style={{ transform: `rotate(${typeof sale.images[imageIndex]?.rotation === 'number' ? sale.images[imageIndex].rotation : 0}deg)` }}
                            />
                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                          </button>

@@ -59,6 +59,7 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
+          style={{ transform: `rotate(${typeof estate.images?.[0]?.rotation === 'number' ? estate.images[0].rotation : 0}deg)` }}
         />
         <div className="absolute top-3 right-3">
           {(() => { const ds = getSaleDisplayStatus(estate); const label = ds.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); return <Badge className={getStatusColor(ds)}>{label}</Badge>; })()}

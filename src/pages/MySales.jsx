@@ -458,6 +458,7 @@ export default function MySales() {
                          : sale.images[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
                        alt={sale.title}
                        className="w-full h-full object-cover"
+                       style={{ transform: `rotate(${typeof sale.images[0]?.rotation === 'number' ? sale.images[0].rotation : 0}deg)` }}
                      />
                      {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-[10px] ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
                    </div>
@@ -569,6 +570,7 @@ export default function MySales() {
                                   src={typeof sale.images[0] === 'string' ? sale.images[0] : sale.images[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
                                   alt={sale.title}
                                   className="w-full h-full object-cover"
+                                  style={{ transform: `rotate(${typeof sale.images[0]?.rotation === 'number' ? sale.images[0].rotation : 0}deg)` }}
                                 />
                               </div>
                             )}
