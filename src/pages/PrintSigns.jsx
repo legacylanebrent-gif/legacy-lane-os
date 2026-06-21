@@ -375,7 +375,7 @@ export default function PrintSigns() {
                     text-align: center;
                   }
                   .sign-content h1 {
-                    font-size: ${fontSize}px; font-weight: 900; margin: 0; color: #1e293b;
+                    font-size: ${fontSize}px; font-family: 'Arial Black', Gadget, sans-serif; font-weight: 900; margin: 0; color: #1e293b;
                     text-transform: uppercase; letter-spacing: 4px; line-height: 1.15;
                     word-break: break-word; max-width: 100%;
                   }
