@@ -69,9 +69,31 @@ export default function ReferCompany() {
           </div>
           <h1 className="text-3xl font-serif font-bold text-slate-900">Help Estate Sale Companies Discover EstateSalen</h1>
           <p className="text-slate-600 text-lg max-w-xl mx-auto">
-            Know an estate sale company that should be on EstateSalen? Share your referral link — they get a free month trial and you earn rewards!
+            Know an estate sale company that should be on EstateSalen? Share your referral link — they get a free month trial and you earn 500 Reward Points when they pay their first month!
           </p>
         </div>
+
+        {/* What You Earn Card */}
+        <Card className="border-green-200 bg-green-50/50">
+          <CardContent className="p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 rounded-full p-2">
+                <Sparkles className="w-6 h-6 text-green-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">What You'll Earn</h2>
+            </div>
+            <p className="text-slate-700 text-lg">
+              When the company you refer <span className="font-semibold">signs up and pays their first month of service</span>, you receive{' '}
+              <span className="font-bold text-green-700 text-xl">500 Reward Points</span> from EstateSalen.com.
+            </p>
+            <p className="text-slate-600 text-sm">
+              Points can be redeemed for gift cards, exclusive access, and more. The more companies you refer, the more you earn — there's no limit!
+            </p>
+            <Link to={createPageUrl('MyRewards')} className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 font-semibold text-sm">
+              View your rewards dashboard <ArrowRight className="w-4 h-4" />
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* QR Code Card */}
         <Card className="border-orange-200 bg-orange-50/50">
