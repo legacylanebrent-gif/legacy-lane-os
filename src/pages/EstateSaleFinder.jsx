@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin, Calendar, DollarSign, Eye, Bookmark, Navigation } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import EstateSaleCard from '@/components/estate/EstateSaleCard';
 import { shouldShowSaleOnFrontend } from '@/components/estate/getSaleDisplayStatus';
 import { useSEO } from '@/hooks/useSEO';
@@ -359,10 +361,13 @@ export default function EstateSaleFinder() {
               <div className="text-center py-16">
                 <MapPin className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                 <h3 className="text-xl font-semibold text-slate-700 mb-2">
-                  No estate sales found
+                  No upcoming or active estate sales currently found in your area.
                 </h3>
                 <p className="text-slate-500">
-                  Try adjusting your search or check back later
+                  We are continually building our territories. Refer a company you know and earn a{' '}
+                  <Link to={createPageUrl('ReferCompany')} className="text-orange-600 font-semibold underline hover:text-orange-700">
+                    Referral Reward
+                  </Link>!
                 </p>
               </div>
             ) : (
