@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   User, Heart, AlertCircle, MapPin, ShoppingBag, Star, Users,
-  MessageSquare, Bell, HandCoins, Route, Calendar, Image, Building2
+  MessageSquare, Bell, HandCoins, Route, Calendar, Image, Building2,
+  Briefcase, ClipboardList
 } from 'lucide-react';
 import SalesTimeline from './consumer/SalesTimeline';
 import RouteMapWidget from './consumer/RouteMapWidget';
@@ -95,6 +96,8 @@ export default function ConsumerDashboard({ user }) {
   }
 
   const role = user?.primary_account_type || 'consumer';
+  const isBusinessUser = ['super_admin', 'platform_ops', 'growth_team', 'partnerships', 'education_admin', 'finance_admin', 'estate_sale_operator', 'real_estate_agent', 'investor', 'coach'].includes(role);
+  const isOperator = role === 'estate_sale_operator';
   const canSeeBuyouts = ['reseller', 'Estate Sale Company Owner', 'estate_sale_operator', 'admin'].includes(role) || user?.role === 'admin';
 
   const quickActions = [
@@ -129,6 +132,26 @@ export default function ConsumerDashboard({ user }) {
             : 'Follow companies to see personalized sale alerts'}
         </p>
       </div>
+
+      {/* Business role shortcuts */}
+      {isBusinessUser && (
+        <div className="flex flex-wrap gap-2">
+          <Link to="/Dashboard">
+            <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-100 text-xs gap-1.5">
+              <Briefcase className="w-3.5 h-3.5" />
+              My Biz Dashboard
+            </Button>
+          </Link>
+          {isOperator && (
+            <Link to={createPageUrl('MySales')}>
+              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50 text-xs gap-1.5">
+                <ClipboardList className="w-3.5 h-3.5" />
+                Manage My Sales
+              </Button>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
