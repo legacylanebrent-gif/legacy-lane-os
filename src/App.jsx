@@ -141,6 +141,7 @@ import RewardDetail from './pages/RewardDetail';
 import ReferCompany from './pages/ReferCompany';
 import MyCalendar from './pages/MyCalendar';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './lib/ScrollToTop';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -397,6 +398,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ErrorBoundary>
+            <ScrollToTop />
             <NavigationTracker />
             <AuthenticatedApp />
           </ErrorBoundary>
