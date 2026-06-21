@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { Switch } from '@/components/ui/switch';
@@ -1074,6 +1074,24 @@ Be practical and realistic for an estate sale context.`,
     return expanded;
   };
 
+  const handleRotateImage = async (index) => {
+    const img = formData.images[index];
+    if (!img) return;
+    const currentRot = typeof img.rotation === 'number' ? img.rotation : 0;
+    const newRot = (currentRot + 90) % 360;
+    const updatedImages = [...formData.images];
+    updatedImages[index] = { ...updatedImages[index], rotation: newRot };
+    setFormData(prev => ({ ...prev, images: updatedImages }));
+    const currentSaleId = saleIdRef.current;
+    if (currentSaleId) {
+      try {
+        await base44.entities.EstateSale.update(currentSaleId, { images: updatedImages });
+      } catch (e) {
+        console.error('Failed to persist rotation:', e.message);
+      }
+    }
+  };
+
   const handlePointerDown = (e, index) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointerIdRef.current = e.pointerId;
@@ -1794,12 +1812,20 @@ Return ONLY the description text, no extra commentary.`
                             alt={`Photo ${index + 1}`}
                             className="w-full h-full object-cover pointer-events-none"
                             width="200" height="200" loading="lazy"
+                            style={{ transform: `rotate(${typeof image.rotation === 'number' ? image.rotation : 0}deg)` }}
                             onLoad={() => setImageErrors(prev => ({ ...prev, [index]: false }))}
                             onError={(e) => {
                               const errMsg = e.target.src ? `${e.target.src.substring(0, 60)}...` : 'empty src';
                               setImageErrors(prev => ({ ...prev, [index]: errMsg }));
                             }}
                           />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRotateImage(index); }}
+                            title="Rotate 90°"
+                            className="absolute top-1 left-1 bg-white/90 text-slate-700 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto hover:bg-white"
+                          >
+                            <RotateCw className="w-3 h-3" />
+                          </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) }); }}
                             className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
