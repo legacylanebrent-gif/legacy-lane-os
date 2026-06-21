@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw } from 'lucide-react';
+import { ArrowLeft, Plus, X, Camera, Sparkles, Scan, Brain, Wand2, FileDown, Printer, ChevronsDownUp, ChevronsUpDown, Rocket, RotateCw, RotateCcw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { Switch } from '@/components/ui/switch';
@@ -1074,11 +1074,13 @@ Be practical and realistic for an estate sale context.`,
     return expanded;
   };
 
-  const handleRotateImage = async (index) => {
+  const handleRotateImage = async (index, direction = 'cw') => {
     const img = formData.images[index];
     if (!img) return;
     const currentRot = typeof img.rotation === 'number' ? img.rotation : 0;
-    const newRot = (currentRot + 90) % 360;
+    const delta = direction === 'cw' ? 90 : -90;
+    let newRot = (currentRot + delta) % 360;
+    if (newRot < 0) newRot += 360;
     const updatedImages = [...formData.images];
     updatedImages[index] = { ...updatedImages[index], rotation: newRot };
     setFormData(prev => ({ ...prev, images: updatedImages }));
@@ -1819,13 +1821,24 @@ Return ONLY the description text, no extra commentary.`
                               setImageErrors(prev => ({ ...prev, [index]: errMsg }));
                             }}
                           />
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRotateImage(index); }}
-                            title="Rotate 90°"
-                            className="absolute top-1 left-1 bg-white/90 text-slate-700 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto hover:bg-white"
-                          >
-                            <RotateCw className="w-3 h-3" />
-                          </button>
+                          <div className="absolute top-1 left-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                            <button
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); handleRotateImage(index, 'ccw'); }}
+                              title="Rotate left 90°"
+                              className="bg-white/90 text-slate-700 rounded p-1 hover:bg-white"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </button>
+                            <button
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); handleRotateImage(index, 'cw'); }}
+                              title="Rotate right 90°"
+                              className="bg-white/90 text-slate-700 rounded p-1 hover:bg-white"
+                            >
+                              <RotateCw className="w-3 h-3" />
+                            </button>
+                          </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) }); }}
                             className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
