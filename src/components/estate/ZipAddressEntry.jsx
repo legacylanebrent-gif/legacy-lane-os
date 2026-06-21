@@ -3,30 +3,26 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 
-// ZIP → cities/state lookup using Google Maps Geocoding API
+// ZIP → cities/state lookup using Zippopotam.us (returns ALL cities for a ZIP)
 async function lookupZip(zip) {
   try {
-    const res = await base44.functions.invoke('getConfig', {});
-    const key = res.data?.GOOGLE_MAPS_API_KEY;
-    if (!key) return null;
-    const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?components=postal_code:${zip}|country:US&key=${key}`);
+    const r = await fetch(`https://api.zippopotam.us/us/${zip}`);
+    if (!r.ok) return null;
     const data = await r.json();
-    if (!data.results?.length) return null;
+    if (!data.places?.length) return null;
 
-    // Collect all city candidates from all results
-    const cities = new Set();
-    let state = '';
-    for (const result of data.results) {
-      for (const comp of result.address_components) {
-        if (comp.types.includes('locality') || comp.types.includes('sublocality') || comp.types.includes('neighborhood')) {
-          cities.add(comp.long_name);
-        }
-        if (comp.types.includes('administrative_area_level_1') && !state) {
-          state = comp.short_name;
-        }
+    const state = data.places[0]['state abbreviation'];
+    // Deduplicate city names (some ZIPs list the same place twice)
+    const seen = new Set();
+    const cities = [];
+    for (const place of data.places) {
+      const name = place['place name'];
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        cities.push(name);
       }
     }
-    return { cities: [...cities], state };
+    return { cities, state };
   } catch {
     return null;
   }
@@ -74,12 +70,14 @@ export default function ZipAddressEntry({ address, location, onChange, onLocatio
       if (result) {
         setCityOptions(result.cities);
         setZipState(result.state);
-        // Auto-select if only one city
-        if (result.cities.length === 1 && !city) {
+        // Auto-select only when there's exactly one city option
+        if (result.cities.length === 1) {
           setCity(result.cities[0]);
           notifyChange({ zip, city: result.cities[0], state: result.state, street });
         } else {
-          notifyChange({ zip, city, state: result.state, street });
+          // Multiple cities — clear any prior city so user must pick
+          setCity('');
+          notifyChange({ zip, city: '', state: result.state, street });
         }
       }
     });
@@ -140,26 +138,33 @@ export default function ZipAddressEntry({ address, location, onChange, onLocatio
       {zipState && (
         <div>
           <Label>City *</Label>
-          {cityOptions.length > 1 ? (
-            <div className="flex flex-wrap gap-2 mt-1">
-              {cityOptions.map(c => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => {
-                    setCity(c);
-                    notifyChange({ zip, city: c, state: zipState, street });
-                  }}
-                  className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
-                    city === c
-                      ? 'bg-slate-800 text-white border-slate-800'
-                      : 'bg-white text-slate-700 border-slate-300 hover:border-slate-500'
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+          {cityOptions.length > 0 ? (
+            <>
+              {cityOptions.length > 1 && (
+                <p className="text-xs text-amber-600 mt-1 mb-2">
+                  Multiple cities share ZIP {zip} — please select the correct one:
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2 mt-1">
+                {cityOptions.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      setCity(c);
+                      notifyChange({ zip, city: c, state: zipState, street });
+                    }}
+                    className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                      city === c
+                        ? 'bg-slate-800 text-white border-slate-800'
+                        : 'bg-white text-slate-700 border-slate-300 hover:border-slate-500'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </>
           ) : (
             <Input
               value={city}
