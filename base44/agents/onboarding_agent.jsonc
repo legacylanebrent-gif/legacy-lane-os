@@ -54,6 +54,13 @@
         "read",
         "update"
       ]
+    },
+    {
+      "entity_name": "PendingTeamInvite",
+      "allowed_operations": [
+        "read",
+        "update"
+      ]
     }
   ],
   "context_files": [],

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Shield, Users, Settings, Mail, Phone, UserPlus } from 'lucide-react';
+import { Shield, Users, Settings, Mail, Phone, UserPlus, MessageSquare } from 'lucide-react';
 import TeamPermissionsModal from '@/components/team/TeamPermissionsModal';
 import InviteTeamMemberModal from '@/components/team/InviteTeamMemberModal';
 
@@ -21,6 +21,7 @@ export default function ManageTeam() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteModalType, setInviteModalType] = useState('email');
 
   useEffect(() => {
     loadData();
@@ -67,10 +68,16 @@ export default function ManageTeam() {
           <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Manage Team</h1>
           <p className="text-slate-600">Control your team members' access and permissions</p>
         </div>
-        <Button onClick={() => setShowInviteModal(true)} className="bg-orange-600 hover:bg-orange-700">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Invite Member
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="border-green-400 text-green-700 hover:bg-green-50">
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Text Invite
+          </Button>
+          <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="bg-orange-600 hover:bg-orange-700">
+            <Mail className="w-4 h-4 mr-2" />
+            Email Invite
+          </Button>
+        </div>
       </div>
 
       {teamMembers.length === 0 ? (
@@ -81,10 +88,16 @@ export default function ManageTeam() {
             <p className="text-sm text-slate-400 mb-4">
               Invite your first team member using the button above.
             </p>
-            <Button onClick={() => setShowInviteModal(true)} className="bg-orange-600 hover:bg-orange-700">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Invite Member
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="border-green-400 text-green-700 hover:bg-green-50">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Text Invite
+              </Button>
+              <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="bg-orange-600 hover:bg-orange-700">
+                <Mail className="w-4 h-4 mr-2" />
+                Email Invite
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -151,6 +164,7 @@ export default function ManageTeam() {
         open={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         operator={user}
+        initialInviteType={inviteModalType}
         onSuccess={loadData}
       />
 

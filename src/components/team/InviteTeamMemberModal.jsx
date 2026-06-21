@@ -19,8 +19,8 @@ function generateInviteCode() {
   return 'teaminv-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
-export default function InviteTeamMemberModal({ open, onClose, operator, onSuccess }) {
-  const [inviteType, setInviteType] = useState(null); // null = choice screen, 'email' | 'text'
+export default function InviteTeamMemberModal({ open, onClose, operator, initialInviteType = null, onSuccess }) {
+  const [inviteType, setInviteType] = useState(initialInviteType); // null = choice screen, 'email' | 'text'
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState('team_member');
@@ -42,7 +42,7 @@ export default function InviteTeamMemberModal({ open, onClose, operator, onSucce
   };
 
   const reset = () => {
-    setInviteType(null);
+    setInviteType(initialInviteType);
     setEmail('');
     setPhone('');
     setRole('team_member');
@@ -210,7 +210,7 @@ We're excited to have you on board!
             ) : (
               <UserPlus className="w-5 h-5 text-orange-600" />
             )}
-            {done ? 'Invitation Sent!' : inviteType === 'text' ? 'Send Text Invite' : inviteType === 'email' ? 'Send Email Invite' : 'Invite Team Member'}
+            {done ? 'Invitation Sent!' : inviteType === 'text' ? 'Invite via Text Message' : inviteType === 'email' ? 'Invite via Email' : 'Invite Team Member'}
           </DialogTitle>
         </DialogHeader>
 
