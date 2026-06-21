@@ -26,6 +26,14 @@
       "type": "string",
       "description": "Phone number invited (for text invites)"
     },
+    "first_name": {
+      "type": "string",
+      "description": "First name of the invited person"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the invited person"
+    },
     "role": {
       "type": "string",
       "enum": [

@@ -23,6 +23,8 @@ export default function InviteTeamMemberModal({ open, onClose, operator, initial
   const [inviteType, setInviteType] = useState(initialInviteType);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [role, setRole] = useState('team_member');
   const companyName = operator?.company_name || operator?.full_name || 'our company';
 
@@ -41,6 +43,8 @@ export default function InviteTeamMemberModal({ open, onClose, operator, initial
       setInviteType(initialInviteType);
       setEmail('');
       setPhone('');
+      setFirstName('');
+      setLastName('');
       setRole('team_member');
       setPersonalNote(defaultNote);
       setStep('form');
@@ -61,6 +65,8 @@ export default function InviteTeamMemberModal({ open, onClose, operator, initial
     setInviteType(initialInviteType);
     setEmail('');
     setPhone('');
+    setFirstName('');
+    setLastName('');
     setRole('team_member');
     setPersonalNote(defaultNote);
     setStep('form');
@@ -116,6 +122,8 @@ export default function InviteTeamMemberModal({ open, onClose, operator, initial
         company_name: companyName,
         invite_type: 'email',
         contact_email: email,
+        first_name: firstName,
+        last_name: lastName,
         role,
         personal_note: personalNote,
         invite_code: inviteCode,
@@ -196,6 +204,8 @@ We're excited to have you on board!
         company_name: companyName,
         invite_type: 'text',
         contact_phone: phone,
+        first_name: firstName,
+        last_name: lastName,
         role,
         personal_note: personalNote,
         invite_code: inviteCode,
@@ -290,46 +300,63 @@ We're excited to have you on board!
 
         {/* ── Text Invite Flow ── */}
         {inviteType === 'text' && !done && (
-          <div className="space-y-5 mt-2">
-            {/* Phone */}
-            <div>
-              <Label>Phone Number</Label>
+        <div className="space-y-5 mt-2">
+          {/* Name fields */}
+          <div>
+            <Label>Invitee Name</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
               <Input
-                type="tel"
-                placeholder="(555) 123-4567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                placeholder="First name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input
+                placeholder="Last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
               />
             </div>
+          </div>
 
-            {/* Role */}
-            <div>
-              <Label>Team Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map(r => (
-                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedRoleInfo && (
-                <p className="text-xs text-slate-500 mt-1">{selectedRoleInfo.description}</p>
-              )}
-            </div>
+          {/* Phone */}
+          <div>
+            <Label>Phone Number</Label>
+            <Input
+              type="tel"
+              placeholder="(555) 123-4567"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
 
-            {/* Personal note */}
-            <div>
-              <Label>Personal Note <span className="text-slate-400 font-normal">(included in message)</span></Label>
-              <Textarea
-                value={personalNote}
-                onChange={(e) => setPersonalNote(e.target.value)}
-                className="mt-1 text-sm"
-                rows={3}
-              />
-            </div>
+          {/* Role */}
+          <div>
+            <Label>Team Role</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_OPTIONS.map(r => (
+                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedRoleInfo && (
+              <p className="text-xs text-slate-500 mt-1">{selectedRoleInfo.description}</p>
+            )}
+          </div>
+
+          {/* Personal note */}
+          <div>
+            <Label>Personal Note <span className="text-slate-400 font-normal">(included in message)</span></Label>
+            <Textarea
+              value={personalNote}
+              onChange={(e) => setPersonalNote(e.target.value)}
+              className="mt-1 text-sm"
+              rows={3}
+            />
+          </div>
 
             {/* SMS Preview */}
             <div>
@@ -378,49 +405,66 @@ We're excited to have you on board!
 
         {/* ── Email Invite Flow ── */}
         {inviteType === 'email' && !done && (
-          <div className="space-y-5 mt-2">
-            {/* Email */}
-            <div>
-              <Label>Email Address</Label>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  type="email"
-                  placeholder="teammate@email.com"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setStep('form'); setResult(null); }}
-                  disabled={step === 'checking'}
-                />
-              </div>
-            </div>
-
-            {/* Role */}
-            <div>
-              <Label>Team Role</Label>
-              <Select value={role} onValueChange={(v) => { setRole(v); setStep('form'); setResult(null); }}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map(r => (
-                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedRoleInfo && (
-                <p className="text-xs text-slate-500 mt-1">{selectedRoleInfo.description}</p>
-              )}
-            </div>
-
-            {/* Personal note */}
-            <div>
-              <Label>Personal Note <span className="text-slate-400 font-normal">(optional)</span></Label>
-              <Textarea
-                value={personalNote}
-                onChange={(e) => setPersonalNote(e.target.value)}
-                className="mt-1 text-sm"
-                rows={4}
+        <div className="space-y-5 mt-2">
+          {/* Name fields */}
+          <div>
+            <Label>Invitee Name</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <Input
+                placeholder="First name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input
+                placeholder="Last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <Label>Email Address</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                type="email"
+                placeholder="teammate@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setStep('form'); setResult(null); }}
+                disabled={step === 'checking'}
+              />
+            </div>
+          </div>
+
+          {/* Role */}
+          <div>
+            <Label>Team Role</Label>
+            <Select value={role} onValueChange={(v) => { setRole(v); setStep('form'); setResult(null); }}>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLE_OPTIONS.map(r => (
+                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedRoleInfo && (
+              <p className="text-xs text-slate-500 mt-1">{selectedRoleInfo.description}</p>
+            )}
+          </div>
+
+          {/* Personal note */}
+          <div>
+            <Label>Personal Note <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <Textarea
+              value={personalNote}
+              onChange={(e) => setPersonalNote(e.target.value)}
+              className="mt-1 text-sm"
+              rows={4}
+            />
+          </div>
 
             {/* Check result banner */}
             {step === 'result' && result && (
