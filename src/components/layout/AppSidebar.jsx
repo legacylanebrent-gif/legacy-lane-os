@@ -192,7 +192,7 @@ const ADMIN_SUBGROUP_ORDER = [
   '⚙️ Platform Config',
 ];
 
-const TOP_GROUP_ORDER = ['Main', 'Estate Sales', 'CRM & Leads', 'Marketing', 'Finance', 'Agent + Owner', 'Education', 'Reseller', 'Directory', 'Admin', 'Landing Pages'];
+const TOP_GROUP_ORDER = ['Main', 'Estate Sales', 'CRM & Leads', 'Marketing', 'Finance', 'Education', 'Reseller', 'Agent + Owner', 'Directory', 'Admin', 'Landing Pages'];
 
 // ─── Collapsible subgroup component ──────────────────────────────────────────
 function SubGroup({ label, items, currentPageName, defaultOpen }) {
