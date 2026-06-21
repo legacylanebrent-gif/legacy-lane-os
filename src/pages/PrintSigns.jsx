@@ -124,13 +124,22 @@ export default function PrintSigns() {
       </div>
     `).join('');
 
-    const printWindow = window.open('', '', 'width=900,height=700');
+    const printWindow = window.open('', '', 'width=900,height=1100');
     printWindow.document.write(`
       <html>
         <head>
           <title>QR Code Sheet - ${sale?.title}</title>
           <style>
-            body { margin: 0; padding: 16px; font-family: Arial, sans-serif; background: #fff; }
+            * { box-sizing: border-box; }
+            body { 
+              margin: 0; 
+              padding: 20px; 
+              font-family: Arial, sans-serif; 
+              background: #fff;
+              width: 8.5in;
+              min-height: 11in;
+              margin: 0 auto;
+            }
             h2 { font-size: 18px; margin-bottom: 16px; }
             .grid { display: flex; flex-wrap: wrap; gap: 12px; }
             .qr-item {
@@ -167,7 +176,13 @@ export default function PrintSigns() {
               overflow: hidden;
             }
             @media print {
-              body { padding: 8px; }
+              @page { size: letter; margin: 0.5in; }
+              body { 
+                padding: 0; 
+                width: 8.5in; 
+                min-height: 11in;
+                margin: 0;
+              }
               .grid { gap: 8px; }
               .qr-item { width: 150px; }
             }
@@ -351,10 +366,7 @@ export default function PrintSigns() {
             const generateSignHtml = (template, forView = false) => {
               const logoUrl = getOperatorLogo();
               const bg = forView ? 'background: #f8fafc;' : '';
-              const pageStyle = forView
-                ? `width: 816px; height: 1056px; margin: 20px auto; ${bg} box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;`
-                : 'width: 100%; height: 100%;';
-
+              
               // Dynamic font size: shorter text = bigger, up to 120px
               const charCount = template.name.length;
               const fontSize = charCount <= 10 ? 120 : charCount <= 16 ? 100 : charCount <= 24 ? 80 : charCount <= 36 ? 64 : 52;
@@ -362,12 +374,17 @@ export default function PrintSigns() {
               return `<html><head><title>${template.name}</title>
                 <style>
                   * { box-sizing: border-box; margin: 0; padding: 0; }
-                  html, body { height: 100%; display: flex; align-items: center; justify-content: center; font-family: Arial, Helvetica, sans-serif; ${bg} }
+                  html, body { 
+                    ${forView ? 'height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;' : 'height: auto;'}
+                    font-family: Arial, Helvetica, sans-serif; 
+                  }
                   .letter-page {
-                    ${pageStyle}
+                    ${forView ? 'width: 816px; height: 1056px; margin: 20px auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;' : 'width: 8.5in; height: 11in; margin: 0;'}
                     border: 3px solid #1e293b;
                     display: flex; flex-direction: column;
                     padding: 48px;
+                    page-break-after: always;
+                    break-after: page;
                   }
                   .sign-content {
                     flex: 1;
@@ -388,8 +405,24 @@ export default function PrintSigns() {
                     max-height: 192px; max-width: 600px; object-fit: contain;
                   }
                   @media print {
-                    html, body { margin: 0; padding: 0; ${!forView ? 'height: auto;' : ''} }
-                    .letter-page { ${forView ? '' : 'width: 8.5in; height: 11in;'} border: 3px solid #000; box-shadow: none; margin: 0; border-radius: 0; }
+                    @page { size: letter; margin: 0.5in; }
+                    html, body { 
+                      height: auto; 
+                      margin: 0; 
+                      padding: 0; 
+                      print-color-adjust: exact; 
+                      -webkit-print-color-adjust: exact; 
+                    }
+                    .letter-page { 
+                      width: 8.5in; 
+                      height: 11in; 
+                      border: 3px solid #000; 
+                      box-shadow: none; 
+                      margin: 0; 
+                      border-radius: 0;
+                      page-break-after: always;
+                      break-after: page;
+                    }
                   }
                 </style></head><body>
                 <div class="letter-page">
