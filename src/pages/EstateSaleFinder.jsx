@@ -92,7 +92,6 @@ export default function EstateSaleFinder() {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
     getUserLocation();
-    loadEstates();
   }, []);
 
   useEffect(() => {
