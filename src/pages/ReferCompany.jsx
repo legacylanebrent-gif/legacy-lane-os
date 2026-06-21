@@ -112,7 +112,7 @@ export default function ReferCompany() {
               <h2 className="text-xl font-bold text-slate-900">Your Referral QR Code</h2>
             </div>
             <p className="text-slate-600">
-              Show this QR code to an estate sale company owner. When they scan it, they'll land on our pricing page with your referral tracked.
+              Show this QR code to an estate sale company owner. When they scan it, they'll land on our sign up page with your referral tracked in the process. When they pay for their first month you will be notified and have access to your Gift Card.
             </p>
             <div className="flex justify-center">
               {qrDataUrl ? (
