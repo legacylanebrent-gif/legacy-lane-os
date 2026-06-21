@@ -20,7 +20,7 @@ export default function InviteTeamMemberModal({ open, onClose, operator, onSucce
   const [role, setRole] = useState('team_member');
   const companyName = operator?.company_name || operator?.full_name || 'our company';
   const [personalNote, setPersonalNote] = useState(
-    `Hi! I'd like to invite you to join the ${companyName} team on EstateSalen.com. We use this platform to manage our estate sales and I think you'll find it easy and powerful to work with. Looking forward to having you on board!`
+    `Hi! I'm inviting you to my team on EstateSalen.com. We use this platform to manage our estate sales and other business operations. Click the link to register and when onboarding, choose Team Member and you will be auto-linked to my team. Send me a text or email once you have completed the process!`
   );
   const [step, setStep] = useState('form'); // 'form' | 'checking' | 'result'
   const [result, setResult] = useState(null); // { type: 'new' | 'existing', user?: object }
@@ -30,7 +30,7 @@ export default function InviteTeamMemberModal({ open, onClose, operator, onSucce
   const reset = () => {
     setEmail('');
     setRole('team_member');
-    setPersonalNote(`Hi! I'd like to invite you to join the ${companyName} team on EstateSalen.com. We use this platform to manage our estate sales and I think you'll find it easy and powerful to work with. Looking forward to having you on board!`);
+    setPersonalNote(`Hi! I'm inviting you to my team on EstateSalen.com. We use this platform to manage our estate sales and other business operations. Click the link to register and when onboarding, choose Team Member and you will be auto-linked to my team. Send me a text or email once you have completed the process!`);
     setStep('form');
     setResult(null);
     setSending(false);
