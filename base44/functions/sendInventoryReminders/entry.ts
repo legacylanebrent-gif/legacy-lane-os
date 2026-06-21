@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+function escapeHtml(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -17,7 +21,6 @@ Deno.serve(async (req) => {
       const cutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       if (created > cutoff) return false;
 
-      // Skip if already reminded within the last 7 days
       if (item.inventory_reminder_sent_at) {
         const lastReminder = new Date(item.inventory_reminder_sent_at);
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -38,7 +41,6 @@ Deno.serve(async (req) => {
       bySeller[item.seller_id].push(item);
     }
 
-    // Get all users in one batch
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
     const userMap = {};
     for (const u of allUsers) {
@@ -51,40 +53,45 @@ Deno.serve(async (req) => {
       const sellerData = userMap[sellerId];
       if (!sellerData || !sellerData.email) continue;
 
-      const itemList = sellerItems.map(i => `\u2022 ${i.title} (${i.category || 'no category'}) \u2014 $${(i.price || 0).toLocaleString()}`).join('\n');
-      const itemIds = sellerItems.map(i => i.id);
       const itemCount = sellerItems.length;
+      const itemIds = sellerItems.map(i => i.id);
+
+      // Build plain text item list for body fallback
+      const plainItemList = sellerItems.map(i =>
+        `- ${i.title} (${i.category || 'no category'}) \u2014 $${(i.price || 0).toLocaleString()}`
+      ).join('\n');
+
+      // Build HTML item list
+      const htmlItemList = sellerItems.map(i =>
+        `<li><strong>${escapeHtml(i.title)}</strong> (${escapeHtml(i.category || 'no category')}) \u2014 $${(i.price || 0).toLocaleString()}</li>`
+      ).join('');
 
       // Create in-app notification
       await base44.asServiceRole.entities.Notification.create({
         user_id: sellerId,
         type: 'reminder',
         title: `Inventory Check: ${itemCount} item(s) listed 14+ days ago`,
-        message: `You have ${itemCount} item(s) that have been in your inventory for over 14 days. Review their status \u2014 mark as sold elsewhere or renew for another 14 days.\n\n${itemList}`,
+        message: `You have ${itemCount} item(s) that have been in your inventory for over 14 days. Review their status \u2014 mark as sold elsewhere or renew for another 14 days.\n\n${plainItemList}`,
         link_to_page: 'Inventory',
         read: false,
       });
 
-      // Send email notification
+      // Send email notification with HTML formatting
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: sellerData.email,
         subject: `Inventory Check: ${itemCount} item(s) listed 14+ days ago on EstateSalen`,
-        body: `Hi ${sellerData.full_name || 'there'},
-
-It's been 14 days since you listed ${itemCount} item(s) on EstateSalen. Here's a quick summary:
-
-${itemList}
-
-Please take a moment to update their status:
-
-\u2022 If sold elsewhere \u2014 mark the item as "Sold" from your Inventory page
-\u2022 If still available \u2014 renew the item for another 14 days
-
-Keeping your inventory up to date helps buyers find what's actually available and avoids confusion.
-
-\u27a1\ufe0f Review your inventory: https://estatesalen.com/Inventory
-
-\u2014 The EstateSalen Team`
+        body: `Hi ${sellerData.full_name || 'there'},\n\nIt's been 14 days since you listed ${itemCount} item(s) on EstateSalen. Here's a quick summary:\n\n${plainItemList}\n\nPlease take a moment to update their status:\n- Sold elsewhere? Mark the item as "Sold" from your Inventory page.\n- Still available? Renew the item for another 14 days.\n\nKeeping your inventory up to date helps buyers find what's actually available and avoids confusion.\n\nReview your inventory: https://estatesalen.com/Inventory\n\n\u2014 The EstateSalen Team`,
+        html: `<p>Hi ${escapeHtml(sellerData.full_name || 'there')},</p>
+<p>It's been <strong>14 days</strong> since you listed ${itemCount} item(s) on EstateSalen. Here's a quick summary:</p>
+<ul style="padding-left:20px;margin:16px 0;">${htmlItemList}</ul>
+<p><strong>Please take a moment to update their status:</strong></p>
+<ul style="padding-left:20px;margin:16px 0;">
+  <li><strong>Sold elsewhere?</strong> \u2014 Mark the item as "Sold" from your Inventory page.</li>
+  <li><strong>Still available?</strong> \u2014 Renew the item for another 14 days.</li>
+</ul>
+<p>Keeping your inventory up to date helps buyers find what's actually available and avoids confusion.</p>
+<p style="margin-top:24px;"><a href="https://estatesalen.com/Inventory" style="display:inline-block;background:#f97316;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Review Your Inventory</a></p>
+<p style="margin-top:32px;color:#64748b;font-size:14px;">\u2014 The EstateSalen Team</p>`
       });
 
       // Mark all these items as reminded
