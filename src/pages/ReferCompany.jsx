@@ -182,7 +182,7 @@ export default function ReferCompany() {
               <h2 className="text-xl font-bold text-slate-900">Why EstateSalen Beats EstateSales.net</h2>
             </div>
             <p className="text-slate-600">
-              EstateSales.net lists weekend sales. EstateSalen.com does that as well as runs your entire company — from AI pricing and POS checkout to CRM, marketing automation, VIP events, contracts, and more. All for the same or less than what they already pay.
+              EstateSales.net lists weekend sales. EstateSalen.com does that as well as runs your entire company — from AI pricing and POS checkout to CRM, marketing automation, VIP Buyout, contracts, and more. All for the same or less than what they already pay.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
