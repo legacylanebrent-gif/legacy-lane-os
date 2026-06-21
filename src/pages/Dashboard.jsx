@@ -62,9 +62,13 @@ export default function Dashboard() {
     );
   }
 
+  // Check for force=consumer override (allows any role to view consumer dashboard)
+  const urlParams = new URLSearchParams(window.location.search);
+  const forceConsumer = urlParams.get('force') === 'consumer';
+
   // Route to appropriate dashboard based on primary account type
   const renderDashboard = () => {
-    const accountType = user.primary_account_type || user.primary_role;
+    const accountType = forceConsumer ? 'consumer' : (user.primary_account_type || user.primary_role);
     
     try {
       switch (accountType) {
