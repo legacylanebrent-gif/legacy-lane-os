@@ -69,7 +69,7 @@ export default function ReferCompany() {
           </div>
           <h1 className="text-3xl font-serif font-bold text-slate-900">Help Estate Sale Companies Discover EstateSalen</h1>
           <p className="text-slate-600 text-lg max-w-xl mx-auto">
-            Know an estate sale company that should be on EstateSalen? Share your referral link — they get a free month trial and you earn 500 Reward Points when they pay their first month!
+            Know an estate sale company that should be on EstateSalen? Share your referral link — they get a free month trial and you earn 500 Reward Points + a $25 Visa eGift Card when they pay their first month!
           </p>
         </div>
 
@@ -83,9 +83,18 @@ export default function ReferCompany() {
               <h2 className="text-xl font-bold text-slate-900">What You'll Earn</h2>
             </div>
             <p className="text-slate-700 text-lg">
-              When the company you refer <span className="font-semibold">signs up and pays their first month of service</span>, you receive{' '}
-              <span className="font-bold text-green-700 text-xl">500 Reward Points</span> from EstateSalen.com.
+              When the company you refer <span className="font-semibold">signs up and pays their first month of service</span>, you receive:
             </p>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-3 border border-green-200">
+                <Sparkles className="w-5 h-5 text-green-600" />
+                <span className="font-bold text-green-700 text-lg">500 Reward Points</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-3 border border-green-200">
+                <span className="text-lg">💳</span>
+                <span className="font-bold text-green-700 text-lg">$25 Visa eGift Card</span>
+              </div>
+            </div>
             <p className="text-slate-600 text-sm">
               Points can be redeemed for gift cards, exclusive access, and more. The more companies you refer, the more you earn — there's no limit!
             </p>
