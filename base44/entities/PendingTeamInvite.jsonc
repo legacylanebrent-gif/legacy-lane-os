@@ -1,0 +1,67 @@
+{
+  "name": "PendingTeamInvite",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "Operator/team leader who sent the invite"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name at time of invite"
+    },
+    "invite_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "text"
+      ],
+      "description": "How the invite was sent"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Email address invited (for email invites)"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Phone number invited (for text invites)"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "team_admin",
+        "team_member",
+        "team_marketer"
+      ],
+      "description": "Team role assigned"
+    },
+    "personal_note": {
+      "type": "string",
+      "description": "Personal note from the team leader"
+    },
+    "invite_code": {
+      "type": "string",
+      "description": "Unique code the invitee can use during signup to auto-link"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "expired",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Current status of the invite"
+    },
+    "invited_user_id": {
+      "type": "string",
+      "description": "User ID once they register and are linked"
+    }
+  },
+  "required": [
+    "operator_id",
+    "invite_type",
+    "role"
+  ]
+}
