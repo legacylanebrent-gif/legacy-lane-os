@@ -1171,18 +1171,18 @@ Be practical and realistic for an estate sale context.`,
               </p>
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0 items-center">
-            <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))} size="sm" className="text-xs lg:text-sm">Cancel</Button>
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} size="sm" className="hidden sm:flex text-xs lg:text-sm">
-              {saving ? 'Saving...' : 'Save'}
+          <div className="flex flex-col gap-1.5 flex-shrink-0 sm:flex-row sm:gap-2 sm:items-center">
+            <Button onClick={() => handleSave(true)} disabled={saving} size="sm" className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-xs lg:text-sm">
+              {saving ? 'Saving...' : 'Save & Close'}
             </Button>
-            <Button onClick={handlePublish} disabled={saving} size="sm" className="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white text-xs lg:text-sm">
+            <Button onClick={handlePublish} disabled={saving} size="sm" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs lg:text-sm">
               <Rocket className="w-3 h-3 mr-1" />
               {saving ? '...' : 'Publish'}
             </Button>
-            <Button onClick={() => handleSave(true)} disabled={saving} size="sm" className="bg-orange-600 hover:bg-orange-700 text-xs lg:text-sm">
-              {saving ? 'Saving...' : 'Save & Close'}
+            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} size="sm" className="w-full sm:w-auto text-xs lg:text-sm">
+              {saving ? 'Saving...' : 'Save'}
             </Button>
+            <Button variant="outline" onClick={() => navigate(createPageUrl('MySales'))} size="sm" className="w-full sm:w-auto text-xs lg:text-sm">Cancel</Button>
           </div>
         </div>
       </div>
