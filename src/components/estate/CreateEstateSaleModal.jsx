@@ -1017,9 +1017,9 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                   if (saved) setStep(2);
                 }} 
                 disabled={!canProceedToStep2 || loading}
-                className="w-full bg-orange-600 hover:bg-orange-700"
+                className="w-full bg-orange-600 hover:bg-orange-700 mt-2"
               >
-                {loading ? 'Saving...' : 'Continue to Schedule'}
+                {loading ? 'Saving...' : 'Continue to Schedule →'}
               </Button>
             </>
           )}
@@ -1105,19 +1105,19 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                 )}
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  Back
-                </Button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <Button 
                   onClick={async () => {
                     const saved = await saveDraft();
                     if (saved) setStep(3);
                   }} 
                   disabled={!canProceedToStep3 || loading}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  className="w-full bg-orange-600 hover:bg-orange-700 order-1"
                 >
-                  {loading ? 'Saving...' : 'Continue to Details'}
+                  {loading ? 'Saving...' : 'Continue to Media →'}
+                </Button>
+                <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto order-2">
+                  ← Back
                 </Button>
               </div>
             </>
@@ -1425,19 +1425,19 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                 </TabsContent>
               </Tabs>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                  Back
-                </Button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <Button 
                   onClick={async () => {
                     const saved = await saveDraft();
                     if (saved) setStep(4);
                   }}
                   disabled={loading}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  className="w-full bg-orange-600 hover:bg-orange-700 order-1"
                 >
-                  {loading ? 'Saving...' : 'Continue to Details'}
+                  {loading ? 'Saving...' : 'Continue to Details →'}
+                </Button>
+                <Button variant="outline" onClick={() => setStep(2)} className="w-full sm:w-auto order-2">
+                  ← Back
                 </Button>
               </div>
             </>
@@ -1679,24 +1679,24 @@ export default function CreateEstateSaleModal({ open, onClose, onSuccess, sale }
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
-                  Back
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 pt-2 border-t">
+                <Button 
+                  onClick={() => handleSubmit(true)}
+                  disabled={loading}
+                  className="w-full bg-orange-600 hover:bg-orange-700 order-1"
+                >
+                  {loading ? 'Publishing...' : '🚀 Publish Now'}
                 </Button>
                 <Button 
                   variant="outline"
                   onClick={() => handleSubmit(false)}
                   disabled={loading}
-                  className="flex-1"
+                  className="w-full order-2"
                 >
                   {loading ? 'Saving...' : 'Save as Draft'}
                 </Button>
-                <Button 
-                  onClick={() => handleSubmit(true)}
-                  disabled={loading}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
-                >
-                  {loading ? 'Publishing...' : 'Publish Now'}
+                <Button variant="outline" onClick={() => setStep(3)} className="w-full sm:w-auto order-3">
+                  ← Back
                 </Button>
               </div>
               </>
