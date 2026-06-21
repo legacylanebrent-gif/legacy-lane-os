@@ -2184,7 +2184,7 @@ Return ONLY the description text, no extra commentary.`
                            onClick={() => setExpandedCards(prev => prev[index] ? {} : { [index]: true })}
                            className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                          >
-                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" />
+                           <img src={getImageSrc(image, 200, { imageThumbnails, index })} alt={`Photo ${index + 1}`} className="w-10 h-10 object-cover rounded flex-shrink-0 bg-slate-200" width="40" height="40" loading="lazy" style={{ transform: `rotate(${typeof image.rotation === 'number' ? image.rotation : 0}deg)` }} />
                            <span className="flex-1 text-sm font-medium text-slate-700 truncate">
                              {image.name || `Photo ${index + 1}`}
                            </span>
@@ -2204,6 +2204,7 @@ Return ONLY the description text, no extra commentary.`
                                 alt={`Photo ${index + 1}`}
                                 className="w-full h-full object-cover rounded-lg bg-slate-200"
                                 width="160" height="160" loading="lazy"
+                                style={{ transform: `rotate(${typeof image.rotation === 'number' ? image.rotation : 0}deg)` }}
                               />
                               {multiItemFlags[index] === true && (
                                 <button type="button" title="Flagged as multi-item"
