@@ -61,6 +61,20 @@ const FEATURES = [
     color: 'text-red-600',
     bg: 'bg-red-50 border-red-200',
   },
+  {
+    icon: ShoppingBag,
+    title: '$5 & Under Sales',
+    desc: 'Love a bargain? Our $5 & Under Sales feature special events where everything is priced at $5 or less. Get notified the moment these treasure-hunt events are posted near you.',
+    color: 'text-green-600',
+    bg: 'bg-green-50 border-green-200',
+  },
+  {
+    icon: Bell,
+    title: 'Reseller Buyout Events',
+    desc: 'Resellers get exclusive access to buyout sale events — bulk liquidation opportunities where you can purchase entire estates or large lots at wholesale prices. Resellers only.',
+    color: 'text-orange-600',
+    bg: 'bg-orange-50 border-orange-200',
+  },
 ];
 
 const HOW_IT_WORKS = [

@@ -18,6 +18,8 @@ const PLATFORM_FEATURES = [
   { icon: BarChart3, title: 'Referral Deal Pipeline', desc: 'Track every referred deal from initial introduction through closing. Know exactly where each opportunity stands and what\'s coming next.' },
   { icon: TrendingUp, title: 'Territory-Based Matching', desc: 'Operators are matched to your territory based on geography, certification, performance, and availability. You get the right partner for every property.' },
   { icon: Users, title: 'Dedicated Agent Dashboard', desc: 'Your personal command center for managing partnerships, tracking referrals, monitoring deal pipelines, and growing your referral revenue.' },
+  { icon: Target, title: '$5 & Under Sale Promotions', desc: 'Operators can launch $5 & Under Sales with one click — promoting bargain events to all platform users and driving massive buyer traffic to sales.' },
+  { icon: TrendingUp, title: 'Reseller-Only Buyout Promotions', desc: 'Operators can create reseller-only buyout sale events — bulk liquidation opportunities promoted exclusively to the reseller network for maximum recovery.' },
 ];
 
 const BENEFITS = [
@@ -29,6 +31,8 @@ const BENEFITS = [
   'AI-powered property opportunity identification',
   'Direct messaging with operator partners',
   'Real-time deal pipeline tracking',
+  '$5 & Under Sale promotions for bargain-hunting buyers',
+  'Reseller-only buyout sale promotions for bulk liquidation',
 ];
 
 export default function LandingPageAgent() {

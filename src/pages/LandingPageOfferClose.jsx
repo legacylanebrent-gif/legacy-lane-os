@@ -21,6 +21,8 @@ const VALUE_ITEMS = [
   'Route planner for buyers',
   'Early sign-in & buyer check-in tools',
   'Auto-generated sale preview blog posts (Elite tier) — featured items get indexed by Google before sale day',
+  '$5 & Under Sale promotions — attract bargain hunters with one-click event creation',
+  'Reseller-only buyout sale promotions — bulk liquidation events for your reseller network',
 ];
 
 const TRANSFORMATION_ITEMS = [

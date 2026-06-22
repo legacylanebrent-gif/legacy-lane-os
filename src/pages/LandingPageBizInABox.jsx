@@ -183,12 +183,12 @@ export default function LandingPageBizInABox() {
         {
           title: 'Legacy Lane OS Elite Included',
           subtitle: 'Operate like a much larger company from day one — backed by 10 autonomous SuperAgents.',
-          items: ['Sale Management', 'Inventory Management', 'Google Lens™ AI Item Research', 'AI Pricing Assistance', 'AI Descriptions', 'Smart QR Code System with Dynamic Pricing', 'VIP Presales', 'Customer Database', 'Marketing Automation', 'Team Management', 'POS Checkout System', 'Reporting & Analytics', 'ISO Wanted Items™ Buyer Matching', 'Reseller Event Management', 'Buyout Event Management', 'Referral Tracking', 'Lead Management', 'Customer Follow-Up Systems', '10-Agent SuperAgent Autonomous System']
+          items: ['Sale Management', 'Inventory Management', 'Google Lens™ AI Item Research', 'AI Pricing Assistance', 'AI Descriptions', 'Smart QR Code System with Dynamic Pricing', 'VIP Presales', 'Customer Database', 'Marketing Automation', 'Team Management', 'POS Checkout System', 'Reporting & Analytics', 'ISO Wanted Items™ Buyer Matching', 'Reseller Event Management', 'Buyout Event Management', '$5 & Under Sale Promotions', 'Reseller-Only Buyout Sale Promotions', 'Referral Tracking', 'Lead Management', 'Customer Follow-Up Systems', '10-Agent SuperAgent Autonomous System']
         },
         {
           title: 'Your AI Marketing Department',
           subtitle: '10 SuperAgents work autonomously 24/7 — drafting campaigns, generating ads, and managing outreach while you sleep.',
-          items: ['Meta (Facebook/Instagram) Ad Campaigns', 'AI Ad Copy & Creative Generation', 'Social Media Campaigns across all platforms', 'Email Campaigns (drafted & scheduled)', 'Text/SMS Campaigns', 'Featured Item Promotions', 'Sale Countdown Campaigns', 'VIP Event Promotions', 'Reseller Event Promotions', 'Cleanout Campaigns', 'Real Estate Referral Campaigns', 'Autonomous marketing pipeline from draft to publish']
+          items: ['Meta (Facebook/Instagram) Ad Campaigns', 'AI Ad Copy & Creative Generation', 'Social Media Campaigns across all platforms', 'Email Campaigns (drafted & scheduled)', 'Text/SMS Campaigns', 'Featured Item Promotions', 'Sale Countdown Campaigns', 'VIP Event Promotions', 'Reseller Event Promotions', '$5 & Under Sale Promotions', 'Reseller-Only Buyout Sale Promotions', 'Cleanout Campaigns', 'Real Estate Referral Campaigns', 'Autonomous marketing pipeline from draft to publish']
         },
         {
           title: 'Free Coaching Included',

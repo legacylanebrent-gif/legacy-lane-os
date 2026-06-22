@@ -17,7 +17,8 @@ const BEFORE_AFTER = [
 const SOLUTION_FEATURES = [
   'AI-assisted pricing', 'Inventory organization', 'Sale setup workflows',
   'Item descriptions', 'Marketing support', 'Team task management',
-  'Buyer check-in tools', 'Offer tracking', 'Sale-day systems', 'Done-for-you support options'
+  'Buyer check-in tools', 'Offer tracking', 'Sale-day systems',
+  '$5 & Under Sale promotions', 'Reseller-only buyout sale promotions', 'Done-for-you support options'
 ];
 
 const SAVE_FEATURES = [

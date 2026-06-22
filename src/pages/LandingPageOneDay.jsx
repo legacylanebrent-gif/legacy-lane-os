@@ -55,6 +55,8 @@ const WHAT_IF = [
   'Your customers could scan QR codes for item details and pricing?',
   'Your checkout system tracked every transaction?',
   'Your reports and payouts practically built themselves?',
+  'You could launch $5 & Under Sale promotions with one click?',
+  'You could promote reseller-only buyout events to your entire reseller network?',
 ];
 
 const SMALL_TASKS = [

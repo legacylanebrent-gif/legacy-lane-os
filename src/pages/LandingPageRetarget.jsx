@@ -46,6 +46,8 @@ const SYSTEM_WAY = [
   'Better item descriptions and exposure',
   'Less owner-dependent execution',
   'More repeatable sale process',
+  '$5 & Under Sale promotions',
+  'Reseller-only buyout sale promotions',
 ];
 
 const OBJECTIONS = [
