@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     // Fetch all public data in parallel
     const [sales, operators, cityHubs, catHubs, brandHubs, blogPages, companyPages, recaps, priceGuides, wantedItems] = await Promise.all([
-      base44.asServiceRole.entities.EstateSale.filter({ status: { $in: ['upcoming', 'active'] }, sale_type: { $nin: ['buyout_or_cleanout', 'bundle_buyout'] } }, '-created_date', 500),
+      base44.asServiceRole.entities.EstateSale.filter({ status: { $in: ['upcoming', 'active'] }, sale_type: { $ne: 'buyout_or_cleanout' } }, '-created_date', 500),
       base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', 1000),
       base44.asServiceRole.entities.SEOCityHub.filter({ status: 'published' }, '-updated_date', 2000),
       base44.asServiceRole.entities.SEOCategoryHub.filter({ status: 'published' }, '-updated_date', 500),

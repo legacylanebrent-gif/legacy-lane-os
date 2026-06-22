@@ -392,7 +392,7 @@ Deno.serve(async (req) => {
     }
 
     // Buyout events are operator-only — no SEO generation
-    if (sale.sale_type === 'buyout_or_cleanout' || sale.sale_type === 'bundle_buyout') {
+    if (sale.sale_type === 'buyout_or_cleanout') {
       return Response.json({ message: 'Skipped — buyout event, no SEO' });
     }
 

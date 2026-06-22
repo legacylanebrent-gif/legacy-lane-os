@@ -31,9 +31,14 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: `status=${sale.status}` });
     }
 
-    // Buyout events are operator-only — no SEO generation
+    // Buyout events are operator-only — no SEO, just notify resellers
     if (sale.sale_type === 'buyout_or_cleanout') {
-      return Response.json({ skipped: true, reason: 'buyout event — no SEO' });
+      try {
+        await base44.asServiceRole.functions.invoke('notifyBuyoutResellers', { sale_id: saleId });
+      } catch (e) {
+        console.error('notifyBuyoutResellers failed:', e.message);
+      }
+      return Response.json({ skipped: true, reason: 'buyout event — resellers notified, no SEO' });
     }
 
     const log = [];
