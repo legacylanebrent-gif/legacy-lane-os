@@ -227,10 +227,48 @@ export default function BuyerPrefsTab({ user }) {
     }));
   };
 
+  const handlePurchaseSearches = async () => {
+    try {
+      const result = await base44.functions.invoke('consumerImageSearchCredits', { action: 'purchase', amount: 50 });
+      if (result.data.allowed) {
+        alert(`✅ ${result.data.message}\n\nYou can now analyze ${result.data.total_remaining} more images.`);
+      }
+    } catch (e) {
+      console.error('Purchase error:', e);
+      alert('Failed to purchase searches. Please try again.');
+    }
+  };
+
   const handleAnalyzeImage = async () => {
     if (!wantedForm.image_urls || wantedForm.image_urls.length === 0) return;
+    
     setAnalyzingImage(true);
     try {
+      // Check credits first
+      const creditCheck = await base44.functions.invoke('consumerImageSearchCredits', { action: 'check' });
+      
+      if (!creditCheck.data.allowed) {
+        const upgradeConfirm = window.confirm(
+          `⚠️ Image Search Limit Reached\n\n` +
+          `You've used all ${creditCheck.data.annual_limit} free image searches for this year.\n` +
+          `Purchased searches remaining: ${creditCheck.data.purchased_searches || 0}\n\n` +
+          `Would you like to purchase 50 additional searches for $9.99?`
+        );
+        if (upgradeConfirm) {
+          await handlePurchaseSearches();
+          // Retry the check after purchase
+          const newCheck = await base44.functions.invoke('consumerImageSearchCredits', { action: 'check' });
+          if (!newCheck.data.allowed) {
+            setAnalyzingImage(false);
+            return;
+          }
+        } else {
+          setAnalyzingImage(false);
+          return;
+        }
+      }
+
+      // Proceed with image analysis
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Analyze this image and help me create a detailed wanted item listing. Please provide:
 1. A specific, descriptive title for this item
@@ -255,6 +293,9 @@ Format your response as JSON with these fields: title, category, subcategory, br
           required: ['title', 'category', 'description'],
         },
       });
+
+      // Consume a credit after successful analysis
+      await base44.functions.invoke('consumerImageSearchCredits', { action: 'consume', amount: 1 });
 
       const analysis = response.data;
       setWantedForm(p => ({

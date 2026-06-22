@@ -1,0 +1,42 @@
+{
+  "name": "ConsumerImageSearchCredits",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Consumer user ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email for identification"
+    },
+    "annual_limit": {
+      "type": "integer",
+      "default": 10,
+      "description": "Annual free image search limit"
+    },
+    "searches_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of free searches used this year"
+    },
+    "purchased_searches": {
+      "type": "integer",
+      "default": 0,
+      "description": "Additional purchased searches remaining"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Current annual period start date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Current annual period end date"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}
