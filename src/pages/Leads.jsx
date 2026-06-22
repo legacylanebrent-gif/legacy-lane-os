@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Mail, Phone, MapPin, Clock, TrendingUp, User,
-  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign, Gift
+  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign, Gift, Lock
 } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 const PIPELINE_STAGES = [
   { value: 'prospecting', label: 'Prospecting' },
@@ -30,6 +31,7 @@ export default function Leads() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('leads');
   const [hasEnterprisePackage, setHasEnterprisePackage] = useState(false);
+  const [hasLeadAccess, setHasLeadAccess] = useState(null); // null = checking, false = no access, true = access
 
   // Leads (assigned to this Estate Sale Company Owner)
   const [leads, setLeads] = useState([]);
@@ -52,12 +54,22 @@ export default function Leads() {
   const loadUser = async () => {
     const me = await base44.auth.me();
     setUser(me);
-    
+
     // Check if user has Enterprise Package subscription
     const subscriptions = await base44.entities.Subscription.filter({ user_id: me.id, status: 'active' });
     const hasEnterprise = subscriptions.some(sub => sub.package_type === 'Enterprise' || sub.package_name?.includes('Enterprise'));
     setHasEnterprisePackage(hasEnterprise);
-    
+
+    // Lead Center is only for Professional and Elite tiers
+    const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+    if (ADMIN_ROLES.includes(me.primary_account_type) || me.role === 'admin') {
+      setHasLeadAccess(true);
+    } else {
+      const tier = subscriptions.length > 0 ? subscriptions[0].tier : null;
+      const LEAD_TIERS = ['professional', 'premium', 'enterprise', 'elite'];
+      setHasLeadAccess(LEAD_TIERS.includes(tier));
+    }
+
     loadLeads(me.id);
     loadDeals(me.id);
   };
@@ -114,6 +126,27 @@ export default function Leads() {
   };
 
   const getDealsByStage = (stage) => deals.filter(d => d.stage === stage);
+
+  if (hasLeadAccess === false) {
+    return (
+      <div className="p-6 lg:p-8">
+        <div className="max-w-lg mx-auto text-center mt-12">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-8 h-8 text-slate-400" />
+          </div>
+          <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Lead Center Not Included in Your Plan</h1>
+          <p className="text-slate-600 mb-6">
+            The Lead Center is available with the <span className="font-semibold">Professional</span> and <span className="font-semibold">Elite</span> packages.
+            Elite members receive 1st-tier priority leads, while Professional members receive 2nd-tier leads.
+            Upgrade your subscription to start receiving assigned leads.
+          </p>
+          <Button asChild className="bg-orange-600 hover:bg-orange-700">
+            <a href={createPageUrl('OperatorPackages')}>View Subscription Packages</a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
