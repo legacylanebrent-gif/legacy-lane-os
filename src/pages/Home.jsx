@@ -1429,7 +1429,10 @@ export default function Home() {
                         {sale.images && sale.images.length > 0 && (
                           <div className="relative h-48 overflow-hidden">
                             <img src={sale.images[0].url || sale.images[0]} alt={sale.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <Badge className="absolute top-3 right-3 bg-orange-600 text-white">Buyout Event</Badge>
+                            <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                              <Badge className="bg-orange-600 text-white">Buyout Event</Badge>
+                              <Badge className="bg-teal-600 text-white text-[10px]">Resellers Only</Badge>
+                            </div>
                           </div>
                         )}
                         <CardContent className="p-5">

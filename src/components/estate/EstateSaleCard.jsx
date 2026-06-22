@@ -66,6 +66,12 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           {estate.sale_type === 'five_and_under_sale' && (
             <Badge className="bg-green-600 text-white text-[10px]">$5 & Under Sale</Badge>
           )}
+          {estate.sale_type === 'buyout_or_cleanout' && (
+            <Badge className="bg-orange-600 text-white text-[10px]">Buyout Event</Badge>
+          )}
+          {estate.sale_type === 'buyout_or_cleanout' && (
+            <Badge className="bg-teal-600 text-white text-[10px]">Resellers Only</Badge>
+          )}
         </div>
         {estate.premium_listing && (
           <div className="absolute top-3 left-3">
