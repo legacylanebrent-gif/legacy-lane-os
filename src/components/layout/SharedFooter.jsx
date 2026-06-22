@@ -42,6 +42,7 @@ export default function SharedFooter() {
               <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
               <li><Link to="/CompanyLanding" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Platform Features</Link></li>
               <li><Link to="/CompareEstateSales" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Compare vs EstateSales.net</Link></li>
+              <li><Link to="/WhyIEstateSalen" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Why I Built EstateSalen</Link></li>
             </ul>
           </div>
 

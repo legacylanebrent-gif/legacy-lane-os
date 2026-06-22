@@ -110,6 +110,7 @@ import SaleRecapPage from './pages/SaleRecapPage';
 import PriceGuidePage from './pages/PriceGuidePage';
 import WantedItemsPage from './pages/WantedItemsPage';
 import WeeklyVideoIntelligence from './pages/WeeklyVideoIntelligence';
+import WhyIEstateSalen from './pages/WhyIEstateSalen';
 import ProbateHub from './pages/ProbateHub';
 import ProbateStatePage from './pages/ProbateStatePage';
 import ProbateChecklist from './pages/ProbateChecklist';
@@ -316,6 +317,7 @@ const AuthenticatedApp = () => {
       <Route path="/DonationDetail" element={<LayoutWrapper currentPageName="DonationDetail"><DonationDetail /></LayoutWrapper>} />
       <Route path="/VendorManagement" element={<LayoutWrapper currentPageName="VendorManagement"><VendorManagement /></LayoutWrapper>} />
       <Route path="/VendorClaim" element={<VendorClaim />} />
+      <Route path="/WhyIEstateSalen" element={<WhyIEstateSalen />} />
 
       {/* ── Knowledge Graph Public Routes ── */}
       <Route path="/estate-sales" element={<CityHubPage />} />
