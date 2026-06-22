@@ -51,9 +51,9 @@ export const ALL_NAV_ITEMS = [
   { page: 'SaleConversionPipeline', label: 'Sale Pipeline',          icon: TrendingUp,      group: 'CRM & Leads' },
 
   // ── MARKETING ───────────────────────────────────────────────────────────────
-  { page: 'Campaigns',              label: 'Campaigns',              icon: Megaphone,       group: 'Marketing' },
   { page: 'MarketingTasks',         label: 'Marketing Tasks',        icon: Megaphone,       group: 'Marketing' },
   { page: 'CampaignBuilder',        label: 'Campaign Builder',       icon: Zap,             group: 'Marketing' },
+  { page: 'Campaigns',              label: 'Campaigns',              icon: Megaphone,       group: 'Marketing' },
   { page: 'Analytics',              label: 'Analytics',              icon: BarChart3,       group: 'Marketing' },
   { page: 'SocialAdsHub',           label: 'Social Ads Hub',         icon: Megaphone,       group: 'Marketing' },
 
