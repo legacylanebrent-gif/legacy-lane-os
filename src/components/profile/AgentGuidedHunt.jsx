@@ -246,10 +246,12 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                         try {
                           const { file_url } = await base44.integrations.Core.UploadFile({ file });
                           setUploadedImage(file_url);
-                          // Auto-analyze the image after upload
+                          console.log('Image uploaded:', file_url);
+                          
+                          // Auto-analyze the uploaded image
                           setAnalyzingImage(true);
                           const response = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return ONLY valid JSON: {"category": "CategoryName", "searchQuery": "specific search terms"}`,
+                            prompt: `Look at this image and identify what category it belongs to from this list: ${CATEGORIES.join(', ')}. Then provide a specific search query to find similar items (include brand, style, era, or type if visible). Return ONLY valid JSON with this exact format: {"category": "ExactCategoryName", "searchQuery": "specific search terms"}. Example: {"category": "Cameras & Photography", "searchQuery": "vintage medium format camera"}`,
                             file_urls: [file_url],
                             response_json_schema: {
                               type: 'object',
@@ -267,8 +269,10 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                             if (analysis.searchQuery) {
                               setSearchQuery(analysis.searchQuery);
                             }
+                            console.log('Analysis successful:', { category: analysis.category, searchQuery: analysis.searchQuery });
                           } else {
-                            throw new Error('Invalid response format from AI');
+                            console.error('Invalid analysis response:', analysis);
+                            setError('Could not analyze image. Please select category manually.');
                           }
                         } catch (err) {
                           console.error('Upload or analysis error:', err);
