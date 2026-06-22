@@ -1,0 +1,55 @@
+{
+  "name": "DonationResponse",
+  "type": "object",
+  "properties": {
+    "donation_id": {
+      "type": "string",
+      "description": "Reference to Donation entity"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID of the donation company"
+    },
+    "vendor_name": {
+      "type": "string",
+      "description": "Donation company business name"
+    },
+    "vendor_email": {
+      "type": "string"
+    },
+    "vendor_phone": {
+      "type": "string"
+    },
+    "interested_items": {
+      "type": "string",
+      "description": "What items the donation company is interested in picking up"
+    },
+    "can_facilitate_pickup": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether they can facilitate pickups during the required timeframe"
+    },
+    "available_dates": {
+      "type": "string",
+      "description": "When they are available to pick up (free text or date range)"
+    },
+    "message": {
+      "type": "string",
+      "description": "Additional message to the operator or seller"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "Status of this response"
+    }
+  },
+  "required": [
+    "donation_id",
+    "vendor_id"
+  ]
+}

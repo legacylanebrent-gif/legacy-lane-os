@@ -38,6 +38,7 @@ export const ALL_NAV_ITEMS = [
   // ── ESTATE SALES (operator-facing) ──────────────────────────────────────────
   { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },
   { page: 'CleanoutEditor',         label: 'My Cleanouts',           icon: Trash2,          group: 'Estate Sales' },
+  { page: 'DonationEditor',         label: 'My Donations',           icon: Heart,           group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',            icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'My Inventory',            icon: Package,         group: 'Estate Sales' },
   { page: 'StorageManagement',      label: 'Storage Management',     icon: Warehouse,       group: 'Estate Sales' },

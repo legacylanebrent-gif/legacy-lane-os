@@ -95,6 +95,8 @@ import ScalabilityManager from './pages/ScalabilityManager';
 import MySalesGuide from './pages/MySalesGuide';
 import CleanoutEditor from './pages/CleanoutEditor';
 import CleanoutDetail from './pages/CleanoutDetail';
+import DonationEditor from './pages/DonationEditor';
+import DonationDetail from './pages/DonationDetail';
 import CityHubPage from './pages/CityHubPage';
 import CategoryHubPage from './pages/CategoryHubPage';
 import BrandHubPage from './pages/BrandHubPage';
@@ -308,6 +310,8 @@ const AuthenticatedApp = () => {
       <Route path="/MySalesGuide" element={<LayoutWrapper currentPageName="MySalesGuide"><MySalesGuide /></LayoutWrapper>} />
       <Route path="/CleanoutEditor" element={<LayoutWrapper currentPageName="CleanoutEditor"><CleanoutEditor /></LayoutWrapper>} />
       <Route path="/CleanoutDetail" element={<LayoutWrapper currentPageName="CleanoutDetail"><CleanoutDetail /></LayoutWrapper>} />
+      <Route path="/DonationEditor" element={<LayoutWrapper currentPageName="DonationEditor"><DonationEditor /></LayoutWrapper>} />
+      <Route path="/DonationDetail" element={<LayoutWrapper currentPageName="DonationDetail"><DonationDetail /></LayoutWrapper>} />
 
       {/* ── Knowledge Graph Public Routes ── */}
       <Route path="/estate-sales" element={<CityHubPage />} />

@@ -221,6 +221,34 @@ export default function MySales() {
     }
   };
 
+  const handleCreateDonation = async (sale) => {
+    try {
+      const photoUrls = (sale.images || [])
+        .map(img => (typeof img === 'string' ? img : img?.url))
+        .filter(Boolean);
+
+      const newDonation = await base44.entities.Donation.create({
+        title: sale.title + ' — Donation Pickup',
+        description: sale.description || '',
+        property_address: sale.property_address
+          ? { ...sale.property_address }
+          : { street: '', city: '', state: '', zip: '' },
+        pickup_deadline: '',
+        scope_description: '',
+        access_notes: '',
+        photos: photoUrls,
+        status: 'draft',
+        operator_id: user.id,
+        operator_name: user.full_name || user.company_name || '',
+      });
+
+      navigate(`/DonationEditor?id=${newDonation.id}`);
+    } catch (error) {
+      console.error('Error creating donation:', error);
+      alert('Failed to create donation: ' + error.message);
+    }
+  };
+
   const handleFiveAndUnderConfirm = async () => {
     const sale = fiveAndUnderSale;
     if (!sale) return;
@@ -411,6 +439,13 @@ export default function MySales() {
           >
             <Plus className="w-4 h-4 mr-2" />
             Create Cleanout
+          </Button>
+          <Button
+            onClick={() => navigate('/DonationEditor?id=new')}
+            className="bg-pink-600 hover:bg-pink-700"
+          >
+            <Heart className="w-4 h-4 mr-2" />
+            Create Donation
           </Button>
         </div>
       </div>
@@ -618,6 +653,7 @@ export default function MySales() {
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
+{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 & Under</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}

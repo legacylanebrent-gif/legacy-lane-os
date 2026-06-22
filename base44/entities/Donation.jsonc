@@ -1,0 +1,116 @@
+{
+  "name": "Donation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "Geographic coordinates for distance matching"
+    },
+    "pickup_deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Date by which donations must be picked up"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of photo URLs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "responses_closed",
+        "awarded",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Current status of the donation event"
+    },
+    "scope_description": {
+      "type": "string",
+      "description": "What items are available for donation"
+    },
+    "access_notes": {
+      "type": "string",
+      "description": "How to access the property for pickup"
+    },
+    "operator_handling_donations": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, operator handles all donations and seller contact details are NOT shared with donation companies"
+    },
+    "seller_name": {
+      "type": "string",
+      "description": "Home seller's name \u2014 shared with donation companies unless operator is handling"
+    },
+    "seller_phone": {
+      "type": "string",
+      "description": "Home seller's phone \u2014 shared with donation companies unless operator is handling"
+    },
+    "seller_email": {
+      "type": "string",
+      "description": "Home seller's email \u2014 shared with donation companies unless operator is handling"
+    },
+    "awarded_vendor_id": {
+      "type": "string",
+      "description": "User ID of the donation company selected"
+    },
+    "awarded_vendor_name": {
+      "type": "string"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the donation event was published to donation companies"
+    }
+  },
+  "required": [
+    "title",
+    "operator_id",
+    "pickup_deadline"
+  ]
+}
