@@ -206,58 +206,18 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                       <img src={uploadedImage} alt="Uploaded item" className="max-w-full max-h-40 w-auto h-auto object-contain rounded" />
                       <button
                         type="button"
-                        onClick={() => setUploadedImage(null)}
+                        onClick={() => { setUploadedImage(null); setCategory(''); setSearchQuery(''); setError(''); }}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 shadow-sm"
                       >
                         <X className="w-3 h-3" />
                       </button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
-                      onClick={async () => {
-                        setAnalyzingImage(true);
-                        setError('');
-                        try {
-                          const response = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return ONLY valid JSON: {"category": "CategoryName", "searchQuery": "specific search terms"}`,
-                            file_urls: [uploadedImage],
-                            response_json_schema: {
-                              type: 'object',
-                              properties: {
-                                category: { type: 'string', description: 'Category from the list' },
-                                searchQuery: { type: 'string', description: 'Specific search query' },
-                              },
-                              required: ['category', 'searchQuery'],
-                            },
-                          });
-                          console.log('AI Analysis response:', response.data);
-                          const analysis = response.data;
-                          if (analysis && analysis.category) {
-                            setCategory(analysis.category);
-                            if (analysis.searchQuery) {
-                              setSearchQuery(analysis.searchQuery);
-                            }
-                          } else {
-                            throw new Error('Invalid response format from AI');
-                          }
-                        } catch (e) {
-                          console.error('Image analysis error:', e);
-                          setError('Could not analyze image. Please try again or select category manually.');
-                        } finally {
-                          setAnalyzingImage(false);
-                        }
-                      }}
-                      disabled={analyzingImage}
-                    >
-                      {analyzingImage ? (
-                        <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Analyzing with AI...</>
-                      ) : (
-                        <><Sparkles className="w-3 h-3 mr-2" /> Auto-Fill Category & Search</>
-                      )}
-                    </Button>
+                    {analyzingImage && (
+                      <div className="flex items-center justify-center gap-2 text-sm text-purple-700">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Analyzing your image...
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <label className="cursor-pointer block">
@@ -282,16 +242,43 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                         const file = e.target.files[0];
                         if (!file) return;
                         setUploadingImage(true);
+                        setError('');
                         try {
                           const { file_url } = await base44.integrations.Core.UploadFile({ file });
                           setUploadedImage(file_url);
+                          // Auto-analyze the image after upload
+                          setAnalyzingImage(true);
+                          const response = await base44.integrations.Core.InvokeLLM({
+                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return ONLY valid JSON: {"category": "CategoryName", "searchQuery": "specific search terms"}`,
+                            file_urls: [file_url],
+                            response_json_schema: {
+                              type: 'object',
+                              properties: {
+                                category: { type: 'string', description: 'Category from the list' },
+                                searchQuery: { type: 'string', description: 'Specific search query' },
+                              },
+                              required: ['category', 'searchQuery'],
+                            },
+                          });
+                          console.log('AI Analysis response:', response.data);
+                          const analysis = response.data;
+                          if (analysis && analysis.category) {
+                            setCategory(analysis.category);
+                            if (analysis.searchQuery) {
+                              setSearchQuery(analysis.searchQuery);
+                            }
+                          } else {
+                            throw new Error('Invalid response format from AI');
+                          }
                         } catch (err) {
-                          alert('Upload failed');
+                          console.error('Upload or analysis error:', err);
+                          setError('Could not analyze image. Please select category manually.');
                         } finally {
                           setUploadingImage(false);
+                          setAnalyzingImage(false);
                         }
                       }}
-                      disabled={uploadingImage}
+                      disabled={uploadingImage || analyzingImage}
                     />
                   </label>
                 )}
