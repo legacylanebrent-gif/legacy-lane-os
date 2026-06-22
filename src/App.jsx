@@ -93,6 +93,8 @@ import ActualRevenue from './pages/ActualRevenue';
 import EstimatedPNL from './pages/EstimatedPNL';
 import ScalabilityManager from './pages/ScalabilityManager';
 import MySalesGuide from './pages/MySalesGuide';
+import CleanoutEditor from './pages/CleanoutEditor';
+import CleanoutDetail from './pages/CleanoutDetail';
 import CityHubPage from './pages/CityHubPage';
 import CategoryHubPage from './pages/CategoryHubPage';
 import BrandHubPage from './pages/BrandHubPage';
@@ -304,6 +306,8 @@ const AuthenticatedApp = () => {
       <Route path="/EstimatedPNL" element={<LayoutWrapper currentPageName="EstimatedPNL"><EstimatedPNL /></LayoutWrapper>} />
       <Route path="/ScalabilityManager" element={<LayoutWrapper currentPageName="ScalabilityManager"><ScalabilityManager /></LayoutWrapper>} />
       <Route path="/MySalesGuide" element={<LayoutWrapper currentPageName="MySalesGuide"><MySalesGuide /></LayoutWrapper>} />
+      <Route path="/CleanoutEditor" element={<LayoutWrapper currentPageName="CleanoutEditor"><CleanoutEditor /></LayoutWrapper>} />
+      <Route path="/CleanoutDetail" element={<LayoutWrapper currentPageName="CleanoutDetail"><CleanoutDetail /></LayoutWrapper>} />
 
       {/* ── Knowledge Graph Public Routes ── */}
       <Route path="/estate-sales" element={<CityHubPage />} />
