@@ -537,7 +537,12 @@ export default function MySales() {
                        className="w-full h-full object-cover"
                        style={{ transform: `rotate(${typeof sale.images[0]?.rotation === 'number' ? sale.images[0].rotation : 0}deg)` }}
                      />
-                     {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`absolute top-2 right-2 text-[10px] ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
+                     <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                       {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`text-[10px] ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
+                       {sale.sale_type === 'five_and_under_sale' && (
+                         <Badge className="bg-green-600 text-white text-[10px]">$5 & Under Sale</Badge>
+                       )}
+                     </div>
                    </div>
                  )}
                  <CardContent className="p-4 flex-1">

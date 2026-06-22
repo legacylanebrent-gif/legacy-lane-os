@@ -61,8 +61,11 @@ export default function EstateSaleCard({ estate, onClick, expanded = false, oper
           decoding="async"
           style={{ transform: `rotate(${typeof estate.images?.[0]?.rotation === 'number' ? estate.images[0].rotation : 0}deg)` }}
         />
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
           {(() => { const ds = getSaleDisplayStatus(estate); const label = ds.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); return <Badge className={getStatusColor(ds)}>{label}</Badge>; })()}
+          {estate.sale_type === 'five_and_under_sale' && (
+            <Badge className="bg-green-600 text-white text-[10px]">$5 & Under Sale</Badge>
+          )}
         </div>
         {estate.premium_listing && (
           <div className="absolute top-3 left-3">

@@ -119,6 +119,7 @@ export default function Home() {
   });
   const [showDealers, setShowDealers] = useState(true);
   const [dealerProfiles, setDealerProfiles] = useState([]);
+  const [buyoutSales, setBuyoutSales] = useState([]);
 
   useSEO({
     title: 'EstateSalen.com — Find Estate Sales Near You',
@@ -707,9 +708,13 @@ export default function Home() {
     // Locally featured sales also appear in the regular sales grid (they show in both sections)
     const regular = filterByDistance(visibleSales.filter(s => !s.national_featured));
 
+    // Buyout sales (for reseller view)
+    const buyouts = filterByDistance(visibleSales.filter(s => s.sale_type === 'buyout_or_cleanout'));
+
     setNationalFeatured(national);
     setLocalFeatured(local);
     setRegularSales(regular);
+    setBuyoutSales(buyouts);
   };
 
   if (checkingAuth || loading) {
@@ -1406,8 +1411,72 @@ export default function Home() {
                       </div>
                       </section>
 
+                      {/* Buyout Sales — Resellers Only */}
+                      {isAuthenticated && currentUser?.primary_account_type === 'reseller' && buyoutSales.length > 0 && (
+                      <section className="py-8 sm:py-12 px-2 sm:px-4 bg-gradient-to-br from-orange-50 to-amber-50">
+                      <div className="max-w-7xl mx-auto px-2 sm:px-0">
+                      <div className="text-center mb-6 sm:mb-8">
+                      <Badge className="mb-3 bg-orange-600 text-white text-sm px-4 py-1">Buyout Events</Badge>
+                      <h3 className="text-2xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">
+                      📦 Buyout Sales Near You
+                      </h3>
+                      <p className="text-base sm:text-lg text-slate-600">Bulk purchase opportunities for resellers</p>
+                      </div>
+                      <div className={`grid ${getSaleGridCols(buyoutSales.length)} gap-4 sm:gap-6`}>
+                      {buyoutSales.map(sale => (
+                      <Link key={sale.id} to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="block group">
+                      <Card className="overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-orange-300 bg-white">
+                        {sale.images && sale.images.length > 0 && (
+                          <div className="relative h-48 overflow-hidden">
+                            <img src={sale.images[0].url || sale.images[0]} alt={sale.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <Badge className="absolute top-3 right-3 bg-orange-600 text-white">Buyout Event</Badge>
+                          </div>
+                        )}
+                        <CardContent className="p-5">
+                          <h4 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">{sale.title}</h4>
+                          {sale.operator_id && (sale.operator_name || operators[sale.operator_id]) && (
+                            <Link to={createPageUrl('BusinessProfile') + '?id=' + sale.operator_id} onClick={(e) => e.stopPropagation()} className="text-sm text-cyan-600 hover:text-cyan-700 font-medium block mb-3">
+                              by {sale.operator_name || operators[sale.operator_id]}
+                            </Link>
+                          )}
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-start gap-2 text-slate-600">
+                              <MapPin className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                              <span>{sale.property_address?.city}, {sale.property_address?.state} {sale.property_address?.zip}</span>
+                            </div>
+                            {sale.buyout_config?.minimum_bid && (
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <DollarSign className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                                <span>Minimum Bid: ${sale.buyout_config.minimum_bid.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {sale.buyout_config?.buyout_mode && (
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <Package className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                                <span className="capitalize">{sale.buyout_config.buyout_mode.replace(/_/g, ' ')}</span>
+                              </div>
+                            )}
+                            {sale.sale_dates && sale.sale_dates.length > 0 && (
+                              <div className="flex items-start gap-2 text-slate-600">
+                                <Calendar className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                                <span>{format(new Date(sale.sale_dates[0].date + 'T00:00:00'), 'MMM d, yyyy')}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-4 pt-4 border-t">
+                            <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">View Buyout Details</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      </Link>
+                      ))}
+                      </div>
+                      </div>
+                      </section>
+                      )}
+
                       {/* Local Advertising Panel */}
-          <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
+                      <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
           <div className="max-w-7xl mx-auto">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
             <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Local Advertising Space</p>
