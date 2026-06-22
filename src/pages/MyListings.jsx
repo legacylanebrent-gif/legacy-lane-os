@@ -74,11 +74,11 @@ export default function MyListings() {
   });
 
   const stats = {
-    total: activeItems.length,
-    available: activeItems.filter(i => i.status === 'available').length,
-    sold: activeItems.filter(i => i.status === 'sold').length,
+    total: items.length,
+    available: items.filter(i => i.status === 'available' && !isInactive(i)).length,
+    sold: items.filter(i => i.status === 'sold' && !isInactive(i)).length,
     deactivated: deactivatedItems.length,
-    revenue: activeItems.filter(i => i.status === 'sold').reduce((sum, i) => sum + i.price, 0)
+    revenue: items.filter(i => i.status === 'sold' && !isInactive(i)).reduce((sum, i) => sum + i.price, 0)
   };
 
   return (
