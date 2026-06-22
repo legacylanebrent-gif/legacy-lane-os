@@ -22,6 +22,8 @@ const CATEGORIES = [
       { feature: 'SEO-optimized sale pages (Google ranking)', us: true, them: 'partial' },
       { feature: 'Company profile page', us: true, them: true },
       { feature: 'Verified account badge', us: true, them: true },
+      { feature: '$5 & Under Sale promotions (one-click bargain events)', us: true, them: false },
+      { feature: 'Reseller-only buyout sale promotions (bulk liquidation events)', us: true, them: false },
     ],
   },
   {
