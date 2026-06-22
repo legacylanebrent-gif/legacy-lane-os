@@ -14,7 +14,7 @@ export default function MyListings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('available');
   const [viewMode, setViewMode] = useState('grid');
   const [editingItem, setEditingItem] = useState(null);
 
@@ -67,15 +67,16 @@ export default function MyListings() {
   const deactivatedItems = items.filter(isInactive);
 
   const filteredItems = items.filter(item => {
-    if (isInactive(item) && filter !== 'deactivated') return false;
     if (filter === 'all') return true;
     if (filter === 'deactivated') return isInactive(item);
-    return item.status === filter;
+    return !isInactive(item) && item.status === filter;
   });
 
   const stats = {
-    total: activeItems.length,
-    available: activeItems.filter(i => i.status !== 'sold').length,
+    total: items.length,
+    available: activeItems.filter(i => i.status === 'available').length,
+    pending: activeItems.filter(i => i.status === 'pending').length,
+    reserved: activeItems.filter(i => i.status === 'reserved').length,
     sold: activeItems.filter(i => i.status === 'sold').length,
     deactivated: deactivatedItems.length,
     revenue: activeItems.filter(i => i.status === 'sold').reduce((sum, i) => sum + i.price, 0)
@@ -155,10 +156,12 @@ export default function MyListings() {
         <Tabs value={filter} onValueChange={setFilter}>
           <div className="flex justify-between items-center mb-4">
             <TabsList>
-              <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
               <TabsTrigger value="available">Available ({stats.available})</TabsTrigger>
+              <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
+              <TabsTrigger value="reserved">Reserved ({stats.reserved})</TabsTrigger>
               <TabsTrigger value="sold">Sold ({stats.sold})</TabsTrigger>
               <TabsTrigger value="deactivated">Deactivated ({stats.deactivated})</TabsTrigger>
+              <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
               <Button
@@ -195,7 +198,7 @@ export default function MyListings() {
                   <>
                     <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                     <h3 className="text-xl font-semibold text-slate-700 mb-2">
-                      No listings yet
+                      No {filter !== 'all' ? filter : ''} listings
                     </h3>
                     <p className="text-slate-500 mb-6">
                       Create your first listing to start selling
