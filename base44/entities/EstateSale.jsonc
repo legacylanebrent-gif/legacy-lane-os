@@ -292,6 +292,71 @@
       "default": true,
       "description": "Whether early sign-in list is allowed for this sale"
     },
+    "buyout_config": {
+      "type": "object",
+      "description": "Configuration for buyout events \u2014 only applies when sale_type is buyout_or_cleanout",
+      "properties": {
+        "bid_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Deadline for resellers to submit buyout bids"
+        },
+        "buyout_mode": {
+          "type": "string",
+          "enum": [
+            "full_buyout",
+            "cherry_pick"
+          ],
+          "default": "full_buyout",
+          "description": "Full buyout = all or nothing; cherry_pick = resellers can pick individual items"
+        },
+        "reseller_radius_miles": {
+          "type": "integer",
+          "default": 25,
+          "description": "Marketing radius in miles to notify resellers"
+        },
+        "minimum_bid": {
+          "type": "number",
+          "description": "Minimum acceptable buyout bid (whole dollars)"
+        },
+        "estimated_total_value": {
+          "type": "number",
+          "description": "Estimated total value of all contents (whole dollars)"
+        },
+        "inventory_summary": {
+          "type": "string",
+          "description": "Brief summary of what is included in the buyout"
+        },
+        "pickup_deadline": {
+          "type": "string",
+          "format": "date",
+          "description": "Deadline for the winning bidder to remove all items"
+        },
+        "payment_terms": {
+          "type": "string",
+          "description": "Payment terms for the buyout (e.g. cash, certified check, wire transfer)"
+        },
+        "reseller_registration_required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether resellers must register before bidding"
+        },
+        "max_reseller_spots": {
+          "type": "integer",
+          "description": "Maximum number of resellers who can participate"
+        },
+        "highlights": {
+          "type": "string",
+          "description": "Notable or high-value items to promote in the buyout listing"
+        },
+        "cleanout_required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the property must be completely emptied (cleanout)"
+        }
+      },
+      "default": null
+    },
     "seo_title": {
       "type": "string",
       "description": "SEO optimized page title"

@@ -26,6 +26,7 @@ import ProfileCompletionGate, { isProfileComplete } from '@/components/profile/P
 import GoogleLensCreditDisplay from '@/components/pricing/GoogleLensCreditDisplay';
 import { getImageSrc } from '@/utils/imageOptimizer';
 import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
+import BuyoutEventSection from '@/components/estate/BuyoutEventSection';
 import ImageImportModal from '@/components/estate/ImageImportModal';
 import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
 
@@ -117,7 +118,8 @@ export default function SaleEditor() {
     categories: [],
     commission_rate: '',
     special_notes: '',
-    payment_methods: []
+    payment_methods: [],
+    buyout_config: null
   });
 
   // Keep saleIdRef in sync so auto-save closure has latest value
@@ -180,6 +182,7 @@ export default function SaleEditor() {
           categories: latest.categories,
           special_notes: latest.special_notes,
           payment_methods: latest.payment_methods,
+          buyout_config: latest.sale_type === 'buyout_or_cleanout' ? latest.buyout_config : null,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -256,6 +259,7 @@ export default function SaleEditor() {
         commission_rate: saleData.commission_rate || '',
         special_notes: saleData.special_notes || '',
         payment_methods: saleData.payment_methods || [],
+        buyout_config: saleData.buyout_config || null,
         national_featured: saleData.national_featured || false
       });
       setFeaturedNationally(saleData.national_featured || false);
@@ -396,6 +400,7 @@ export default function SaleEditor() {
           categories: formData.categories,
           special_notes: formData.special_notes,
           payment_methods: formData.payment_methods,
+          buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -474,6 +479,7 @@ export default function SaleEditor() {
           categories: formData.categories,
           special_notes: formData.special_notes,
           payment_methods: formData.payment_methods,
+          buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
           operator_id: saleId ? undefined : user.id,
@@ -1564,6 +1570,14 @@ Return ONLY the description text, no extra commentary.`
             </div>
           </CardContent>
         </Card>
+
+        {/* Buyout Event Configuration — only shown for buyout_or_cleanout */}
+        {formData.sale_type === 'buyout_or_cleanout' && (
+          <BuyoutEventSection
+            buyoutConfig={formData.buyout_config}
+            onChange={(cfg) => setFormData(prev => ({ ...prev, buyout_config: cfg }))}
+          />
+        )}
 
         {/* Location */}
         <Card>
