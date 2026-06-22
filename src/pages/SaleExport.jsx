@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowLeft, Download, FileText, FileSpreadsheet, 
-  FileImage, Receipt, Package, Users, Calendar
+  FileImage, Receipt, Package, Users, Calendar, Scan
 } from 'lucide-react';
 
 const EXPORT_OPTIONS = [
@@ -129,13 +129,23 @@ export default function SaleExport() {
             <p className="text-slate-600">Export Sale Data</p>
           </div>
         </div>
-        <Button 
-          onClick={handleExportAll}
-          className="bg-cyan-600 hover:bg-cyan-700"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export All
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => navigate(createPageUrl('SalePricingTool'))}
+            className="border-orange-500 text-orange-700 hover:bg-orange-50"
+          >
+            <Scan className="w-4 h-4 mr-2" />
+            Pricing Tool
+          </Button>
+          <Button 
+            onClick={handleExportAll}
+            className="bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export All
+          </Button>
+        </div>
       </div>
 
       <Card>
