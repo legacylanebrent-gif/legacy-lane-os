@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
       const recipients = await fetchRecipients(base44, user.id);
       const quota = await getOrCreateQuota(base44, user);
       const available = quota.profiles_included + quota.additional_purchased - quota.profiles_used;
+      const weeklyCheck = await checkWeeklyLimit(base44, user.id);
 
       return Response.json({
         success: true,
@@ -51,6 +52,8 @@ Deno.serve(async (req) => {
         available_quota: Math.max(0, available),
         would_send: Math.min(recipients.length, Math.max(0, available)),
         needs_purchase: recipients.length > available,
+        weekly_limit_reached: !weeklyCheck.allowed,
+        last_sent_at: weeklyCheck.lastSentAt || null,
       });
     }
 
@@ -74,6 +77,18 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Campaign is missing email subject or body' }, { status: 400 });
       }
 
+      // Check weekly limit — Elite companies can only email their list once per week
+      const weeklyCheck = await checkWeeklyLimit(base44, user.id);
+      if (!weeklyCheck.allowed) {
+        const lastDate = new Date(weeklyCheck.lastSentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const nextAvailable = new Date(new Date(weeklyCheck.lastSentAt).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return Response.json({
+          error: `Weekly limit reached. You last sent on ${lastDate}. You can send again on ${nextAvailable}.`,
+          weekly_limit: true,
+          last_sent_at: weeklyCheck.lastSentAt,
+        }, { status: 429 });
+      }
+
       // Check quota
       const quota = await getOrCreateQuota(base44, user);
       const available = quota.profiles_included + quota.additional_purchased - quota.profiles_used;
@@ -86,10 +101,10 @@ Deno.serve(async (req) => {
         }, { status: 402 });
       }
 
-      // Fetch recipients
+      // Fetch recipients (filtered by email preferences)
       const recipients = await fetchRecipients(base44, user.id);
       if (recipients.length === 0) {
-        return Response.json({ error: 'No eligible recipients found. You need active followers with marketing opt-in.' }, { status: 400 });
+        return Response.json({ error: 'No eligible recipients found. You need active followers who have opted into company direct emails.' }, { status: 400 });
       }
 
       // Limit to available quota
@@ -134,6 +149,16 @@ Deno.serve(async (req) => {
           ...(campaign.metrics || {}),
           sent: newSent,
         },
+      });
+
+      // Log this send for weekly limit enforcement
+      await base44.asServiceRole.entities.CompanyEmailLog.create({
+        operator_id: user.id,
+        company_name: user.company_name || senderName,
+        campaign_id: campaign_id,
+        sent_at: new Date().toISOString(),
+        recipient_count: sentCount,
+        email_type: 'company_direct',
       });
 
       return Response.json({
@@ -196,14 +221,38 @@ async function fetchRecipients(base44, operatorId) {
     subscription_status: 'active',
   });
 
-  // Deduplicate by email
+  // Fetch all email preferences to filter by opt-in
+  // Only include followers who have company_direct_emails = true (or no preference record = default true)
+  const allPrefs = await base44.asServiceRole.entities.EmailPreferences.list('-created_date', 5000);
+  const optedOut = new Set();
+  for (const p of allPrefs) {
+    if (p.company_direct_emails === false) optedOut.add(p.user_id);
+  }
+
+  // Deduplicate by email and filter by preference
   const seen = new Set();
   const recipients = [];
   for (const f of followers) {
     if (f.consumer_email && !seen.has(f.consumer_email.toLowerCase())) {
+      // Skip if user has explicitly opted out of company direct emails
+      if (f.consumer_user_id && optedOut.has(f.consumer_user_id)) continue;
       seen.add(f.consumer_email.toLowerCase());
       recipients.push({ email: f.consumer_email, user_id: f.consumer_user_id });
     }
   }
   return recipients;
+}
+
+// Check if operator has already sent a campaign this week (7-day rolling window)
+async function checkWeeklyLimit(base44, operatorId) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const recentLogs = await base44.asServiceRole.entities.CompanyEmailLog.filter({
+    operator_id: operatorId,
+  });
+  for (const log of recentLogs) {
+    if (log.sent_at && log.sent_at >= sevenDaysAgo) {
+      return { allowed: false, lastSentAt: log.sent_at };
+    }
+  }
+  return { allowed: true };
 }

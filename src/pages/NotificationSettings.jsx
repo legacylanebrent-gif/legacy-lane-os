@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Mail, MessageSquare, Save, AlertCircle, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SaleAlertSettings from '@/components/notifications/SaleAlertSettings';
+import EmailPreferencesTab from '@/components/profile/EmailPreferencesTab.jsx';
 
 const NOTIFICATION_CATEGORIES = [
   {
@@ -268,6 +269,9 @@ export default function NotificationSettings() {
           );
         })}
       </div>
+
+      {/* Email Preferences — EstateSalen marketing, local sale alerts, company direct emails */}
+      <EmailPreferencesTab user={user} />
 
       {/* Sale Alert Settings */}
       <SaleAlertSettings

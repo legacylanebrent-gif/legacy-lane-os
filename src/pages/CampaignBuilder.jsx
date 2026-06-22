@@ -416,6 +416,23 @@ export default function CampaignBuilder() {
                         </div>
                       </div>
 
+                      {/* Weekly limit notice */}
+                      {recipientPreview?.weekly_limit_reached && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+                          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-amber-900">
+                              Weekly send limit reached
+                            </p>
+                            <p className="text-xs text-amber-700">
+                              You last sent on {new Date(recipientPreview.last_sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
+                              Elite companies can email their list once per week. You can send again on{' '}
+                              {new Date(new Date(recipientPreview.last_sent_at).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Quota warning */}
                       {needsPurchase && availableQuota < recipientCount && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">

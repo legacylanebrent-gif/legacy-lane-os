@@ -36,6 +36,7 @@ import MarketplaceCredentialsTab from '@/components/profile/MarketplaceCredentia
 import InteractiveTerritorySelector from '@/components/profile/InteractiveTerritorySelector';
 import LocationRequiredCard from '@/components/profile/LocationRequiredCard';
 import BuyerPrefsTab from '@/components/profile/BuyerPrefsTab';
+import EmailPreferencesTab from '@/components/profile/EmailPreferencesTab.jsx';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -111,7 +112,7 @@ export default function MyProfile() {
   const [saved, setSaved] = useState(false);
   const searchParams = new URLSearchParams(window.location.search);
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabParam && ['account','buyer_prefs','estate_sales','business','territory','sales','payments','marketplace','agent_tools','vendor_services','vendor_leads','reseller_prefs','reseller_leads','dealer_profile','subscription'].includes(tabParam) ? tabParam : 'account');
+  const [activeTab, setActiveTab] = useState(tabParam && ['account','buyer_prefs','estate_sales','business','territory','sales','payments','marketplace','agent_tools','vendor_services','vendor_leads','reseller_prefs','reseller_leads','dealer_profile','subscription','email_preferences'].includes(tabParam) ? tabParam : 'account');
   const [marketplaceTab, setMarketplaceTab] = useState('social');
   const [uploading, setUploading] = useState({});
   const [newCounty, setNewCounty] = useState('');
@@ -402,6 +403,7 @@ export default function MyProfile() {
           {(isOperator || (isReseller && subscription?.tier === 'pro')) && <TabsTrigger value="marketplace" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Social & Marketplaces</TabsTrigger>}
           {isAgent && <TabsTrigger value="agent_tools" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Agent Tools</TabsTrigger>}
           {!isConsumer && <TabsTrigger value="subscription" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Subscription</TabsTrigger>}
+          <TabsTrigger value="email_preferences" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Email Preferences</TabsTrigger>
         </TabsList>
 
         {/* ─────────────── ACCOUNT TAB ─────────────── */}
@@ -1768,6 +1770,11 @@ export default function MyProfile() {
             </div>
           </TabsContent>
         )}
+
+        {/* ─────────────── EMAIL PREFERENCES TAB ─────────────── */}
+        <TabsContent value="email_preferences" className="space-y-6">
+          <EmailPreferencesTab user={user} />
+        </TabsContent>
       </Tabs>
       </div>
 
