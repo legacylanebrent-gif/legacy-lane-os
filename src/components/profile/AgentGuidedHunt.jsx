@@ -221,8 +221,8 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                         setAnalyzingImage(true);
                         try {
                           const response = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return as JSON: {"category": "...", "searchQuery": "..."}`,
-                            file_urls: Array.isArray(uploadedImage) ? uploadedImage[0] : uploadedImage,
+                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return ONLY valid JSON: {"category": "CategoryName", "searchQuery": "specific search terms"}`,
+                            file_urls: [uploadedImage],
                             response_json_schema: {
                               type: 'object',
                               properties: {
@@ -232,12 +232,19 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                               required: ['category', 'searchQuery'],
                             },
                           });
+                          console.log('AI Analysis response:', response.data);
                           const analysis = response.data;
-                          if (analysis.category) setCategory(analysis.category);
-                          if (analysis.searchQuery) setSearchQuery(analysis.searchQuery);
+                          if (analysis && analysis.category) {
+                            setCategory(analysis.category);
+                            if (analysis.searchQuery) {
+                              setSearchQuery(analysis.searchQuery);
+                            }
+                          } else {
+                            throw new Error('Invalid response format from AI');
+                          }
                         } catch (e) {
                           console.error('Image analysis error:', e);
-                          alert('Could not analyze image. Please select category manually.');
+                          alert('Could not analyze image. Please try again or select category manually.');
                         } finally {
                           setAnalyzingImage(false);
                         }
