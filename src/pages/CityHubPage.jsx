@@ -34,7 +34,7 @@ export default function CityHubPage() {
         const city = cityHub.city;
         const state = cityHub.state;
         const activeSales = await base44.entities.EstateSale.filter(
-          { 'property_address.city': city, 'property_address.state': state, status: { $in: ['upcoming', 'active'] } },
+          { 'property_address.city': city, 'property_address.state': state, status: { $in: ['upcoming', 'active'] }, sale_type: { $ne: 'buyout_or_cleanout' } },
           '-created_date', 12
         );
         setSales(activeSales);

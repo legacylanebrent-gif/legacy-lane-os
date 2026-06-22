@@ -28,7 +28,7 @@ export default function CompanyProfilePage() {
       setPage(p);
       if (p?.entity_id) {
         const sales = await base44.entities.EstateSale.filter(
-          { operator_id: p.entity_id, status: { $in: ['upcoming', 'active'] } }, '-created_date', 6
+          { operator_id: p.entity_id, status: { $in: ['upcoming', 'active'] }, sale_type: { $ne: 'buyout_or_cleanout' } }, '-created_date', 6
         );
         setActiveSales(sales);
       }

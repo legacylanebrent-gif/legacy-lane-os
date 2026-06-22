@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: reseller.email,
           subject: `🔨 New Buyout Opportunity Near You: ${sale.title}`,
-          body: `Hi ${name},\n\nA new buyout opportunity has just been published near you on EstateSalen!\n\n${sale.title}\nLocation: ${locationDisplay}\nMode: ${modeLabel}\nBid Deadline: ${bidDeadlineStr}\n${cfg.minimum_bid ? 'Minimum Bid: $' + cfg.minimum_bid + '\n' : ''}${cfg.estimated_total_value ? 'Estimated Total Value: $' + cfg.estimated_total_value + '\n' : ''}${cfg.inventory_summary ? 'Inventory: ' + cfg.inventory_summary + '\n' : ''}${cfg.highlights ? 'Highlights: ' + cfg.highlights + '\n' : ''}${cfg.pickup_deadline ? 'Pickup Deadline: ' + cfg.pickup_deadline + '\n' : ''}${cfg.payment_terms ? 'Payment: ' + cfg.payment_terms + '\n' : ''}\nLog in to EstateSalen to submit your bid.\n\n— EstateSalen Buyout Network`,
+          body: `Hi ${name},\n\nA new buyout opportunity has just been published near you on EstateSalen!\n\n${sale.title}\nLocation: ${locationDisplay}\nMode: ${modeLabel}\nBid Deadline: ${bidDeadlineStr}\n${cfg.minimum_bid ? 'Minimum Bid: $' + cfg.minimum_bid + '\n' : ''}${cfg.estimated_total_value ? 'Estimated Total Value: $' + cfg.estimated_total_value + '\n' : ''}${cfg.inventory_summary ? 'Inventory: ' + cfg.inventory_summary + '\n' : ''}${cfg.highlights ? 'Highlights: ' + cfg.highlights + '\n' : ''}${cfg.pickup_deadline ? 'Pickup Deadline: ' + cfg.pickup_deadline + '\n' : ''}${cfg.payment_terms ? 'Payment: ' + cfg.payment_terms + '\n' : ''}\nClick the button below to view the buyout details and submit your bid.\n\n— EstateSalen Buyout Network`,
           html: `<p>Hi ${esc(name)},</p>
 <p>A new buyout opportunity has just been published near you on EstateSalen!</p>
 <div style="background:#fff7ed;border-left:4px solid #f97316;padding:16px 20px;border-radius:6px;margin:16px 0;">
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
   ${cfg.pickup_deadline ? `<p style="margin:4px 0;color:#64748b;">🚚 Pickup Deadline: ${esc(cfg.pickup_deadline)}</p>` : ''}
   ${cfg.payment_terms ? `<p style="margin:4px 0;color:#64748b;">💳 Payment: ${esc(cfg.payment_terms)}</p>` : ''}
 </div>
-<p style="margin:16px 0;"><a href="https://estatesalen.com/MySales" style="background:#f97316;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Log In to Bid</a></p>
+<p style="margin:16px 0;"><a href="https://estatesalen.com/EstateSaleDetail?id=${saleId}" style="background:#f97316;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;">View Buyout & Bid</a></p>
 <p style="color:#94a3b8;font-size:12px;margin-top:24px;">— EstateSalen Buyout Network</p>`
         });
         emailsSent++;

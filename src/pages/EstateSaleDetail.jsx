@@ -106,6 +106,19 @@ export default function EstateSaleDetail() {
         return;
       }
 
+      // Buyout events are operator-only — restrict to publishing operator, their team, resellers, and admins
+      if (foundSale.sale_type === 'buyout_or_cleanout') {
+        const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+        const isOperator = authUser && foundSale.operator_id === authUser.id;
+        const isTeamMember = authUser && authUser.operator_id === foundSale.operator_id;
+        const isAdmin = authUser && (ADMIN_ROLES.includes(authUser.primary_account_type) || authUser.role === 'admin');
+        const isReseller = authUser && (authUser.primary_account_type === 'reseller' || authUser.primary_account_type === 'collector_dealer');
+        if (!isOperator && !isTeamMember && !isAdmin && !isReseller) {
+          window.location.href = createPageUrl('Home');
+          return;
+        }
+      }
+
       setSale(foundSale);
 
       // Try to load Estate Sale Company Owner info and check follow status
