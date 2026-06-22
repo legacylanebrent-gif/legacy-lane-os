@@ -183,6 +183,7 @@ export default function SaleEditor() {
           special_notes: latest.special_notes,
           payment_methods: latest.payment_methods,
           buyout_config: latest.sale_type === 'buyout_or_cleanout' ? latest.buyout_config : null,
+          promoted_to_all_users: latest.sale_type === 'five_and_under_sale',
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -401,6 +402,7 @@ export default function SaleEditor() {
           special_notes: formData.special_notes,
           payment_methods: formData.payment_methods,
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
+          promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -1483,6 +1485,7 @@ Be practical and realistic for an estate sale context.`,
                       <SelectItem value="online_estate_sale">Online Estate Sale</SelectItem>
                       <SelectItem value="outside_sale">Outside Sale</SelectItem>
                       <SelectItem value="buyout_or_cleanout">Buyout Event</SelectItem>
+                      <SelectItem value="five_and_under_sale">$5 and Under Sale</SelectItem>
                       <SelectItem value="demolition_sale">Demolition Sale</SelectItem>
                       <SelectItem value="single_item_type_collection">Single Item Type Collection</SelectItem>
                       <SelectItem value="bundle_buyout">Bundle Buyout</SelectItem>

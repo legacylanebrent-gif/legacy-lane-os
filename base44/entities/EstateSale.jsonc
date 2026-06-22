@@ -23,6 +23,7 @@
         "online_estate_sale",
         "outside_sale",
         "buyout_or_cleanout",
+        "five_and_under_sale",
         "demolition_sale",
         "single_item_type_collection",
         "bundle_buyout"
@@ -356,6 +357,11 @@
         }
       },
       "default": null
+    },
+    "promoted_to_all_users": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this sale is promoted to all platform users"
     },
     "seo_title": {
       "type": "string",

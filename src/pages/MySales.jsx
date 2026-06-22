@@ -70,6 +70,8 @@ export default function MySales() {
   const [buyerMatchData, setBuyerMatchData] = useState(null);
   const [liquidationModal, setLiquidationModal] = useState({ open: false, step: 'confirm', error: null });
   const [liquidationSale, setLiquidationSale] = useState(null);
+  const [fiveAndUnderModal, setFiveAndUnderModal] = useState({ open: false, step: 'confirm', error: null });
+  const [fiveAndUnderSale, setFiveAndUnderSale] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -184,6 +186,69 @@ export default function MySales() {
   const handleLiquidationStart = (sale) => {
     setLiquidationSale(sale);
     setLiquidationModal({ open: true, step: 'confirm', error: null });
+  };
+
+  const handleFiveAndUnderStart = (sale) => {
+    setFiveAndUnderSale(sale);
+    setFiveAndUnderModal({ open: true, step: 'confirm', error: null });
+  };
+
+  const handleFiveAndUnderConfirm = async () => {
+    const sale = fiveAndUnderSale;
+    if (!sale) return;
+
+    setFiveAndUnderModal({ open: true, step: 'details', error: null });
+
+    const advance = (step) => {
+      return new Promise(resolve => {
+        setFiveAndUnderModal(prev => ({ ...prev, step }));
+        setTimeout(resolve, 400);
+      });
+    };
+
+    try {
+      await advance('details');
+      await advance('location');
+
+      const copiedImages = (sale.images || []).map(img =>
+        typeof img === 'string'
+          ? { url: img, name: '', description: '' }
+          : { ...img, price: null, ai_first_search_price: null, ai_deep_search_price: null, synopsis: '', skip_item: false, skip_serp_search: false, serp_search_status: null, categories: [] }
+      );
+
+      await advance('images');
+      await advance('categories');
+      await advance('creating');
+
+      const newSale = await base44.entities.EstateSale.create({
+        title: sale.title + ' — $5 and Under Sale',
+        description: sale.description || '',
+        sale_type: 'five_and_under_sale',
+        status: 'draft',
+        property_address: sale.property_address ? { ...sale.property_address } : { street: '', city: '', state: '', zip: '' },
+        location: sale.location ? { ...sale.location } : null,
+        sale_dates: [],
+        images: copiedImages,
+        categories: sale.categories ? [...sale.categories] : [],
+        commission_rate: sale.commission_rate || null,
+        special_notes: sale.special_notes || '',
+        payment_methods: sale.payment_methods ? [...sale.payment_methods] : [],
+        promoted_to_all_users: true,
+        operator_id: user.id,
+        operator_name: user.full_name || user.company_name || '',
+      });
+
+      setFiveAndUnderModal(prev => ({ ...prev, step: 'done' }));
+
+      setTimeout(() => {
+        setFiveAndUnderModal({ open: false, step: 'confirm', error: null });
+        setFiveAndUnderSale(null);
+        navigate(createPageUrl('SaleEditor') + '?saleId=' + newSale.id);
+      }, 1200);
+    } catch (error) {
+      console.error('Error launching $5 and Under sale:', error);
+      setFiveAndUnderModal(prev => ({ ...prev, error: error.message || 'Failed to duplicate sale' }));
+    }
   };
 
   const handleLiquidationConfirm = async () => {
@@ -379,6 +444,18 @@ export default function MySales() {
         onConfirm={handleLiquidationConfirm}
       />
 
+      <LiquidationProgressModal
+        open={fiveAndUnderModal.open}
+        currentStep={fiveAndUnderModal.step}
+        error={fiveAndUnderModal.error}
+        saleTitle={fiveAndUnderSale?.title}
+        onCancel={() => {
+          setFiveAndUnderModal({ open: false, step: 'confirm', error: null });
+          setFiveAndUnderSale(null);
+        }}
+        onConfirm={handleFiveAndUnderConfirm}
+      />
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
@@ -500,6 +577,7 @@ export default function MySales() {
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Liquidation</Button>)}
+{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 & Under</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
                                className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
