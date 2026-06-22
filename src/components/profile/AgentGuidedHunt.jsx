@@ -248,7 +248,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                           setUploadedImage(file_url);
                           console.log('Image uploaded:', file_url);
                           
-                          // Auto-analyze the uploaded image
+                          // Auto-analyze the uploaded image using OpenAI
                           setAnalyzingImage(true);
                           const response = await base44.integrations.Core.InvokeLLM({
                             prompt: `Look at this image and identify what category it belongs to from this list: ${CATEGORIES.join(', ')}. Then provide a specific search query to find similar items (include brand, style, era, or type if visible). Return ONLY valid JSON with this exact format: {"category": "ExactCategoryName", "searchQuery": "specific search terms"}. Example: {"category": "Cameras & Photography", "searchQuery": "vintage medium format camera"}`,
@@ -261,6 +261,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                               },
                               required: ['category', 'searchQuery'],
                             },
+                            model: 'gpt_5_mini',
                           });
                           console.log('AI Analysis response:', response.data);
                           const analysis = response.data;
