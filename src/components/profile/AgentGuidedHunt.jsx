@@ -219,6 +219,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                       className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
                       onClick={async () => {
                         setAnalyzingImage(true);
+                        setError('');
                         try {
                           const response = await base44.integrations.Core.InvokeLLM({
                             prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return ONLY valid JSON: {"category": "CategoryName", "searchQuery": "specific search terms"}`,
@@ -244,7 +245,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                           }
                         } catch (e) {
                           console.error('Image analysis error:', e);
-                          alert('Could not analyze image. Please try again or select category manually.');
+                          setError('Could not analyze image. Please try again or select category manually.');
                         } finally {
                           setAnalyzingImage(false);
                         }
@@ -296,6 +297,13 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                 )}
               </div>
             </div>
+
+            {/* Error message */}
+            {error && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
 
             {/* Show analysis results after analysis */}
             {uploadedImage && category && searchQuery && (
