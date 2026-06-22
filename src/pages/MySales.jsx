@@ -756,7 +756,9 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="h-7 text-xs border-emerald-500 text-black hover:bg-emerald-50 px-2"><Receipt className="w-3 h-3 mr-1" />Expenses</Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-500 text-black hover:bg-purple-50 px-2"><Link to={`/ResellerPackupEventEditor?saleId=${sale.id}`}><Package className="w-3 h-3 mr-1" />Reseller Event</Link></Button>
-                                </div>
+                                <Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className="h-7 text-xs border-cyan-600 text-cyan-700 hover:bg-cyan-50 px-2"><Building2 className="w-3 h-3 mr-1" />Cleanout</Button>
+                                <Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className="h-7 text-xs border-pink-600 text-pink-700 hover:bg-pink-50 px-2"><Heart className="w-3 h-3 mr-1" />Donation</Button>
+                              </div>
                             </CardContent>
                           </Card>
                         ))}
