@@ -46,6 +46,42 @@
       ],
       "default": "draft"
     },
+    "email_subject": {
+      "type": "string",
+      "description": "Email subject line for email campaigns"
+    },
+    "email_body": {
+      "type": "string",
+      "description": "HTML body content of the email campaign"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "From name for the email \u2014 defaults to operator's company name"
+    },
+    "reply_to_email": {
+      "type": "string",
+      "description": "Reply-to email address for the campaign"
+    },
+    "audience_type": {
+      "type": "string",
+      "enum": [
+        "followers",
+        "crm_connections",
+        "all_subscribers"
+      ],
+      "default": "followers",
+      "description": "Which audience to send to"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the campaign was last sent"
+    },
+    "recipient_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of recipients in the last send"
+    },
     "funnel_steps": {
       "type": "array",
       "items": {

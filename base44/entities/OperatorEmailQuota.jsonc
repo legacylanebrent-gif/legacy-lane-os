@@ -1,0 +1,67 @@
+{
+  "name": "OperatorEmailQuota",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator"
+    },
+    "operator_email": {
+      "type": "string",
+      "description": "Operator email for identification"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Operator company name at time of quota setup"
+    },
+    "subscription_tier": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "growth",
+        "professional",
+        "elite"
+      ],
+      "default": "elite",
+      "description": "Subscription tier that determines included profiles"
+    },
+    "profiles_included": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Profiles included with the Elite plan (1000)"
+    },
+    "profiles_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total profiles emailed this billing period"
+    },
+    "additional_purchased": {
+      "type": "integer",
+      "default": 0,
+      "description": "Additional profile blocks purchased (in blocks of 1000)"
+    },
+    "additional_purchased_used": {
+      "type": "integer",
+      "default": 0,
+      "description": "How many of the purchased additional profiles have been used"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of current billing period"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of current billing period"
+    },
+    "last_purchase_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the operator last purchased additional profiles"
+    }
+  },
+  "required": [
+    "operator_id"
+  ]
+}
