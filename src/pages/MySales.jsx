@@ -391,14 +391,6 @@ export default function MySales() {
             <BookOpen className="w-4 h-4 mr-2" />
             EstateSalen 411
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/CleanoutEditor')}
-            className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
-          >
-            <Building2 className="w-4 h-4 mr-2" />
-            My Cleanouts
-          </Button>
           <Button 
             onClick={() => {
               if (!isProfileComplete(user)) {

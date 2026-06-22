@@ -15,7 +15,7 @@ import {
   ChevronDown, ChevronRight, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
   UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film,
   Scale, Database, AlertTriangle, Target, Search, GitBranch, Mail, Share2,
-  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar
+  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar, Trash2
 } from 'lucide-react';
 
 // ─── Master Nav Item List ─────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ export const ALL_NAV_ITEMS = [
 
   // ── ESTATE SALES (operator-facing) ──────────────────────────────────────────
   { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },
+  { page: 'CleanoutEditor',         label: 'My Cleanouts',           icon: Trash2,          group: 'Estate Sales' },
   { page: 'ManageTeam',             label: 'Manage Team',            icon: UserPlus,        group: 'Estate Sales' },
   { page: 'Inventory',              label: 'My Inventory',            icon: Package,         group: 'Estate Sales' },
   { page: 'StorageManagement',      label: 'Storage Management',     icon: Warehouse,       group: 'Estate Sales' },
