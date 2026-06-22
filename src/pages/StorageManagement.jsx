@@ -355,26 +355,6 @@ export default function StorageManagement() {
         </Button>
       </div>
 
-      {/* Best Practices */}
-      <Card className="bg-cyan-50 border-cyan-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-cyan-900">
-            <Lightbulb className="w-5 h-5" />
-            Labeling Best Practices
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
-            {BEST_PRACTICES.map((practice, idx) => (
-              <div key={idx} className="p-3 bg-white rounded-lg border border-cyan-200">
-                <h4 className="font-semibold text-cyan-900 mb-1">{practice.title}</h4>
-                <p className="text-sm text-cyan-700">{practice.description}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Locations Grid */}
       {locations.length === 0 ? (
         <Card className="p-12 text-center">
@@ -488,9 +468,29 @@ export default function StorageManagement() {
             </Card>
           ))}
         </div>
-      )}
+        )}
 
-      {/* Create/Edit Space Modal */}
+        {/* Best Practices */}
+        <Card className="bg-cyan-50 border-cyan-200">
+        <CardHeader>
+         <CardTitle className="flex items-center gap-2 text-cyan-900">
+           <Lightbulb className="w-5 h-5" />
+           Labeling Best Practices
+         </CardTitle>
+        </CardHeader>
+        <CardContent>
+         <div className="grid md:grid-cols-2 gap-4">
+           {BEST_PRACTICES.map((practice, idx) => (
+             <div key={idx} className="p-3 bg-white rounded-lg border border-cyan-200">
+               <h4 className="font-semibold text-cyan-900 mb-1">{practice.title}</h4>
+               <p className="text-sm text-cyan-700">{practice.description}</p>
+             </div>
+           ))}
+         </div>
+        </CardContent>
+        </Card>
+
+        {/* Create/Edit Space Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0">
