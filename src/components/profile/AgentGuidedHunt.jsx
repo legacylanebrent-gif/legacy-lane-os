@@ -202,14 +202,14 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
               <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 bg-slate-50">
                 {uploadedImage ? (
                   <div className="space-y-3">
-                    <div className="relative">
-                      <img src={uploadedImage} alt="Uploaded item" className="w-full h-48 object-cover rounded-lg" />
+                    <div className="relative flex items-center justify-center bg-white rounded-lg border border-slate-200 p-2">
+                      <img src={uploadedImage} alt="Uploaded item" className="max-w-full max-h-40 w-auto h-auto object-contain rounded" />
                       <button
                         type="button"
                         onClick={() => setUploadedImage(null)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-600"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 shadow-sm"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3" />
                       </button>
                     </div>
                     <Button
@@ -290,11 +290,11 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
               </div>
             </div>
 
-            {/* Show analysis results after upload */}
+            {/* Show analysis results after analysis */}
             {uploadedImage && category && searchQuery && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-start gap-2 mb-2">
-                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-start gap-2 mb-3">
+                  <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-green-800">AI Analysis Complete!</p>
                     <p className="text-xs text-green-700 mt-1">
@@ -302,7 +302,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-xs h-8 flex-1"
