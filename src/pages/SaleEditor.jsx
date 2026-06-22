@@ -1476,7 +1476,7 @@ Be practical and realistic for an estate sale context.`,
                       <SelectItem value="business_closing">Business Closing</SelectItem>
                       <SelectItem value="online_estate_sale">Online Estate Sale</SelectItem>
                       <SelectItem value="outside_sale">Outside Sale</SelectItem>
-                      <SelectItem value="buyout_or_cleanout">Buyout Or Cleanout</SelectItem>
+                      <SelectItem value="buyout_or_cleanout">Buyout Event</SelectItem>
                       <SelectItem value="demolition_sale">Demolition Sale</SelectItem>
                       <SelectItem value="single_item_type_collection">Single Item Type Collection</SelectItem>
                       <SelectItem value="bundle_buyout">Bundle Buyout</SelectItem>
