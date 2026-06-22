@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Sparkles, ArrowRight, Search, Check, Plus, Loader2,
-  ShoppingBag, ChevronRight, RotateCcw, X, ListFilter
+  ShoppingBag, ChevronRight, RotateCcw, X, ListFilter,
+  Image as ImageIcon, Upload
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -35,6 +36,9 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
   const [error, setError] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [customItems, setCustomItems] = useState([]);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
 
   const addCustomItem = () => {
     const title = customTitle.trim();
@@ -56,6 +60,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
     setCustomItems([]);
     setCustomTitle('');
     setError('');
+    setUploadedImage(null);
   };
 
   const handleSearch = async () => {
@@ -191,6 +196,109 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
         {/* Step 1: Category */}
         {step === 'category' && (
           <div className="space-y-4">
+            {/* Image Upload */}
+            <div>
+              <Label className="text-sm mb-2 block">Upload a Photo (Optional)</Label>
+              <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 bg-slate-50">
+                {uploadedImage ? (
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <img src={uploadedImage} alt="Uploaded item" className="w-full h-48 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => setUploadedImage(null)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+                      onClick={async () => {
+                        setAnalyzingImage(true);
+                        try {
+                          const response = await base44.integrations.Core.InvokeLLM({
+                            prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return as JSON: {"category": "...", "searchQuery": "..."}`,
+                            file_urls: uploadedImage,
+                            response_json_schema: {
+                              type: 'object',
+                              properties: {
+                                category: { type: 'string', description: 'Category from the list' },
+                                searchQuery: { type: 'string', description: 'Specific search query' },
+                              },
+                              required: ['category', 'searchQuery'],
+                            },
+                          });
+                          const analysis = response.data;
+                          if (analysis.category) setCategory(analysis.category);
+                          if (analysis.searchQuery) setSearchQuery(analysis.searchQuery);
+                        } catch (e) {
+                          console.error('Image analysis error:', e);
+                          alert('Could not analyze image. Please select category manually.');
+                        } finally {
+                          setAnalyzingImage(false);
+                        }
+                      }}
+                      disabled={analyzingImage}
+                    >
+                      {analyzingImage ? (
+                        <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Analyzing with AI...</>
+                      ) : (
+                        <><Sparkles className="w-3 h-3 mr-2" /> Auto-Fill Category & Search</>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer block">
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      {uploadingImage ? (
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-3" />
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-slate-400 mb-3" />
+                      )}
+                      <p className="text-sm font-medium text-slate-700 mb-1">
+                        {uploadingImage ? 'Uploading...' : 'Upload a photo of what you\'re hunting for'}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Our AI will analyze it and suggest the category and search terms
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        setUploadingImage(true);
+                        try {
+                          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                          setUploadedImage(file_url);
+                        } catch (err) {
+                          alert('Upload failed');
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      }}
+                      disabled={uploadingImage}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-500">Or select manually</span>
+              </div>
+            </div>
+
             <div>
               <Label className="text-sm">What are you hunting for?</Label>
               <Select value={category} onValueChange={setCategory}>
