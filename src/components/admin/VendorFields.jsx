@@ -24,7 +24,8 @@ const VENDOR_TYPES = [
   { value: 'electrician', label: 'Electrician' },
   { value: 'painter', label: 'Painter' },
   { value: 'flooring', label: 'Flooring Specialist' },
-  { value: 'roofer', label: 'Roofing Contractor' }
+  { value: 'roofer', label: 'Roofing Contractor' },
+  { value: 'donation_company', label: 'Donation Pickup Company (Free Forever)' }
 ];
 
 export default function VendorFields({ formData, setFormData, uploadingLogo, handleLogoUpload }) {

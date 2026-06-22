@@ -146,6 +146,15 @@ const VENDOR_CATEGORIES = [
       { value: 'shipping_service', label: 'Shipping Service' },
     ],
   },
+  {
+    key: 'community_donation',
+    label: 'Community & Donation',
+    icon: Heart,
+    color: 'bg-pink-50 text-pink-700 border-pink-200',
+    types: [
+      { value: 'donation_company', label: 'Donation Pickup Company' },
+    ],
+  },
 ];
 
 export default function VendorSignup() {
@@ -154,6 +163,7 @@ export default function VendorSignup() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isDonationCompany, setIsDonationCompany] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -170,6 +180,15 @@ export default function VendorSignup() {
   };
 
   const handleGetStarted = () => {
+    if (isAuthenticated) {
+      window.location.href = createPageUrl('MyProfile');
+    } else {
+      base44.auth.redirectToLogin(createPageUrl('VendorSignup'));
+    }
+  };
+
+  const handleSelectDonation = () => {
+    setIsDonationCompany(true);
     if (isAuthenticated) {
       window.location.href = createPageUrl('MyProfile');
     } else {
@@ -332,6 +351,31 @@ export default function VendorSignup() {
               Don't see your service? Select "Other" when signing up
             </Badge>
           </div>
+
+          {/* Free Forever banner for Donation Companies */}
+          {expandedCategory === 'community_donation' && (
+            <div className="mt-8 max-w-2xl mx-auto">
+              <div className="bg-gradient-to-r from-pink-50 to-green-50 border-2 border-pink-200 rounded-2xl p-8 text-center shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-slate-900 mb-2">Free Forever for Donation Companies</h3>
+                <p className="text-sm text-slate-600 mb-4 max-w-md mx-auto">
+                  As a thank you for the work you do in our communities, donation pickup companies get full access to the EstateSalen vendor network at no cost — no subscription fee, ever.
+                </p>
+                <Badge className="bg-green-600 text-white text-sm py-1.5 px-4 mb-4">$0/month · $0/year · Always Free</Badge>
+                <div>
+                  <Button
+                    onClick={handleSelectDonation}
+                    size="lg"
+                    className="bg-pink-600 hover:bg-pink-700 text-white text-lg px-8 py-4 rounded-xl shadow-lg"
+                  >
+                    Join Free as a Donation Company
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -382,6 +426,15 @@ export default function VendorSignup() {
                 Annual <Badge className="ml-1.5 bg-green-600 text-xs">Save 20%</Badge>
               </Button>
             </div>
+          </div>
+
+          {/* Donation Company Free Forever callout */}
+          <div className="max-w-2xl mx-auto mb-8 bg-gradient-to-r from-pink-50 to-green-50 border border-pink-200 rounded-xl p-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Heart className="w-5 h-5 text-pink-600" />
+              <span className="font-semibold text-slate-800">Donation Pickup Company?</span>
+            </div>
+            <p className="text-sm text-slate-600">Your account is <strong className="text-green-700">always free</strong> — select "Community & Donation" above to get started at no cost.</p>
           </div>
 
           {loading ? (

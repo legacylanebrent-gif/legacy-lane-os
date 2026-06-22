@@ -68,8 +68,10 @@
         "storage_facility",
         "pods_container",
         "shipping_service",
+        "donation_company",
         "other"
-      ]
+      ],
+      "description": "Type of vendor service. 'donation_company' is always free \u2014 no subscription fee, ever."
     },
     "vendor_category": {
       "type": "string",
@@ -82,7 +84,8 @@
         "light_repair_prep",
         "specialty_contractors",
         "buyer_facing",
-        "moving_logistics"
+        "moving_logistics",
+        "community_donation"
       ],
       "description": "High-level category grouping"
     },

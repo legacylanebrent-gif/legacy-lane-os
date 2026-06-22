@@ -19,6 +19,7 @@ const VENDOR_TYPES = [
   { value: 'appraiser', label: 'Appraiser' },
   { value: 'photographer', label: 'Photographer' },
   { value: 'inspector', label: 'Inspector' },
+  { value: 'donation_company', label: 'Donation Pickup Company (Free)' },
   { value: 'other', label: 'Other' }
 ];
 
