@@ -134,6 +134,181 @@ export default function WhyIEstateSalen() {
           </div>
         </div>
 
+        {/* AI Section */}
+        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6">
+              AI Is Changing the World ... And We're Growing With It.
+            </h2>
+          </div>
+
+          <div className="prose prose-lg max-w-none mb-12">
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              There was a time when every business relied entirely on people, paperwork, phone calls, filing cabinets, spreadsheets, sticky notes, and long hours.
+            </p>
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              For decades, that was simply the way things were done.
+            </p>
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              Then came computers.
+            </p>
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              Then the internet.
+            </p>
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              Then smartphones.
+            </p>
+            <p className="text-lg text-slate-700 leading-relaxed mb-8">
+              And now, we're entering the next major shift in how businesses operate.
+            </p>
+
+            <div className="bg-gradient-to-br from-navy-50 to-blue-50 border-2 border-navy-200 rounded-xl p-8 mb-8">
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Artificial Intelligence.</h3>
+              <p className="text-slate-700 mb-4">Whether we embrace it or not, AI is becoming part of everyday life.</p>
+              <p className="text-slate-700 mb-6">It's helping people:</p>
+              <div className="grid md:grid-cols-2 gap-3">
+                {[
+                  'Find information faster',
+                  'Automate repetitive tasks',
+                  'Create content',
+                  'Organize data',
+                  'Improve customer experiences',
+                  'Make better decisions',
+                  'Save valuable time'
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-white border border-navy-200 rounded-md px-4 py-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <span className="text-slate-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              The estate sale industry is no exception.
+            </p>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 mb-8">
+              <p className="text-lg text-slate-800 leading-relaxed mb-4">
+                The reality is that most estate sale company owners didn't get into this business because they love paperwork, spreadsheets, social media posting, inventory management, or administrative tasks.
+              </p>
+              <p className="text-lg text-slate-800 leading-relaxed font-semibold">
+                They got into this business because they enjoy helping families, uncovering treasures, serving clients, and creating successful sales.
+              </p>
+              <p className="text-xl text-navy-900 font-bold mt-6 text-center">
+                That's where we believe AI can help.
+              </p>
+            </div>
+          </div>
+
+          {/* AI Isn't Perfect Section */}
+          <div className="border-t-2 border-slate-200 pt-12 mt-12">
+            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6">
+              AI Isn't Perfect. Neither Are Humans.
+            </h3>
+            
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 mb-8">
+              <p className="text-lg text-slate-700 mb-4">Let's be transparent.</p>
+              <p className="text-slate-700 mb-4">Artificial Intelligence is not perfect.</p>
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                {['Sometimes it gets things wrong', 'Sometimes it needs guidance', 'Sometimes it requires human review and common sense'].map((item, idx) => (
+                  <div key={idx} className="bg-white border border-slate-200 rounded-md px-4 py-3 text-slate-700 text-center">
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <p className="text-slate-700 mb-2">But every day it becomes smarter.</p>
+              <p className="text-slate-700 mb-2">Every month it becomes more capable.</p>
+              <p className="text-slate-700 mb-6">Every year it becomes more useful.</p>
+              
+              <div className="bg-navy-900 text-white rounded-lg p-6">
+                <p className="text-lg font-semibold">
+                  The companies that learn how to leverage AI responsibly today will likely have a significant advantage tomorrow.
+                </p>
+                <p className="text-slate-300 mt-4">
+                  Not because AI replaces people.
+                </p>
+                <p className="text-slate-300 font-semibold">
+                  But because AI allows people to focus on higher-value work.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Human + AI Section */}
+          <div className="border-t-2 border-slate-200 pt-12 mt-12">
+            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
+              We Believe The Future Is Human + AI
+            </h3>
+            
+            <div className="max-w-3xl mx-auto mb-8">
+              <p className="text-lg text-slate-700 mb-6 text-center">
+                At EstateSalen, we don't believe technology should replace estate sale professionals.
+              </p>
+              <p className="text-lg text-slate-700 mb-6 text-center">
+                We believe it should empower them.
+              </p>
+              
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl p-8 mb-8">
+                <p className="text-xl text-slate-800 font-bold text-center mb-6">
+                  Our goal is simple:
+                </p>
+                <p className="text-lg text-slate-700 text-center mb-6">
+                  Use AI to eliminate repetitive work so you can focus on what matters most.
+                </p>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {['Serving clients', 'Building relationships', 'Managing sales', 'Growing your business', 'Spending more time doing what you enjoy'].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-white border border-cyan-200 rounded-md px-4 py-3">
+                      <CheckCircle2 className="w-5 h-5 text-cyan-600" />
+                      <span className="text-slate-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-slate-700 mb-2 text-center">When AI can save you time, we use it.</p>
+              <p className="text-slate-700 mb-6 text-center">When human expertise is required, we trust the professionals.</p>
+              
+              <div className="bg-navy-900 text-white rounded-lg p-8 text-center">
+                <p className="text-2xl font-bold mb-4">
+                  The future isn't AI versus people.
+                </p>
+                <p className="text-xl text-slate-300">
+                  The future is people using AI to accomplish more than ever before.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Our Commitment Section */}
+          <div className="border-t-2 border-slate-200 pt-12 mt-12">
+            <h3 className="text-3xl font-serif font-bold text-slate-900 mb-6 text-center">
+              Our Commitment
+            </h3>
+            
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-8 md:p-12">
+              <p className="text-lg text-slate-700 mb-6 text-center">
+                EstateSalen is committed to continuously improving and evolving alongside the latest advancements in technology.
+              </p>
+              <p className="text-lg text-slate-700 mb-6 text-center">
+                As AI becomes more powerful, more accurate, and more useful, we will continue integrating new tools and capabilities that help estate sale companies operate more efficiently and profitably.
+              </p>
+              
+              <div className="bg-white border border-purple-200 rounded-lg p-8 mb-8">
+                <p className="text-xl text-slate-800 font-bold text-center mb-4">
+                  We're not building software for yesterday's estate sale company.
+                </p>
+                <p className="text-2xl text-navy-900 font-bold text-center mb-6">
+                  We're building the operating system for tomorrow's.
+                </p>
+                <p className="text-lg text-slate-700 text-center font-semibold">
+                  Because the companies that embrace innovation today will be the companies leading the industry tomorrow.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Lead Generation Section */}
         <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6">
