@@ -35,6 +35,7 @@ export default function SharedFooter() {
           <div>
             <h4 className="text-lg font-semibold mb-4">For Businesses</h4>
             <ul className="space-y-2">
+              <li><Link to="/WhyIEstateSalen" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Why I Built EstateSalen</Link></li>
               <li><Link to={createPageUrl('OperatorPackages')} className="text-white hover:text-orange-400 transition-colors">List Your Company</Link></li>
               <li><Link to="/LandingPageAgent" className="text-white hover:text-orange-400 transition-colors">Real Estate Agents</Link></li>
               <li><Link to={createPageUrl('VendorSignup')} className="text-white hover:text-orange-400 transition-colors">Vendors</Link></li>
@@ -42,7 +43,6 @@ export default function SharedFooter() {
               <li><Link to={createPageUrl('StartYourCompany')} className="text-white hover:text-orange-400 transition-colors font-semibold">Start Your Own Estate Sale Company</Link></li>
               <li><Link to="/CompanyLanding" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Platform Features</Link></li>
               <li><Link to="/CompareEstateSales" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Compare vs EstateSales.net</Link></li>
-              <li><Link to="/WhyIEstateSalen" className="text-orange-400 hover:text-orange-300 transition-colors font-semibold">Why I Built EstateSalen</Link></li>
             </ul>
           </div>
 
