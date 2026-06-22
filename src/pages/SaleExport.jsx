@@ -566,8 +566,8 @@ export default function SaleExport() {
                             >
                               {exporting[`${option.id}-${fmt}`] ? 'Exporting...' : (
                                 <>
-                                  {fmt === 'pdf' ? <FileDown className="w-3 h-3 mr-2" /> : <Download className="w-3 h-3 mr-2" />}
-                                  {fmt.toUpperCase()}
+                                  {fmt === 'pdf' ? <FileDown className="w-3 h-3 mr-2" /> : fmt === 'csv' ? <FileSpreadsheet className="w-3 h-3 mr-2" /> : <Download className="w-3 h-3 mr-2" />}
+                                  {fmt === 'csv' ? 'XLS' : fmt.toUpperCase()}
                                 </>
                               )}
                             </Button>
