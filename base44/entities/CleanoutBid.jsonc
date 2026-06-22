@@ -1,0 +1,51 @@
+{
+  "name": "CleanoutBid",
+  "type": "object",
+  "properties": {
+    "cleanout_id": {
+      "type": "string",
+      "description": "Reference to Cleanout entity"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "User ID of the cleanout vendor"
+    },
+    "vendor_name": {
+      "type": "string",
+      "description": "Vendor business name"
+    },
+    "vendor_email": {
+      "type": "string"
+    },
+    "vendor_phone": {
+      "type": "string"
+    },
+    "bid_amount": {
+      "type": "number",
+      "description": "Bid amount in whole dollars"
+    },
+    "estimated_days": {
+      "type": "integer",
+      "description": "Estimated days to complete the cleanout"
+    },
+    "message": {
+      "type": "string",
+      "description": "Vendor message to the operator"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "awarded",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "Status of this bid"
+    }
+  },
+  "required": [
+    "cleanout_id",
+    "vendor_id",
+    "bid_amount"
+  ]
+}

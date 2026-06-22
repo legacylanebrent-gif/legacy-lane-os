@@ -13,7 +13,7 @@ import BuyerMatchModal from '@/components/estate/BuyerMatchModal';
 import SaleExpensesModal from '@/components/expenses/SaleExpensesModal';
 import { 
         Plus, Search, Calendar, MapPin, Eye, Heart, DollarSign, 
-        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket
+        Package, Edit, TrendingUp, Star, Briefcase, Trash, FileText, BarChart3, Megaphone, Download, Globe, Users, Receipt, Sparkles, ChevronDown, ChevronUp, BookOpen, Pin, UserCheck, Rocket, Building2
       } from 'lucide-react';
 import SocialCampaignModal from '@/components/social/SocialCampaignModal';
 import LiquidationProgressModal from '@/components/estate/LiquidationProgressModal';
@@ -193,6 +193,34 @@ export default function MySales() {
     setFiveAndUnderModal({ open: true, step: 'confirm', error: null });
   };
 
+  const handleCreateCleanout = async (sale) => {
+    try {
+      const photoUrls = (sale.images || [])
+        .map(img => (typeof img === 'string' ? img : img?.url))
+        .filter(Boolean);
+
+      const newCleanout = await base44.entities.Cleanout.create({
+        title: sale.title + ' — Cleanout',
+        description: sale.description || '',
+        property_address: sale.property_address
+          ? { ...sale.property_address }
+          : { street: '', city: '', state: '', zip: '' },
+        cleanout_deadline: '',
+        scope_description: '',
+        access_notes: '',
+        photos: photoUrls,
+        status: 'draft',
+        operator_id: user.id,
+        operator_name: user.full_name || user.company_name || '',
+      });
+
+      navigate(`/CleanoutEditor?id=${newCleanout.id}`);
+    } catch (error) {
+      console.error('Error creating cleanout:', error);
+      alert('Failed to create cleanout: ' + error.message);
+    }
+  };
+
   const handleFiveAndUnderConfirm = async () => {
     const sale = fiveAndUnderSale;
     if (!sale) return;
@@ -354,7 +382,7 @@ export default function MySales() {
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-1 md:mb-2">My Estate Sales</h1>
           <p className="text-sm md:text-base text-slate-600">Manage your estate sale listings and track performance</p>
         </div>
-        <div className="flex gap-2 md:self-start">
+        <div className="flex gap-2 md:self-start flex-wrap">
           <Button
             variant="outline"
             onClick={() => navigate(createPageUrl('MySalesGuide'))}
@@ -362,6 +390,14 @@ export default function MySales() {
           >
             <BookOpen className="w-4 h-4 mr-2" />
             EstateSalen 411
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/CleanoutEditor')}
+            className="border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            My Cleanouts
           </Button>
           <Button 
             onClick={() => {
@@ -376,6 +412,13 @@ export default function MySales() {
           >
             <Plus className="w-4 h-4 mr-2" />
             Create Sale
+          </Button>
+          <Button
+            onClick={() => navigate('/CleanoutEditor?id=new')}
+            className="bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Cleanout
           </Button>
         </div>
       </div>
@@ -582,6 +625,7 @@ export default function MySales() {
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
+{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 & Under</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}

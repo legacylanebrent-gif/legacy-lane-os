@@ -1,0 +1,91 @@
+{
+  "name": "Cleanout",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Estate Sale Company Owner user ID"
+    },
+    "operator_name": {
+      "type": "string"
+    },
+    "property_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      }
+    },
+    "cleanout_deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Date by which cleanout must be completed"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of photo URLs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "bidding_closed",
+        "awarded",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Current status of the cleanout"
+    },
+    "scope_description": {
+      "type": "string",
+      "description": "What needs to be cleaned out"
+    },
+    "access_notes": {
+      "type": "string",
+      "description": "How to access the property"
+    },
+    "awarded_vendor_id": {
+      "type": "string",
+      "description": "User ID of the vendor who won the bid"
+    },
+    "awarded_vendor_name": {
+      "type": "string"
+    },
+    "awarded_bid_amount": {
+      "type": "number",
+      "description": "Winning bid amount in whole dollars"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the cleanout was published to vendors"
+    }
+  },
+  "required": [
+    "title",
+    "operator_id",
+    "cleanout_deadline"
+  ]
+}
