@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowLeft, Download, FileText, FileSpreadsheet, 
-  FileImage, Receipt, Package, Users, Calendar, Scan
+  FileImage, Receipt, Package, Users, Calendar, Scan, FileDown
 } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 const EXPORT_OPTIONS = [
   {
@@ -15,7 +16,7 @@ const EXPORT_OPTIONS = [
     name: 'Pricing List',
     description: 'Google Lens pricing results with market ranges and sale prices',
     icon: Scan,
-    format: 'CSV'
+    format: 'CSV / PDF'
   },
   {
     id: 'inventory',
@@ -101,7 +102,7 @@ export default function SaleExport() {
     setExporting(prev => ({ ...prev, [exportId]: true }));
 
     try {
-      if (exportId === 'pricing-list') {
+      if (exportId === 'pricing-list' || exportId === 'pricing-list-pdf') {
         const pricings = await base44.entities.SaleItemPricing.filter({ sale_id: sale.id });
         if (pricings.length === 0) {
           alert('No pricing data found. Use the Pricing Tool to analyze photos first.');
@@ -116,6 +117,61 @@ export default function SaleExport() {
           p.price_max || '',
           p.user_price || ''
         ]);
+
+        if (exportId === 'pricing-list-pdf') {
+          const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 40;
+          const tableWidth = pageWidth - margin * 2;
+          const colWidths = [tableWidth * 0.35, tableWidth * 0.15, tableWidth * 0.12, tableWidth * 0.12, tableWidth * 0.12, tableWidth * 0.14];
+          let y = margin;
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${sale.title} — Pricing List`, margin, y);
+          y += 24;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 12, tableWidth, 18, 'F');
+          let x = margin;
+          headers.forEach((h, i) => {
+            doc.text(h, x + 4, y);
+            x += colWidths[i];
+          });
+          y += 18;
+
+          doc.setFont('helvetica', 'normal');
+          rows.forEach((row, rowIdx) => {
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+              doc.addPage();
+              y = margin;
+              doc.setFillColor(240, 240, 240);
+              doc.rect(margin, y - 12, tableWidth, 18, 'F');
+              doc.setFont('helvetica', 'bold');
+              x = margin;
+              headers.forEach((h, i) => { doc.text(h, x + 4, y); x += colWidths[i]; });
+              y += 18;
+              doc.setFont('helvetica', 'normal');
+            }
+            if (rowIdx % 2 === 0) {
+              doc.setFillColor(248, 248, 252);
+              doc.rect(margin, y - 12, tableWidth, 16, 'F');
+            }
+            x = margin;
+            row.forEach((cell, i) => {
+              const val = cell !== '' && i >= 2 ? `$${cell}` : cell;
+              doc.text(String(val).substring(0, 60), x + 4, y);
+              x += colWidths[i];
+            });
+            y += 16;
+          });
+
+          doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_pricing.pdf`);
+          return;
+        }
+
         const csv = [headers, ...rows]
           .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
           .join('\n');
@@ -203,22 +259,45 @@ export default function SaleExport() {
                         <h3 className="font-semibold text-slate-900 mb-1">{option.name}</h3>
                         <p className="text-sm text-slate-600 mb-2">{option.description}</p>
                         <p className="text-xs text-slate-500 mb-3">Format: {option.format}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full"
-                          onClick={() => handleExport(option.id)}
-                          disabled={exporting[option.id]}
-                        >
-                          {exporting[option.id] ? (
-                            'Exporting...'
-                          ) : (
-                            <>
-                              <Download className="w-3 h-3 mr-2" />
-                              Export
-                            </>
-                          )}
-                        </Button>
+                        {option.id === 'pricing-list' ? (
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => handleExport('pricing-list')}
+                              disabled={exporting['pricing-list']}
+                            >
+                              {exporting['pricing-list'] ? 'Exporting...' : (<><Download className="w-3 h-3 mr-2" />CSV</>)}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => handleExport('pricing-list-pdf')}
+                              disabled={exporting['pricing-list-pdf']}
+                            >
+                              {exporting['pricing-list-pdf'] ? 'Exporting...' : (<><FileDown className="w-3 h-3 mr-2" />PDF</>)}
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => handleExport(option.id)}
+                            disabled={exporting[option.id]}
+                          >
+                            {exporting[option.id] ? (
+                              'Exporting...'
+                            ) : (
+                              <>
+                                <Download className="w-3 h-3 mr-2" />
+                                Export
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
