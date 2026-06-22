@@ -65,6 +65,7 @@ export default function MySales() {
   const [socialSale, setSocialSale] = useState(null);
   const [showCompletedSection, setShowCompletedSection] = useState(false);
   const [isElite, setIsElite] = useState(false);
+  const [isProOrElite, setIsProOrElite] = useState(false);
   const [featuringId, setFeaturingId] = useState(null);
   const [matchingSaleId, setMatchingSaleId] = useState(null);
   const [buyerMatchData, setBuyerMatchData] = useState(null);
@@ -93,6 +94,8 @@ export default function MySales() {
       // Check if user is on Elite subscription
       const subs = await base44.entities.Subscription.filter({ user_id: userData.id });
       if (subs.length > 0 && ['premium', 'enterprise', 'elite'].includes(subs[0].tier)) setIsElite(true);
+      // Check if user is on Pro or Elite (for Cleanout/Donation access)
+      if (subs.length > 0 && ['professional', 'premium', 'enterprise', 'elite'].includes(subs[0].tier)) setIsProOrElite(true);
     } catch (error) {
       console.error('Error loading sales:', error);
     } finally {
@@ -433,20 +436,24 @@ export default function MySales() {
             <Plus className="w-4 h-4 mr-2" />
             Create Sale
           </Button>
-          <Button
-            onClick={() => navigate('/CleanoutEditor?id=new')}
-            className="bg-cyan-600 hover:bg-cyan-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Cleanout
-          </Button>
-          <Button
-            onClick={() => navigate('/DonationEditor?id=new')}
-            className="bg-pink-600 hover:bg-pink-700"
-          >
-            <Heart className="w-4 h-4 mr-2" />
-            Create Donation
-          </Button>
+          {isProOrElite && (
+            <Button
+              onClick={() => navigate('/CleanoutEditor?id=new')}
+              className="bg-cyan-600 hover:bg-cyan-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Cleanout
+            </Button>
+          )}
+          {isProOrElite && (
+            <Button
+              onClick={() => navigate('/DonationEditor?id=new')}
+              className="bg-pink-600 hover:bg-pink-700"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Create Donation
+            </Button>
+          )}
         </div>
       </div>
 
@@ -653,8 +660,8 @@ export default function MySales() {
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
-{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
-{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
+{!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
+{!isCompleted && isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 Under</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
@@ -756,8 +763,8 @@ export default function MySales() {
                                 <Button variant="outline" size="sm" onClick={() => { setExpensesSale(sale); setShowExpensesModal(true); }} className="h-7 text-xs border-emerald-500 text-black hover:bg-emerald-50 px-2"><Receipt className="w-3 h-3 mr-1" />Expenses</Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-blue-500 text-black hover:bg-blue-50 px-2"><Link to={createPageUrl('SaleContracts') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1" />Contracts</Link></Button>
                                 <Button variant="outline" size="sm" asChild className="h-7 text-xs border-purple-500 text-black hover:bg-purple-50 px-2"><Link to={`/ResellerPackupEventEditor?saleId=${sale.id}`}><Package className="w-3 h-3 mr-1" />Reseller Event</Link></Button>
-                                <Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className="h-7 text-xs border-cyan-600 text-cyan-700 hover:bg-cyan-50 px-2"><Building2 className="w-3 h-3 mr-1" />Cleanout</Button>
-                                <Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className="h-7 text-xs border-pink-600 text-pink-700 hover:bg-pink-50 px-2"><Heart className="w-3 h-3 mr-1" />Donation</Button>
+                                {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className="h-7 text-xs border-cyan-600 text-cyan-700 hover:bg-cyan-50 px-2"><Building2 className="w-3 h-3 mr-1" />Cleanout</Button>)}
+                                {isProOrElite && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className="h-7 text-xs border-pink-600 text-pink-700 hover:bg-pink-50 px-2"><Heart className="w-3 h-3 mr-1" />Donation</Button>)}
                               </div>
                             </CardContent>
                           </Card>
