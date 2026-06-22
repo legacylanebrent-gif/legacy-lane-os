@@ -651,6 +651,7 @@ export default function MySales() {
                        return (
                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-2">
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleEdit(sale)} className={`${btnClass} border-blue-500 text-black hover:bg-blue-50`}><Edit className="w-3 h-3 mr-1 flex-shrink-0" />Edit Sale</Button>)}
+{!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
@@ -665,7 +666,7 @@ export default function MySales() {
                                className={`${btnClass} border-emerald-500 hover:bg-emerald-50`}
                              ><UserCheck className="w-3 h-3 mr-1 flex-shrink-0" />{matchingSaleId === sale.id ? '...' : 'Buyer Match'}</Button>
                            )}
-                           {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-teal-500 hover:bg-teal-50`}><Link to={createPageUrl('Worksheet') + '?saleId=' + sale.id}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Transactions</Link></Button>)}
+                           
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-purple-500 hover:bg-purple-50`}><Link to={createPageUrl('SaleInventory') + '?saleId=' + sale.id}><Package className="w-3 h-3 mr-1 flex-shrink-0" />Inventory</Link></Button>
                            <Button variant="outline" size="sm" asChild className={`${btnClass} border-cyan-500 hover:bg-cyan-50`}><Link to={createPageUrl('Attendance') + '?saleId=' + sale.id}><TrendingUp className="w-3 h-3 mr-1 flex-shrink-0" />Attendance</Link></Button>
                            {!isCompleted && (<Button variant="outline" size="sm" asChild className={`${btnClass} border-amber-500 hover:bg-amber-50`}><Link to={createPageUrl('SaleTasks') + '?saleId=' + sale.id}><FileText className="w-3 h-3 mr-1 flex-shrink-0" />Tasks</Link></Button>)}
