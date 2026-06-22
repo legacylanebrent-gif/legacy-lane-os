@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Package, Eye, DollarSign, Grid3x3, List } from 'lucide-react';
+import { Plus, Package, Eye, EyeOff, DollarSign, Grid3x3, List, Trash2, RotateCcw } from 'lucide-react';
 import CreateItemModal from '@/components/marketplace/CreateItemModal';
 
 export default function MyListings() {
@@ -34,6 +34,30 @@ export default function MyListings() {
       console.error('Error loading items:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (item) => {
+    if (!window.confirm(`Permanently delete "${item.title}"? This cannot be undone.`)) return;
+    try {
+      await base44.entities.Item.delete(item.id);
+      loadData();
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item');
+    }
+  };
+
+  const handleToggleActive = async (item) => {
+    const isInactive = item.inventory_display_status === 'inactive';
+    try {
+      await base44.entities.Item.update(item.id, {
+        inventory_display_status: isInactive ? 'active' : 'inactive'
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error toggling item status:', error);
+      alert('Failed to update item');
     }
   };
 
@@ -200,6 +224,24 @@ export default function MyListings() {
                           <Button variant="outline" className="w-full">View</Button>
                         </Link>
                         <Button variant="outline" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          title={item.inventory_display_status === 'inactive' ? 'Reactivate' : 'Deactivate'}
+                          onClick={() => handleToggleActive(item)}
+                          className={item.inventory_display_status === 'inactive' ? 'text-amber-600 border-amber-400' : 'text-slate-500'}
+                        >
+                          {item.inventory_display_status === 'inactive' ? <RotateCcw className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          title="Delete permanently"
+                          onClick={() => handleDelete(item)}
+                          className="text-red-600 border-red-400 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -259,6 +301,24 @@ export default function MyListings() {
                               <Button variant="outline" size="sm">View</Button>
                             </Link>
                             <Button variant="outline" size="sm" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              title={item.inventory_display_status === 'inactive' ? 'Reactivate' : 'Deactivate'}
+                              onClick={() => handleToggleActive(item)}
+                              className={item.inventory_display_status === 'inactive' ? 'text-amber-600 border-amber-400' : 'text-slate-500'}
+                            >
+                              {item.inventory_display_status === 'inactive' ? <RotateCcw className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              title="Delete permanently"
+                              onClick={() => handleDelete(item)}
+                              className="text-red-600 border-red-400 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
