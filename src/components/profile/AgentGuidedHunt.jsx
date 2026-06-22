@@ -222,7 +222,7 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                         try {
                           const response = await base44.integrations.Core.InvokeLLM({
                             prompt: `Analyze this image and tell me: 1) What category this item belongs to (choose from: ${CATEGORIES.join(', ')}), 2) A specific search query to find similar items (e.g., brand, style, era, type). Return as JSON: {"category": "...", "searchQuery": "..."}`,
-                            file_urls: uploadedImage,
+                            file_urls: Array.isArray(uploadedImage) ? uploadedImage[0] : uploadedImage,
                             response_json_schema: {
                               type: 'object',
                               properties: {
@@ -289,6 +289,11 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
                 )}
               </div>
             </div>
+
+            <p className="text-xs text-slate-500 text-center">
+              <ImageIcon className="w-3 h-3 inline mr-1" />
+              One image at a time for AI analysis
+            </p>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

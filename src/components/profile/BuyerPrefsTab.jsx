@@ -241,7 +241,7 @@ export default function BuyerPrefsTab({ user }) {
 6. Any other identifying information that would help find this item
 
 Format your response as JSON with these fields: title, category, subcategory, brand, era, description`,
-        file_urls: wantedForm.image_urls[0],
+        file_urls: Array.isArray(wantedForm.image_urls) ? wantedForm.image_urls[0] : wantedForm.image_urls,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -456,26 +456,32 @@ Format your response as JSON with these fields: title, category, subcategory, br
                   </label>
                 </div>
                 {wantedForm.image_urls?.length > 0 && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                    onClick={handleAnalyzeImage}
-                    disabled={analyzingImage}
-                  >
-                    {analyzingImage ? (
-                      <>
-                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                        Analyzing with AI...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3 h-3 mr-2" />
-                        Auto-Fill Details from Image
-                      </>
-                    )}
-                  </Button>
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-500">
+                      <ImageIcon className="w-3 h-3 inline mr-1" />
+                      Analyzing first image only
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      onClick={handleAnalyzeImage}
+                      disabled={analyzingImage}
+                    >
+                      {analyzingImage ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                          Analyzing with AI...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3 h-3 mr-2" />
+                          Auto-Fill Details from Image
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
 
