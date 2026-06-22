@@ -391,6 +391,11 @@ Deno.serve(async (req) => {
       return Response.json({ message: `Skipped — sale status is "${sale.status}"` });
     }
 
+    // Buyout events are operator-only — no SEO generation
+    if (sale.sale_type === 'buyout_or_cleanout' || sale.sale_type === 'bundle_buyout') {
+      return Response.json({ message: 'Skipped — buyout event, no SEO' });
+    }
+
     // Load Estate Sale Company Owner/company user
     let company = null;
     if (sale.operator_id) {

@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     // Fetch all public data in parallel
-    const [sales, Estate Sale Company Owners, cityHubs, catHubs, brandHubs, blogPages, companyPages, recaps, priceGuides, wantedItems] = await Promise.all([
-      base44.asServiceRole.entities.EstateSale.filter({ status: { $in: ['upcoming', 'active'] } }, '-created_date', 500),
+    const [sales, operators, cityHubs, catHubs, brandHubs, blogPages, companyPages, recaps, priceGuides, wantedItems] = await Promise.all([
+      base44.asServiceRole.entities.EstateSale.filter({ status: { $in: ['upcoming', 'active'] }, sale_type: { $nin: ['buyout_or_cleanout', 'bundle_buyout'] } }, '-created_date', 500),
       base44.asServiceRole.entities.FutureEstateOperator.list('-created_date', 1000),
       base44.asServiceRole.entities.SEOCityHub.filter({ status: 'published' }, '-updated_date', 2000),
       base44.asServiceRole.entities.SEOCategoryHub.filter({ status: 'published' }, '-updated_date', 500),
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // State finder pages
-    const statesWithOperators = [...new Set(Estate Sale Company Owners.map(op => op.state).filter(Boolean))];
+    const statesWithOperators = [...new Set(operators.map(op => op.state).filter(Boolean))];
     for (const state of statesWithOperators) {
       entries.push(urlEntry(`${BASE_URL}/EstateSaleFinder?state=${state}`, '0.7', 'weekly'));
     }
