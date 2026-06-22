@@ -359,14 +359,62 @@ export default function EstateSaleDetail() {
     }
   };
 
-  const toggleImageSave = (index) => {
+  const toggleImageSave = async (index) => {
+    if (!currentUser) {
+      base44.auth.redirectToLogin(window.location.href);
+      return;
+    }
+
+    const image = sale.images[index];
+    const imageUrl = typeof image === 'string' ? image : image?.url;
+    const imageName = typeof image === 'object' ? (image.name || '') : '';
+    const imageDesc = typeof image === 'object' ? (image.description || '') : '';
+
     setSavedImages(prev => {
-      const updated = prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index];
-      localStorage.setItem(`savedImages_${sale.id}`, JSON.stringify(updated));
-      return updated;
+      const isCurrentlySaved = prev.includes(index);
+      
+      if (isCurrentlySaved) {
+        // Remove from saved
+        const updated = prev.filter(i => i !== index);
+        localStorage.setItem(`savedImages_${sale.id}`, JSON.stringify(updated));
+        return updated;
+      } else {
+        // Add to saved in localStorage
+        const updated = [...prev, index];
+        localStorage.setItem(`savedImages_${sale.id}`, JSON.stringify(updated));
+        
+        // Create WantedItem entity
+        createWantedItemFromImage(imageUrl, imageName, imageDesc, index);
+        return updated;
+      }
     });
+  };
+
+  const createWantedItemFromImage = async (imageUrl, name, description, imageIndex) => {
+    try {
+      // Extract category from sale categories or use generic
+      const primaryCategory = sale.categories?.[0] || 'other';
+      
+      // Create a wanted item based on the saved image
+      await base44.entities.WantedItem.create({
+        buyer_id: currentUser.id,
+        buyer_name: currentUser.full_name || currentUser.email,
+        title: name || `Item from ${sale.title}`,
+        description: description || `Interested in this item from estate sale: ${sale.title}`,
+        category: primaryCategory,
+        image_url: imageUrl,
+        status: 'active',
+        public_visibility: false,
+        distance: 50,
+        shipping_ok: true,
+        allow_dealer_contact: true,
+      });
+      
+      alert('✓ Item saved to your wanted list! We\'ll notify you when similar items are found.');
+    } catch (error) {
+      console.error('Error creating wanted item:', error);
+      alert('Could not save to wanted list. Please try again.');
+    }
   };
 
   // --- Dynamic SEO (safe — hooks must not be conditional) ---
@@ -912,13 +960,23 @@ export default function EstateSaleDetail() {
                        );
                      })}
                    </div>
-                   <Button
-                     onClick={handleMessageOperator}
-                     className="w-full mt-4 bg-orange-600 hover:bg-orange-700 gap-2"
-                   >
-                     <MessageSquare className="w-4 h-4" />
-                     Message Seller About These Photos
-                   </Button>
+                   <div className="space-y-2 mt-4">
+                     <Button
+                       onClick={handleMessageOperator}
+                       className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
+                     >
+                       <MessageSquare className="w-4 h-4" />
+                       Message Seller About These Photos
+                     </Button>
+                     <Button
+                       variant="outline"
+                       className="w-full gap-2"
+                       onClick={() => window.location.href = createPageUrl('MyProfile')}
+                     >
+                       <Heart className="w-4 h-4" />
+                       View My Wanted Items
+                     </Button>
+                   </div>
                  </CardContent>
                </Card>
              )}
