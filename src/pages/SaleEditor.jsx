@@ -119,7 +119,8 @@ export default function SaleEditor() {
     commission_rate: '',
     special_notes: '',
     payment_methods: [],
-    buyout_config: null
+    buyout_config: null,
+    promoted_to_all_users: false
   });
 
   // Keep saleIdRef in sync so auto-save closure has latest value
@@ -261,6 +262,7 @@ export default function SaleEditor() {
         special_notes: saleData.special_notes || '',
         payment_methods: saleData.payment_methods || [],
         buyout_config: saleData.buyout_config || null,
+        promoted_to_all_users: saleData.promoted_to_all_users || false,
         national_featured: saleData.national_featured || false
       });
       setFeaturedNationally(saleData.national_featured || false);
@@ -482,6 +484,7 @@ export default function SaleEditor() {
           special_notes: formData.special_notes,
           payment_methods: formData.payment_methods,
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
+          promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
           national_featured: featuredNationally,
           local_featured: featuredLocally,
           operator_id: saleId ? undefined : user.id,
