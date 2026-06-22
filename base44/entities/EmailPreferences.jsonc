@@ -1,0 +1,53 @@
+{
+  "name": "EmailPreferences",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email for identification"
+    },
+    "role": {
+      "type": "string",
+      "description": "User's primary account type at time of preference setup"
+    },
+    "estate_salen_marketing": {
+      "type": "boolean",
+      "default": true,
+      "description": "Opt into EstateSalen platform business and marketing emails (can be sent daily)"
+    },
+    "local_sale_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Opt into local estate sale broadcast emails for sales in their area"
+    },
+    "company_direct_emails": {
+      "type": "boolean",
+      "default": true,
+      "description": "Opt into direct emails from favorited/followed companies (Elite companies, once per week max)"
+    },
+    "notification_radius_miles": {
+      "type": "number",
+      "default": 25,
+      "description": "Radius in miles from user's location for local sale notifications"
+    },
+    "location_city": {
+      "type": "string",
+      "description": "User's city for local sale matching"
+    },
+    "location_state": {
+      "type": "string",
+      "description": "User's state for local sale matching"
+    },
+    "location_zip": {
+      "type": "string",
+      "description": "User's ZIP code for local sale matching"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

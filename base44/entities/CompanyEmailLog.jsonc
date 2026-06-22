@@ -1,0 +1,42 @@
+{
+  "name": "CompanyEmailLog",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "description": "User ID of the estate sale operator who sent the campaign"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name at time of send"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Reference to the Campaign entity that was sent"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the campaign was sent"
+    },
+    "recipient_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of recipients in this send"
+    },
+    "email_type": {
+      "type": "string",
+      "enum": [
+        "company_direct",
+        "platform_marketing",
+        "local_sale_broadcast"
+      ],
+      "default": "company_direct",
+      "description": "Type of email send this log records"
+    }
+  },
+  "required": [
+    "operator_id",
+    "sent_at"
+  ]
+}
