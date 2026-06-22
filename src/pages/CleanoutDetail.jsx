@@ -55,9 +55,12 @@ export default function CleanoutDetail() {
       const cleanoutData = results[0];
       setCleanout(cleanoutData);
 
+      const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
       const isOperator = cleanoutData.operator_id === userData.id;
+      const isTeamMember = userData.operator_id && cleanoutData.operator_id === userData.operator_id;
+      const isAdmin = ADMIN_ROLES.includes(userData.primary_account_type) || userData.role === 'admin';
 
-      if (!isOperator) {
+      if (!isOperator && !isTeamMember && !isAdmin) {
         const vpResults = await base44.entities.CleanoutVendorProfile.filter({ user_id: userData.id });
         if (vpResults.length === 0) {
           setAccessDenied(true);
@@ -93,7 +96,8 @@ export default function CleanoutDetail() {
     }
   };
 
-  const isOperator = cleanout && user && cleanout.operator_id === user.id;
+  const ADMIN_ROLES_RENDER = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+  const isOperator = cleanout && user && (cleanout.operator_id === user.id || (user.operator_id && cleanout.operator_id === user.operator_id) || ADMIN_ROLES_RENDER.includes(user.primary_account_type) || user.role === 'admin');
 
   const handleSubmitBid = async () => {
     if (!bidForm.bid_amount) {

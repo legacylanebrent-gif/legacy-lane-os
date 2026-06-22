@@ -50,10 +50,12 @@ export default function CleanoutEditor() {
     setLoading(true);
     base44.auth.me().then(u => {
       setUser(u);
+      const isTeamRole = ['team_admin', 'team_member', 'team_marketer'].includes(u.primary_account_type);
+      const operatorId = isTeamRole ? u.operator_id : u.id;
       if (isListMode) {
-        loadCleanouts(u.id);
+        loadCleanouts(operatorId);
       } else if (!isNewMode) {
-        loadCleanout(editId);
+        loadCleanout(editId, operatorId);
       } else {
         setLoading(false);
       }
@@ -71,11 +73,15 @@ export default function CleanoutEditor() {
     }
   };
 
-  const loadCleanout = async (id) => {
+  const loadCleanout = async (id, operatorId) => {
     try {
       const results = await base44.entities.Cleanout.filter({ id });
       if (results.length > 0) {
         const c = results[0];
+        if (c.operator_id !== operatorId) {
+          setLoading(false);
+          return;
+        }
         setForm({
           title: c.title || '',
           description: c.description || '',

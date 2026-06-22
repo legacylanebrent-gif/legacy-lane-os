@@ -55,10 +55,12 @@ export default function DonationEditor() {
     setLoading(true);
     base44.auth.me().then(u => {
       setUser(u);
+      const isTeamRole = ['team_admin', 'team_member', 'team_marketer'].includes(u.primary_account_type);
+      const operatorId = isTeamRole ? u.operator_id : u.id;
       if (isListMode) {
-        loadDonations(u.id);
+        loadDonations(operatorId);
       } else if (!isNewMode) {
-        loadDonation(editId);
+        loadDonation(editId, operatorId);
       } else {
         setLoading(false);
       }
@@ -76,11 +78,15 @@ export default function DonationEditor() {
     }
   };
 
-  const loadDonation = async (id) => {
+  const loadDonation = async (id, operatorId) => {
     try {
       const results = await base44.entities.Donation.filter({ id });
       if (results.length > 0) {
         const d = results[0];
+        if (d.operator_id !== operatorId) {
+          setLoading(false);
+          return;
+        }
         setForm({
           title: d.title || '',
           description: d.description || '',

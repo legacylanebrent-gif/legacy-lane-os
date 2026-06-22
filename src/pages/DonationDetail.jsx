@@ -61,9 +61,12 @@ export default function DonationDetail() {
       const donationData = results[0];
       setDonation(donationData);
 
+      const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
       const isOperator = donationData.operator_id === userData.id;
+      const isTeamMember = userData.operator_id && donationData.operator_id === userData.operator_id;
+      const isAdmin = ADMIN_ROLES.includes(userData.primary_account_type) || userData.role === 'admin';
 
-      if (!isOperator) {
+      if (!isOperator && !isTeamMember && !isAdmin) {
         // Check if user has a donation_company vendor profile
         const vpResults = await base44.entities.Vendor.filter({ user_id: userData.id, vendor_type: 'donation_company' });
         if (vpResults.length === 0) {
@@ -101,7 +104,8 @@ export default function DonationDetail() {
     }
   };
 
-  const isOperator = donation && user && donation.operator_id === user.id;
+  const ADMIN_ROLES_RENDER = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+  const isOperator = donation && user && (donation.operator_id === user.id || (user.operator_id && donation.operator_id === user.operator_id) || ADMIN_ROLES_RENDER.includes(user.primary_account_type) || user.role === 'admin');
 
   const handleSubmitResponse = async () => {
     if (!responseForm.interested_items) {
