@@ -153,17 +153,15 @@ export default function CRM() {
           <p className="text-slate-600 mt-1">Manage your connections and relationships</p>
         </div>
         <div className="flex gap-2">
-          {['super_admin', 'platform_ops', 'growth_team', 'partnerships', 'education_admin', 'finance_admin'].includes(user?.primary_account_type) && (
-            <Button
-              variant="outline"
-              onClick={handleRemoveDuplicates}
-              disabled={removingDuplicates}
-              className="text-orange-600 border-orange-600"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            onClick={handleRemoveDuplicates}
+            disabled={removingDuplicates}
+            className="text-orange-600 border-orange-600"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
+          </Button>
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
               <Button className="bg-cyan-600 hover:bg-cyan-700">
@@ -662,6 +660,22 @@ function AddConnectionForm({ user, onSuccess, onCancel }) {
     if (existing.length > 0) {
       alert('A connection with this email already exists in your CRM.');
       return;
+    }
+    
+    // Also check by phone if provided
+    if (formData.connected_user_phone.trim()) {
+      const normalizePhone = (p) => p.replace(/\D/g, '');
+      const existingByPhone = await base44.entities.Connection.filter({
+        account_owner_id: user.id
+      });
+      const phoneMatch = existingByPhone.find(c => 
+        c.connected_user_phone && 
+        normalizePhone(c.connected_user_phone) === normalizePhone(formData.connected_user_phone.trim())
+      );
+      if (phoneMatch) {
+        alert('A connection with this phone number already exists in your CRM.');
+        return;
+      }
     }
     
     if (existingUser) {
