@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
@@ -239,12 +239,41 @@ function NavItem({ item, currentPageName }) {
 }
 
 // ─── Main Sidebar ─────────────────────────────────────────────────────────────
+// Marketing pages that require Elite tier (Professional only sees Marketing Tasks)
+const ELITE_ONLY_MARKETING_PAGES = new Set(['CampaignBuilder', 'Campaigns', 'Analytics', 'SocialAdsHub']);
+const ADMIN_ROLES_SIDEBAR = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
   const [open, setOpen] = useState(true);
+  const [subscriptionTier, setSubscriptionTier] = useState(null);
+
+  useEffect(() => {
+    const fetchTier = async () => {
+      if (!user) return;
+      if (ADMIN_ROLES_SIDEBAR.includes(user.primary_account_type) || user.role === 'admin') {
+        setSubscriptionTier('admin');
+        return;
+      }
+      try {
+        const subs = await base44.entities.Subscription.filter({ user_id: user.id, status: 'active' });
+        setSubscriptionTier(subs.length > 0 ? subs[0].tier : null);
+      } catch {
+        setSubscriptionTier(null);
+      }
+    };
+    fetchTier();
+  }, [user]);
 
   const handleLogout = () => base44.auth.logout(createPageUrl('Home'));
 
-  const visibleItems = ALL_NAV_ITEMS.filter(item => allowedPages.includes(item.page));
+  const visibleItems = ALL_NAV_ITEMS.filter(item => {
+    if (!allowedPages.includes(item.page)) return false;
+    // Gate Elite-only marketing pages for Professional tier
+    if (ELITE_ONLY_MARKETING_PAGES.has(item.page)) {
+      if (subscriptionTier !== 'admin' && subscriptionTier !== 'elite') return false;
+    }
+    return true;
+  });
 
   // Group all items by top-level group
   const grouped = visibleItems.reduce((acc, item) => {

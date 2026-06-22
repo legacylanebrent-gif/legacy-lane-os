@@ -33,17 +33,12 @@
     "profiles_used": {
       "type": "integer",
       "default": 0,
-      "description": "Total profiles emailed this billing period"
+      "description": "Total profiles emailed (against included + purchased)"
     },
     "additional_purchased": {
       "type": "integer",
       "default": 0,
-      "description": "Additional profile blocks purchased (in blocks of 1000)"
-    },
-    "additional_purchased_used": {
-      "type": "integer",
-      "default": 0,
-      "description": "How many of the purchased additional profiles have been used"
+      "description": "Additional profile blocks purchased (each block = 1000 profiles)"
     },
     "period_start": {
       "type": "string",
@@ -59,6 +54,10 @@
       "type": "string",
       "format": "date-time",
       "description": "When the operator last purchased additional profiles"
+    },
+    "pending_checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID for a pending additional-profiles purchase"
     }
   },
   "required": [
