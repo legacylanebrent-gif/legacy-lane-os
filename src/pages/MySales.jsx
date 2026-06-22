@@ -610,7 +610,7 @@ export default function MySales() {
                      <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
                        {(() => { const ds = getSaleDisplayStatus(sale); return <Badge className={`text-[10px] ${getStatusColor(ds)}`}>{getStatusLabel(ds)}</Badge>; })()}
                        {sale.sale_type === 'five_and_under_sale' && (
-                         <Badge className="bg-green-600 text-white text-[10px]">$5 & Under Sale</Badge>
+                         <Badge className="bg-green-600 text-white text-[10px]">$5 Under Sale</Badge>
                        )}
                      </div>
                    </div>
@@ -654,7 +654,7 @@ export default function MySales() {
                            {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleLiquidationStart(sale)} className={`${btnClass} border-orange-600 text-orange-700 hover:bg-orange-50`}><Rocket className="w-3 h-3 mr-1 flex-shrink-0" />Create Buyout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateCleanout(sale)} className={`${btnClass} border-cyan-600 text-cyan-700 hover:bg-cyan-50`}><Building2 className="w-3 h-3 mr-1 flex-shrink-0" />Create Cleanout</Button>)}
 {!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleCreateDonation(sale)} className={`${btnClass} border-pink-600 text-pink-700 hover:bg-pink-50`}><Heart className="w-3 h-3 mr-1 flex-shrink-0" />Create Donation</Button>)}
-{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 & Under</Button>)}
+{!isCompleted && (<Button variant="outline" size="sm" onClick={() => handleFiveAndUnderStart(sale)} className={`${btnClass} border-green-600 text-green-700 hover:bg-green-50`}><DollarSign className="w-3 h-3 mr-1 flex-shrink-0" />Create $5 Under</Button>)}
                            {!isCompleted && isElite && (
                              <Button variant="outline" size="sm" onClick={() => handleToggleLocalFeatured(sale)} disabled={featuringId === sale.id}
                                className={`${btnClass} ${sale.local_featured ? 'border-amber-500 bg-amber-50' : 'border-amber-400 hover:bg-amber-50'}`}
