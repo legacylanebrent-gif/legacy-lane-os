@@ -9,9 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Mail, Phone, MapPin, Clock, TrendingUp, User,
-  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign, Gift, Upload
+  CheckCircle, Search, Users, AlertCircle, Plus, DollarSign, Gift
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const PIPELINE_STAGES = [
   { value: 'prospecting', label: 'Prospecting' },
@@ -28,7 +27,6 @@ const getScoreColor = (score) => {
 };
 
 export default function Leads() {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('leads');
   const [hasEnterprisePackage, setHasEnterprisePackage] = useState(false);
@@ -123,15 +121,6 @@ export default function Leads() {
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">My Lead Center</h1>
         <p className="text-slate-600">Leads assigned to you and your active deal pipeline</p>
       </div>
-
-      {user?.role === 'admin' && (
-        <div className="flex items-center gap-3 mb-4">
-          <Button onClick={() => navigate('/AdminLeadImporter')} className="gap-2 bg-blue-600 hover:bg-blue-700">
-            <Upload className="w-4 h-4" />
-            Import Leads from CSV
-          </Button>
-        </div>
-      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 w-full max-w-sm">

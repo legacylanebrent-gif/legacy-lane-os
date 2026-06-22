@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, Plus, Search, Mail, Phone, Tag, MessageSquare, 
-  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle, Trash2
+  Star, TrendingUp, Archive, UserPlus, Send, AlertCircle, Trash2, Lock
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -39,6 +39,7 @@ export default function CRM() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [removingDuplicates, setRemovingDuplicates] = useState(false);
+  const [hasCrmAccess, setHasCrmAccess] = useState(null); // null = checking, false = no access, true = access
 
   useEffect(() => {
     loadData();
@@ -52,7 +53,19 @@ export default function CRM() {
     try {
       const userData = await base44.auth.me();
       setUser(userData);
-      
+
+      // Admins always have CRM access
+      const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
+      if (ADMIN_ROLES.includes(userData.primary_account_type) || userData.role === 'admin') {
+        setHasCrmAccess(true);
+      } else {
+        // Check subscription tier — Starter does NOT include CRM; Growth and above do
+        const subs = await base44.entities.Subscription.filter({ user_id: userData.id, status: 'active' });
+        const tier = subs.length > 0 ? subs[0].tier : null;
+        const CRM_TIERS = ['growth', 'pro', 'professional', 'premium', 'enterprise', 'elite'];
+        setHasCrmAccess(CRM_TIERS.includes(tier));
+      }
+
       const connectionsData = await base44.entities.Connection.filter({
         account_owner_id: userData.id
       }, '-created_date');
@@ -140,6 +153,26 @@ export default function CRM() {
         <div className="animate-pulse space-y-4">
           <div className="h-12 bg-slate-200 rounded w-1/3"></div>
           <div className="h-96 bg-slate-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasCrmAccess === false) {
+    return (
+      <div className="p-6 lg:p-8">
+        <div className="max-w-lg mx-auto text-center mt-12">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-8 h-8 text-slate-400" />
+          </div>
+          <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">CRM Not Included in Your Plan</h1>
+          <p className="text-slate-600 mb-6">
+            The CRM is available starting with the <span className="font-semibold">Growth</span> package.
+            Upgrade your subscription to manage connections, track leads, and build client relationships.
+          </p>
+          <Button asChild className="bg-orange-600 hover:bg-orange-700">
+            <a href={createPageUrl('OperatorPackages')}>View Subscription Packages</a>
+          </Button>
         </div>
       </div>
     );
