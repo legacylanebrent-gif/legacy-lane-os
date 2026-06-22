@@ -61,16 +61,24 @@ export default function MyListings() {
     }
   };
 
+  const isInactive = (item) => item.inventory_display_status === 'inactive';
+
+  const activeItems = items.filter(i => !isInactive(i));
+  const deactivatedItems = items.filter(isInactive);
+
   const filteredItems = items.filter(item => {
+    if (isInactive(item) && filter !== 'deactivated') return false;
     if (filter === 'all') return true;
+    if (filter === 'deactivated') return isInactive(item);
     return item.status === filter;
   });
 
   const stats = {
-    total: items.length,
-    available: items.filter(i => i.status === 'available').length,
-    sold: items.filter(i => i.status === 'sold').length,
-    revenue: items.filter(i => i.status === 'sold').reduce((sum, i) => sum + i.price, 0)
+    total: activeItems.length,
+    available: activeItems.filter(i => i.status === 'available').length,
+    sold: activeItems.filter(i => i.status === 'sold').length,
+    deactivated: deactivatedItems.length,
+    revenue: activeItems.filter(i => i.status === 'sold').reduce((sum, i) => sum + i.price, 0)
   };
 
   return (
@@ -150,6 +158,7 @@ export default function MyListings() {
               <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
               <TabsTrigger value="available">Available ({stats.available})</TabsTrigger>
               <TabsTrigger value="sold">Sold ({stats.sold})</TabsTrigger>
+              <TabsTrigger value="deactivated">Deactivated ({stats.deactivated})</TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
               <Button
@@ -172,19 +181,33 @@ export default function MyListings() {
           <TabsContent value={filter} className="mt-6">
             {filteredItems.length === 0 ? (
               <Card className="p-12 text-center">
-                <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                <h3 className="text-xl font-semibold text-slate-700 mb-2">
-                  No listings yet
-                </h3>
-                <p className="text-slate-500 mb-6">
-                  Create your first listing to start selling
-                </p>
-                <Button
-                  onClick={() => setShowCreateModal(true)}
-                  className="bg-gold-600 hover:bg-gold-700"
-                >
-                  Create Listing
-                </Button>
+                {filter === 'deactivated' ? (
+                  <>
+                    <EyeOff className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                      No deactivated items
+                    </h3>
+                    <p className="text-slate-500">
+                      Items you deactivate will appear here. You can reactivate them anytime.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                      No listings yet
+                    </h3>
+                    <p className="text-slate-500 mb-6">
+                      Create your first listing to start selling
+                    </p>
+                    <Button
+                      onClick={() => setShowCreateModal(true)}
+                      className="bg-gold-600 hover:bg-gold-700"
+                    >
+                      Create Listing
+                    </Button>
+                  </>
+                )}
               </Card>
             ) : viewMode === 'grid' ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
