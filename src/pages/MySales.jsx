@@ -219,7 +219,7 @@ export default function MySales() {
       const newSale = await base44.entities.EstateSale.create({
         title: sale.title + ' — Liquidation Event',
         description: sale.description || '',
-        sale_type: sale.sale_type || '',
+        sale_type: 'buyout_or_cleanout',
         status: 'draft',
         property_address: sale.property_address ? { ...sale.property_address } : { street: '', city: '', state: '', zip: '' },
         location: sale.location ? { ...sale.location } : null,
