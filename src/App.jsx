@@ -97,6 +97,8 @@ import CleanoutEditor from './pages/CleanoutEditor';
 import CleanoutDetail from './pages/CleanoutDetail';
 import DonationEditor from './pages/DonationEditor';
 import DonationDetail from './pages/DonationDetail';
+import VendorManagement from './pages/VendorManagement.jsx';
+import VendorClaim from './pages/VendorClaim.jsx';
 import CityHubPage from './pages/CityHubPage';
 import CategoryHubPage from './pages/CategoryHubPage';
 import BrandHubPage from './pages/BrandHubPage';
@@ -312,6 +314,8 @@ const AuthenticatedApp = () => {
       <Route path="/CleanoutDetail" element={<LayoutWrapper currentPageName="CleanoutDetail"><CleanoutDetail /></LayoutWrapper>} />
       <Route path="/DonationEditor" element={<LayoutWrapper currentPageName="DonationEditor"><DonationEditor /></LayoutWrapper>} />
       <Route path="/DonationDetail" element={<LayoutWrapper currentPageName="DonationDetail"><DonationDetail /></LayoutWrapper>} />
+      <Route path="/VendorManagement" element={<LayoutWrapper currentPageName="VendorManagement"><VendorManagement /></LayoutWrapper>} />
+      <Route path="/VendorClaim" element={<VendorClaim />} />
 
       {/* ── Knowledge Graph Public Routes ── */}
       <Route path="/estate-sales" element={<CityHubPage />} />
