@@ -23,42 +23,42 @@ const EXPORT_OPTIONS = [
     name: 'Inventory List',
     description: 'Complete list of all items with pricing',
     icon: Package,
-    format: 'CSV / Excel'
+    formats: ['csv', 'pdf']
   },
   {
     id: 'sales-report',
     name: 'Sales Report',
     description: 'Detailed sales transactions and totals',
     icon: Receipt,
-    format: 'PDF / CSV'
+    formats: ['pdf', 'csv']
   },
   {
     id: 'attendance',
     name: 'Attendance Report',
     description: 'Visitor check-in data and analytics',
     icon: Users,
-    format: 'CSV / PDF'
+    formats: ['csv', 'pdf']
   },
   {
     id: 'photos',
     name: 'Sale Photos',
     description: 'All photos from the sale listing',
     icon: FileImage,
-    format: 'ZIP'
+    formats: ['zip']
   },
   {
     id: 'financial',
     name: 'Financial Summary',
     description: 'Revenue breakdown and commission details',
     icon: FileText,
-    format: 'PDF'
+    formats: ['pdf']
   },
   {
     id: 'timeline',
     name: 'Sale Timeline',
     description: 'Complete timeline of sale activities',
     icon: Calendar,
-    format: 'PDF'
+    formats: ['pdf']
   }
 ];
 
@@ -102,7 +102,8 @@ export default function SaleExport() {
     setExporting(prev => ({ ...prev, [exportId]: true }));
 
     try {
-      if (exportId === 'pricing-list' || exportId === 'pricing-list-pdf') {
+      // Pricing List
+      if (exportId === 'pricing-list-csv' || exportId === 'pricing-list-pdf') {
         const pricings = await base44.entities.SaleItemPricing.filter({ sale_id: sale.id });
         if (pricings.length === 0) {
           alert('No pricing data found. Use the Pricing Tool to analyze photos first.');
@@ -185,7 +186,302 @@ export default function SaleExport() {
         return;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Inventory List
+      if (exportId === 'inventory-csv' || exportId === 'inventory-pdf') {
+        const items = sale.images || [];
+        if (items.length === 0) {
+          alert('No inventory items found.');
+          return;
+        }
+        const headers = ['Item Name', 'Description', 'Category', 'Price', 'Status'];
+        const rows = items.map(img => [
+          typeof img === 'object' ? (img.name || '') : '',
+          typeof img === 'object' ? (img.description || '') : '',
+          typeof img === 'object' ? ((img.categories || []).join(', ')) : '',
+          typeof img === 'object' ? (img.price || '') : '',
+          typeof img === 'object' ? (img.status || 'available') : ''
+        ]);
+
+        if (exportId === 'inventory-pdf') {
+          const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 40;
+          const tableWidth = pageWidth - margin * 2;
+          const colWidths = [tableWidth * 0.3, tableWidth * 0.35, tableWidth * 0.15, tableWidth * 0.1, tableWidth * 0.1];
+          let y = margin;
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${sale.title} — Inventory List`, margin, y);
+          y += 24;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 12, tableWidth, 18, 'F');
+          let x = margin;
+          headers.forEach((h, i) => {
+            doc.text(h, x + 4, y);
+            x += colWidths[i];
+          });
+          y += 18;
+
+          doc.setFont('helvetica', 'normal');
+          rows.forEach((row, rowIdx) => {
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+              doc.addPage();
+              y = margin;
+              doc.setFillColor(240, 240, 240);
+              doc.rect(margin, y - 12, tableWidth, 18, 'F');
+              doc.setFont('helvetica', 'bold');
+              x = margin;
+              headers.forEach((h, i) => { doc.text(h, x + 4, y); x += colWidths[i]; });
+              y += 18;
+              doc.setFont('helvetica', 'normal');
+            }
+            if (rowIdx % 2 === 0) {
+              doc.setFillColor(248, 248, 252);
+              doc.rect(margin, y - 12, tableWidth, 16, 'F');
+            }
+            x = margin;
+            row.forEach((cell, i) => {
+              const val = i === 3 && cell !== '' ? `$${cell}` : cell;
+              doc.text(String(val).substring(0, 50), x + 4, y);
+              x += colWidths[i];
+            });
+            y += 16;
+          });
+
+          doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_inventory.pdf`);
+          return;
+        }
+
+        const csv = [headers, ...rows]
+          .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          .join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}_inventory.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Sales Report
+      if (exportId === 'sales-report-pdf' || exportId === 'sales-report-csv') {
+        const headers = ['Date', 'Item', 'Price', 'Payment Method', 'Buyer'];
+        const rows = [];
+        const revenue = sale.actual_revenue || 0;
+        rows.push(['Total Revenue', '', `$${revenue}`, '', '']);
+
+        if (exportId === 'sales-report-pdf') {
+          const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 40;
+          const tableWidth = pageWidth - margin * 2;
+          const colWidths = [tableWidth * 0.2, tableWidth * 0.35, tableWidth * 0.15, tableWidth * 0.15, tableWidth * 0.15];
+          let y = margin;
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${sale.title} — Sales Report`, margin, y);
+          y += 24;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 12, tableWidth, 18, 'F');
+          let x = margin;
+          headers.forEach((h, i) => {
+            doc.text(h, x + 4, y);
+            x += colWidths[i];
+          });
+          y += 18;
+
+          doc.setFont('helvetica', 'normal');
+          rows.forEach((row, rowIdx) => {
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+              doc.addPage();
+              y = margin;
+              doc.setFillColor(240, 240, 240);
+              doc.rect(margin, y - 12, tableWidth, 18, 'F');
+              doc.setFont('helvetica', 'bold');
+              x = margin;
+              headers.forEach((h, i) => { doc.text(h, x + 4, y); x += colWidths[i]; });
+              y += 18;
+              doc.setFont('helvetica', 'normal');
+            }
+            if (rowIdx % 2 === 0) {
+              doc.setFillColor(248, 248, 252);
+              doc.rect(margin, y - 12, tableWidth, 16, 'F');
+            }
+            x = margin;
+            row.forEach((cell, i) => {
+              doc.text(String(cell).substring(0, 50), x + 4, y);
+              x += colWidths[i];
+            });
+            y += 16;
+          });
+
+          doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_sales_report.pdf`);
+          return;
+        }
+
+        const csv = [headers, ...rows]
+          .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          .join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}_sales_report.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Attendance Report
+      if (exportId === 'attendance-csv' || exportId === 'attendance-pdf') {
+        const signIns = await base44.entities.EarlySignIn.filter({ sale_id: sale.id });
+        const headers = ['Name', 'Email', 'Sale Date', 'Signed At'];
+        const rows = signIns.map(s => [
+          s.user_name || '',
+          s.user_email || '',
+          s.sale_date || '',
+          s.signed_at || ''
+        ]);
+
+        if (exportId === 'attendance-pdf') {
+          const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 40;
+          const tableWidth = pageWidth - margin * 2;
+          const colWidths = [tableWidth * 0.25, tableWidth * 0.3, tableWidth * 0.2, tableWidth * 0.25];
+          let y = margin;
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${sale.title} — Attendance Report`, margin, y);
+          y += 24;
+
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 12, tableWidth, 18, 'F');
+          let x = margin;
+          headers.forEach((h, i) => {
+            doc.text(h, x + 4, y);
+            x += colWidths[i];
+          });
+          y += 18;
+
+          doc.setFont('helvetica', 'normal');
+          rows.forEach((row, rowIdx) => {
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+              doc.addPage();
+              y = margin;
+              doc.setFillColor(240, 240, 240);
+              doc.rect(margin, y - 12, tableWidth, 18, 'F');
+              doc.setFont('helvetica', 'bold');
+              x = margin;
+              headers.forEach((h, i) => { doc.text(h, x + 4, y); x += colWidths[i]; });
+              y += 18;
+              doc.setFont('helvetica', 'normal');
+            }
+            if (rowIdx % 2 === 0) {
+              doc.setFillColor(248, 248, 252);
+              doc.rect(margin, y - 12, tableWidth, 16, 'F');
+            }
+            x = margin;
+            row.forEach((cell, i) => {
+              doc.text(String(cell).substring(0, 50), x + 4, y);
+              x += colWidths[i];
+            });
+            y += 16;
+          });
+
+          doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_attendance.pdf`);
+          return;
+        }
+
+        const csv = [headers, ...rows]
+          .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          .join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}_attendance.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Photos (ZIP - placeholder)
+      if (exportId === 'photos-zip') {
+        alert('Photo export coming soon!');
+        return;
+      }
+
+      // Financial Summary (PDF)
+      if (exportId === 'financial-pdf') {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+        const margin = 40;
+        let y = margin;
+
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${sale.title} — Financial Summary`, margin, y);
+        y += 36;
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        const lines = [
+          `Total Revenue: $${sale.actual_revenue || 0}`,
+          `Commission Rate: ${sale.commission_rate || 0}%`,
+          `Commission Earned: $${sale.commission_earned || 0}`,
+          `Total Items: ${sale.total_items || 0}`,
+          `Views: ${sale.views || 0}`,
+          `Saves: ${sale.saves || 0}`
+        ];
+        lines.forEach(line => {
+          doc.text(line, margin, y);
+          y += 20;
+        });
+
+        doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_financial.pdf`);
+        return;
+      }
+
+      // Timeline (PDF)
+      if (exportId === 'timeline-pdf') {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+        const margin = 40;
+        let y = margin;
+
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${sale.title} — Sale Timeline`, margin, y);
+        y += 36;
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        const saleDates = sale.sale_dates || [];
+        if (saleDates.length > 0) {
+          saleDates.forEach((sd, i) => {
+            doc.text(`Day ${i + 1}: ${sd.date || ''} from ${sd.start_time || ''} to ${sd.end_time || ''}`, margin, y);
+            y += 20;
+          });
+        } else {
+          doc.text('No sale dates scheduled.', margin, y);
+        }
+
+        doc.save(`${sale.title.replace(/[^a-z0-9]/gi, '_')}_timeline.pdf`);
+        return;
+      }
+
       alert(`Export complete! (${exportId})`);
     } catch (error) {
       console.error('Export error:', error);
@@ -258,46 +554,25 @@ export default function SaleExport() {
                       <div className="flex-1">
                         <h3 className="font-semibold text-slate-900 mb-1">{option.name}</h3>
                         <p className="text-sm text-slate-600 mb-2">{option.description}</p>
-                        <p className="text-xs text-slate-500 mb-3">Format: {option.format}</p>
-                        {option.id === 'pricing-list' ? (
-                          <div className="flex gap-2">
+                        <div className="flex gap-2">
+                          {option.formats.map(fmt => (
                             <Button 
+                              key={fmt}
                               variant="outline" 
                               size="sm" 
                               className="flex-1"
-                              onClick={() => handleExport('pricing-list')}
-                              disabled={exporting['pricing-list']}
+                              onClick={() => handleExport(`${option.id}-${fmt}`)}
+                              disabled={exporting[`${option.id}-${fmt}`]}
                             >
-                              {exporting['pricing-list'] ? 'Exporting...' : (<><Download className="w-3 h-3 mr-2" />CSV</>)}
+                              {exporting[`${option.id}-${fmt}`] ? 'Exporting...' : (
+                                <>
+                                  {fmt === 'pdf' ? <FileDown className="w-3 h-3 mr-2" /> : <Download className="w-3 h-3 mr-2" />}
+                                  {fmt.toUpperCase()}
+                                </>
+                              )}
                             </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="flex-1"
-                              onClick={() => handleExport('pricing-list-pdf')}
-                              disabled={exporting['pricing-list-pdf']}
-                            >
-                              {exporting['pricing-list-pdf'] ? 'Exporting...' : (<><FileDown className="w-3 h-3 mr-2" />PDF</>)}
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full"
-                            onClick={() => handleExport(option.id)}
-                            disabled={exporting[option.id]}
-                          >
-                            {exporting[option.id] ? (
-                              'Exporting...'
-                            ) : (
-                              <>
-                                <Download className="w-3 h-3 mr-2" />
-                                Export
-                              </>
-                            )}
-                          </Button>
-                        )}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
