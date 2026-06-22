@@ -97,6 +97,7 @@ export default function SaleEditor() {
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [pricingSearch, setPricingSearch] = useState('');
   const [creditRefreshTrigger, setCreditRefreshTrigger] = useState(0);
+  const [creditDisplayKey, setCreditDisplayKey] = useState(0);
   const gridRef = useRef(null);
   const pointerIdRef = useRef(null);
   const pdfCancelRef = useRef(false);
@@ -643,6 +644,10 @@ export default function SaleEditor() {
 
       updatedImages[index] = img;
       setFormData(prev => ({ ...prev, images: updatedImages }));
+      
+      // Refresh credit display after successful search
+      setCreditRefreshTrigger(prev => prev + 1);
+      setCreditDisplayKey(prev => prev + 1);
     } catch (e) {
       console.error('SerpAI Search error:', e.message);
       setSerpResults(prev => ({ ...prev, [image.url]: { error: e.message } }));
@@ -1802,7 +1807,14 @@ Return ONLY the description text, no extra commentary.`
         {/* Photos */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            {user && <GoogleLensCreditDisplay operatorId={user.id} compact />}
+            {user && (
+              <GoogleLensCreditDisplay 
+                key={creditDisplayKey}
+                operatorId={user.id} 
+                compact 
+                refreshTrigger={creditRefreshTrigger}
+              />
+            )}
             <Tabs value={photoTab} onValueChange={setPhotoTab}>
               <TabsList className="w-full">
                 <TabsTrigger value="thumbnails" className="flex-1 text-xs sm:text-sm">Thumbnails</TabsTrigger>
@@ -1811,6 +1823,7 @@ Return ONLY the description text, no extra commentary.`
               <TabsContent value="thumbnails" className="space-y-4">
 
                 {formData.images.length > 0 && (
+                  
                   <div className="space-y-4">
                     <h3 className="font-medium text-slate-900">Photos ({formData.images.length})</h3>
                     <div className="flex flex-wrap gap-3" ref={gridRef}>
@@ -2041,6 +2054,13 @@ Return ONLY the description text, no extra commentary.`
                                  processed++;
                                  batchCount++;
                                  setSerpBatchProgress(prev => ({ ...prev, current: processed }));
+
+                                 // Refresh credit display periodically during batch
+                                 if (processed % 5 === 0) {
+                                   setCreditRefreshTrigger(prev => prev + 1);
+                                   setCreditDisplayKey(prev => prev + 1);
+                                 }
+
                                  // Save to DB every 10 images
                                  if (batchCount >= 10) {
                                    try {
@@ -2063,10 +2083,14 @@ Return ONLY the description text, no extra commentary.`
                                await base44.entities.EstateSale.update(saleId, { images: latest.images });
                              } catch (_) {}
                            }
+                           // Final credit refresh after batch completes
+                           setCreditRefreshTrigger(prev => prev + 1);
+                           setCreditDisplayKey(prev => prev + 1);
+
                            setSerpBatchRunning(false);
                            setShowDeepSearchModal(false);
                            setSerpBatchProgress({ current: 0, total: 0, stoppedAt: null });
-                        };
+                           };
                         const multiItemCount = Object.values(multiItemFlags).filter(Boolean).length;
                         const unscanned = formData.images.filter((img, i) => !img.name && !img.description && multiItemFlags[i] === undefined).length;
                         runBatchRef.current = runBatch;
