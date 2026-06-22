@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ShoppingBag, Target, Plus, X, Clock, DollarSign, MapPin,
-  Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles, ArrowRight
+  Package, Search, Trash2, Edit3, Check, Eye, EyeOff, Sparkles, ArrowRight,
+  Image as ImageIcon, Upload, Loader2
 } from 'lucide-react';
 import CategorySuggestions from '@/components/profile/CategorySuggestions';
 import AgentGuidedHunt from '@/components/profile/AgentGuidedHunt';
@@ -58,7 +59,11 @@ export default function BuyerPrefsTab({ user }) {
     shipping_ok: true,
     public_visibility: true,
     allow_dealer_contact: false,
+    image_urls: [],
   });
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
 
   const [suggestionsKey, setSuggestionsKey] = useState(0);
   const [aiSuggestions, setAiSuggestions] = useState(null);
@@ -131,6 +136,7 @@ export default function BuyerPrefsTab({ user }) {
       shipping_ok: true,
       public_visibility: true,
       allow_dealer_contact: false,
+      image_urls: [],
     });
     setEditingItem(null);
     setShowWantedForm(false);
@@ -154,6 +160,7 @@ export default function BuyerPrefsTab({ user }) {
       shipping_ok: item.shipping_ok !== false,
       public_visibility: item.public_visibility !== false,
       allow_dealer_contact: item.allow_dealer_contact === true,
+      image_urls: item.image_urls || [],
     });
     setShowWantedForm(true);
     setSuggestionsKey(k => k + 1);
@@ -180,6 +187,7 @@ export default function BuyerPrefsTab({ user }) {
         shipping_ok: wantedForm.shipping_ok,
         public_visibility: wantedForm.public_visibility,
         allow_dealer_contact: wantedForm.allow_dealer_contact,
+        image_urls: wantedForm.image_urls || [],
         status: 'active',
       };
 
@@ -196,6 +204,73 @@ export default function BuyerPrefsTab({ user }) {
       console.error('Error saving wanted item:', e);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUploadImage = async (file) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setWantedForm(p => ({ ...p, image_urls: [...(p.image_urls || []), file_url] }));
+    } catch (e) {
+      alert('Upload failed');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    setWantedForm(p => ({
+      ...p,
+      image_urls: p.image_urls.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAnalyzeImage = async () => {
+    if (!wantedForm.image_urls || wantedForm.image_urls.length === 0) return;
+    setAnalyzingImage(true);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze this image and help me create a detailed wanted item listing. Please provide:
+1. A specific, descriptive title for this item
+2. The likely category and subcategory
+3. Brand/maker if visible
+4. Era/period if determinable
+5. Key details about materials, dimensions, condition, and distinctive features
+6. Any other identifying information that would help find this item
+
+Format your response as JSON with these fields: title, category, subcategory, brand, era, description`,
+        file_urls: wantedForm.image_urls[0],
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'Descriptive title for the item' },
+            category: { type: 'string', description: 'Main category' },
+            subcategory: { type: 'string', description: 'Subcategory' },
+            brand: { type: 'string', description: 'Brand or maker name' },
+            era: { type: 'string', description: 'Era or period' },
+            description: { type: 'string', description: 'Detailed description with materials, dimensions, condition, distinctive features' },
+          },
+          required: ['title', 'category', 'description'],
+        },
+      });
+
+      const analysis = response.data;
+      setWantedForm(p => ({
+        ...p,
+        title: analysis.title || p.title,
+        category: analysis.category || p.category,
+        subcategory: analysis.subcategory || p.subcategory,
+        brand: analysis.brand || p.brand,
+        era: analysis.era || p.era,
+        description: analysis.description || p.description,
+      }));
+    } catch (e) {
+      console.error('Image analysis error:', e);
+      alert('Could not analyze image. Please fill in details manually.');
+    } finally {
+      setAnalyzingImage(false);
     }
   };
 
@@ -347,6 +422,63 @@ export default function BuyerPrefsTab({ user }) {
                 {editingItem ? 'Edit Wanted Item' : 'What Are You Looking For?'}
               </h3>
 
+              {/* Image Upload Section */}
+              <div className="mb-4">
+                <Label className="mb-2 block">Item Photos (Optional)</Label>
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {wantedForm.image_urls?.map((url, idx) => (
+                    <div key={idx} className="relative group">
+                      <img src={url} alt={`Item ${idx + 1}`} className="w-24 h-24 object-cover rounded-lg border" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="cursor-pointer">
+                    <div className="w-24 h-24 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center hover:border-orange-400 transition-colors bg-slate-50">
+                      {uploadingImage ? (
+                        <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-slate-400" />
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => handleUploadImage(e.target.files[0])}
+                      disabled={uploadingImage}
+                    />
+                  </label>
+                </div>
+                {wantedForm.image_urls?.length > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                    onClick={handleAnalyzeImage}
+                    disabled={analyzingImage}
+                  >
+                    {analyzingImage ? (
+                      <>
+                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                        Analyzing with AI...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3 mr-2" />
+                        Auto-Fill Details from Image
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label>Item Name *</Label>
@@ -406,8 +538,8 @@ export default function BuyerPrefsTab({ user }) {
                   <Textarea
                     value={wantedForm.description}
                     onChange={e => setWantedForm(p => ({ ...p, description: e.target.value }))}
-                    rows={3}
-                    placeholder="Be specific — era, materials, dimensions, color, any identifying marks..."
+                    rows={4}
+                    placeholder="Be specific — era, materials, dimensions, color, any identifying marks... (AI-auto-filled from image if uploaded)"
                   />
                 </div>
                 <div>
@@ -519,6 +651,13 @@ export default function BuyerPrefsTab({ user }) {
                         </Badge>
                       )}
                     </div>
+                    {item.image_urls && item.image_urls.length > 0 && (
+                      <div className="flex gap-2 mb-2 overflow-x-auto">
+                        {item.image_urls.map((url, idx) => (
+                          <img key={idx} src={url} alt={`Item ${idx + 1}`} className="w-16 h-16 object-cover rounded border flex-shrink-0" />
+                        ))}
+                      </div>
+                    )}
                     {item.description && (
                       <p className="text-sm text-slate-500 line-clamp-2 mb-2">{item.description}</p>
                     )}
