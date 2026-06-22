@@ -16,7 +16,7 @@ const EXPORT_OPTIONS = [
     name: 'Pricing List',
     description: 'Google Lens pricing results with market ranges and sale prices',
     icon: Scan,
-    format: 'CSV / PDF'
+    formats: ['csv', 'pdf']
   },
   {
     id: 'inventory',
