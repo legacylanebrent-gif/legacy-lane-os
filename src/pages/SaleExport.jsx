@@ -11,6 +11,13 @@ import {
 
 const EXPORT_OPTIONS = [
   {
+    id: 'pricing-list',
+    name: 'Pricing List',
+    description: 'Google Lens pricing results with market ranges and sale prices',
+    icon: Scan,
+    format: 'CSV'
+  },
+  {
     id: 'inventory',
     name: 'Inventory List',
     description: 'Complete list of all items with pricing',
@@ -92,12 +99,44 @@ export default function SaleExport() {
 
   const handleExport = async (exportId) => {
     setExporting(prev => ({ ...prev, [exportId]: true }));
-    
-    // Simulate export
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    alert(`Export complete! (${exportId})`);
-    setExporting(prev => ({ ...prev, [exportId]: false }));
+
+    try {
+      if (exportId === 'pricing-list') {
+        const pricings = await base44.entities.SaleItemPricing.filter({ sale_id: sale.id });
+        if (pricings.length === 0) {
+          alert('No pricing data found. Use the Pricing Tool to analyze photos first.');
+          return;
+        }
+        const headers = ['Item', 'Type', 'Min Price', 'Avg Price', 'Max Price', 'Sale Price'];
+        const rows = pricings.map(p => [
+          p.item_title || '',
+          p.knowledge_graph_type || '',
+          p.price_min || '',
+          p.price_avg || '',
+          p.price_max || '',
+          p.user_price || ''
+        ]);
+        const csv = [headers, ...rows]
+          .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          .join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sale.title.replace(/[^a-z0-9]/gi, '_')}_pricing.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      alert(`Export complete! (${exportId})`);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Export failed: ' + error.message);
+    } finally {
+      setExporting(prev => ({ ...prev, [exportId]: false }));
+    }
   };
 
   const handleExportAll = async () => {
@@ -129,23 +168,13 @@ export default function SaleExport() {
             <p className="text-slate-600">Export Sale Data</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => navigate(createPageUrl('SalePricingTool'))}
-            className="border-orange-500 text-orange-700 hover:bg-orange-50"
-          >
-            <Scan className="w-4 h-4 mr-2" />
-            Pricing Tool
-          </Button>
-          <Button 
-            onClick={handleExportAll}
-            className="bg-cyan-600 hover:bg-cyan-700"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export All
-          </Button>
-        </div>
+        <Button 
+          onClick={handleExportAll}
+          className="bg-cyan-600 hover:bg-cyan-700"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export All
+        </Button>
       </div>
 
       <Card>
