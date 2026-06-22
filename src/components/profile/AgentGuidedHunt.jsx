@@ -290,6 +290,41 @@ export default function AgentGuidedHunt({ user, onItemsAdded }) {
               </div>
             </div>
 
+            {/* Show analysis results after upload */}
+            {uploadedImage && category && searchQuery && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-start gap-2 mb-2">
+                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-green-800">AI Analysis Complete!</p>
+                    <p className="text-xs text-green-700 mt-1">
+                      We detected: <span className="font-medium">{category}</span> — "{searchQuery}"
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-xs h-8 flex-1"
+                    onClick={() => setStep('search')}
+                  >
+                    Continue to Step 2 <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-8 border-green-300 text-green-700 hover:bg-green-100 flex-1"
+                    onClick={() => {
+                      setCategory('');
+                      setSearchQuery('');
+                    }}
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" /> Clear
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <p className="text-xs text-slate-500 text-center">
               <ImageIcon className="w-3 h-3 inline mr-1" />
               One image at a time for AI analysis
