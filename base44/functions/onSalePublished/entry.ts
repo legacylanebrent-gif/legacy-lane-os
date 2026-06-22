@@ -31,6 +31,11 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: `status=${sale.status}` });
     }
 
+    // Buyout events are operator-only — no SEO generation
+    if (sale.sale_type === 'buyout_or_cleanout') {
+      return Response.json({ skipped: true, reason: 'buyout event — no SEO' });
+    }
+
     const log = [];
     const invoke = async (fn, payload, label) => {
       try {

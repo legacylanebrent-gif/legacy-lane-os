@@ -48,6 +48,11 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'sale not upcoming/active' });
     }
 
+    // Buyout events are operator-only — do not notify regular users
+    if (sale.sale_type === 'buyout_or_cleanout') {
+      return Response.json({ skipped: true, reason: 'buyout event — no consumer alerts' });
+    }
+
     const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY') || '';
 
     // Get sale location

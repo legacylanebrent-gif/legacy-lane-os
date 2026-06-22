@@ -81,6 +81,8 @@ export function getSaleDisplayStatus(sale) {
 
 // Determine if sale should be visible on frontend to public users
 export function shouldShowSaleOnFrontend(sale) {
+  // Buyout events are operator-only opportunities — never shown to regular users
+  if (sale.sale_type === 'buyout_or_cleanout') return false;
   // Explicitly-set status takes priority over date-based computation
   if (sale.status === 'active' || sale.status === 'upcoming') {
     // Even with active/upcoming status, hide if all dates have passed in user's local timezone

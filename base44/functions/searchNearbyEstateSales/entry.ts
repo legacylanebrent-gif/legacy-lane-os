@@ -14,6 +14,8 @@ Deno.serve(async (req) => {
 
         // Filter by distance using Haversine formula
         const nearbyEstates = estateSales.filter(estate => {
+            // Buyout events are operator-only — never shown to regular users
+            if (estate.sale_type === 'buyout_or_cleanout') return false;
             if (!estate.location?.lat || !estate.location?.lng) return false;
             
             const distance = calculateDistance(
