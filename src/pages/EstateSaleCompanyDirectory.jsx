@@ -115,8 +115,31 @@ export default function EstateSaleCompanyDirectory() {
         combined = [...netData, ...orgData];
       }
 
-      const seen = new Set();
-      const deduped = combined.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
+      // Deduplicate across sources. The same company often appears in
+      // FutureEstateOperator, EstatesalesOrgOperator, and FutureOperatorLead
+      // with different record IDs, so we dedup by normalized company name +
+      // state (and phone when available) instead of relying on record id alone.
+      const normName = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(llc|inc|co|estate|sales|sale|company|the)$/g, '').trim();
+      const normPhone = (s) => (s || '').toString().replace(/[^0-9]/g, '').replace(/^1/, '').slice(-10);
+      const seenIds = new Set();
+      const seenKeys = new Set();
+      const deduped = [];
+      // Sort so subscribers and cleaned records are kept first (preferred source)
+      combined.sort((a, b) => (isEstateSalenSubscriber(b) ? 1 : 0) - (isEstateSalenSubscriber(a) ? 1 : 0));
+      for (const r of combined) {
+        if (!r || seenIds.has(r.id)) continue;
+        const state = stripHtml(r.state);
+        const nameKey = normName(r.company_name);
+        const phoneKey = normPhone(r.phone);
+        // Build a dedup key: prefer phone+state when phone exists, else name+state
+        const dedupKey = phoneKey && phoneKey.length >= 10
+          ? `p:${phoneKey}`
+          : `n:${nameKey}:${state}`;
+        if (seenKeys.has(dedupKey)) continue;
+        seenIds.add(r.id);
+        seenKeys.add(dedupKey);
+        deduped.push(r);
+      }
       const all = deduped.map(cleanEmailFn);
 
       const counts = {};
