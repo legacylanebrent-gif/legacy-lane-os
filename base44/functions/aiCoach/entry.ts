@@ -10,9 +10,9 @@ const EMBEDDING_MODEL = 'text-embedding-3-small';
 // ── Credit helpers ────────────────────────────────────────────────────────────
 
 const TIER_CREDIT_LIMITS = {
-  starter: 100000,
-  growth: 300000,
-  professional: 750000,
+  starter: 0,
+  growth: 500000,
+  professional: 1000000,
   elite: 2000000,
 };
 
