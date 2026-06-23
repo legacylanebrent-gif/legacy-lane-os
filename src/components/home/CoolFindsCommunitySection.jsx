@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, CalendarDays, MapPin, ArrowRight, Ticket } from 'lucide-react';
 import { format } from 'date-fns';
+import { getCategoryLabel } from '@/components/coolfinds/categories';
 
 export default function CoolFindsCommunitySection() {
   const [stories, setStories] = useState([]);
@@ -82,7 +83,7 @@ export default function CoolFindsCommunitySection() {
                         )}
                         <CardContent className="flex-1 p-4 flex flex-col justify-center">
                           <Badge className="self-start mb-2 bg-violet-100 text-violet-700 text-[10px] uppercase tracking-wide">
-                            {story.category === 'crazy_stories' ? 'Crazy Story' : story.category === 'hidden_treasures' ? 'Hidden Treasure' : 'Cool Find'}
+                            {getCategoryLabel(story.category)}
                           </Badge>
                           <h5 className="font-semibold text-slate-900 group-hover:text-violet-600 transition-colors line-clamp-2 mb-1">
                             {story.title}

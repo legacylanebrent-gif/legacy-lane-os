@@ -5,23 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Sparkles, Eye, Calendar, Building2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Eye, Calendar, Building2, MapPin } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import CoolFindsComments from '@/components/coolfinds/CoolFindsComments';
+import { getCategoryColor, getCategoryLabel } from '@/components/coolfinds/categories';
 import { useSEO } from '@/hooks/useSEO';
-
-const CATEGORY_LABELS = {
-  cool_finds: 'Cool Finds',
-  crazy_stories: 'Crazy Stories',
-  hidden_treasures: 'Hidden Treasures',
-};
-
-const CATEGORY_COLORS = {
-  cool_finds: 'bg-orange-100 text-orange-700',
-  crazy_stories: 'bg-purple-100 text-purple-700',
-  hidden_treasures: 'bg-cyan-100 text-cyan-700',
-};
 
 export default function CoolFindsDetail() {
   const { slug } = useParams();
@@ -30,6 +20,7 @@ export default function CoolFindsDetail() {
   const [notFound, setNotFound] = useState(false);
   const [user, setUser] = useState(null);
   const [companySlug, setCompanySlug] = useState(null);
+  const [relatedStories, setRelatedStories] = useState([]);
 
   useEffect(() => {
     loadStory();
@@ -67,6 +58,20 @@ export default function CoolFindsDetail() {
       try {
         await base44.entities.CoolFindStory.update(data.id, { views: (data.views || 0) + 1 });
       } catch (_) {}
+
+      // Load related stories for "You May Also Like"
+      if (data.related_story_ids && data.related_story_ids.length > 0) {
+        try {
+          const related = [];
+          for (const rid of data.related_story_ids.slice(0, 3)) {
+            try {
+              const r = await base44.entities.CoolFindStory.get(rid);
+              if (r && r.status === 'published') related.push(r);
+            } catch (_) {}
+          }
+          setRelatedStories(related);
+        } catch (_) {}
+      }
     } catch (e) {
       console.error('Error loading story:', e);
       setNotFound(true);
@@ -131,8 +136,8 @@ export default function CoolFindsDetail() {
           <ArrowLeft className="w-4 h-4" /> Back to Blog
         </Link>
 
-        <Badge className={`mb-4 ${CATEGORY_COLORS[story.category] || 'bg-slate-100'}`}>
-          {CATEGORY_LABELS[story.category] || story.category}
+        <Badge className={`mb-4 ${getCategoryColor(story.category)}`}>
+          {getCategoryLabel(story.category)}
         </Badge>
 
         <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-4">{story.title}</h1>
@@ -185,10 +190,47 @@ export default function CoolFindsDetail() {
           </div>
         ) : null}
 
-        {/* Story content */}
-        <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap text-lg">
-          {story.story_content}
+        {/* Story content — prefer AI-enhanced version if available */}
+        <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-lg">
+          {story.ai_enhanced_content ? (
+            <ReactMarkdown>{story.ai_enhanced_content}</ReactMarkdown>
+          ) : (
+            <div className="whitespace-pre-wrap">{story.story_content}</div>
+          )}
         </div>
+
+        {/* AI-generated metadata: era, object type, tags */}
+        {(story.era || story.object_type || (story.tags && story.tags.length > 0)) && (
+          <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
+            {story.era && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-semibold text-slate-700">Era:</span>
+                <Badge className="bg-indigo-100 text-indigo-700">{story.era}</Badge>
+              </div>
+            )}
+            {story.object_type && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-semibold text-slate-700">Object Type:</span>
+                <Badge className="bg-teal-100 text-teal-700">{story.object_type}</Badge>
+              </div>
+            )}
+            {story.tags && story.tags.length > 0 && (
+              <div className="flex items-center flex-wrap gap-2">
+                <span className="text-sm font-semibold text-slate-700">Tags:</span>
+                {story.tags.map((tag, i) => (
+                  <Badge key={i} className="bg-purple-100 text-purple-700">#{tag}</Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Where found */}
+        {story.where_found && (
+          <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+            <MapPin className="w-4 h-4" /> Found: {story.where_found}
+          </div>
+        )}
 
         {/* Photo gallery */}
         {story.photos?.length > 1 && (
@@ -218,6 +260,36 @@ export default function CoolFindsDetail() {
                   <Building2 className="w-4 h-4 mr-2" /> View Company Profile
                 </Button>
               </Link>
+            </div>
+          </div>
+        )}
+
+        {/* You May Also Like — AI-recommended related stories */}
+        {relatedStories.length > 0 && (
+          <div className="mt-12">
+            <h3 className="text-xl font-serif font-bold text-slate-900 mb-4">You May Also Like</h3>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {relatedStories.map(rel => (
+                <Link key={rel.id} to={`/cool-finds/${rel.slug || rel.id}`}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
+                    {rel.featured_image_url || rel.photos?.[0] ? (
+                      <div className="h-32 overflow-hidden bg-slate-100">
+                        <img src={rel.featured_image_url || rel.photos[0]} alt={rel.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-32 bg-gradient-to-br from-purple-100 to-orange-100 flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-purple-300" />
+                      </div>
+                    )}
+                    <CardContent className="p-3 flex-1 flex flex-col">
+                      <Badge className={`w-fit mb-1.5 text-[10px] ${getCategoryColor(rel.category)}`}>
+                        {getCategoryLabel(rel.category)}
+                      </Badge>
+                      <h4 className="font-serif font-bold text-sm text-slate-900 line-clamp-2">{rel.title}</h4>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
             </div>
           </div>
         )}

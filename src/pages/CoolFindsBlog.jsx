@@ -8,13 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles, Search, ArrowRight, PenSquare, Eye } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
+import { COOL_FIND_CATEGORIES, getCategoryColor, getCategoryLabel } from '@/components/coolfinds/categories';
 import { useSEO } from '@/hooks/useSEO';
 
 const CATEGORIES = [
   { key: 'all', label: 'All Stories', color: 'bg-slate-100 text-slate-700' },
-  { key: 'cool_finds', label: 'Cool Finds', color: 'bg-orange-100 text-orange-700' },
-  { key: 'crazy_stories', label: 'Crazy Stories', color: 'bg-purple-100 text-purple-700' },
-  { key: 'hidden_treasures', label: 'Hidden Treasures', color: 'bg-cyan-100 text-cyan-700' },
+  ...COOL_FIND_CATEGORIES,
 ];
 
 export default function CoolFindsBlog() {
@@ -157,8 +156,8 @@ export default function CoolFindsBlog() {
                     </div>
                   )}
                   <CardContent className="p-4 flex-1 flex flex-col">
-                    <Badge className={`w-fit mb-2 ${CATEGORIES.find(c => c.key === story.category)?.color || 'bg-slate-100'}`}>
-                      {CATEGORIES.find(c => c.key === story.category)?.label || story.category}
+                    <Badge className={`w-fit mb-2 ${getCategoryColor(story.category)}`}>
+                      {getCategoryLabel(story.category)}
                     </Badge>
                     <h3 className="font-serif font-bold text-lg text-slate-900 mb-2 line-clamp-2">{story.title}</h3>
                     {story.excerpt && (

@@ -7,12 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { CheckCircle, XCircle, Eye, Loader2, Sparkles, Clock } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-
-const CATEGORY_LABELS = {
-  cool_finds: 'Cool Finds',
-  crazy_stories: 'Crazy Stories',
-  hidden_treasures: 'Hidden Treasures',
-};
+import { getCategoryColor, getCategoryLabel } from '@/components/coolfinds/categories';
 
 export default function AdminCoolFinds() {
   const [stories, setStories] = useState([]);
@@ -116,8 +111,8 @@ export default function AdminCoolFinds() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
-                              <Badge className="bg-purple-100 text-purple-700 mb-1">
-                                {CATEGORY_LABELS[story.category] || story.category}
+                              <Badge className={`mb-1 ${getCategoryColor(story.category)}`}>
+                                {getCategoryLabel(story.category)}
                               </Badge>
                               {story.is_admin_post && (
                                 <Badge className="bg-blue-100 text-blue-700 ml-1">Admin Post</Badge>
@@ -135,7 +130,21 @@ export default function AdminCoolFinds() {
                             {story.youtube_url && <Badge className="bg-red-100 text-red-700">YouTube</Badge>}
                             {story.video_url && <Badge className="bg-green-100 text-green-700">Video</Badge>}
                             {story.photos?.length > 0 && <span>• {story.photos.length} photos</span>}
+                            {story.ai_metadata_status === 'pending' && <Badge className="bg-amber-100 text-amber-700">AI: Pending</Badge>}
+                            {story.ai_metadata_status === 'generated' && <Badge className="bg-blue-100 text-blue-700">AI: Enriched</Badge>}
+                            {story.ai_metadata_status === 'failed' && <Badge className="bg-red-100 text-red-700">AI: Failed</Badge>}
                           </div>
+
+                          {/* AI-generated metadata preview */}
+                          {story.ai_metadata_status === 'generated' && (story.tags?.length > 0 || story.era || story.object_type) && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {story.era && <Badge className="bg-indigo-50 text-indigo-600 text-[10px]">{story.era}</Badge>}
+                              {story.object_type && <Badge className="bg-teal-50 text-teal-600 text-[10px]">{story.object_type}</Badge>}
+                              {story.tags?.slice(0, 4).map((tag, i) => (
+                                <Badge key={i} className="bg-purple-50 text-purple-600 text-[10px]">#{tag}</Badge>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Actions */}
                           <div className="flex gap-2">
