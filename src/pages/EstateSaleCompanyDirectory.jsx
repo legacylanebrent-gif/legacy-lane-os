@@ -200,7 +200,29 @@ export default function EstateSaleCompanyDirectory() {
   const stateName = useMemo(() => US_STATES.find(s => s.code === selectedState)?.name || selectedState, [selectedState]);
   const stateCenter = useMemo(() => STATE_CENTERS[selectedState] || [39.8, -98.6], [selectedState]);
   const mapZoom = useMemo(() => selectedState === 'AK' || selectedState === 'CA' || selectedState === 'TX' ? 5 : 7, [selectedState]);
-  const mapMarkers = useMemo(() => displayedOperators.filter(op => op.lat && op.lng).slice(0, 200), [displayedOperators]);
+  const mapMarkers = useMemo(() => {
+    // Businesses sharing a city geocode to identical coordinates, which stacks
+    // their pins on top of each other so only the topmost is clickable. Spread
+    // co-located pins with a small deterministic offset so every business gets
+    // its own visible, clickable marker.
+    const base = displayedOperators.filter(op => op.lat && op.lng).slice(0, 200);
+    const coordCount = {};
+    base.forEach(op => {
+      const key = `${op.lat.toFixed(4)}|${op.lng.toFixed(4)}`;
+      coordCount[key] = (coordCount[key] || 0) + 1;
+    });
+    const coordIndex = {};
+    return base.map(op => {
+      const key = `${op.lat.toFixed(4)}|${op.lng.toFixed(4)}`;
+      const total = coordCount[key];
+      if (total <= 1) return op;
+      const idx = coordIndex[key] = (coordIndex[key] || 0) + 1;
+      // Arrange duplicates in a small circle around the shared point.
+      const angle = (idx / total) * 2 * Math.PI;
+      const radius = 0.01; // ~0.01 degrees ≈ ~0.7 miles
+      return { ...op, lat: op.lat + Math.sin(angle) * radius, lng: op.lng + Math.cos(angle) * radius };
+    });
+  }, [displayedOperators]);
   const totalCount = Object.values(stateCounts).reduce((s, c) => s + c, 0);
 
   const [claimingOperator, setClaimingOperator] = useState(null);
