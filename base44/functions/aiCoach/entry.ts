@@ -9,22 +9,46 @@ const EMBEDDING_MODEL = 'text-embedding-3-small';
 
 // ── Credit helpers ────────────────────────────────────────────────────────────
 
-async function getOrCreateCreditAccount(base44, operatorId) {
-  const accounts = await base44.asServiceRole.entities.OperatorAICreditAccount.filter({ operator_id: operatorId });
-  if (accounts.length > 0) return accounts[0];
+const TIER_CREDIT_LIMITS = {
+  starter: 100000,
+  growth: 300000,
+  professional: 750000,
+  elite: 2000000,
+};
 
+async function getOrCreateCreditAccount(base44, user) {
+  const operatorId = user.id;
+  const accounts = await base44.asServiceRole.entities.OperatorAICreditAccount.filter({ operator_id: operatorId });
+  if (accounts.length > 0) {
+    const acct = accounts[0];
+    // Fix accounts that were created with a 0 limit — set the correct tier-based limit
+    const tier = acct.subscription_tier || user.subscription_tier || 'starter';
+    const correctLimit = TIER_CREDIT_LIMITS[tier] || TIER_CREDIT_LIMITS.starter;
+    if ((acct.monthly_credit_limit || 0) === 0 && acct.status !== 'over_limit') {
+      await base44.asServiceRole.entities.OperatorAICreditAccount.update(acct.id, {
+        monthly_credit_limit: correctLimit,
+        subscription_tier: tier,
+        status: 'active',
+      });
+      acct.monthly_credit_limit = correctLimit;
+      acct.status = 'active';
+    }
+    return acct;
+  }
+
+  const tier = user.subscription_tier || 'starter';
   const now = new Date();
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return await base44.asServiceRole.entities.OperatorAICreditAccount.create({
     operator_id: operatorId,
-    subscription_tier: 'starter',
-    monthly_credit_limit: 0,
+    subscription_tier: tier,
+    monthly_credit_limit: TIER_CREDIT_LIMITS[tier] || TIER_CREDIT_LIMITS.starter,
     monthly_credits_used: 0,
     bonus_credits: 0,
     rollover_credits: 0,
     current_period_start: now.toISOString(),
     current_period_end: periodEnd.toISOString(),
-    status: 'pending_setup',
+    status: 'active',
   });
 }
 
@@ -100,7 +124,7 @@ Deno.serve(async (req) => {
   const selectedModel = model || DEFAULT_MODEL;
 
   // ── Rule 2: Credits are always fetched for the authenticated user only ──
-  const creditAccount = await getOrCreateCreditAccount(base44, user.id);
+  const creditAccount = await getOrCreateCreditAccount(base44, user);
   const available = getAvailableCredits(creditAccount);
 
   if (available <= 0) {
