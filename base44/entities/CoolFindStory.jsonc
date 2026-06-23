@@ -1,0 +1,108 @@
+{
+  "name": "CoolFindStory",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Headline of the cool find or story"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly slug for the story page"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "cool_finds",
+        "crazy_stories",
+        "hidden_treasures"
+      ],
+      "description": "Which blog section this belongs to"
+    },
+    "story_content": {
+      "type": "string",
+      "description": "Full story body (markdown or plain text)"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short summary for cards and SEO"
+    },
+    "author_company_name": {
+      "type": "string",
+      "description": "Estate sale company that submitted the story"
+    },
+    "author_id": {
+      "type": "string",
+      "description": "User ID of the submitter"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Contact email for the submitter"
+    },
+    "author_phone": {
+      "type": "string",
+      "description": "Contact phone for the submitter"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of uploaded photo URLs"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "Uploaded video file URL (for company submissions)"
+    },
+    "youtube_url": {
+      "type": "string",
+      "description": "YouTube video embed URL (for admin-created posts)"
+    },
+    "featured_image_url": {
+      "type": "string",
+      "description": "Primary image shown on cards and headers"
+    },
+    "is_admin_post": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if created by an admin (enables YouTube URL field)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "rejected"
+      ],
+      "default": "draft",
+      "description": "Editorial status \u2014 drafts await admin approval"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the story was submitted"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the story was approved and published"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "views": {
+      "type": "integer",
+      "default": 0,
+      "description": "Page view count"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "story_content"
+  ]
+}

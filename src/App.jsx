@@ -151,6 +151,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './lib/ScrollToTop';
 import TrainingBlog from './pages/TrainingBlog';
 import TrainingArticleDetail from './pages/TrainingArticleDetail';
+import CoolFindsBlog from './pages/CoolFindsBlog';
+import CoolFindsSubmit from './pages/CoolFindsSubmit';
+import CoolFindsDetail from './pages/CoolFindsDetail';
+import AdminCoolFinds from './pages/AdminCoolFinds';
+import CommunityEvents from './pages/CommunityEvents';
+import CommunityEventSubmit from './pages/CommunityEventSubmit';
+import AdminCommunityEvents from './pages/AdminCommunityEvents';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -399,6 +406,17 @@ const AuthenticatedApp = () => {
       <Route path="/probate-realtors/:stateSlug/:countySlug" element={<ProviderDirectoryPage directoryType="probate-realtors" />} />
       <Route path="/:lifeEventSlug/:stateSlug" element={<LifeEventStatePage />} />
       <Route path="/:lifeEventSlug/:stateSlug/:countySlug" element={<LifeEventCountyPage />} />
+
+      {/* ── Cool Finds Blog ── */}
+      <Route path="/CoolFindsBlog" element={<CoolFindsBlog />} />
+      <Route path="/CoolFindsSubmit" element={<CoolFindsSubmit />} />
+      <Route path="/cool-finds/:slug" element={<CoolFindsDetail />} />
+      <Route path="/AdminCoolFinds" element={<LayoutWrapper currentPageName="AdminCoolFinds"><AdminCoolFinds /></LayoutWrapper>} />
+
+      {/* ── Community Events (Flea Markets & Antique Shows) ── */}
+      <Route path="/CommunityEvents" element={<CommunityEvents />} />
+      <Route path="/CommunityEventSubmit" element={<CommunityEventSubmit />} />
+      <Route path="/AdminCommunityEvents" element={<LayoutWrapper currentPageName="AdminCommunityEvents"><AdminCommunityEvents /></LayoutWrapper>} />
 
       {/* ── Mobile Consumer App Routes ── */}
       <Route path="/OnboardingChat" element={<OnboardingChat />} />

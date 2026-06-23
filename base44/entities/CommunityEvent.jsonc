@@ -1,0 +1,148 @@
+{
+  "name": "CommunityEvent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of the flea market or antique show"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event details, what to expect, vendors, etc."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "flea_market",
+        "antique_show",
+        "craft_show",
+        "collectibles_show",
+        "other"
+      ],
+      "default": "flea_market",
+      "description": "Type of community event"
+    },
+    "organizer_name": {
+      "type": "string",
+      "description": "Name of the event organizer"
+    },
+    "organizer_id": {
+      "type": "string",
+      "description": "User ID of the registered organizer"
+    },
+    "organizer_email": {
+      "type": "string",
+      "description": "Contact email used for communication"
+    },
+    "organizer_phone": {
+      "type": "string",
+      "description": "Contact phone for the organizer"
+    },
+    "property_address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "formatted_address": {
+          "type": "string"
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "description": "Geocoded coordinates for map placement"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "First day of the event"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last day of the event (can equal start_date for single-day events)"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Daily start time (e.g. 9:00 AM)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Daily end time (e.g. 5:00 PM)"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Optional link to the event's own website"
+    },
+    "admission_fee": {
+      "type": "string",
+      "description": "Admission cost (e.g. Free, $5, $10/person)"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of event photo URLs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "completed",
+        "rejected"
+      ],
+      "default": "draft",
+      "description": "Drafts await admin approval; completed events auto-expire from the map"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event was auto-marked completed"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed"
+      ],
+      "default": "not_geocoded"
+    }
+  },
+  "required": [
+    "title",
+    "event_type",
+    "organizer_name",
+    "property_address",
+    "start_date"
+  ]
+}

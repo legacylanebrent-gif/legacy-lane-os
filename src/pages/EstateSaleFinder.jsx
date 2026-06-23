@@ -33,6 +33,16 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+// Violet icon for community events (flea markets, antique shows)
+const communityEventIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 function MapUpdater({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
@@ -80,6 +90,7 @@ export default function EstateSaleFinder() {
     const s = localStorage.getItem('savedSales');
     return s ? JSON.parse(s) : [];
   });
+  const [communityEvents, setCommunityEvents] = useState([]);
 
   const handleToggleSave = (estate) => {
     setSavedSaleIds(prev => {
@@ -137,11 +148,29 @@ export default function EstateSaleFinder() {
       if (data.success) {
         setEstates((data.estates || []).filter(s => shouldShowSaleOnFrontend(s)));
       }
+      loadCommunityEvents();
     } catch (error) {
       console.error('Error searching nearby:', error);
       loadEstates();
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load published community events (flea markets, antique shows) for the map
+  const loadCommunityEvents = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const data = await base44.entities.CommunityEvent.filter({ status: 'published' }, 'start_date', 100);
+      const visible = (data || []).filter(e => {
+        if (!e.start_date) return false;
+        const eventEnd = e.end_date || e.start_date;
+        return e.start_date >= thirtyDaysAgo && eventEnd >= today && e.location?.lat && e.location?.lng;
+      });
+      setCommunityEvents(visible);
+    } catch (e) {
+      console.error('Error loading community events:', e);
     }
   };
 
@@ -236,6 +265,7 @@ export default function EstateSaleFinder() {
         setFeaturedEstates([]);
         setRegularEstates([]);
       }
+      loadCommunityEvents();
     } catch (error) {
       console.error('Error loading estates:', error);
     } finally {
@@ -434,6 +464,19 @@ export default function EstateSaleFinder() {
         ) : (
           // Map View
           <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-3 flex flex-wrap items-center gap-4 mb-2 text-sm">
+              <span className="flex items-center gap-1.5">
+                <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png" alt="Estate Sale" className="h-5" />
+                <span className="text-slate-600 font-medium">Estate Sales</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png" alt="Community Event" className="h-5" />
+                <span className="text-slate-600 font-medium">Flea Markets & Antique Shows</span>
+              </span>
+              <Link to="/CommunityEvents" className="ml-auto text-violet-600 hover:underline text-sm font-medium">
+                Browse all community events →
+              </Link>
+            </div>
             <div className="lg:col-span-2">
               <Card className="overflow-hidden h-[600px] [&_.leaflet-container]:z-0 [&_.leaflet-pane]:z-[5] [&_.leaflet-top]:z-[10] [&_.leaflet-bottom]:z-[10]">
                 <MapContainer
@@ -471,6 +514,34 @@ export default function EstateSaleFinder() {
                               <p className="text-sm text-slate-500">
                                 {new Date(estate.sale_dates[0].date).toLocaleDateString()}
                               </p>
+                            )}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
+                  {communityEvents.map((evt) => {
+                    if (!evt.location?.lat || !evt.location?.lng) return null;
+                    return (
+                      <Marker
+                        key={`evt-${evt.id}`}
+                        position={[evt.location.lat, evt.location.lng]}
+                        icon={communityEventIcon}
+                      >
+                        <Popup>
+                          <div className="p-2 min-w-[200px]">
+                            <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-violet-600 mb-1">
+                              {evt.event_type === 'antique_show' ? 'Antique Show' : 'Flea Market'}
+                            </span>
+                            <h3 className="font-semibold text-navy-900 mb-1">{evt.title}</h3>
+                            <p className="text-sm text-slate-600 mb-1">
+                              {evt.property_address?.city}, {evt.property_address?.state}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              {new Date(evt.start_date + 'T00:00:00').toLocaleDateString()}
+                            </p>
+                            {evt.admission_fee && (
+                              <p className="text-sm text-violet-600 font-medium mt-1">{evt.admission_fee}</p>
                             )}
                           </div>
                         </Popup>
