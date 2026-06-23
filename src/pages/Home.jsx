@@ -1479,83 +1479,83 @@ export default function Home() {
                         </section>
                       )}
 
-                      {/* Browse by State & Estate Sale Request CTAs - Moved above advertising */}
+                      {/* Local Advertising Space */}
+                      <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
+                        <div className="max-w-7xl mx-auto">
+                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+                            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Locally Featured Businesses Near {userZipCode || 'You'}</p>
+                            <p className="text-white text-2xl font-semibold">Target your local community with premium placement</p>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* Cool Finds & Community Events - Moved up for weekend traffic */}
+                      <CoolFindsCommunitySection />
+
+                      {/* Locally Featured Vendors */}
+                      <LocalVendorSection userLocation={userLocation} userZipCode={userZipCode} />
+
+                      {/* National Advertising Space */}
+                      <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
+                        <div className="max-w-7xl mx-auto">
+                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
+                            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">National Advertising Space</p>
+                            <p className="text-white text-2xl font-semibold">Premium placement available for nationwide reach</p>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* Browse by State & Estate Sale Request CTAs - Moved below Cool Finds */}
                       <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Browse by State */}
-                <Link to={createPageUrl('SearchByState')}>
-                  <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
-                    <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
-                      <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <MapPin className="w-10 h-10 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-3xl font-serif font-bold text-white mb-2">
-                          Browse by State
-                        </h3>
-                        <p className="text-lg text-cyan-100">
-                          Discover estate sales in all 50 states
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                        <div className="max-w-7xl mx-auto">
+                          <div className="grid md:grid-cols-2 gap-8">
+                            {/* Browse by State */}
+                            <Link to={createPageUrl('SearchByState')}>
+                              <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
+                                <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <MapPin className="w-10 h-10 text-white" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                                      Browse by State
+                                    </h3>
+                                    <p className="text-lg text-cyan-100">
+                                      Discover estate sales in all 50 states
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
 
-                {/* Estate Sale Request */}
-                <div 
-                  onClick={() => setShowSaleRequestModal(true)}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full"
-                >
-                  <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
-                    <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <HomeIcon className="w-10 h-10 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-3xl font-serif font-bold text-white mb-2">
-                        Need an Estate Sale {t('Company')}?
-                      </h3>
-                      <p className="text-lg text-orange-100">
-                        We'll connect you with trusted professionals in your area
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+                            {/* Estate Sale Request */}
+                            <div 
+                              onClick={() => setShowSaleRequestModal(true)}
+                              className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full"
+                            >
+                              <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                                <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                  <HomeIcon className="w-10 h-10 text-white" />
+                                </div>
+                                <div>
+                                  <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                                    Need an Estate Sale {t('Company')}?
+                                  </h3>
+                                  <p className="text-lg text-orange-100">
+                                    We'll connect you with trusted professionals in your area
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
 
-      {/* Local Advertising Space */}
-      <section className="py-8 px-4 bg-gradient-to-r from-cyan-600 to-blue-600">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
-            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">Locally Featured Businesses Near {userZipCode || 'You'}</p>
-            <p className="text-white text-2xl font-semibold">Target your local community with premium placement</p>
-          </div>
-        </div>
-      </section>
+                      {/* Marketplace Feature Section */}
+                      <MarketplaceFeatureSection />
 
-      {/* Cool Finds & Community Events - Moved up for weekend traffic */}
-      <CoolFindsCommunitySection />
-
-      {/* Locally Featured Vendors */}
-      <LocalVendorSection userLocation={userLocation} userZipCode={userZipCode} />
-
-      {/* National Advertising Space */}
-      <section className="py-8 px-4 bg-gradient-to-r from-purple-600 to-purple-700">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/20">
-            <p className="text-white/80 text-sm uppercase tracking-wider mb-2">National Advertising Space</p>
-            <p className="text-white text-2xl font-semibold">Premium placement available for nationwide reach</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Marketplace Feature Section */}
-      <MarketplaceFeatureSection />
-
-      {/* Recent Blog Posts */}
-      <RecentBlogPosts />
+                      {/* Recent Blog Posts */}
+                      <RecentBlogPosts />
 
       {/* Sign Up CTAs */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
