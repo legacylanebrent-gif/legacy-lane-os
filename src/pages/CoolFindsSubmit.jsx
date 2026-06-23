@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, Upload, X, Youtube, Loader2, CheckCircle, ArrowLeft, MapPin, Wand2 } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
+import AIStoryAssistance from '@/components/coolfinds/AIStoryAssistance';
 import { useSEO } from '@/hooks/useSEO';
 
 export default function CoolFindsSubmit() {
@@ -100,6 +101,82 @@ export default function CoolFindsSubmit() {
 
   const removePhoto = (idx) => {
     setPhotos(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleAISubmit = async () => {
+    if (!form.story_content || form.story_content.trim().length < 10) {
+      alert('Please write at least a few sentences about your find first.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const prompt = `You are a professional blog writer for an estate sale community blog called "Cool Finds & Crazy Stories."
+A user has submitted a rough draft of a story about something they found. Rewrite and enhance it into a compelling, well-structured blog post.
+
+User's original title: "${form.title || '(none provided)'}"
+Where found: "${form.where_found || '(not specified)'}"
+User's original story:
+"""
+${form.story_content}
+"""
+
+Instructions:
+- Write an engaging, polished blog post (300-600 words).
+- Use a conversational, enthusiastic tone — like sharing a discovery with friends.
+- Structure with short paragraphs. You may use a brief intro, the discovery story, and what makes it special.
+- Do NOT invent facts that contradict the user's story. Enhance the writing, not the facts.
+- Create a catchy, click-worthy blog title (max 80 characters).
+
+Return JSON with:
+- "title": the suggested blog title
+- "story_content": the full enhanced blog post body (plain text, no markdown headers)`;
+
+      const aiResult = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            story_content: { type: 'string' },
+          },
+          required: ['title', 'story_content'],
+        },
+      });
+
+      const aiTitle = aiResult.title || form.title;
+      const aiContent = aiResult.story_content || form.story_content;
+      const slug = aiTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36);
+
+      await base44.entities.CoolFindStory.create({
+        ...form,
+        title: aiTitle,
+        story_content: aiContent,
+        slug,
+        photos,
+        video_url: videoUrl || null,
+        featured_image_url: photos[0] || null,
+        is_admin_post: isAdmin,
+        status: 'draft',
+        ai_metadata_status: 'pending',
+        submitted_at: new Date().toISOString(),
+      });
+
+      if (form.operator_id) {
+        try {
+          const existing = await base44.entities.SEOPage.filter({ entity_id: form.operator_id, page_type: 'company' });
+          if (existing.length === 0) {
+            await base44.functions.invoke('generateOperatorSEOProfile', { operator_id: form.operator_id });
+          }
+        } catch (_) {}
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error('AI submit error:', err);
+      alert('Error generating AI version. Please try again or submit your own version.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -229,14 +306,26 @@ export default function CoolFindsSubmit() {
 
               <div>
                 <Label>Your Story *</Label>
-                <Textarea
-                  required
-                  value={form.story_content}
-                  onChange={(e) => setForm({ ...form, story_content: e.target.value })}
-                  placeholder="Tell us what you found... What is it? What happened? What made it special? Don't worry about making it perfect — our AI will polish it for you."
-                  className="mt-1 min-h-[200px]"
-                />
-                <p className="text-xs text-slate-400 mt-1">Just write naturally — AI will enhance the structure and flow.</p>
+                <div className="mt-1 flex flex-col lg:flex-row gap-4">
+                  <div className="flex-1">
+                    <Textarea
+                      required
+                      value={form.story_content}
+                      onChange={(e) => setForm({ ...form, story_content: e.target.value })}
+                      placeholder="Tell us what you found... What is it? What happened? What made it special? Don't worry about making it perfect — our AI will polish it for you."
+                      className="min-h-[200px]"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">Just write naturally — AI will enhance the structure and flow.</p>
+                  </div>
+                  <div className="lg:w-72 flex-shrink-0">
+                    <AIStoryAssistance
+                      title={form.title}
+                      storyContent={form.story_content}
+                      whereFound={form.where_found}
+                      onApplyAI={(newTitle, newContent) => setForm(f => ({ ...f, title: newTitle, story_content: newContent }))}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -341,7 +430,7 @@ export default function CoolFindsSubmit() {
             </CardContent>
           </Card>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               type="submit"
               disabled={submitting}
@@ -349,12 +438,25 @@ export default function CoolFindsSubmit() {
               size="lg"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-              {submitting ? 'Submitting...' : 'Submit for Review'}
+              {submitting ? 'Submitting...' : 'Submit My Version'}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAISubmit}
+              disabled={submitting || !form.story_content}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white flex-1"
+              size="lg"
+            >
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
+              {submitting ? 'Submitting...' : 'Submit AI Version'}
             </Button>
             <Link to="/CoolFindsBlog">
               <Button type="button" variant="outline" size="lg">Cancel</Button>
             </Link>
           </div>
+          <p className="text-xs text-slate-400 text-center">
+            "Submit My Version" uses your exact text. "Submit AI Version" lets AI rewrite your story first, then submits the enhanced version.
+          </p>
         </form>
       </div>
 
