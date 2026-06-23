@@ -26,6 +26,8 @@ export default function CoolFindsSubmit() {
   const [submitted, setSubmitted] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, message: '' });
+  const [showProgressModal, setShowProgressModal] = useState(false);
 
   // Simplified form — users only submit: Title, Basic Story, Photos, Where Found
   // AI auto-generates: Category, Tags, Era, Object Type, SEO, Related Stories, Enhanced Content
@@ -70,16 +72,22 @@ export default function CoolFindsSubmit() {
   const handlePhotoUpload = async (files) => {
     if (!files || files.length === 0) return;
     setUploadingPhotos(true);
+    setShowProgressModal(true);
+    setUploadProgress({ current: 0, total: files.length, message: 'Starting upload...' });
     try {
       const uploaded = [];
-      for (const file of files) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      for (let i = 0; i < files.length; i++) {
+        setUploadProgress({ current: i + 1, total: files.length, message: `Uploading photo ${i + 1} of ${files.length}...` });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: files[i] });
         uploaded.push(file_url);
       }
       setPhotos(prev => [...prev, ...uploaded]);
+      setUploadProgress({ current: files.length, total: files.length, message: 'Upload complete!' });
+      setTimeout(() => setShowProgressModal(false), 1500);
     } catch (e) {
       console.error('Photo upload error:', e);
       alert('Error uploading photos. Please try again.');
+      setShowProgressModal(false);
     } finally {
       setUploadingPhotos(false);
     }
@@ -88,12 +96,17 @@ export default function CoolFindsSubmit() {
   const handleVideoUpload = async (file) => {
     if (!file) return;
     setUploadingVideo(true);
+    setShowProgressModal(true);
+    setUploadProgress({ current: 0, total: 1, message: 'Uploading video...' });
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setVideoUrl(file_url);
+      setUploadProgress({ current: 1, total: 1, message: 'Upload complete!' });
+      setTimeout(() => setShowProgressModal(false), 1500);
     } catch (e) {
       console.error('Video upload error:', e);
       alert('Error uploading video. Please try again.');
+      setShowProgressModal(false);
     } finally {
       setUploadingVideo(false);
     }
@@ -272,23 +285,7 @@ Return JSON with:
           </p>
         </div>
 
-        {/* AI Info Banner */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
-          <div className="flex items-start gap-3">
-            <Wand2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-slate-700">
-              <p className="font-semibold text-purple-800 mb-1">AI-Powered Story Enrichment</p>
-              <p>You only need to provide the basics. After you submit, our AI will automatically:</p>
-              <ul className="mt-1.5 space-y-0.5 text-slate-600">
-                <li>• Assign the best category and tags</li>
-                <li>• Identify the era and object type</li>
-                <li>• Generate SEO title, description, and keywords</li>
-                <li>• Enhance your story with polished writing</li>
-                <li>• Recommend related stories for "You May Also Like"</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
@@ -459,6 +456,38 @@ Return JSON with:
           </p>
         </form>
       </div>
+
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
+                {uploadProgress.current >= uploadProgress.total ? (
+                  <CheckCircle className="w-8 h-8 text-green-500" />
+                ) : (
+                  <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                )}
+              </div>
+              <h3 className="text-xl font-serif font-semibold text-slate-900 mb-2">
+                {uploadProgress.current >= uploadProgress.total ? 'Upload Complete!' : 'Uploading...'}
+              </h3>
+              <p className="text-slate-600 mb-4">{uploadProgress.message}</p>
+              {uploadProgress.total > 0 && (
+                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 transition-all duration-300"
+                    style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                  />
+                </div>
+              )}
+              <p className="text-xs text-slate-400 mt-3">
+                {uploadProgress.current} of {uploadProgress.total} files uploaded
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SharedFooter />
     </div>
