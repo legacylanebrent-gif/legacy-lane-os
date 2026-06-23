@@ -40,6 +40,8 @@ export default function CoolFindsSubmit() {
     author_company_name: '',
     author_email: '',
     author_phone: '',
+    author_id: '',
+    operator_id: null,
     youtube_url: '',
   });
   const [photos, setPhotos] = useState([]);
@@ -52,11 +54,14 @@ export default function CoolFindsSubmit() {
         return;
       }
       setUser(u);
+      const isOperator = u.primary_account_type === 'estate_sale_operator';
       setForm(f => ({
         ...f,
         author_email: u.email || '',
         author_company_name: u.company_name || u.full_name || '',
         author_phone: u.phone || '',
+        author_id: u.id || '',
+        operator_id: isOperator ? u.id : null,
       }));
       setLoading(false);
     }).catch(() => {
@@ -122,6 +127,16 @@ export default function CoolFindsSubmit() {
         status: 'draft',
         submitted_at: new Date().toISOString(),
       });
+
+      // If an operator submitted, ensure they have a company SEO page for cross-linking
+      if (form.operator_id) {
+        try {
+          const existing = await base44.entities.SEOPage.filter({ entity_id: form.operator_id, page_type: 'company' });
+          if (existing.length === 0) {
+            await base44.functions.invoke('generateOperatorSEOProfile', { operator_id: form.operator_id });
+          }
+        } catch (_) {}
+      }
 
       setSubmitted(true);
     } catch (err) {

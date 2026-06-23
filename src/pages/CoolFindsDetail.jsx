@@ -28,6 +28,7 @@ export default function CoolFindsDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [user, setUser] = useState(null);
+  const [companySlug, setCompanySlug] = useState(null);
 
   useEffect(() => {
     loadStory();
@@ -50,6 +51,16 @@ export default function CoolFindsDetail() {
         return;
       }
       setStory(data);
+
+      // If an operator submitted, fetch their company SEO page slug for a profile link
+      if (data.operator_id) {
+        try {
+          const pages = await base44.entities.SEOPage.filter({ entity_id: data.operator_id, page_type: 'company' });
+          if (pages.length > 0 && pages[0].slug) {
+            setCompanySlug(pages[0].slug);
+          }
+        } catch (_) {}
+      }
 
       // Increment views
       try {
@@ -127,9 +138,15 @@ export default function CoolFindsDetail() {
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-8 pb-8 border-b border-slate-200">
           {story.author_company_name && (
-            <span className="flex items-center gap-1.5">
-              <Building2 className="w-4 h-4" /> {story.author_company_name}
-            </span>
+            companySlug ? (
+              <Link to={`/companies?slug=${companySlug}`} className="flex items-center gap-1.5 text-orange-600 hover:text-orange-700 hover:underline font-medium">
+                <Building2 className="w-4 h-4" /> {story.author_company_name}
+              </Link>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Building2 className="w-4 h-4" /> {story.author_company_name}
+              </span>
+            )
           )}
           {story.published_at && (
             <span className="flex items-center gap-1.5">
@@ -182,6 +199,24 @@ export default function CoolFindsDetail() {
                   <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-48 object-cover hover:scale-105 transition-transform cursor-pointer" />
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Company promotion — shown when an operator submitted */}
+        {companySlug && (
+          <div className="mt-10 p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Building2 className="w-10 h-10 text-orange-600 flex-shrink-0" />
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-lg font-serif font-bold text-slate-900">{story.author_company_name}</h3>
+                <p className="text-sm text-slate-600">This story was shared by {story.author_company_name}. Visit their company profile to see upcoming sales and more.</p>
+              </div>
+              <Link to={`/companies?slug=${companySlug}`}>
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white whitespace-nowrap">
+                  <Building2 className="w-4 h-4 mr-2" /> View Company Profile
+                </Button>
+              </Link>
             </div>
           </div>
         )}

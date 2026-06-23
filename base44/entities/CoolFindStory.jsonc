@@ -29,11 +29,15 @@
     },
     "author_company_name": {
       "type": "string",
-      "description": "Estate sale company that submitted the story"
+      "description": "Name of the submitter or estate sale company"
     },
     "author_id": {
       "type": "string",
       "description": "User ID of the submitter"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Operator (Estate Sale Company Owner) user ID \u2014 set when an operator submits, used to link the story to their company profile for SEO and promotion"
     },
     "author_email": {
       "type": "string",
