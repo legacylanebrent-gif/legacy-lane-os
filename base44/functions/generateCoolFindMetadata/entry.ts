@@ -42,6 +42,13 @@ Deno.serve(async (req) => {
 
 A user has submitted a story with minimal information. Your job is to analyze it and generate rich metadata to make it a compelling, discoverable blog post.
 
+IMPORTANT MODERATION RULES:
+- Remove ALL phone numbers, email addresses, website URLs, and direct contact links from the story content.
+- Remove any mentions of personal contact information (addresses, social media handles, etc.).
+- Company names are acceptable (e.g., "Johnson Estate Sales"), but NO direct contact details.
+- General calls to action like "comment below" or "reach out" are fine, but NOT with specific contact info.
+- If the story contains contact info, rewrite those sentences to remove the contact details while keeping the story intact.
+
 SUBMITTED INFORMATION:
 Title: "${title}"
 Basic Story: "${story_content.substring(0, 3000)}"
@@ -78,7 +85,7 @@ Generate a JSON object with:
 6. seo_title: an SEO-optimized page title (max 60 chars, include the key discovery term)
 7. seo_description: an SEO meta description (max 160 chars)
 8. seo_keywords: 5-10 SEO keywords for search engines
-9. ai_enhanced_content: an enhanced, well-structured version of the story with better flow, an engaging opening hook, and clear paragraphs. Keep the original facts and tone but make it read like a polished blog post. Use markdown formatting. Do NOT invent facts that aren't in the original story — enhance the writing, not the content.
+9. ai_enhanced_content: an enhanced, well-structured version of the story with better flow, an engaging opening hook, and clear paragraphs. Keep the original facts and tone but make it read like a polished blog post. Use markdown formatting. Do NOT invent facts that aren't in the original story — enhance the writing, not the content. REMOVE ALL phone numbers, emails, URLs, and direct contact information. Company names are OK, but no personal contact details.
 10. related_story_ids: array of up to 3 existing story IDs that are topically related (by category, tags, object_type, or era). Only include IDs from the existing stories list. Empty array if none are related.`;
 
     const result = await base44.integrations.Core.InvokeLLM({
