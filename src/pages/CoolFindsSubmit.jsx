@@ -177,7 +177,7 @@ export default function CoolFindsSubmit() {
           </div>
           <h1 className="text-3xl font-serif font-bold text-slate-900 mb-2">Submit Your Story</h1>
           <p className="text-slate-600">
-            Share a cool find, crazy story, or hidden treasure from your estate sales. Your submission will be reviewed by our team before publishing.
+            Share a cool find, crazy story, or hidden treasure from your estate sale or collection. Your submission will be reviewed by our team before publishing.
           </p>
         </div>
 
