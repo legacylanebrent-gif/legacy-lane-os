@@ -242,11 +242,11 @@ export default function EstateSaleCompanyDirectory() {
           <Badge className={`mt-2 text-xs ${featured ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-cyan-100 text-cyan-800 border-cyan-200'}`}>
             ✓ EstateSalen Member
           </Badge>
-        ) : (
+        ) : currentUser?.primary_account_type === 'estate_sale_operator' ? (
           <Button size="sm" className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7" onClick={() => setClaimingOperator(op)}>
             Claim My Business
           </Button>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
