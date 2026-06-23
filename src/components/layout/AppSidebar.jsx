@@ -60,6 +60,7 @@ export const ALL_NAV_ITEMS = [
   // ── EDUCATION ───────────────────────────────────────────────────────────────
   { page: 'Courses',                label: 'Browse Courses',         icon: GraduationCap,   group: 'Education' },
   { page: 'MyCourses',              label: 'My Courses',             icon: GraduationCap,   group: 'Education' },
+  { page: 'TrainingBlog',           label: 'Training Blog',           icon: FileText,        group: 'Education' },
 
   // ── FINANCE ─────────────────────────────────────────────────────────────────
   { page: 'IncomeTracker',          label: 'Income Tracker',         icon: TrendingUp,      group: 'Finance' },
