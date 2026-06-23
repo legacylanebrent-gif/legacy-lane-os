@@ -155,6 +155,7 @@ import CoolFindsBlog from './pages/CoolFindsBlog';
 import CoolFindsSubmit from './pages/CoolFindsSubmit';
 import CoolFindsDetail from './pages/CoolFindsDetail';
 import AdminCoolFinds from './pages/AdminCoolFinds';
+import EstateSaleCompanyDirectory from './pages/EstateSaleCompanyDirectory';
 import CommunityEvents from './pages/CommunityEvents';
 import CommunityEventSubmit from './pages/CommunityEventSubmit';
 import AdminCommunityEvents from './pages/AdminCommunityEvents';

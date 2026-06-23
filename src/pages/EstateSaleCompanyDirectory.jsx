@@ -166,6 +166,18 @@ export default function EstateSaleCompanyDirectory() {
   const eliteOperators = useMemo(() => displayedOperators.filter(isElite), [displayedOperators]);
   const otherPaidOperators = useMemo(() => displayedOperators.filter(op => isPaidSubscriber(op) && !isElite(op)), [displayedOperators]);
   const unpaidOperators = useMemo(() => displayedOperators.filter(op => !isPaidSubscriber(op)), [displayedOperators]);
+  const filteredStates = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return US_STATES.filter(s => stateCounts[s.code]);
+    return US_STATES.filter(s =>
+      stateCounts[s.code] && (s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q))
+    );
+  }, [stateCounts, searchQuery]);
+  const stateName = useMemo(() => US_STATES.find(s => s.code === selectedState)?.name || selectedState, [selectedState]);
+  const stateCenter = useMemo(() => STATE_CENTERS[selectedState] || [39.8, -98.6], [selectedState]);
+  const mapZoom = useMemo(() => selectedState === 'AK' || selectedState === 'CA' || selectedState === 'TX' ? 5 : 7, [selectedState]);
+  const mapMarkers = useMemo(() => displayedOperators.filter(op => op.lat && op.lng).slice(0, 200), [displayedOperators]);
+  const totalCount = Object.values(stateCounts).reduce((s, c) => s + c, 0);
 
   const [claimingOperator, setClaimingOperator] = useState(null);
 
@@ -215,13 +227,6 @@ export default function EstateSaleCompanyDirectory() {
       </CardContent>
     </Card>
   );
-
-  const totalCount = Object.values(stateCounts).reduce((s, c) => s + c, 0);
-
-  const stateName = useMemo(() => US_STATES.find(s => s.code === selectedState)?.name || selectedState, [selectedState]);
-  const stateCenter = useMemo(() => STATE_CENTERS[selectedState] || [39.8, -98.6], [selectedState]);
-  const mapZoom = useMemo(() => selectedState === 'AK' || selectedState === 'CA' || selectedState === 'TX' ? 5 : 7, [selectedState]);
-  const mapMarkers = useMemo(() => displayedOperators.filter(op => op.lat && op.lng).slice(0, 200), [displayedOperators]);
 
   if (selectedState) {
 
@@ -370,15 +375,6 @@ export default function EstateSaleCompanyDirectory() {
       </div>
     );
   }
-
-  // State selection view
-  const filteredStates = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return US_STATES.filter(s => stateCounts[s.code]);
-    return US_STATES.filter(s =>
-      stateCounts[s.code] && (s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q))
-    );
-  }, [stateCounts, searchQuery]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
