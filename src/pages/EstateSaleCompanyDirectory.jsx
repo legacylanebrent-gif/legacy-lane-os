@@ -237,7 +237,6 @@ export default function EstateSaleCompanyDirectory() {
               <Globe className="w-3 h-3" /> Website
             </a>
           )}
-          {op.member_since && <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>}
         </div>
         {isEstateSalenSubscriber(op) ? (
           <Badge className={`mt-2 text-xs ${featured ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-cyan-100 text-cyan-800 border-cyan-200'}`}>
