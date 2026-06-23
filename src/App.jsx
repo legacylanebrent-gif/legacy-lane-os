@@ -150,6 +150,7 @@ import MyCalendar from './pages/MyCalendar';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './lib/ScrollToTop';
 import TrainingBlog from './pages/TrainingBlog';
+import TrainingArticleDetail from './pages/TrainingArticleDetail';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -257,6 +258,7 @@ const AuthenticatedApp = () => {
       <Route path="/ReferCompany" element={<LayoutWrapper currentPageName="ReferCompany"><ReferCompany /></LayoutWrapper>} />
       <Route path="/MyCalendar" element={<LayoutWrapper currentPageName="MyCalendar"><MyCalendar /></LayoutWrapper>} />
       <Route path="/TrainingBlog" element={<LayoutWrapper currentPageName="TrainingBlog"><TrainingBlog /></LayoutWrapper>} />
+      <Route path="/training/:slug" element={<LayoutWrapper currentPageName="TrainingArticleDetail"><TrainingArticleDetail /></LayoutWrapper>} />
       <Route path="/LandingPageSaleLeak" element={<LandingPageSaleLeak />} />
       <Route path="/LandingPageProfitLevers" element={<LandingPageProfitLevers />} />
       <Route path="/LandingPageScaleReady" element={<LandingPageScaleReady />} />
