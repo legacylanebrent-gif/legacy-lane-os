@@ -461,7 +461,7 @@ export default function AICoachPanel({ user, onClose, currentPathname }) {
         )}
 
         {/* Starter prompts */}
-        {showStarters && messages.length === 0 && !screenActions && starters.length > 0 && (
+        {showStarters && messages.length === 0 && !screenActions && starters && starters.length > 0 && (
           <div className="space-y-1.5 mt-2">
             <p className="text-xs text-slate-500 font-medium px-0.5">Try asking:</p>
             <div className={activeMode.key === 'business_coaching' ? 'grid grid-cols-2 gap-1.5' : 'space-y-1.5'}>

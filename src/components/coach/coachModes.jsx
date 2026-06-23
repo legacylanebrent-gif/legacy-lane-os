@@ -444,6 +444,14 @@ export const MODE_STARTERS = {
     'Build a plan to contact divorce attorneys',
     'Build a plan to contact financial planners',
   ],
+  general_assistant: [
+    'How do I get more estate sale leads?',
+    'What should I post on social media this week?',
+    'Help me write a blog post for my territory',
+    'How do I build referral partnerships with real estate agents?',
+    'What\'s the best way to promote my next sale?',
+    'How do I price items for an estate sale?',
+  ],
   monthly_business_review: [
     'Review my March numbers: 3 sales, $65K revenue, 8 leads, 2 referral partners contacted',
     'Help me analyze last month: 5 sales completed, $120K revenue, 15 new leads, 10 emails sent',
