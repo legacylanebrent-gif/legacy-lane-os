@@ -412,6 +412,7 @@ const AuthenticatedApp = () => {
       <Route path="/CoolFindsSubmit" element={<CoolFindsSubmit />} />
       <Route path="/cool-finds/:slug" element={<CoolFindsDetail />} />
       <Route path="/AdminCoolFinds" element={<LayoutWrapper currentPageName="AdminCoolFinds"><AdminCoolFinds /></LayoutWrapper>} />
+      <Route path="/EstateSaleCompanyDirectory" element={<EstateSaleCompanyDirectory />} />
 
       {/* ── Community Events (Flea Markets & Antique Shows) ── */}
       <Route path="/CommunityEvents" element={<CommunityEvents />} />

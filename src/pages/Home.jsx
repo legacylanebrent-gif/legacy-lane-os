@@ -1546,10 +1546,35 @@ export default function Home() {
                                   </p>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
+                              </div>
+                              </div>
+                              </div>
+                              </section>
+
+                              {/* Link to new Public Directory */}
+                              <section className="py-8 px-4 bg-white">
+                              <div className="max-w-7xl mx-auto">
+                              <div className="grid md:grid-cols-1 gap-8">
+                              <Link to="/EstateSaleCompanyDirectory">
+                              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
+                                <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Building2 className="w-10 h-10 text-white" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                                      Browse All Companies
+                                    </h3>
+                                    <p className="text-lg text-indigo-100">
+                                      Search our full directory of estate sale companies
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              </Link>
+                              </div>
+                              </div>
+                              </section>
 
                       {/* Marketplace Feature Section */}
                       <MarketplaceFeatureSection />
