@@ -50,22 +50,24 @@ function cleanEmailFn(record) {
   return isJunkEmail(record.email) ? { ...record, email: '' } : record;
 }
 
+// A company is a real EstateSalen subscriber only if it has an active subscription
+// or has been claimed by a registered EstateSalen user. Scraped package_type /
+// membership_tier fields come from EstateSales.net / EstateSales.org and do NOT
+// represent an EstateSalen subscription.
+function isEstateSalenSubscriber(op) {
+  return op.subscription_status === 'active' || op.subscription_status === 'free_trial' || !!op.claimed_by_user_id;
+}
+
 function isPaidSubscriber(op) {
-  const pkg = (op.package_type || op.membership_tier || '').toLowerCase();
-  return pkg.includes('elite') || pkg.includes('professional') || pkg.includes('growth') || pkg.includes('pro') || pkg.includes('platinum') || pkg.includes('premium');
+  return isEstateSalenSubscriber(op);
 }
 
 function isElite(op) {
-  const pkg = (op.package_type || op.membership_tier || '').toLowerCase();
-  return pkg.includes('elite');
+  return isEstateSalenSubscriber(op);
 }
 
 function tierRank(op) {
-  const pkg = (op.package_type || op.membership_tier || '').toLowerCase();
-  if (pkg.includes('elite')) return 4;
-  if (pkg.includes('professional') || pkg.includes('pro') || pkg.includes('platinum')) return 3;
-  if (pkg.includes('growth') || pkg.includes('premium')) return 2;
-  if (pkg.includes('starter') || pkg.includes('basic')) return 1;
+  if (isEstateSalenSubscriber(op)) return 4;
   return 0;
 }
 
@@ -164,7 +166,6 @@ export default function EstateSaleCompanyDirectory() {
   }, [operators, selectedState, searchQuery]);
 
   const eliteOperators = useMemo(() => displayedOperators.filter(isElite), [displayedOperators]);
-  const otherPaidOperators = useMemo(() => displayedOperators.filter(op => isPaidSubscriber(op) && !isElite(op)), [displayedOperators]);
   const unpaidOperators = useMemo(() => displayedOperators.filter(op => !isPaidSubscriber(op)), [displayedOperators]);
   const filteredStates = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -215,9 +216,9 @@ export default function EstateSaleCompanyDirectory() {
           )}
           {op.member_since && <p className="text-xs text-slate-400">Member since {stripHtml(op.member_since)}</p>}
         </div>
-        {op.package_type || op.membership_tier ? (
-          <Badge className={`mt-2 text-xs ${featured ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-orange-100 text-orange-700 border-orange-200'}`}>
-            {stripHtml(op.package_type || op.membership_tier)}
+        {isEstateSalenSubscriber(op) ? (
+          <Badge className={`mt-2 text-xs ${featured ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-cyan-100 text-cyan-800 border-cyan-200'}`}>
+            ✓ EstateSalen Member
           </Badge>
         ) : (
           <Button size="sm" className="mt-3 w-full text-xs bg-orange-500 hover:bg-orange-600 text-white h-7" onClick={() => setClaimingOperator(op)}>
@@ -305,33 +306,17 @@ export default function EstateSaleCompanyDirectory() {
               </div>
             </section>
 
-            {/* Featured / Elite Section */}
+            {/* Verified EstateSalen Members */}
             {eliteOperators.length > 0 && (
               <section className="py-10 px-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-y border-yellow-200">
                 <div className="max-w-7xl mx-auto">
                   <div className="flex items-center gap-3 mb-6">
                     <Star className="w-6 h-6 text-yellow-500 fill-yellow-400" />
-                    <h2 className="text-2xl font-serif font-bold text-slate-900">Featured Companies</h2>
-                    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Elite Level</Badge>
+                    <h2 className="text-2xl font-serif font-bold text-slate-900">Verified EstateSalen Members</h2>
+                    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Active Subscribers</Badge>
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {eliteOperators.map(op => <OperatorCard key={op.id} op={op} featured />)}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Other Paid Subscribers */}
-            {otherPaidOperators.length > 0 && (
-              <section className="py-10 px-4 bg-gradient-to-br from-cyan-50 to-blue-50 border-y border-cyan-200">
-                <div className="max-w-7xl mx-auto">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Star className="w-5 h-5 text-cyan-500 fill-cyan-400" />
-                    <h2 className="text-xl font-serif font-bold text-slate-900">Premium Companies</h2>
-                    <Badge className="bg-cyan-100 text-cyan-800 border-cyan-300">Professional/Growth</Badge>
-                  </div>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {otherPaidOperators.map(op => <OperatorCard key={op.id} op={op} featured={false} />)}
                   </div>
                 </div>
               </section>
@@ -344,10 +329,10 @@ export default function EstateSaleCompanyDirectory() {
                   <h2 className="text-2xl font-serif font-bold text-slate-900">
                     All Companies in {stateName}
                   </h2>
-                  <Badge variant="outline" className="text-sm">{displayedOperators.length} total</Badge>
+                  <Badge variant="outline" className="text-sm">{unpaidOperators.length} unclaimed</Badge>
                 </div>
 
-                {displayedOperators.length === 0 ? (
+                {unpaidOperators.length === 0 ? (
                   <div className="text-center py-20 text-slate-400">
                     <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>No companies found{searchQuery ? ` for "${searchQuery}"` : ''}.</p>
