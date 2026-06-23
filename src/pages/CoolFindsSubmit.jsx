@@ -244,10 +244,11 @@ export default function CoolFindsSubmit() {
               <h3 className="font-semibold text-slate-800">Contact Information</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Company Name</Label>
+                  <Label>Your Name or Company Name</Label>
                   <Input
                     value={form.author_company_name}
                     onChange={(e) => setForm({ ...form, author_company_name: e.target.value })}
+                    placeholder="John Smith or ABC Estate Sales"
                     className="mt-1"
                   />
                 </div>
