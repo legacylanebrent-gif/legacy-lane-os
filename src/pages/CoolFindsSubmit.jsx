@@ -303,6 +303,11 @@ Return JSON with:
 
               <div>
                 <Label>Your Story *</Label>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-2">
+                  <p className="text-xs text-purple-800">
+                    <strong>On your smart phone?</strong> Click inside the box below and press the Microphone icon and tell the story. It will be dictated in the box and you can either edit or use AI to clean it up.
+                  </p>
+                </div>
                 <div className="mt-1 flex flex-col lg:flex-row gap-4">
                   <div className="flex-1">
                     <Textarea
