@@ -246,12 +246,17 @@ export default function EstateSaleCompanyDirectory() {
               <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">{selectedState}</span>
               </div>
-              <div>
+              <div className="flex-1">
                 <h1 className="text-4xl font-serif font-bold text-white">{stateName} Estate Sale Companies</h1>
                 <p className="text-slate-400 text-sm">
                   {loading ? 'Loading...' : `${displayedOperators.length.toLocaleString()} companies in directory`}
                 </p>
               </div>
+              <Link to="/OperatorPackages">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 h-11 text-base whitespace-nowrap">
+                  + Add My Business
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
