@@ -139,6 +139,11 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                         <Send className="w-4 h-4 mr-2" /> Refer a Company
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/CommunityEventSubmit" className="cursor-pointer">
+                        <CalendarDays className="w-4 h-4 mr-2" /> Submit Community Event
+                      </Link>
+                    </DropdownMenuItem>
                     {user?.primary_account_type === 'real_estate_agent' && (
                       <>
                         <DropdownMenuSeparator />
