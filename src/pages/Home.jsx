@@ -1505,10 +1505,10 @@ export default function Home() {
                         </div>
                       </section>
 
-                      {/* Browse by State & Estate Sale Request CTAs - Moved below Cool Finds */}
+                      {/* Browse by State, Estate Sale Request & Company Directory CTAs - Combined in one row */}
                       <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
                         <div className="max-w-7xl mx-auto">
-                          <div className="grid md:grid-cols-2 gap-8">
+                          <div className="grid md:grid-cols-3 gap-6">
                             {/* Browse by State */}
                             <Link to={createPageUrl('SearchByState')}>
                               <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
@@ -1546,16 +1546,10 @@ export default function Home() {
                                   </p>
                                 </div>
                               </div>
-                              </div>
-                              </div>
-                              </div>
-                              </section>
+                            </div>
 
-                              {/* Link to new Public Directory */}
-                              <section className="py-8 px-4 bg-white">
-                              <div className="max-w-7xl mx-auto">
-                              <div className="grid md:grid-cols-1 gap-8">
-                              <Link to="/EstateSaleCompanyDirectory">
+                            {/* Browse All Companies */}
+                            <Link to="/EstateSaleCompanyDirectory">
                               <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
                                 <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
                                   <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1571,10 +1565,10 @@ export default function Home() {
                                   </div>
                                 </div>
                               </div>
-                              </Link>
-                              </div>
-                              </div>
-                              </section>
+                            </Link>
+                          </div>
+                        </div>
+                      </section>
 
                       {/* Marketplace Feature Section */}
                       <MarketplaceFeatureSection />
