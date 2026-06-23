@@ -29,6 +29,16 @@
       "default": true,
       "description": "Opt into direct emails from favorited/followed companies (Elite companies, once per week max)"
     },
+    "cool_finds_blog_email": {
+      "type": "boolean",
+      "default": false,
+      "description": "Opt into weekly email digest of new Cool Finds blog posts"
+    },
+    "cool_finds_blog_in_app": {
+      "type": "boolean",
+      "default": false,
+      "description": "Opt into in-app notifications for new Cool Finds blog posts"
+    },
     "notification_radius_miles": {
       "type": "number",
       "default": 25,

@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, MapPin, Building2, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { Mail, MapPin, Building2, Save, CheckCircle2, Loader2, Bell } from 'lucide-react';
 
 const RADIUS_OPTIONS = [10, 25, 50, 100];
 
@@ -40,6 +40,8 @@ export default function EmailPreferencesTab({ user, compact = false }) {
           estate_salen_marketing: prefs.estate_salen_marketing,
           local_sale_notifications: prefs.local_sale_notifications,
           company_direct_emails: prefs.company_direct_emails,
+          cool_finds_blog_email: prefs.cool_finds_blog_email,
+          cool_finds_blog_in_app: prefs.cool_finds_blog_in_app,
           notification_radius_miles: prefs.notification_radius_miles,
           location_city: prefs.location_city,
           location_state: prefs.location_state,
@@ -161,6 +163,40 @@ export default function EmailPreferencesTab({ user, compact = false }) {
             <Switch
               checked={prefs.company_direct_emails}
               onCheckedChange={(v) => setPrefs({ ...prefs, company_direct_emails: v })}
+            />
+          </div>
+
+          {/* Cool Finds Blog - Weekly Email Digest */}
+          <div className="flex items-start justify-between p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Mail className="w-5 h-5 text-purple-600 mt-0.5" />
+              <div>
+                <div className="font-medium text-sm">Cool Finds Weekly Email Digest</div>
+                <div className="text-xs text-purple-700 mt-0.5">
+                  Get a weekly email every Monday with all the new cool finds stories from across the country.
+                </div>
+              </div>
+            </div>
+            <Switch
+              checked={prefs.cool_finds_blog_email || false}
+              onCheckedChange={(v) => setPrefs({ ...prefs, cool_finds_blog_email: v })}
+            />
+          </div>
+
+          {/* Cool Finds Blog - In-App Notifications */}
+          <div className="flex items-start justify-between p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Bell className="w-5 h-5 text-purple-600 mt-0.5" />
+              <div>
+                <div className="font-medium text-sm">Cool Finds In-App Notifications</div>
+                <div className="text-xs text-purple-700 mt-0.5">
+                  Get notified in your dashboard whenever a new cool finds story is published.
+                </div>
+              </div>
+            </div>
+            <Switch
+              checked={prefs.cool_finds_blog_in_app || false}
+              onCheckedChange={(v) => setPrefs({ ...prefs, cool_finds_blog_in_app: v })}
             />
           </div>
         </CardContent>
