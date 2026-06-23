@@ -72,7 +72,7 @@ export default function CoolFindsBlog() {
             Cool Finds, Crazy Stories & Hidden Treasures
           </h1>
           <p className="text-lg text-purple-100 max-w-2xl mx-auto mb-8">
-            Real discoveries from estate sale companies across the country — from rare antiques to unbelievable stories behind the items.
+            Real discoveries from estate sale companies and users across the country — from rare antiques to unbelievable stories behind the items. We're building great stories here ... submit yours today!
           </p>
           <Link to="/CoolFindsSubmit">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
