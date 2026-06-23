@@ -253,17 +253,6 @@ export default function EstateSaleCompanyDirectory() {
                 </p>
               </div>
             </div>
-            {!loading && (
-              <div className="mt-6 max-w-xl relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  placeholder="Search by county, city, or business name..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 text-base bg-white/95 border-0 shadow-xl"
-                />
-              </div>
-            )}
           </div>
         </section>
 
@@ -300,6 +289,22 @@ export default function EstateSaleCompanyDirectory() {
                 </div>
               </section>
             )}
+
+            {/* Search Filter */}
+            <section className="py-6 px-4 bg-white border-b border-slate-200">
+              <div className="max-w-7xl mx-auto">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    placeholder="Search by county, city, or business name..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-9 h-11 bg-white border shadow"
+                  />
+                </div>
+                <p className="text-slate-500 text-xs mt-2">{displayedOperators.length} companies found</p>
+              </div>
+            </section>
 
             {/* Verified EstateSalen Members */}
             {eliteOperators.length > 0 && (
