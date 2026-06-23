@@ -92,7 +92,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/CoolFindsSubmit" className="cursor-pointer">
-                        <PenSquare className="w-4 h-4 mr-2" /> Submit a Story
+                        <PenSquare className="w-4 h-4 mr-2" /> Submit Cool Find
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

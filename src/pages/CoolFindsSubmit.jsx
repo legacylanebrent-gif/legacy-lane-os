@@ -20,7 +20,7 @@ const CATEGORIES = [
 
 export default function CoolFindsSubmit() {
   useSEO({
-    title: 'Submit Your Story | Cool Finds Blog',
+    title: 'Submit Cool Find | Cool Finds Blog',
     description: 'Share your cool finds, crazy stories, or hidden treasures with the EstateSalen community.',
   });
 
