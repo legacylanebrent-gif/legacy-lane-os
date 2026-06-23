@@ -17,7 +17,7 @@ import {
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, HelpCircle,
   Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home, Search,
-  BookOpen, PenSquare
+  BookOpen
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -81,18 +81,8 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/blog" className="cursor-pointer">
-                        <BookOpen className="w-4 h-4 mr-2" /> Blog
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link to="/CoolFindsBlog" className="cursor-pointer">
                         <Sparkles className="w-4 h-4 mr-2" /> Cool Finds Blog
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/CoolFindsSubmit" className="cursor-pointer">
-                        <PenSquare className="w-4 h-4 mr-2" /> Submit Cool Find
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

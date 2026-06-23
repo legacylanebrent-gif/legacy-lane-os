@@ -75,8 +75,8 @@ export default function CoolFindsBlog() {
             Real discoveries from estate sale companies across the country — from rare antiques to unbelievable stories behind the items.
           </p>
           <Link to="/CoolFindsSubmit">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
-              <PenSquare className="w-4 h-4 mr-2" /> Submit Your Story
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all">
+              <Sparkles className="w-5 h-5 mr-2" /> Share Your Discovery — Submit Your Story
             </Button>
           </Link>
         </div>
