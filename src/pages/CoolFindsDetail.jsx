@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Sparkles, Eye, Calendar, Building2 } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
+import CoolFindsComments from '@/components/coolfinds/CoolFindsComments';
 import { useSEO } from '@/hooks/useSEO';
 
 const CATEGORY_LABELS = {
@@ -231,6 +232,9 @@ export default function CoolFindsDetail() {
             </Button>
           </Link>
         </div>
+
+        {/* Comments section — registered users only */}
+        <CoolFindsComments storyId={story.id} user={user} />
       </article>
 
       <SharedFooter />

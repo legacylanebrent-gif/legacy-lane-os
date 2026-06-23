@@ -1,0 +1,82 @@
+{
+  "name": "CoolFindComment",
+  "type": "object",
+  "properties": {
+    "story_id": {
+      "type": "string",
+      "description": "Reference to the CoolFindStory this comment belongs to"
+    },
+    "author_id": {
+      "type": "string",
+      "description": "User ID of the commenter"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the commenter at time of posting"
+    },
+    "content": {
+      "type": "string",
+      "description": "The comment text"
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "Optional reference to a parent comment for threaded replies"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "visible",
+        "flagged",
+        "hidden",
+        "removed"
+      ],
+      "default": "visible",
+      "description": "Moderation status \u2014 flagged = pending review, hidden = auto-hidden by spam filter, removed = deleted by moderator"
+    },
+    "spam_score": {
+      "type": "number",
+      "default": 0,
+      "description": "AI-detected spam likelihood (0-100)"
+    },
+    "spam_category": {
+      "type": "string",
+      "description": "Category of spam if detected (commercial_solicit, phishing, off_platform_contact, generic_spam, clean)"
+    },
+    "toxicity_score": {
+      "type": "number",
+      "default": 0,
+      "description": "AI-detected toxicity/negativity level (0-100)"
+    },
+    "toxicity_category": {
+      "type": "string",
+      "description": "Category of toxicity if detected (harassment, hate_speech, personal_attack, excessive_negativity, clean)"
+    },
+    "flagged_by": {
+      "type": "string",
+      "description": "What flagged this comment (system, moderator, agent)"
+    },
+    "moderation_action": {
+      "type": "string",
+      "description": "Action taken by moderator (approved, removed, warned_user, banned_user)"
+    },
+    "moderated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a moderator took action"
+    },
+    "moderated_by": {
+      "type": "string",
+      "description": "User ID of the moderator or agent name"
+    },
+    "moderation_notes": {
+      "type": "string",
+      "description": "Internal notes from the moderation agent"
+    }
+  },
+  "required": [
+    "story_id",
+    "author_id",
+    "author_name",
+    "content"
+  ]
+}
