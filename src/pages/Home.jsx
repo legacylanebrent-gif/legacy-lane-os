@@ -28,6 +28,7 @@ import RecordPurchaseModal from '@/components/purchase/RecordPurchaseModal';
 import LocalVendorSection from '@/components/home/LocalVendorSection';
 import MarketplaceFeatureSection from '@/components/home/MarketplaceFeatureSection';
 import RecentBlogPosts from '@/components/home/RecentBlogPosts';
+import CoolFindsCommunitySection from '@/components/home/CoolFindsCommunitySection';
 import SharedFooter from '@/components/layout/SharedFooter';
 import { t } from '@/components/terminology';
 import { 
@@ -1552,6 +1553,9 @@ export default function Home() {
 
       {/* Recent Blog Posts */}
       <RecentBlogPosts />
+
+      {/* Cool Finds & Community Events */}
+      <CoolFindsCommunitySection />
 
       {/* Sign Up CTAs */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-slate-100">
