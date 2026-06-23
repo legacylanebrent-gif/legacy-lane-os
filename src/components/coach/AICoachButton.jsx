@@ -4,11 +4,10 @@ import { Brain } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import AICoachPanel from './AICoachPanel';
 
-const OPERATOR_ROLES = [
+const ALLOWED_OPERATOR_ROLES = [
   'estate_sale_operator', 'team_admin', 'team_member', 'team_marketer',
-  'real_estate_agent', 'investor', 'coach',
-  'super_admin', 'platform_ops', 'admin',
 ];
+const ALLOWED_TIERS = ['growth', 'professional', 'elite'];
 
 export default function AICoachButton() {
   const [open, setOpen] = useState(false);
@@ -17,7 +16,10 @@ export default function AICoachButton() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (u && OPERATOR_ROLES.includes(u.primary_account_type || u.role)) {
+      if (!u) return;
+      const role = u.primary_account_type || u.role;
+      const tier = u.subscription_tier || 'starter';
+      if (ALLOWED_OPERATOR_ROLES.includes(role) && ALLOWED_TIERS.includes(tier)) {
         setUser(u);
       }
     }).catch(() => {});

@@ -118,6 +118,26 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // ── AI Coach is reserved for estate sale operators on the top 3 tiers (growth, professional, elite) ──
+  const ALLOWED_OPERATOR_ROLES = ['estate_sale_operator', 'team_admin', 'team_member', 'team_marketer'];
+  const ALLOWED_TIERS = ['growth', 'professional', 'elite'];
+  const userRole = user.primary_account_type || user.role;
+  const userTier = user.subscription_tier || 'starter';
+
+  if (!ALLOWED_OPERATOR_ROLES.includes(userRole)) {
+    return Response.json({
+      error: 'access_denied',
+      message: 'AI Coach is reserved for Estate Sale Operators. Upgrade to an operator plan to access this feature.',
+    }, { status: 403 });
+  }
+
+  if (!ALLOWED_TIERS.includes(userTier)) {
+    return Response.json({
+      error: 'access_denied',
+      message: 'AI Coach requires a Growth, Professional, or Elite plan. Upgrade your subscription to access the AI Coach.',
+    }, { status: 403 });
+  }
+
   const { messages, model, ai_mode, voice_preferences } = await req.json();
   // NOTE: any "context" from the frontend is intentionally discarded here.
   // All context is fetched below using the authenticated user.id.
