@@ -220,6 +220,7 @@ export default function AdminMasterOperatorDirectory() {
                     Processed {rebuildResult.stats?.totalSourceRecords ?? 0} source records across {rebuildResult.calls} batches.
                     {' '}Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}
                     {' '}({rebuildResult.stats?.phoneMatches ?? 0} phone merges, {rebuildResult.stats?.nameStateMatches ?? 0} name+state merges).
+                    {' '}Synced {rebuildResult.stats?.subscribersSynced ?? 0} subscriber(s).
                   </p>
                 </div>
               </div>

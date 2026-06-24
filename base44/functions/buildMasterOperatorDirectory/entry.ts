@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     if (cursor.phase === 'merge') {
       while (Date.now() - startedAt < TIME_BUDGET_MS) {
         if (cursor.sourceIndex >= SOURCE_ENTITIES.length) {
-          cursor.phase = 'done';
+          cursor.phase = 'sync_subscribers';
           break;
         }
         const sourceName = SOURCE_ENTITIES[cursor.sourceIndex];
@@ -122,6 +122,61 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── Phase: sync subscriber status from registered operator Users ──
+    // Real EstateSalen subscribers (Users with primary_account_type
+    // 'estate_sale_operator') are not in the scraped sources, so we cross-
+    // reference them against the master directory by normalized phone and
+    // stamp subscription_status='active' + claimed_by_user_id on matches.
+    if (cursor.phase === 'sync_subscribers') {
+      try {
+        const users = await base44.asServiceRole.entities.User.list('-created_date', 500, 0);
+        const operators = users.filter(u => u.primary_account_type === 'estate_sale_operator' && u.phone);
+        const phoneToUser = {};
+        for (const u of operators) {
+          const p = normalizePhone(u.phone);
+          if (p) phoneToUser[p] = u;
+        }
+        const phones = Object.keys(phoneToUser);
+        let synced = 0;
+        if (phones.length > 0) {
+          // Match by phone_normalized first (populated on freshly-built records).
+          const byNorm = await master.filter({ phone_normalized: { $in: phones } }, '-created_date', 500, 0);
+          // Fallback: older records may lack phone_normalized, so also query by
+          // common raw phone formats derived from the digits.
+          const rawVariants = [];
+          for (const digits of phones) {
+            if (digits.length === 10) {
+              rawVariants.push(digits, `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`, `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`, `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6)}`);
+            }
+          }
+          const byRaw = rawVariants.length > 0
+            ? await master.filter({ phone: { $in: rawVariants } }, '-created_date', 500, 0)
+            : [];
+          // Merge, dedup by id, resolve the matching user.
+          const seen = new Set();
+          const toUpdate = [];
+          for (const m of [...byNorm, ...byRaw]) {
+            if (seen.has(m.id)) continue;
+            seen.add(m.id);
+            const norm = m.phone_normalized || normalizePhone(m.phone);
+            const u = phoneToUser[norm];
+            if (u) {
+              toUpdate.push({ id: m.id, subscription_status: 'active', claimed_by_user_id: u.id, phone_normalized: norm });
+            }
+          }
+          for (let i = 0; i < toUpdate.length; i += 500) {
+            await master.bulkUpdate(toUpdate.slice(i, i + 500));
+          }
+          synced = toUpdate.length;
+        }
+        cursor.stats.subscribersSynced = synced;
+      } catch (e) {
+        console.error('subscriber sync error:', e.message);
+        cursor.stats.subscriberSyncError = e.message;
+      }
+      cursor.phase = 'done';
+    }
+
     const done = cursor.phase === 'done';
     return Response.json({
       done,
@@ -143,7 +198,8 @@ function freshStats() {
     phoneMatches: 0,
     nameStateMatches: 0,
     created: 0,
-    updated: 0
+    updated: 0,
+    subscribersSynced: 0
   };
 }
 
@@ -173,6 +229,26 @@ function firstNonEmpty(...vals) {
     if (v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) return v;
   }
   return null;
+}
+
+// Pick the most "active" subscription status across merged source records.
+const SUBSCRIPTION_RANK = {
+  active: 5,
+  free_trial: 4,
+  free_lead_access: 3,
+  expired: 2,
+  cancelled: 1,
+  none: 0
+};
+function bestSubscriptionStatus(records) {
+  let best = 'none';
+  let bestRank = -1;
+  for (const r of records) {
+    const status = r.subscription_status || 'none';
+    const rank = SUBSCRIPTION_RANK[status] ?? 0;
+    if (rank > bestRank) { best = status; bestRank = rank; }
+  }
+  return best;
 }
 
 function mergeArrays(...arrs) {
@@ -242,6 +318,8 @@ function buildFields(records, existing) {
     logo_image_url: firstNonEmpty(...allRecs.map(r => r.logo_image_url)),
     profile_url: firstNonEmpty(...allRecs.map(r => r.profile_url)),
     company_id: firstNonEmpty(...allRecs.map(r => r.company_id)),
+    subscription_status: bestSubscriptionStatus(allRecs),
+    claimed_by_user_id: firstNonEmpty(...allRecs.map(r => r.claimed_by_user_id)),
     enrichment_status: firstNonEmpty(...allRecs.map(r => r.enrichment_status)) || 'not_started',
     lead_stage: firstNonEmpty(...allRecs.map(r => r.lead_stage)) || 'future_operator',
     audience_sync_status: firstNonEmpty(...allRecs.map(r => r.audience_sync_status)) || 'not_synced',

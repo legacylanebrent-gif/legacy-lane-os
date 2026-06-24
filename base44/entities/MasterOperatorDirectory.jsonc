@@ -145,6 +145,23 @@
       "type": "string",
       "description": "Estatesales.org company ID"
     },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "free_lead_access",
+        "free_trial",
+        "active",
+        "expired",
+        "cancelled"
+      ],
+      "default": "none",
+      "description": "Best subscription status across merged source records (from FutureEstateOperator)"
+    },
+    "claimed_by_user_id": {
+      "type": "string",
+      "description": "EstateSalen User ID of the person who claimed this listing (from FutureEstateOperator)"
+    },
     "enrichment_status": {
       "type": "string",
       "enum": [
