@@ -48,8 +48,10 @@ Deno.serve(async (req) => {
   const started = Date.now();
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user || user.role !== 'admin') {
+    // Scheduled automations run without a user context — allow them to proceed.
+    // For manual/HTTP invocations, require admin.
+    const user = await base44.auth.me().catch(() => null);
+    if (user && user.role !== 'admin') {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
     const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
