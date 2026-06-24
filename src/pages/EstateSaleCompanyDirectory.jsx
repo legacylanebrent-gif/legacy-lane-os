@@ -92,55 +92,17 @@ export default function EstateSaleCompanyDirectory() {
   const loadAllCompanies = async () => {
     setLoading(true);
     try {
+      // Pull from the MasterOperatorDirectory, which is already phone-deduplicated
+      // across FutureEstateOperator, EstatesalesOrgOperator & FutureOperatorLead
+      // by the buildMasterOperatorDirectory job. No client-side dedup needed here.
       const BATCH_SIZE = 500;
-      const MAX_RECORDS = 12000;
-      const offsets = [];
-      for (let offset = 0; offset < MAX_RECORDS; offset += BATCH_SIZE) offsets.push(offset);
-
-      const [netBatches, orgBatches, cleanBatches] = await Promise.all([
-        Promise.all(offsets.map(o => base44.entities.FutureEstateOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
-        Promise.all(offsets.slice(0, 4).map(o => base44.entities.EstatesalesOrgOperator.list('-created_date', BATCH_SIZE, o).catch(() => []))),
-        Promise.all(offsets.slice(0, 4).map(o => base44.entities.FutureOperatorLead.list('-created_date', BATCH_SIZE, o).catch(() => []))),
-      ]);
-
-      const netData = netBatches.flat().filter(Boolean);
-      const orgData = orgBatches.flat().filter(Boolean).map(r => ({ ...r, state: r.base_state, city: r.base_city }));
-      const cleanData = cleanBatches.flat().filter(Boolean);
-
-      let combined;
-      if (cleanData.length > 0) {
-        const cleanSourceIds = new Set(cleanData.map(r => r.source_id).filter(Boolean));
-        combined = [...cleanData, ...netData.filter(r => !cleanSourceIds.has(r.id)), ...orgData.filter(r => !cleanSourceIds.has(r.id))];
-      } else {
-        combined = [...netData, ...orgData];
-      }
-
-      // Deduplicate across sources. The same company often appears in
-      // FutureEstateOperator, EstatesalesOrgOperator, and FutureOperatorLead
-      // with different record IDs, so we dedup by normalized company name +
-      // state (and phone when available) instead of relying on record id alone.
-      const normName = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(llc|inc|co|estate|sales|sale|company|the)$/g, '').trim();
-      const normPhone = (s) => (s || '').toString().replace(/[^0-9]/g, '').replace(/^1/, '').slice(-10);
-      const seenIds = new Set();
-      const seenKeys = new Set();
-      const deduped = [];
-      // Sort so subscribers and cleaned records are kept first (preferred source)
-      combined.sort((a, b) => (isEstateSalenSubscriber(b) ? 1 : 0) - (isEstateSalenSubscriber(a) ? 1 : 0));
-      for (const r of combined) {
-        if (!r || seenIds.has(r.id)) continue;
-        const state = stripHtml(r.state);
-        const nameKey = normName(r.company_name);
-        const phoneKey = normPhone(r.phone);
-        // Build a dedup key: prefer phone+state when phone exists, else name+state
-        const dedupKey = phoneKey && phoneKey.length >= 10
-          ? `p:${phoneKey}`
-          : `n:${nameKey}:${state}`;
-        if (seenKeys.has(dedupKey)) continue;
-        seenIds.add(r.id);
-        seenKeys.add(dedupKey);
-        deduped.push(r);
-      }
-      const all = deduped.map(cleanEmailFn);
+      const MAX_BATCHES = 30; // ~15k records cap
+      const batches = await Promise.all(
+        Array.from({ length: MAX_BATCHES }, (_, i) =>
+          base44.entities.MasterOperatorDirectory.list('-created_date', BATCH_SIZE, i * BATCH_SIZE).catch(() => [])
+        )
+      );
+      const all = batches.flat().filter(Boolean).map(cleanEmailFn);
 
       const counts = {};
       all.forEach(op => {
