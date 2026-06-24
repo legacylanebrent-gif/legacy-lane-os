@@ -4,9 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X } from 'lucide-react';
 
 const PAGE_SIZE = 50;
+
+const US_STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+];
+
+const SOURCE_LABELS = {
+  FutureEstateOperator: 'ES.net',
+  EstatesalesOrgOperator: 'ES.org',
+  FutureOperatorLead: 'FOL'
+};
 
 export default function AdminMasterOperatorDirectory() {
   const [records, setRecords] = useState([]);
@@ -14,6 +24,9 @@ export default function AdminMasterOperatorDirectory() {
   const [rebuilding, setRebuilding] = useState(false);
   const [search, setSearch] = useState('');
   const [mergeFilter, setMergeFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [geocodeFilter, setGeocodeFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [stats, setStats] = useState(null);
@@ -40,19 +53,30 @@ export default function AdminMasterOperatorDirectory() {
   const loadRecords = useCallback(async (resetSkip = 0) => {
     setLoading(true);
     try {
+      const query = {};
+      if (mergeFilter) query.merge_status = mergeFilter;
+      if (stateFilter) query.state = stateFilter;
+      if (geocodeFilter) query.geocode_status = geocodeFilter;
+
       let batch;
-      if (mergeFilter) {
-        batch = await base44.entities.MasterOperatorDirectory.filter({ merge_status: mergeFilter }, '-created_date', PAGE_SIZE, resetSkip);
+      if (Object.keys(query).length > 0) {
+        batch = await base44.entities.MasterOperatorDirectory.filter(query, '-created_date', PAGE_SIZE, resetSkip);
       } else {
         batch = await base44.entities.MasterOperatorDirectory.list('-created_date', PAGE_SIZE, resetSkip);
       }
-      const filtered = search
-        ? batch.filter(r =>
-            (r.company_name || '').toLowerCase().includes(search.toLowerCase()) ||
-            (r.phone || '').toLowerCase().includes(search.toLowerCase()) ||
-            (r.city || '').toLowerCase().includes(search.toLowerCase())
-          )
-        : batch;
+
+      let filtered = batch;
+      if (search) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(r =>
+          (r.company_name || '').toLowerCase().includes(q) ||
+          (r.phone || '').toLowerCase().includes(q) ||
+          (r.city || '').toLowerCase().includes(q)
+        );
+      }
+      if (sourceFilter) {
+        filtered = filtered.filter(r => (r.sources || []).includes(sourceFilter));
+      }
       setRecords(resetSkip === 0 ? filtered : [...records, ...filtered]);
       setHasMore(batch.length === PAGE_SIZE);
       setSkip(resetSkip);
@@ -61,7 +85,7 @@ export default function AdminMasterOperatorDirectory() {
     } finally {
       setLoading(false);
     }
-  }, [search, mergeFilter, records]);
+  }, [search, mergeFilter, stateFilter, geocodeFilter, sourceFilter, records]);
 
   useEffect(() => { loadStats(); }, [loadStats]);
 
@@ -69,7 +93,7 @@ export default function AdminMasterOperatorDirectory() {
     const timer = setTimeout(() => loadRecords(0), 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, mergeFilter]);
+  }, [search, mergeFilter, stateFilter, geocodeFilter, sourceFilter]);
 
   const handleRebuild = async () => {
     setRebuilding(true);
@@ -144,25 +168,71 @@ export default function AdminMasterOperatorDirectory() {
         <StatCard icon={MapPin} label="States" value={stats?.states ?? '—'} color="text-purple-600" />
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <Input
-            placeholder="Search by company, phone, or city..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search by company, phone, or city..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          {(mergeFilter || stateFilter || geocodeFilter || sourceFilter) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setMergeFilter(''); setStateFilter(''); setGeocodeFilter(''); setSourceFilter(''); }}
+              className="text-slate-500"
+            >
+              <X className="w-3.5 h-3.5 mr-1" />Clear Filters
+            </Button>
+          )}
         </div>
-        <select
-          value={mergeFilter}
-          onChange={(e) => setMergeFilter(e.target.value)}
-          className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white"
-        >
-          <option value="">All Sources</option>
-          <option value="merged">Merged (multi-source)</option>
-          <option value="single_source">Single Source</option>
-        </select>
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+            <Filter className="w-3.5 h-3.5" />Filters:
+          </div>
+          <select
+            value={mergeFilter}
+            onChange={(e) => setMergeFilter(e.target.value)}
+            className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white"
+          >
+            <option value="">All Merge Types</option>
+            <option value="merged">Merged (multi-source)</option>
+            <option value="single_source">Single Source</option>
+          </select>
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white"
+          >
+            <option value="">All States</option>
+            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            value={geocodeFilter}
+            onChange={(e) => setGeocodeFilter(e.target.value)}
+            className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white"
+          >
+            <option value="">All Geocode Status</option>
+            <option value="geocoded">Geocoded</option>
+            <option value="not_geocoded">Not Geocoded</option>
+            <option value="failed">Failed</option>
+            <option value="skipped">Skipped</option>
+          </select>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white"
+          >
+            <option value="">All Source Entities</option>
+            <option value="FutureEstateOperator">ES.net (FutureEstateOperator)</option>
+            <option value="EstatesalesOrgOperator">ES.org (EstatesalesOrgOperator)</option>
+            <option value="FutureOperatorLead">FOL (FutureOperatorLead)</option>
+          </select>
+        </div>
       </div>
 
       <div className="border border-slate-200 rounded-lg overflow-hidden">
