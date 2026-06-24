@@ -98,9 +98,26 @@ export default function AdminMasterOperatorDirectory() {
   const handleRebuild = async () => {
     setRebuilding(true);
     setRebuildResult(null);
+    let cursor = null;
+    let calls = 0;
     try {
-      const res = await base44.functions.invoke('buildMasterOperatorDirectory', {});
-      setRebuildResult(res.data);
+      while (true) {
+        calls += 1;
+        const res = await base44.functions.invoke('buildMasterOperatorDirectory', cursor ? { cursor } : {});
+        const data = res.data || {};
+        if (data.error) { setRebuildResult({ error: data.error }); break; }
+        cursor = data.cursor || null;
+        const s = data.stats || cursor?.stats || {};
+        setRebuildResult({
+          progress: true,
+          calls,
+          done: data.done,
+          stats: s,
+          phase: cursor?.phase
+        });
+        if (data.done) break;
+        if (calls > 200) { setRebuildResult({ error: 'Rebuild exceeded 200 batches — stopped for safety.' }); break; }
+      }
       await loadStats();
       await loadRecords(0);
     } catch (err) {
@@ -131,7 +148,7 @@ export default function AdminMasterOperatorDirectory() {
       </div>
 
       {rebuildResult && (
-        <Card className={rebuildResult.error ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}>
+        <Card className={rebuildResult.error ? 'border-red-200 bg-red-50' : rebuildResult.done ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50'}>
           <CardContent className="pt-4">
             {rebuildResult.error ? (
               <div className="flex items-start gap-2 text-red-700">
@@ -141,16 +158,26 @@ export default function AdminMasterOperatorDirectory() {
                   <p className="text-sm">{rebuildResult.error}</p>
                 </div>
               </div>
-            ) : (
+            ) : rebuildResult.done ? (
               <div className="flex items-start gap-2 text-green-700">
                 <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold">Directory rebuilt successfully</p>
+                  <p className="font-semibold">Directory rebuilt successfully (batched)</p>
                   <p className="text-sm">
-                    {rebuildResult.masterRecordsCreated || rebuildResult.total_created || 0} unique records from{' '}
-                    {rebuildResult.totalSourceRecords || rebuildResult.total_source_records || 0} source records.
-                    {(rebuildResult.mergedFromMultipleSources || rebuildResult.merged_from_multiple_sources) &&
-                      ` ${rebuildResult.mergedFromMultipleSources || rebuildResult.merged_from_multiple_sources} merged from multiple sources.`}
+                    Processed {rebuildResult.stats?.totalSourceRecords ?? 0} source records across {rebuildResult.calls} batches.
+                    {' '}Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}
+                    {' '}({rebuildResult.stats?.phoneMatches ?? 0} phone merges, {rebuildResult.stats?.nameStateMatches ?? 0} name+state merges).
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 text-blue-700">
+                <Loader2 className="w-5 h-5 flex-shrink-0 mt-0.5 animate-spin" />
+                <div>
+                  <p className="font-semibold">Rebuilding in batches… (call {rebuildResult.calls}, phase: {rebuildResult.phase || 'merge'})</p>
+                  <p className="text-sm">
+                    Source records processed: {rebuildResult.stats?.totalSourceRecords ?? 0}.
+                    Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}.
                   </p>
                 </div>
               </div>

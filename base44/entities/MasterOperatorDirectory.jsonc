@@ -8,7 +8,11 @@
     },
     "phone": {
       "type": "string",
-      "description": "Normalized phone number \u2014 primary dedup key"
+      "description": "Display phone number (raw, richest source wins)"
+    },
+    "phone_normalized": {
+      "type": "string",
+      "description": "Digits-only normalized phone used as the primary cross-source dedup key"
     },
     "email": {
       "type": "string"

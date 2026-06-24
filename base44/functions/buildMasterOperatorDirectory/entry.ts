@@ -1,15 +1,33 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// Builds the MasterOperatorDirectory by merging all unique records from
-// FutureEstateOperator, EstatesalesOrgOperator, and FutureOperatorLead.
-// Deduplicates by phone number (primary key). When the same phone appears in
-// multiple source entities, merges the richest field from each source and
-// tracks all contributing sources.
+// Self-driving, time-budgeted rebuild of the MasterOperatorDirectory.
 //
-// Idempotent: clears the MasterOperatorDirectory before rebuilding.
+// Because a full in-memory rebuild of all source records times out, this
+// function processes source records in batches and upserts into
+// MasterOperatorDirectory incrementally. Dedup is "eventually consistent"
+// across batches:
+//   - Primary key: normalized phone (phone_normalized). Each batch queries
+//     existing master records matching the batch's phones and merges into them.
+//   - Secondary key (phoneless records): normalized company name + state.
+//     Each batch queries existing master records matching the batch's company
+//     names and merges those sharing the same state.
+//
+// State is carried via the payload cursor so the caller (frontend button or
+// scheduled automation) can drive it to completion with repeated calls until
+// `done === true`.
+//
+// Cursor shape: { phase, sourceIndex, skip, clearSkip, stats }
+//   phase: 'clear' | 'merge' | 'done'
+//
 // Admin-only when triggered manually; also callable by scheduled automation.
 
+const SOURCE_ENTITIES = ['FutureEstateOperator', 'EstatesalesOrgOperator', 'FutureOperatorLead'];
+const BATCH_SIZE = 150;
+const CLEAR_BATCH = 50;
+const TIME_BUDGET_MS = 5000; // stay safely under the platform per-call limit
+
 Deno.serve(async (req) => {
+  const startedAt = Date.now();
   try {
     const base44 = createClientFromRequest(req);
 
@@ -27,219 +45,365 @@ Deno.serve(async (req) => {
       // No user context — background automation, allow
     }
 
-    const SOURCE_ENTITIES = ['FutureEstateOperator', 'EstatesalesOrgOperator', 'FutureOperatorLead'];
+    let body = {};
+    try { body = await req.json(); } catch (e) { body = {}; }
+    if (body.debugAuth) {
+      return Response.json({ debugAuth: true, isManual, elapsed: Date.now() - startedAt });
+    }
+    const cursor = body.cursor || { phase: 'clear', sourceIndex: 0, skip: 0, clearSkip: 0, stats: freshStats() };
+
     const master = base44.asServiceRole.entities.MasterOperatorDirectory;
 
-    // Step 1: Clear existing master records
-    let cleared = 0;
-    while (true) {
-      const existing = await master.list('-created_date', 500, 0);
-      if (existing.length === 0) break;
-      await master.deleteMany({ id: { $in: existing.map(r => r.id) } });
-      cleared += existing.length;
-      if (existing.length < 500) break;
-    }
-
-    // Step 2: Load all records from each source entity
-    const allRecords = []; // { record, source }
-    for (const sourceName of SOURCE_ENTITIES) {
-      const entity = base44.asServiceRole.entities[sourceName];
-      let skip = 0;
-      let batch;
-      do {
-        batch = await entity.list('-created_date', 500, skip);
-        for (const r of batch) {
-          allRecords.push({ record: r, source: sourceName });
+    // ── Phase: clear existing master records (batched, resumable) ──
+    if (cursor.phase === 'clear') {
+      let clearedThisCall = 0;
+      while (Date.now() - startedAt < TIME_BUDGET_MS) {
+        const listStart = Date.now();
+        const existing = await master.list('-created_date', CLEAR_BATCH, cursor.clearSkip);
+        const listMs = Date.now() - listStart;
+        if (body.debugList) {
+          return Response.json({ debugList: true, count: existing.length, listMs, sampleIds: existing.slice(0, 3).map(r => r.id) });
         }
-        skip += 500;
-      } while (batch.length === 500 && skip < 50000);
-    }
-
-    // Step 3: Group by normalized phone
-    function normalizePhone(p) {
-      if (!p) return null;
-      const digits = p.replace(/[^0-9]/g, '');
-      return digits.length >= 7 ? digits : null;
-    }
-
-    const phoneGroups = {}; // phone -> [{ record, source }]
-    const noPhoneRecords = []; // records without a usable phone
-
-    for (const item of allRecords) {
-      const phone = normalizePhone(item.record.phone);
-      if (phone) {
-        if (!phoneGroups[phone]) phoneGroups[phone] = [];
-        phoneGroups[phone].push(item);
-      } else {
-        noPhoneRecords.push(item);
-      }
-    }
-
-    // Step 4: Merge each phone group into a single master record
-    function firstNonEmpty(...vals) {
-      for (const v of vals) {
-        if (v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) return v;
-      }
-      return null;
-    }
-
-    function mergeArrays(...arrs) {
-      const result = [];
-      const seen = new Set();
-      for (const arr of arrs) {
-        if (Array.isArray(arr)) {
-          for (const item of arr) {
-            const key = String(item).toLowerCase();
-            if (!seen.has(key)) {
-              seen.add(key);
-              result.push(item);
-            }
-          }
+        if (existing.length === 0) {
+          cursor.phase = 'merge';
+          cursor.sourceIndex = 0;
+          cursor.skip = 0;
+          break;
+        }
+        const delStart = Date.now();
+        if (body.debugDeleteParallel) {
+          const ids = existing.slice(0, 50).map(r => r.id);
+          await Promise.all(ids.map(id => master.delete(id).catch(e => ({ error: e.message }))));
+          return Response.json({ debugDeleteParallel: true, delMs: Date.now() - delStart, count: ids.length });
+        }
+        if (body.debugDeleteManySimple) {
+          const r = await master.deleteMany({ geocode_status: 'skipped' });
+          return Response.json({ debugDeleteManySimple: true, delMs: Date.now() - delStart, result: r });
+        }
+        if (body.debugDeleteOne) {
+          await master.delete(existing[0].id);
+          return Response.json({ debugDeleteOne: true, delMs: Date.now() - delStart, id: existing[0].id });
+        }
+        await master.deleteMany({ id: { $in: existing.map(r => r.id) } });
+        const delMs = Date.now() - delStart;
+        if (body.debugDelete) {
+          return Response.json({ debugDelete: true, delMs, deletedCount: existing.length });
+        }
+        cursor.stats.cleared += existing.length;
+        clearedThisCall += existing.length;
+        cursor.clearSkip = 0;
+        if (body.debug) {
+          return Response.json({ done: false, cursor, clearedThisCall, debug: { listMs, delMs, count: existing.length } });
+        }
+        if (existing.length < CLEAR_BATCH) {
+          cursor.phase = 'merge';
+          cursor.sourceIndex = 0;
+          cursor.skip = 0;
+          break;
         }
       }
-      return result;
+      return Response.json({ done: false, cursor, clearedThisCall });
     }
 
-    const masterRecords = [];
+    // ── Phase: incremental upsert merge ──
+    if (cursor.phase === 'merge') {
+      while (Date.now() - startedAt < TIME_BUDGET_MS) {
+        if (cursor.sourceIndex >= SOURCE_ENTITIES.length) {
+          cursor.phase = 'done';
+          break;
+        }
+        const sourceName = SOURCE_ENTITIES[cursor.sourceIndex];
+        const entity = base44.asServiceRole.entities[sourceName];
+        const batch = await entity.list('-created_date', BATCH_SIZE, cursor.skip);
+        cursor.stats.totalSourceRecords += batch.length;
 
-    for (const [phone, items] of Object.entries(phoneGroups)) {
-      const merged = buildMergedRecord(phone, items);
-      masterRecords.push(merged);
+        if (batch.length === 0) {
+          // Move to next source entity
+          cursor.sourceIndex += 1;
+          cursor.skip = 0;
+          continue;
+        }
+
+        await processBatch(master, batch, sourceName, cursor.stats);
+        cursor.skip += batch.length;
+
+        if (batch.length < BATCH_SIZE) {
+          cursor.sourceIndex += 1;
+          cursor.skip = 0;
+        }
+      }
     }
 
-    // For records without phone, dedup by normalized company name + state.
-    // It's rare for two distinct businesses to share a name in the same state.
-    function normalizeName(n) {
-      if (!n || typeof n !== 'string') return null;
-      const cleaned = n.toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .replace(/\b(estate sale[s]?|estates sale[s]?|llc|inc|co|company|the)\b/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      return cleaned.length >= 3 ? cleaned : null;
+    const done = cursor.phase === 'done';
+    return Response.json({
+      done,
+      cursor,
+      isManual,
+      stats: cursor.stats
+    });
+  } catch (error) {
+    console.error('buildMasterOperatorDirectory error:', error);
+    return Response.json({ error: error.message, stack: error.stack }, { status: 500 });
+  }
+});
+
+function freshStats() {
+  return {
+    cleared: 0,
+    totalSourceRecords: 0,
+    batchesProcessed: 0,
+    phoneMatches: 0,
+    nameStateMatches: 0,
+    created: 0,
+    updated: 0
+  };
+}
+
+function normalizePhone(p) {
+  if (!p) return null;
+  const digits = String(p).replace(/[^0-9]/g, '');
+  return digits.length >= 7 ? digits : null;
+}
+
+function normalizeName(n) {
+  if (!n || typeof n !== 'string') return null;
+  const cleaned = n.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\b(estate sale[s]?|estates sale[s]?|llc|inc|co|company|the)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned.length >= 3 ? cleaned : null;
+}
+
+function normalizeState(s) {
+  if (!s || typeof s !== 'string') return '';
+  return s.trim().toLowerCase();
+}
+
+function firstNonEmpty(...vals) {
+  for (const v of vals) {
+    if (v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) return v;
+  }
+  return null;
+}
+
+function mergeArrays(...arrs) {
+  const result = [];
+  const seen = new Set();
+  for (const arr of arrs) {
+    if (Array.isArray(arr)) {
+      for (const item of arr) {
+        const key = String(item).toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+        }
+      }
     }
+  }
+  return result;
+}
 
-    function normalizeState(s) {
-      if (!s || typeof s !== 'string') return '';
-      return s.trim().toLowerCase();
-    }
+// Build the field set for a master record from a list of source records,
+// merging the richest values. `existing` is the current master record (if any).
+function buildFields(records, existing) {
+  const allRecs = existing ? [existing, ...records] : records;
+  // Sort by richness (most fields first) for primary selection
+  const sorted = [...allRecs].sort((a, b) => {
+    const score = (r) => Object.values(r).filter(v => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)).length;
+    return score(b) - score(a);
+  });
+  const primary = sorted[0];
 
-    const nameStateGroups = {}; // "name|state" -> [{ record, source }]
-    const noNameRecords = []; // can't dedup without a name
+  const phoneNorm = firstNonEmpty(...allRecs.map(r => r.phone_normalized)) || normalizePhone(firstNonEmpty(...allRecs.map(r => r.phone)));
+  const companyName = firstNonEmpty(primary.company_name, ...allRecs.map(r => r.company_name));
 
-    for (const item of noPhoneRecords) {
-      const name = normalizeName(item.record.company_name);
-      const state = normalizeState(item.record.state || item.record.base_state || item.record.source_state);
+  return {
+    company_name: (companyName && typeof companyName === 'string') ? companyName : 'Unknown Company',
+    phone: firstNonEmpty(...allRecs.map(r => r.phone)),
+    phone_normalized: phoneNorm,
+    email: firstNonEmpty(...allRecs.map(r => r.email)),
+    website: firstNonEmpty(...allRecs.map(r => r.website_url || r.website)),
+    owner_name: firstNonEmpty(...allRecs.map(r => r.owner_name)),
+    city: firstNonEmpty(...allRecs.map(r => r.city || r.base_city || r.scraped_city)),
+    state: firstNonEmpty(...allRecs.map(r => r.state || r.base_state || r.source_state)),
+    zip_code: firstNonEmpty(...allRecs.map(r => r.zip_code)),
+    county: firstNonEmpty(...allRecs.map(r => r.county)),
+    lat: firstNonEmpty(...allRecs.map(r => r.lat)),
+    lng: firstNonEmpty(...allRecs.map(r => r.lng)),
+    geocoded_address: firstNonEmpty(...allRecs.map(r => r.geocoded_address)),
+    geocoded_city: firstNonEmpty(...allRecs.map(r => r.geocoded_city)),
+    geocoded_county: firstNonEmpty(...allRecs.map(r => r.geocoded_county)),
+    geocoded_zip: firstNonEmpty(...allRecs.map(r => r.geocoded_zip)),
+    geocode_status: firstNonEmpty(...allRecs.map(r => r.geocode_status)) || 'not_geocoded',
+    geocode_last_run: firstNonEmpty(...allRecs.map(r => r.geocode_last_run)),
+    facebook: firstNonEmpty(...allRecs.map(r => r.facebook)),
+    instagram: firstNonEmpty(...allRecs.map(r => r.instagram)),
+    about_text: firstNonEmpty(...allRecs.map(r => r.about_text)),
+    services_offered: mergeArrays(...allRecs.map(r => r.services_offered)),
+    memberships: mergeArrays(...allRecs.map(r => r.memberships)),
+    credentials: mergeArrays(...allRecs.map(r => r.credentials)),
+    service_area_cities: mergeArrays(...allRecs.map(r => r.service_area_cities)),
+    membership_tier: firstNonEmpty(...allRecs.map(r => r.membership_tier)) || 'unknown',
+    member_since: firstNonEmpty(...allRecs.map(r => r.member_since)),
+    years_in_business: firstNonEmpty(...allRecs.map(r => r.years_in_business)),
+    sales_posted: firstNonEmpty(...allRecs.map(r => r.sales_posted)),
+    active_sales_count: firstNonEmpty(...allRecs.map(r => r.active_sales_count)),
+    bonded_insured: allRecs.some(r => r.bonded_insured === true),
+    award_winner: allRecs.some(r => r.award_winner === true),
+    logo_image_url: firstNonEmpty(...allRecs.map(r => r.logo_image_url)),
+    profile_url: firstNonEmpty(...allRecs.map(r => r.profile_url)),
+    company_id: firstNonEmpty(...allRecs.map(r => r.company_id)),
+    enrichment_status: firstNonEmpty(...allRecs.map(r => r.enrichment_status)) || 'not_started',
+    lead_stage: firstNonEmpty(...allRecs.map(r => r.lead_stage)) || 'future_operator',
+    audience_sync_status: firstNonEmpty(...allRecs.map(r => r.audience_sync_status)) || 'not_synced',
+    meta_custom_audience_id: firstNonEmpty(...allRecs.map(r => r.meta_custom_audience_id)),
+    last_synced_at: firstNonEmpty(...allRecs.map(r => r.last_synced_at)),
+    tags: firstNonEmpty(...allRecs.map(r => r.tags)) || {},
+    notes: firstNonEmpty(...allRecs.map(r => r.notes))
+  };
+}
+
+function mergeSourceMeta(records, existing) {
+  const sources = [];
+  const sourceRecordIds = {};
+  const collect = (rec, src) => {
+    if (!src) return;
+    if (!sources.includes(src)) sources.push(src);
+    if (rec && rec.id) sourceRecordIds[src] = rec.id;
+  };
+  if (existing) {
+    for (const s of (existing.sources || [])) if (!sources.includes(s)) sources.push(s);
+    Object.assign(sourceRecordIds, existing.source_record_ids || {});
+  }
+  // records: [{ record, source }]
+  for (const item of records) collect(item.record, item.source);
+  return { sources, sourceRecordIds, merge_status: sources.length > 1 ? 'merged' : 'single_source' };
+}
+
+// Process one batch of source records: group, query existing matches, upsert.
+async function processBatch(master, batch, sourceName, stats) {
+  stats.batchesProcessed += 1;
+
+  // Group this batch's records by normalized phone, then by name+state for phoneless.
+  const phoneGroups = {};      // normalizedPhone -> [{ record, source }]
+  const nameStateGroups = {};  // "name|state" -> [{ record, source }]
+  const noNameItems = [];      // phoneless + no usable name
+
+  for (const record of batch) {
+    const item = { record, source: sourceName };
+    const phone = normalizePhone(record.phone);
+    if (phone) {
+      if (!phoneGroups[phone]) phoneGroups[phone] = [];
+      phoneGroups[phone].push(item);
+    } else {
+      const name = normalizeName(record.company_name);
+      const state = normalizeState(record.state || record.base_state || record.source_state);
       if (name) {
         const key = `${name}|${state}`;
         if (!nameStateGroups[key]) nameStateGroups[key] = [];
         nameStateGroups[key].push(item);
       } else {
-        noNameRecords.push(item);
+        noNameItems.push(item);
       }
     }
-
-    let nameStateMerged = 0;
-    for (const [key, items] of Object.entries(nameStateGroups)) {
-      masterRecords.push(buildMergedRecord(null, items));
-      if (items.length > 1) nameStateMerged++;
-    }
-    // Records with neither phone nor a usable name — keep as-is
-    for (const item of noNameRecords) {
-      masterRecords.push(buildMergedRecord(null, [item]));
-    }
-
-    function buildMergedRecord(phone, items) {
-      const sources = [];
-      const sourceRecordIds = {};
-      for (const item of items) {
-        if (!sources.includes(item.source)) sources.push(item.source);
-        sourceRecordIds[item.source] = item.record.id;
-      }
-
-      // Sort items by richness (most fields first) for primary field selection
-      const sorted = [...items].sort((a, b) => {
-        const scoreA = Object.values(a.record).filter(v => v !== null && v !== undefined && v !== '').length;
-        const scoreB = Object.values(b.record).filter(v => v !== null && v !== undefined && v !== '').length;
-        return scoreB - scoreA;
-      });
-
-      const primary = sorted[0].record;
-      const allRecs = items.map(i => i.record);
-
-      const companyName = firstNonEmpty(primary.company_name, ...allRecs.map(r => r.company_name));
-      return {
-        company_name: (companyName && typeof companyName === 'string') ? companyName : 'Unknown Company',
-        phone: phone ? items[0].record.phone : null,
-        email: firstNonEmpty(...allRecs.map(r => r.email)),
-        website: firstNonEmpty(...allRecs.map(r => r.website_url || r.website)),
-        owner_name: firstNonEmpty(...allRecs.map(r => r.owner_name)),
-        city: firstNonEmpty(...allRecs.map(r => r.city || r.base_city || r.scraped_city)),
-        state: firstNonEmpty(...allRecs.map(r => r.state || r.base_state || r.source_state)),
-        zip_code: firstNonEmpty(...allRecs.map(r => r.zip_code)),
-        county: firstNonEmpty(...allRecs.map(r => r.county)),
-        lat: firstNonEmpty(...allRecs.map(r => r.lat)),
-        lng: firstNonEmpty(...allRecs.map(r => r.lng)),
-        geocoded_address: firstNonEmpty(...allRecs.map(r => r.geocoded_address)),
-        geocoded_city: firstNonEmpty(...allRecs.map(r => r.geocoded_city)),
-        geocoded_county: firstNonEmpty(...allRecs.map(r => r.geocoded_county)),
-        geocoded_zip: firstNonEmpty(...allRecs.map(r => r.geocoded_zip)),
-        geocode_status: firstNonEmpty(...allRecs.map(r => r.geocode_status)) || 'not_geocoded',
-        geocode_last_run: firstNonEmpty(...allRecs.map(r => r.geocode_last_run)),
-        facebook: firstNonEmpty(...allRecs.map(r => r.facebook)),
-        instagram: firstNonEmpty(...allRecs.map(r => r.instagram)),
-        about_text: firstNonEmpty(...allRecs.map(r => r.about_text)),
-        services_offered: mergeArrays(...allRecs.map(r => r.services_offered)),
-        memberships: mergeArrays(...allRecs.map(r => r.memberships)),
-        credentials: mergeArrays(...allRecs.map(r => r.credentials)),
-        service_area_cities: mergeArrays(...allRecs.map(r => r.service_area_cities)),
-        membership_tier: firstNonEmpty(...allRecs.map(r => r.membership_tier)) || 'unknown',
-        member_since: firstNonEmpty(...allRecs.map(r => r.member_since)),
-        years_in_business: firstNonEmpty(...allRecs.map(r => r.years_in_business)),
-        sales_posted: firstNonEmpty(...allRecs.map(r => r.sales_posted)),
-        active_sales_count: firstNonEmpty(...allRecs.map(r => r.active_sales_count)),
-        bonded_insured: allRecs.some(r => r.bonded_insured === true),
-        award_winner: allRecs.some(r => r.award_winner === true),
-        logo_image_url: firstNonEmpty(...allRecs.map(r => r.logo_image_url)),
-        profile_url: firstNonEmpty(...allRecs.map(r => r.profile_url)),
-        company_id: firstNonEmpty(...allRecs.map(r => r.company_id)),
-        enrichment_status: firstNonEmpty(...allRecs.map(r => r.enrichment_status)) || 'not_started',
-        lead_stage: firstNonEmpty(...allRecs.map(r => r.lead_stage)) || 'future_operator',
-        audience_sync_status: firstNonEmpty(...allRecs.map(r => r.audience_sync_status)) || 'not_synced',
-        meta_custom_audience_id: firstNonEmpty(...allRecs.map(r => r.meta_custom_audience_id)),
-        last_synced_at: firstNonEmpty(...allRecs.map(r => r.last_synced_at)),
-        tags: firstNonEmpty(...allRecs.map(r => r.tags)) || {},
-        notes: firstNonEmpty(...allRecs.map(r => r.notes)),
-        sources: sources,
-        source_record_ids: sourceRecordIds,
-        merge_status: sources.length > 1 ? 'merged' : 'single_source'
-      };
-    }
-
-    // Filter out records with no valid company_name string
-    const validRecords = masterRecords.filter(r => r.company_name && typeof r.company_name === 'string' && r.company_name.trim().length > 0);
-
-    // Step 5: Bulk create in batches of 500
-    let created = 0;
-    for (let i = 0; i < validRecords.length; i += 500) {
-      const batch = validRecords.slice(i, i + 500);
-      await master.bulkCreate(batch);
-      created += batch.length;
-    }
-
-    return Response.json({
-      success: true,
-      cleared: cleared,
-      totalSourceRecords: allRecords.length,
-      uniquePhoneGroups: Object.keys(phoneGroups).length,
-      recordsWithoutPhone: noPhoneRecords.length,
-      nameStateGroups: Object.keys(nameStateGroups).length,
-      nameStateMerged: nameStateMerged,
-      masterRecordsCreated: created,
-      mergedFromMultipleSources: masterRecords.filter(r => r.merge_status === 'merged').length
-    });
-  } catch (error) {
-    console.error('buildMasterOperatorDirectory error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
   }
-});
+
+  // ── Phone groups: query existing master records by phone_normalized ──
+  const phoneKeys = Object.keys(phoneGroups);
+  const phoneExistingMap = {}; // normalizedPhone -> master record
+  if (phoneKeys.length > 0) {
+    try {
+      const existing = await master.filter({ phone_normalized: { $in: phoneKeys } }, '-created_date', 500, 0);
+      for (const e of existing) {
+        const pk = e.phone_normalized || normalizePhone(e.phone);
+        if (pk) phoneExistingMap[pk] = e;
+      }
+    } catch (e) {
+      console.error('phone filter error:', e.message);
+    }
+  }
+
+  const toCreate = [];
+  const toUpdate = [];
+
+  for (const [pk, items] of Object.entries(phoneGroups)) {
+    const existing = phoneExistingMap[pk];
+    const fields = buildFields(items.map(i => i.record), existing);
+    const meta = mergeSourceMeta(items, existing);
+    if (existing) {
+      stats.phoneMatches += 1;
+      stats.updated += 1;
+      toUpdate.push({ id: existing.id, ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
+    } else {
+      stats.created += 1;
+      toCreate.push({ ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
+    }
+  }
+
+  // ── Name+state groups (phoneless): query existing by company_name, match state ──
+  const nameStateKeys = Object.keys(nameStateGroups);
+  // Collect distinct raw company names to query
+  const distinctNames = [];
+  const seenNames = new Set();
+  for (const key of nameStateKeys) {
+    for (const item of nameStateGroups[key]) {
+      const raw = item.record.company_name;
+      if (raw && !seenNames.has(raw)) { seenNames.add(raw); distinctNames.push(raw); }
+    }
+  }
+  const nameExistingMap = {}; // raw company_name -> [master records]
+  if (distinctNames.length > 0) {
+    try {
+      const existing = await master.filter({ company_name: { $in: distinctNames } }, '-created_date', 500, 0);
+      for (const e of existing) {
+        const raw = e.company_name;
+        if (!nameExistingMap[raw]) nameExistingMap[raw] = [];
+        nameExistingMap[raw].push(e);
+      }
+    } catch (e) {
+      console.error('name filter error:', e.message);
+    }
+  }
+
+  for (const [key, items] of Object.entries(nameStateGroups)) {
+    const state = normalizeState(items[0].record.state || items[0].record.base_state || items[0].record.source_state);
+    // Find an existing master record with the same raw name AND same state
+    let existing = null;
+    for (const item of items) {
+      const candidates = nameExistingMap[item.record.company_name] || [];
+      const match = candidates.find(c => normalizeState(c.state) === state);
+      if (match) { existing = match; break; }
+    }
+    const fields = buildFields(items.map(i => i.record), existing);
+    const meta = mergeSourceMeta(items, existing);
+    if (existing) {
+      stats.nameStateMatches += 1;
+      stats.updated += 1;
+      toUpdate.push({ id: existing.id, ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
+    } else {
+      stats.created += 1;
+      toCreate.push({ ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
+    }
+  }
+
+  // ── No-name, no-phone records: create as-is ──
+  for (const item of noNameItems) {
+    const fields = buildFields([item.record], null);
+    const meta = mergeSourceMeta([item], null);
+    stats.created += 1;
+    toCreate.push({ ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
+  }
+
+  // ── Persist ──
+  if (toCreate.length > 0) {
+    for (let i = 0; i < toCreate.length; i += 500) {
+      await master.bulkCreate(toCreate.slice(i, i + 500));
+    }
+  }
+  if (toUpdate.length > 0) {
+    for (let i = 0; i < toUpdate.length; i += 500) {
+      await master.bulkUpdate(toUpdate.slice(i, i + 500));
+    }
+  }
+}
