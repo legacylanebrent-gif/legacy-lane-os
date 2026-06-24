@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2 } from 'lucide-react';
 
 const PAGE_SIZE = 50;
 
@@ -31,6 +31,8 @@ export default function AdminMasterOperatorDirectory() {
   const [hasMore, setHasMore] = useState(true);
   const [stats, setStats] = useState(null);
   const [rebuildResult, setRebuildResult] = useState(null);
+  const [fixingEncoding, setFixingEncoding] = useState(false);
+  const [encodingResult, setEncodingResult] = useState(null);
 
   const loadStats = useCallback(async () => {
     try {
@@ -131,6 +133,38 @@ export default function AdminMasterOperatorDirectory() {
 
   const loadMore = () => loadRecords(skip + PAGE_SIZE);
 
+  const handleFixEncoding = async () => {
+    setFixingEncoding(true);
+    setEncodingResult(null);
+    let cursor = { skip: 0, scanned: 0, fixed: 0, updated: 0 };
+    let calls = 0;
+    try {
+      while (true) {
+        calls += 1;
+        const res = await base44.functions.invoke('fixDirectoryEncoding', { cursor });
+        const data = res.data || {};
+        if (data.error) { setEncodingResult({ error: data.error }); break; }
+        cursor = data.cursor || cursor;
+        setEncodingResult({
+          progress: !data.done,
+          calls,
+          done: data.done,
+          scanned: cursor.scanned,
+          fixed: cursor.fixed,
+          updated: cursor.updated
+        });
+        if (data.done) break;
+        if (calls > 200) { setEncodingResult({ error: 'Exceeded 200 batches — stopped for safety.' }); break; }
+        await new Promise(r => setTimeout(r, 400));
+      }
+      await loadRecords(0);
+    } catch (err) {
+      setEncodingResult({ error: err.message || 'Encoding fix failed.' });
+    } finally {
+      setFixingEncoding(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -143,10 +177,16 @@ export default function AdminMasterOperatorDirectory() {
             Consolidated, phone-deduplicated directory from FutureEstateOperator, EstatesalesOrgOperator & FutureOperatorLead
           </p>
         </div>
-        <Button onClick={handleRebuild} disabled={rebuilding} className="bg-orange-600 hover:bg-orange-700 text-white">
-          {rebuilding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-          {rebuilding ? 'Rebuilding...' : 'Rebuild & Dedup (by Phone)'}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button onClick={handleRebuild} disabled={rebuilding} className="bg-orange-600 hover:bg-orange-700 text-white">
+            {rebuilding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            {rebuilding ? 'Rebuilding...' : 'Rebuild & Dedup (by Phone)'}
+          </Button>
+          <Button onClick={handleFixEncoding} disabled={fixingEncoding} variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50">
+            {fixingEncoding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Wand2 className="w-4 h-4 mr-2" />}
+            {fixingEncoding ? 'Fixing...' : 'Fix Encoding (â€™â†’\' )'}
+          </Button>
+        </div>
       </div>
 
       {rebuildResult && (
@@ -181,6 +221,42 @@ export default function AdminMasterOperatorDirectory() {
                     {rebuildResult.phase === 'clear'
                       ? <>Clearing old records: {rebuildResult.stats?.cleared ?? 0} deleted so far.</>
                       : <>Source records processed: {rebuildResult.stats?.totalSourceRecords ?? 0}. Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}.</>}
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {encodingResult && (
+        <Card className={encodingResult.error ? 'border-red-200 bg-red-50' : encodingResult.done ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50'}>
+          <CardContent className="pt-4">
+            {encodingResult.error ? (
+              <div className="flex items-start gap-2 text-red-700">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Encoding Fix Error</p>
+                  <p className="text-sm">{encodingResult.error}</p>
+                </div>
+              </div>
+            ) : encodingResult.done ? (
+              <div className="flex items-start gap-2 text-green-700">
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Encoding fixed across directory</p>
+                  <p className="text-sm">
+                    Scanned {encodingResult.scanned ?? 0} records. Found mojibake in {encodingResult.fixed ?? 0} records, updated {encodingResult.updated ?? 0} across {encodingResult.calls} batches.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 text-blue-700">
+                <Loader2 className="w-5 h-5 flex-shrink-0 mt-0.5 animate-spin" />
+                <div>
+                  <p className="font-semibold">Fixing encoding… (batch {encodingResult.calls})</p>
+                  <p className="text-sm">
+                    Scanned {encodingResult.scanned ?? 0}, found {encodingResult.fixed ?? 0} with mojibake, updated {encodingResult.updated ?? 0}.
                   </p>
                 </div>
               </div>
