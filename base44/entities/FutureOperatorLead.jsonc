@@ -59,6 +59,10 @@
     "geocoded_county": {
       "type": "string"
     },
+    "geocoded_address": {
+      "type": "string",
+      "description": "Full formatted address returned by geocoder"
+    },
     "geocoded_zip": {
       "type": "string"
     },
@@ -71,6 +75,11 @@
         "skipped"
       ],
       "default": "not_geocoded"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last geocoding attempt"
     },
     "enrichment_status": {
       "type": "string",

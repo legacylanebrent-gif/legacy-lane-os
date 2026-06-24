@@ -147,6 +147,42 @@
         "failed"
       ],
       "default": "not_started"
+    },
+    "lat": {
+      "type": "number",
+      "description": "Latitude from geocoding"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Longitude from geocoding"
+    },
+    "geocoded_address": {
+      "type": "string",
+      "description": "Full formatted address returned by geocoder"
+    },
+    "geocoded_city": {
+      "type": "string",
+      "description": "City resolved from geocoding"
+    },
+    "geocoded_county": {
+      "type": "string",
+      "description": "County resolved from geocoding"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded",
+      "description": "Status of geocoding attempt"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last geocoding attempt"
     }
   },
   "required": [
