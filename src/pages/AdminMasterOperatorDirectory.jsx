@@ -21,21 +21,16 @@ export default function AdminMasterOperatorDirectory() {
 
   const loadStats = useCallback(async () => {
     try {
-      const all = await base44.entities.MasterOperatorDirectory.list('-created_date', 500, 0);
-      let merged = 0, single = 0, geocoded = 0, notGeocoded = 0;
-      const stateSet = new Set();
-      for (const r of all) {
-        if (r.merge_status === 'merged') merged++;
-        else single++;
-        if (r.geocode_status === 'geocoded') geocoded++;
-        else notGeocoded++;
-        if (r.state) stateSet.add(r.state);
-      }
+      const res = await base44.functions.invoke('getMasterOperatorDirectoryStats', {});
+      const d = res.data || {};
       setStats({
-        total: all.length,
-        merged, single, geocoded, notGeocoded,
-        states: stateSet.size,
-        approximate: all.length === 500
+        total: d.total ?? 0,
+        merged: d.merged ?? 0,
+        single: d.single ?? 0,
+        geocoded: d.geocoded ?? 0,
+        notGeocoded: d.notGeocoded ?? 0,
+        states: d.states ?? 0,
+        approximate: false
       });
     } catch (err) {
       console.error('Stats error:', err);
