@@ -55,33 +55,44 @@ export default function AdminMasterOperatorDirectory() {
   const loadRecords = useCallback(async (resetSkip = 0) => {
     setLoading(true);
     try {
-      const query = {};
-      if (mergeFilter) query.merge_status = mergeFilter;
-      if (stateFilter) query.state = stateFilter;
-      if (geocodeFilter) query.geocode_status = geocodeFilter;
-
-      let batch;
-      if (Object.keys(query).length > 0) {
-        batch = await base44.entities.MasterOperatorDirectory.filter(query, '-created_date', PAGE_SIZE, resetSkip);
+      // When a search term is active, use server-side search so records beyond the
+      // first loaded batch are still findable. Otherwise fall back to direct listing.
+      if (search.trim()) {
+        const res = await base44.functions.invoke('searchMasterOperatorDirectory', {
+          search: search.trim(),
+          merge_status: mergeFilter,
+          state: stateFilter,
+          geocode_status: geocodeFilter,
+          source: sourceFilter,
+          skip: resetSkip,
+          limit: PAGE_SIZE
+        });
+        const data = res.data || {};
+        const page = data.records || [];
+        setRecords(resetSkip === 0 ? page : [...records, ...page]);
+        setHasMore(!!data.hasMore);
+        setSkip(resetSkip);
       } else {
-        batch = await base44.entities.MasterOperatorDirectory.list('-created_date', PAGE_SIZE, resetSkip);
-      }
+        const query = {};
+        if (mergeFilter) query.merge_status = mergeFilter;
+        if (stateFilter) query.state = stateFilter;
+        if (geocodeFilter) query.geocode_status = geocodeFilter;
 
-      let filtered = batch;
-      if (search) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(r =>
-          (r.company_name || '').toLowerCase().includes(q) ||
-          (r.phone || '').toLowerCase().includes(q) ||
-          (r.city || '').toLowerCase().includes(q)
-        );
+        let batch;
+        if (Object.keys(query).length > 0) {
+          batch = await base44.entities.MasterOperatorDirectory.filter(query, '-created_date', PAGE_SIZE, resetSkip);
+        } else {
+          batch = await base44.entities.MasterOperatorDirectory.list('-created_date', PAGE_SIZE, resetSkip);
+        }
+
+        let filtered = batch;
+        if (sourceFilter) {
+          filtered = filtered.filter(r => (r.sources || []).includes(sourceFilter));
+        }
+        setRecords(resetSkip === 0 ? filtered : [...records, ...filtered]);
+        setHasMore(batch.length === PAGE_SIZE);
+        setSkip(resetSkip);
       }
-      if (sourceFilter) {
-        filtered = filtered.filter(r => (r.sources || []).includes(sourceFilter));
-      }
-      setRecords(resetSkip === 0 ? filtered : [...records, ...filtered]);
-      setHasMore(batch.length === PAGE_SIZE);
-      setSkip(resetSkip);
     } catch (err) {
       console.error('Load error:', err);
     } finally {
