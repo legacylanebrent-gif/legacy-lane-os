@@ -107,8 +107,45 @@ Deno.serve(async (req) => {
       masterRecords.push(merged);
     }
 
-    // For records without phone, include as-is (can't cross-dedup)
+    // For records without phone, dedup by normalized company name + state.
+    // It's rare for two distinct businesses to share a name in the same state.
+    function normalizeName(n) {
+      if (!n || typeof n !== 'string') return null;
+      const cleaned = n.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\b(estate sale[s]?|estates sale[s]?|llc|inc|co|company|the)\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return cleaned.length >= 3 ? cleaned : null;
+    }
+
+    function normalizeState(s) {
+      if (!s || typeof s !== 'string') return '';
+      return s.trim().toLowerCase();
+    }
+
+    const nameStateGroups = {}; // "name|state" -> [{ record, source }]
+    const noNameRecords = []; // can't dedup without a name
+
     for (const item of noPhoneRecords) {
+      const name = normalizeName(item.record.company_name);
+      const state = normalizeState(item.record.state || item.record.base_state || item.record.source_state);
+      if (name) {
+        const key = `${name}|${state}`;
+        if (!nameStateGroups[key]) nameStateGroups[key] = [];
+        nameStateGroups[key].push(item);
+      } else {
+        noNameRecords.push(item);
+      }
+    }
+
+    let nameStateMerged = 0;
+    for (const [key, items] of Object.entries(nameStateGroups)) {
+      masterRecords.push(buildMergedRecord(null, items));
+      if (items.length > 1) nameStateMerged++;
+    }
+    // Records with neither phone nor a usable name — keep as-is
+    for (const item of noNameRecords) {
       masterRecords.push(buildMergedRecord(null, [item]));
     }
 
@@ -196,6 +233,8 @@ Deno.serve(async (req) => {
       totalSourceRecords: allRecords.length,
       uniquePhoneGroups: Object.keys(phoneGroups).length,
       recordsWithoutPhone: noPhoneRecords.length,
+      nameStateGroups: Object.keys(nameStateGroups).length,
+      nameStateMerged: nameStateMerged,
       masterRecordsCreated: created,
       mergedFromMultipleSources: masterRecords.filter(r => r.merge_status === 'merged').length
     });
