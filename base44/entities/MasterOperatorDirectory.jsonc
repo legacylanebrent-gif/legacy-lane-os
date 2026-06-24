@@ -1,0 +1,202 @@
+{
+  "name": "MasterOperatorDirectory",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Primary company name (richest source wins)"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Normalized phone number \u2014 primary dedup key"
+    },
+    "email": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "geocoded_address": {
+      "type": "string"
+    },
+    "geocoded_city": {
+      "type": "string"
+    },
+    "geocoded_county": {
+      "type": "string"
+    },
+    "geocoded_zip": {
+      "type": "string"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "facebook": {
+      "type": "string"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "about_text": {
+      "type": "string"
+    },
+    "services_offered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "service_area_cities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "membership_tier": {
+      "type": "string",
+      "enum": [
+        "elite",
+        "platinum",
+        "basic",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "member_since": {
+      "type": "string"
+    },
+    "years_in_business": {
+      "type": "number"
+    },
+    "sales_posted": {
+      "type": "number"
+    },
+    "active_sales_count": {
+      "type": "number"
+    },
+    "bonded_insured": {
+      "type": "boolean",
+      "default": false
+    },
+    "award_winner": {
+      "type": "boolean",
+      "default": false
+    },
+    "logo_image_url": {
+      "type": "string"
+    },
+    "profile_url": {
+      "type": "string",
+      "description": "Estatesales.org profile URL"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Estatesales.org company ID"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "searching",
+        "found",
+        "failed"
+      ],
+      "default": "not_started"
+    },
+    "lead_stage": {
+      "type": "string",
+      "default": "future_operator"
+    },
+    "audience_sync_status": {
+      "type": "string",
+      "default": "not_synced"
+    },
+    "meta_custom_audience_id": {
+      "type": "string"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Which source entities contributed to this record (e.g. FutureEstateOperator, EstatesalesOrgOperator, FutureOperatorLead)"
+    },
+    "source_record_ids": {
+      "type": "object",
+      "description": "Map of source entity name to original record ID",
+      "default": {}
+    },
+    "merge_status": {
+      "type": "string",
+      "enum": [
+        "single_source",
+        "merged",
+        "unmatched"
+      ],
+      "default": "single_source",
+      "description": "Whether this record came from one source or was merged from multiple"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}
