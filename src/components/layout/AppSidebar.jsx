@@ -94,6 +94,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminFutureOperators',   label: 'EstateSales.net Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
   { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
   { page: 'FutOperLeads',           label: 'Future Operator Leads',  icon: Merge,           group: 'Admin', subgroup: '👥 Users & Operators' },
+  { page: 'AdminMasterOperatorDirectory', label: 'Master Operator Directory', icon: Database,  group: 'Admin', subgroup: '👥 Users & Operators' },
   { page: 'AdminAgentApplications', label: 'Agent Applications',     icon: Award,           group: 'Admin', subgroup: '👥 Users & Operators' },
   { page: 'AdminPageAccess',        label: 'Page Permissions',       icon: Shield,          group: 'Admin', subgroup: '👥 Users & Operators' },
   { page: 'BizInABox',              label: 'Biz in a Box',           icon: Briefcase,       group: 'Admin', subgroup: '👥 Users & Operators' },
