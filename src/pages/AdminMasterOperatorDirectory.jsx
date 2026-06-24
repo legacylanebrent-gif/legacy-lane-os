@@ -116,7 +116,9 @@ export default function AdminMasterOperatorDirectory() {
           phase: cursor?.phase
         });
         if (data.done) break;
-        if (calls > 200) { setRebuildResult({ error: 'Rebuild exceeded 200 batches — stopped for safety.' }); break; }
+        if (calls > 500) { setRebuildResult({ error: 'Rebuild exceeded 500 batches — stopped for safety.' }); break; }
+        // Small cooldown to avoid sustained API rate limits between calls
+        await new Promise(r => setTimeout(r, 500));
       }
       await loadStats();
       await loadRecords(0);
@@ -176,8 +178,9 @@ export default function AdminMasterOperatorDirectory() {
                 <div>
                   <p className="font-semibold">Rebuilding in batches… (call {rebuildResult.calls}, phase: {rebuildResult.phase || 'merge'})</p>
                   <p className="text-sm">
-                    Source records processed: {rebuildResult.stats?.totalSourceRecords ?? 0}.
-                    Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}.
+                    {rebuildResult.phase === 'clear'
+                      ? <>Clearing old records: {rebuildResult.stats?.cleared ?? 0} deleted so far.</>
+                      : <>Source records processed: {rebuildResult.stats?.totalSourceRecords ?? 0}. Created {rebuildResult.stats?.created ?? 0}, updated {rebuildResult.stats?.updated ?? 0}.</>}
                   </p>
                 </div>
               </div>

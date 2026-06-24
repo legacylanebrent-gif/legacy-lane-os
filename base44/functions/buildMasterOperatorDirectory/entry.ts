@@ -24,7 +24,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 const SOURCE_ENTITIES = ['FutureEstateOperator', 'EstatesalesOrgOperator', 'FutureOperatorLead'];
 const BATCH_SIZE = 150;
 const CLEAR_BATCH = 50;
-const TIME_BUDGET_MS = 5000; // stay safely under the platform per-call limit
+const DELETE_CONCURRENCY = 8;
+const DELETE_DELAY_MS = 120;
+const TIME_BUDGET_MS = 8000; // stay safely under the platform per-call limit
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 Deno.serve(async (req) => {
   const startedAt = Date.now();
@@ -47,54 +51,38 @@ Deno.serve(async (req) => {
 
     let body = {};
     try { body = await req.json(); } catch (e) { body = {}; }
-    if (body.debugAuth) {
-      return Response.json({ debugAuth: true, isManual, elapsed: Date.now() - startedAt });
-    }
     const cursor = body.cursor || { phase: 'clear', sourceIndex: 0, skip: 0, clearSkip: 0, stats: freshStats() };
 
     const master = base44.asServiceRole.entities.MasterOperatorDirectory;
 
     // ── Phase: clear existing master records (batched, resumable) ──
+    // NOTE: deleteMany is unavailable in this runtime, so we delete records
+    // individually in parallel chunks.
     if (cursor.phase === 'clear') {
       let clearedThisCall = 0;
       while (Date.now() - startedAt < TIME_BUDGET_MS) {
-        const listStart = Date.now();
-        const existing = await master.list('-created_date', CLEAR_BATCH, cursor.clearSkip);
-        const listMs = Date.now() - listStart;
-        if (body.debugList) {
-          return Response.json({ debugList: true, count: existing.length, listMs, sampleIds: existing.slice(0, 3).map(r => r.id) });
-        }
+        const existing = await master.list('-created_date', CLEAR_BATCH, 0);
         if (existing.length === 0) {
           cursor.phase = 'merge';
           cursor.sourceIndex = 0;
           cursor.skip = 0;
           break;
         }
-        const delStart = Date.now();
-        if (body.debugDeleteParallel) {
-          const ids = existing.slice(0, 50).map(r => r.id);
-          await Promise.all(ids.map(id => master.delete(id).catch(e => ({ error: e.message }))));
-          return Response.json({ debugDeleteParallel: true, delMs: Date.now() - delStart, count: ids.length });
+        const ids = existing.map(r => r.id);
+        let successCount = 0;
+        let rateLimited = false;
+        for (let i = 0; i < ids.length; i += DELETE_CONCURRENCY) {
+          if (Date.now() - startedAt >= TIME_BUDGET_MS) break;
+          const chunk = ids.slice(i, i + DELETE_CONCURRENCY);
+          const results = await Promise.all(chunk.map(id => master.delete(id).then(() => true).catch(() => false)));
+          const ok = results.filter(Boolean).length;
+          successCount += ok;
+          if (ok === 0) { rateLimited = true; break; }
+          await sleep(DELETE_DELAY_MS);
         }
-        if (body.debugDeleteManySimple) {
-          const r = await master.deleteMany({ geocode_status: 'skipped' });
-          return Response.json({ debugDeleteManySimple: true, delMs: Date.now() - delStart, result: r });
-        }
-        if (body.debugDeleteOne) {
-          await master.delete(existing[0].id);
-          return Response.json({ debugDeleteOne: true, delMs: Date.now() - delStart, id: existing[0].id });
-        }
-        await master.deleteMany({ id: { $in: existing.map(r => r.id) } });
-        const delMs = Date.now() - delStart;
-        if (body.debugDelete) {
-          return Response.json({ debugDelete: true, delMs, deletedCount: existing.length });
-        }
-        cursor.stats.cleared += existing.length;
-        clearedThisCall += existing.length;
-        cursor.clearSkip = 0;
-        if (body.debug) {
-          return Response.json({ done: false, cursor, clearedThisCall, debug: { listMs, delMs, count: existing.length } });
-        }
+        cursor.stats.cleared += successCount;
+        clearedThisCall += successCount;
+        if (rateLimited) break;
         if (existing.length < CLEAR_BATCH) {
           cursor.phase = 'merge';
           cursor.sourceIndex = 0;
