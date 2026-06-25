@@ -278,11 +278,23 @@ export default function MobileHome() {
       </div>
 
       {/* CTA */}
-      <div className="px-4 mt-6 mb-4">
+      <div className="px-4 mt-6 mb-4 space-y-3">
         <Link to={createPageUrl('OperatorPackages')}>
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-4 text-center text-white">
             <p className="font-semibold text-sm">Need an estate sale company?</p>
             <p className="text-xs text-orange-100 mt-0.5">We'll connect you with local pros →</p>
+          </div>
+        </Link>
+        <Link to={createPageUrl('EstateSaleCompanyDirectory')}>
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-4 text-center text-white">
+            <p className="font-semibold text-sm">Browse all companies</p>
+            <p className="text-xs text-cyan-100 mt-0.5">Explore estate sale companies nationwide →</p>
+          </div>
+        </Link>
+        <Link to={createPageUrl('CoolFindsBlog')}>
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 text-center text-white">
+            <p className="font-semibold text-sm">Cool Finds & Crazy Stories</p>
+            <p className="text-xs text-purple-100 mt-0.5">Discover hidden treasures & wild tales →</p>
           </div>
         </Link>
       </div>
