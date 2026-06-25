@@ -430,6 +430,9 @@ const AuthenticatedApp = () => {
       <Route path="/mobile/marketplace" element={<MobileAppShell title="Marketplace"><Pages.BrowseItems /></MobileAppShell>} />
       <Route path="/mobile/route" element={<MobileAppShell title="Route"><RoutePlanner /></MobileAppShell>} />
       <Route path="/mobile/profile" element={<MobileAppShell title="Profile"><Pages.MyProfile /></MobileAppShell>} />
+      <Route path="/mobile/companies" element={<MobileAppShell title="Companies"><EstateSaleCompanyDirectory /></MobileAppShell>} />
+      <Route path="/mobile/cool-finds" element={<MobileAppShell title="Cool Finds"><CoolFindsBlog /></MobileAppShell>} />
+      <Route path="/mobile/packages" element={<MobileAppShell title="Packages"><Pages.OperatorPackages /></MobileAppShell>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
