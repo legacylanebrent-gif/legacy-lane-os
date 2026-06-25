@@ -39,29 +39,29 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 pb-20">
       {/* Minimal top header */}
       {showHeader && (
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 h-24 flex items-center justify-between">
-          <Link to="/mobile" className="flex items-center gap-3">
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 h-[72px] flex items-center justify-between">
+          <Link to="/mobile" className="flex items-center gap-2">
             <img
               src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png"
               alt="EstateSalen"
-              className="h-14 w-14 object-contain"
+              className="h-10 w-10 object-contain"
             />
-            <span className="text-lg font-serif font-bold text-slate-800">EstateSalen</span>
+            <span className="text-base font-serif font-bold text-slate-800">EstateSalen</span>
           </Link>
           <div className="flex items-center gap-1">
             <MobileQRCheckIn />
-            <Link to={createPageUrl('Messages')} className="relative p-3 text-slate-400 hover:text-slate-600">
-              <MessageSquare className="w-7 h-7" />
+            <Link to={createPageUrl('Messages')} className="relative p-2 text-slate-400 hover:text-slate-600">
+              <MessageSquare className="w-5 h-5" />
               {unreadMessages > 0 && (
-                <span className="absolute top-1 right-1 min-w-[20px] h-5 flex items-center justify-center rounded-full bg-orange-600 text-white text-[11px] font-bold px-1 leading-none">
+                <span className="absolute top-0.5 right-0.5 min-w-[15px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
                   {unreadMessages > 9 ? '9+' : unreadMessages}
                 </span>
               )}
             </Link>
-            <Link to={createPageUrl('Notifications')} className="relative p-3 text-slate-400 hover:text-slate-600">
-              <Bell className="w-7 h-7" />
+            <Link to={createPageUrl('Notifications')} className="relative p-2 text-slate-400 hover:text-slate-600">
+              <Bell className="w-5 h-5" />
               {unreadNotifs > 0 && (
-                <span className="absolute top-1 right-1 min-w-[20px] h-5 flex items-center justify-center rounded-full bg-orange-600 text-white text-[11px] font-bold px-1 leading-none">
+                <span className="absolute top-0.5 right-0.5 min-w-[15px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
                   {unreadNotifs > 9 ? '9+' : unreadNotifs}
                 </span>
               )}

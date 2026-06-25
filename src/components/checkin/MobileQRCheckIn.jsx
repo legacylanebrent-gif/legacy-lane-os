@@ -22,10 +22,10 @@ export default function MobileQRCheckIn() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="relative p-3 text-slate-400 hover:text-slate-600"
+        className="relative p-2 text-slate-400 hover:text-slate-600"
         aria-label="Scan QR to check in"
       >
-        <QrCode className="w-7 h-7" />
+        <QrCode className="w-5 h-5" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
