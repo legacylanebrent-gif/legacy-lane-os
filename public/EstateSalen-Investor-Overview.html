@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EstateSalen — Investor Overview</title>
+<style>
+  @page {
+    size: letter;
+    margin: 1in;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #1e293b;
+    max-width: 8.5in;
+    margin: 0 auto;
+    padding: 0 0.5in;
+  }
+  h1 {
+    font-size: 28pt;
+    color: #0f172a;
+    text-align: center;
+    margin-top: 2in;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 18pt;
+    color: #0f172a;
+    border-bottom: 2px solid #f97316;
+    padding-bottom: 4px;
+    margin-top: 32px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 14pt;
+    color: #334155;
+    margin-top: 24px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 12pt;
+    color: #ea580c;
+    margin-top: 18px;
+    page-break-after: avoid;
+  }
+  p { margin: 10px 0; text-align: justify; }
+  ul, ol { margin: 10px 0 10px 24px; }
+  li { margin: 6px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #0f172a;
+    color: #fff;
+    padding: 10px;
+    text-align: left;
+    font-size: 11pt;
+  }
+  td {
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    font-size: 11pt;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f8fafc; }
+  .cover {
+    text-align: center;
+    padding-top: 3in;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 36pt; margin: 0; }
+  .cover .subtitle { font-size: 16pt; color: #64748b; margin-top: 12px; }
+  .cover .meta { font-size: 12pt; color: #94a3b8; margin-top: 2in; }
+  .toc { page-break-after: always; }
+  .toc h2 { border: none; }
+  .toc ul { list-style: none; margin-left: 0; }
+  .toc li { margin: 8px 0; font-size: 12pt; }
+  .toc .section-num { color: #f97316; font-weight: bold; margin-right: 8px; }
+  .page-break { page-break-before: always; }
+  .callout {
+    background: #fff7ed;
+    border-left: 4px solid #f97316;
+    padding: 16px 20px;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+  .callout-title { font-weight: bold; color: #ea580c; margin-bottom: 8px; }
+  .stat-box {
+    display: inline-block;
+    width: 30%;
+    background: #0f172a;
+    color: #fff;
+    padding: 20px;
+    margin: 8px 1%;
+    text-align: center;
+    border-radius: 8px;
+    page-break-inside: avoid;
+  }
+  .stat-box .number { font-size: 24pt; font-weight: bold; color: #fb923c; }
+  .stat-box .label { font-size: 10pt; margin-top: 8px; }
+  .section { page-break-before: always; }
+  .footer-note { font-size: 10pt; color: #94a3b8; font-style: italic; margin-top: 40px; }
+  strong { color: #0f172a; }
+  em { color: #475569; }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <h1>ESTATESALEN</h1>
+  <div class="subtitle">The Life Transition &amp; Estate Economy Engine</div>
+  <div class="subtitle" style="font-size:13pt; margin-top:8px;">Investor Master Document &mdash; Executive Strategy Overview</div>
+  <div class="meta">
+    Prepared: June 2026<br/>
+    Confidential &mdash; For Investor Review Only
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ul>
+    <li><span class="section-num">1.</span> Executive Summary</li>
+    <li><span class="section-num">2.</span> Market Opportunity &amp; The Silver Tsunami</li>
+    <li><span class="section-num">3.</span> The Problem: A Fragmented Industry</li>
+    <li><span class="section-num">4.</span> The EstateSalen Solution: A Unified Ecosystem</li>
+    <li><span class="section-num">5.</span> Core Pillar I: The SEO Demand Capture Engine</li>
+    <li><span class="section-num">6.</span> Core Pillar II: The Autonomous Operator Super-App</li>
+    <li><span class="section-num">7.</span> Core Pillar III: The Consumer Marketplace</li>
+    <li><span class="section-num">8.</span> The Market Bridge: Agents &amp; Operators Unified</li>
+    <li><span class="section-num">9.</span> Diversified Monetization Stack</li>
+    <li><span class="section-num">10.</span> Subscription Tiers &amp; Package Structure</li>
+    <li><span class="section-num">11.</span> AI &amp; Autonomous Agent Infrastructure</li>
+    <li><span class="section-num">12.</span> The Master Operator Directory: Data Moat</li>
+    <li><span class="section-num">13.</span> Operational Performance &amp; KPIs</li>
+    <li><span class="section-num">14.</span> Territory Rollout: The Cluster &amp; Convert Model</li>
+    <li><span class="section-num">15.</span> Financial Roadmap &amp; Unit Economics</li>
+    <li><span class="section-num">16.</span> Competitive Landscape &amp; Strategic Moat</li>
+    <li><span class="section-num">17.</span> Technology Architecture Overview</li>
+    <li><span class="section-num">18.</span> Data Assets &amp; Future-State Monetization</li>
+    <li><span class="section-num">19.</span> Go-to-Market Strategy</li>
+    <li><span class="section-num">20.</span> Risk Mitigation</li>
+    <li><span class="section-num">21.</span> The Investment Ask &amp; Use of Funds</li>
+    <li><span class="section-num">22.</span> Vision: The Standardized Infrastructure</li>
+    <li><span class="section-num">23.</span> Appendix: Feature Inventory</li>
+  </ul>
+</div>
+
+<!-- SECTION 1: EXECUTIVE SUMMARY -->
+<div class="section">
+  <h2>1. Executive Summary</h2>
+  <p>
+    <strong>EstateSalen</strong> is the first-of-its-kind, vertically integrated technology platform designed specifically
+    to capture and monetize the "Life Transition" market. We sit at the intersection of three massive, traditionally
+    fragmented sectors: <strong>Estate Settlement, Property Transition (Probate/Downsizing), and the Resale/Antique Economy.</strong>
+  </p>
+  <p>
+    The platform unifies fragmented markets&mdash;estate sale operators, real estate agents, collectors, resellers, and
+    individual consumers&mdash;into a single, high-velocity ecosystem powered by AI automation. We are not merely a
+    directory or event calendar; we are the <strong>operating system</strong> that makes life transitions seamless for
+    families, profitable for operators, and efficient for the entire industry.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">Key Value Proposition</div>
+    <p style="margin:0;">
+      EstateSalen doesn't just sell software; we sell <strong>deal flow</strong>. We control the entire property
+      lifecycle&mdash;from the first probate inquiry, through the estate sale cleanup, to the final real estate listing.
+      We are the operating system for the next generation of property transition.
+    </p>
+  </div>
+
+  <h3>At a Glance</h3>
+  <div>
+    <div class="stat-box">
+      <div class="number">$100B+</div>
+      <div class="label">Addressable Life Transition Market</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">25%</div>
+      <div class="label">Qualified Lead &rarr; Deal Conversion Rate</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">70%</div>
+      <div class="label">Reduction in Operator Cataloging Labor</div>
+    </div>
+  </div>
+
+  <h3>What Makes Us Different</h3>
+  <ul>
+    <li><strong>The Only "Market Bridge":</strong> We are the only platform tying Real Estate Agents and Estate Sale Operators together in a mutually beneficial, revenue-sharing relationship.</li>
+    <li><strong>Autonomous AI Engine:</strong> Our platform handles business-running logic (outreach, lead matching, marketing, pricing) automatically&mdash;an engine that grows itself.</li>
+    <li><strong>Proprietary Data Dominance:</strong> Through cross-source ingestion and deduplication, we maintain the most accurate, geocoded operator and vendor database in the United States.</li>
+    <li><strong>Diversified Revenue:</strong> Recurring SaaS stability combined with transactional upside from marketplace commissions, referral fees, and premium placements.</li>
+  </ul>
+</div>
+
+<!-- SECTION 2: MARKET OPPORTUNITY -->
+<div class="section">
+  <h2>2. Market Opportunity &amp; The Silver Tsunami</h2>
+  <p>
+    The life transition market&mdash;probate, senior downsizing, inherited property, and divorce&mdash;is massive,
+    fragmented, and underserved by modern technology. We are witnessing the largest generational wealth transfer in
+    history, often referred to as the <strong>"Silver Tsunami."</strong>
+  </p>
+
+  <h3>The Demographic Shift</h3>
+  <p>
+    As baby boomers downsize, an estimated $68 trillion in wealth will transfer to the next generation over the coming
+    decades. Each transition triggers a cascade of decisions: what to sell, what to keep, how to price, who to hire,
+    and when to list the property. Families are overwhelmed, operators are under-equipped, and the digital tools used
+    to manage these transitions are siloed and inefficient.
+  </p>
+
+  <h3>The Market Gap</h3>
+  <p>
+    Despite the enormous financial stakes, the estate sale and life transition industry remains stubbornly analog:
+  </p>
+  <ul>
+    <li><strong>No standardized platform:</strong> Operators use spreadsheets, paper signs, and manual pricing guides.</li>
+    <li><strong>No bridge between sectors:</strong> Real estate agents and estate sale operators work in silos, relying on word-of-mouth referrals.</li>
+    <li><strong>No data transparency:</strong> Pricing, inventory, and service capacity are opaque to consumers and professionals alike.</li>
+    <li><strong>No consumer trust layer:</strong> Families entering probate or downsizing have no authoritative resource to guide them.</li>
+  </ul>
+
+  <h3>Our Market Position</h3>
+  <p>
+    EstateSalen provides the operating system that makes these transitions seamless, profitable for operators, and
+    intuitive for families. We are not competing with estate sale companies&mdash;we are <em>empowering</em> them,
+    while simultaneously building the consumer-facing trust layer that captures demand at the point of life events.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">Why Now</div>
+    <p style="margin:0;">
+      The convergence of three forces&mdash;the Silver Tsunami demographic shift, the maturation of AI automation
+      technology, and the complete absence of a unified platform&mdash;creates a once-in-a-generation opportunity
+      to define the infrastructure for an entire industry.
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 3: THE PROBLEM -->
+<div class="section">
+  <h2>3. The Problem: A Fragmented Industry</h2>
+  <p>
+    The estate sale and life transition industry suffers from systemic fragmentation across every participant group.
+    Each stakeholder faces unique pain points that no single platform has addressed&mdash;until now.
+  </p>
+
+  <h3>The Consumer's Pain</h3>
+  <ul>
+    <li>Families entering probate or downsizing have no authoritative resource to guide them through the process.</li>
+    <li>Finding a trustworthy estate sale company requires guesswork and word-of-mouth recommendations.</li>
+    <li>There is no transparency into pricing, service quality, or availability.</li>
+    <li>The emotional burden of a life transition is compounded by logistical chaos.</li>
+  </ul>
+
+  <h3>The Operator's Pain</h3>
+  <ul>
+    <li>Cataloging and pricing inventory is labor-intensive, requiring hours of manual research per sale.</li>
+    <li>Marketing relies on fragmented tools&mdash;Facebook posts, email blasts, and physical signs.</li>
+    <li>Lead generation is inconsistent; operators depend on referrals they cannot control.</li>
+    <li>Point-of-sale, inventory tracking, and storage management require disconnected software tools.</li>
+    <li>Expanding reach to multiple marketplaces (eBay, Etsy) requires manual, duplicate effort.</li>
+  </ul>
+
+  <h3>The Real Estate Agent's Pain</h3>
+  <ul>
+    <li>Agents struggle with property preparation (cleanouts, staging, repairs) before a listing can go live.</li>
+    <li>Finding reliable estate sale operators for client properties is a hit-or-miss process.</li>
+    <li>There is no standardized platform for lead sharing or service-capacity verification.</li>
+    <li>Probate listings require specialized knowledge and vendor networks that most agents lack.</li>
+  </ul>
+
+  <h3>The Industry's Pain</h3>
+  <ul>
+    <li>No standardized data layer exists for operator directories, service areas, or pricing history.</li>
+    <li>Multiple competing directories (estatesales.org, estatesales.net) create overlapping, inconsistent records.</li>
+    <li>No platform connects the full lifecycle: probate inquiry &rarr; estate sale &rarr; cleanout &rarr; property listing.</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-title">The Core Insight</div>
+    <p style="margin:0;">
+      Every participant in this industry is solving their own piece of the puzzle in isolation. No one has built the
+      connective tissue that ties them together. That connective tissue is exactly what EstateSalen provides&mdash;and
+      it is what creates our defensible moat.
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 4: THE SOLUTION -->
+<div class="section">
+  <h2>4. The EstateSalen Solution: A Unified Ecosystem</h2>
+  <p>
+    EstateSalen is built on three interconnected pillars that work together as a single, compounding ecosystem. Each
+    pillar addresses a specific market failure, but their true power emerges from their integration.
+  </p>
+
+  <h3>Pillar I: The SEO Demand Capture Engine</h3>
+  <p>
+    We don't just acquire traffic; we build the infrastructure that captures it. Our automated SEO Engine dynamically
+    generates hyper-local content for every county in the U.S., becoming the default "digital answer" for families in
+    transition. When someone searches "probate realtor [County]" or "estate sale company [City]," we are there.
+  </p>
+
+  <h3>Pillar II: The Autonomous Operator Super-App</h3>
+  <p>
+    We provide the software that makes operators successful. From AI-powered pricing intelligence that reduces
+    cataloging labor by 70%, to autonomous marketing agents that fill their calendars, to integrated POS and
+    inventory management&mdash;we are the complete operating system for the modern estate sale business.
+  </p>
+
+  <h3>Pillar III: The Consumer Marketplace</h3>
+  <p>
+    We provide a consumer-first discovery experience with location-aware mobile maps, route planning for multi-sale
+    weekends, QR-based check-in, and the "Cool Finds" content community that drives engagement and repeat visits.
+  </p>
+
+  <h3>The Connective Tissue: The Market Bridge</h3>
+  <p>
+    Above all three pillars sits the <strong>Referral Pipeline</strong>&mdash;the exclusive bridge that connects Real
+    Estate Agents and Estate Sale Operators in a mutually beneficial, revenue-sharing relationship. This bridge is
+    what transforms us from a software company into critical market infrastructure.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">The Compounding Loop</div>
+    <p style="margin:0;">
+      Demand (SEO) feeds Supply (Operators), which feeds the Bridge (Agent referrals), which feeds back into Demand
+      (more listings, more content, more SEO authority). Every new participant strengthens the loop for every other
+      participant. This is the network effect that makes our platform defensible.
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 5: SEO ENGINE -->
+<div class="section">
+  <h2>5. Core Pillar I: The SEO Demand Capture Engine</h2>
+  <p>
+    Our SEO Engine is not a marketing department&mdash;it is an autonomous content factory that produces thousands of
+    hyper-local, high-intent landing pages without human intervention. It does the work of 50 marketing managers at
+    the cost of server infrastructure.
+  </p>
+
+  <h3>Automated Local SEO Hubs</h3>
+  <p>
+    We generate thousands of hyper-local landing pages and "Probate/Downsizing Hubs" dynamically. Our system maps every
+    city and county in the US, capturing search intent for terms like "probate realtor [County]" or "estate sale
+    company [City]" before competitors can even rank.
+  </p>
+  <ul>
+    <li><strong>City Hub Pages:</strong> Localized estate sale discovery pages for every major U.S. city.</li>
+    <li><strong>State &amp; County Guides:</strong> Comprehensive probate and life-transition guides by jurisdiction.</li>
+    <li><strong>Category &amp; Brand Hubs:</strong> Item-level SEO pages for antiques, collectibles, and specific brands.</li>
+    <li><strong>Life Event Hubs:</strong> Dedicated pages for probate, pre-probate, inherited property, senior downsizing, assisted living transition, divorce, foreclosure, estate cleanout, executor/trustee/heir guides, and moving sales.</li>
+  </ul>
+
+  <h3>Estate Sale University</h3>
+  <p>
+    An automated content engine that provides the answers consumers search for early in their journey, cementing our
+    brand as the trusted authority. Articles cover probate 101, estate sale process, pricing and value, cleanout and
+    donations, inherited homes, downsizing, legal and tax considerations, and dedicated guides for operators and buyers.
+  </p>
+
+  <h3>Programmatic Content Generation</h3>
+  <p>
+    Our backend functions automatically generate:
+  </p>
+  <ul>
+    <li>SEO-optimized article content with structured JSON-LD schema markup.</li>
+    <li>FAQ sections for every guide, optimized for featured snippets.</li>
+    <li>Internal linking between related hubs to build topical authority.</li>
+    <li>Weekly market reports and video batch scripts for content freshness.</li>
+    <li>Automated sitemap generation and search console submission for rapid indexing.</li>
+  </ul>
+
+  <h3>The Result</h3>
+  <p>
+    When we deploy in a new territory, we instantly occupy the #1 search slot for all life-transition intent in that
+    county. We become the primary intake channel for families in transition&mdash;before any competitor even knows
+    the market exists.
+  </p>
+</div>
+
+<!-- SECTION 6: OPERATOR SUPER-APP -->
+<div class="section">
+  <h2>6. Core Pillar II: The Autonomous Operator Super-App</h2>
+  <p>
+    We don't just give operators a listing tool; we give them a complete business operating system that handles
+    pricing, marketing, sales, inventory, and logistics autonomously.
+  </p>
+
+  <h3>AI-Powered Pricing Intelligence</h3>
+  <ul>
+    <li><strong>SerpAPI Integration:</strong> Automated image search and AI-driven pricing intelligence that slashes the labor time for cataloging items by 70%+.</li>
+    <li><strong>Google Lens Pricing:</strong> Visual search integration for instant item identification and comparable pricing.</li>
+    <li><strong>Deep Search Modal:</strong> Multi-source price verification for high-value items.</li>
+    <li><strong>Batch Pricing:</strong> Process dozens of items simultaneously with AI-suggested prices.</li>
+    <li><strong>Item Knowledge Base:</strong> A growing proprietary database of item pricing history and reference images.</li>
+  </ul>
+
+  <h3>Autonomous Marketing Engine</h3>
+  <ul>
+    <li><strong>AI Marketing Pilot:</strong> Autonomous agents handle end-to-end customer outreach, lead nurturing, and social media posting.</li>
+    <li><strong>Social Campaign Automation:</strong> Generate and schedule social posts, images, and monthly content calendars automatically.</li>
+    <li><strong>Facebook Ad Integration:</strong> AI-generated ad creatives and campaign drafts with audience targeting.</li>
+    <li><strong>Email Campaigns:</strong> Operator-to-follower email campaigns with audience segmentation and performance tracking.</li>
+    <li><strong>Sale Promotion Engine:</strong> Automated promotion of sales across all channels upon publication.</li>
+  </ul>
+
+  <h3>Full Operational Stack</h3>
+  <ul>
+    <li><strong>POS &amp; Checkout:</strong> Scan-and-cart functionality, checkout station integration, and QR-based cart scanning.</li>
+    <li><strong>Inventory Management:</strong> Full inventory tracking with storage location management and warehouse contents viewing.</li>
+    <li><strong>Sale Pipeline:</strong> Draft &rarr; upcoming &rarr; active &rarr; completed &rarr; archived workflow with automated status transitions.</li>
+    <li><strong>Sale Editor:</strong> Comprehensive sale creation with photo management, rotation, skip-item toggling, and AI-generated synopses.</li>
+    <li><strong>Multi-Channel Listing:</strong> One-click publishing to internal marketplace, eBay, and Etsy simultaneously.</li>
+    <li><strong>Settlement Statements:</strong> Automated commission calculations and settlement generation.</li>
+    <li><strong>Sale Recaps:</strong> Post-sale analytics and YouTube recap script generation.</li>
+  </ul>
+
+  <h3>Buyout &amp; Cleanout Network</h3>
+  <p>
+    Operators can initiate buyout/liquidation events with reseller bidding, cherry-pick modes, minimum bids, and
+    automated reseller notification within configurable radius. Cleanout leads are automatically matched to cleanout
+    vendors and donation companies in the network.
+  </p>
+
+  <h3>AI Credit System</h3>
+  <p>
+    A tiered AI credit system manages usage across all AI features, with monthly limits, bonus credits, rollover
+    credits, and per-feature cost configuration. Google Lens searches have their own dedicated credit pool with
+    purchase capability for additional searches.
+  </p>
+</div>
+
+<!-- SECTION 7: CONSUMER MARKETPLACE -->
+<div class="section">
+  <h2>7. Core Pillar III: The Consumer Marketplace</h2>
+  <p>
+    We provide a consumer-first discovery experience designed for the modern mobile shopper. Our consumer app (iOS/Android)
+    is built from the same codebase, ensuring a native, responsive experience across all devices.
+  </p>
+
+  <h3>Discovery &amp; Navigation</h3>
+  <ul>
+    <li><strong>Location-Aware Maps:</strong> Interactive maps showing estate sales, community events, and dealers/stores with consistent category-colored pins.</li>
+    <li><strong>Route Planner:</strong> Multi-sale weekend planning with drag-and-drop reordering, optimized routing, and Google Maps integration.</li>
+    <li><strong>Persistent Search Radius:</strong> Default 25-mile radius saved to localStorage, adjustable per user preference.</li>
+    <li><strong>Personalized Alerts:</strong> Local sale notifications based on user location and notification radius preferences.</li>
+  </ul>
+
+  <h3>Engagement Features</h3>
+  <ul>
+    <li><strong>Early Sign-In Lists:</strong> Mobile QR check-in and early sign-in management for high-demand sales.</li>
+    <li><strong>Favorite Companies:</strong> Follow and track preferred estate sale companies with direct email opt-in.</li>
+    <li><strong>Wanted Items:</strong> Buyers can flag desired items and receive automatic notifications when matching items appear in new sales.</li>
+    <li><strong>My Calendar:</strong> Monthly calendar view of planned sale visits with event details and navigation links.</li>
+    <li><strong>Rewards &amp; Check-ins:</strong> Gamified check-in system with reward actions and referral rewards.</li>
+  </ul>
+
+  <h3>Cool Finds Blog: Content-Driven Discovery</h3>
+  <p>
+    A high-engagement community content platform where users submit stories of amazing finds, hidden treasures, and
+    strange discoveries from estate sales. AI-generated metadata (category, era, object type, tags, SEO keywords)
+    powers discovery and filtering. Community moderation ensures quality and rejects contact information or
+    commercial solicitation.
+  </p>
+  <ul>
+    <li>17 content categories ranging from "What Is This?" to "Most Valuable Discoveries."</li>
+    <li>AI story enrichment and excerpt generation for cards and SEO.</li>
+    <li>Threaded comments with AI-powered spam and toxicity detection.</li>
+    <li>Weekly email digest for subscribers, with separate toggles for email and in-app notifications.</li>
+    <li>Operator-linked stories for SEO and company promotion.</li>
+  </ul>
+
+  <h3>Community Events</h3>
+  <p>
+    Beyond estate sales, we support flea markets, antique shows, craft shows, and collectibles shows. Organizers can
+    submit events with geocoded locations, and events auto-complete when their end date passes.
+  </p>
+
+  <h3>Mobile-First Consumer Shell</h3>
+  <p>
+    A dedicated bottom-tab navigation isolates consumer experiences from administrative UI. Quick-access buttons for
+    "Need an estate sale co," "Browse all companies," and "Cool finds and crazy stories" keep navigation within the
+    in-app context. All admin-facing elements are strictly excluded from the mobile build.
+  </p>
+</div>
+
+<!-- SECTION 8: THE MARKET BRIDGE -->
+<div class="section">
+  <h2>8. The Market Bridge: Agents &amp; Operators Unified</h2>
+  <p>
+    This is the single most compelling narrative in our pitch. Investors fundamentally understand that real estate
+    agents and estate sale operators are natural partners, yet they currently operate as fragmented silos. By
+    positioning EstateSalen as the <strong>exclusive "Marketplace Bridge"</strong> between these two, we transition
+    from being a software company to a <strong>critical market infrastructure provider.</strong>
+  </p>
+
+  <h3>The Friction Point (The Status Quo)</h3>
+  <ul>
+    <li><strong>Real Estate Agents</strong> struggle with property preparation (cleanouts, staging, repairs) before a listing can go live.</li>
+    <li><strong>Estate Sale Operators</strong> are experts at liquidating assets but often struggle to find high-value property listings.</li>
+    <li><strong>The Problem:</strong> Currently, they find each other through "luck"&mdash;word of mouth or disjointed networking. There is no standard for lead sharing, no transparency on service capacity, and no incentive-based ecosystem for mutual growth.</li>
+  </ul>
+
+  <h3>The EstateSalen Solution: The Referral Pipeline</h3>
+  <p>
+    We are the only platform that provides the infrastructure to align their incentives and operational workflows:
+  </p>
+  <ul>
+    <li><strong>Mutual Lead Exchange:</strong> Agents can instantly source and vet estate sale companies for their clients, and estate sale companies can refer inherited properties back to our vetted agent network.</li>
+    <li><strong>Technical Integration:</strong> Shared project dashboards where operators can flag "property ready for listing," instantly notifying the partner real estate agent.</li>
+    <li><strong>Incentivized Ecosystem:</strong> Automated, verifiable commission splits for every closed deal between these two parties, making it financially profitable for them to use our platform exclusively.</li>
+    <li><strong>Referral Agreements:</strong> Digitally generated, QR-code-enabled referral agreements with non-exclusive and review-based partnership options.</li>
+    <li><strong>Lead Circumvention Detection:</strong> Automated checks prevent parties from bypassing the platform to avoid referral fees.</li>
+  </ul>
+
+  <h3>Why This Wins: The Investor "Aha!" Moment</h3>
+  <ul>
+    <li><strong>Sticky Ecosystem:</strong> Once an agent and an operator are connected and transacting through our platform, the cost of switching away from EstateSalen is prohibitively high. We aren't just a tool; we are their revenue partner.</li>
+    <li><strong>Data Dominance:</strong> By tying these sectors together, we possess proprietary data on the entire property transition lifecycle. We know which homes are being inherited (probate data), when they are being cleared (estate sale data), and when they are hitting the market (agent data).</li>
+    <li><strong>Network Effects:</strong> By onboarding one elite real estate agent who manages probate listings, we instantly bring their network of vendors and service providers onto our platform.</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-title">The Bridge Analogy</div>
+    <p style="margin:0;">
+      "We are building the standardized railroad for the entire transition economy. If you want to be a serious
+      transition professional in this market, you have to be on EstateSalen. We don't acquire users one-by-one; we
+      acquire clusters."
+    </p>
+  </div>
+
+  <h3>Agent Partnership Tools</h3>
+  <ul>
+    <li>Territory applications with ROI calculators and profit-share calculators.</li>
+    <li>Agent-operator portal with territory management, city assignments, and partnership controls.</li>
+    <li>Listing pool submissions for agents to submit properties needing estate sale services.</li>
+    <li>Automated operator matching and notification for submitted listings.</li>
+    <li>Commission tracking and wallet integration for transparent financial settlement.</li>
+  </ul>
+</div>
+
+<!-- SECTION 9: MONETIZATION -->
+<div class="section">
+  <h2>9. Diversified Monetization Stack</h2>
+  <p>
+    We have structured our revenue model to be recession-resistant by diversifying across both SaaS (recurring) and
+    transactional (upside) streams. This multi-layered approach ensures compounding growth and high-margin scalability.
+  </p>
+
+  <table>
+    <tr>
+      <th style="width:25%;">Revenue Layer</th>
+      <th style="width:45%;">Description</th>
+      <th style="width:30%;">Strategic Goal</th>
+    </tr>
+    <tr>
+      <td><strong>Tiered SaaS Subscriptions</strong></td>
+      <td>Monthly recurring revenue from Starter to Elite operator, dealer, and agent tiers.</td>
+      <td>Stability &amp; Retention</td>
+    </tr>
+    <tr>
+      <td><strong>Marketplace Take-Rate</strong></td>
+      <td>Percentage-based commission on every POS and marketplace sale processed through the platform.</td>
+      <td>Growth Upside</td>
+    </tr>
+    <tr>
+      <td><strong>Referral &amp; Commission Fees</strong></td>
+      <td>B2B referral fees when we match sellers with our agent/vendor network; commission splits on closed deals.</td>
+      <td>Network Effect</td>
+    </tr>
+    <tr>
+      <td><strong>Premium Placements</strong></td>
+      <td>High-margin fees for featured sales, promoted listings, national/local featured status, and ad placements.</td>
+      <td>Cash-Flow Efficiency</td>
+    </tr>
+    <tr>
+      <td><strong>Marketing Campaign Services</strong></td>
+      <td>Fee-for-service email campaigns, SMS campaigns, and social media campaign management.</td>
+      <td>Service Upsell</td>
+    </tr>
+    <tr>
+      <td><strong>AI Credit Purchases</strong></td>
+      <td>Pay-as-you-go AI feature usage: Google Lens searches, image analysis, and advanced AI model access.</td>
+      <td>Usage-Based Upside</td>
+    </tr>
+    <tr>
+      <td><strong>Email Profile Packages</strong></td>
+      <td>Elite plan includes 1,000 email profiles; additional blocks of 1,000 available for $40 each.</td>
+      <td>Volume-Based Upside</td>
+    </tr>
+    <tr>
+      <td><strong>Enterprise Insights (Future)</strong></td>
+      <td>Data-as-a-Service for appraisers, insurers, banks, and financial institutions.</td>
+      <td>Long-term Valuation</td>
+    </tr>
+  </table>
+
+  <h3>Featured Listing Economics</h3>
+  <ul>
+    <li><strong>National Featured:</strong> Premium placement across the entire platform.</li>
+    <li><strong>Local Featured:</strong> 30-day featured status in a specific region.</li>
+    <li><strong>Promoted to All Users:</strong> Platform-wide promotion for high-visibility sales.</li>
+    <li><strong>Email &amp; SMS Campaign Add-ons:</strong> Per-campaign pricing for targeted outreach.</li>
+  </ul>
+
+  <h3>Biz-in-a-Box</h3>
+  <p>
+    A turnkey business-in-a-box offering for new estate sale operators: one-time setup fee, discounted monthly fee for
+    year one, and ongoing revenue share. This creates a pipeline of new operators entering the ecosystem with
+    EstateSalen as their foundational platform from day one.
+  </p>
+</div>
+
+<!-- SECTION 10: SUBSCRIPTION TIERS -->
+<div class="section">
+  <h2>10. Subscription Tiers &amp; Package Structure</h2>
+  <p>
+    Our subscription packages are structured by account type and tier level, with granular feature access controlled
+    through allowed features, allowed pages, and usage limits.
+  </p>
+
+  <h3>Account Types</h3>
+  <ul>
+    <li>Estate Sale Operator</li>
+    <li>Real Estate Agent</li>
+    <li>Vendor (service providers across 60+ categories)</li>
+    <li>Consignor</li>
+    <li>Investor</li>
+    <li>Biz-in-a-Box (new operator pipeline)</li>
+    <li>Reseller</li>
+    <li>Collector/Dealer</li>
+  </ul>
+
+  <h3>Tier Levels</h3>
+  <table>
+    <tr>
+      <th>Tier</th>
+      <th>Positioning</th>
+      <th>Key Differentiators</th>
+    </tr>
+    <tr>
+      <td><strong>Starter</strong></td>
+      <td>Entry-level for new operators</td>
+      <td>Limited listings, basic photos, core POS</td>
+    </tr>
+    <tr>
+      <td><strong>Growth</strong></td>
+      <td>Expanding operators</td>
+      <td>More listings, enhanced marketing tools</td>
+    </tr>
+    <tr>
+      <td><strong>Professional</strong></td>
+      <td>Established operators</td>
+      <td>Full operational stack, marketing tasks (no advanced marketing tools)</td>
+    </tr>
+    <tr>
+      <td><strong>Elite</strong></td>
+      <td>Top-tier operators</td>
+      <td>Unlimited listings, full Marketing section (Campaigns, Analytics, Social Ads Hub), 1,000 email profiles included</td>
+    </tr>
+  </table>
+
+  <h3>Usage Limits by Tier</h3>
+  <table>
+    <tr>
+      <th>Limit</th>
+      <th>Starter</th>
+      <th>Growth</th>
+      <th>Professional</th>
+      <th>Elite</th>
+    </tr>
+    <tr>
+      <td>Active Listings</td>
+      <td>3</td>
+      <td>10</td>
+      <td>25</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <td>Photos Per Listing</td>
+      <td>50</td>
+      <td>100</td>
+      <td>Unlimited</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <td>Monthly Leads</td>
+      <td>10</td>
+      <td>25</td>
+      <td>50</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <td>Marketing Campaigns</td>
+      <td>0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>Unlimited</td>
+    </tr>
+    <tr>
+      <td>Storage Capacity</td>
+      <td>10 GB</td>
+      <td>50 GB</td>
+      <td>100 GB</td>
+      <td>Unlimited</td>
+    </tr>
+  </table>
+  <p style="font-size:10pt; color:#94a3b8;">* Specific limits are configurable per package and may vary by account type.</p>
+
+  <h3>Feature Access Control</h3>
+  <p>
+    Each package defines <strong>allowed_features</strong> (structured feature keys), <strong>allowed_pages</strong>
+    (accessible page routes), and <strong>limits</strong> (usage caps). A separate <strong>PageAccess</strong> entity
+    controls page-level access by account type, ensuring granular permission management across the entire platform.
+  </p>
+
+  <h3>Vendor Subscriptions</h3>
+  <p>
+    Vendors across 60+ service categories (real estate agents, probate attorneys, cleanout crews, movers, appraisers,
+    etc.) subscribe at standard, preferred, or premier tiers. Donation companies are always free&mdash;no subscription
+    fee, ever&mdash;as a community service commitment.
+  </p>
+</div>
+
+<!-- SECTION 11: AI INFRASTRUCTURE -->
+<div class="section">
+  <h2>11. AI &amp; Autonomous Agent Infrastructure</h2>
+  <p>
+    Most platforms in this space are "human-in-the-loop." Ours is "AI-in-the-loop," meaning we can scale to thousands
+    of active operators without a linear increase in headcount. Our autonomous agent ecosystem is the engine that
+    makes this possible.
+  </p>
+
+  <h3>The Autonomous Agent Ecosystem</h3>
+  <p>
+    We have deployed a multi-agent system where specialized AI agents handle distinct business functions:
+  </p>
+  <table>
+    <tr>
+      <th>Agent</th>
+      <th>Function</th>
+    </tr>
+    <tr>
+      <td><strong>Admin Ops Agent</strong></td>
+      <td>Platform administration, daily reports, system health monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>Lead Conversion Agent</strong></td>
+      <td>Lead scoring, nurturing sequences, conversion optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Marketing Autopilot Agent</strong></td>
+      <td>Social media scheduling, campaign generation, ad creative drafting</td>
+    </tr>
+    <tr>
+      <td><strong>Inventory Pricing Agent</strong></td>
+      <td>Item pricing intelligence, comparable analysis, knowledge extraction</td>
+    </tr>
+    <tr>
+      <td><strong>Content SEO Agent</strong></td>
+      <td>Automated content generation, SEO optimization, internal linking</td>
+    </tr>
+    <tr>
+      <td><strong>Customer Success Agent</strong></td>
+      <td>Onboarding guidance, support interactions, retention workflows</td>
+    </tr>
+    <tr>
+      <td><strong>Relationship Coach</strong></td>
+      <td>Agent-operator relationship health scoring and intervention</td>
+    </tr>
+    <tr>
+      <td><strong>Financial Ops Agent</strong></td>
+      <td>Commission tracking, wallet management, payout processing</td>
+    </tr>
+    <tr>
+      <td><strong>Quality Assurance Agent</strong></td>
+      <td>Content moderation, spam detection, compliance enforcement</td>
+    </tr>
+    <tr>
+      <td><strong>Community Moderation Agent</strong></td>
+      <td>Cool Finds story and comment moderation with toxicity detection</td>
+    </tr>
+    <tr>
+      <td><strong>Item Match Agent</strong></td>
+      <td>Wanted item matching to new sale inventory</td>
+    </tr>
+    <tr>
+      <td><strong>Onboarding Agent</strong></td>
+      <td>New user onboarding flow and recommendation generation</td>
+    </tr>
+  </table>
+
+  <h3>Autonomous Run System</h3>
+  <p>
+    Operators can compose, propose, approve, execute, and cancel autonomous runs&mdash;multi-step AI workflows that
+    execute business logic without human intervention. Each run is tracked with action queues, execution confirmations,
+    and detailed tool logs for full transparency and auditability.
+  </p>
+
+  <h3>AI Credit Management</h3>
+  <p>
+    A sophisticated credit system governs AI usage:
+  </p>
+  <ul>
+    <li>Per-operator AI credit accounts with monthly limits, bonus credits, and rollover credits.</li>
+    <li>Per-mode credit configuration (general assistant, blog post, image generation, video script, etc.).</li>
+    <li>Google Lens search credits with separate purchase and monitoring flows.</li>
+    <li>Consumer image search credits (10 free annually, with purchased add-ons).</li>
+    <li>Operator AI usage alerts for anomaly detection.</li>
+  </ul>
+
+  <h3>AI Coach</h3>
+  <p>
+    A platform-wide AI coach provides guided content flows, tone adjustment, voice preferences, sale promotion
+    engines, and screen-aware actions. The coach adapts to the operator's current context and provides actionable
+    recommendations.
+  </p>
+</div>
+
+<!-- SECTION 12: MASTER DIRECTORY -->
+<div class="section">
+  <h2>12. The Master Operator Directory: Data Moat</h2>
+  <p>
+    Through our automated ingestion and cross-source deduplication, we maintain the most accurate, geocoded operator
+    and vendor database in the United States. This is our proprietary data moat&mdash;the "Source of Truth" for the
+    entire industry.
+  </p>
+
+  <h3>How It Works</h3>
+  <p>
+    Our system ingests operator data from multiple sources (estatesales.org, estatesales.net, FutureEstateOperator
+    leads, PropStream data) and merges them into a single, deduplicated record per company. The primary deduplication
+    key is <strong>normalized phone number</strong>, ensuring reliable cross-source matching regardless of business
+    name variations.
+  </p>
+
+  <h3>Rich Data Per Record</h3>
+  <ul>
+    <li>Company name, phone, email, website, owner name</li>
+    <li>City, state, ZIP, county with geocoded coordinates</li>
+    <li>Services offered, memberships, credentials</li>
+    <li>Service area cities, membership tier, years in business</li>
+    <li>Sales posted, active sales count, bonded/insured status</li>
+    <li>Logo image, profile URL, social media links</li>
+    <li>Subscription status and claimed-by-user ID</li>
+    <li>Enrichment status, lead stage, audience sync status</li>
+    <li>Source tracking (which entities contributed to each record)</li>
+    <li>Merge status (single-source vs. merged from multiple sources)</li>
+  </ul>
+
+  <h3>Build &amp; Maintenance</h3>
+  <p>
+    The directory is rebuilt through a batched, time-budgeted, and resumable process that uses payload cursors to
+    prevent timeouts during full database updates. The clear phase uses parallel, throttled individual deletions to
+    avoid rate-limiting. A dedicated encoding-fix utility scans and normalizes mojibake characters in directory records.
+  </p>
+
+  <h3>Server-Side Search</h3>
+  <p>
+    A dedicated server-side search function handles large-scale database queries beyond client-side limits, enabling
+    fast, paginated search across the entire directory. Server-side aggregation provides dashboard stats without
+    hitting client-side 500-record limits.
+  </p>
+
+  <h3>Subscriber Sync</h3>
+  <p>
+    During each build, registered operator Users are matched to MasterOperatorDirectory records by phone and stamped
+    as active subscribers. This enables subscriber badge display in the public directory and provides a clear view of
+    which operators are paying platform members.
+  </p>
+
+  <h3>Public Directory</h3>
+  <p>
+    The public-facing directory uses MasterOperatorDirectory as the single source of truth. Users can browse by state,
+    search by company name, view interactive maps, and claim their business listing. Unclaimed listings show a "Claim
+    My Business" button visible only to Operator user roles.
+  </p>
+
+  <h3>National Scraping Infrastructure</h3>
+  <p>
+    We maintain dedicated scraping functions for all 50 states plus DC, with state-specific test functions and
+    duplicate-cleanup utilities. This infrastructure continuously refreshes our directory with new operators and
+    updates existing records.
+  </p>
+</div>
+
+<!-- SECTION 13: KPIs -->
+<div class="section">
+  <h2>13. Operational Performance &amp; KPIs</h2>
+  <p>
+    Our platform tracks comprehensive KPIs across leads, opportunities, estate sales, inventory, revenue, and
+    conversion. The following metrics are indicative of platform velocity and operational density.
+  </p>
+
+  <h3>Key Performance Indicators</h3>
+  <table>
+    <tr>
+      <th>Metric</th>
+      <th>Indicative Value</th>
+      <th>Significance</th>
+    </tr>
+    <tr>
+      <td>Qualified Lead &rarr; Deal Conversion Rate</td>
+      <td>~25%</td>
+      <td>AI matching tools outperform manual sales teams</td>
+    </tr>
+    <tr>
+      <td>Items Sold Per Sale (Average)</td>
+      <td>~12</td>
+      <td>High liquidity and buyer demand per event</td>
+    </tr>
+    <tr>
+      <td>Cataloging Labor Reduction</td>
+      <td>~70%</td>
+      <td>SerpAPI + AI pricing eliminates manual research</td>
+    </tr>
+    <tr>
+      <td>Average Estate Sale Value</td>
+      <td>~$708</td>
+      <td>Baseline transaction value per event</td>
+    </tr>
+    <tr>
+      <td>Revenue/Lead Snapshot (Period)</td>
+      <td>~$8,500</td>
+      <td>Indicative of the growth funnel</td>
+    </tr>
+  </table>
+
+  <h3>Tracked KPI Entity Fields</h3>
+  <ul>
+    <li>Leads count, opportunities count, estate sales count</li>
+    <li>Inventory items sold, revenue total, average sale value</li>
+    <li>Conversion rate, territory, reporting period</li>
+    <li>Daily platform snapshots for trend analysis</li>
+  </ul>
+
+  <h3>Scalability Velocity</h3>
+  <p>
+    Because our territory launches are automated (content + operators + marketing), our Customer Acquisition Cost (CAC)
+    drops as we move into new regions. The SEO engine captures demand at near-zero marginal cost, and the referral
+    pipeline converts that demand into paying operators without a linear sales team.
+  </p>
+
+  <h3>Unit Economics</h3>
+  <p>
+    High-leverage AI tools significantly reduce the cost-per-sale for our operators, ensuring maximum platform
+    retention and lifetime value (LTV). The combination of recurring SaaS revenue and transactional upside creates
+    a high-margin, compounding P&amp;L.
+  </p>
+</div>
+
+<!-- SECTION 14: TERRITORY ROLLOUT -->
+<div class="section">
+  <h2>14. Territory Rollout: The Cluster &amp; Convert Model</h2>
+  <p>
+    We don't scale by "spraying" the country. We scale by <strong>winning high-density clusters</strong> and converting
+    them into permanent infrastructure. This is our repeatable, defensible growth engine.
+  </p>
+
+  <h3>Phase 1: The "Lead Magnet" Launch (Demand Dominance)</h3>
+  <ul>
+    <li><strong>Targeting:</strong> We identify a high-density territory (typically a large metropolitan county with high probate/transition volume).</li>
+    <li><strong>The Hub Launch:</strong> Our automated SEO Engine goes live with the [County] Probate Hub and [City] Estate Sale Hub, instantly capturing 100% of the localized search volume.</li>
+    <li><strong>Outcome:</strong> We become the default digital answer for anyone going through a transition in that region.</li>
+  </ul>
+
+  <h3>Phase 2: The "Bridge" Activation (Supply Conversion)</h3>
+  <ul>
+    <li><strong>Operator Onboarding:</strong> We invite the top 5 estate sale operators in the county. We provide them with our Super-App tools. They bring their existing inventory and buyer lists into our ecosystem.</li>
+    <li><strong>Agent Integration:</strong> We then present our Referral Pipeline to the top Probate Real Estate Agents in that same territory, offering them exclusive access to verified, inventory-ready estates.</li>
+  </ul>
+
+  <h3>Phase 3: The "Network Lock" (The Moat)</h3>
+  <ul>
+    <li><strong>Mutual Referral Loop:</strong> Once the Agent and the Operator start referring deals to each other through EstateSalen, the B2B stickiness is absolute. They are no longer just software users; they are business partners whose revenue growth depends on the platform's transparency.</li>
+    <li><strong>Expansion:</strong> We repeat this cluster model county-by-county, eventually creating a contiguous network that covers entire states.</li>
+  </ul>
+
+  <h3>The Flywheel Effect</h3>
+  <p>
+    Once we establish a cluster (SEO dominance + local Operator density + Agent network), the cost of acquiring the
+    next customer in that territory drops to near zero because the referral network is already doing the work for us.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">The 48-Hour Territory Launch</div>
+    <p style="margin:0;">
+      1. Demand Initialization: SEO Engine goes live, occupying #1 search for all life-transition intent in the county.<br/>
+      2. Operator Deployment: Top 5 county operators onboarded as "local nodes."<br/>
+      3. Bridge Activation: Referral Pipeline connects county Probate Agents to operators.<br/>
+      4. Network Lock: Deal-sharing creates a proprietary B2B moat.
+    </p>
+  </div>
+
+  <h3>Territory Management Tools</h3>
+  <ul>
+    <li>Territory launch forms with automated page publishing.</li>
+    <li>Housio territory sync for external territory data integration.</li>
+    <li>Micro-territory deduplication and cleanup utilities.</li>
+    <li>Territory ROI calculators for agent applications.</li>
+    <li>National coverage grid for visibility into deployment status.</li>
+    <li>Facebook page and post management per territory.</li>
+  </ul>
+</div>
+
+<!-- SECTION 15: FINANCIAL ROADMAP -->
+<div class="section">
+  <h2>15. Financial Roadmap &amp; Unit Economics</h2>
+  <p>
+    We avoid the linear growth trap by replacing human effort with Autonomous AI Infrastructure. Our software costs
+    remain fixed while our revenue (SaaS + Commission + Transaction Fees) grows linearly with every deal processed.
+  </p>
+
+  <h3>Revenue Phase Progression</h3>
+  <table>
+    <tr>
+      <th>Phase</th>
+      <th>Primary Revenue</th>
+      <th>Strategic Metric</th>
+    </tr>
+    <tr>
+      <td><strong>Early Stage</strong></td>
+      <td>SaaS Subscriptions (Operators)</td>
+      <td>Market Penetration %</td>
+    </tr>
+    <tr>
+      <td><strong>Mid Stage</strong></td>
+      <td>Marketplace Commissions &amp; Lead Fees</td>
+      <td>Transaction Velocity</td>
+    </tr>
+    <tr>
+      <td><strong>Late Stage</strong></td>
+      <td>Referral Fees &amp; Premium B2B Ads</td>
+      <td>Ecosystem Stickiness</td>
+    </tr>
+    <tr>
+      <td><strong>Maturity</strong></td>
+      <td>Enterprise Data Insights &amp; API Licensing</td>
+      <td>Long-term Valuation</td>
+    </tr>
+  </table>
+
+  <h3>Margin Expansion Logic</h3>
+  <p>
+    Because the platform <em>is</em> the infrastructure, our software costs remain fixed while our revenue grows
+    linearly with every deal processed. The AI engine handles outreach, lead matching, marketing, and pricing
+    automatically&mdash;meaning we can scale to thousands of active operators without a linear increase in headcount.
+  </p>
+
+  <h3>Recurring Revenue Stability</h3>
+  <ul>
+    <li>Monthly SaaS subscriptions provide predictable, compounding revenue.</li>
+    <li>Annual pricing options improve cash flow and reduce churn.</li>
+    <li>Per-item pricing model available for low-volume operators.</li>
+    <li>Biz-in-a-Box setup fees provide upfront cash with ongoing revenue share.</li>
+  </ul>
+
+  <h3>Transactional Upside</h3>
+  <ul>
+    <li>Marketplace take-rates scale with platform transaction volume.</li>
+    <li>Referral fees scale with agent-operator deal flow.</li>
+    <li>Featured listing and ad placement fees scale with operator count.</li>
+    <li>AI credit purchases scale with AI feature adoption.</li>
+    <li>Email profile package add-ons ($40 per additional 1,000) scale with operator marketing maturity.</li>
+  </ul>
+
+  <h3>Platform Expense Management</h3>
+  <p>
+    We track platform expenses, ad spend, daily cost-revenue analysis, and platform-wide snapshots to maintain
+    visibility into unit economics and margin health. This data feeds directly into investor reporting.
+  </p>
+</div>
+
+<!-- SECTION 16: COMPETITIVE LANDSCAPE -->
+<div class="section">
+  <h2>16. Competitive Landscape &amp; Strategic Moat</h2>
+  <p>
+    Our competitors are not other software platforms&mdash;they are the status quo: spreadsheets, paper signs, phone
+    calls, and word-of-mouth. When software competitors do exist, they are single-feature tools that cannot replicate
+    our ecosystem.
+  </p>
+
+  <h3>How We Differentiate</h3>
+  <table>
+    <tr>
+      <th>Competitor Type</th>
+      <th>Their Limitation</th>
+      <th>Our Advantage</th>
+    </tr>
+    <tr>
+      <td>Event Calendars (estatesales.org, estatesales.net)</td>
+      <td>Just listings; no operational tools, no agent bridge, no AI</td>
+      <td>Full operating system + referral pipeline + autonomous AI</td>
+    </tr>
+    <tr>
+      <td>POS Software (Square, etc.)</td>
+      <td>Generic; no estate-sale-specific features or marketplace</td>
+      <td>Purpose-built for estate sales with integrated marketplace and multi-channel listing</td>
+    </tr>
+    <tr>
+      <td>Marketing Tools (Mailchimp, etc.)</td>
+      <td>Generic; no estate-sale audience or automation</td>
+      <td>Autonomous marketing agents with estate-sale-specific templates and audience targeting</td>
+    </tr>
+    <tr>
+      <td>Real Estate CRMs</td>
+      <td>No estate sale integration or vendor network</td>
+      <td>The Market Bridge connects agents to operators with verifiable referral tracking</td>
+    </tr>
+  </table>
+
+  <h3>Our Defensible Moat</h3>
+  <ol>
+    <li><strong>The "Source of Truth" Directory:</strong> Through automated ingestion and cross-source deduplication, we maintain the industry's most comprehensive operator directory. No competitor can replicate this without years of scraping and enrichment.</li>
+    <li><strong>Closed-Loop Ecosystem:</strong> By linking Reseller Networks, Cleanout Crews, and Estate Sale Operators, we create a closed-loop ecosystem where more participants increase the liquidity of every sale on the platform.</li>
+    <li><strong>Autonomous Scalability:</strong> Most platforms in this space are "human-in-the-loop." Ours is "AI-in-the-loop," meaning we can scale to thousands of active operators without a linear increase in headcount.</li>
+    <li><strong>The Market Bridge:</strong> We are the only platform tying Real Estate Agents and Estate Sale Operators together. Once they transact through our platform, the switching cost is prohibitively high because we are their revenue partner.</li>
+    <li><strong>SEO Authority:</strong> Our automated content engine has generated thousands of indexed pages. This topical authority compounds over time and is extremely difficult for a new entrant to displace.</li>
+  </ol>
+
+  <div class="callout">
+    <div class="callout-title">The Investor Answer</div>
+    <p style="margin:0;">
+      "Software is easy to copy; liquidity and trust are not. By being the bridge between Agents and Operators, we
+      control the deal flow. Competitors only offer tools; we offer revenue."
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 17: TECHNOLOGY ARCHITECTURE -->
+<div class="section">
+  <h2>17. Technology Architecture Overview</h2>
+  <p>
+    EstateSalen is built on a modern, scalable technology stack designed for rapid feature development, autonomous
+    AI integration, and high-volume data processing.
+  </p>
+
+  <h3>Frontend Stack</h3>
+  <ul>
+    <li><strong>React + Vite:</strong> Modern, component-based UI with hot-reload development.</li>
+    <li><strong>Tailwind CSS:</strong> Token-based design system for consistent, responsive styling.</li>
+    <li><strong>shadcn/ui:</strong> Accessible, reusable component library.</li>
+    <li><strong>React Router:</strong> Client-side routing with layout composition.</li>
+    <li><strong>React Query:</strong> Server-state management for data fetching and caching.</li>
+    <li><strong>React Leaflet:</strong> Interactive maps with custom pin registry.</li>
+    <li><strong>Framer Motion:</strong> Smooth animations and transitions.</li>
+    <li><strong>Recharts:</strong> Data visualization for dashboards and analytics.</li>
+    <li><strong>React Hook Form + Zod:</strong> Type-safe form validation.</li>
+    <li><strong>React Markdown:</strong> Rich content rendering for articles and stories.</li>
+  </ul>
+
+  <h3>Backend &amp; Infrastructure</h3>
+  <ul>
+    <li><strong>Base44 BaaS:</strong> Backend-as-a-service with auth, database, integrations, and hosting.</li>
+    <li><strong>Deno Deploy:</strong> Serverless backend functions for external API integration.</li>
+    <li><strong>Entity-based Data Model:</strong> 200+ entity types with JSON schemas, built-in RLS, and real-time subscriptions.</li>
+    <li><strong>Automations:</strong> Scheduled, entity-triggered, connector-webhook, and in-app-agent automations.</li>
+  </ul>
+
+  <h3>AI &amp; Integrations</h3>
+  <ul>
+    <li><strong>OpenAI API:</strong> LLM integration for content generation, coaching, and analysis.</li>
+    <li><strong>SerpAPI:</strong> Visual search for item pricing intelligence.</li>
+    <li><strong>Google Lens:</strong> Image-based item identification and pricing.</li>
+    <li><strong>Google Maps:</strong> Geocoding, routing, and location services.</li>
+    <li><strong>Google Search Console:</strong> SEO performance tracking and indexing submission.</li>
+    <li><strong>Meta/Facebook Ads:</strong> Ad campaign creation, audience sync, and lead intake.</li>
+    <li><strong>Customer.io:</strong> Pipelines/CDP mode for marketing event tracking.</li>
+    <li><strong>Housio/Houszu:</strong> Territory data integration and deal synchronization.</li>
+    <li><strong>PropStream:</strong> Real estate listing data for lead extraction.</li>
+    <li><strong>Base44 Payments (Wix Payments):</strong> Checkout and subscription billing.</li>
+    <li><strong>Gmail OAuth:</strong> CRM email sync for agent-operator communication.</li>
+  </ul>
+
+  <h3>Mobile Architecture</h3>
+  <p>
+    The same React codebase publishes to iOS and Android. A dedicated mobile app shell with bottom-tab navigation
+    isolates consumer experiences from administrative UI. All admin-facing elements are strictly excluded from the
+    mobile build, creating a focused, consumer-only application.
+  </p>
+
+  <h3>Security &amp; Access Control</h3>
+  <ul>
+    <li>Role-based access control (RBAC) with 13+ account types.</li>
+    <li>Page-level access configuration per account type.</li>
+    <li>Row-level security (RLS) on all entities.</li>
+    <li>Admin-only functions with role verification.</li>
+    <li>Lead circumvention detection to protect referral fee integrity.</li>
+    <li>Content moderation with AI-powered spam and toxicity detection.</li>
+  </ul>
+</div>
+
+<!-- SECTION 18: DATA ASSETS -->
+<div class="section">
+  <h2>18. Data Assets &amp; Future-State Monetization</h2>
+  <p>
+    By the time we hit 100 counties, we will possess the most granular, data-rich view of the $100B estate settlement
+    industry&mdash;an asset that is inherently valuable to larger financial and property institutions.
+  </p>
+
+  <h3>Proprietary Data Assets</h3>
+  <ul>
+    <li><strong>Master Operator Directory:</strong> The most comprehensive, deduplicated, geocoded operator database in the U.S.</li>
+    <li><strong>Item Knowledge Base:</strong> Growing database of item pricing history, reference images, and knowledge extractions.</li>
+    <li><strong>Sale Performance Data:</strong> Historical data on sale volume, item turnover, and revenue per sale.</li>
+    <li><strong>Lead &amp; Conversion Pipeline:</strong> End-to-end lead scoring, conversion rates, and deal flow data.</li>
+    <li><strong>Property Lifecycle Data:</strong> From probate inquiry through estate sale to property listing&mdash;the full transition journey.</li>
+    <li><strong>Consumer Behavior Data:</strong> Search patterns, favorite companies, wanted items, and route planning behavior.</li>
+    <li><strong>Territory Demand Signals:</strong> Localized demand metrics and market reports per county.</li>
+  </ul>
+
+  <h3>Future-State Monetization</h3>
+  <table>
+    <tr>
+      <th>Data Product</th>
+      <th>Target Buyer</th>
+      <th>Value Proposition</th>
+    </tr>
+    <tr>
+      <td>Market Trend Reports</td>
+      <td>Appraisers, Auction Houses</td>
+      <td>Real-time pricing and demand data by category and region</td>
+    </tr>
+    <tr>
+      <td>Transition Risk Scoring</td>
+      <td>Insurance Providers</td>
+      <td>Property transition likelihood and timeline prediction</td>
+    </tr>
+    <tr>
+      <td>Operator Quality Scores</td>
+      <td>Banks, Financial Institutions</td>
+      <td>Verified operator performance and reliability metrics</td>
+    </tr>
+    <tr>
+      <td>Inventory Intelligence API</td>
+      <td>Resellers, Collectors</td>
+      <td>Real-time inventory availability and pricing across markets</td>
+    </tr>
+    <tr>
+      <td>Probate Property Pipeline</td>
+      <td>Real Estate Brokerages</td>
+      <td>Early-stage identification of properties entering transition</td>
+    </tr>
+  </table>
+
+  <h3>The Compounding Asset</h3>
+  <p>
+    Every transaction on our platform enriches our data assets. Every data asset makes our platform more valuable to
+    the next participant. This compounding data advantage is the ultimate long-term moat&mdash;and the ultimate
+    long-term valuation driver.
+  </p>
+</div>
+
+<!-- SECTION 19: GO-TO-MARKET -->
+<div class="section">
+  <h2>19. Go-to-Market Strategy</h2>
+  <p>
+    Our go-to-market strategy leverages the compounding loop of our three pillars. We don't need a massive sales team
+    because our SEO engine and internal referral pipeline attract the market leaders to us.
+  </p>
+
+  <h3>Demand-Side Acquisition</h3>
+  <ul>
+    <li><strong>SEO Engine:</strong> Automated local content captures high-intent search traffic at near-zero marginal cost.</li>
+    <li><strong>Estate Sale University:</strong> Educational content builds trust and captures consumers early in their journey.</li>
+    <li><strong>Cool Finds Blog:</strong> Community-driven content creates viral, shareable discovery.</li>
+    <li><strong>Community Events:</strong> Flea markets and antique shows expand the discovery surface area.</li>
+    <li><strong>Mobile App:</strong> Consumer-first mobile experience drives retention and repeat visits.</li>
+  </ul>
+
+  <h3>Supply-Side Acquisition</h3>
+  <ul>
+    <li><strong>Directory Ingestion:</strong> We proactively scrape and ingest operators from public sources, then invite them to claim their listings.</li>
+    <li><strong>Biz-in-a-Box:</strong> We create new operators from scratch with a turnkey business package.</li>
+    <li><strong>Free Tier:</strong> Starter tier removes friction for new operators to join.</li>
+    <li><strong>AI Tool Demonstration:</strong> The 70% labor reduction is a compelling, quantifiable value proposition.</li>
+  </ul>
+
+  <h3>Bridge-Side Acquisition</h3>
+  <ul>
+    <li><strong>Agent Territory Applications:</strong> Agents apply for exclusive territory rights with ROI calculators.</li>
+    <li><strong>Listing Pool Submissions:</strong> Agents submit properties needing estate sale services, drawing operators onto the platform.</li>
+    <li><strong>Referral Revenue:</strong> Once agents experience the referral revenue, they become advocates.</li>
+  </ul>
+
+  <h3>Retention Strategy</h3>
+  <ul>
+    <li>Recurring SaaS revenue with annual pricing options.</li>
+    <li>Network effects: leaving the platform means losing referral partners.</li>
+    <li>AI credit rollover encourages continued usage.</li>
+    <li>Profile completion gates with missing-field prompts.</li>
+    <li>Onboarding modal for new operators to ensure activation.</li>
+    <li>Relationship health scoring to identify at-risk partnerships.</li>
+  </ul>
+</div>
+
+<!-- SECTION 20: RISK MITIGATION -->
+<div class="section">
+  <h2>20. Risk Mitigation</h2>
+  <p>
+    We have proactively addressed the primary risks investors may identify.
+  </p>
+
+  <h3>Market Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> Economic downturn reduces estate sale activity.</li>
+    <li><strong>Mitigation:</strong> Life transitions (death, divorce, downsizing) are recession-resistant. Diversified revenue (SaaS + transactional) provides stability. The Silver Tsunami demographic shift is a multi-decade tailwind.</li>
+  </ul>
+
+  <h3>Competitive Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> A well-funded competitor copies our software.</li>
+    <li><strong>Mitigation:</strong> Software is easy to copy; liquidity and trust are not. Our Market Bridge, Master Directory, and SEO authority create network effects that cannot be replicated by a feature clone. The switching cost for connected agent-operator pairs is prohibitively high.</li>
+  </ul>
+
+  <h3>Technology Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> AI costs or API dependencies create margin pressure.</li>
+    <li><strong>Mitigation:</strong> Our AI credit system passes costs through to operators. Multi-model support (OpenAI, Google, Anthropic) prevents vendor lock-in. Per-mode credit configuration allows margin optimization.</li>
+  </ul>
+
+  <h3>Regulatory Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> Probate and real estate regulations vary by jurisdiction.</li>
+    <li><strong>Mitigation:</strong> Our state and county guide content is jurisdiction-specific. Referral agreements include compliance acknowledgements. Lead circumvention detection protects referral fee integrity.</li>
+  </ul>
+
+  <h3>Operational Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> Scaling support for thousands of operators.</li>
+    <li><strong>Mitigation:</strong> Autonomous AI agents handle outreach, marketing, and support. The AI Coach provides guided onboarding. Quality assurance and community moderation agents handle content at scale.</li>
+  </ul>
+
+  <h3>Data Risk</h3>
+  <ul>
+    <li><strong>Risk:</strong> Data quality issues from multi-source ingestion.</li>
+    <li><strong>Mitigation:</strong> Phone-normalized deduplication, encoding-fix utilities, and continuous scraping infrastructure maintain data quality. Server-side search handles scale beyond client limits.</li>
+  </ul>
+</div>
+
+<!-- SECTION 21: INVESTMENT ASK -->
+<div class="section">
+  <h2>21. The Investment Ask &amp; Use of Funds</h2>
+  <p>
+    We are seeking investment to accelerate our territory rollout, deepen our AI infrastructure, and expand our data
+    monetization capabilities.
+  </p>
+
+  <h3>Use of Funds</h3>
+  <table>
+    <tr>
+      <th>Allocation</th>
+      <th>Percentage</th>
+      <th>Purpose</th>
+    </tr>
+    <tr>
+      <td>Territory Rollout</td>
+      <td>35%</td>
+      <td>Accelerate cluster-and-convert deployment across 100+ high-volume counties</td>
+    </tr>
+    <tr>
+      <td>AI Infrastructure</td>
+      <td>25%</td>
+      <td>Deepen autonomous agent capabilities, expand AI credit system, enhance pricing intelligence</td>
+    </tr>
+    <tr>
+      <td>Engineering &amp; Product</td>
+      <td>20%</td>
+      <td>Scale engineering team, build data monetization APIs, enhance mobile experience</td>
+    </tr>
+    <tr>
+      <td>Marketing &amp; Brand</td>
+      <td>10%</td>
+      <td>National brand awareness, operator acquisition campaigns, consumer app growth</td>
+    </tr>
+    <tr>
+      <td>Operations &amp; Compliance</td>
+      <td>10%</td>
+      <td>Legal, compliance, customer success infrastructure</td>
+    </tr>
+  </table>
+
+  <h3>Milestones</h3>
+  <ul>
+    <li><strong>Month 6:</strong> 50 active territories with SEO dominance and operator onboarding.</li>
+    <li><strong>Month 12:</strong> 100 active territories with full Bridge activation in top 25 metro areas.</li>
+    <li><strong>Month 18:</strong> Data monetization API launched; enterprise insights revenue begins.</li>
+    <li><strong>Month 24:</strong> National coverage with contiguous territory network across all major states.</li>
+  </ul>
+</div>
+
+<!-- SECTION 22: VISION -->
+<div class="section">
+  <h2>22. Vision: The Standardized Infrastructure</h2>
+  <p>
+    Our ultimate vision is to be the <strong>Standardized Infrastructure</strong> for the $100B+ life transition
+    economy. Every probate home, every estate liquidation, and every property sale in the US will eventually touch
+    our platform.
+  </p>
+
+  <h3>The MLS for Life Transitions</h3>
+  <p>
+    Just as the MLS (Multiple Listing Service) is the indispensable infrastructure for real estate transactions,
+    EstateSalen will be the indispensable infrastructure for life transitions. But unlike the MLS, we add B2B
+    financial settlement tools, autonomous AI automation, and a consumer trust layer&mdash;making us more valuable
+    and more defensible than a pure listing service.
+  </p>
+
+  <h3>The Three-Layer Control</h3>
+  <p>
+    Our model is simple: <strong>We own the Search (Demand), we own the Operating System (Supply), and we own the
+    Bridge (Referral Pipeline).</strong> Every county we enter reinforces this loop, making our platform more
+    defensible, more profitable, and more essential to the life transition economy.
+  </p>
+
+  <h3>The End State</h3>
+  <p>
+    When a family enters probate, they search for guidance and find our Estate Sale University. When they need an
+    estate sale company, they find our directory. When the operator catalogs their items, they use our AI pricing
+    engine. When the sale happens, buyers discover it on our mobile app. When the property needs to be listed, our
+    Referral Pipeline connects them to a vetted agent. When the cleanout happens, our vendor network handles it.
+    When the data is analyzed, our platform provides the insights.
+  </p>
+  <p>
+    <strong>Every step of the journey flows through EstateSalen.</strong> That is what it means to be the
+    infrastructure for an industry.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">Closing Statement</div>
+    <p style="margin:0;">
+      "We don't sell software; we sell deal flow. Our SEO engine does the work of 50 marketing managers. We control
+      the property lifecycle: from the first probate inquiry, through the estate sale cleanup, to the final real
+      estate listing. We are building the operating system for the next generation of property transition&mdash;and
+      we are the only company tying the two sectors of this business world together in a mutually beneficial
+      relationship."
+    </p>
+  </div>
+</div>
+
+<!-- SECTION 23: APPENDIX -->
+<div class="section">
+  <h2>23. Appendix: Feature Inventory</h2>
+  <p>
+    The following is a summary of the major feature categories currently deployed on the EstateSalen platform.
+  </p>
+
+  <h3>SEO &amp; Content Engine</h3>
+  <ul>
+    <li>Automated city, state, county, category, and brand hub page generation</li>
+    <li>Life event hub generation (probate, downsizing, divorce, foreclosure, etc.)</li>
+    <li>Estate Sale University article generation with FAQ and schema markup</li>
+    <li>Internal linking engine for topical authority</li>
+    <li>Automated sitemap generation and search console submission</li>
+    <li>Weekly SEO content generation and reporting</li>
+    <li>Daily SEO boosts and performance tracking</li>
+  </ul>
+
+  <h3>Operator Tools</h3>
+  <ul>
+    <li>Sale editor with photo management, rotation, and AI synopses</li>
+    <li>Batch pricing and deep search pricing modals</li>
+    <li>Google Lens pricing integration with credit management</li>
+    <li>Scan-and-cart POS with QR code scanning</li>
+    <li>Checkout station integration</li>
+    <li>Inventory and storage management</li>
+    <li>Sold inventory tracking</li>
+    <li>Multi-channel listing (eBay, Etsy)</li>
+    <li>Settlement statement generation</li>
+    <li>Sale recap and YouTube script generation</li>
+    <li>Buyout/liquidation event management with reseller bidding</li>
+    <li>Cleanout and donation matching</li>
+    <li>Print sign generation</li>
+    <li>Sale export functionality</li>
+  </ul>
+
+  <h3>Marketing &amp; Outreach</h3>
+  <ul>
+    <li>Autonomous marketing agent with social campaign generation</li>
+    <li>Monthly social content calendar generation</li>
+    <li>Facebook ad campaign creation and audience sync</li>
+    <li>Email campaign management with audience segmentation</li>
+    <li>Operator-to-follower email campaigns</li>
+    <li>Sale promotion engine with multi-channel publishing</li>
+    <li>Social post scheduling, approval, and publishing workflow</li>
+    <li>Marketing performance tracking and insights</li>
+  </ul>
+
+  <h3>Agent &amp; Referral Tools</h3>
+  <ul>
+    <li>Agent territory applications with ROI and profit-share calculators</li>
+    <li>Agent-operator portal with territory management</li>
+    <li>Referral deal pipeline with agreement generation</li>
+    <li>Referral QR code generation</li>
+    <li>Lead circumvention detection</li>
+    <li>Commission tracking and wallet integration</li>
+    <li>Listing pool submissions with operator matching</li>
+    <li>Partnership request, review, and termination workflows</li>
+  </ul>
+
+  <h3>Consumer Features</h3>
+  <ul>
+    <li>Mobile consumer app with bottom-tab navigation</li>
+    <li>Location-aware estate sale discovery maps</li>
+    <li>Route planner with drag-and-drop reordering</li>
+    <li>Early sign-in and QR check-in</li>
+    <li>Favorite companies with follow functionality</li>
+    <li>Wanted items with automatic matching</li>
+    <li>My calendar with monthly view</li>
+    <li>Rewards and check-in gamification</li>
+    <li>Cool Finds blog with AI metadata and community moderation</li>
+    <li>Community events (flea markets, antique shows)</li>
+    <li>Company directory with state-level browsing</li>
+    <li>Notification preferences with granular toggles</li>
+  </ul>
+
+  <h3>Admin &amp; Platform Management</h3>
+  <ul>
+    <li>Admin dashboard with KPI tracking</li>
+    <li>Master operator directory management</li>
+    <li>User management and role assignment</li>
+    <li>Page access configuration per account type</li>
+    <li>Subscription package management</li>
+    <li>AI credit configuration and monitoring</li>
+    <li>Platform expense and ad spend tracking</li>
+    <li>Daily cost-revenue analysis</li>
+    <li>Platform-wide snapshots and analytics</li>
+    <li>Autonomous run management and approval</li>
+    <li>Admin AI operator and command console</li>
+    <li>Content engine administration</li>
+    <li>Territory launch and management</li>
+    <li>National coverage grid</li>
+  </ul>
+
+  <h3>Vendor Network</h3>
+  <ul>
+    <li>60+ vendor types across 10 categories</li>
+    <li>Vendor management with tiered subscriptions</li>
+    <li>Vendor claim workflow</li>
+    <li>Cleanout lead matching</li>
+    <li>Donation company network (always free)</li>
+    <li>Reseller network with packup events</li>
+    <li>Collector/dealer dashboard</li>
+  </ul>
+
+  <h3>Integrations</h3>
+  <ul>
+    <li>OpenAI (multi-model LLM)</li>
+    <li>SerpAPI (visual search pricing)</li>
+    <li>Google Lens (image identification)</li>
+    <li>Google Maps (geocoding, routing)</li>
+    <li>Google Search Console (SEO tracking)</li>
+    <li>Meta/Facebook Ads (campaign management, lead intake)</li>
+    <li>Customer.io (marketing automation, CDP mode)</li>
+    <li>Housio/Houszu (territory and deal sync)</li>
+    <li>PropStream (real estate listing data)</li>
+    <li>Base44 Payments / Wix Payments (checkout, subscriptions)</li>
+    <li>Gmail OAuth (CRM email sync)</li>
+    <li>BCRise (data sync)</li>
+  </ul>
+
+  <p class="footer-note">
+    This document is a strategic overview prepared for investor review. Specific metrics, pricing, and feature
+    availability are subject to change as the platform evolves. For live data demonstrations, refer to the
+    platform's dashboard pages: /ActualRevenue, /EstimatedPNL, /SaleConversionPipeline, /AutonomousRunsDashboard.
+  </p>
+</div>
+
+</body>
+</html>
