@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { MapPin } from 'lucide-react';
@@ -70,6 +71,9 @@ export default function EmptySalesMap({ userLocation, searchRadius, communityEve
           <Button onClick={onTryLocation} className="bg-cyan-600 hover:bg-cyan-700">
             Try Different Location
           </Button>
+          <Link to="/ReferCompany" className="block mt-3 text-sm text-slate-500 hover:text-cyan-700 underline">
+            Know a company in this area? Refer them →
+          </Link>
         </div>
       </div>
     </div>
