@@ -278,7 +278,7 @@ export default function MobileHome() {
       </div>
 
       {/* CTA */}
-      <div className="px-4 mt-6 mb-4 space-y-4">
+      <div className="px-4 mt-6 mb-4 space-y-5">
         <Link to="/mobile/packages">
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-4 text-center text-white">
             <p className="font-semibold text-sm">Need an estate sale company?</p>
