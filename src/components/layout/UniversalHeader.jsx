@@ -22,6 +22,10 @@ import {
 import { base44 } from '@/api/base44Client';
 
 export default function UniversalHeader({ user, isAuthenticated }) {
+  // Hide the universal header inside the mobile app shell — it has its own header
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/mobile')) {
+    return null;
+  }
   const userInitials = user?.full_name
     ?.split(' ')
     .map(n => n[0])
