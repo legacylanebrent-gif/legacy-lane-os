@@ -2,19 +2,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // ─────────────────────────────────────────────
 // Customer.io Service Layer
-// Legacy Lane OS — Marketing Automation Engine
+// EstateSalen — Marketing Automation Engine
+// Pipelines (CDP) mode, US region
 // ─────────────────────────────────────────────
-// Environment variables required (add when ready):
-//   CUSTOMERIO_ENABLED=false
+// Environment variables:
+//   CUSTOMERIO_ENABLED=true
 //   CUSTOMERIO_API_MODE=pipelines
-//   CUSTOMERIO_PIPELINES_WRITE_KEY=
-//   CUSTOMERIO_TRACK_SITE_ID=
-//   CUSTOMERIO_TRACK_API_KEY=
-//   CUSTOMERIO_APP_API_KEY=
 //   CUSTOMERIO_REGION=us
+//   CUSTOMERIO_PIPELINES_WRITE_KEY=
+//   CUSTOMERIO_APP_API_KEY=
 //   CUSTOMERIO_WEBHOOK_SIGNING_SECRET=
 //   CUSTOMERIO_DEFAULT_FROM_EMAIL=
-//   CUSTOMERIO_DEFAULT_FROM_NAME=Legacy Lane Alerts
+//   CUSTOMERIO_DEFAULT_FROM_NAME=
 // ─────────────────────────────────────────────
 
 function getCustomerIoConfig() {
@@ -22,30 +21,17 @@ function getCustomerIoConfig() {
   const apiMode = Deno.env.get('CUSTOMERIO_API_MODE') || 'pipelines';
   const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
   const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '';
-  const trackSiteId = Deno.env.get('CUSTOMERIO_TRACK_SITE_ID') || '';
-  const trackApiKey = Deno.env.get('CUSTOMERIO_TRACK_API_KEY') || '';
   const appApiKey = Deno.env.get('CUSTOMERIO_APP_API_KEY') || '';
   const fromEmail = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_EMAIL') || '';
-  const fromName = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_NAME') || 'Legacy Lane Alerts';
+  const fromName = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_NAME') || 'EstateSalen Alerts';
 
-  const configured = enabled && (
-    (apiMode === 'pipelines' && !!pipelinesWriteKey) ||
-    (apiMode === 'track' && !!trackSiteId && !!trackApiKey)
-  );
+  const configured = enabled && !!pipelinesWriteKey;
 
-  return { enabled, configured, apiMode, region, pipelinesWriteKey, trackSiteId, trackApiKey, appApiKey, fromEmail, fromName };
+  return { enabled, configured, apiMode, region, pipelinesWriteKey, appApiKey, fromEmail, fromName };
 }
 
-function getPipelinesEndpoint(region) {
-  return region === 'eu'
-    ? 'https://cdp.customer.io/v1'
-    : 'https://cdp.customer.io/v1';
-}
-
-function getTrackEndpoint(region) {
-  return region === 'eu'
-    ? 'https://track-eu.customer.io/api/v1'
-    : 'https://track.customer.io/api/v1';
+function getPipelinesEndpoint() {
+  return 'https://cdp.customer.io/v1';
 }
 
 // Identify (create/update) a person in Customer.io
@@ -77,39 +63,20 @@ async function identifyConsumer(profile, config) {
     }
   };
 
-  if (config.apiMode === 'pipelines') {
-    const endpoint = `${getPipelinesEndpoint(config.region)}/identify`;
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Customer.io identify failed: ${res.status} — ${err}`);
-    }
-    return { sent: true, mode: 'pipelines' };
-  } else {
-    // Track API mode
-    const endpoint = `${getTrackEndpoint(config.region)}/customers/${encodeURIComponent(payload.userId)}`;
-    const auth = btoa(`${config.trackSiteId}:${config.trackApiKey}`);
-    const res = await fetch(endpoint, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`,
-      },
-      body: JSON.stringify(payload.traits),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Customer.io identify (track) failed: ${res.status} — ${err}`);
-    }
-    return { sent: true, mode: 'track' };
+  const endpoint = `${getPipelinesEndpoint()}/identify`;
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Customer.io identify failed: ${res.status} — ${err}`);
   }
+  return { sent: true, mode: 'pipelines' };
 }
 
 // Track an event in Customer.io
@@ -120,51 +87,28 @@ async function trackEvent({ userId, email, eventName, data }, config) {
   }
 
   const resolvedUserId = userId || email;
-
-  if (config.apiMode === 'pipelines') {
-    const endpoint = `${getPipelinesEndpoint(config.region)}/track`;
-    const payload = {
-      userId: resolvedUserId,
-      event: eventName,
-      properties: {
-        ...data,
-        triggered_at: new Date().toISOString(),
-      }
-    };
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Customer.io track event failed: ${res.status} — ${err}`);
+  const endpoint = `${getPipelinesEndpoint()}/track`;
+  const payload = {
+    userId: resolvedUserId,
+    event: eventName,
+    properties: {
+      ...data,
+      triggered_at: new Date().toISOString(),
     }
-    return { sent: true, mode: 'pipelines', event: eventName };
-  } else {
-    const endpoint = `${getTrackEndpoint(config.region)}/customers/${encodeURIComponent(resolvedUserId)}/events`;
-    const auth = btoa(`${config.trackSiteId}:${config.trackApiKey}`);
-    const payload = {
-      name: eventName,
-      data: { ...data, triggered_at: new Date().toISOString() }
-    };
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Customer.io track event (track api) failed: ${res.status} — ${err}`);
-    }
-    return { sent: true, mode: 'track', event: eventName };
+  };
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Customer.io track event failed: ${res.status} — ${err}`);
   }
+  return { sent: true, mode: 'pipelines', event: eventName };
 }
 
 // Helper to log events to the MarketingEventLog entity
@@ -218,8 +162,8 @@ Deno.serve(async (req) => {
     }
     try {
       const testResult = await identifyConsumer({
-        user_id: 'legacy_lane_test_user',
-        email: 'test@legacylane-internal.com',
+        user_id: 'estatesalen_test_user',
+        email: 'test@estatesalen-internal.com',
         first_name: 'Test',
         last_name: 'Connection',
         source: 'admin_added',
@@ -345,7 +289,7 @@ Deno.serve(async (req) => {
       payload_json: sale,
     });
 
-    // Find eligible consumers: globally opted in + estate_sale_alerts + subscribed to this Estate Sale Company Owner + not suppressed
+    // Find eligible consumers: globally opted in + estate_sale_alerts + subscribed to this operator + not suppressed
     const subscribers = await base44.asServiceRole.entities.OperatorFollowerSubscription.filter({
       operator_id: sale.operator_id,
       subscription_status: 'active',
@@ -353,7 +297,6 @@ Deno.serve(async (req) => {
 
     let sentCount = 0;
     for (const sub of subscribers) {
-      // Check global opt-in
       const profiles = await base44.asServiceRole.entities.ConsumerMarketingProfile.filter({ email: sub.consumer_email });
       const profile = profiles[0];
       if (!profile) continue;
@@ -371,7 +314,7 @@ Deno.serve(async (req) => {
         sale_zip: sale.property_address?.zip || '',
         sale_start_date: sale.sale_dates?.[0]?.date || '',
         sale_end_date: sale.sale_dates?.[sale.sale_dates.length - 1]?.date || '',
-        sale_url: `https://legacylane.com/EstateSaleDetail?id=${sale.id}`,
+        sale_url: `https://estatesalen.com/EstateSaleDetail?id=${sale.id}`,
         hero_image_url: sale.images?.[0]?.url || '',
         categories: sale.categories || [],
         triggered_at: new Date().toISOString(),
