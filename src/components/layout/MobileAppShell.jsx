@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import MobileTabBar from '@/components/layout/MobileTabBar';
+import MobileQRCheckIn from '@/components/checkin/MobileQRCheckIn';
 import { Bell, MessageSquare } from 'lucide-react';
 
 export default function MobileAppShell({ children, title, showHeader = true }) {
@@ -38,28 +39,29 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 pb-20">
       {/* Minimal top header */}
       {showHeader && (
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 h-12 flex items-center justify-between">
-          <Link to="/mobile" className="flex items-center gap-2">
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 h-24 flex items-center justify-between">
+          <Link to="/mobile" className="flex items-center gap-3">
             <img
               src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png"
               alt="EstateSalen"
-              className="h-7 w-7 object-contain"
+              className="h-14 w-14 object-contain"
             />
-            <span className="text-sm font-serif font-bold text-slate-800">EstateSalen</span>
+            <span className="text-lg font-serif font-bold text-slate-800">EstateSalen</span>
           </Link>
           <div className="flex items-center gap-1">
-            <Link to={createPageUrl('Messages')} className="relative p-1.5 text-slate-400 hover:text-slate-600">
-              <MessageSquare className="w-4 h-4" />
+            <MobileQRCheckIn />
+            <Link to={createPageUrl('Messages')} className="relative p-3 text-slate-400 hover:text-slate-600">
+              <MessageSquare className="w-7 h-7" />
               {unreadMessages > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
+                <span className="absolute top-1 right-1 min-w-[20px] h-5 flex items-center justify-center rounded-full bg-orange-600 text-white text-[11px] font-bold px-1 leading-none">
                   {unreadMessages > 9 ? '9+' : unreadMessages}
                 </span>
               )}
             </Link>
-            <Link to={createPageUrl('Notifications')} className="relative p-1.5 text-slate-400 hover:text-slate-600">
-              <Bell className="w-4 h-4" />
+            <Link to={createPageUrl('Notifications')} className="relative p-3 text-slate-400 hover:text-slate-600">
+              <Bell className="w-7 h-7" />
               {unreadNotifs > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
+                <span className="absolute top-1 right-1 min-w-[20px] h-5 flex items-center justify-center rounded-full bg-orange-600 text-white text-[11px] font-bold px-1 leading-none">
                   {unreadNotifs > 9 ? '9+' : unreadNotifs}
                 </span>
               )}
