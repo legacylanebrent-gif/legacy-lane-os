@@ -39,7 +39,7 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
       {/* Minimal top header */}
       {showHeader && (
         <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200 px-4 h-12 flex items-center justify-between">
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+          <Link to="/mobile" className="flex items-center gap-2">
             <img
               src="https://media.base44.com/images/public/69471382fc72e5b50c72fcc7/9e49bee96_logo_pic.png"
               alt="EstateSalen"

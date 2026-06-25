@@ -4,11 +4,11 @@ import { createPageUrl } from '@/utils';
 import { Home, Search, ShoppingBag, MapPin, User } from 'lucide-react';
 
 const tabs = [
-  { label: 'Discover', icon: Home, path: '/' },
-  { label: 'Search', icon: Search, path: '/EstateSaleFinder' },
-  { label: 'Marketplace', icon: ShoppingBag, path: '/BrowseItems' },
-  { label: 'Route', icon: MapPin, path: '/RoutePlanner' },
-  { label: 'Profile', icon: User, path: '/MyProfile' },
+  { label: 'Discover', icon: Home, path: '/mobile' },
+  { label: 'Search', icon: Search, path: '/mobile/sales' },
+  { label: 'Marketplace', icon: ShoppingBag, path: '/mobile/marketplace' },
+  { label: 'Route', icon: MapPin, path: '/mobile/route' },
+  { label: 'Profile', icon: User, path: '/mobile/profile' },
 ];
 
 export default function MobileTabBar({ unreadTotal = 0 }) {
@@ -22,7 +22,7 @@ export default function MobileTabBar({ unreadTotal = 0 }) {
           return (
             <Link
               key={tab.path}
-              to={createPageUrl(tab.path === '/' ? 'Home' : tab.path.replace('/', ''))}
+              to={tab.path}
               className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
                 isActive ? 'text-orange-600' : 'text-slate-400'
               }`}

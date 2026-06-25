@@ -143,6 +143,7 @@ import RelationshipsDashboard from './pages/RelationshipsDashboard';
 import SuperAgentCommandCenter from './pages/SuperAgentCommandCenter.jsx';
 import PropstreamAgentLeads from './pages/PropstreamAgentLeads';
 import MobileHome from './pages/MobileHome';
+import MobileAppShell from '@/components/layout/MobileAppShell';
 import CollectorDealerDashboard from './pages/CollectorDealerDashboard';
 import RewardDetail from './pages/RewardDetail';
 import ReferCompany from './pages/ReferCompany';
@@ -425,6 +426,10 @@ const AuthenticatedApp = () => {
       {/* ── Mobile Consumer App Routes ── */}
       <Route path="/OnboardingChat" element={<OnboardingChat />} />
       <Route path="/mobile" element={<MobileHome />} />
+      <Route path="/mobile/sales" element={<MobileAppShell title="Search"><Pages.EstateSaleFinder /></MobileAppShell>} />
+      <Route path="/mobile/marketplace" element={<MobileAppShell title="Marketplace"><Pages.BrowseItems /></MobileAppShell>} />
+      <Route path="/mobile/route" element={<MobileAppShell title="Route"><RoutePlanner /></MobileAppShell>} />
+      <Route path="/mobile/profile" element={<MobileAppShell title="Profile"><Pages.MyProfile /></MobileAppShell>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
