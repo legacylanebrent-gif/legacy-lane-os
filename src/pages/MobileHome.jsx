@@ -22,6 +22,10 @@ export default function MobileHome() {
   const [savedSales, setSavedSales] = useState([]);
   const [routeSales, setRouteSales] = useState([]);
   const [activeFilter, setActiveFilter] = useState('nearby');
+  const [searchRadius, setSearchRadius] = useState(() => {
+    const stored = localStorage.getItem('mobileSearchRadius');
+    return stored ? parseInt(stored, 10) : 25;
+  });
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => { loadLocalState(); }, []);
@@ -84,7 +88,7 @@ export default function MobileHome() {
     const regular = list.filter(s => !s.national_featured && !s.local_featured);
 
     if (userLocation) {
-      const byDist = (arr) => arr.filter(s => s.distance !== null && s.distance < 50).sort((a, b) => a.distance - b.distance);
+      const byDist = (arr) => arr.filter(s => s.distance !== null && s.distance < searchRadius).sort((a, b) => a.distance - b.distance);
       return [...national, ...byDist(local), ...byDist(regular)];
     }
     return [...national, ...local, ...regular];
@@ -151,7 +155,7 @@ export default function MobileHome() {
         </div>
 
         {/* Filter chips */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+        <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
           {['nearby', 'featured', 'this-weekend'].map(f => (
             <button
               key={f}
@@ -165,10 +169,28 @@ export default function MobileHome() {
           ))}
         </div>
 
+        {/* Radius selector */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-slate-500 whitespace-nowrap">Within</span>
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {[10, 25, 50, 100, 250].map(r => (
+              <button
+                key={r}
+                onClick={() => { setSearchRadius(r); localStorage.setItem('mobileSearchRadius', String(r)); }}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                  searchRadius === r ? 'bg-cyan-600 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {r} mi
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Stats */}
         {userLocation && (
           <p className="text-xs text-slate-500 mb-3">
-            {displaySales.length} sales within 50 miles
+            {displaySales.length} sales within {searchRadius} miles
           </p>
         )}
       </div>
