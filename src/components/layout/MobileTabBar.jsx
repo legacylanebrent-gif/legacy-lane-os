@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Search, Building2, MapPin, User } from 'lucide-react';
+import { Home, Search, ShoppingBag, MapPin, User } from 'lucide-react';
 
 const tabs = [
   { label: 'Discover', icon: Home, path: '/' },
-  { label: 'Sales', icon: Search, path: '/EstateSaleFinder' },
-  { label: 'Companies', icon: Building2, path: '/BrowseOperators' },
+  { label: 'Search', icon: Search, path: '/EstateSaleFinder' },
+  { label: 'Marketplace', icon: ShoppingBag, path: '/BrowseItems' },
   { label: 'Route', icon: MapPin, path: '/RoutePlanner' },
   { label: 'Profile', icon: User, path: '/MyProfile' },
 ];
