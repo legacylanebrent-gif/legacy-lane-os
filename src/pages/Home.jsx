@@ -49,25 +49,9 @@ const formatTime12h = (time) => {
 import { useSEO } from '@/hooks/useSEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
-// Fix Leaflet default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Custom purple dealer marker
-const dealerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+import { estateSaleIcon, communityEventIcon, storeIcon as dealerIcon } from '@/components/maps/mapPins';
+import MapPinLegend from '@/components/maps/MapPinLegend';
 
 // Component to update map view when userLocation changes
 function ChangeMapView({ center, zoom }) {
@@ -120,6 +104,7 @@ export default function Home() {
   });
   const [showDealers, setShowDealers] = useState(true);
   const [dealerProfiles, setDealerProfiles] = useState([]);
+  const [communityEvents, setCommunityEvents] = useState([]);
   const [buyoutSales, setBuyoutSales] = useState([]);
 
   useSEO({
@@ -351,6 +336,21 @@ export default function Home() {
         setDealerProfiles(profiles || []);
       } catch (error) {
         console.log('Could not load dealer profiles:', error);
+      }
+
+      // Load published community events (flea markets, antique shows) for the map
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const eventData = await base44.entities.CommunityEvent.filter({ status: 'published' }, 'start_date', 200);
+        const visibleEvents = (eventData || []).filter(e => {
+          if (!e.start_date) return false;
+          const eventEnd = e.end_date || e.start_date;
+          return e.start_date >= thirtyDaysAgo && eventEnd >= today && e.location?.lat && e.location?.lng;
+        });
+        setCommunityEvents(visibleEvents);
+      } catch (error) {
+        console.log('Could not load community events:', error);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -955,7 +955,7 @@ export default function Home() {
                 />
                 {localFeatured.map(sale => 
                   sale.location && sale.location.lat && sale.location.lng && (
-                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]} icon={estateSaleIcon}>
                       <Popup>
                         <div className="text-sm">
                           <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
@@ -970,7 +970,7 @@ export default function Home() {
                 )}
                 {regularSales.map(sale => 
                   sale.location && sale.location.lat && sale.location.lng && (
-                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]}>
+                    <Marker key={sale.id} position={[sale.location.lat, sale.location.lng]} icon={estateSaleIcon}>
                       <Popup>
                         <div className="text-sm">
                           <Link to={createPageUrl('EstateSaleDetail') + '?id=' + sale.id} className="text-cyan-600 hover:text-cyan-700 hover:underline font-semibold">
@@ -983,13 +983,30 @@ export default function Home() {
                     </Marker>
                   )
                 )}
-                {/* Dealer locations — purple pins */}
+                {/* Community events — violet pins (flea markets & antique shows) */}
+                {communityEvents.map(evt =>
+                  evt.location && evt.location.lat && evt.location.lng && (
+                    <Marker key={`evt-${evt.id}`} position={[evt.location.lat, evt.location.lng]} icon={communityEventIcon}>
+                      <Popup>
+                        <div className="text-sm">
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-violet-600 mb-0.5">
+                            {evt.event_type === 'antique_show' ? 'Antique Show' : 'Flea Market'}
+                          </span>
+                          <p className="font-semibold text-slate-900">{evt.title}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{evt.property_address?.city}, {evt.property_address?.state}</p>
+                          {evt.start_date && <p className="text-xs text-slate-500 mt-0.5">{new Date(evt.start_date + 'T00:00:00').toLocaleDateString()}</p>}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )
+                )}
+                {/* Dealer / Store locations — red pins */}
                 {showDealers && dealerProfiles.map(profile =>
                   profile.lat && profile.lng && (
                     <Marker key={`dealer-${profile.id}`} position={[profile.lat, profile.lng]} icon={dealerIcon}>
                       <Popup>
                         <div className="text-sm">
-                          <p className="font-semibold text-purple-700">{profile.business_name}</p>
+                          <p className="font-semibold text-red-700">{profile.business_name}</p>
                           <p className="text-xs text-slate-600 mt-0.5">{profile.city}, {profile.state}</p>
                           {profile.business_type && (
                             <p className="text-xs text-slate-500 mt-0.5 capitalize">{profile.business_type.replace(/_/g, ' ')}</p>
@@ -1000,16 +1017,7 @@ export default function Home() {
                   )
                 )}
               </MapContainer>
-              <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <img src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png" alt="" className="w-3.5 h-5 object-contain" />
-                  <span>Estate Sale</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png" alt="" className="w-3.5 h-5 object-contain" />
-                  <span>Dealer</span>
-                </div>
-              </div>
+              <MapPinLegend />
             </div>
           </div>
         </section>

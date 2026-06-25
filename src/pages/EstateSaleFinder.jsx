@@ -14,34 +14,8 @@ import { useSEO } from '@/hooks/useSEO';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
-// Fix Leaflet default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-const customIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-// Violet icon for community events (flea markets, antique shows)
-const communityEventIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+import { estateSaleIcon as customIcon, communityEventIcon, storeIcon } from '@/components/maps/mapPins';
 
 function MapUpdater({ center, zoom }) {
   const map = useMap();
@@ -92,6 +66,7 @@ export default function EstateSaleFinder() {
     return s ? JSON.parse(s) : [];
   });
   const [communityEvents, setCommunityEvents] = useState([]);
+  const [dealerProfiles, setDealerProfiles] = useState([]);
 
   const handleToggleSave = (estate) => {
     setSavedSaleIds(prev => {
@@ -196,8 +171,19 @@ export default function EstateSaleFinder() {
         return e.start_date >= thirtyDaysAgo && eventEnd >= today && e.location?.lat && e.location?.lng;
       });
       setCommunityEvents(visible);
+      loadDealerProfiles();
     } catch (e) {
       console.error('Error loading community events:', e);
+    }
+  };
+
+  // Load geocoded dealer/store profiles for the map
+  const loadDealerProfiles = async () => {
+    try {
+      const profiles = await base44.entities.ResellerProfile.filter({ geocode_status: 'geocoded', is_active: true }, '-created_date', 200);
+      setDealerProfiles(profiles || []);
+    } catch (e) {
+      console.error('Error loading dealer profiles:', e);
     }
   };
 
@@ -500,6 +486,10 @@ export default function EstateSaleFinder() {
                 <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png" alt="Community Event" className="h-5" />
                 <span className="text-slate-600 font-medium">Flea Markets & Antique Shows</span>
               </span>
+              <span className="flex items-center gap-1.5">
+                <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png" alt="Store / Dealer" className="h-5" />
+                <span className="text-slate-600 font-medium">Stores & Dealers</span>
+              </span>
               <Link to="/CommunityEvents" className="ml-auto text-violet-600 hover:underline text-sm font-medium">
                 Browse all community events →
               </Link>
@@ -569,6 +559,33 @@ export default function EstateSaleFinder() {
                             </p>
                             {evt.admission_fee && (
                               <p className="text-sm text-violet-600 font-medium mt-1">{evt.admission_fee}</p>
+                            )}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
+                  {dealerProfiles.map((profile) => {
+                    if (!profile.lat || !profile.lng) return null;
+                    return (
+                      <Marker
+                        key={`dealer-${profile.id}`}
+                        position={[profile.lat, profile.lng]}
+                        icon={storeIcon}
+                      >
+                        <Popup>
+                          <div className="p-2 min-w-[200px]">
+                            <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-red-600 mb-1">
+                              Store / Dealer
+                            </span>
+                            <h3 className="font-semibold text-navy-900 mb-1">{profile.business_name}</h3>
+                            <p className="text-sm text-slate-600 mb-1">
+                              {profile.city}, {profile.state}
+                            </p>
+                            {profile.business_type && (
+                              <p className="text-sm text-slate-500 capitalize">
+                                {profile.business_type.replace(/_/g, ' ')}
+                              </p>
                             )}
                           </div>
                         </Popup>
