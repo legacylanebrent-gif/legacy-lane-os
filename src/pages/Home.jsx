@@ -52,6 +52,7 @@ import 'leaflet/dist/leaflet.css';
 
 import { estateSaleIcon, communityEventIcon, storeIcon as dealerIcon } from '@/components/maps/mapPins';
 import MapPinLegend from '@/components/maps/MapPinLegend';
+import EmptySalesMap from '@/components/home/EmptySalesMap';
 
 // Component to update map view when userLocation changes
 function ChangeMapView({ center, zoom }) {
@@ -1299,17 +1300,13 @@ export default function Home() {
           </div>
 
           {regularSales.length === 0 ? (
-            <Card className="p-8 sm:p-16 text-center bg-slate-50">
-              <MapPin className="w-20 h-20 text-slate-300 mx-auto mb-6" />
-              <p className="text-slate-500 text-xl mb-4">
-                {userLocation 
-                  ? 'No sales found within 25 miles.'
-                  : 'No estate sales available.'}
-              </p>
-              <Button onClick={handleUseMyLocation} className="bg-cyan-600 hover:bg-cyan-700">
-                Try Different Location
-              </Button>
-            </Card>
+            <EmptySalesMap
+              userLocation={userLocation}
+              searchRadius={searchRadius}
+              communityEvents={communityEvents}
+              dealerProfiles={dealerProfiles}
+              onTryLocation={handleUseMyLocation}
+            />
           ) : (
             <div className={`grid ${getSaleGridCols(regularSales.length)} gap-4 sm:gap-6 lg:gap-8`}>
               {regularSales.map(sale => (
