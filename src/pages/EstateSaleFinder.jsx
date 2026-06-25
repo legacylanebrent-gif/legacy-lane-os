@@ -81,6 +81,7 @@ export default function EstateSaleFinder() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParam ? decodeURIComponent(searchParam) : '');
   const [userLocation, setUserLocation] = useState(null);
+  const [geoFailed, setGeoFailed] = useState(false);
   const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]); // Default to LA
   const [selectedEstate, setSelectedEstate] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
@@ -111,6 +112,31 @@ export default function EstateSaleFinder() {
     filterEstates();
   }, [estates, searchQuery]);
 
+  // When geolocation is unavailable, fall back to the logged-in user's saved location
+  useEffect(() => {
+    if (!user || !geoFailed || userLocation) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('state') && (urlParams.get('city') || urlParams.get('county'))) return;
+
+    (async () => {
+      try {
+        const prefs = await base44.entities.EmailPreferences.filter({ user_id: user.id });
+        const pref = prefs[0];
+        if (!pref) return;
+        const { data } = pref.location_zip
+          ? await base44.functions.invoke('geocodeZip', { zip: pref.location_zip })
+          : await base44.functions.invoke('geocodeCity', { city: pref.location_city, state: pref.location_state });
+        if (data?.lat && data?.lng) {
+          const coords = [data.lat, data.lng];
+          setMapCenter(coords);
+          searchNearby(data.lat, data.lng);
+        }
+      } catch (e) {
+        console.error('Error using saved location preference:', e);
+      }
+    })();
+  }, [user, geoFailed, userLocation]);
+
   const getUserLocation = () => {
     // Check if browsing by state/city/county - skip geocoding
     const urlParams = new URLSearchParams(window.location.search);
@@ -133,6 +159,7 @@ export default function EstateSaleFinder() {
         },
         (error) => {
           console.log('Location access denied, using default location');
+          setGeoFailed(true);
           loadEstates();
         }
       );
