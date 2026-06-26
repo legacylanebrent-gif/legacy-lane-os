@@ -90,11 +90,12 @@ async function identifyConsumer(profile, config) {
     },
     body: JSON.stringify(payload),
   });
+  const responseText = await res.text();
+  console.log(`[CustomerIO identify] status=${res.status} userId=${payload.userId} email=${profile.email} response=${responseText}`);
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Customer.io identify failed: ${res.status} — ${err}`);
+    throw new Error(`Customer.io identify failed: ${res.status} — ${responseText}`);
   }
-  return { sent: true, mode: 'pipelines' };
+  return { sent: true, mode: 'pipelines', httpStatus: res.status, response: responseText || '(empty)' };
 }
 
 // Track an event in Customer.io
