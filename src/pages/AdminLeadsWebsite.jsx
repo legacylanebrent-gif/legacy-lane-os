@@ -9,7 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Mail, Phone, MapPin, Clock, Users, AlertCircle, CheckCircle, User, TrendingUp, Globe } from 'lucide-react';
+import { Plus, Mail, Phone, MapPin, Clock, AlertCircle, CheckCircle, User, TrendingUp, Globe } from 'lucide-react';
+import WebsiteLeadDetailModal from '@/components/leads/WebsiteLeadDetailModal';
 
 const WEBSITE_PAGES = ['Estate Sale Request Form', 'Home Value Tool', 'Find an Operator', 'Contact Page', 'Estate Finder', 'Agent Signup', 'Vendor Signup'];
 
@@ -126,96 +127,72 @@ export default function AdminLeadsWebsite() {
         <Input placeholder="Search by name, email, page..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1" />
       </div>
 
-      {/* Cards */}
+      {/* Table */}
       {loading ? <div className="animate-pulse h-48 bg-slate-100 rounded-lg" /> : filtered.length === 0 ? (
         <Card><CardContent className="p-12 text-center"><Globe className="w-16 h-16 mx-auto text-slate-300 mb-4" /><p className="text-slate-500">No website leads found</p></CardContent></Card>
       ) : (
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map(lead => (
-            <Card key={lead.id} className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-cyan-400" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold ${getScoreColor(lead.score || 0)}`}>{lead.score || 0}</div>
-                    <div>
-                      <p className="font-semibold">{lead.contact_name || 'Unknown'}</p>
-                      {lead.website_page && <Badge className="bg-cyan-100 text-cyan-700 text-xs">{lead.website_page}</Badge>}
-                    </div>
-                  </div>
-                  {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
-                    : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
-                    : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
-                </div>
-                <div className="space-y-1 text-sm">
-                  {lead.contact_email && <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-slate-400" /><span className="text-cyan-600 truncate">{lead.contact_email}</span></div>}
-                  {lead.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{lead.contact_phone}</span></div>}
-                  {lead.property_address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" /><span className="text-slate-600 line-clamp-1">{lead.property_address}</span></div>}
-                </div>
-                <div className="space-y-2 mt-3 pt-2 border-t text-xs">
-                  {lead.estimated_value && <div className="flex justify-between"><span className="text-slate-500">Home Value:</span><span className="text-green-600 font-semibold">${lead.estimated_value.toLocaleString()}</span></div>}
-                  {lead.estimated_value && (
-                    <>
-                      <div className="flex justify-between"><span className="text-slate-500">Platform Referral Income:</span><span className="text-blue-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.70).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-500">Estate Sale Company Owner Referral Income:</span><span className="text-purple-600 font-semibold">${(lead.estimated_value * 0.02 * 0.25 * 0.30).toLocaleString('en-US', {maximumFractionDigits: 0})}</span></div>
-                    </>
-                  )}
-                </div>
-                {!lead.routed_to && !lead.converted && (
-                  <div className="mt-3" onClick={e => e.stopPropagation()}>
-                    <Select onValueChange={(opId) => handleAssign(lead.id, opId)}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Assign to Estate Sale Company Owner..." /></SelectTrigger>
-                      <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+        <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 w-14">Score</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Name</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">Email</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden lg:table-cell">Phone</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden lg:table-cell">Location</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden xl:table-cell">Situation</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map(lead => (
+                  <tr key={lead.id} className="hover:bg-cyan-50/50 cursor-pointer transition-colors" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
+                    <td className="px-4 py-3">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${getScoreColor(lead.score || 0)}`}>{lead.score || 0}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-slate-900">{lead.contact_name || 'Unknown'}</p>
+                      {lead.lead_status === 'in_progress' && <span className="text-xs text-yellow-600">In Progress</span>}
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      {lead.contact_email ? <span className="text-cyan-600 truncate block max-w-[180px]">{lead.contact_email}</span> : <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 hidden lg:table-cell text-slate-600">
+                      {lead.contact_phone || <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 hidden lg:table-cell text-slate-600">
+                      {lead.property_county || lead.property_state ? `${lead.property_county || ''}${lead.property_county && lead.property_state ? ', ' : ''}${lead.property_state || ''}` : (lead.property_address ? <span className="truncate block max-w-[160px]">{lead.property_address}</span> : <span className="text-slate-300">—</span>)}
+                    </td>
+                    <td className="px-4 py-3 hidden xl:table-cell text-slate-600 capitalize">
+                      {lead.situation ? lead.situation.replace(/_/g, ' ') : <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      {lead.converted ? <Badge className="bg-green-100 text-green-800">Converted</Badge>
+                        : lead.routed_to ? <Badge className="bg-cyan-100 text-cyan-800">Assigned</Badge>
+                        : <Badge className="bg-orange-100 text-orange-800">New</Badge>}
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell text-slate-500 text-xs whitespace-nowrap">
+                      {new Date(lead.created_date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Detail Modal */}
-      <Dialog open={showDetail} onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Website Lead</DialogTitle></DialogHeader>
-          {selectedLead && (
-            <div className="space-y-4 mt-2">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold ${getScoreColor(selectedLead.score || 0)}`}>{selectedLead.score || 0}</div>
-                <div>
-                  <p className="font-bold text-lg">{selectedLead.contact_name || 'Unknown'}</p>
-                  {selectedLead.website_page && <Badge className="bg-cyan-100 text-cyan-700">{selectedLead.website_page}</Badge>}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                {selectedLead.contact_email && <div><p className="text-xs text-slate-500">Email</p><a href={`mailto:${selectedLead.contact_email}`} className="text-cyan-600 hover:underline break-all">{selectedLead.contact_email}</a></div>}
-                {selectedLead.contact_phone && <div><p className="text-xs text-slate-500">Phone</p><a href={`tel:${selectedLead.contact_phone}`} className="text-cyan-600 hover:underline">{selectedLead.contact_phone}</a></div>}
-                {selectedLead.timeline && <div><p className="text-xs text-slate-500">Timeline</p><p className="capitalize">{selectedLead.timeline.replace(/_/g, ' ')}</p></div>}
-                {selectedLead.estimated_value && <div><p className="text-xs text-slate-500">Est. Value</p><p className="text-green-600 font-semibold">${selectedLead.estimated_value.toLocaleString()}</p></div>}
-                {selectedLead.situation && <div><p className="text-xs text-slate-500">Situation</p><p className="capitalize">{selectedLead.situation}</p></div>}
-                {selectedLead.intent && <div><p className="text-xs text-slate-500">Intent</p><p className="capitalize">{selectedLead.intent.replace(/_/g, ' ')}</p></div>}
-              </div>
-              {selectedLead.property_address && <div className="flex items-start gap-2 text-sm p-3 bg-slate-50 rounded-lg"><MapPin className="w-4 h-4 text-cyan-600 mt-0.5" /><span>{selectedLead.property_address}</span></div>}
-              {selectedLead.notes && <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="font-medium mb-1">Notes</p><p className="text-slate-600">{selectedLead.notes}</p></div>}
-              {!selectedLead.routed_to && !selectedLead.converted && (
-                <div><p className="text-sm font-medium mb-1">Assign to operator</p>
-                  <Select onValueChange={(opId) => handleAssign(selectedLead.id, opId)}>
-                    <SelectTrigger><SelectValue placeholder="Select Estate Sale Company Owner..." /></SelectTrigger>
-                    <SelectContent>{operators.map(op => <SelectItem key={op.id} value={op.id}>{op.company_name || op.full_name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              )}
-              {selectedLead.routed_to && !selectedLead.converted && (
-                <Button onClick={() => handleMarkConverted(selectedLead.id)} className="w-full bg-green-600 hover:bg-green-700"><CheckCircle className="w-4 h-4 mr-2" />Mark as Converted</Button>
-              )}
-              <div className="flex items-center gap-2 pt-2 border-t text-xs text-slate-500">
-                <Clock className="w-3 h-3" />{new Date(selectedLead.created_date).toLocaleDateString()}
-                {selectedLead.converted && <Badge className="ml-auto bg-green-100 text-green-800">Converted</Badge>}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <WebsiteLeadDetailModal
+        lead={selectedLead}
+        open={showDetail}
+        onOpenChange={(open) => { setShowDetail(open); if (!open) setSelectedLead(null); }}
+        operators={operators}
+        onAssign={handleAssign}
+        onMarkConverted={handleMarkConverted}
+      />
 
       {/* Add Modal */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
