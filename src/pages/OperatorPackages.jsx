@@ -10,6 +10,7 @@ import { Check, Star, ArrowLeft } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import OperatorTestimonials from '@/components/operators/OperatorTestimonials';
+import LeadTestimonialBanner from '@/components/operators/LeadTestimonialBanner';
 
 export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
@@ -191,6 +192,9 @@ export default function OperatorPackages() {
             )}
           </div>
         </div>
+
+        {/* Lead Testimonial Banner */}
+        <LeadTestimonialBanner />
 
         {/* Packages Grid */}
         <div className="grid md:grid-cols-3 gap-8">
