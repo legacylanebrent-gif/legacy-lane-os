@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle2, AlertCircle, Zap, Settings, RefreshCw, Send, BookOpen, Users, Activity } from 'lucide-react';
+import CustomerIOSegmentation from '@/components/customerio/CustomerIOSegmentation';
 
 const STATUS_COLORS = {
   connected: 'bg-green-100 text-green-700 border-green-200',
@@ -200,6 +201,9 @@ export default function CustomerIODashboard() {
           </ol>
         </CardContent>
       </Card>
+
+      {/* Segmentation Strategy */}
+      <CustomerIOSegmentation />
 
       {/* Recent Event Log */}
       <Card>

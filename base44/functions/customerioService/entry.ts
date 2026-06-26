@@ -34,6 +34,11 @@ function getPipelinesEndpoint() {
   return 'https://cdp.customer.io/v1';
 }
 
+function getAppApiEndpoint() {
+  const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
+  return region === 'eu' ? 'https://api-eu.customer.io' : 'https://api.customer.io';
+}
+
 // Identify (create/update) a person in Customer.io
 async function identifyConsumer(profile, config) {
   if (!config.configured) {
@@ -47,14 +52,27 @@ async function identifyConsumer(profile, config) {
       email: profile.email,
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
+      // ── Role & Subscription (for role/tier segments) ──
+      role: profile.role || profile.primary_account_type || 'consumer',
+      subscription_tier: profile.subscription_tier || 'none',
+      subscription_status: profile.subscription_status || 'none',
+      // ── Location (for geo segments) ──
       zip_code: profile.zip_code || '',
       city: profile.city || '',
       state: profile.state || '',
-      preferred_radius_miles: profile.preferred_radius_miles || 25,
+      notification_radius_miles: profile.notification_radius_miles || profile.preferred_radius_miles || 25,
+      // ── Notification Preferences (for preference-based segments) ──
+      estate_salen_marketing: profile.estate_salen_marketing ?? true,
+      local_sale_notifications: profile.local_sale_notifications ?? true,
+      company_direct_emails: profile.company_direct_emails ?? true,
+      cool_finds_blog_email: profile.cool_finds_blog_email ?? false,
+      cool_finds_blog_in_app: profile.cool_finds_blog_in_app ?? false,
+      // ── Legacy opt-in flags (kept for backward compat) ──
       global_marketing_opt_in: profile.global_marketing_opt_in ?? true,
       estate_sale_alerts_opt_in: profile.estate_sale_alerts_opt_in ?? true,
       vip_alerts_opt_in: profile.vip_alerts_opt_in ?? false,
       weekly_digest_opt_in: profile.weekly_digest_opt_in ?? false,
+      // ── Favorite Companies (for operator-specific segments) ──
       followed_operator_ids: profile.followed_operator_ids || [],
       followed_operator_names: profile.followed_operator_names || [],
       active_operator_count: profile.active_operator_count || 0,
@@ -340,6 +358,92 @@ Deno.serve(async (req) => {
     });
 
     return Response.json({ success: true, triggerType, customerioEventName, eligible: subscribers.length, sent: sentCount });
+  }
+
+  // ── listSegments (App API — Bearer auth with App API Key) ──
+  if (action === 'listSegments') {
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    if (!config.appApiKey) return Response.json({ error: 'CUSTOMERIO_APP_API_KEY not configured' }, { status: 400 });
+    try {
+      const res = await fetch(`${getAppApiEndpoint()}/v1/segments?per=100`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${config.appApiKey}` },
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        return Response.json({ error: `Customer.io listSegments failed: ${res.status} — ${err}` }, { status: res.status });
+      }
+      const data = await res.json();
+      return Response.json({ success: true, segments: data.segments || data || [] });
+    } catch (err) {
+      return Response.json({ error: err.message }, { status: 500 });
+    }
+  }
+
+  // ── getSegment ──
+  if (action === 'getSegment') {
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const { segmentId } = params;
+    if (!segmentId) return Response.json({ error: 'Missing segmentId' }, { status: 400 });
+    if (!config.appApiKey) return Response.json({ error: 'CUSTOMERIO_APP_API_KEY not configured' }, { status: 400 });
+    try {
+      const res = await fetch(`${getAppApiEndpoint()}/v1/segments/${segmentId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${config.appApiKey}` },
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        return Response.json({ error: `Customer.io getSegment failed: ${res.status} — ${err}` }, { status: res.status });
+      }
+      const data = await res.json();
+      return Response.json({ success: true, segment: data });
+    } catch (err) {
+      return Response.json({ error: err.message }, { status: 500 });
+    }
+  }
+
+  // ── addCustomersToSegment (manual segments only) ──
+  if (action === 'addCustomersToSegment') {
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const { segmentId, customerIds } = params;
+    if (!segmentId || !customerIds || !Array.isArray(customerIds)) return Response.json({ error: 'Missing segmentId or customerIds[]' }, { status: 400 });
+    if (!config.appApiKey) return Response.json({ error: 'CUSTOMERIO_APP_API_KEY not configured' }, { status: 400 });
+    try {
+      const res = await fetch(`${getAppApiEndpoint()}/v1/segments/${segmentId}/add_customers`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${config.appApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: customerIds }),
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        return Response.json({ error: `Customer.io addCustomersToSegment failed: ${res.status} — ${err}` }, { status: res.status });
+      }
+      return Response.json({ success: true, added: customerIds.length });
+    } catch (err) {
+      return Response.json({ error: err.message }, { status: 500 });
+    }
+  }
+
+  // ── removeCustomersFromSegment (manual segments only) ──
+  if (action === 'removeCustomersFromSegment') {
+    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const { segmentId, customerIds } = params;
+    if (!segmentId || !customerIds || !Array.isArray(customerIds)) return Response.json({ error: 'Missing segmentId or customerIds[]' }, { status: 400 });
+    if (!config.appApiKey) return Response.json({ error: 'CUSTOMERIO_APP_API_KEY not configured' }, { status: 400 });
+    try {
+      const res = await fetch(`${getAppApiEndpoint()}/v1/segments/${segmentId}/remove_customers`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${config.appApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: customerIds }),
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        return Response.json({ error: `Customer.io removeCustomersFromSegment failed: ${res.status} — ${err}` }, { status: res.status });
+      }
+      return Response.json({ success: true, removed: customerIds.length });
+    } catch (err) {
+      return Response.json({ error: err.message }, { status: 500 });
+    }
   }
 
   return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
