@@ -169,6 +169,36 @@
     "sales_allowed": {
       "type": "string"
     },
+    "amount_to_sell": {
+      "type": "string",
+      "description": "How much of the home contents are to be sold (all, most, some)"
+    },
+    "home_on_market": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is the home currently listed on the market?"
+    },
+    "service_type": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Full Service",
+          "Sale Only",
+          "Estate + Real Estate Sale"
+        ]
+      },
+      "default": [],
+      "description": "Type of service the lead is interested in"
+    },
+    "items_to_sell": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Categories of items to be sold"
+    },
     "intent": {
       "type": "string",
       "enum": [

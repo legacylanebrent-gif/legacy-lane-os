@@ -51,7 +51,8 @@ export default function SaleRequestModal({ open, onClose }) {
     gated_community: false,
     sales_allowed: '',
     amount_to_sell: '',
-    interested_in_full_service: '',
+    home_on_market: '',
+    service_type: [],
     items_to_sell: [],
     timeline: '',
     notes: '',
@@ -102,7 +103,8 @@ export default function SaleRequestModal({ open, onClose }) {
         gated_community: formData.gated_community,
         sales_allowed: formData.sales_allowed,
         amount_to_sell: formData.amount_to_sell,
-        interested_in_full_service: formData.interested_in_full_service,
+        home_on_market: formData.home_on_market === 'yes',
+        service_type: formData.service_type,
         items_to_sell: formData.items_to_sell,
         timeline: formData.timeline,
         score: parseInt(formData.score),
@@ -142,7 +144,7 @@ export default function SaleRequestModal({ open, onClose }) {
       contact_name: '', contact_email: '', contact_phone: '', property_address: '',
       source: 'website', situation: 'rather_not_say', home_size: '',
       gated_community: false, sales_allowed: '', amount_to_sell: '',
-      interested_in_full_service: '', items_to_sell: [], timeline: '', notes: '', score: 75
+      home_on_market: '', service_type: [], items_to_sell: [], timeline: '', notes: '', score: 75
     });
     onClose();
   };
@@ -397,19 +399,32 @@ export default function SaleRequestModal({ open, onClose }) {
                         </Select>
                       </div>
                     </div>
-                    <div>
-                      <Label>Size of Home</Label>
-                      <Select value={formData.home_size} onValueChange={(v) => setFormData({...formData, home_size: v})}>
-                        <SelectTrigger><SelectValue placeholder="Select size..." /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1-2_bedroom">1-2 Bedroom House</SelectItem>
-                          <SelectItem value="3-4_bedroom">3-4 Bedroom House</SelectItem>
-                          <SelectItem value="5+_bedroom">5+ Bedroom House</SelectItem>
-                          <SelectItem value="apartment_condo">Apartment or Condo</SelectItem>
-                          <SelectItem value="storefront_business">Storefront or Business</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Size of Home</Label>
+                        <Select value={formData.home_size} onValueChange={(v) => setFormData({...formData, home_size: v})}>
+                          <SelectTrigger><SelectValue placeholder="Select size..." /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1-2_bedroom">1-2 Bedroom House</SelectItem>
+                            <SelectItem value="3-4_bedroom">3-4 Bedroom House</SelectItem>
+                            <SelectItem value="5+_bedroom">5+ Bedroom House</SelectItem>
+                            <SelectItem value="apartment_condo">Apartment or Condo</SelectItem>
+                            <SelectItem value="storefront_business">Storefront or Business</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>How much is to be sold?</Label>
+                        <Select value={formData.amount_to_sell} onValueChange={(v) => setFormData({...formData, amount_to_sell: v})}>
+                          <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All (90-100%)</SelectItem>
+                            <SelectItem value="most">Most (50-90%)</SelectItem>
+                            <SelectItem value="some">Some (&lt;50%)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2">
@@ -432,28 +447,27 @@ export default function SaleRequestModal({ open, onClose }) {
                         </div>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label>How much is to be sold?</Label>
-                        <Select value={formData.amount_to_sell} onValueChange={(v) => setFormData({...formData, amount_to_sell: v})}>
-                          <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All (90-100%)</SelectItem>
-                            <SelectItem value="most">Most (50-90%)</SelectItem>
-                            <SelectItem value="some">Some (&lt;50%)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Interested in full service?</Label>
-                        <Select value={formData.interested_in_full_service} onValueChange={(v) => setFormData({...formData, interested_in_full_service: v})}>
-                          <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="yes">Yes</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
-                            <SelectItem value="unsure">Maybe</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    <div>
+                      <Label>Is the home currently on the market?</Label>
+                      <Select value={formData.home_on_market} onValueChange={(v) => setFormData({...formData, home_on_market: v})}>
+                        <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>What type of service are you interested in?</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50">
+                        {['Full Service', 'Sale Only', 'Estate + Real Estate Sale'].map(option => (
+                          <div key={option} className="flex items-center space-x-2">
+                            <input type="checkbox" id={`service_${option}`} checked={formData.service_type.includes(option)}
+                              onChange={(e) => { if (e.target.checked) setFormData({...formData, service_type: [...formData.service_type, option]}); else setFormData({...formData, service_type: formData.service_type.filter(s => s !== option)}); }}
+                              className="w-4 h-4 text-cyan-600 border-slate-300 rounded focus:ring-cyan-500" />
+                            <Label htmlFor={`service_${option}`} className="cursor-pointer text-sm">{option}</Label>
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <div>
