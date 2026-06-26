@@ -164,6 +164,23 @@ export default function SaleRequestModal({ open, onClose }) {
         situation: formData.situation || 'standard',
         notes: formData.notes
       });
+      // Fire admin notification, admin email, Lead Conversion agent alert, and lead acknowledgment email
+      try {
+        await base44.functions.invoke('notifyWebsiteLead', {
+          leadId: leadId,
+          companyCount: companyCount,
+          contactName: formData.contact_name,
+          contactEmail: formData.contact_email,
+          contactPhone: formData.contact_phone,
+          propertyAddress: formData.property_address,
+          selectedState: selectedState,
+          selectedCounty: selectedCounty,
+          situation: formData.situation,
+          timeline: formData.timeline
+        });
+      } catch (notifError) {
+        console.error('Failed to send lead notifications:', notifError);
+      }
       setSubmitted(true);
     } catch (error) {
       console.error('Error creating lead:', error);
