@@ -39,6 +39,7 @@ export default function SaleRequestModal({ open, onClose }) {
   const [selectedCounty, setSelectedCounty] = useState('');
   const [companyCount, setCompanyCount] = useState(null);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
+  const [leadId, setLeadId] = useState(null);
   
   const [formData, setFormData] = useState({
     contact_name: '',
@@ -87,11 +88,43 @@ export default function SaleRequestModal({ open, onClose }) {
       .finally(() => setLoadingCompanies(false));
   }, [selectedState, selectedCounty, step]);
 
+  const handleStateNext = async () => {
+    try {
+      const lead = await base44.entities.Lead.create({
+        source: 'website',
+        source_details: 'Estate sale request via website',
+        intent: 'estate_sale',
+        property_state: selectedState,
+        lead_status: 'in_progress',
+        current_step: 2
+      });
+      setLeadId(lead.id);
+    } catch (error) {
+      console.error('Error saving lead progress (state):', error);
+    }
+    setStep(2);
+  };
+
+  const handleCountySelect = async (county) => {
+    setSelectedCounty(county);
+    if (leadId) {
+      try {
+        await base44.entities.Lead.update(leadId, {
+          property_county: county,
+          current_step: 3
+        });
+      } catch (error) {
+        console.error('Error saving lead progress (county):', error);
+      }
+    }
+    setStep(3);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await base44.entities.Lead.create({
+      const leadData = {
         source: formData.source,
         source_details: 'Estate sale request via website',
         intent: 'estate_sale',
@@ -111,8 +144,15 @@ export default function SaleRequestModal({ open, onClose }) {
         contact_name: formData.contact_name,
         contact_email: formData.contact_email,
         contact_phone: formData.contact_phone,
-        notes: formData.notes
-      });
+        notes: formData.notes,
+        lead_status: 'submitted',
+        current_step: 4
+      };
+      if (leadId) {
+        await base44.entities.Lead.update(leadId, leadData);
+      } else {
+        await base44.entities.Lead.create(leadData);
+      }
       const names = formData.contact_name.split(' ');
       await base44.entities.Contact.create({
         first_name: names[0],
@@ -136,6 +176,7 @@ export default function SaleRequestModal({ open, onClose }) {
   const handleClose = () => {
     setStep(1);
     setSubmitted(false);
+    setLeadId(null);
     setSelectedState('');
     setSelectedCounty('');
     setCounties([]);
@@ -224,7 +265,7 @@ export default function SaleRequestModal({ open, onClose }) {
                     </SelectContent>
                   </Select>
                   <div className="flex justify-end pt-4">
-                    <Button onClick={() => setStep(2)} disabled={!selectedState} className="bg-cyan-600 hover:bg-cyan-700 gap-2">
+                    <Button onClick={handleStateNext} disabled={!selectedState} className="bg-cyan-600 hover:bg-cyan-700 gap-2">
                       Next <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -254,7 +295,7 @@ export default function SaleRequestModal({ open, onClose }) {
                         {counties.map(t => (
                           <button
                             key={t.county}
-                            onClick={() => setSelectedCounty(t.county)}
+                            onClick={() => handleCountySelect(t.county)}
                             className={`text-left p-4 rounded-lg border transition-all ${
                               selectedCounty === t.county
                                 ? 'border-cyan-600 bg-cyan-50 ring-2 ring-cyan-200'
@@ -278,12 +319,9 @@ export default function SaleRequestModal({ open, onClose }) {
                   </div>
 
                   {/* Fixed nav at bottom */}
-                  <div className="flex-none flex justify-between pt-3 border-t">
+                  <div className="flex-none flex justify-start pt-3 border-t">
                     <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
                       <ArrowLeft className="w-4 h-4" /> Back
-                    </Button>
-                    <Button onClick={() => setStep(3)} disabled={!selectedCounty} className="bg-cyan-600 hover:bg-cyan-700 gap-2">
-                      Next <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

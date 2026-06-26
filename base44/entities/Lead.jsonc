@@ -236,6 +236,20 @@
         "exploring"
       ]
     },
+    "lead_status": {
+      "type": "string",
+      "enum": [
+        "in_progress",
+        "submitted"
+      ],
+      "default": "in_progress",
+      "description": "Whether the lead form is still being filled out or has been submitted"
+    },
+    "current_step": {
+      "type": "integer",
+      "default": 0,
+      "description": "Current step of the estate sale request modal the user is on (1-4)"
+    },
     "routed_to": {
       "type": "string",
       "description": "User ID of assigned professional"
