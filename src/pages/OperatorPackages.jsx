@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Check, Star, ArrowLeft } from 'lucide-react';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
+import OperatorTestimonials from '@/components/operators/OperatorTestimonials';
 
 export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
@@ -375,6 +376,9 @@ export default function OperatorPackages() {
             Need help choosing? <a href="#" className="text-orange-600 hover:underline">Contact our team</a>
           </p>
         </div>
+
+        {/* Testimonials */}
+        <OperatorTestimonials />
       </div>
 
       <SharedFooter />
