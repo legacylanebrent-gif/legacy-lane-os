@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, TrendingUp, AlertCircle, CheckCircle, User, Facebook, Database, Globe, ExternalLink } from 'lucide-react';
+import { Search, TrendingUp, AlertCircle, CheckCircle, User, Facebook, Database, Globe, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const SOURCE_CONFIG = {
   social_ads:  { label: 'Social Ads',  color: 'bg-blue-100 text-blue-700',   icon: Facebook, accent: 'text-blue-600',  page: 'AdminLeadsSocialAds' },
@@ -24,46 +24,57 @@ const getScoreColor = (score) => {
   return 'bg-red-100 text-red-700';
 };
 
+const PAGE_SIZE = 100;
+
 export default function AdminLeads() {
   const [leads, setLeads] = useState([]);
+  const [stats, setStats] = useState({ total: 0, unassigned: 0, assigned: 0, converted: 0, bySource: {} });
+  const [totalFiltered, setTotalFiltered] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [skip, setSkip] = useState(0);
+  const [exhausted, setExhausted] = useState(false);
+  const debounceRef = useRef(null);
 
-  useEffect(() => { loadData(); }, []);
-
-  const loadData = async () => {
+  const loadData = async (skipVal) => {
     setLoading(true);
-    const data = await base44.entities.Lead.list('-created_date');
-    setLeads(data);
+    try {
+      const res = await base44.functions.invoke('getAdminLeadsData', {
+        skip: skipVal,
+        limit: PAGE_SIZE,
+        search,
+        sourceFilter,
+        statusFilter
+      });
+      const data = res.data || res;
+      setLeads(data.leads || []);
+      setStats(data.stats || { total: 0, unassigned: 0, assigned: 0, converted: 0, bySource: {} });
+      setTotalFiltered(data.totalFiltered || 0);
+      setExhausted(data.exhausted !== false);
+    } catch (e) {
+      console.error('Failed to load leads:', e);
+    }
     setLoading(false);
   };
 
-  const filtered = leads.filter(lead => {
-    const q = search.toLowerCase();
-    const matchSearch = !search ||
-      lead.contact_name?.toLowerCase().includes(q) ||
-      lead.contact_email?.toLowerCase().includes(q) ||
-      lead.property_address?.toLowerCase().includes(q) ||
-      lead.source?.toLowerCase().includes(q);
-    const matchSource = sourceFilter === 'all' || lead.source === sourceFilter;
-    const matchStatus = statusFilter === 'all' ||
-      (statusFilter === 'unassigned' && !lead.routed_to && !lead.converted) ||
-      (statusFilter === 'assigned' && lead.routed_to && !lead.converted) ||
-      (statusFilter === 'converted' && lead.converted);
-    return matchSearch && matchSource && matchStatus;
-  });
+  // Debounced reload on filter/search change; immediate on skip change
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const delay = skip === 0 ? 400 : 0;
+    debounceRef.current = setTimeout(() => { loadData(skip); }, delay);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, sourceFilter, statusFilter, skip]);
 
-  const stats = {
-    total: leads.length,
-    unassigned: leads.filter(l => !l.routed_to && !l.converted).length,
-    assigned: leads.filter(l => l.routed_to && !l.converted).length,
-    converted: leads.filter(l => l.converted).length,
-    social: leads.filter(l => l.source === 'social_ads').length,
-    propstream: leads.filter(l => l.source === 'propstream').length,
-    website: leads.filter(l => l.source === 'website').length,
+  const handleFilterChange = (setter) => (val) => {
+    setter(val);
+    setSkip(0);
   };
+
+  const currentPage = Math.floor(skip / PAGE_SIZE) + 1;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -71,6 +82,7 @@ export default function AdminLeads() {
       <div>
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">All Leads — Consolidated</h1>
         <p className="text-slate-600">Every lead from all sources. Use the source pages to add and manage leads by channel.</p>
+        {!exhausted && <p className="text-xs text-amber-600 mt-1">⚠ Stats may be partial — dataset exceeded the scan time budget. Refresh to try again.</p>}
       </div>
 
       {/* Source Quick Links */}
@@ -80,7 +92,7 @@ export default function AdminLeads() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Social Ads</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.social}</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.bySource?.social_ads || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Facebook className="w-6 h-6 text-blue-500" />
@@ -94,7 +106,7 @@ export default function AdminLeads() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Propstream</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.propstream}</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.bySource?.propstream || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Database className="w-6 h-6 text-purple-500" />
@@ -108,7 +120,7 @@ export default function AdminLeads() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Website</p>
-                <p className="text-2xl font-bold text-cyan-600">{stats.website}</p>
+                <p className="text-2xl font-bold text-cyan-600">{stats.bySource?.website || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="w-6 h-6 text-cyan-500" />
@@ -131,9 +143,9 @@ export default function AdminLeads() {
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input placeholder="Search by name, email, address..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          <Input placeholder="Search by name, email, address..." value={search} onChange={e => handleFilterChange(setSearch)(e.target.value)} className="pl-10" />
         </div>
-        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+        <Select value={sourceFilter} onValueChange={handleFilterChange(setSourceFilter)}>
           <SelectTrigger className="w-44"><SelectValue placeholder="All Sources" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sources</SelectItem>
@@ -145,7 +157,7 @@ export default function AdminLeads() {
             <SelectItem value="organic">Organic</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={handleFilterChange(setStatusFilter)}>
           <SelectTrigger className="w-40"><SelectValue placeholder="All Statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
@@ -177,9 +189,9 @@ export default function AdminLeads() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.length === 0 ? (
+                {leads.length === 0 ? (
                   <tr><td colSpan="9" className="p-12 text-center text-slate-400">No leads found</td></tr>
-                ) : filtered.map(lead => {
+                ) : leads.map(lead => {
                   const src = SOURCE_CONFIG[lead.source] || { label: lead.source, color: 'bg-slate-100 text-slate-700' };
                   const SrcIcon = src.icon;
                   return (
@@ -219,8 +231,18 @@ export default function AdminLeads() {
               </tbody>
             </table>
           </div>
-          <div className="p-4 border-t text-sm text-slate-500">
-            Showing {filtered.length} of {leads.length} leads
+          {/* Pagination */}
+          <div className="p-4 border-t flex items-center justify-between text-sm text-slate-500">
+            <span>Showing {leads.length} of {totalFiltered} matching leads (sorted newest first)</span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={skip === 0 || loading} onClick={() => setSkip(Math.max(0, skip - PAGE_SIZE))}>
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </Button>
+              <span className="text-xs">Page {currentPage} of {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={skip + PAGE_SIZE >= totalFiltered || loading} onClick={() => setSkip(skip + PAGE_SIZE)}>
+                Next <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       )}
