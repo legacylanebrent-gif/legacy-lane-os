@@ -1,26 +1,65 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+// Returns the UTC Date for 00:00:00 today in America/New_York (DST-aware)
+function startOfTodayET() {
+  const tz = 'America/New_York';
+  const now = new Date();
+  const etParts = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).formatToParts(now);
+  const utcParts = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).formatToParts(now);
+  const g = t => etParts.find(p => p.type === t).value;
+  const gu = t => utcParts.find(p => p.type === t).value;
+  const etMin = ((parseInt(g('hour'), 10) % 24) * 60) + parseInt(g('minute'), 10);
+  const utcMin = ((parseInt(gu('hour'), 10) % 24) * 60) + parseInt(gu('minute'), 10);
+  let offsetMin = utcMin - etMin;
+  if (offsetMin > 720) offsetMin -= 1440;
+  if (offsetMin < -720) offsetMin += 1440;
+  const etMidnightUTC = Date.UTC(parseInt(g('year'), 10), parseInt(g('month'), 10) - 1, parseInt(g('day'), 10), 0, 0, 0);
+  return new Date(etMidnightUTC + offsetMin * 60000);
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    const body = await req.json().catch(() => ({}));
+    const isDaily = body.mode === 'daily';
 
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    // Auth: manual full extraction requires an admin; daily automation runs server-side
+    if (!isDaily) {
+      const user = await base44.auth.me();
+      if (!user || user.role !== 'admin') {
+        return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+      }
     }
 
-    // Parse request body for batch parameters
-    const body = await req.json().catch(() => ({}));
     const batchSize = body.batch_size || 100;
     const batchNumber = body.batch_number || 1;
 
-    // Fetch all PropstreamREListing records (no limit)
-    const listings = await base44.asServiceRole.entities.PropstreamREListing.list('-imported_date', 100000);
-    
+    // Fetch listings — daily mode only today's imports; full mode all records
+    let listings;
+    if (isDaily) {
+      const since = startOfTodayET();
+      listings = [];
+      const PAGE = 5000;
+      let skip = 0;
+      while (true) {
+        const batch = await base44.asServiceRole.entities.PropstreamREListing.filter({}, '-created_date', PAGE, skip);
+        if (!batch || batch.length === 0) break;
+        for (const l of batch) {
+          if (new Date(l.created_date) >= since) listings.push(l);
+        }
+        if (new Date(batch[batch.length - 1].created_date) < since) break;
+        if (batch.length < PAGE) break;
+        skip += PAGE;
+      }
+    } else {
+      listings = await base44.asServiceRole.entities.PropstreamREListing.list('-imported_date', 100000);
+    }
+
     if (listings.length === 0) {
-      return Response.json({ 
-        message: 'No PropStream listings found to process',
-        agents_created: 0 
+      return Response.json({
+        message: isDaily ? 'No new PropStream listings imported today' : 'No PropStream listings found to process',
+        mode: isDaily ? 'daily' : 'full',
+        agents_created: 0
       });
     }
 
@@ -165,9 +204,9 @@ Deno.serve(async (req) => {
     let created = 0;
     let updated = 0;
     
-    // Calculate batch range
-    const startIndex = (batchNumber - 1) * batchSize;
-    const endIndex = Math.min(startIndex + batchSize, agentsToCreate.length);
+    // Daily mode processes all of today's agents in one pass; full mode batches
+    const startIndex = isDaily ? 0 : (batchNumber - 1) * batchSize;
+    const endIndex = isDaily ? agentsToCreate.length : Math.min(startIndex + batchSize, agentsToCreate.length);
     const batchToProcess = agentsToCreate.slice(startIndex, endIndex);
     
     // Separate creates and updates for bulk operations
@@ -250,7 +289,10 @@ Deno.serve(async (req) => {
     const hasMoreBatches = endIndex < agentsToCreate.length;
 
     return Response.json({
-      message: `Successfully processed batch ${batchNumber} of PropStream agent leads`,
+      message: isDaily
+        ? `Daily extraction complete: processed ${listings.length} listing(s) imported today`
+        : `Successfully processed batch ${batchNumber} of PropStream agent leads`,
+      mode: isDaily ? 'daily' : 'full',
       total_listings_processed: listings.length,
       unique_agents_found: agentsToCreate.length,
       agents_created: created,
