@@ -3,34 +3,61 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // ════════════════════════════════════════════════════════════
 // PropStream Agent "Congrats on your new listing" Email Drafter
 // Runs twice daily (9am / 9pm ET). Looks for PropStream agent
-// leads imported in the last 12 hours, drafts a personalized
-// congrats email, matches a reputable local operator, and pushes
-// each draft to Customer.io (identify + track event) so a CIO
-// campaign can blast the personalized email.
+// leads imported in the last 12 hours, groups them by agent
+// (one email per agent — multiple listings combined into one),
+// and picks the email variant:
+//   • FULL     — agent NOT contacted in the last 30 days
+//   • REMINDER — agent already contacted in the last 30 days
+// Drafts a personalized email, matches a reputable local
+// operator, and pushes each draft to Customer.io (identify +
+// track event) so a CIO campaign can blast the personalized
+// email. Each send is logged to MarketingEventLog so future
+// runs know who was contacted.
 // ════════════════════════════════════════════════════════════
+
+const EVENT_NAME = 'propstream_agent_new_listing_congrats';
+const CONTACT_WINDOW_DAYS = 30;
 
 // ────────────────────────────────────────────────────────────
 // EMAIL COPY — editable. Swap in your own wording any time.
-// `ctx` = { firstName, listingAddress, city, state, operatorLine }
+// ctx = { firstName, isMultiple, listingCount, cityList,
+//         listingDetail, primaryCity, operatorLine }
 // ────────────────────────────────────────────────────────────
-const EMAIL_SUBJECT = (ctx) => `Congrats on your new listing in ${ctx.city}!`;
+const EMAIL_SUBJECT = (ctx) => {
+  const prefix = ctx.variant === 'reminder' ? 'Following up — ' : '';
+  const listingWord = ctx.isMultiple ? `${ctx.listingCount} new listings` : 'new listing';
+  return `${prefix}Congrats on your ${listingWord} in ${ctx.primaryCity}!`;
+};
 
-const EMAIL_BODY = (ctx) => `Hi ${ctx.firstName},
+const EMAIL_BODY_FULL = (ctx) => `Hi ${ctx.firstName},
 
-Congratulations on your new listing${ctx.listingAddress ? ` at ${ctx.listingAddress}` : ''} in ${ctx.city}, ${ctx.state} — great to see your business growing!
+Congratulations on your ${ctx.isMultiple ? `${ctx.listingCount} new listings` : 'new listing'} in ${ctx.cityList}${ctx.listingDetail} — great to see your business growing!
 
-At EstateSalen, we partner with reputable estate sale companies across the country. We'd love to bridge you with a trusted operator who services ${ctx.city} — someone who can help your seller with a full or partial estate sale, cleanout, or downsizing, and who can send referral business your way.
+At EstateSalen, we partner with reputable estate sale companies across the country. We'd love to bridge you with a trusted operator who services ${ctx.primaryCity} — someone who can help your seller${ctx.isMultiple ? 's' : ''} with a full or partial estate sale, cleanout, or downsizing, and who can send referral business your way.
 ${ctx.operatorLine}
 
-We also generate Territory and City leads every single day through EstateSalen.com — from estate sale companies listing on our platform, organic search traffic, and our paid ad campaigns. When a family in ${ctx.city} needs help, those leads come to us first, and we route them to the right local professionals.
+We also generate Territory and City leads every single day through EstateSalen.com — from estate sale companies listing on our platform, organic search traffic, and our paid ad campaigns. When a family in ${ctx.primaryCity} needs help, those leads come to us first, and we route them to the right local professionals.
 
-If you'd like an introduction to a vetted operator in ${ctx.city} — or want to start receiving our local lead flow — just reply to this email.
+If you'd like an introduction to a vetted operator in ${ctx.primaryCity} — or want to start receiving our local lead flow — just reply to this email.
 
 Best,
 The EstateSalen Team
 estatesalen.com`;
 
-const EVENT_NAME = 'propstream_agent_new_listing_congrats';
+const EMAIL_BODY_REMINDER = (ctx) => `Hi ${ctx.firstName},
+
+Just a quick note — congrats on your ${ctx.isMultiple ? `${ctx.listingCount} new listings` : 'new listing'} in ${ctx.cityList}${ctx.listingDetail}!
+
+As a reminder, EstateSalen links your sellers up with reputable estate sale companies for full or partial estate sales, cleanouts, and downsizing — and we can connect you with a vetted operator in ${ctx.primaryCity}.
+${ctx.operatorLine}
+
+We're still generating Territory and City leads daily through EstateSalen.com (operator listings, organic search, and paid ads) and routing them to the right local pros.
+
+Want an intro to an operator in ${ctx.primaryCity}, or want to receive our local lead flow? Just reply to this email.
+
+Best,
+The EstateSalen Team
+estatesalen.com`;
 
 // ── Customer.io (Pipelines / CDP) helpers ──
 function getCioConfig() {
@@ -62,9 +89,9 @@ async function cioTrack(userId, email, eventName, data, config) {
   return { sent: true };
 }
 
-// Parse "123 Main St - $450000 (Austin, TX)" → { address, territory, state }
+// Parse "123 Main St - $450000 (Austin, TX)" → { address, city, state }
 function parsePropertyAddress(raw) {
-  const out = { address: raw || '', territory: '', state: '' };
+  const out = { address: raw || '', city: '', state: '' };
   if (!raw) return out;
   const dashIdx = raw.indexOf(' - $');
   let addressPart = raw, rest = '';
@@ -74,7 +101,7 @@ function parsePropertyAddress(raw) {
   if (parenIdx >= 0) {
     const inside = rest.slice(parenIdx + 1).replace(/\)$/, '').trim();
     const parts = inside.split(',').map(s => s.trim());
-    out.territory = parts[0] || '';
+    out.city = parts[0] || '';
     out.state = parts[1] || '';
   }
   return out;
@@ -101,6 +128,27 @@ async function findOperatorForCity(base44, city, state) {
   const pool = inCity.length > 0 ? inCity : candidates;
   pool.sort((a, b) => (tierRank[b.membership_tier] || 0) - (tierRank[a.membership_tier] || 0) || (b.sales_posted || 0) - (a.sales_posted || 0));
   return pool[0];
+}
+
+// Emails we already sent a congrats to in the last CONTACT_WINDOW_DAYS days
+async function getContactedEmails(base44) {
+  const since = new Date(Date.now() - CONTACT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const contacted = new Set();
+  const PAGE = 5000;
+  let skip = 0;
+  while (true) {
+    const batch = await base44.asServiceRole.entities.MarketingEventLog.filter({ event_name: EVENT_NAME, status: 'sent' }, '-created_date', PAGE, skip);
+    if (!batch || batch.length === 0) break;
+    for (const e of batch) {
+      if (e.consumer_email && new Date(e.created_date) >= since) {
+        contacted.add(e.consumer_email.toLowerCase().trim());
+      }
+    }
+    if (new Date(batch[batch.length - 1].created_date) < since) break;
+    if (batch.length < PAGE) break;
+    skip += PAGE;
+  }
+  return contacted;
 }
 
 Deno.serve(async (req) => {
@@ -131,62 +179,114 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: `No new PropStream agent leads in the last ${windowHours}h`, drafted: 0 });
     }
 
+    // 2. Group by agent email — one email per agent, all their listings combined
+    const byAgent = new Map();
+    let skipped = 0;
+    for (const lead of newLeads) {
+      const email = (lead.agent_email || '').toLowerCase().trim();
+      if (!email) { skipped++; continue; }
+      if (!byAgent.has(email)) byAgent.set(email, { email, agent_name: lead.agent_name, records: [], addresses: [] });
+      const g = byAgent.get(email);
+      g.records.push(lead);
+      for (const addr of (lead.property_addresses || [])) {
+        if (addr && !g.addresses.includes(addr)) g.addresses.push(addr);
+      }
+    }
+
+    // 3. Who was already contacted in the last 30 days?
+    const contactedEmails = await getContactedEmails(base44);
+
     const config = getCioConfig();
     const drafted = [];
-    let sent = 0, failed = 0, skipped = 0;
+    let sent = 0, failed = 0;
 
-    for (const lead of newLeads) {
-      if (!lead.agent_email) { skipped++; continue; }
+    for (const [, g] of byAgent) {
+      const firstRecord = g.records[0];
 
-      const firstAddrRaw = (lead.property_addresses && lead.property_addresses[0]) || '';
-      const parsed = parsePropertyAddress(firstAddrRaw);
-      const city = lead.territory_name || parsed.territory || '';
-      const state = lead.brokerage_state || parsed.state || lead.state || '';
-      const listingAddress = parsed.address || '';
+      // Parse all listings for this agent
+      let listings = g.addresses.map(parsePropertyAddress).filter(l => l.address);
+      if (listings.length === 0) {
+        listings = [{ address: '', city: firstRecord.territory_name || '', state: firstRecord.brokerage_state || firstRecord.state || '' }];
+      }
+      const isMultiple = listings.length >= 2;
+      const listingCount = listings.length;
 
-      const operator = await findOperatorForCity(base44, city, state);
+      const primaryCity = listings[0].city || firstRecord.territory_name || '';
+      const primaryState = listings[0].state || firstRecord.brokerage_state || firstRecord.state || '';
+      const primaryCityLabel = primaryCity || primaryState || 'your area';
+
+      // cityList for "in {cityList}": primary city (or state / area)
+      const cityList = primaryCityLabel;
+
+      // listingDetail: single → " at 123 Main St"; multiple → ":\n\n• ..."
+      let listingDetail = '';
+      if (isMultiple) {
+        listingDetail = ':\n\n' + listings.map(l => {
+          const loc = [l.city, l.state].filter(Boolean).join(', ');
+          return `• ${l.address}${loc ? ` — ${loc}` : ''}`;
+        }).join('\n');
+      } else if (listings[0].address) {
+        listingDetail = ` at ${listings[0].address}`;
+      }
+
+      // 4. Variant: reminder if contacted in last 30 days, else full
+      const variant = contactedEmails.has(g.email) ? 'reminder' : 'full';
+
+      // 5. Match a reputable local operator
+      const operator = await findOperatorForCity(base44, primaryCity, primaryState);
       const operatorLine = operator
-        ? `\nWe have a vetted operator ready in ${city || state}: ${operator.company_name}${operator.phone ? ` (${operator.phone})` : ''}. Reply "connect" and we'll make the introduction.`
-        : `\nWe're actively building out our ${city || state} operator network — reply "connect" and we'll match you with a vetted local operator.`;
+        ? `\nWe have a vetted operator ready in ${primaryCityLabel}: ${operator.company_name}${operator.phone ? ` (${operator.phone})` : ''}. Reply "connect" and we'll make the introduction.`
+        : `\nWe're actively building out our ${primaryCityLabel} operator network — reply "connect" and we'll match you with a vetted local operator.`;
 
       const ctx = {
-        firstName: firstNameOf(lead.agent_name),
-        listingAddress,
-        city: city || state || 'your area',
-        state,
+        variant,
+        firstName: firstNameOf(g.agent_name),
+        isMultiple,
+        listingCount,
+        cityList,
+        listingDetail,
+        primaryCity: primaryCityLabel,
         operatorLine,
       };
 
       const subject = EMAIL_SUBJECT(ctx);
-      const emailBody = EMAIL_BODY(ctx);
+      const emailBody = variant === 'reminder' ? EMAIL_BODY_REMINDER(ctx) : EMAIL_BODY_FULL(ctx);
 
-      drafted.push({
-        agent_lead_id: lead.id,
-        agent_name: lead.agent_name,
-        agent_email: lead.agent_email,
-        city, state, listingAddress,
+      const draft = {
+        agent_email: g.email,
+        agent_name: g.agent_name,
+        variant,
+        isMultiple,
+        listingCount,
+        listings: listings.map(l => ({ address: l.address, city: l.city, state: l.state })),
+        primaryCity: primaryCityLabel,
         matched_operator: operator ? { id: operator.id, company_name: operator.company_name, phone: operator.phone } : null,
         email_subject: subject,
         email_body: emailBody,
-      });
+      };
+      drafted.push(draft);
 
       if (dryRun) continue;
 
-      // 2. Push to Customer.io: identify the agent, then track the congrats event with the composed email
+      // 6. Push to Customer.io + log the send
+      const userId = `propstream_agent:${g.email}`;
+      let logStatus = 'sent';
       try {
-        const userId = `propstream_agent:${lead.id}`;
-        await cioIdentify(userId, lead.agent_email, {
+        await cioIdentify(userId, g.email, {
           first_name: ctx.firstName,
-          agent_name: lead.agent_name,
-          brokerage_name: lead.brokerage_name || '',
-          city, state,
+          agent_name: g.agent_name,
+          brokerage_name: firstRecord.brokerage_name || '',
+          city: primaryCity, state: primaryState,
           source: 'propstream_agent_lead',
           updated_at: new Date().toISOString(),
         }, config);
-        await cioTrack(userId, lead.agent_email, EVENT_NAME, {
-          agent_name: lead.agent_name,
-          listing_address: listingAddress,
-          city, state,
+        await cioTrack(userId, g.email, EVENT_NAME, {
+          variant,
+          agent_name: g.agent_name,
+          listing_count: listingCount,
+          listings: listings.map(l => ({ address: l.address, city: l.city, state: l.state })),
+          primary_city: primaryCity,
+          state: primaryState,
           matched_operator_name: operator?.company_name || '',
           matched_operator_phone: operator?.phone || '',
           email_subject: subject,
@@ -194,23 +294,41 @@ Deno.serve(async (req) => {
         }, config);
         sent++;
       } catch (err) {
-        console.error(`CIO send failed for ${lead.agent_email}: ${err.message}`);
+        console.error(`CIO send failed for ${g.email}: ${err.message}`);
+        logStatus = 'failed';
         failed++;
+      }
+
+      // Log so future runs know this agent was contacted
+      try {
+        await base44.asServiceRole.entities.MarketingEventLog.create({
+          event_name: EVENT_NAME,
+          consumer_email: g.email,
+          consumer_user_id: userId,
+          payload_json: { variant, listing_count: listingCount, primary_city: primaryCity, state: primaryState, matched_operator_name: operator?.company_name || '' },
+          provider: 'customerio',
+          provider_response: { status: logStatus },
+          status: logStatus,
+          created_at: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.error(`MarketingEventLog create failed for ${g.email}: ${logErr.message}`);
       }
     }
 
     return Response.json({
       success: true,
       window_hours: windowHours,
-      new_leads_found: newLeads.length,
+      new_lead_records: newLeads.length,
+      unique_agents: byAgent.size,
       drafted: drafted.length,
       sent_to_customerio: sent,
       failed,
-      skipped,
+      skipped_no_email: skipped,
       dry_run: dryRun,
       drafts: dryRun
         ? drafted
-        : drafted.map(d => ({ agent_email: d.agent_email, city: d.city, matched_operator: d.matched_operator?.company_name || null })),
+        : drafted.map(d => ({ agent_email: d.agent_email, variant: d.variant, listings: d.listingCount, city: d.primaryCity, matched_operator: d.matched_operator?.company_name || null })),
     });
   } catch (error) {
     console.error('draftPropstreamAgentCongratsEmails error:', error);
