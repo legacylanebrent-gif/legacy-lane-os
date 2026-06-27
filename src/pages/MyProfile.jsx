@@ -392,7 +392,7 @@ export default function MyProfile() {
           {!isConsumer && <TabsTrigger value="business" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">
             {isAgentOperator ? 'Business Profile' : isAgent ? 'Agent Profile' : isReseller ? 'Business' : isVendor ? 'Vendor Profile' : 'Business'}
           </TabsTrigger>}
-          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isReseller ? 'Service Area' : 'Service Area (Estate Sales)'}</TabsTrigger>}
+          {!isConsumer && <TabsTrigger value="territory" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">{isReseller ? 'Service Area' : isAgent ? 'Service Area (Real Estate)' : 'Service Area (Estate Sales)'}</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_services" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Services</TabsTrigger>}
           {isVendor && <TabsTrigger value="vendor_leads" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Buyout Leads</TabsTrigger>}
           {isReseller && <TabsTrigger value="reseller_prefs" className="rounded-md border border-input bg-muted px-3 py-1.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary">Reseller Buying</TabsTrigger>}
@@ -1017,7 +1017,7 @@ export default function MyProfile() {
               </CardContent>
             </Card>
           ) : (
-            <InteractiveTerritorySelector form={form} setForm={setForm} />
+            <InteractiveTerritorySelector form={form} setForm={setForm} accountType={acct} />
           )}
 
           {/* Max Radius */}

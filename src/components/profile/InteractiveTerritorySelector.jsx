@@ -13,7 +13,7 @@ const US_STATES = [
   'VA','WA','WV','WI','WY','DC'
 ];
 
-export default function InteractiveTerritorySelector({ form, setForm }) {
+export default function InteractiveTerritorySelector({ form, setForm, accountType }) {
   const [selectedState, setSelectedState] = useState(null);
   const [counties, setCounties] = useState([]);
   const [loadingCounties, setLoadingCounties] = useState(false);
@@ -132,8 +132,8 @@ export default function InteractiveTerritorySelector({ form, setForm }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />Service Area (Estate Sales)</CardTitle>
-        <p className="text-sm text-slate-500">Select a state → counties → micro-territories for each county</p>
+        <CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5" />{accountType === 'real_estate_agent' ? 'Service Area (Real Estate)' : 'Service Area (Estate Sales)'}</CardTitle>
+        <p className="text-sm text-slate-500">{accountType === 'real_estate_agent' ? 'Select a state → counties → cities for each county territory' : 'Select a state → counties → micro-territories for each county'}</p>
       </CardHeader>
       <CardContent className="space-y-6">
 
