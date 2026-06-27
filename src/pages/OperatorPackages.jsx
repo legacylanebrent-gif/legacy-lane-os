@@ -183,7 +183,9 @@ export default function OperatorPackages() {
             Choose Your Perfect Plan
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
-            Select the subscription package that best fits your estate sale business needs
+            Select the subscription package that best fits your business — whether you run estate sales, 
+            serve as a vendor or consignor, resell inventory, represent clients as an agent, or launch a 
+            Biz-in-a-Box franchise
           </p>
 
           {/* Account Type Tabs */}
