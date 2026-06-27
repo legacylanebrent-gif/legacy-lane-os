@@ -239,15 +239,12 @@ export default function OperatorPackages() {
                 </Badge>
                 <CardTitle className="text-3xl mb-2">{pkgData.package_name}</CardTitle>
                 {pkgData.package_name === 'Elite' && (
-                 <div className="space-y-2 mb-3">
-                   <Badge className="bg-purple-600 text-white text-xs px-2 py-1 w-fit mx-auto block">
-                     ⭐ Featured on Company Finder
-                   </Badge>
-                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-xs text-purple-800 leading-relaxed">
-                     <span className="font-bold">🔍 Local SEO Game Changer:</span> Auto-generated sale preview blog posts published 2 days before every sale — featuring all your items with descriptions, pricing, and your company info. Fresh local content indexed by Google before your doors open.
-                   </div>
-                 </div>
-                )}
+                 <div className="mb-3">
+                    <Badge className="bg-purple-600 text-white text-xs px-2 py-1 w-fit mx-auto block">
+                      ⭐ Featured on Company Finder
+                    </Badge>
+                  </div>
+                 )}
                 <p className="text-slate-600 text-sm">{pkgData.description}</p>
                 </CardHeader>
 
