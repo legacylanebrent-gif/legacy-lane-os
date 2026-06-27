@@ -21,7 +21,7 @@ export default function OperatorPackages() {
   const [activeTab, setActiveTab] = useState('estate_sale_operator');
 
   const PRICING_TABS = [
-    { key: 'estate_sale_operator', label: 'Operators' },
+    { key: 'estate_sale_operator', label: 'Estate Sale Co' },
     { key: 'real_estate_agent', label: 'Agents' },
     { key: 'vendor', label: 'Vendors' },
     { key: 'consignor', label: 'Consignors' },
