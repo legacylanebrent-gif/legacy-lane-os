@@ -481,7 +481,7 @@ export default function OperatorPackages() {
                 <CardContent>
                   {/* Pricing */}
                   <div className="text-center mb-6 pb-6 border-b">
-                    {pkgData.account_type !== 'biz_in_a_box' && pkgData.monthly_price !== 0 && pkgData.monthly_price != null && (
+                    {pkgData.account_type === 'estate_sale_operator' && pkgData.monthly_price !== 0 && pkgData.monthly_price != null && (
                       <div className="mb-2">
                         <Badge className="bg-green-600 text-white text-sm px-3 py-1">
                           14-Day Free Trial Available
@@ -522,7 +522,9 @@ export default function OperatorPackages() {
                           <span className="text-5xl font-bold text-slate-900">${price}</span>
                           <span className="text-slate-600">/mo</span>
                         </div>
-                        <p className="text-sm text-slate-500 mt-1">after 14-day trial</p>
+                        {pkgData.account_type === 'estate_sale_operator' && (
+                          <p className="text-sm text-slate-500 mt-1">after 14-day trial</p>
+                        )}
                         {pkgData.per_item_price != null && (
                           <p className="text-sm text-slate-600 mt-1">
                             + ${pkgData.per_item_price} per sale listing
@@ -610,8 +612,8 @@ export default function OperatorPackages() {
                     </div>
                   )}
 
-                  {/* Start Free Trial Button — not for Biz in a Box, not for existing business users upgrading */}
-                  {pkgData.account_type !== 'biz_in_a_box' && !isExistingBusinessUser && (
+                  {/* Start Free Trial Button — Operators only, not for existing business users upgrading */}
+                  {pkgData.account_type === 'estate_sale_operator' && !isExistingBusinessUser && (
                     <Button
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
                       size="lg"
