@@ -122,6 +122,14 @@
         "storage": {
           "type": "string",
           "description": "Storage Capacity (e.g. '10 GB' or 'Unlimited')"
+        },
+        "cities": {
+          "type": "string",
+          "description": "Directory cities the agent can claim placement in (e.g. '5' or 'Unlimited')"
+        },
+        "territories": {
+          "type": "string",
+          "description": "County territories the agent can own (e.g. '1' or 'Unlimited')"
         }
       }
     },
