@@ -136,25 +136,63 @@ export default function OperatorPackages() {
         const user = await base44.auth.me();
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');
-        
-        await base44.auth.updateMe({
-          primary_account_type: accountType,
-          selected_package: pkg.id,
-          subscription_tier: pkgData.tier_level
-        });
 
-        // Create referral if ref exists
-        if (ref) {
-          try {
-            await base44.functions.invoke('createReferral', { 
-              referralCode: ref 
-            });
-          } catch (refError) {
-            console.error('Error creating referral:', refError);
+        // Check if this is a downgrade (existing business user moving to a lower tier)
+        const TIER_ORDER_LOCAL = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, premium: 3, elite: 3 };
+        const userRank = TIER_ORDER_LOCAL[user.subscription_tier] ?? -1;
+        const pkgRank = TIER_ORDER_LOCAL[pkgData.tier_level] ?? -1;
+        const isBusinessUser = user.primary_account_type && 
+          user.primary_account_type !== 'consumer' && 
+          user.primary_account_type !== 'user';
+        const isDowngrade = isBusinessUser && userRank > pkgRank && pkgData.account_type !== 'biz_in_a_box';
+
+        if (isDowngrade) {
+          // Pro-rate: downgrade takes effect on next billing cycle date
+          // User keeps current plan access until then
+          const currentPeriodEnd = user.current_period_end || user.subscription_end_date;
+          let effectiveDate;
+          if (currentPeriodEnd) {
+            effectiveDate = new Date(currentPeriodEnd);
+          } else {
+            // Default to end of current monthly billing cycle (30 days from now)
+            effectiveDate = new Date();
+            effectiveDate.setDate(effectiveDate.getDate() + 30);
           }
+
+          await base44.auth.updateMe({
+            pending_downgrade: {
+              target_tier: pkgData.tier_level,
+              target_package: pkg.id,
+              target_account_type: accountType,
+              effective_date: effectiveDate.toISOString(),
+              requested_at: new Date().toISOString(),
+            }
+          });
+
+          alert(`Your downgrade to ${pkgData.package_name} will take effect on ${effectiveDate.toLocaleDateString()}. ` +
+                `You'll keep full access to your current plan until then, and the price difference will be pro-rated on your next billing cycle.`);
+          window.location.href = createPageUrl('Dashboard');
+        } else {
+          // Upgrade or new signup — process immediately
+          await base44.auth.updateMe({
+            primary_account_type: accountType,
+            selected_package: pkg.id,
+            subscription_tier: pkgData.tier_level
+          });
+
+          // Create referral if ref exists
+          if (ref) {
+            try {
+              await base44.functions.invoke('createReferral', { 
+                referralCode: ref 
+              });
+            } catch (refError) {
+              console.error('Error creating referral:', refError);
+            }
+          }
+          
+          window.location.href = createPageUrl('Dashboard');
         }
-        
-        window.location.href = createPageUrl('Dashboard');
       }
     } catch (error) {
       console.error('Error during sign up:', error);
@@ -179,6 +217,9 @@ export default function OperatorPackages() {
     currentUser.primary_account_type && 
     currentUser.primary_account_type !== 'consumer' && 
     currentUser.primary_account_type !== 'user';
+
+  const TIER_ORDER = { starter: 0, basic: 0, growth: 1, professional: 2, pro: 2, premium: 3, elite: 3 };
+  const getTierRank = (tier) => TIER_ORDER[tier] ?? -1;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
@@ -283,6 +324,27 @@ export default function OperatorPackages() {
               );
             const isFreeTier = (pkgData.tier_level === 'basic' || pkgData.tier_level === 'starter') && 
               (pkgData.monthly_price === 0 || pkgData.monthly_price == null);
+
+            // Determine button action based on user's current tier vs this package
+            let buttonAction = 'signup';
+            let buttonText = 'Sign Up Now';
+            if (pkgData.account_type === 'biz_in_a_box') {
+              buttonAction = 'get_started';
+              buttonText = 'Get Started';
+            } else if (isExistingBusinessUser) {
+              const userRank = getTierRank(currentUser.subscription_tier);
+              const pkgRank = getTierRank(pkgData.tier_level);
+              if (userRank === pkgRank && currentUser.primary_account_type === activeTab) {
+                buttonAction = 'current';
+                buttonText = 'Current Plan';
+              } else if (userRank > pkgRank) {
+                buttonAction = 'downgrade';
+                buttonText = 'Downgrade';
+              } else {
+                buttonAction = 'upgrade';
+                buttonText = 'Upgrade';
+              }
+            }
 
             return (
               <Card 
@@ -456,17 +518,22 @@ export default function OperatorPackages() {
                     </Button>
                   )}
                   
-                  {/* Sign Up Button */}
+                  {/* Sign Up / Upgrade / Downgrade Button */}
                   <Button
-                    className={`w-full ${pkgData.account_type !== 'biz_in_a_box' ? 'mt-3' : ''} ${
-                      pkgData.featured 
-                        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
-                        : 'bg-slate-800 hover:bg-slate-700 text-white'
+                    className={`w-full ${pkgData.account_type !== 'biz_in_a_box' && buttonAction !== 'current' ? 'mt-3' : ''} ${
+                      buttonAction === 'current'
+                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                        : buttonAction === 'downgrade'
+                          ? 'bg-slate-600 hover:bg-slate-700 text-white'
+                          : pkgData.featured 
+                            ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                            : 'bg-slate-800 hover:bg-slate-700 text-white'
                     }`}
                     size="lg"
+                    disabled={buttonAction === 'current'}
                     onClick={() => handleSignUp(pkg)}
                   >
-                    {pkgData.account_type === 'biz_in_a_box' ? 'Get Started' : (isExistingBusinessUser ? 'Upgrade' : 'Sign Up Now')}
+                    {buttonText}
                   </Button>
                 </CardContent>
               </Card>
