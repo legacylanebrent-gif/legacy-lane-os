@@ -62,7 +62,7 @@ export default function EmptySalesMap({ userLocation, searchRadius, communityEve
       <MapPinLegend />
 
       {/* Overlay message — pointer-events-none so the map stays interactive */}
-      <div className="absolute inset-x-0 top-0 z-[1000] flex justify-center pointer-events-none">
+      <div className="absolute inset-x-0 top-24 z-[1000] flex justify-center pointer-events-none">
         <div className="m-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 px-6 py-4 text-center max-w-md pointer-events-auto">
           <MapPin className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-slate-600 text-lg mb-3">
