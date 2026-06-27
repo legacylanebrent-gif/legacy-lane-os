@@ -18,9 +18,18 @@ export default function OperatorPackages() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState('estate_sale_operator');
+
+  const PRICING_TABS = [
+    { key: 'estate_sale_operator', label: 'Operators' },
+    { key: 'vendor', label: 'Vendors' },
+    { key: 'consignor', label: 'Consignors' },
+    { key: 'reseller', label: 'Resellers' },
+    { key: 'real_estate_agent', label: 'Agents' },
+  ];
 
   useEffect(() => {
-    loadPackages();
+    loadPackages(activeTab);
     processPostSignup();
     base44.auth.isAuthenticated().then(authed => {
       setIsAuthenticated(authed);
@@ -28,13 +37,13 @@ export default function OperatorPackages() {
     });
   }, []);
 
-  const loadPackages = async () => {
+  const loadPackages = async (tab = activeTab) => {
     try {
       const data = await base44.entities.SubscriptionPackage.list();
       const operatorPackages = data.filter(pkg => {
         const accountType = pkg.data?.account_type || pkg.account_type;
         const isActive = pkg.data?.is_active !== false && pkg.is_active !== false;
-        return accountType === 'estate_sale_operator' && isActive;
+        return accountType === activeTab && isActive;
       });
       
       // Sort by price (ascending)
@@ -173,6 +182,27 @@ export default function OperatorPackages() {
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
             Select the subscription package that best fits your estate sale business needs
           </p>
+
+          {/* Account Type Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            {PRICING_TABS.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setLoading(true);
+                  loadPackages(tab.key);
+                }}
+                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                  activeTab === tab.key
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4">
