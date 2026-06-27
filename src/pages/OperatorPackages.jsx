@@ -22,10 +22,12 @@ export default function OperatorPackages() {
 
   const PRICING_TABS = [
     { key: 'estate_sale_operator', label: 'Operators' },
+    { key: 'real_estate_agent', label: 'Agents' },
     { key: 'vendor', label: 'Vendors' },
     { key: 'consignor', label: 'Consignors' },
+    { key: 'biz_in_a_box', label: 'Biz in a Box' },
+    { key: 'diy_seller', label: 'DIY Sale' },
     { key: 'reseller', label: 'Resellers' },
-    { key: 'real_estate_agent', label: 'Agents' },
   ];
 
   useEffect(() => {
@@ -46,11 +48,12 @@ export default function OperatorPackages() {
         return accountType === tab && isActive;
       });
       
-      // Sort by price (ascending)
+      // Sort by tier level (starter → growth → professional → elite)
+      const tierOrder = { starter: 0, growth: 1, professional: 2, elite: 3, basic: 0, pro: 2, premium: 3 };
       operatorPackages.sort((a, b) => {
-        const priceA = a.data?.monthly_price || a.monthly_price || 0;
-        const priceB = b.data?.monthly_price || b.monthly_price || 0;
-        return priceA - priceB;
+        const tierA = tierOrder[a.data?.tier_level || a.tier_level] ?? 99;
+        const tierB = tierOrder[b.data?.tier_level || b.tier_level] ?? 99;
+        return tierA - tierB;
       });
       
       setPackages(operatorPackages);
@@ -303,32 +306,81 @@ export default function OperatorPackages() {
                 <CardContent>
                   {/* Pricing */}
                   <div className="text-center mb-6 pb-6 border-b">
-                    <div className="mb-2">
-                      <Badge className="bg-green-600 text-white text-sm px-3 py-1">
-                        14-Day Free Trial Available
-                      </Badge>
-                    </div>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-5xl font-bold text-slate-900">${price}</span>
-                      <span className="text-slate-600">/mo</span>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">after 14-day trial</p>
-                    {isAnnual && pkgData.annual_price && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-sm text-slate-600">
-                          Billed ${billingAmount} annually
-                        </p>
-                        {savings > 0 && (
-                          <p className="text-sm text-green-600 font-semibold">
-                            Save ${savings} per year
+                    {pkgData.account_type !== 'biz_in_a_box' && (
+                      <div className="mb-2">
+                        <Badge className="bg-green-600 text-white text-sm px-3 py-1">
+                          14-Day Free Trial Available
+                        </Badge>
+                      </div>
+                    )}
+
+                    {pkgData.account_type === 'biz_in_a_box' ? (
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-4xl font-bold text-slate-900">${pkgData.biz_in_a_box_setup_fee?.toLocaleString() || '0'}</div>
+                          <div className="text-sm text-slate-600">One-Time Investment</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-slate-900">${pkgData.biz_in_a_box_monthly_year1 || '0'}/mo</div>
+                          <div className="text-sm text-slate-600">Monthly Fee (Year 1)</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-slate-900">{pkgData.biz_in_a_box_revenue_share || '0'}%</div>
+                          <div className="text-sm text-slate-600">Royalty Fee</div>
+                        </div>
+                      </div>
+                    ) : pkgData.pricing_model === 'per_item' ? (
+                      <div>
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-5xl font-bold text-slate-900">${pkgData.per_item_price}</span>
+                          <span className="text-slate-600">/item</span>
+                        </div>
+                        {pkgData.platform_fee_percentage && (
+                          <p className="text-sm text-slate-600 mt-2">
+                            + {pkgData.platform_fee_percentage}% platform fee
                           </p>
                         )}
                       </div>
-                    )}
-                    {!isAnnual && (
-                      <p className="text-sm text-slate-600 mt-2">
-                        Billed ${billingAmount} monthly
-                      </p>
+                    ) : (
+                      <>
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-5xl font-bold text-slate-900">${price}</span>
+                          <span className="text-slate-600">/mo</span>
+                        </div>
+                        <p className="text-sm text-slate-500 mt-1">after 14-day trial</p>
+                        {pkgData.per_item_price != null && (
+                          <p className="text-sm text-slate-600 mt-1">
+                            + ${pkgData.per_item_price} per sale listing
+                          </p>
+                        )}
+                        {pkgData.per_lead_price != null && (
+                          <p className="text-sm text-slate-600 mt-1">
+                            + ${pkgData.per_lead_price} per lead
+                          </p>
+                        )}
+                        {pkgData.referral_fee_percentage && (
+                          <p className="text-sm text-slate-600 mt-1">
+                            + {pkgData.referral_fee_percentage}% referral fee per closed client
+                          </p>
+                        )}
+                        {isAnnual && pkgData.annual_price && (
+                          <div className="mt-2 space-y-1">
+                            <p className="text-sm text-slate-600">
+                              Billed ${billingAmount} annually
+                            </p>
+                            {savings > 0 && (
+                              <p className="text-sm text-green-600 font-semibold">
+                                Save ${savings} per year
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {!isAnnual && (
+                          <p className="text-sm text-slate-600 mt-2">
+                            Billed ${billingAmount} monthly
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -383,22 +435,20 @@ export default function OperatorPackages() {
                     </div>
                   )}
 
-                  {/* Start Free Trial Button */}
-                  <Button
-                    className={`w-full ${
-                      pkgData.featured 
-                        ? 'bg-green-600 hover:bg-green-700 text-white' 
-                        : 'bg-green-600 hover:bg-green-700 text-white'
-                    }`}
-                    size="lg"
-                    onClick={() => handleSignUp(pkg)}
-                  >
-                    Start Free Trial
-                  </Button>
+                  {/* Start Free Trial Button — not for Biz in a Box */}
+                  {pkgData.account_type !== 'biz_in_a_box' && (
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      size="lg"
+                      onClick={() => handleSignUp(pkg)}
+                    >
+                      Start Free Trial
+                    </Button>
+                  )}
                   
                   {/* Sign Up Button */}
                   <Button
-                    className={`w-full mt-3 ${
+                    className={`w-full ${pkgData.account_type !== 'biz_in_a_box' ? 'mt-3' : ''} ${
                       pkgData.featured 
                         ? 'bg-orange-600 hover:bg-orange-700 text-white' 
                         : 'bg-slate-800 hover:bg-slate-700 text-white'
@@ -406,7 +456,7 @@ export default function OperatorPackages() {
                     size="lg"
                     onClick={() => handleSignUp(pkg)}
                   >
-                    Sign Up Now
+                    {pkgData.account_type === 'biz_in_a_box' ? 'Get Started' : 'Sign Up Now'}
                   </Button>
                 </CardContent>
               </Card>
