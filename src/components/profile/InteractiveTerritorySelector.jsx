@@ -13,12 +13,23 @@ const US_STATES = [
   'VA','WA','WV','WI','WY','DC'
 ];
 
-export default function InteractiveTerritorySelector({ form, setForm, accountType }) {
+export default function InteractiveTerritorySelector({ form, setForm, accountType, limits }) {
   const [selectedState, setSelectedState] = useState(null);
   const [counties, setCounties] = useState([]);
   const [loadingCounties, setLoadingCounties] = useState(false);
   // municipalitiesMap: { [county]: { loading, items } }
   const [municipalitiesMap, setMunicipalitiesMap] = useState({});
+
+  // Territory restrictions from the agent's subscription package (limits.territories = counties, limits.cities = cities)
+  const parseLimit = (v) => {
+    if (!v) return Infinity;
+    if (typeof v === 'string' && v.toLowerCase() === 'unlimited') return Infinity;
+    const n = parseInt(v, 10);
+    return isNaN(n) ? Infinity : n;
+  };
+  const maxCounties = limits ? parseLimit(limits.territories) : Infinity;
+  const maxCities = limits ? parseLimit(limits.cities) : Infinity;
+  const isRestricted = limits && (maxCounties !== Infinity || maxCities !== Infinity);
 
   useEffect(() => {
     if (!selectedState) { setCounties([]); return; }
@@ -91,6 +102,10 @@ export default function InteractiveTerritorySelector({ form, setForm, accountTyp
       }));
     } else {
       // Select: add county and start loading its municipalities
+      if (form.service_counties.length >= maxCounties) {
+        alert(`Your plan allows up to ${maxCounties} ${maxCounties === 1 ? 'territory' : 'territories'} (counties). Remove one before adding another, or upgrade your plan.`);
+        return;
+      }
       setForm(p => ({ ...p, service_counties: [...p.service_counties, county] }));
       loadMunicipalities(county);
     }
@@ -101,6 +116,10 @@ export default function InteractiveTerritorySelector({ form, setForm, accountTyp
     if (cities.includes(cityName)) {
       setForm(p => ({ ...p, service_cities: p.service_cities.filter(c => c !== cityName) }));
     } else {
+      if (cities.length >= maxCities) {
+        alert(`Your plan allows up to ${maxCities} ${maxCities === 1 ? 'city' : 'cities'}. Remove one before adding another, or upgrade your plan.`);
+        return;
+      }
       setForm(p => ({ ...p, service_cities: [...p.service_cities, cityName] }));
     }
   };
@@ -121,7 +140,14 @@ export default function InteractiveTerritorySelector({ form, setForm, accountTyp
 
   const selectAllForCounty = (county) => {
     const names = (municipalitiesMap[county]?.items || []).map(m => m.name);
-    setForm(p => ({ ...p, service_cities: [...new Set([...p.service_cities, ...names])] }));
+    const current = form.service_cities || [];
+    const notYetSelected = names.filter(n => !current.includes(n));
+    const remaining = maxCities === Infinity ? notYetSelected.length : Math.max(0, maxCities - current.length);
+    const toAdd = notYetSelected.slice(0, remaining);
+    if (toAdd.length < notYetSelected.length) {
+      alert(`Your plan allows up to ${maxCities} cities total. Only ${toAdd.length} more ${toAdd.length === 1 ? 'city' : 'cities'} ${toAdd.length === 1 ? 'was' : 'were'} added.`);
+    }
+    setForm(p => ({ ...p, service_cities: [...new Set([...p.service_cities, ...toAdd])] }));
   };
 
   const clearAllForCounty = (county) => {
@@ -179,6 +205,11 @@ export default function InteractiveTerritorySelector({ form, setForm, accountTyp
               Counties in {selectedState}
               <ChevronRight className="w-4 h-4 text-slate-400" />
               <span className="text-slate-500 font-normal text-xs">Select counties to expand their micro-territories below</span>
+              {isRestricted && maxCounties !== Infinity && (
+                <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${form.service_counties.length >= maxCounties ? 'bg-red-100 text-red-700' : 'bg-cyan-100 text-cyan-700'}`}>
+                  {form.service_counties.length} / {maxCounties} {maxCounties === 1 ? 'territory' : 'territories'}
+                </span>
+              )}
             </p>
             {loadingCounties ? (
               <div className="flex items-center gap-2 text-sm text-slate-500 py-3">
@@ -213,6 +244,11 @@ export default function InteractiveTerritorySelector({ form, setForm, accountTyp
             <p className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
               <span className="w-5 h-5 bg-purple-600 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
               Micro-Territories by County
+              {isRestricted && maxCities !== Infinity && (
+                <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${(form.service_cities || []).length >= maxCities ? 'bg-red-100 text-red-700' : 'bg-purple-100 text-purple-700'}`}>
+                  {(form.service_cities || []).length} / {maxCities} {maxCities === 1 ? 'city' : 'cities'}
+                </span>
+              )}
             </p>
             {form.service_counties.map(county => {
               const muniData = municipalitiesMap[county];

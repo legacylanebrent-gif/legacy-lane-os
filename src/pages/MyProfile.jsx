@@ -348,6 +348,12 @@ export default function MyProfile() {
   const isReseller = acct === 'reseller' || operatorHasResellerAccess;
   const isCollectorDealer = acct === 'collector_dealer';
 
+  // Real estate agent territory limits from their subscription package (cities / territories)
+  const agentTierRaw = (user?.subscription_tier || subscription?.tier || '').toLowerCase();
+  const agentNormalizedTier = (agentTierRaw === 'premium' || agentTierRaw === 'enterprise') ? 'elite' : agentTierRaw;
+  const agentPackage = packages.find(p => (p.data || p).tier_level === agentNormalizedTier);
+  const agentTerritoryLimits = (isAgent && agentPackage) ? (agentPackage.data || agentPackage).limits : null;
+
   // Collector dealer specialty options
   const DEALER_SPECIALTY_OPTIONS = [
     'Antiques', 'Fine Art', 'Paintings', 'Sculpture', 'Prints & Lithographs',
@@ -1017,7 +1023,7 @@ export default function MyProfile() {
               </CardContent>
             </Card>
           ) : (
-            <InteractiveTerritorySelector form={form} setForm={setForm} accountType={acct} />
+            <InteractiveTerritorySelector form={form} setForm={setForm} accountType={acct} limits={agentTerritoryLimits} />
           )}
 
           {/* Max Radius */}
