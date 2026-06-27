@@ -25,7 +25,7 @@ export default function OperatorPackages() {
     { key: 'real_estate_agent', label: 'Agents' },
     { key: 'vendor', label: 'Vendors' },
     { key: 'consignor', label: 'Consignors' },
-    { key: 'biz_in_a_box', label: 'Legacy Lane' },
+    { key: 'biz_in_a_box', label: 'Biz in a Box' },
     { key: 'diy_seller', label: 'DIY Sale' },
     { key: 'reseller', label: 'Resellers' },
   ];
@@ -184,8 +184,8 @@ export default function OperatorPackages() {
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
             Select the subscription package that best fits your business — whether you run estate sales, 
-            serve as a vendor or consignor, resell inventory, represent clients as an agent, or launch a 
-            Biz-in-a-Box franchise
+            serve as a vendor or consignor, resell inventory, represent clients as an agent, or start 
+            your own Legacy Lane estate sale co with our Business-in-a-Box
           </p>
 
           {/* Account Type Tabs */}
