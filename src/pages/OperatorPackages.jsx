@@ -481,7 +481,7 @@ export default function OperatorPackages() {
                 <CardContent>
                   {/* Pricing */}
                   <div className="text-center mb-6 pb-6 border-b">
-                    {pkgData.account_type !== 'biz_in_a_box' && (
+                    {pkgData.account_type !== 'biz_in_a_box' && pkgData.monthly_price !== 0 && pkgData.monthly_price != null && (
                       <div className="mb-2">
                         <Badge className="bg-green-600 text-white text-sm px-3 py-1">
                           14-Day Free Trial Available
