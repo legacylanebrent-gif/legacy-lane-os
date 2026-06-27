@@ -81,13 +81,14 @@ export default function OperatorPackages() {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get('ref');
       const pkgId = params.get('pkg');
+      const accountType = params.get('type') || 'estate_sale_operator';
 
       if (pkgId) {
         const user = await base44.auth.me();
         
-        // Update user to Estate Sale Company Owner account type
+        // Update user to the selected account type (pre-qualifies them for onboarding)
         await base44.auth.updateMe({
-          primary_account_type: 'estate_sale_operator',
+          primary_account_type: accountType,
           selected_package: pkgId,
           subscription_tier: 'basic'
         });
@@ -113,6 +114,8 @@ export default function OperatorPackages() {
   };
 
   const handleSignUp = async (pkg) => {
+    const pkgData = pkg.data || pkg;
+    const accountType = pkgData.account_type || activeTab;
     try {
       const isAuth = await base44.auth.isAuthenticated();
       
@@ -121,8 +124,8 @@ export default function OperatorPackages() {
         const ref = params.get('ref');
         const pkgId = pkg.id;
         
-        // Build return URL with package and ref info
-        let returnUrl = `${window.location.pathname}?pkg=${pkgId}`;
+        // Build return URL with package, account type, and ref info
+        let returnUrl = `${window.location.pathname}?pkg=${pkgId}&type=${accountType}`;
         if (ref) {
           returnUrl += `&ref=${ref}`;
         }
@@ -135,9 +138,9 @@ export default function OperatorPackages() {
         const ref = params.get('ref');
         
         await base44.auth.updateMe({
-          primary_account_type: 'estate_sale_operator',
+          primary_account_type: accountType,
           selected_package: pkg.id,
-          subscription_tier: pkg.data?.tier_level || pkg.tier_level
+          subscription_tier: pkgData.tier_level
         });
 
         // Create referral if ref exists
@@ -171,6 +174,11 @@ export default function OperatorPackages() {
       </div>
     );
   }
+
+  const isExistingBusinessUser = isAuthenticated && currentUser && 
+    currentUser.primary_account_type && 
+    currentUser.primary_account_type !== 'consumer' && 
+    currentUser.primary_account_type !== 'user';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
@@ -437,8 +445,8 @@ export default function OperatorPackages() {
                     </div>
                   )}
 
-                  {/* Start Free Trial Button — not for Biz in a Box */}
-                  {pkgData.account_type !== 'biz_in_a_box' && (
+                  {/* Start Free Trial Button — not for Biz in a Box, not for existing business users upgrading */}
+                  {pkgData.account_type !== 'biz_in_a_box' && !isExistingBusinessUser && (
                     <Button
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
                       size="lg"
@@ -458,7 +466,7 @@ export default function OperatorPackages() {
                     size="lg"
                     onClick={() => handleSignUp(pkg)}
                   >
-                    {pkgData.account_type === 'biz_in_a_box' ? 'Get Started' : 'Sign Up Now'}
+                    {pkgData.account_type === 'biz_in_a_box' ? 'Get Started' : (isExistingBusinessUser ? 'Upgrade' : 'Sign Up Now')}
                   </Button>
                 </CardContent>
               </Card>
