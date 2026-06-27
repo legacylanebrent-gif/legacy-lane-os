@@ -25,7 +25,7 @@ export default function OperatorPackages() {
     { key: 'real_estate_agent', label: 'Agents' },
     { key: 'vendor', label: 'Vendors' },
     { key: 'consignor', label: 'Consignors' },
-    { key: 'biz_in_a_box', label: 'Biz in a Box' },
+    { key: 'biz_in_a_box', label: 'Legacy Lane' },
     { key: 'diy_seller', label: 'DIY Sale' },
     { key: 'reseller', label: 'Resellers' },
   ];
