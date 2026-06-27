@@ -11,6 +11,7 @@ import UniversalHeader from '@/components/layout/UniversalHeader';
 import SharedFooter from '@/components/layout/SharedFooter';
 import OperatorTestimonials from '@/components/operators/OperatorTestimonials';
 import LeadTestimonialBanner from '@/components/operators/LeadTestimonialBanner';
+import DonationDocUploadModal from '@/components/operators/DonationDocUploadModal';
 
 export default function OperatorPackages() {
   const [packages, setPackages] = useState([]);
@@ -19,6 +20,8 @@ export default function OperatorPackages() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('estate_sale_operator');
+  const [showDonationDocModal, setShowDonationDocModal] = useState(false);
+  const [pendingDonationPkg, setPendingDonationPkg] = useState(null);
 
   const PRICING_TABS = [
     { key: 'estate_sale_operator', label: 'Estate Sale Co' },
@@ -36,6 +39,25 @@ export default function OperatorPackages() {
     base44.auth.isAuthenticated().then(authed => {
       setIsAuthenticated(authed);
       if (authed) base44.auth.me().then(setCurrentUser).catch(() => {});
+    });
+  }, []);
+
+  // Open donation doc upload modal when returning from login
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const donationPkgId = params.get('show_donation_doc');
+    if (!donationPkgId) return;
+    base44.auth.isAuthenticated().then(async (authed) => {
+      if (!authed) return;
+      try {
+        const pkg = await base44.entities.SubscriptionPackage.get(donationPkgId);
+        if (pkg) {
+          setPendingDonationPkg(pkg);
+          setShowDonationDocModal(true);
+        }
+      } catch (err) {
+        console.error('Error loading donation package for doc upload:', err);
+      }
     });
   }, []);
 
@@ -83,6 +105,16 @@ export default function OperatorPackages() {
       const pkgId = params.get('pkg');
       const accountType = params.get('type') || 'estate_sale_operator';
 
+      const isDonation = params.get('donation') === '1';
+
+      if (pkgId && isDonation) {
+        // Donation partners must upload non-profit docs before account is activated.
+        // Redirect back to this page with a flag to open the doc upload modal.
+        const redirectUrl = `${window.location.pathname}?show_donation_doc=${pkgId}${ref ? `&ref=${ref}` : ''}`;
+        window.location.href = redirectUrl;
+        return;
+      }
+
       if (pkgId) {
         const user = await base44.auth.me();
         
@@ -113,9 +145,28 @@ export default function OperatorPackages() {
     }
   };
 
+  const isDonationPackage = (pkgData) => (pkgData.package_name || '').toLowerCase().includes('donation');
+
   const handleSignUp = async (pkg) => {
     const pkgData = pkg.data || pkg;
     const accountType = pkgData.account_type || activeTab;
+
+    // Donation partners must upload non-profit status docs before completing signup
+    if (isDonationPackage(pkgData)) {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        let returnUrl = `${window.location.pathname}?pkg=${pkg.id}&type=${accountType}&donation=1`;
+        if (ref) returnUrl += `&ref=${ref}`;
+        base44.auth.redirectToLogin(returnUrl);
+      } else {
+        setPendingDonationPkg(pkg);
+        setShowDonationDocModal(true);
+      }
+      return;
+    }
+
     try {
       const isAuth = await base44.auth.isAuthenticated();
       
@@ -217,6 +268,38 @@ export default function OperatorPackages() {
     } catch (error) {
       console.error('Error during sign up:', error);
       alert('There was an error. Please try again.');
+    }
+  };
+
+  const handleDonationDocComplete = async (docUrl) => {
+    const pkg = pendingDonationPkg;
+    const pkgData = pkg?.data || pkg;
+    const accountType = pkgData?.account_type || 'vendor';
+    try {
+      await base44.auth.updateMe({
+        primary_account_type: accountType,
+        selected_package: pkg.id,
+        subscription_tier: pkgData?.tier_level || 'starter',
+        nonprofit_doc_url: docUrl,
+        nonprofit_doc_uploaded_at: new Date().toISOString()
+      });
+
+      // Create referral if ref exists
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      if (ref) {
+        try {
+          await base44.functions.invoke('createReferral', { referralCode: ref });
+        } catch (refError) {
+          console.error('Error creating referral:', refError);
+        }
+      }
+
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.href = createPageUrl('Dashboard');
+    } catch (error) {
+      console.error('Error completing donation signup:', error);
+      alert('There was an error saving your information. Please try again.');
     }
   };
 
@@ -582,6 +665,12 @@ export default function OperatorPackages() {
       </div>
 
       <SharedFooter />
+
+      <DonationDocUploadModal
+        open={showDonationDocModal}
+        onClose={() => { setShowDonationDocModal(false); setPendingDonationPkg(null); }}
+        onComplete={handleDonationDocComplete}
+      />
     </div>
   );
 }
