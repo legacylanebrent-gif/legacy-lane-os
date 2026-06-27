@@ -173,25 +173,45 @@ export default function OperatorPackages() {
                 `You'll keep full access to your current plan until then, and the price difference will be pro-rated on your next billing cycle.`);
           window.location.href = createPageUrl('Dashboard');
         } else {
-          // Upgrade or new signup — process immediately
-          await base44.auth.updateMe({
-            primary_account_type: accountType,
-            selected_package: pkg.id,
-            subscription_tier: pkgData.tier_level
-          });
+          const isUpgrade = isBusinessUser && userRank >= 0 && userRank < pkgRank && pkgData.account_type !== 'biz_in_a_box';
 
-          // Create referral if ref exists
-          if (ref) {
+          if (isUpgrade) {
+            // Pro-rated upgrade: create Wix checkout session with pro-rated charge + new subscription
             try {
-              await base44.functions.invoke('createReferral', { 
-                referralCode: ref 
+              const response = await base44.functions.invoke('create-checkout', {
+                product: 'subscription_upgrade',
+                package_id: pkg.id,
               });
-            } catch (refError) {
-              console.error('Error creating referral:', refError);
+              if (response.data?.redirectUrl) {
+                window.location.href = response.data.redirectUrl;
+              } else {
+                throw new Error('No redirect URL returned');
+              }
+            } catch (upgradeError) {
+              console.error('Error creating upgrade checkout:', upgradeError);
+              alert('There was an error processing your upgrade. Please try again.');
             }
+          } else {
+            // New signup — process immediately
+            await base44.auth.updateMe({
+              primary_account_type: accountType,
+              selected_package: pkg.id,
+              subscription_tier: pkgData.tier_level
+            });
+
+            // Create referral if ref exists
+            if (ref) {
+              try {
+                await base44.functions.invoke('createReferral', { 
+                  referralCode: ref 
+                });
+              } catch (refError) {
+                console.error('Error creating referral:', refError);
+              }
+            }
+            
+            window.location.href = createPageUrl('Dashboard');
           }
-          
-          window.location.href = createPageUrl('Dashboard');
         }
       }
     } catch (error) {
