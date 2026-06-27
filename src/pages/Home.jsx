@@ -1513,7 +1513,7 @@ export default function Home() {
                       {/* Browse by State, Estate Sale Request & Company Directory CTAs - Combined in one row */}
                       <section className="py-16 px-4 bg-gradient-to-br from-slate-900 to-slate-800">
                         <div className="max-w-7xl mx-auto">
-                          <div className="grid md:grid-cols-3 gap-6">
+                          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Browse by State */}
                             <Link to={createPageUrl('SearchByState')}>
                               <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
@@ -1566,6 +1566,25 @@ export default function Home() {
                                     </h3>
                                     <p className="text-lg text-indigo-100">
                                       Search our full directory of estate sale companies
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+
+                            {/* Need a Real Estate Agent? */}
+                            <Link to="/RealEstateAgentDirectory">
+                              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all cursor-pointer group hover:scale-[1.02] h-full">
+                                <div className="flex flex-col items-center text-center gap-6 h-full justify-center">
+                                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <User className="w-10 h-10 text-white" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-3xl font-serif font-bold text-white mb-2">
+                                      Need a Real Estate Agent?
+                                    </h3>
+                                    <p className="text-lg text-emerald-100">
+                                      Find trusted agents for your life transition
                                     </p>
                                   </div>
                                 </div>

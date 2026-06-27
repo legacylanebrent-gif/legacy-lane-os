@@ -158,6 +158,8 @@ import CoolFindsDetail from './pages/CoolFindsDetail';
 import AdminCoolFinds from './pages/AdminCoolFinds';
 import EstateSaleCompanyDirectory from './pages/EstateSaleCompanyDirectory';
 import AdminMasterOperatorDirectory from './pages/AdminMasterOperatorDirectory';
+import RealEstateAgentDirectory from './pages/RealEstateAgentDirectory';
+import AdminRealEstateAgentDirectory from './pages/AdminRealEstateAgentDirectory';
 import CommunityEvents from './pages/CommunityEvents';
 import CommunityEventSubmit from './pages/CommunityEventSubmit';
 import AdminCommunityEvents from './pages/AdminCommunityEvents';
@@ -417,6 +419,8 @@ const AuthenticatedApp = () => {
       <Route path="/AdminCoolFinds" element={<LayoutWrapper currentPageName="AdminCoolFinds"><AdminCoolFinds /></LayoutWrapper>} />
       <Route path="/EstateSaleCompanyDirectory" element={<EstateSaleCompanyDirectory />} />
       <Route path="/AdminMasterOperatorDirectory" element={<LayoutWrapper currentPageName="AdminMasterOperatorDirectory"><AdminMasterOperatorDirectory /></LayoutWrapper>} />
+      <Route path="/RealEstateAgentDirectory" element={<RealEstateAgentDirectory />} />
+      <Route path="/AdminRealEstateAgentDirectory" element={<LayoutWrapper currentPageName="AdminRealEstateAgentDirectory"><AdminRealEstateAgentDirectory /></LayoutWrapper>} />
 
       {/* ── Community Events (Flea Markets & Antique Shows) ── */}
       <Route path="/CommunityEvents" element={<CommunityEvents />} />

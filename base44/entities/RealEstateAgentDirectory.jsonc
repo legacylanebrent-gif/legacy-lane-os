@@ -1,0 +1,185 @@
+{
+  "name": "RealEstateAgentDirectory",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Primary agent contact name (richest source wins)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Brokerage or company name the agent works under"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Display phone number (raw, richest source wins)"
+    },
+    "phone_normalized": {
+      "type": "string",
+      "description": "Digits-only normalized phone used as the primary cross-source dedup key"
+    },
+    "email": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Real estate license number if known"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "geocoded_address": {
+      "type": "string"
+    },
+    "geocoded_city": {
+      "type": "string"
+    },
+    "geocoded_county": {
+      "type": "string"
+    },
+    "geocoded_zip": {
+      "type": "string"
+    },
+    "geocode_status": {
+      "type": "string",
+      "enum": [
+        "not_geocoded",
+        "geocoded",
+        "failed",
+        "skipped"
+      ],
+      "default": "not_geocoded"
+    },
+    "geocode_last_run": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "service_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Cities/regions the agent covers"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Practice focus (probate, divorce, downsizing, relocation, luxury, investment, etc.)"
+    },
+    "years_experience": {
+      "type": "number"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where this record was scraped/imported from"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the record in the original source"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Profile or listing URL on the source site"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "free_lead_access",
+        "free_trial",
+        "active",
+        "expired",
+        "cancelled"
+      ],
+      "default": "none",
+      "description": "Best subscription status across merged source records"
+    },
+    "claimed_by_user_id": {
+      "type": "string",
+      "description": "EstateSalen User ID of the agent who claimed this listing"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked EstateSalen User ID when this agent is a registered platform user"
+    },
+    "enrichment_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "searching",
+        "found",
+        "failed"
+      ],
+      "default": "not_started"
+    },
+    "lead_stage": {
+      "type": "string",
+      "default": "future_agent"
+    },
+    "audience_sync_status": {
+      "type": "string",
+      "default": "not_synced"
+    },
+    "meta_custom_audience_id": {
+      "type": "string"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Which source entities contributed to this record"
+    },
+    "source_record_ids": {
+      "type": "object",
+      "description": "Map of source entity name to original record ID",
+      "default": {}
+    },
+    "merge_status": {
+      "type": "string",
+      "enum": [
+        "single_source",
+        "merged",
+        "unmatched"
+      ],
+      "default": "single_source",
+      "description": "Whether this record came from one source or was merged from multiple"
+    }
+  },
+  "required": [
+    "agent_name"
+  ]
+}
