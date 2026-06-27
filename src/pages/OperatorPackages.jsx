@@ -43,7 +43,7 @@ export default function OperatorPackages() {
       const operatorPackages = data.filter(pkg => {
         const accountType = pkg.data?.account_type || pkg.account_type;
         const isActive = pkg.data?.is_active !== false && pkg.is_active !== false;
-        return accountType === activeTab && isActive;
+        return accountType === tab && isActive;
       });
       
       // Sort by price (ascending)
@@ -409,7 +409,7 @@ export default function OperatorPackages() {
         </div>
 
         {/* Testimonials */}
-        <OperatorTestimonials />
+        <OperatorTestimonials accountType={activeTab} />
       </div>
 
       <SharedFooter />
