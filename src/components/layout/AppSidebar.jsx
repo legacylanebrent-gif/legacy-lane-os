@@ -107,6 +107,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'AdminLeadsPropstream',   label: 'Propstream Probate',     icon: Search,          group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'PropstreamREListings',   label: 'PropStream RE Listings', icon: Building2,       group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'Admin', subgroup: '📋 Leads & CRM' },
+  { page: 'AdminPropstreamAgentEmailDrafts', label: 'Agent Email Drafts', icon: Mail,            group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'AdminLeadImporter',      label: 'Lead Importer',          icon: Upload,          group: 'Admin', subgroup: '📋 Leads & CRM' },
   { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',         icon: Briefcase,       group: 'Admin', subgroup: '📋 Leads & CRM' },
 

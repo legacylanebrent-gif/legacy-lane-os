@@ -1,27 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // ════════════════════════════════════════════════════════════
-// PropStream Agent "Congrats on your new listing" Email Drafter
+// PropStream Agent "Congrats on your new listing" — DRAFT ONLY
 // Runs twice daily (9am / 9pm ET). Looks for PropStream agent
 // leads imported in the last 12 hours, groups them by agent
-// (one email per agent — multiple listings combined into one),
-// and picks the email variant:
-//   • FULL     — agent NOT contacted in the last 30 days
-//   • REMINDER — agent already contacted in the last 30 days
-// Drafts a personalized email, matches a reputable local
-// operator, and pushes each draft to Customer.io (identify +
-// track event) so a CIO campaign can blast the personalized
-// email. Each send is logged to MarketingEventLog so future
-// runs know who was contacted.
+// (one draft per agent — multiple listings combined), picks the
+// variant (full vs reminder based on prior SENT drafts in the
+// last 30 days), and stores each as a DRAFT in
+// PropstreamAgentEmailDraft. It does NOT send anything.
+// An admin reviews the drafts and clicks "Send to Customer.io"
+// (see sendPropstreamAgentEmailDraft) — no auto-blasting.
 // ════════════════════════════════════════════════════════════
 
-const EVENT_NAME = 'propstream_agent_new_listing_congrats';
 const CONTACT_WINDOW_DAYS = 30;
 
 // ────────────────────────────────────────────────────────────
 // EMAIL COPY — editable. Swap in your own wording any time.
 // ctx = { firstName, isMultiple, listingCount, cityList,
-//         listingDetail, primaryCity, operatorLine }
+//         listingDetail, primaryCity, operatorLine, variant }
 // ────────────────────────────────────────────────────────────
 const EMAIL_SUBJECT = (ctx) => {
   const prefix = ctx.variant === 'reminder' ? 'Following up — ' : '';
@@ -59,37 +55,7 @@ Best,
 The EstateSalen Team
 estatesalen.com`;
 
-// ── Customer.io (Pipelines / CDP) helpers ──
-function getCioConfig() {
-  return {
-    enabled: Deno.env.get('CUSTOMERIO_ENABLED') === 'true',
-    pipelinesWriteKey: Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '',
-  };
-}
-
-async function cioIdentify(userId, email, traits, config) {
-  if (!config.enabled || !config.pipelinesWriteKey) return { skipped: true };
-  const res = await fetch('https://cdp.customer.io/v1/identify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}` },
-    body: JSON.stringify({ userId, traits: { email, ...traits } }),
-  });
-  if (!res.ok) throw new Error(`CIO identify failed ${res.status}: ${await res.text()}`);
-  return { sent: true };
-}
-
-async function cioTrack(userId, email, eventName, data, config) {
-  if (!config.enabled || !config.pipelinesWriteKey) return { skipped: true };
-  const res = await fetch('https://cdp.customer.io/v1/track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}` },
-    body: JSON.stringify({ userId: userId || email, event: eventName, properties: { ...data, triggered_at: new Date().toISOString() } }),
-  });
-  if (!res.ok) throw new Error(`CIO track failed ${res.status}: ${await res.text()}`);
-  return { sent: true };
-}
-
-// Parse "123 Main St - $450000 (Austin, TX)" → { address, city, state }
+// ── helpers ──
 function parsePropertyAddress(raw) {
   const out = { address: raw || '', city: '', state: '' };
   if (!raw) return out;
@@ -112,7 +78,6 @@ function firstNameOf(full) {
   return full.trim().split(/\s+/)[0];
 }
 
-// Find a reputable operator servicing the listing city
 async function findOperatorForCity(base44, city, state) {
   if (!state) return null;
   const candidates = await base44.asServiceRole.entities.MasterOperatorDirectory.filter({ state }, '-sales_posted', 500);
@@ -130,19 +95,18 @@ async function findOperatorForCity(base44, city, state) {
   return pool[0];
 }
 
-// Emails we already sent a congrats to in the last CONTACT_WINDOW_DAYS days
+// Agents we already SENT a congrats to in the last 30 days (from the draft table)
 async function getContactedEmails(base44) {
   const since = new Date(Date.now() - CONTACT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const contacted = new Set();
   const PAGE = 5000;
   let skip = 0;
   while (true) {
-    const batch = await base44.asServiceRole.entities.MarketingEventLog.filter({ event_name: EVENT_NAME, status: 'sent' }, '-created_date', PAGE, skip);
+    const batch = await base44.asServiceRole.entities.PropstreamAgentEmailDraft.filter({ status: 'sent' }, '-created_date', PAGE, skip);
     if (!batch || batch.length === 0) break;
-    for (const e of batch) {
-      if (e.consumer_email && new Date(e.created_date) >= since) {
-        contacted.add(e.consumer_email.toLowerCase().trim());
-      }
+    for (const d of batch) {
+      const when = d.sent_at ? new Date(d.sent_at) : new Date(d.created_date);
+      if (when >= since && d.agent_email) contacted.add(d.agent_email.toLowerCase().trim());
     }
     if (new Date(batch[batch.length - 1].created_date) < since) break;
     if (batch.length < PAGE) break;
@@ -179,7 +143,7 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: `No new PropStream agent leads in the last ${windowHours}h`, drafted: 0 });
     }
 
-    // 2. Group by agent email — one email per agent, all their listings combined
+    // 2. Group by agent email — one draft per agent, all their listings combined
     const byAgent = new Map();
     let skipped = 0;
     for (const lead of newLeads) {
@@ -193,32 +157,36 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Who was already contacted in the last 30 days?
+    // 3. Who was already contacted (sent a draft) in the last 30 days?
     const contactedEmails = await getContactedEmails(base44);
 
-    const config = getCioConfig();
-    const drafted = [];
-    let sent = 0, failed = 0;
+    let created = 0, updated = 0;
+    const preview = [];
 
     for (const [, g] of byAgent) {
       const firstRecord = g.records[0];
 
-      // Parse all listings for this agent
       let listings = g.addresses.map(parsePropertyAddress).filter(l => l.address);
       if (listings.length === 0) {
         listings = [{ address: '', city: firstRecord.territory_name || '', state: firstRecord.brokerage_state || firstRecord.state || '' }];
       }
+
+      // Merge with any existing UNSent draft for this agent (one pending draft per agent)
+      let existingId = null;
+      const existing = await base44.asServiceRole.entities.PropstreamAgentEmailDraft.filter({ agent_email: g.email, status: 'draft' }, '-created_date', 1);
+      if (existing && existing.length > 0) {
+        existingId = existing[0].id;
+        const existingAddrs = new Set((existing[0].listings || []).map(l => l.address));
+        listings = [...(existing[0].listings || []), ...listings.filter(l => !existingAddrs.has(l.address))];
+      }
+
       const isMultiple = listings.length >= 2;
       const listingCount = listings.length;
-
       const primaryCity = listings[0].city || firstRecord.territory_name || '';
       const primaryState = listings[0].state || firstRecord.brokerage_state || firstRecord.state || '';
       const primaryCityLabel = primaryCity || primaryState || 'your area';
-
-      // cityList for "in {cityList}": primary city (or state / area)
       const cityList = primaryCityLabel;
 
-      // listingDetail: single → " at 123 Main St"; multiple → ":\n\n• ..."
       let listingDetail = '';
       if (isMultiple) {
         listingDetail = ':\n\n' + listings.map(l => {
@@ -229,90 +197,45 @@ Deno.serve(async (req) => {
         listingDetail = ` at ${listings[0].address}`;
       }
 
-      // 4. Variant: reminder if contacted in last 30 days, else full
       const variant = contactedEmails.has(g.email) ? 'reminder' : 'full';
 
-      // 5. Match a reputable local operator
       const operator = await findOperatorForCity(base44, primaryCity, primaryState);
       const operatorLine = operator
         ? `\nWe have a vetted operator ready in ${primaryCityLabel}: ${operator.company_name}${operator.phone ? ` (${operator.phone})` : ''}. Reply "connect" and we'll make the introduction.`
         : `\nWe're actively building out our ${primaryCityLabel} operator network — reply "connect" and we'll match you with a vetted local operator.`;
 
-      const ctx = {
-        variant,
-        firstName: firstNameOf(g.agent_name),
-        isMultiple,
-        listingCount,
-        cityList,
-        listingDetail,
-        primaryCity: primaryCityLabel,
-        operatorLine,
-      };
-
+      const ctx = { variant, firstName: firstNameOf(g.agent_name), isMultiple, listingCount, cityList, listingDetail, primaryCity: primaryCityLabel, operatorLine };
       const subject = EMAIL_SUBJECT(ctx);
       const emailBody = variant === 'reminder' ? EMAIL_BODY_REMINDER(ctx) : EMAIL_BODY_FULL(ctx);
 
-      const draft = {
+      const draftData = {
         agent_email: g.email,
         agent_name: g.agent_name,
         variant,
-        isMultiple,
-        listingCount,
+        is_multiple: isMultiple,
+        listing_count: listingCount,
         listings: listings.map(l => ({ address: l.address, city: l.city, state: l.state })),
-        primaryCity: primaryCityLabel,
-        matched_operator: operator ? { id: operator.id, company_name: operator.company_name, phone: operator.phone } : null,
+        primary_city: primaryCityLabel,
+        state: primaryState,
+        matched_operator_id: operator?.id || '',
+        matched_operator_name: operator?.company_name || '',
+        matched_operator_phone: operator?.phone || '',
         email_subject: subject,
         email_body: emailBody,
+        status: 'draft',
       };
-      drafted.push(draft);
 
-      if (dryRun) continue;
-
-      // 6. Push to Customer.io + log the send
-      const userId = `propstream_agent:${g.email}`;
-      let logStatus = 'sent';
-      try {
-        await cioIdentify(userId, g.email, {
-          first_name: ctx.firstName,
-          agent_name: g.agent_name,
-          brokerage_name: firstRecord.brokerage_name || '',
-          city: primaryCity, state: primaryState,
-          source: 'propstream_agent_lead',
-          updated_at: new Date().toISOString(),
-        }, config);
-        await cioTrack(userId, g.email, EVENT_NAME, {
-          variant,
-          agent_name: g.agent_name,
-          listing_count: listingCount,
-          listings: listings.map(l => ({ address: l.address, city: l.city, state: l.state })),
-          primary_city: primaryCity,
-          state: primaryState,
-          matched_operator_name: operator?.company_name || '',
-          matched_operator_phone: operator?.phone || '',
-          email_subject: subject,
-          email_body: emailBody,
-        }, config);
-        sent++;
-      } catch (err) {
-        console.error(`CIO send failed for ${g.email}: ${err.message}`);
-        logStatus = 'failed';
-        failed++;
+      if (dryRun) {
+        preview.push({ agent_email: g.email, variant, is_multiple: isMultiple, listing_count: listingCount, primary_city: primaryCityLabel, matched_operator: operator?.company_name || null, email_subject: subject });
+        continue;
       }
 
-      // Log so future runs know this agent was contacted
-      try {
-        await base44.asServiceRole.entities.MarketingEventLog.create({
-          event_name: EVENT_NAME,
-          consumer_email: g.email,
-          consumer_user_id: userId,
-          payload_json: { variant, listing_count: listingCount, primary_city: primaryCity, state: primaryState, matched_operator_name: operator?.company_name || '' },
-          provider: 'customerio',
-          provider_response: { status: logStatus },
-          status: logStatus,
-          created_at: new Date().toISOString(),
-        });
-      } catch (logErr) {
-        console.error(`MarketingEventLog create failed for ${g.email}: ${logErr.message}`);
+      if (existingId) {
+        await base44.asServiceRole.entities.PropstreamAgentEmailDraft.update(existingId, draftData);
+        updated++;
+      } else {
+        await base44.asServiceRole.entities.PropstreamAgentEmailDraft.create(draftData);
+        created++;
       }
     }
 
@@ -321,14 +244,11 @@ Deno.serve(async (req) => {
       window_hours: windowHours,
       new_lead_records: newLeads.length,
       unique_agents: byAgent.size,
-      drafted: drafted.length,
-      sent_to_customerio: sent,
-      failed,
+      drafts_created: created,
+      drafts_updated: updated,
       skipped_no_email: skipped,
       dry_run: dryRun,
-      drafts: dryRun
-        ? drafted
-        : drafted.map(d => ({ agent_email: d.agent_email, variant: d.variant, listings: d.listingCount, city: d.primaryCity, matched_operator: d.matched_operator?.company_name || null })),
+      drafts: dryRun ? preview : undefined,
     });
   } catch (error) {
     console.error('draftPropstreamAgentCongratsEmails error:', error);

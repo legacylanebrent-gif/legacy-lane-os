@@ -160,6 +160,7 @@ import EstateSaleCompanyDirectory from './pages/EstateSaleCompanyDirectory';
 import AdminMasterOperatorDirectory from './pages/AdminMasterOperatorDirectory';
 import RealEstateAgentDirectory from './pages/RealEstateAgentDirectory';
 import AdminRealEstateAgentDirectory from './pages/AdminRealEstateAgentDirectory';
+import AdminPropstreamAgentEmailDrafts from './pages/AdminPropstreamAgentEmailDrafts';
 import CommunityEvents from './pages/CommunityEvents';
 import CommunityEventSubmit from './pages/CommunityEventSubmit';
 import AdminCommunityEvents from './pages/AdminCommunityEvents';
@@ -421,6 +422,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminMasterOperatorDirectory" element={<LayoutWrapper currentPageName="AdminMasterOperatorDirectory"><AdminMasterOperatorDirectory /></LayoutWrapper>} />
       <Route path="/RealEstateAgentDirectory" element={<RealEstateAgentDirectory />} />
       <Route path="/AdminRealEstateAgentDirectory" element={<LayoutWrapper currentPageName="AdminRealEstateAgentDirectory"><AdminRealEstateAgentDirectory /></LayoutWrapper>} />
+      <Route path="/AdminPropstreamAgentEmailDrafts" element={<LayoutWrapper currentPageName="AdminPropstreamAgentEmailDrafts"><AdminPropstreamAgentEmailDrafts /></LayoutWrapper>} />
 
       {/* ── Community Events (Flea Markets & Antique Shows) ── */}
       <Route path="/CommunityEvents" element={<CommunityEvents />} />

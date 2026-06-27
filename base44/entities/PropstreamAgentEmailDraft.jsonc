@@ -1,0 +1,98 @@
+{
+  "name": "PropstreamAgentEmailDraft",
+  "type": "object",
+  "properties": {
+    "agent_email": {
+      "type": "string",
+      "description": "Agent email (lowercased) \u2014 used as the per-agent key"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "variant": {
+      "type": "string",
+      "enum": [
+        "full",
+        "reminder"
+      ],
+      "default": "full",
+      "description": "full = first contact; reminder = already contacted in last 30 days"
+    },
+    "is_multiple": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the agent has 2+ listings in the window"
+    },
+    "listing_count": {
+      "type": "integer",
+      "default": 1
+    },
+    "listings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "primary_city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "matched_operator_id": {
+      "type": "string"
+    },
+    "matched_operator_name": {
+      "type": "string"
+    },
+    "matched_operator_phone": {
+      "type": "string"
+    },
+    "email_subject": {
+      "type": "string"
+    },
+    "email_body": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "failed"
+      ],
+      "default": "draft"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sent_by": {
+      "type": "string",
+      "description": "Email of admin who clicked Send"
+    },
+    "customerio_response": {
+      "type": "object"
+    },
+    "error_message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_email",
+    "email_subject",
+    "email_body"
+  ]
+}
