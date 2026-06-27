@@ -223,8 +223,8 @@ export default function OperatorPackages() {
           </div>
         </div>
 
-        {/* Lead Testimonial Banner */}
-        <LeadTestimonialBanner />
+        {/* Lead Testimonial Banner — Operators only */}
+        {activeTab === 'estate_sale_operator' && <LeadTestimonialBanner />}
 
         {/* Packages Grid */}
         <div className="grid md:grid-cols-3 gap-8">
