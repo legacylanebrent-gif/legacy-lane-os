@@ -204,8 +204,33 @@ export default function OperatorPackages() {
             ))}
           </div>
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
+          {/* Billing Toggle — hidden on Operator tab (shown below testimonial instead) */}
+          {activeTab !== 'estate_sale_operator' && (
+            <div className="flex items-center justify-center gap-4">
+              <span className={`text-lg font-medium ${!isAnnual ? 'text-slate-900' : 'text-slate-500'}`}>
+                Monthly
+              </span>
+              <Switch
+                checked={isAnnual}
+                onCheckedChange={setIsAnnual}
+                className="data-[state=checked]:bg-orange-600"
+              />
+              <span className={`text-lg font-medium ${isAnnual ? 'text-slate-900' : 'text-slate-500'}`}>
+                Annual
+              </span>
+              {isAnnual && (
+                <Badge className="bg-green-600 text-white ml-2">Save up to 10%</Badge>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Lead Testimonial Banner — Operators only */}
+        {activeTab === 'estate_sale_operator' && <LeadTestimonialBanner />}
+
+        {/* Billing Toggle — Operators only, shown below testimonial */}
+        {activeTab === 'estate_sale_operator' && (
+          <div className="flex items-center justify-center gap-4 mb-10">
             <span className={`text-lg font-medium ${!isAnnual ? 'text-slate-900' : 'text-slate-500'}`}>
               Monthly
             </span>
@@ -221,10 +246,7 @@ export default function OperatorPackages() {
               <Badge className="bg-green-600 text-white ml-2">Save up to 10%</Badge>
             )}
           </div>
-        </div>
-
-        {/* Lead Testimonial Banner — Operators only */}
-        {activeTab === 'estate_sale_operator' && <LeadTestimonialBanner />}
+        )}
 
         {/* Packages Grid */}
         <div className="grid md:grid-cols-3 gap-8">
