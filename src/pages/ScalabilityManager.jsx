@@ -119,17 +119,17 @@ export default function ScalabilityManager() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Scalability Manager</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Scalability Manager</h1>
             <p className="text-slate-500 text-sm mt-1">Monitor infrastructure capacity and plan for growth</p>
           </div>
           <Button
             onClick={() => { setProjectingNewSub(null); setShowSimulator(!showSimulator); }}
             variant="outline"
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <TrendingUp className="w-4 h-4" />
             {showSimulator ? 'Hide Simulator' : 'Simulate New Subscriber'}
@@ -137,7 +137,7 @@ export default function ScalabilityManager() {
         </div>
 
         {/* Health Summary */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <Users className="w-8 h-8 text-slate-400" />

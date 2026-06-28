@@ -190,9 +190,9 @@ export default function CSVLeadImport() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold flex items-center gap-2">
-        <Upload className="w-8 h-8" />
+    <div className="p-4 md:p-6 space-y-6">
+      <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+        <Upload className="w-7 h-7 md:w-8 md:h-8" />
         Property List Lead Import
       </h1>
       <p className="text-slate-600">Import property lists from Propstream or similar exports to create leads</p>

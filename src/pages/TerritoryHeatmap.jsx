@@ -80,11 +80,11 @@ export default function TerritoryHeatmap() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Territory Heatmap</h1>
+    <div className="p-4 md:p-6 space-y-6">
+      <h1 className="text-2xl md:text-3xl font-bold">Territory Heatmap</h1>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-slate-600">Active Sales</div>

@@ -73,7 +73,7 @@ export default function AdminCoolFinds() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="draft">
               <Clock className="w-4 h-4 mr-1" /> Pending ({stories.length})
             </TabsTrigger>

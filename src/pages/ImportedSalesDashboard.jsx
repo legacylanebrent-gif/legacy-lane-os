@@ -113,7 +113,7 @@ export default function ImportedSalesDashboard() {
   if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-pulse text-slate-500">Loading...</div></div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -127,7 +127,7 @@ export default function ImportedSalesDashboard() {
               <p className="text-sm text-slate-500">EstateSales.net scraped listings by territory</p>
             </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap w-full sm:w-auto">
             <Button onClick={() => handleScrape(null)} disabled={scraping} className="bg-orange-500 hover:bg-orange-600 text-white">
               <Zap className="w-4 h-4 mr-2" />
               {scraping ? 'Scraping...' : 'Run Scraper (All)'}
@@ -159,7 +159,7 @@ export default function ImportedSalesDashboard() {
         </div>
 
         <Tabs defaultValue="sales">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto">
             <TabsTrigger value="sales">Scraped Sales ({filteredSales.length})</TabsTrigger>
             <TabsTrigger value="territories">Territories ({territories.length})</TabsTrigger>
             <TabsTrigger value="Estate Sale Company Owners">operators ({operators.length})</TabsTrigger>
@@ -172,7 +172,7 @@ export default function ImportedSalesDashboard() {
                 placeholder="Search title, operator, city..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-64 bg-white"
+                className="w-full sm:w-64 bg-white"
               />
               <select value={filterTerritory} onChange={e => setFilterTerritory(e.target.value)}
                 className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white">

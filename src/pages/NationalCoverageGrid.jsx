@@ -123,14 +123,14 @@ export default function NationalCoverageGrid() {
   }
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">National Coverage Grid</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">National Coverage Grid</h1>
           <p className="text-slate-500 text-sm mt-1">Email enrichment and geocoding progress across all 51 states</p>
         </div>
-        <Button onClick={handleExport} variant="outline" className="gap-2">
+        <Button onClick={handleExport} variant="outline" className="gap-2 w-full sm:w-auto">
           <Download className="w-4 h-4" /> Export CSV
         </Button>
       </div>
