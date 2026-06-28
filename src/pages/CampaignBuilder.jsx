@@ -143,20 +143,20 @@ export default function CampaignBuilder() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate(createPageUrl('Campaigns'))}>
-              <ChevronLeft className="w-4 h-4 mr-2" />
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6 md:mb-8">
+          <div className="flex items-center gap-3 md:gap-4">
+            <Button variant="ghost" onClick={() => navigate(createPageUrl('Campaigns'))} className="px-2">
+              <ChevronLeft className="w-4 h-4 mr-1" />
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-serif font-bold text-navy-900">Campaign Builder</h1>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-navy-900">Campaign Builder</h1>
               <p className="text-slate-600">Step {step} of 3</p>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="bg-gold-600 hover:bg-gold-700">
+          <Button onClick={handleSave} disabled={saving} className="bg-gold-600 hover:bg-gold-700 w-full md:w-auto">
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving...' : 'Save Campaign'}
           </Button>
@@ -174,9 +174,9 @@ export default function CampaignBuilder() {
 
         {/* Quota bar */}
         {quota && (
-          <div className="mb-6 bg-white border border-slate-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-6 bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-gold-600" />
+              <Mail className="w-5 h-5 text-gold-600 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-slate-800">Email Campaign Quota</p>
                 <p className="text-xs text-slate-500">
@@ -185,11 +185,11 @@ export default function CampaignBuilder() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               <Badge className={availableQuota > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
                 {availableQuota} remaining
               </Badge>
-              <Button size="sm" variant="outline" onClick={handleBuyProfiles}>
+              <Button size="sm" variant="outline" onClick={handleBuyProfiles} className="w-full sm:w-auto">
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 Buy 1,000 More ($40)
               </Button>
@@ -225,7 +225,7 @@ export default function CampaignBuilder() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="type">Campaign Type *</Label>
                   <Select
@@ -288,7 +288,7 @@ export default function CampaignBuilder() {
                     <p className="text-xs text-slate-500 mt-1">Supports HTML formatting for rich email content.</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="sender_name">Sender Name</Label>
                       <Input
@@ -328,8 +328,8 @@ export default function CampaignBuilder() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-6 border-t">
-                <Button onClick={() => setStep(2)} className="bg-gold-600 hover:bg-gold-700">
+              <div className="flex pt-6 border-t">
+                <Button onClick={() => setStep(2)} className="bg-gold-600 hover:bg-gold-700 w-full md:w-auto md:ml-auto">
                   Next: Build Funnel
                 </Button>
               </div>
@@ -348,9 +348,9 @@ export default function CampaignBuilder() {
                 steps={campaign.funnel_steps}
                 onChange={(steps) => setCampaign({ ...campaign, funnel_steps: steps })}
               />
-              <div className="flex justify-between pt-6 border-t mt-6">
-                <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-                <Button onClick={() => setStep(3)} className="bg-gold-600 hover:bg-gold-700">
+              <div className="flex flex-col-reverse sm:flex-row justify-between gap-2 pt-6 border-t mt-6">
+                <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">Back</Button>
+                <Button onClick={() => setStep(3)} className="bg-gold-600 hover:bg-gold-700 w-full sm:w-auto">
                   Next: Review & Send
                 </Button>
               </div>
@@ -505,15 +505,15 @@ export default function CampaignBuilder() {
                 </div>
               )}
 
-              <div className="flex justify-between pt-6 border-t">
-                <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-                <div className="flex gap-2">
-                  <Button onClick={handleSave} disabled={saving} variant="outline">
+              <div className="flex flex-col-reverse sm:flex-row justify-between gap-2 pt-6 border-t">
+                <Button variant="outline" onClick={() => setStep(2)} className="w-full sm:w-auto">Back</Button>
+                <div className="flex flex-col-reverse sm:flex-row gap-2">
+                  <Button onClick={handleSave} disabled={saving} variant="outline" className="w-full sm:w-auto">
                     <Save className="w-4 h-4 mr-2" />
                     {saving ? 'Saving...' : 'Save Draft'}
                   </Button>
                   {savedCampaignId && (
-                    <Button onClick={() => navigate(createPageUrl('Campaigns'))} className="bg-gold-600 hover:bg-gold-700">
+                    <Button onClick={() => navigate(createPageUrl('Campaigns'))} className="bg-gold-600 hover:bg-gold-700 w-full sm:w-auto">
                       Done
                     </Button>
                   )}
