@@ -144,21 +144,21 @@ export default function AutonomousRunsDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+      <div className="border-b border-slate-200 bg-white px-4 md:px-6 py-4 md:py-5 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:flex-wrap">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0">
               <Cpu className="w-5 h-5 text-blue-600" />
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-slate-800">Autonomous Runs Dashboard</h1>
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-lg md:text-xl font-bold text-slate-800">Autonomous Runs Dashboard</h1>
                 <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-xs">Admin Only</Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">Unified view of all scheduled, running, and completed meta-campaigns and agent runs.</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1 text-xs text-slate-400">
               <Shield className="w-3.5 h-3.5 text-amber-500" />
               {user.full_name || user.email}
@@ -171,7 +171,7 @@ export default function AutonomousRunsDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
@@ -193,7 +193,7 @@ export default function AutonomousRunsDashboard() {
           <div>
             <label className="text-xs text-slate-500 block mb-1">Type</label>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-40 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-40 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="campaign">Meta Campaigns</SelectItem>
@@ -204,7 +204,7 @@ export default function AutonomousRunsDashboard() {
           <div>
             <label className="text-xs text-slate-500 block mb-1">Status</label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-48 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>

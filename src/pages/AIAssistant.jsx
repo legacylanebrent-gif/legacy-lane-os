@@ -241,13 +241,13 @@ function AnalysisTab() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AIAssistant() {
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <div className="flex items-center gap-3 mb-2 flex-wrap">
+          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-5 h-5 text-orange-600" />
           </div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900">AI Assistant</h1>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900">AI Assistant</h1>
           <Badge className="bg-orange-100 text-orange-700 border-orange-200">Powered by OpenAI</Badge>
         </div>
         <p className="text-slate-600">Chat with AI, generate professional content, or get insights from your data.</p>

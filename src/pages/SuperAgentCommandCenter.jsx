@@ -488,28 +488,28 @@ export default function SuperAgentCommandCenter() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="border-b border-slate-200 bg-white px-4 md:px-6 py-4 md:py-5 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0">
               <Brain className="w-6 h-6 text-amber-600" />
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-slate-800 font-serif">SuperAgent Command Center</h1>
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">SuperAgent Command Center</h1>
                 <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">Admin Only</Badge>
               </div>
               <p className="text-sm text-slate-500 mt-0.5">Monitor, manage, and direct your 10 autonomous SuperAgents</p>
             </div>
           </div>
-          <Button size="sm" variant="outline" onClick={loadAgentData} disabled={refreshing} className="gap-2">
+          <Button size="sm" variant="outline" onClick={loadAgentData} disabled={refreshing} className="gap-2 w-full md:w-auto">
             {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             Refresh
           </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
         {/* Overview Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="border-slate-200 shadow-sm">
