@@ -124,21 +124,21 @@ export default function TerritoryFBManager() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <Facebook className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Territory FB Pages</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900">Territory FB Pages</h1>
               <p className="text-sm text-slate-500">Manage organic Facebook posts per territory — 2 days before each sale</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={() => handleGenerate(null)} disabled={generating} className="bg-blue-600 hover:bg-blue-700">
               <Zap className="w-4 h-4 mr-2" />
               {generating ? 'Generating...' : 'Run Generator (All)'}
@@ -170,7 +170,7 @@ export default function TerritoryFBManager() {
         </div>
 
         <Tabs defaultValue="posts">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto">
             <TabsTrigger value="posts">Posts Queue {pendingCount > 0 && <Badge className="ml-2 bg-yellow-500 text-white text-xs">{pendingCount}</Badge>}</TabsTrigger>
             <TabsTrigger value="pages">Territory Pages</TabsTrigger>
           </TabsList>

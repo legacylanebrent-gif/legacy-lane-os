@@ -69,17 +69,17 @@ export default function SocialAdsHub() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center text-white text-xl">📣</div>
-            <h1 className="text-3xl font-serif font-bold text-slate-900">Social Ads Hub</h1>
+            <div className="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center text-white text-xl flex-shrink-0">📣</div>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Social Ads Hub</h1>
           </div>
-          <p className="text-slate-600 ml-13">Facebook Ads Manager · Social Media Insights · Lead Tracking</p>
+          <p className="text-slate-600 md:ml-13">Facebook Ads Manager · Social Media Insights · Lead Tracking</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Badge className="bg-green-100 text-green-700 border-green-300 gap-1.5 text-sm px-3 py-1">
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
             Connected: {adsCredentials.ad_account_id}
@@ -93,7 +93,7 @@ export default function SocialAdsHub() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-11 gap-1 bg-slate-100 p-1">
+        <TabsList className="h-auto gap-1 bg-slate-100 p-1 flex-wrap">
           {tabs.map(t => (
             <TabsTrigger key={t.id} value={t.id} className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <t.icon className="w-4 h-4" />

@@ -133,12 +133,12 @@ export default function CustomerIOReportingCenter() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
               <Zap className="w-5 h-5 text-white" />
             </div>
             Customer.io Reporting Center

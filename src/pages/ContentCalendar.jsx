@@ -78,15 +78,15 @@ export default function ContentCalendar() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Calendar className="w-8 h-8" />
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+          <Calendar className="w-7 h-7 md:w-8 md:h-8" />
           Content Calendar
         </h1>
         <Button 
           onClick={() => setShowModal(true)}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Schedule Content
@@ -94,7 +94,7 @@ export default function ContentCalendar() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-slate-600">Total Items</div>

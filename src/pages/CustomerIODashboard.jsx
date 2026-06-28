@@ -77,19 +77,19 @@ export default function CustomerIODashboard() {
   const configStatus = config?.status || 'not_configured';
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
               <Zap className="w-5 h-5 text-white" />
             </div>
             Customer.io Integration
           </h1>
           <p className="text-slate-500 mt-1">Marketing automation engine for Legacy Lane OS</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={loadData} className="text-xs">
             <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh
           </Button>

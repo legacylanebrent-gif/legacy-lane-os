@@ -213,11 +213,11 @@ export default function OperatorMarketingDashboard() {
   const op = operatorPerf;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Email Performance & Buyer Interest</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Email Performance & Buyer Interest</h1>
           <p className="text-slate-500 mt-1">See how buyers are engaging with your estate sale alerts, which sales are getting the most attention, and what to do next.</p>
         </div>
         <Button onClick={handleRecalculate} disabled={recalculating} variant="outline" size="sm" className="text-xs">

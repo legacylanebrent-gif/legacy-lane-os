@@ -104,10 +104,10 @@ export default function MarketingPreferences() {
   const isGloballyOptedOut = profile?.suppression_status !== 'active' || !profile?.global_marketing_opt_in;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 md:py-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Manage Your Estate Sale Alerts</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Manage Your Estate Sale Alerts</h1>
         <p className="text-slate-500 mt-2">
           Choose which estate sale companies you want to hear from. You can unsubscribe from one company without turning off all Legacy Lane alerts.
         </p>
