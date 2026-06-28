@@ -169,14 +169,14 @@ export default function AdminPageAccess() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Page Access Management</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-2">Page Access Management</h1>
           <p className="text-slate-600">Control which pages different account types can access</p>
         </div>
-        <Button onClick={() => { resetForm(); setModalOpen(true); }} className="bg-orange-600 hover:bg-orange-700">
+        <Button onClick={() => { resetForm(); setModalOpen(true); }} className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Add Configuration
         </Button>

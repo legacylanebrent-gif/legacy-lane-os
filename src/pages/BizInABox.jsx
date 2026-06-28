@@ -228,7 +228,7 @@ export default function BizInABox() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 md:py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0yMCA0NGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
@@ -237,7 +237,7 @@ export default function BizInABox() {
             Launch Your Estate Sale Empire
           </Badge>
           
-          <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">
             Legacy Lane Estate Sales<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-cyan-400">Business in a Box</span>
           </h1>
@@ -247,19 +247,19 @@ export default function BizInABox() {
             <strong className="text-white"> No experience required.</strong> Complete branding, training, and support included.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-lg px-8 py-6">
+          <div className="flex flex-col sm:flex-wrap sm:justify-center gap-4 mb-12">
+            <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-lg px-8 py-6 w-full sm:w-auto">
               <Zap className="w-5 h-5 mr-2" />
               Apply Now
             </Button>
-            <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white/20 hover:bg-white/20 text-lg px-8 py-6">
+            <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white/20 hover:bg-white/20 text-lg px-8 py-6 w-full sm:w-auto">
               <Video className="w-5 h-5 mr-2" />
               Watch Demo
             </Button>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
             {outcomes.map((stat, idx) => {
               const Icon = stat.icon;
               return (
@@ -277,11 +277,11 @@ export default function BizInABox() {
       </section>
 
       {/* What's Included - Hero Grid */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-12 md:py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-orange-600 text-white">Complete Package</Badge>
-            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
               Everything You Need to Succeed
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
@@ -289,7 +289,7 @@ export default function BizInABox() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
             {features.map((feature, idx) => {
               const Icon = feature.icon;
               return (
@@ -333,7 +333,7 @@ export default function BizInABox() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-orange-500 text-white">Investment Breakdown</Badge>
-            <h2 className="text-5xl font-serif font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4">
               Smart Investment, Massive Returns
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
@@ -376,11 +376,11 @@ export default function BizInABox() {
       </section>
 
       {/* Training & Support */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-12 md:py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-cyan-600 text-white">World-Class Support</Badge>
-            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
               Never Feel Alone in Your Journey
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
@@ -475,7 +475,7 @@ export default function BizInABox() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-orange-600 text-white">Limited Availability</Badge>
-            <h2 className="text-5xl font-serif font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
               Ready to Start Your Journey?
             </h2>
             <p className="text-xl text-slate-600">

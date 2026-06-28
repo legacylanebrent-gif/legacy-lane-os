@@ -474,14 +474,14 @@ export default function FutOperLeads() {
   const selectedLeads = filteredOperators.filter(op => selectedIds.has(op.id));
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Fut Oper Leads</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Fut Oper Leads</h1>
           <p className="text-slate-500 text-sm mt-1">Combined lead pipeline from EstateSales.net — enrich, geocode, and manage by state</p>
         </div>
-        <div className="flex gap-4 text-right">
+        <div className="grid grid-cols-2 sm:flex gap-4 sm:text-right">
           <div>
             <div className="text-2xl font-bold text-indigo-700">{leadCount > 0 ? leadCount.toLocaleString() : '...'}</div>
             <div className="text-xs text-slate-500">Clean Leads</div>
@@ -504,7 +504,7 @@ export default function FutOperLeads() {
       {/* Controls */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end">
             {/* State selector */}
             <div>
               <label className="text-xs font-medium text-slate-600 mb-1 block">State</label>
@@ -550,7 +550,7 @@ export default function FutOperLeads() {
             <Badge variant="outline" className="self-end mb-0.5">{filteredOperators.length} shown</Badge>
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-2 ml-auto self-end">
+            <div className="flex flex-wrap gap-2 md:ml-auto self-end">
               <Button onClick={() => setShowSequencePanel(true)} variant="outline" className="text-sm border-violet-300 text-violet-700">
                 <MessageSquare className="w-4 h-4 mr-1" />Outreach ({filteredOperators.length > 0 ? 'Track' : 'View'})
               </Button>

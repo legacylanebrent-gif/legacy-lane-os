@@ -52,10 +52,10 @@ export default function AdminAgentApplications() {
   const AppCard = ({ app }) => (
     <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
       <div
-        className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50"
+        className="flex items-start justify-between gap-2 px-4 py-3 cursor-pointer hover:bg-slate-50"
         onClick={() => toggle(app.id)}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-sm">
             {app.name?.charAt(0)?.toUpperCase() || '?'}
           </div>
@@ -64,7 +64,7 @@ export default function AdminAgentApplications() {
             <p className="text-xs text-slate-500">{app.email} · {app.brokerage} · {app.license_state}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <Badge className={statusColors[app.status]}>{app.status}</Badge>
           <Badge variant="outline" className="text-xs">{interestLabels[app.interested_in] || app.interested_in}</Badge>
           {expanded[app.id] ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -120,13 +120,13 @@ export default function AdminAgentApplications() {
   );
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">Agent Territory Applications</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-1">Agent Territory Applications</h1>
           <p className="text-slate-500">{pending.length} pending · {reviewed.length} reviewed</p>
         </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={load} disabled={loading} className="w-full md:w-auto">
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
         </Button>
       </div>

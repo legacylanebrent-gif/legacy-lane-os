@@ -177,8 +177,8 @@ export default function AdminMasterOperatorDirectory() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Database className="w-6 h-6 text-orange-600" />

@@ -322,10 +322,10 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-2">User Management</h1>
           <p className="text-slate-600">
             {filteredUsers.length} of {users.length} users
             {hasActiveFilters && ' (filtered)'}
@@ -333,7 +333,7 @@ export default function AdminUsers() {
         </div>
         <Button 
           onClick={() => setShowAddModal(true)}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add User
@@ -352,7 +352,7 @@ export default function AdminUsers() {
           </CardHeader>
           <CardContent className="space-y-3">
             {pendingClaims.map(u => (
-              <div key={u.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
+              <div key={u.id} className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center">
                     <Building2 className="w-4 h-4 text-orange-600" />
@@ -362,7 +362,7 @@ export default function AdminUsers() {
                     <p className="text-xs text-slate-500">Company Claim: <strong>{u.claimed_company_name || 'Unknown'}</strong> · {u.company_city}, {u.company_state}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full md:w-auto justify-end">
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1 h-8" onClick={() => handleApproveClaim(u)}>
                     <Check className="w-3.5 h-3.5" /> Approve
                   </Button>
@@ -373,7 +373,7 @@ export default function AdminUsers() {
               </div>
             ))}
             {pendingResellers.map(u => (
-              <div key={u.id} className="flex items-center justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
+              <div key={u.id} className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-white rounded-lg border border-amber-200 px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center">
                     <Store className="w-4 h-4 text-amber-600" />
@@ -383,7 +383,7 @@ export default function AdminUsers() {
                     <p className="text-xs text-slate-500">Reseller Application · Applied {u.reseller_application_date ? new Date(u.reseller_application_date).toLocaleDateString() : 'recently'}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full md:w-auto justify-end">
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1 h-8" onClick={() => handleApproveReseller(u)}>
                     <Check className="w-3.5 h-3.5" /> Approve
                   </Button>
@@ -440,7 +440,7 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>

@@ -353,16 +353,16 @@ export default function AdminEstatesalesOrg() {
   const pctEnriched = globalCounts?.total > 0 ? Math.round((globalCounts.detail_scraped / globalCounts.total) * 100) : 0;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">EstateSales.org Estate Sale Company Owner Scraper</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">EstateSales.org Estate Sale Company Owner Scraper</h1>
           <p className="text-slate-500 text-sm mt-1">Scrape and manage estate sale company data from estatesales.org</p>
         </div>
         <Button
           onClick={() => { setShowProgress(true); loadGlobalCounts(); }}
           variant="outline"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full md:w-auto"
         >
           <Globe2 className="w-4 h-4" />
           All-States Progress
@@ -401,7 +401,7 @@ export default function AdminEstatesalesOrg() {
       {/* Single-state Controls */}
       <Card className="mb-6">
         <CardContent className="pt-4">
-          <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">State</label>
               <Select value={selectedState} onValueChange={setSelectedState}>
@@ -422,7 +422,7 @@ export default function AdminEstatesalesOrg() {
               {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               {enriching ? 'Enriching...' : `Enrich 25 (${selectedState})`}
             </Button>
-            <div className="ml-auto flex gap-2">
+            <div className="md:ml-auto flex gap-2">
               <Button onClick={handleScrapeAllStates} disabled={isRunning} className="bg-indigo-700 text-white">
                 {allStatesScraping ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Globe2 className="w-4 h-4 mr-2" />}
                 Scrape All States
@@ -495,7 +495,7 @@ export default function AdminEstatesalesOrg() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-3 text-sm text-slate-600 ml-auto">
+        <div className="flex gap-3 text-sm text-slate-600 md:ml-auto w-full md:w-auto">
           <span className="font-medium">{counts.total || 0} total ({selectedState === 'ALL' ? 'all' : selectedState})</span>
           <span className="text-orange-600">{counts.listing_only || 0} listing-only</span>
           <span className="text-green-600">{counts.detail_scraped || 0} enriched</span>
@@ -530,8 +530,8 @@ export default function AdminEstatesalesOrg() {
           <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="border rounded-lg overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
             <thead className="bg-slate-50 border-b">
               <tr>
                 <th className="text-left p-3 font-medium text-slate-600">Company</th>
