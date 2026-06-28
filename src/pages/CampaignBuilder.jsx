@@ -147,7 +147,7 @@ export default function CampaignBuilder() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4">
-            <Button variant="ghost" onClick={() => navigate(createPageUrl('Campaigns'))} className="px-2">
+            <Button variant="outline" onClick={() => navigate(createPageUrl('Campaigns'))} className="px-2">
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back
             </Button>
