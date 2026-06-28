@@ -110,13 +110,13 @@ export default function AdminProbateEngine() {
   const filteredLeads = leadFilter === 'all' ? leads : leads.filter(l => l.status === leadFilter);
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Probate SEO Engine</h1>
           <p className="text-slate-500 text-sm">National Probate → Estate Sale → Inherited Home Sale Lead Engine</p>
         </div>
-        <Button onClick={loadAll} variant="outline" size="sm" className="gap-2">
+        <Button onClick={loadAll} variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
           <RefreshCw className="w-4 h-4" /> Refresh
         </Button>
       </div>
@@ -124,7 +124,7 @@ export default function AdminProbateEngine() {
       <StatsRow states={states} counties={counties} leads={leads} jobs={jobs} />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="mb-6">
+        <TabsList className="mb-6 flex-wrap h-auto">
           <TabsTrigger value="states">States ({states.length})</TabsTrigger>
           <TabsTrigger value="counties">Counties ({counties.length})</TabsTrigger>
           <TabsTrigger value="leads">Leads ({leads.length})</TabsTrigger>
@@ -136,7 +136,7 @@ export default function AdminProbateEngine() {
         <TabsContent value="states">
           <div className="mb-4 flex items-center gap-3">
             <Select value={selectedState} onValueChange={setSelectedState}>
-              <SelectTrigger className="w-64"><SelectValue placeholder="Select state to generate..." /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Select state to generate..." /></SelectTrigger>
               <SelectContent>
                 {US_STATES_LIST.map(s => (
                   <SelectItem key={s.abbr} value={s.abbr}>

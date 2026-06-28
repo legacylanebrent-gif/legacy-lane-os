@@ -101,8 +101,8 @@ export default function AdminBlogSelector() {
   const batches = [...new Set(suggestions.map(s => s.batch_id).filter(Boolean))];
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6 max-w-[1400px] mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Blog Topic Selector</h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -112,7 +112,7 @@ export default function AdminBlogSelector() {
         <Button
           onClick={handleGenerate}
           disabled={generating}
-          className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+          className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white w-full sm:w-auto"
         >
           {generating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
           {generating ? 'Generating...' : 'Run Topic Discovery'}

@@ -266,15 +266,15 @@ export default function AdminCentralRepository() {
   const stats = snapshot || {};
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="flex items-start justify-between flex-wrap gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:flex-wrap">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <Database className="w-7 h-7 text-slate-700" />
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <Database className="w-6 h-6 md:w-7 md:h-7 text-slate-700" />
                 Central Item Intelligence Repository
               </h1>
               <Badge className="bg-slate-800 text-white text-xs">🔒 Private Build Mode</Badge>
@@ -284,7 +284,7 @@ export default function AdminCentralRepository() {
               A private growing database of item intelligence created from sale uploads, reseller lookups, barcode scans, AI vision, Google Lens API results, marketplace items, and SEO item profiles.
             </p>
           </div>
-          <Button onClick={handleRunSnapshot} disabled={refreshing} variant="outline" size="sm">
+          <Button onClick={handleRunSnapshot} disabled={refreshing} variant="outline" size="sm" className="w-full md:w-auto">
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             {refreshing ? 'Running...' : 'Run Snapshot Now'}
           </Button>

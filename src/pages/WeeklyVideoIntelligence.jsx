@@ -152,20 +152,20 @@ export default function WeeklyVideoIntelligence() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Film className="w-5 h-5 text-violet-400" />
                 <span className="text-violet-400 text-sm font-semibold uppercase tracking-widest">Weekly Content Engine</span>
               </div>
-              <h1 className="text-3xl font-black tracking-tight">Weekly Video Intelligence</h1>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight">Weekly Video Intelligence</h1>
               <p className="text-slate-400 mt-1 text-sm">Turn estate sale inventory into YouTube videos, blog posts, and market intelligence</p>
             </div>
             <Button
               onClick={generateNewBatch}
               disabled={generating}
-              className="bg-violet-600 hover:bg-violet-700 gap-2"
+              className="bg-violet-600 hover:bg-violet-700 gap-2 w-full md:w-auto"
             >
               {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</> : <><Plus className="w-4 h-4" /> Generate This Week's Batch</>}
             </Button>
@@ -173,7 +173,7 @@ export default function WeeklyVideoIntelligence() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
 
         {/* Batch selector */}
         <div className="flex items-center gap-4 flex-wrap">

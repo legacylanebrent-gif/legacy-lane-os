@@ -51,13 +51,13 @@ export default function AdminContentEngine() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Content Population Engine</h1>
           <p className="text-slate-500 text-sm">AI-powered content generation for all SEO pages · Saves as draft, never auto-publishes</p>
         </div>
-        <Button onClick={loadAll} variant="outline" size="sm" className="gap-2" disabled={loading}>
+        <Button onClick={loadAll} variant="outline" size="sm" className="gap-2 disabled:opacity-50 w-full sm:w-auto" disabled={loading}>
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
         </Button>
       </div>
