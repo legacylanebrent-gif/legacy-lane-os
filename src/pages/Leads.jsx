@@ -149,9 +149,9 @@ export default function Leads() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
       <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">My Lead Center</h1>
+        <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-1">My Lead Center</h1>
         <p className="text-slate-600">Leads assigned to you and your active deal pipeline</p>
       </div>
 
@@ -164,16 +164,16 @@ export default function Leads() {
         {/* ===== LEADS TAB ===== */}
         <TabsContent value="leads" className="mt-6 space-y-6">
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total Assigned</p><p className="text-3xl font-bold">{leads.length}</p></div><div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Active</p><p className="text-3xl font-bold text-cyan-600">{activeCount}</p></div><div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
-            <Card><CardContent className="p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+            <Card><CardContent className="p-4 md:p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Total Assigned</p><p className="text-2xl md:text-3xl font-bold">{leads.length}</p></div><div className="w-9 h-9 md:w-10 md:h-10 bg-slate-100 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-slate-600" /></div></CardContent></Card>
+            <Card><CardContent className="p-4 md:p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Active</p><p className="text-2xl md:text-3xl font-bold text-cyan-600">{activeCount}</p></div><div className="w-9 h-9 md:w-10 md:h-10 bg-cyan-100 rounded-lg flex items-center justify-center"><User className="w-5 h-5 text-cyan-600" /></div></CardContent></Card>
+            <Card><CardContent className="p-4 md:p-5 flex items-center justify-between"><div><p className="text-sm text-slate-600 mb-1">Converted</p><p className="text-2xl md:text-3xl font-bold text-green-600">{convertedCount}</p></div><div className="w-9 h-9 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-green-600" /></div></CardContent></Card>
           </div>
 
           {/* Filters + Search */}
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <Tabs value={filter} onValueChange={setFilter}>
-              <TabsList>
+              <TabsList className="grid grid-cols-3 w-full md:w-auto">
                 <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
                 <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
                 <TabsTrigger value="all">All ({leads.length})</TabsTrigger>
@@ -190,14 +190,14 @@ export default function Leads() {
             <div className="animate-pulse h-48 bg-slate-100 rounded-lg" />
           ) : filteredLeads.length === 0 ? (
             <Card>
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-6 md:p-12 text-center">
                 <Users className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                 <p className="text-slate-500 font-medium">No leads assigned to you yet</p>
                 <p className="text-slate-400 text-sm mt-1">Leads are assigned by the admin team from paid advertising</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {filteredLeads.map(lead => (
                 <Card key={lead.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedLead(lead); setShowDetail(true); }}>
                   <CardContent className="p-5">
@@ -245,23 +245,23 @@ export default function Leads() {
 
         {/* ===== PIPELINE TAB ===== */}
         <TabsContent value="pipeline" className="mt-6 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="text-slate-600">{deals.length} active deals • <span className="font-semibold text-green-700">${totalDealValue.toLocaleString()}</span> total value</p>
-            <Button className="bg-orange-600 hover:bg-orange-700"><Plus className="w-4 h-4 mr-2" />New Deal</Button>
+            <Button className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto"><Plus className="w-4 h-4 mr-2" />New Deal</Button>
           </div>
 
           {dealsLoading ? (
             <div className="animate-pulse h-64 bg-slate-100 rounded-lg" />
           ) : deals.length === 0 ? (
             <Card>
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-6 md:p-12 text-center">
                 <DollarSign className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                 <p className="text-slate-500 font-medium">No active deals in your pipeline</p>
                 <p className="text-slate-400 text-sm mt-1">Deals appear here once leads are converted and tracked</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid lg:grid-cols-5 gap-4">
+            <div className="grid lg:grid-cols-5 gap-3 md:gap-4">
               {PIPELINE_STAGES.map(stage => {
                 const stageDeals = getDealsByStage(stage.value);
                 const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
