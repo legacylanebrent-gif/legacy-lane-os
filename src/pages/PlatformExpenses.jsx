@@ -292,21 +292,21 @@ export default function PlatformExpenses() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-900 text-white px-6 py-8">
-        <div className="max-w-7xl mx-auto flex items-start justify-between flex-wrap gap-4">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-900 text-white px-4 md:px-6 py-6 md:py-8">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:flex-wrap">
           <div>
             <p className="text-indigo-300 text-xs font-semibold uppercase tracking-widest mb-1">Admin — Finance</p>
-            <h1 className="text-3xl font-black tracking-tight">Platform Expense Tracker</h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight">Platform Expense Tracker</h1>
             <p className="text-slate-400 mt-1 text-sm">Track daily API costs vs revenue · Google Lens · Google Maps · Base44 · OpenAI · Meta</p>
           </div>
-          <Button onClick={runAnalysis} disabled={running} className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+          <Button onClick={runAnalysis} disabled={running} className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 w-full md:w-auto">
             <RefreshCw className={`w-4 h-4 ${running ? 'animate-spin' : ''}`} />
             {running ? 'Running Analysis...' : 'Run Today\'s Analysis'}
           </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

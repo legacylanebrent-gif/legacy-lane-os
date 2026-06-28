@@ -238,21 +238,21 @@ export default function AdminAIOperator() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="border-b border-slate-200 bg-white px-4 md:px-6 py-4 md:py-5 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0">
               <Brain className="w-5 h-5 text-amber-600" />
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-slate-800 font-serif tracking-tight">Legacy Lane Admin AI Estate Sale Company Owner</h1>
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-lg md:text-xl font-bold text-slate-800 font-serif tracking-tight">Legacy Lane Admin AI Estate Sale Company Owner</h1>
                 <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">Admin Only</Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">Command the AI to analyze, plan, draft, and execute administrative growth workflows across Legacy Lane OS.</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Link to="/AutonomousRunsDashboard">
               <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
                 <Cpu className="w-3.5 h-3.5" />Runs Dashboard<ExternalLink className="w-3 h-3" />
@@ -267,7 +267,7 @@ export default function AdminAIOperator() {
       </div>
 
       {/* Main */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white border border-slate-200 mb-6 flex-wrap h-auto gap-1 p-1 shadow-sm">
             <TabsTrigger value="command" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-500 text-xs">

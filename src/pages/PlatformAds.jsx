@@ -67,11 +67,11 @@ export default function PlatformAds() {
   const activeCampaigns = campaigns.filter(c => c.status === 'ACTIVE');
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center flex-shrink-0">
             <Megaphone className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -79,9 +79,9 @@ export default function PlatformAds() {
             <p className="text-sm text-slate-500">Live campaigns from the platform Meta Ad Account</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select value={datePreset} onValueChange={handlePresetChange}>
-            <SelectTrigger className="w-40 bg-white text-sm">
+            <SelectTrigger className="w-full md:w-40 bg-white text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

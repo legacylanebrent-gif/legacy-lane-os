@@ -182,14 +182,14 @@ export default function AdminAICredits() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Credit Management</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage operator AI access, credit limits, and usage</p>
         </div>
-        <Button onClick={() => { loadData(); loadPricingConfigs(); }} variant="outline" size="sm">
+        <Button onClick={() => { loadData(); loadPricingConfigs(); }} variant="outline" size="sm" className="w-full md:w-auto">
           <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
       </div>
@@ -206,7 +206,7 @@ export default function AdminAICredits() {
               <CardTitle className="text-base">AI Request Credit Costs</CardTitle>
               <p className="text-sm text-slate-500">Credits charged per request type. Click the pencil icon to edit any value.</p>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-slate-50">

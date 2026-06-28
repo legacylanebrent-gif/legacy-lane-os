@@ -59,11 +59,11 @@ export default function OperatorCommissions() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Commission Tracker</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Commission Tracker</h1>
           <p className="text-slate-500 text-sm mt-1">Real-time view of your platform credits and referral fees</p>
         </div>
 
@@ -79,7 +79,7 @@ export default function OperatorCommissions() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <div className="flex items-center justify-between">
               <div>

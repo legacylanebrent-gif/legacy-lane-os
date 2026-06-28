@@ -96,15 +96,15 @@ export default function OperatorPayoutWallet() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Operator Payout Wallet</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Operator Payout Wallet</h1>
           <p className="text-slate-500 text-sm mt-1">Manage operator referral commission wallets and approve withdrawals</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <p className="text-slate-500 text-xs uppercase font-semibold">Total Available</p>
             <p className="text-2xl font-bold text-slate-900 mt-2">{formatCurrency(stats.totalAvailable)}</p>

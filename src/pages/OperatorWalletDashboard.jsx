@@ -85,10 +85,10 @@ export default function OperatorWalletDashboard() {
   const canWithdraw = wallet?.wallet_status === 'active' && (wallet?.available_balance || 0) >= 10000;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Estate Sale Company Owner Wallet</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Estate Sale Company Owner Wallet</h1>
           <p className="text-slate-500 text-sm mt-1">Platform credits from referral deals — Not real estate commissions</p>
         </div>
 
@@ -103,7 +103,7 @@ export default function OperatorWalletDashboard() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-slate-200 rounded-xl p-1 w-fit">
+        <div className="flex gap-1 bg-slate-200 rounded-xl p-1 w-full sm:w-fit overflow-x-auto">
           {['overview', 'deals', 'commissions', 'transactions'].map(tab => (
             <button
               key={tab}
@@ -121,7 +121,7 @@ export default function OperatorWalletDashboard() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Wallet Summary Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-slate-500 text-sm font-medium">Available Platform Credits</p>
