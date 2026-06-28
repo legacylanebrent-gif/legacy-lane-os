@@ -90,20 +90,20 @@ export default function AdminPropstreamAgentEmailDrafts() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-amber-600" />
+      <div className="border-b border-slate-200 bg-white px-4 py-4 md:px-6 md:py-5 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800 font-serif">Agent Congrats Email Drafts</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800 font-serif leading-tight">Agent Congrats Email Drafts</h1>
               <p className="text-sm text-slate-500 mt-0.5">Review drafts, then send to Customer.io manually — no auto-blasting</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="flex-1 md:w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">Drafts (unsent)</SelectItem>
                 <SelectItem value="sent">Sent</SelectItem>
@@ -111,20 +111,20 @@ export default function AdminPropstreamAgentEmailDrafts() {
                 <SelectItem value="all">All</SelectItem>
               </SelectContent>
             </Select>
-            <Button size="sm" variant="outline" className="gap-2" onClick={() => queryClient.invalidateQueries({ queryKey: ['propstream-agent-email-drafts'] })}>
+            <Button size="sm" variant="outline" className="gap-2 flex-shrink-0" onClick={() => queryClient.invalidateQueries({ queryKey: ['propstream-agent-email-drafts'] })}>
               <RefreshCw className="w-4 h-4" /> Refresh
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-8 space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Showing</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-slate-800">{stats.total}</div></CardContent></Card>
-          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Unsent Drafts</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{stats.draft}</div></CardContent></Card>
-          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Sent</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{stats.sent}</div></CardContent></Card>
-          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Failed</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-red-600">{stats.failed}</div></CardContent></Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Showing</CardTitle></CardHeader><CardContent><div className="text-2xl md:text-3xl font-bold text-slate-800">{stats.total}</div></CardContent></Card>
+          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Unsent Drafts</CardTitle></CardHeader><CardContent><div className="text-2xl md:text-3xl font-bold text-amber-600">{stats.draft}</div></CardContent></Card>
+          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Sent</CardTitle></CardHeader><CardContent><div className="text-2xl md:text-3xl font-bold text-green-600">{stats.sent}</div></CardContent></Card>
+          <Card className="border-slate-200 shadow-sm"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-slate-500">Failed</CardTitle></CardHeader><CardContent><div className="text-2xl md:text-3xl font-bold text-red-600">{stats.failed}</div></CardContent></Card>
         </div>
 
         {/* Table */}
