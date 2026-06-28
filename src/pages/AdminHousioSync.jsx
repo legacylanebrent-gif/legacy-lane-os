@@ -227,7 +227,7 @@ export default function AdminHousioSync() {
                 </div>
 
                 {batchResult[syncType] && (
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                     <div>
                       <span className="text-purple-600">Last batch:</span> {batchResult[syncType].synced_count} records
                     </div>

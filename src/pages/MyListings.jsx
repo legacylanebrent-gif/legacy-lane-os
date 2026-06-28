@@ -205,7 +205,7 @@ export default function MyListings() {
                     </p>
                     <Button
                       onClick={() => setShowCreateModal(true)}
-                      className="bg-gold-600 hover:bg-gold-700"
+                      className="bg-orange-600 hover:bg-orange-700"
                     >
                       Create Listing
                     </Button>

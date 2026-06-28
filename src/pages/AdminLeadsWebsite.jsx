@@ -117,7 +117,7 @@ export default function AdminLeadsWebsite() {
       {/* Filters */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>
             <TabsTrigger value="assigned">Assigned ({assigned})</TabsTrigger>
             <TabsTrigger value="converted">Converted ({converted})</TabsTrigger>

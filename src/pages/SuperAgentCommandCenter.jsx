@@ -560,7 +560,7 @@ export default function SuperAgentCommandCenter() {
 
         {/* Agent Grid */}
         <Tabs defaultValue="all" className="space-y-4">
-          <TabsList className="bg-white border border-slate-200 shadow-sm">
+          <TabsList className="bg-white border border-slate-200 shadow-sm flex-wrap h-auto">
             <TabsTrigger value="all">All Agents</TabsTrigger>
             <TabsTrigger value="active">Active</TabsTrigger>
             <TabsTrigger value="operations">Operations</TabsTrigger>
@@ -604,7 +604,7 @@ export default function SuperAgentCommandCenter() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
                         <div className="bg-slate-50 rounded-lg p-2">
                           <div className="text-lg font-bold text-slate-800">{stats.total_runs || 0}</div>
                           <div className="text-xs text-slate-500">Total</div>

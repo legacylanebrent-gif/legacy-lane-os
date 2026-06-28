@@ -125,7 +125,7 @@ export default function Campaigns() {
                   Create your first marketing campaign to get started
                 </p>
                 <Link to={createPageUrl('CampaignBuilder')}>
-                  <Button className="bg-gold-600 hover:bg-gold-700">
+                  <Button className="bg-orange-600 hover:bg-orange-700">
                     Create Campaign
                   </Button>
                 </Link>

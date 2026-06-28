@@ -178,7 +178,7 @@ export default function RelationshipsDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="all">All ({connections.length})</TabsTrigger>
             <TabsTrigger value="active_partner">Active Partners</TabsTrigger>
             <TabsTrigger value="at_risk">At Risk</TabsTrigger>

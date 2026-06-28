@@ -55,7 +55,7 @@ export default function Vendors() {
 
   const getTierBadge = (tier) => {
     const colors = {
-      premier: 'bg-gold-600 text-white',
+      premier: 'bg-orange-600 text-white',
       preferred: 'bg-blue-600 text-white',
       standard: 'bg-slate-600 text-white'
     };

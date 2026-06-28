@@ -278,7 +278,7 @@ export default function AdminEstateSales() {
             </CardHeader>
             <CardContent className="space-y-6">
               {viewingSale.images && viewingSale.images.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {viewingSale.images.slice(0, 6).map((img, idx) => (
                     <img key={idx} src={img} alt="" className="w-full h-32 object-cover rounded-lg" />
                   ))}
@@ -447,7 +447,7 @@ export default function AdminEstateSales() {
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Listing Type</Label>
               <Tabs value={premiumFilter} onValueChange={setPremiumFilter}>
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3">
                   <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
                   <TabsTrigger value="premium" className="text-xs">Premium</TabsTrigger>
                   <TabsTrigger value="standard" className="text-xs">Standard</TabsTrigger>

@@ -222,7 +222,7 @@ export default function ActualRevenue() {
 
         {/* Charts */}
         <Tabs defaultValue="trends">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="trends"><TrendingUp className="w-4 h-4 mr-2" />12-Month Trends</TabsTrigger>
             <TabsTrigger value="breakdown"><PieChart className="w-4 h-4 mr-2" />Revenue Mix</TabsTrigger>
             <TabsTrigger value="ytd"><Layers className="w-4 h-4 mr-2" />YTD by Channel</TabsTrigger>

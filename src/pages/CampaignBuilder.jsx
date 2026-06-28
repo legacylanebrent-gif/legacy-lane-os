@@ -156,7 +156,7 @@ export default function CampaignBuilder() {
               <p className="text-slate-600">Step {step} of 3</p>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="bg-gold-600 hover:bg-gold-700 w-full md:w-auto">
+          <Button onClick={handleSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto">
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving...' : 'Save Campaign'}
           </Button>
@@ -329,7 +329,7 @@ export default function CampaignBuilder() {
               )}
 
               <div className="flex pt-6 border-t">
-                <Button onClick={() => setStep(2)} className="bg-gold-600 hover:bg-gold-700 w-full md:w-auto md:ml-auto">
+                <Button onClick={() => setStep(2)} className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto md:ml-auto">
                   Next: Build Funnel
                 </Button>
               </div>
@@ -350,7 +350,7 @@ export default function CampaignBuilder() {
               />
               <div className="flex flex-col-reverse sm:flex-row justify-between gap-2 pt-6 border-t mt-6">
                 <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">Back</Button>
-                <Button onClick={() => setStep(3)} className="bg-gold-600 hover:bg-gold-700 w-full sm:w-auto">
+                <Button onClick={() => setStep(3)} className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
                   Next: Review & Send
                 </Button>
               </div>
@@ -513,7 +513,7 @@ export default function CampaignBuilder() {
                     {saving ? 'Saving...' : 'Save Draft'}
                   </Button>
                   {savedCampaignId && (
-                    <Button onClick={() => navigate(createPageUrl('Campaigns'))} className="bg-gold-600 hover:bg-gold-700 w-full sm:w-auto">
+                    <Button onClick={() => navigate(createPageUrl('Campaigns'))} className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
                       Done
                     </Button>
                   )}

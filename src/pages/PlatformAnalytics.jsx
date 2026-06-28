@@ -117,7 +117,7 @@ export default function PlatformAnalytics() {
 
         <Tabs defaultValue="monetization">
           <div className="overflow-x-auto pb-2">
-            <TabsList className="w-max">
+            <TabsList className="w-max flex-wrap h-auto">
               <TabsTrigger value="monetization" className="whitespace-nowrap">Monetization Stack</TabsTrigger>
               <TabsTrigger value="divisions" className="whitespace-nowrap">Division Performance</TabsTrigger>
               <TabsTrigger value="partners" className="whitespace-nowrap">Partner Leaderboard</TabsTrigger>

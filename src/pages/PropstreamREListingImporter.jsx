@@ -599,7 +599,7 @@ export default function PropstreamREListingImporter() {
                 <>
                   <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-4" />
                   <p className="font-semibold text-slate-700 text-lg mb-2">Batch {currentBatchIndex} Complete!</p>
-                  <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
                     {batchResults[batchResults.length - 1] && (
                       <>
                         <div className="bg-green-50 rounded-lg p-3">

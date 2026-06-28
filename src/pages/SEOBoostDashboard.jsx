@@ -135,7 +135,7 @@ export default function SEOBoostDashboard() {
                   </div>
 
                   {/* Meta Info */}
-                  <div className="grid grid-cols-3 gap-4 pt-3 border-t text-xs text-slate-600">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-3 border-t text-xs text-slate-600">
                     <div>
                       <div className="font-semibold">Meta Description</div>
                       <p className="text-xs line-clamp-2">{boost.meta_description}</p>

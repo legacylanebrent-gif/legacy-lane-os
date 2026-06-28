@@ -107,7 +107,7 @@ function RelationshipCard({ record, onRefresh, onMessage }) {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-3 gap-3 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
           <div className="bg-slate-50 rounded-lg p-2 text-center">
             <MessageSquare className="w-4 h-4 mx-auto mb-1 text-slate-400" />
             <div className="font-semibold text-slate-900">{health.total_messages_exchanged}</div>
@@ -295,7 +295,7 @@ export default function RelationshipHealthDashboard() {
 
         {/* Filters */}
         <Tabs value={filter} onValueChange={setFilter} className="mb-6">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="all">All ({health_records.length})</TabsTrigger>
             <TabsTrigger value="high_value">High Value ({summary.very_high + summary.high})</TabsTrigger>
             <TabsTrigger value="at_risk">At Risk ({summary.at_risk})</TabsTrigger>

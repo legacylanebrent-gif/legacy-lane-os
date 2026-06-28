@@ -152,7 +152,7 @@ export default function CustomerIODashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="p-4">
             <p className="text-xs text-amber-700 mb-1">Skipped (no creds)</p>

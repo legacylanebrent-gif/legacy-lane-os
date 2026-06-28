@@ -195,7 +195,7 @@ export default function AdminAICredits() {
       </div>
 
       <Tabs defaultValue="operators">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="operators">Estate Sale Company Owner Accounts</TabsTrigger>
           <TabsTrigger value="pricing">Request Pricing</TabsTrigger>
         </TabsList>

@@ -234,7 +234,7 @@ export default function NationalCoverageGrid() {
           <div className="space-y-4 py-2">
             {stateDetails ? (
               <>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   <div className="bg-slate-50 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-slate-900">{stateDetails.cleanLeads.length}</div>
                     <div className="text-xs text-slate-500">Clean Leads</div>

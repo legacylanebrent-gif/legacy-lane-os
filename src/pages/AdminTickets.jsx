@@ -256,7 +256,7 @@ export default function AdminTickets() {
               />
             </div>
             <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="open">Open</TabsTrigger>
                 <TabsTrigger value="in_progress">In Progress</TabsTrigger>
@@ -343,7 +343,7 @@ export default function AdminTickets() {
           </DialogHeader>
 
           {/* Admin Controls */}
-          <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 rounded-lg">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-lg">
             <div>
               <Label className="text-xs">Status</Label>
               <Select

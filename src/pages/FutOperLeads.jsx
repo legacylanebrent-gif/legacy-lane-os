@@ -920,7 +920,7 @@ export default function FutOperLeads() {
 
             {/* Current table status */}
             {buildLeadCount && (
-              <div className="bg-slate-50 border rounded-lg p-3 text-sm grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-50 border rounded-lg p-3 text-sm grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
                 <div><div className="text-xl font-bold text-slate-800">{(buildLeadCount.total || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Total Leads</div></div>
                 <div><div className="text-xl font-bold text-amber-600">{(buildLeadCount.pending || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Pending</div></div>
                 <div><div className="text-xl font-bold text-green-600">{(buildLeadCount.complete || 0).toLocaleString()}</div><div className="text-xs text-slate-500">Complete</div></div>
@@ -954,7 +954,7 @@ export default function FutOperLeads() {
                 {buildDedup && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
                     <p className="font-medium text-green-800 mb-1">✓ Dedup Complete</p>
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center text-xs">
                       <div><div className="font-bold text-green-700">{(buildDedup.new_inserted || 0).toLocaleString()}</div><div className="text-slate-500">New added</div></div>
                       <div><div className="font-bold text-slate-600">{(buildDedup.skipped_existing || 0).toLocaleString()}</div><div className="text-slate-500">Already existed</div></div>
                       <div><div className="font-bold text-slate-800">{(buildDedup.total_in_table || 0).toLocaleString()}</div><div className="text-slate-500">Total in list</div></div>
@@ -973,7 +973,7 @@ export default function FutOperLeads() {
                       style={{ width: `${buildProcess.total > 0 ? Math.min(100, (buildProcess.done / buildProcess.total) * 100) : 0}%` }}
                     />
                   </div>
-                  <div className="grid grid-cols-4 gap-1 text-center text-xs pt-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-center text-xs pt-1">
                     <div><div className="font-bold text-green-700">{buildProcess.enriched}</div><div className="text-slate-500">Emails found</div></div>
                     <div><div className="font-bold text-cyan-700">{buildProcess.geocoded}</div><div className="text-slate-500">Geocoded</div></div>
                     <div><div className="font-bold text-slate-500">{buildProcess.skipped}</div><div className="text-slate-500">Skipped</div></div>

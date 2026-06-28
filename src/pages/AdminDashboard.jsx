@@ -311,7 +311,7 @@ export default function AdminDashboard() {
           {/* Campaigns */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <SectionHeader icon={Megaphone} label="Meta Campaigns" color="text-blue-600" href="/AutonomousRunsDashboard" />
-            <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3 mb-4">
               {[
                 { label: 'Total', value: stats.campaignsTotal || 0, color: 'text-slate-700' },
                 { label: '🟢 Live Now', value: stats.campaignLive || 0, color: 'text-green-600' },
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
           {/* Agent Runs */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <SectionHeader icon={Cpu} label="Autonomous Agent Runs" color="text-amber-600" href="/AdminAIOperator" />
-            <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3 mb-4">
               {[
                 { label: 'Total Runs', value: stats.agentRunsTotal || 0, color: 'text-slate-700' },
                 { label: '⏳ Needs Approval', value: stats.runsPending || 0, color: 'text-amber-600' },

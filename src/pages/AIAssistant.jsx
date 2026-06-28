@@ -256,7 +256,7 @@ export default function AIAssistant() {
       <Card>
         <CardContent className="p-6">
           <Tabs defaultValue="chat">
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-2 sm:grid-cols-3 mb-6">
               <TabsTrigger value="chat" className="gap-2">
                 <Bot className="w-4 h-4" /> Chat
               </TabsTrigger>

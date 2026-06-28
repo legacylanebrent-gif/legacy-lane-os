@@ -359,7 +359,7 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
 
       {/* ── Tabs ── */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-slate-100">
+        <TabsList className="bg-slate-100 flex-wrap h-auto">
           <TabsTrigger value="kanban">Pipeline Board</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="list">List View</TabsTrigger>
@@ -736,7 +736,7 @@ function DealDetail({ deal, setDeal, onSave, saving, onStageChange, onGenerateTi
       </div>
 
       <Tabs value={detailTab} onValueChange={setDetailTab}>
-        <TabsList className="bg-slate-100">
+        <TabsList className="bg-slate-100 flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="calendar">Dates</TabsTrigger>
           <TabsTrigger value="timeline">

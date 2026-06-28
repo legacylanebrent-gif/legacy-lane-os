@@ -179,7 +179,7 @@ export default function SaleInventory() {
                   setEditingItem(null);
                   setShowForm(true);
                 }}
-                className="bg-gold-600 hover:bg-gold-700 gap-2"
+                className="bg-orange-600 hover:bg-orange-700 gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add Item
@@ -252,7 +252,7 @@ export default function SaleInventory() {
                         <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
 
                         {item.sales_channels?.includes('inventory') && (
-                          <Badge className="bg-gold-100 text-gold-700 flex items-center gap-1">
+                          <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
                             <Package className="w-3 h-3" />
                             Inventory
                           </Badge>

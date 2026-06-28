@@ -520,7 +520,7 @@ export default function PropstreamREListings() {
             <div className="p-6 space-y-6">
               <div>
                 <h3 className="font-semibold text-sm mb-3 text-slate-700">Score Labels</h3>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="bg-red-100 border border-red-200 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold text-red-700">80-100</p>
                     <p className="text-xs text-red-600 font-semibold">Priority</p>

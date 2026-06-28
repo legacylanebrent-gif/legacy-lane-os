@@ -122,7 +122,7 @@ export default function MyCourses() {
               Start learning by enrolling in a course
             </p>
             <Link to={createPageUrl('Courses')}>
-              <Button className="bg-gold-600 hover:bg-gold-700">
+              <Button className="bg-orange-600 hover:bg-orange-700">
                 Browse Courses
               </Button>
             </Link>
@@ -176,7 +176,7 @@ export default function MyCourses() {
 
                         <div className="mt-4 flex gap-3">
                           <Link to={createPageUrl(`CourseLearning?id=${course.id}`)}>
-                            <Button className="bg-gold-600 hover:bg-gold-700">
+                            <Button className="bg-orange-600 hover:bg-orange-700">
                               {enrollment?.progress > 0 ? 'Continue Learning' : 'Start Course'}
                               <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>

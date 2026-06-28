@@ -252,7 +252,7 @@ export default function AdminLeadsPropstream() {
       <div className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList>
+            <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>
               <TabsTrigger value="assigned">Assigned ({assigned})</TabsTrigger>
               <TabsTrigger value="converted">Converted ({converted})</TabsTrigger>
@@ -572,7 +572,7 @@ export default function AdminLeadsPropstream() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div><Label>Est. Value ($)</Label><Input type="number" value={form.estimated_value} onChange={e => setForm({ ...form, estimated_value: e.target.value })} /></div>
               <div><Label>Equity ($)</Label><Input type="number" value={form.propstream_equity} onChange={e => setForm({ ...form, propstream_equity: e.target.value })} /></div>
               <div><Label>Lead Score</Label><Input type="number" min="0" max="100" value={form.score} onChange={e => setForm({ ...form, score: e.target.value })} /></div>

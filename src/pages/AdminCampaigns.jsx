@@ -301,7 +301,7 @@ export default function AdminCampaigns() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="overflow-x-auto pb-2">
-          <TabsList className="w-max">
+          <TabsList className="w-max flex-wrap h-auto">
             <TabsTrigger value="campaigns" className="whitespace-nowrap">My Campaigns</TabsTrigger>
             <TabsTrigger value="templates" className="whitespace-nowrap">Campaign Templates</TabsTrigger>
             <TabsTrigger value="library" className="whitespace-nowrap">Template Library</TabsTrigger>

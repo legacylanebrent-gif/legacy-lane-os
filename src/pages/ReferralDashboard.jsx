@@ -134,7 +134,7 @@ export default function ReferralDashboard() {
 
       {/* Tabs */}
       <Tabs defaultValue="referrals">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="referrals">
             <Users className="w-4 h-4 mr-2" /> My Referrals
           </TabsTrigger>

@@ -46,7 +46,7 @@ export default function VendorDetail() {
 
   const getTierBadge = (tier) => {
     const colors = {
-      premier: 'bg-gold-600 text-white',
+      premier: 'bg-orange-600 text-white',
       preferred: 'bg-blue-600 text-white',
       standard: 'bg-slate-600 text-white'
     };
@@ -119,7 +119,7 @@ export default function VendorDetail() {
 
                 <Button 
                   onClick={() => setShowBidModal(true)}
-                  className="w-full bg-gold-600 hover:bg-gold-700 h-12"
+                  className="w-full bg-orange-600 hover:bg-orange-700 h-12"
                 >
                   <FileText className="w-5 h-5 mr-2" />
                   Request Bid
@@ -143,7 +143,7 @@ export default function VendorDetail() {
             </Card>
 
             <Tabs defaultValue="reviews">
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 <TabsTrigger value="about">About</TabsTrigger>
               </TabsList>

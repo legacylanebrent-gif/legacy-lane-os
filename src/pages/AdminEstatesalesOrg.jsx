@@ -599,7 +599,7 @@ export default function AdminEstatesalesOrg() {
           <div className="flex-1 overflow-y-auto pr-1 space-y-3 min-h-0">
             {/* Global stats */}
             {globalCounts && (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-slate-800">{globalCounts.total.toLocaleString()}</div>
                   <div className="text-xs text-slate-500 mt-1">Total Scraped</div>
