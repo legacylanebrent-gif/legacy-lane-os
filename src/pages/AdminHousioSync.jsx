@@ -87,21 +87,21 @@ export default function AdminHousioSync() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Housio Territory Sync</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Housio Territory Sync</h1>
             <p className="text-slate-600 mt-1">Synchronize territories and micro-territories from Housio</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {batchMode && (
               <Button onClick={exitBatchMode} variant="outline" size="sm">
                 <X className="w-4 h-4 mr-1" /> Exit Batch Mode
               </Button>
             )}
             {!batchMode && (
-              <Button onClick={handleFullSync} disabled={syncing} className="bg-gold-600 hover:bg-gold-700">
+              <Button onClick={handleFullSync} disabled={syncing} className="bg-orange-600 hover:bg-orange-700">
                 {syncing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />

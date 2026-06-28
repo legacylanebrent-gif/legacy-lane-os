@@ -119,13 +119,13 @@ export default function CompanyEmailEnrichment() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-7xl">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">Company Email Enrichment</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Company Email Enrichment</h1>
           <p className="text-slate-500 mt-1">Find, verify, and store email addresses for your estate sale company database.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setShowSettings(s => !s)}>
             <Settings className="w-4 h-4 mr-2" />Settings {showSettings ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
           </Button>
@@ -140,7 +140,7 @@ export default function CompanyEmailEnrichment() {
         <Card className="border-blue-200 bg-blue-50">
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><Settings className="w-4 h-4" />Email Verification Provider Settings</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Verification Provider</Label>
                 <Select value={apiSettings.provider} onValueChange={v => setApiSettings(p => ({ ...p, provider: v }))}>
