@@ -62,18 +62,18 @@ export default function ManageTeam() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Manage Team</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-1">Manage Team</h1>
           <p className="text-slate-600">Control your team members' access and permissions</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="border-green-400 text-green-700 hover:bg-green-50">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="flex-1 md:flex-none border-green-400 text-green-700 hover:bg-green-50">
             <MessageSquare className="w-4 h-4 mr-2" />
             Text Invite
           </Button>
-          <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="bg-orange-600 hover:bg-orange-700">
+          <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="flex-1 md:flex-none bg-orange-600 hover:bg-orange-700">
             <Mail className="w-4 h-4 mr-2" />
             Email Invite
           </Button>
@@ -82,18 +82,18 @@ export default function ManageTeam() {
 
       {teamMembers.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center">
+          <CardContent className="p-6 md:p-12 text-center">
             <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500 text-lg mb-2">No team members yet</p>
             <p className="text-sm text-slate-400 mb-4">
               Invite your first team member using the button above.
             </p>
-            <div className="flex gap-2 justify-center">
-              <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="border-green-400 text-green-700 hover:bg-green-50">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button onClick={() => { setInviteModalType('text'); setShowInviteModal(true); }} variant="outline" className="w-full sm:w-auto border-green-400 text-green-700 hover:bg-green-50">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Text Invite
               </Button>
-              <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={() => { setInviteModalType('email'); setShowInviteModal(true); }} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
                 <Mail className="w-4 h-4 mr-2" />
                 Email Invite
               </Button>
