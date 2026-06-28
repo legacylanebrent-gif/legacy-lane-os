@@ -98,22 +98,22 @@ export default function MarketingTasks() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-5 md:space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">Marketing Tasks</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Marketing Tasks</h1>
           <p className="text-slate-600 mt-1">Manage estate sale and business marketing activities</p>
         </div>
-        <div className="flex gap-3">
-          <Link to={createPageUrl('CampaignBuilder')}>
-            <Button variant="outline" className="border-cyan-600 text-cyan-700 hover:bg-cyan-50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto md:flex md:gap-3">
+          <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto">
+            <Button variant="outline" className="border-cyan-600 text-cyan-700 hover:bg-cyan-50 w-full md:w-auto">
               <Megaphone className="w-4 h-4 mr-2" />
               Create Campaign
             </Button>
           </Link>
           <Dialog open={showTaskForm} onOpenChange={setShowTaskForm}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setEditingTask(null)}>
+              <Button className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto" onClick={() => setEditingTask(null)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </Button>
@@ -141,7 +141,7 @@ export default function MarketingTasks() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="grid grid-cols-2 w-full md:w-auto">
           <TabsTrigger value="estate_sale">
             <Building2 className="w-4 h-4 mr-2" />
             Estate Sale Marketing
@@ -155,7 +155,7 @@ export default function MarketingTasks() {
         <TabsContent value="estate_sale" className="space-y-6 mt-6">
           {sales.length === 0 ? (
             <Card>
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-6 md:p-12 text-center">
                 <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-500">No active estate sales</p>
               </CardContent>
@@ -169,15 +169,15 @@ export default function MarketingTasks() {
               return (
                 <Card key={sale.id} className="border-l-4 border-l-orange-500">
                   <CardHeader className="bg-slate-50">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div>
-                        <CardTitle className="text-xl">{sale.title}</CardTitle>
+                        <CardTitle className="text-lg md:text-xl">{sale.title}</CardTitle>
                         <p className="text-sm text-slate-600 mt-1">
                           {sale.sale_dates && sale.sale_dates[0] && 
                             format(new Date(sale.sale_dates[0].date), 'MMM d, yyyy')}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3">
                         <Badge className="bg-orange-100 text-orange-700">
                           {completedCount}/{totalCount} Complete
                         </Badge>
@@ -233,9 +233,9 @@ export default function MarketingTasks() {
         <TabsContent value="business" className="space-y-6 mt-6">
           <Card>
             <CardHeader className="bg-slate-50">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">General Business Marketing</CardTitle>
-                <Badge className="bg-cyan-100 text-cyan-700">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <CardTitle className="text-lg md:text-xl">General Business Marketing</CardTitle>
+                <Badge className="bg-cyan-100 text-cyan-700 w-fit">
                   {businessTasks.filter(t => t.status === 'completed').length}/{businessTasks.length} Complete
                 </Badge>
               </div>
@@ -284,7 +284,7 @@ export default function MarketingTasks() {
 
 function TaskItem({ task, onToggle, onEdit, getCategoryIcon, getPriorityColor }) {
   return (
-    <div className="flex items-start gap-4 p-4 border rounded-lg hover:bg-slate-50 transition-colors">
+    <div className="flex items-start gap-3 p-3 md:p-4 border rounded-lg hover:bg-slate-50 transition-colors">
       <button
         onClick={() => onToggle(task)}
         className="mt-1 flex-shrink-0"
@@ -421,7 +421,7 @@ function TaskForm({ task, sales, onSave, onCancel }) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         <div>
           <Label>Category</Label>
           <select
@@ -451,7 +451,7 @@ function TaskForm({ task, sales, onSave, onCancel }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         <div>
           <Label>Due Date</Label>
           <Input
@@ -476,11 +476,11 @@ function TaskForm({ task, sales, onSave, onCancel }) {
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
           Cancel
         </Button>
-        <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+        <Button type="submit" className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
           {task?.id ? 'Update Task' : 'Create Task'}
         </Button>
       </div>
