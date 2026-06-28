@@ -47,23 +47,23 @@ export default function Campaigns() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-start mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start mb-6 md:mb-8">
           <div>
-            <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-navy-900 mb-2">
               Marketing Campaigns
             </h1>
             <p className="text-slate-600">Create and manage automated marketing campaigns</p>
           </div>
-          <Link to={createPageUrl('CampaignBuilder')}>
-            <Button className="bg-gold-600 hover:bg-gold-700">
+          <Link to={createPageUrl('CampaignBuilder')} className="w-full md:w-auto">
+            <Button className="bg-orange-600 hover:bg-orange-700 w-full">
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
           </Link>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Total Campaigns</CardTitle>
@@ -106,7 +106,7 @@ export default function Campaigns() {
         </div>
 
         <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList>
+          <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="active">Active</TabsTrigger>
             <TabsTrigger value="draft">Draft</TabsTrigger>
@@ -134,8 +134,8 @@ export default function Campaigns() {
               <div className="grid gap-6">
                 {filteredCampaigns.map(campaign => (
                   <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-xl font-serif font-bold text-navy-900">
@@ -158,7 +158,7 @@ export default function Campaigns() {
                             {campaign.description}
                           </p>
 
-                          <div className="grid grid-cols-4 gap-6">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
                             <div>
                               <p className="text-sm text-slate-500">Sent</p>
                               <p className="text-2xl font-bold text-navy-900">{campaign.metrics?.sent || 0}</p>
@@ -178,7 +178,7 @@ export default function Campaigns() {
                           </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-shrink-0">
                           {campaign.status === 'active' ? (
                             <Button variant="outline" size="icon">
                               <Pause className="w-4 h-4" />
