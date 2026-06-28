@@ -212,11 +212,11 @@ export default function AdminDashboard() {
 
       {/* ── Hero Banner ── */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-orange-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-10">
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div>
               <p className="text-orange-400 text-sm font-semibold uppercase tracking-widest mb-1">{greeting}, {user.full_name?.split(' ')[0] || 'Admin'} 👋</p>
-              <h1 className="text-4xl font-black tracking-tight leading-tight">Admin Command Center</h1>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tight leading-tight">Admin Command Center</h1>
               <p className="text-slate-400 mt-2 max-w-xl">Your full-stack view of leads, outreach, campaigns, and platform growth — everything you need to push the needle today.</p>
               <div className="flex items-center gap-3 mt-4 flex-wrap">
                 <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-3 py-1">
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
-            <Button onClick={loadStats} disabled={refreshing} variant="outline" className="border-orange-400/60 text-orange-300 hover:bg-orange-600 hover:text-white hover:border-orange-500 gap-2 bg-transparent">
+            <Button onClick={loadStats} disabled={refreshing} variant="outline" className="w-full sm:w-auto border-orange-400/60 text-orange-300 hover:bg-orange-600 hover:text-white hover:border-orange-500 gap-2 bg-transparent">
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
@@ -245,12 +245,12 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:px-6 md:py-8 space-y-8 md:space-y-10">
 
         {/* ── Goals / Progress ── */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <SectionHeader icon={Target} label="Growth Goals — 2026" color="text-orange-600" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             <GoalBar label="📧 Leads with Email" current={stats.leadsWithEmail || 0} target={5000} color="bg-orange-500" />
             <GoalBar label="📬 Outreach Sequences Sent" current={stats.outreachTotal || 0} target={1000} color="bg-violet-500" />
             <GoalBar label="💬 Replies Received" current={stats.outreachReplied || 0} target={200} color="bg-green-500" />
@@ -307,11 +307,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── Campaigns & Agent Runs ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Campaigns */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <SectionHeader icon={Megaphone} label="Meta Campaigns" color="text-blue-600" href="/AutonomousRunsDashboard" />
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
               {[
                 { label: 'Total', value: stats.campaignsTotal || 0, color: 'text-slate-700' },
                 { label: '🟢 Live Now', value: stats.campaignLive || 0, color: 'text-green-600' },
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
           {/* Agent Runs */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <SectionHeader icon={Cpu} label="Autonomous Agent Runs" color="text-amber-600" href="/AdminAIOperator" />
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
               {[
                 { label: 'Total Runs', value: stats.agentRunsTotal || 0, color: 'text-slate-700' },
                 { label: '⏳ Needs Approval', value: stats.runsPending || 0, color: 'text-amber-600' },

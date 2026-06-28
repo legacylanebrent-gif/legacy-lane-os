@@ -409,7 +409,7 @@ export default function AdminBuildReport() {
   const autoFailed = AUTOMATIONS_LIST.filter(a => a.status === 'FAILED').length;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Build Completion Report — Phases 1–12</h1>
@@ -508,7 +508,7 @@ export default function AdminBuildReport() {
         <div className="space-y-1">
           {PUBLIC_ROUTES.map(r => (
             <div key={r.route} className="flex items-center gap-3 py-1.5 border-b border-slate-100 last:border-0 text-xs">
-              <code className="font-mono text-slate-600 w-80 shrink-0">{r.route}</code>
+              <code className="font-mono text-slate-600 w-32 sm:w-80 shrink-0">{r.route}</code>
               <span className="flex-1 text-slate-500">{r.label}</span>
               <StatusBadge status={r.status} />
               {r.note && <span className="text-amber-600 text-xs max-w-xs">{r.note}</span>}

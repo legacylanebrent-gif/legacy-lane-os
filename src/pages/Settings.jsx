@@ -124,10 +124,10 @@ export default function Settings() {
   }
 
   const SettingsContent = () => (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-navy-900 mb-2">
             Platform Settings
           </h1>
           <p className="text-slate-600">Manage all aspects of Legacy Lane OS</p>
@@ -218,7 +218,7 @@ export default function Settings() {
                   <CardDescription>Platform fees and commissions</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label htmlFor="platform_fee">Platform Fee (%)</Label>
                       <Input
@@ -404,7 +404,7 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  <Button className="bg-gold-600 hover:bg-gold-700">
+                  <Button className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto">
                     Manage Role Permissions
                   </Button>
                 </div>
@@ -618,11 +618,11 @@ export default function Settings() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end mt-8">
+        <div className="flex mt-8">
           <Button 
             onClick={handleSave}
             disabled={saving}
-            className="bg-gold-600 hover:bg-gold-700"
+            className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving...' : 'Save All Settings'}

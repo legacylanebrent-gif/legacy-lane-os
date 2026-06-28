@@ -123,9 +123,9 @@ export default function ApiKeyManager() {
   const pullEndpointNote = 'Use the backend function URL from: Dashboard → Code → Functions → saleDataFeed';
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 mt-6">
+    <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-6 mt-6">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-slate-900">Website Data Feed API</h1>
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Website Data Feed API</h1>
         <p className="text-slate-500 mt-1">Connect your personal website to Legacy Lane OS — push your sales and inventory automatically.</p>
       </div>
 

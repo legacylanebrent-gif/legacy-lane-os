@@ -58,7 +58,7 @@ export default function LaunchAuditCenter() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-5">
+      <div className="bg-white border-b border-slate-200 px-4 py-4 md:px-6 md:py-5">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center">
@@ -72,7 +72,7 @@ export default function LaunchAuditCenter() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:px-6 space-y-6">
         {/* Scorecard */}
         <AuditScorecard score={calcScore()} breakdown={breakdown} />
 
@@ -87,7 +87,7 @@ export default function LaunchAuditCenter() {
             ))}
           </TabsList>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 mt-4">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 mt-4">
             <TabsContent value="pages" className="mt-0">
               <LandingPageAudit onScoreUpdate={data => updateScore('pages', data)} />
             </TabsContent>
