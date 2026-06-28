@@ -179,25 +179,25 @@ export default function CRM() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-5 md:space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">CRM</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">CRM</h1>
           <p className="text-slate-600 mt-1">Manage your connections and relationships</p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full md:w-auto md:flex md:gap-2">
           <Button
             variant="outline"
             onClick={handleRemoveDuplicates}
             disabled={removingDuplicates}
-            className="text-orange-600 border-orange-600"
+            className="text-orange-600 border-orange-600 w-full md:w-auto"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             {removingDuplicates ? 'Removing...' : 'Remove Duplicates'}
           </Button>
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
+              <Button className="bg-cyan-600 hover:bg-cyan-700 w-full md:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Connection
               </Button>
@@ -220,7 +220,7 @@ export default function CRM() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -281,8 +281,8 @@ export default function CRM() {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[250px]">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
+            <div className="w-full md:flex-1 md:min-w-[250px]">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <Input
@@ -294,7 +294,7 @@ export default function CRM() {
               </div>
             </div>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -305,7 +305,7 @@ export default function CRM() {
               </SelectContent>
             </Select>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -377,7 +377,7 @@ function ConnectionCard({ connection, onSelect, getConnectionTypeColor, getConne
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <h3 className="font-semibold text-slate-900">{connection.connected_user_name || 'Unnamed'}</h3>
             <Badge className={getConnectionTypeColor(connection.connection_type)}>
               {getConnectionTypeIcon(connection.connection_type)}
@@ -484,20 +484,20 @@ function ConnectionDetail({ connection, onUpdate, onClose, getConnectionTypeColo
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center">
-            <Users className="w-8 h-8 text-cyan-600" />
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-cyan-100 rounded-full flex items-center justify-center shrink-0">
+            <Users className="w-7 h-7 md:w-8 md:h-8 text-cyan-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">{connection.connected_user_name || 'Unnamed'}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">{connection.connected_user_name || 'Unnamed'}</h2>
             <Badge className={getConnectionTypeColor(connection.connection_type)}>
               {getConnectionTypeIcon(connection.connection_type)}
               <span className="ml-1">{connection.connection_type}</span>
             </Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {connection.status === 'pending' && (
             <Button onClick={handleSendMessage} variant="outline" className="text-orange-600">
               <Send className="w-4 h-4 mr-2" />
@@ -515,7 +515,7 @@ function ConnectionDetail({ connection, onUpdate, onClose, getConnectionTypeColo
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
         <div className="space-y-4">
           <div>
             <Label className="text-slate-600">Email</Label>
