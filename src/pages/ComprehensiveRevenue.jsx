@@ -419,15 +419,15 @@ export default function ComprehensiveRevenue() {
     .slice(0, 20);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Comprehensive Revenue Dashboard</h1>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-2">Comprehensive Revenue Dashboard</h1>
           <p className="text-slate-600">Future operators + Additional Revenue Streams Analysis</p>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4 md:mb-8">
           <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">

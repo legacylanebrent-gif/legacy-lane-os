@@ -261,10 +261,10 @@ export default function EstimatedPNL() {
   const pieData = streamBreakdown.map(s => ({ name: s.label, value: s.margin }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="mb-4">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Estimated P&amp;L Dashboard</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-2">Estimated P&amp;L Dashboard</h1>
           <p className="text-slate-600">Projected margins based on Comprehensive Revenue model with adjustable costs</p>
         </div>
 

@@ -99,19 +99,19 @@ export default function NotificationAnalytics() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Notification Analytics</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-2">Notification Analytics</h1>
           <p className="text-slate-600">Track notification delivery, engagement, and user preferences</p>
         </div>
-        <Button onClick={loadData} variant="outline" className="gap-2">
+        <Button onClick={loadData} variant="outline" className="gap-2 w-full md:w-auto">
           <RefreshCw className="w-4 h-4" />
           Refresh
         </Button>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Notifications</CardTitle>

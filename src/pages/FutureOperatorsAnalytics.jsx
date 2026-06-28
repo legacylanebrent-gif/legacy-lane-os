@@ -159,15 +159,15 @@ export default function FutureOperatorsAnalytics() {
     .slice(0, 15);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Total Estate Sale Company Owners</h1>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-2xl md:text-3xl sm:text-4xl font-serif font-bold text-slate-900 mb-2">Future Total Estate Sale Company Owners</h1>
           <p className="text-slate-600">Current database overview and revenue potential analysis</p>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 md:mb-8">
           <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">

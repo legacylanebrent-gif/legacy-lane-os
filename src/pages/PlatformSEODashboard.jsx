@@ -205,20 +205,20 @@ export default function PlatformSEODashboard() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Search className="w-5 h-5 text-cyan-400" />
                 <span className="text-cyan-400 text-sm font-semibold uppercase tracking-widest">Platform SEO Command Center</span>
               </div>
-              <h1 className="text-3xl font-black tracking-tight">SEO Dashboard</h1>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight">SEO Dashboard</h1>
               <p className="text-slate-400 mt-1 text-sm">Content inventory, indexing queue, opportunities &amp; Google Search Console</p>
               {snapshot?.fetched_at && (
                 <p className="text-slate-500 text-xs mt-2">GSC last updated: {new Date(snapshot.fetched_at).toLocaleString()} · {snapshot.period_days}-day window</p>
               )}
             </div>
-            <Button onClick={runFetch} disabled={refreshing} className="bg-cyan-600 hover:bg-cyan-700 gap-2">
+            <Button onClick={runFetch} disabled={refreshing} className="bg-cyan-600 hover:bg-cyan-700 gap-2 w-full md:w-auto">
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Fetching...' : 'Refresh GSC Data'}
             </Button>
@@ -226,7 +226,7 @@ export default function PlatformSEODashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-10">
 
         {/* ── 1. SEO Pages Created ── */}
         <section>

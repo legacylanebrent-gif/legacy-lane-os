@@ -119,16 +119,16 @@ export default function ActualRevenue() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-orange-50 to-cyan-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-slate-900">Actual Revenue</h1>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Actual Revenue</h1>
             <p className="text-slate-600 mt-1">Track real revenue across all 10 channels</p>
           </div>
           <div className="flex items-center gap-3">
             {saved && <span className="text-sm text-green-600 font-medium">✓ Saved</span>}
-            <Button onClick={handleSave} className="bg-gold-600 hover:bg-gold-700 text-white">
+            <Button onClick={handleSave} className="bg-orange-600 hover:bg-orange-700 text-white w-full md:w-auto">
               <Save className="w-4 h-4 mr-2" />
               Save Month
             </Button>
