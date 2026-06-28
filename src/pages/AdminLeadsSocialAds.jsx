@@ -90,18 +90,18 @@ export default function AdminLeadsSocialAds() {
   });
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Facebook className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-4xl font-serif font-bold text-slate-900">Social Ads Leads</h1>
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900">Social Ads Leads</h1>
           </div>
-          <p className="text-slate-600 ml-13">Leads from Facebook, Instagram, TikTok & other paid social campaigns</p>
+          <p className="text-slate-600 md:ml-13">Leads from Facebook, Instagram, TikTok & other paid social campaigns</p>
         </div>
-        <Button onClick={() => setShowAdd(true)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => setShowAdd(true)} className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
           <Plus className="w-4 h-4 mr-2" />Add Lead
         </Button>
       </div>
@@ -115,7 +115,7 @@ export default function AdminLeadsSocialAds() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-3 items-center">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <Tabs value={filter} onValueChange={setFilter}>
           <TabsList>
             <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>

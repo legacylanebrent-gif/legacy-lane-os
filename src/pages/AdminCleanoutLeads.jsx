@@ -118,21 +118,21 @@ export default function AdminCleanoutLeads() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Truck className="w-6 h-6 text-green-600" />Cleanout Leads</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Truck className="w-6 h-6 text-green-600 flex-shrink-0" />Cleanout Leads</h1>
           <p className="text-slate-500 text-sm mt-1">Manage property cleanout opportunities</p>
         </div>
-        <Button onClick={load} variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Refresh</Button>
+        <Button onClick={load} variant="outline" size="sm" className="w-full md:w-auto"><RefreshCw className="w-4 h-4 mr-2" />Refresh</Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[['Total', stats.total, 'slate'], ['New', stats.new, 'blue'], ['Sent', stats.sent, 'yellow'], ['Won', stats.won, 'green']].map(([label, count, color]) => (
-          <div key={label} className={`bg-${color}-50 border border-${color}-200 rounded-xl p-4`}>
+        {[['Total', stats.total, 'bg-slate-50 border-slate-200 text-slate-700'], ['New', stats.new, 'bg-blue-50 border-blue-200 text-blue-700'], ['Sent', stats.sent, 'bg-yellow-50 border-yellow-200 text-yellow-700'], ['Won', stats.won, 'bg-green-50 border-green-200 text-green-700']].map(([label, count, cls]) => (
+          <div key={label} className={`${cls.split(' ')[0]} ${cls.split(' ')[1]} rounded-xl p-4`}>
             <p className="text-xs font-semibold text-slate-500 uppercase">{label}</p>
-            <p className={`text-2xl font-bold text-${color}-700`}>{count}</p>
+            <p className={`text-2xl font-bold ${cls.split(' ')[2]}`}>{count}</p>
           </div>
         ))}
       </div>

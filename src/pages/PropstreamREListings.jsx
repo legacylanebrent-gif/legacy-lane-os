@@ -163,15 +163,15 @@ export default function PropstreamREListings() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-purple-700 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-purple-700 rounded-lg flex items-center justify-center flex-shrink-0">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-3xl font-serif font-bold text-slate-900">PropStream RE Listings</h1>
+            <h1 className="text-xl md:text-3xl font-serif font-bold text-slate-900">PropStream RE Listings</h1>
           </div>
           <p className="text-slate-500 text-sm">Import daily PropStream MLS listings, score estate sale opportunities, prep agent outreach, and distribute leads to operators.</p>
         </div>

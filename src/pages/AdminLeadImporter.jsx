@@ -275,7 +275,7 @@ export default function AdminLeadImporter() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div className="flex items-center gap-3 mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -284,7 +284,7 @@ export default function AdminLeadImporter() {
       </div>
 
       <div>
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Lead Importer</h1>
+        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">Lead Importer</h1>
         <p className="text-slate-600">Import property lists from Propstream and assign to local operators by territory</p>
       </div>
 
@@ -294,7 +294,7 @@ export default function AdminLeadImporter() {
             <CardTitle>Upload CSV File</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50">
+            <div className="border-2 border-dashed rounded-lg p-6 md:p-8 text-center cursor-pointer hover:bg-slate-50">
               <input
                 type="file"
                 accept=".csv"

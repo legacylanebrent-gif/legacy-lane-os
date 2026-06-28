@@ -186,18 +186,18 @@ export default function AdminLeadsPropstream() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Database className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-4xl font-serif font-bold text-slate-900">Propstream Probate Leads</h1>
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900">Propstream Probate Leads</h1>
           </div>
           <p className="text-slate-600">Leads sourced from Propstream API — absentee owners, inherited, distressed properties</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <Button onClick={() => setShowImport(true)} className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md">
             <FileSpreadsheet className="w-4 h-4 mr-2" />Batch Import
           </Button>
@@ -250,7 +250,7 @@ export default function AdminLeadsPropstream() {
 
       {/* Filters */}
       <div className="space-y-3">
-        <div className="flex flex-col md:flex-row gap-3 items-center">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <Tabs value={filter} onValueChange={setFilter}>
             <TabsList>
               <TabsTrigger value="unassigned">Unassigned ({unassigned})</TabsTrigger>
@@ -343,7 +343,7 @@ export default function AdminLeadsPropstream() {
       </div>
 
       {/* Page Size */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-slate-500">{filtered.length} leads</p>
         <div className="flex items-center gap-2">
           <label className="text-xs text-slate-500">Rows per page:</label>

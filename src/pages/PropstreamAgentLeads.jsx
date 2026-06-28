@@ -434,18 +434,18 @@ export default function PropstreamAgentLeads() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="border-b border-slate-200 bg-white px-4 md:px-6 py-4 md:py-5 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800 font-serif">PropStream Agent Leads</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">PropStream Agent Leads</h1>
               <p className="text-sm text-slate-500 mt-0.5">Manage real estate agent partnerships from MLS listings</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
             <Button 
               size="sm" 
               variant="outline" 
@@ -482,7 +482,7 @@ export default function PropstreamAgentLeads() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="border-slate-200 shadow-sm">
@@ -530,8 +530,8 @@ export default function PropstreamAgentLeads() {
         {/* Filters */}
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="p-4">
-            <div className="flex flex-wrap gap-4 items-end">
-              <div className="flex-1 min-w-64">
+            <div className="flex flex-col gap-4 md:flex-wrap md:flex-row md:items-end">
+              <div className="w-full md:flex-1 md:min-w-64">
                 <Label className="text-sm font-medium text-slate-700 mb-2">Search</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -543,7 +543,7 @@ export default function PropstreamAgentLeads() {
                   />
                 </div>
               </div>
-              <div className="w-48">
+              <div className="w-full md:w-48">
                 <Label className="text-sm font-medium text-slate-700 mb-2">Status</Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger>
