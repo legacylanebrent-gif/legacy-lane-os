@@ -332,11 +332,11 @@ export default function StorageManagement() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">Storage Space Management</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-1">Storage Space Management</h1>
           <p className="text-slate-600">Organize your inventory storage locations with flexible labeling</p>
         </div>
         <Button 
@@ -348,7 +348,7 @@ export default function StorageManagement() {
             });
             setShowModal(true);
           }}
-          className="bg-orange-600 hover:bg-orange-700"
+          className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Space
@@ -357,12 +357,12 @@ export default function StorageManagement() {
 
       {/* Locations Grid */}
       {locations.length === 0 ? (
-        <Card className="p-12 text-center">
+        <Card className="p-6 md:p-12 text-center">
           <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-500 text-lg mb-4">No storage locations yet</p>
           <Button 
             onClick={() => setShowModal(true)}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Create Your First Space
@@ -424,11 +424,10 @@ export default function StorageManagement() {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2">
+                <div className="grid grid-cols-2 gap-2 pt-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
                     onClick={() => handleEdit(location)}
                   >
                     <Edit className="w-3 h-3 mr-1" />
@@ -437,7 +436,7 @@ export default function StorageManagement() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 text-purple-600 hover:bg-purple-50"
+                    className="text-purple-600 hover:bg-purple-50"
                     onClick={() => handleCustomize(location)}
                   >
                     <Lightbulb className="w-3 h-3 mr-1" />
@@ -447,7 +446,7 @@ export default function StorageManagement() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-cyan-600 hover:bg-cyan-50"
+                      className="text-cyan-600 hover:bg-cyan-50"
                       onClick={() => generateAndPrintQR(location)}
                     >
                       <QrCode className="w-3 h-3 mr-1" />
@@ -457,7 +456,7 @@ export default function StorageManagement() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 text-red-600 hover:bg-red-50"
+                    className="text-red-600 hover:bg-red-50"
                     onClick={() => handleDelete(location.id)}
                   >
                     <Trash2 className="w-3 h-3 mr-1" />
@@ -479,7 +478,7 @@ export default function StorageManagement() {
          </CardTitle>
         </CardHeader>
         <CardContent>
-         <div className="grid md:grid-cols-2 gap-4">
+         <div className="grid md:grid-cols-2 gap-3">
            {BEST_PRACTICES.map((practice, idx) => (
              <div key={idx} className="p-3 bg-white rounded-lg border border-cyan-200">
                <h4 className="font-semibold text-cyan-900 mb-1">{practice.title}</h4>
