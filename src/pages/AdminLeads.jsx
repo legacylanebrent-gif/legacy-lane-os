@@ -77,22 +77,22 @@ export default function AdminLeads() {
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-1">All Leads — Consolidated</h1>
+        <h1 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-1">All Leads — Consolidated</h1>
         <p className="text-slate-600">Every lead from all sources. Use the source pages to add and manage leads by channel.</p>
         {!exhausted && <p className="text-xs text-amber-600 mt-1">⚠ Stats may be partial — dataset exceeded the scan time budget. Refresh to try again.</p>}
       </div>
 
       {/* Source Quick Links */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Link to={createPageUrl('AdminLeadsSocialAds')}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Social Ads</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.bySource?.social_ads || 0}</p>
+                <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.bySource?.social_ads || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Facebook className="w-6 h-6 text-blue-500" />
@@ -103,10 +103,10 @@ export default function AdminLeads() {
         </Link>
         <Link to={createPageUrl('AdminLeadsPropstream')}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-purple-500">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Propstream</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.bySource?.propstream || 0}</p>
+                <p className="text-xl md:text-2xl font-bold text-purple-600">{stats.bySource?.propstream || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Database className="w-6 h-6 text-purple-500" />
@@ -117,10 +117,10 @@ export default function AdminLeads() {
         </Link>
         <Link to={createPageUrl('AdminLeadsWebsite')}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-cyan-500">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-3 md:p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Website</p>
-                <p className="text-2xl font-bold text-cyan-600">{stats.bySource?.website || 0}</p>
+                <p className="text-xl md:text-2xl font-bold text-cyan-600">{stats.bySource?.website || 0}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="w-6 h-6 text-cyan-500" />
@@ -132,11 +132,11 @@ export default function AdminLeads() {
       </div>
 
       {/* Overall Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Total Leads</p><p className="text-3xl font-bold mt-1">{stats.total}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Unassigned</p><p className="text-3xl font-bold mt-1 text-orange-600">{stats.unassigned}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Assigned</p><p className="text-3xl font-bold mt-1 text-cyan-600">{stats.assigned}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-slate-500">Converted</p><p className="text-3xl font-bold mt-1 text-green-600">{stats.converted}</p></CardContent></Card>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card><CardContent className="p-3 md:p-4"><p className="text-sm text-slate-500">Total Leads</p><p className="text-xl md:text-3xl font-bold mt-1">{stats.total}</p></CardContent></Card>
+        <Card><CardContent className="p-3 md:p-4"><p className="text-sm text-slate-500">Unassigned</p><p className="text-xl md:text-3xl font-bold mt-1 text-orange-600">{stats.unassigned}</p></CardContent></Card>
+        <Card><CardContent className="p-3 md:p-4"><p className="text-sm text-slate-500">Assigned</p><p className="text-xl md:text-3xl font-bold mt-1 text-cyan-600">{stats.assigned}</p></CardContent></Card>
+        <Card><CardContent className="p-3 md:p-4"><p className="text-sm text-slate-500">Converted</p><p className="text-xl md:text-3xl font-bold mt-1 text-green-600">{stats.converted}</p></CardContent></Card>
       </div>
 
       {/* Filters */}
@@ -146,7 +146,7 @@ export default function AdminLeads() {
           <Input placeholder="Search by name, email, address..." value={search} onChange={e => handleFilterChange(setSearch)(e.target.value)} className="pl-10" />
         </div>
         <Select value={sourceFilter} onValueChange={handleFilterChange(setSourceFilter)}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="All Sources" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-44"><SelectValue placeholder="All Sources" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sources</SelectItem>
             <SelectItem value="social_ads">Social Ads</SelectItem>
@@ -158,7 +158,7 @@ export default function AdminLeads() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={handleFilterChange(setStatusFilter)}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-40"><SelectValue placeholder="All Statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -232,7 +232,7 @@ export default function AdminLeads() {
             </table>
           </div>
           {/* Pagination */}
-          <div className="p-4 border-t flex items-center justify-between text-sm text-slate-500">
+          <div className="p-3 md:p-4 border-t flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-sm text-slate-500">
             <span>Showing {leads.length} of {totalFiltered} matching leads (sorted newest first)</span>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" disabled={skip === 0 || loading} onClick={() => setSkip(Math.max(0, skip - PAGE_SIZE))}>
