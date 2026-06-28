@@ -85,77 +85,77 @@ export default function MyListings() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cream-50 to-sage-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start mb-6 md:mb-8">
           <div>
-            <h1 className="text-4xl font-serif font-bold text-navy-900 mb-2">
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-navy-900 mb-1">
               My Listings
             </h1>
             <p className="text-slate-600">Manage your marketplace items</p>
           </div>
           <Button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gold-600 hover:bg-gold-700"
+            className="bg-orange-600 hover:bg-orange-700 w-full md:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Listing
           </Button>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Total Listings</p>
-                  <p className="text-3xl font-bold text-navy-900 mt-1">{stats.total}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-navy-900 mt-1">{stats.total}</p>
                 </div>
-                <Package className="w-10 h-10 text-blue-600" />
+                <Package className="w-8 h-8 md:w-10 md:h-10 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Available</p>
-                  <p className="text-3xl font-bold text-navy-900 mt-1">{stats.available}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-navy-900 mt-1">{stats.available}</p>
                 </div>
-                <Eye className="w-10 h-10 text-green-600" />
+                <Eye className="w-8 h-8 md:w-10 md:h-10 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Sold</p>
-                  <p className="text-3xl font-bold text-navy-900 mt-1">{stats.sold}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-navy-900 mt-1">{stats.sold}</p>
                 </div>
-                <Package className="w-10 h-10 text-amber-600" />
+                <Package className="w-8 h-8 md:w-10 md:h-10 text-amber-600" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Revenue</p>
-                  <p className="text-3xl font-bold text-navy-900 mt-1">
+                  <p className="text-2xl md:text-3xl font-bold text-navy-900 mt-1">
                     ${stats.revenue.toLocaleString()}
                   </p>
                 </div>
-                <DollarSign className="w-10 h-10 text-emerald-600" />
+                <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-emerald-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs value={filter} onValueChange={setFilter}>
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
+          <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-4">
+            <TabsList className="w-full md:w-auto overflow-x-auto justify-start md:justify-center">
               <TabsTrigger value="available">Available ({stats.available})</TabsTrigger>
               <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
               <TabsTrigger value="reserved">Reserved ({stats.reserved})</TabsTrigger>
@@ -163,7 +163,7 @@ export default function MyListings() {
               <TabsTrigger value="deactivated">Deactivated ({stats.deactivated})</TabsTrigger>
               <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
             </TabsList>
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-end md:self-auto">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="icon"
@@ -183,7 +183,7 @@ export default function MyListings() {
 
           <TabsContent value={filter} className="mt-6">
             {filteredItems.length === 0 ? (
-              <Card className="p-12 text-center">
+              <Card className="p-6 md:p-12 text-center">
                 {filter === 'deactivated' ? (
                   <>
                     <EyeOff className="w-16 h-16 mx-auto text-slate-300 mb-4" />
@@ -213,7 +213,7 @@ export default function MyListings() {
                 )}
               </Card>
             ) : viewMode === 'grid' ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredItems.map(item => (
                   <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <img
@@ -245,8 +245,8 @@ export default function MyListings() {
                         <span>•</span>
                         <span>{item.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                       </div>
-                      <div className="mt-4 flex gap-2">
-                        <Link to={createPageUrl(`ItemDetail?id=${item.id}`)} className="flex-1">
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <Link to={createPageUrl(`ItemDetail?id=${item.id}`)}>
                           <Button variant="outline" className="w-full">View</Button>
                         </Link>
                         <Button variant="outline" onClick={() => { setEditingItem(item); setShowCreateModal(true); }}>Edit</Button>
