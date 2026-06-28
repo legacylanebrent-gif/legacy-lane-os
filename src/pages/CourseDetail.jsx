@@ -107,7 +107,7 @@ export default function CourseDetail() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <Badge className="bg-gold-600 text-white mb-4">
+              <Badge className="bg-orange-600 text-white mb-4">
                 {course.category?.replace(/_/g, ' ')}
               </Badge>
               
@@ -121,16 +121,16 @@ export default function CourseDetail() {
 
               <div className="flex items-center gap-6 text-sm mb-6">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-gold-400" />
+                  <GraduationCap className="w-5 h-5 text-orange-400" />
                   <span>{course.instructor_name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-gold-400" />
+                  <Users className="w-5 h-5 text-orange-400" />
                   <span>{course.enrollment_count || 0} students</span>
                 </div>
                 {course.rating && (
                   <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-gold-400 fill-current" />
+                    <Star className="w-5 h-5 text-orange-400 fill-current" />
                     <span>{course.rating} ({course.total_reviews})</span>
                   </div>
                 )}
@@ -139,7 +139,7 @@ export default function CourseDetail() {
               {enrollment ? (
                 <Button
                   onClick={() => navigate(createPageUrl(`CourseLearning?id=${course.id}`))}
-                  className="bg-gold-600 hover:bg-gold-700 text-white"
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
                   size="lg"
                 >
                   {enrollment.progress > 0 ? 'Continue Learning' : 'Start Course'}
@@ -149,7 +149,7 @@ export default function CourseDetail() {
                 <Button
                   onClick={handleEnroll}
                   disabled={enrolling}
-                  className="bg-gold-600 hover:bg-gold-700 text-white"
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
                   size="lg"
                 >
                   {enrolling ? 'Enrolling...' : course.price > 0 ? `Enroll - $${course.price}` : 'Enroll for Free'}
@@ -185,7 +185,7 @@ export default function CourseDetail() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-sage-50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-gold-100 flex items-center justify-center text-sm font-semibold text-gold-700">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm font-semibold text-orange-700">
                           {index + 1}
                         </div>
                         <div>
@@ -219,7 +219,7 @@ export default function CourseDetail() {
                 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-gold-600" />
+                    <Clock className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-slate-500">Duration</p>
                       <p className="font-semibold">{course.duration_hours || 0} hours</p>
@@ -229,7 +229,7 @@ export default function CourseDetail() {
                   <Separator />
 
                   <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-gold-600" />
+                    <BookOpen className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-slate-500">Lessons</p>
                       <p className="font-semibold">{course.total_lessons || lessons.length}</p>
@@ -239,7 +239,7 @@ export default function CourseDetail() {
                   <Separator />
 
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-5 h-5 text-gold-600" />
+                    <BarChart3 className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-slate-500">Level</p>
                       <p className="font-semibold capitalize">{course.level}</p>
@@ -250,7 +250,7 @@ export default function CourseDetail() {
                     <>
                       <Separator />
                       <div className="flex items-center gap-3">
-                        <Award className="w-5 h-5 text-gold-600" />
+                        <Award className="w-5 h-5 text-orange-600" />
                         <div>
                           <p className="text-sm text-slate-500">Certificate</p>
                           <p className="font-semibold">Yes</p>

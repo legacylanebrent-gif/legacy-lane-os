@@ -176,7 +176,7 @@ export default function CampaignBuilder() {
         {quota && (
           <div className="mb-6 bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-gold-600 flex-shrink-0" />
+              <Mail className="w-5 h-5 text-orange-600 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-slate-800">Email Campaign Quota</p>
                 <p className="text-xs text-slate-500">
@@ -261,7 +261,7 @@ export default function CampaignBuilder() {
               {isEmail && (
                 <div className="space-y-4 pt-4 border-t">
                   <div className="flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-gold-600" />
+                    <Mail className="w-5 h-5 text-orange-600" />
                     <h3 className="text-lg font-semibold text-navy-900">Email Content</h3>
                   </div>
 

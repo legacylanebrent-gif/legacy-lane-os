@@ -226,7 +226,7 @@ export default function PrintSigns() {
       </div>
 
       <Tabs defaultValue="signs">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="qrcodes" className="flex items-center gap-2">
             <QrCode className="w-4 h-4" />
             QR Code Sheet

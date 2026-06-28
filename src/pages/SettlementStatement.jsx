@@ -304,7 +304,7 @@ export default function SettlementStatement() {
               <Card>
                 <CardHeader className="pb-2"><CardTitle className="text-base">Revenue by Sale Phase</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                     {deal.pre_sale_selling_enabled && (
                       <div className="bg-blue-50 rounded-lg p-3 text-center">
                         <p className="text-blue-600 font-bold text-xl">${preSaleRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>

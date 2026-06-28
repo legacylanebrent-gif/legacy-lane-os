@@ -205,7 +205,7 @@ export default function VendorDetail() {
                             href={vendor.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-gold-600 hover:underline"
+                            className="text-orange-600 hover:underline"
                           >
                             {vendor.website}
                           </a>
@@ -228,7 +228,7 @@ export default function VendorDetail() {
                   <div className="space-y-2">
                     {vendor.service_areas.map((area, index) => (
                       <div key={index} className="flex items-center gap-2 text-slate-700">
-                        <MapPin className="w-4 h-4 text-gold-600" />
+                        <MapPin className="w-4 h-4 text-orange-600" />
                         <span>{area}</span>
                       </div>
                     ))}

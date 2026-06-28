@@ -383,7 +383,7 @@ export default function Worksheet() {
 
       {/* Tabs */}
       <Tabs defaultValue="transactions">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="transactions" className="whitespace-nowrap">
             <DollarSign className="w-4 h-4 mr-2" />
             Transactions

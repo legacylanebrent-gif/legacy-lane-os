@@ -36,13 +36,13 @@ export default function LeadCapture() {
               <Card 
                 key={source.value}
                 className={`cursor-pointer transition-all ${
-                  activeTab === source.value ? 'ring-2 ring-gold-500' : 'hover:shadow-lg'
+                  activeTab === source.value ? 'ring-2 ring-orange-500' : 'hover:shadow-lg'
                 }`}
                 onClick={() => setActiveTab(source.value)}
               >
                 <CardContent className="p-6 text-center">
                   <Icon className={`w-10 h-10 mx-auto mb-3 ${
-                    activeTab === source.value ? 'text-gold-600' : 'text-slate-400'
+                    activeTab === source.value ? 'text-orange-600' : 'text-slate-400'
                   }`} />
                   <h3 className="font-semibold text-navy-900 mb-1">{source.label}</h3>
                   <p className="text-xs text-slate-500">{source.description}</p>

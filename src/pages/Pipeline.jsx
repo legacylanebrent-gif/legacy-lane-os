@@ -49,7 +49,7 @@ export default function Pipeline() {
             </h1>
             <p className="text-slate-600">{deals.length} active deals • ${totalValue.toLocaleString()} total value</p>
           </div>
-          <Button className="bg-gold-600 hover:bg-gold-700">
+          <Button className="bg-orange-600 hover:bg-orange-700">
             <Plus className="w-4 h-4 mr-2" />
             New Deal
           </Button>
@@ -82,7 +82,7 @@ export default function Pipeline() {
                           {deal.name}
                         </h3>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-lg font-bold text-gold-600">
+                          <span className="text-lg font-bold text-orange-600">
                             ${deal.value?.toLocaleString() || 0}
                           </span>
                           {deal.probability && (

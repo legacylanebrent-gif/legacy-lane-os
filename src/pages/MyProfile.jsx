@@ -1099,7 +1099,7 @@ export default function MyProfile() {
                 {estateSales.length > 0 ? (
                   <>
                     {subscription && (
-                      <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 rounded-lg">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4 p-4 bg-gradient-to-r from-orange-50 to-cyan-50 rounded-lg">
                         <div className="text-center"><div className="text-xl font-bold">{estateSales.length}</div><div className="text-xs text-slate-500">Total Sales</div></div>
                         <div className="text-center"><div className="text-xl font-bold text-cyan-700">{estateSales.reduce((s, x) => s + (x.views || 0), 0)}</div><div className="text-xs text-slate-500">Views</div></div>
                         <div className="text-center"><div className="text-xl font-bold text-green-700">${estateSales.reduce((s, x) => s + (x.actual_revenue || 0), 0).toLocaleString()}</div><div className="text-xs text-slate-500">Revenue</div></div>
@@ -1432,7 +1432,7 @@ export default function MyProfile() {
             <CardContent>
               {purchases.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                     <div className="text-center p-3 bg-orange-50 rounded-lg"><div className="text-xl font-bold text-orange-700">{purchases.length}</div><div className="text-xs text-slate-500">Purchases</div></div>
                     <div className="text-center p-3 bg-cyan-50 rounded-lg"><div className="text-xl font-bold text-cyan-700">${purchases.reduce((s, p) => s + (p.price * p.quantity || 0), 0).toFixed(0)}</div><div className="text-xs text-slate-500">Total Spent</div></div>
                     <div className="text-center p-3 bg-purple-50 rounded-lg"><div className="text-xl font-bold text-purple-700">{purchases.reduce((s, p) => s + (p.quantity || 0), 0)}</div><div className="text-xs text-slate-500">Items</div></div>

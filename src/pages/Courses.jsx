@@ -71,7 +71,7 @@ export default function Courses() {
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-gold-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center">
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function Courses() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-          <TabsList className="bg-white border">
+          <TabsList className="bg-white border flex-wrap h-auto">
             {categories.map(cat => (
               <TabsTrigger key={cat.value} value={cat.value}>
                 {cat.label}

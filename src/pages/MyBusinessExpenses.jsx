@@ -612,7 +612,7 @@ export default function MyBusinessExpenses() {
               <span className="text-sm font-medium text-slate-700">Filters:</span>
             </div>
             <Tabs value={dateFilter} onValueChange={setDateFilter}>
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="all">All Time</TabsTrigger>
                 <TabsTrigger value="this_month">This Month</TabsTrigger>
                 <TabsTrigger value="last_month">Last Month</TabsTrigger>

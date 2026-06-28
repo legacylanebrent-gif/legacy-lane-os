@@ -156,7 +156,7 @@ export default function ContactDetail() {
 
           <div className="lg:col-span-2">
             <Tabs defaultValue="activity">
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="activity">Activity</TabsTrigger>
                 <TabsTrigger value="deals">Deals ({activeDeals.length})</TabsTrigger>
                 <TabsTrigger value="properties">Properties ({properties.length})</TabsTrigger>
@@ -167,7 +167,7 @@ export default function ContactDetail() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Activity Timeline</CardTitle>
-                      <Button size="sm" className="bg-gold-600 hover:bg-gold-700">
+                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
                         <Plus className="w-4 h-4 mr-2" />
                         Log Activity
                       </Button>
@@ -184,7 +184,7 @@ export default function ContactDetail() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Deals</CardTitle>
-                      <Button size="sm" className="bg-gold-600 hover:bg-gold-700">
+                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
                         <Plus className="w-4 h-4 mr-2" />
                         New Deal
                       </Button>
@@ -202,7 +202,7 @@ export default function ContactDetail() {
                               <p className="text-sm text-slate-500 capitalize">{deal.deal_type}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-bold text-gold-600">
+                              <p className="text-lg font-bold text-orange-600">
                                 ${deal.value?.toLocaleString() || 0}
                               </p>
                               <Badge className="capitalize">{deal.stage}</Badge>

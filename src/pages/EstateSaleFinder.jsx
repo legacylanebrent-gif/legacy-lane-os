@@ -377,7 +377,7 @@ export default function EstateSaleFinder() {
 
           {userLocation && (
             <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
-              <Navigation className="w-4 h-4 text-gold-600" />
+              <Navigation className="w-4 h-4 text-orange-600" />
               <span>Showing results near your location</span>
             </div>
           )}

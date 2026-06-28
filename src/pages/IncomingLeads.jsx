@@ -302,7 +302,7 @@ export default function IncomingLeads() {
               <span className="text-sm font-medium text-slate-700">Filters:</span>
             </div>
             <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
+              <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="unassigned">Unassigned ({unassignedCount})</TabsTrigger>
                 <TabsTrigger value="assigned">Assigned ({assignedCount})</TabsTrigger>
                 <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
@@ -647,7 +647,7 @@ export default function IncomingLeads() {
 
             <div>
               <Label>What will you be selling?</Label>
-              <div className="grid grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 p-4 border rounded-lg bg-slate-50">
                 {['Furniture', 'Clothing', 'Decor', 'Collectables', 'Antiques', 'Art', 'Vehicles', 'Tools', 'Appliances', 'Electronics', 'Other', "I don't know"].map(item => (
                   <div key={item} className="flex items-center space-x-2">
                     <input

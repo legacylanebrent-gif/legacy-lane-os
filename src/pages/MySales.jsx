@@ -590,7 +590,7 @@ export default function MySales() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
           <TabsTrigger value="draft">Draft ({stats.draft})</TabsTrigger>
           <TabsTrigger value="active">Active ({stats.active})</TabsTrigger>

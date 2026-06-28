@@ -182,7 +182,7 @@ export default function Attendance() {
       </div>
 
       <Tabs defaultValue="manual" className="space-y-6">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="manual">Manual Count</TabsTrigger>
           <TabsTrigger value="qr">QR Code Check-in</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>

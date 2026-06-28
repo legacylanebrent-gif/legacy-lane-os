@@ -175,7 +175,7 @@ function JoinModal({ defaultPlan, onClose }) {
           {step === 3 && (
             <div className="space-y-4">
               <h3 className="font-semibold text-slate-700">Your Service Area</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="col-span-2">
                   <Label className="mb-1 block">City</Label>
                   <Input value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />

@@ -325,7 +325,7 @@ export default function MarketplaceItemDetail() {
                 <>
                   <div>
                     <p className="text-sm text-slate-600 mb-1">Current Bid</p>
-                    <p className="text-3xl font-bold text-gold-600">${highestBid?.toLocaleString() || item.reserve_price?.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-orange-600">${highestBid?.toLocaleString() || item.reserve_price?.toLocaleString()}</p>
                     <p className="text-xs text-slate-500 mt-1">{bids.length} bids</p>
                   </div>
 
@@ -375,7 +375,7 @@ export default function MarketplaceItemDetail() {
                         <Button
                           onClick={handlePlaceBid}
                           disabled={submittingBid || !bidAmount}
-                          className="w-full bg-gold-600 hover:bg-gold-700"
+                          className="w-full bg-orange-600 hover:bg-orange-700"
                         >
                           {submittingBid ? 'Placing bid...' : 'Place Bid'}
                         </Button>
@@ -398,7 +398,7 @@ export default function MarketplaceItemDetail() {
                 <>
                   <div>
                     <p className="text-sm text-slate-600 mb-1">Price</p>
-                    <p className="text-3xl font-bold text-gold-600">${item.price?.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-orange-600">${item.price?.toLocaleString()}</p>
                     {item.shipping_option !== 'LOCAL_PICKUP_ONLY' && (
                       <p className="text-xs text-slate-500 mt-1">
                         {item.shipping_cost > 0 ? `+ $${item.shipping_cost} shipping` : 'Free shipping'}

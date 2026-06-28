@@ -96,7 +96,7 @@ export default function MyCourses() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Certificates</CardTitle>
-              <Award className="h-5 w-5 text-gold-600" />
+              <Award className="h-5 w-5 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-navy-900">{stats.certificates}</div>

@@ -64,7 +64,7 @@ export default function CategoryHubPage() {
         </div>
 
         {hub.average_sold_price && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-green-700">${hub.average_sold_price?.toFixed(0)}</div>
               <div className="text-sm text-green-600">Avg Sold Price</div>

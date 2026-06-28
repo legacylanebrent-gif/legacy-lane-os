@@ -275,7 +275,7 @@ export default function CollectorDealerDashboard() {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-4 border border-orange-100 text-center">
               <div className="text-3xl font-bold text-orange-700">{activeHuntCount}</div>
               <div className="text-xs text-slate-500 mt-1">Active Hunt Items</div>

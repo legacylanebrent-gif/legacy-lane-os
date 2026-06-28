@@ -321,7 +321,7 @@ function ResultScreen({ results, onRetake }) {
         <p className={`text-2xl font-bold ${categoryColor}`}>{results.leakCategory}</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
           <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Per Sale</p>
           <p className="text-xl font-bold text-red-600">{results.estimatedLeakPerSale}</p>

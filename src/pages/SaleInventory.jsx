@@ -286,7 +286,7 @@ export default function SaleInventory() {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gold-600">${item.price?.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-orange-600">${item.price?.toLocaleString()}</p>
                       <p className="text-xs text-slate-500 mt-1">Qty: {item.quantity}</p>
                       {item.sku && <p className="text-xs text-slate-500">SKU: {item.sku}</p>}
                     </div>

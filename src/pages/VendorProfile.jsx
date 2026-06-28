@@ -191,7 +191,7 @@ export default function VendorProfile() {
 
                 {/* Stats — hidden until data is populated */}
                 {false && (
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">{vendorData.rating || 'N/A'}</div>
                     <div className="text-sm text-slate-600 flex items-center justify-center gap-1">

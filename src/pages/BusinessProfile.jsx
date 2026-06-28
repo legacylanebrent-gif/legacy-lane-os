@@ -246,7 +246,7 @@ export default function BusinessProfile() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-900">{currentSales.length + pastSales.length}</div>
                     <div className="text-sm text-slate-600">Total Sales</div>

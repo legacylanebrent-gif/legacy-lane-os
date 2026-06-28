@@ -90,7 +90,7 @@ export default function PriceGuidePage() {
         </div>
 
         {/* Price Summary */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center shadow-sm">
             <div className="text-2xl font-bold text-green-700">
               {knowledge.average_value ? `$${knowledge.average_value?.toFixed(0)}` : 'N/A'}
@@ -115,7 +115,7 @@ export default function PriceGuidePage() {
         {demand && (
           <div className="bg-white border rounded-2xl p-5 mb-8">
             <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-orange-500" /> Buyer Demand</h2>
-            <div className="grid grid-cols-4 gap-3 text-center text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-sm">
               <div><div className="text-xl font-bold text-slate-800">{demand.watch_count}</div><div className="text-slate-500">Watching</div></div>
               <div><div className="text-xl font-bold text-slate-800">{demand.wanted_count}</div><div className="text-slate-500">Wanted</div></div>
               <div><div className="text-xl font-bold text-slate-800">{demand.active_inventory_count}</div><div className="text-slate-500">Available</div></div>

@@ -173,7 +173,7 @@ export default function Leads() {
           {/* Filters + Search */}
           <div className="flex flex-col md:flex-row gap-3 items-center">
             <Tabs value={filter} onValueChange={setFilter}>
-              <TabsList className="grid grid-cols-3 w-full md:w-auto">
+              <TabsList className="grid grid-cols-2 sm:grid-cols-3 w-full md:w-auto">
                 <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
                 <TabsTrigger value="converted">Converted ({convertedCount})</TabsTrigger>
                 <TabsTrigger value="all">All ({leads.length})</TabsTrigger>

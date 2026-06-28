@@ -124,7 +124,7 @@ export default function CourseLearning() {
             </Button>
 
             {enrollment?.completed && (
-              <Badge className="bg-gold-600">
+              <Badge className="bg-orange-600">
                 <Award className="w-4 h-4 mr-1" />
                 Course Completed
               </Badge>
@@ -163,7 +163,7 @@ export default function CourseLearning() {
                       }}
                       className={`w-full text-left p-3 rounded-lg transition-colors ${
                         isCurrent
-                          ? 'bg-gold-100 border-2 border-gold-500'
+                          ? 'bg-orange-100 border-2 border-orange-500'
                           : 'hover:bg-slate-50 border border-transparent'
                       }`}
                     >
