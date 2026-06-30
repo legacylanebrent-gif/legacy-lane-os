@@ -27,7 +27,7 @@ export default function ItemsHub() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader hideAuth />
+      <UniversalHeader />
       <SEBreadcrumb crumbs={[{ label: 'Item Value Guides' }]} />
 
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4 text-center">

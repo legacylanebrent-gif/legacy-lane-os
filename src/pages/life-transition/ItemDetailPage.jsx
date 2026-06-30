@@ -26,7 +26,7 @@ export default function ItemDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader hideAuth />
+      <UniversalHeader />
       <SEBreadcrumb crumbs={[{ label: 'Item Guides', href: '/items' }, { label: item.item_name }]} />
 
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">

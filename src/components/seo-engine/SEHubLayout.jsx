@@ -44,7 +44,7 @@ export default function SEHubLayout({
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader hideAuth />
+      <UniversalHeader />
       <SEBreadcrumb crumbs={breadcrumbs} />
 
       {/* Hero */}

@@ -308,7 +308,7 @@ export default function EstateSettlementPlanner() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader hideAuth />
+      <UniversalHeader />
       <SEBreadcrumb crumbs={[{ label: 'Estate Settlement Planner' }]} />
 
       {/* Hero */}
