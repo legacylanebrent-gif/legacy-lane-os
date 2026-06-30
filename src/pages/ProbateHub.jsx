@@ -47,7 +47,7 @@ export default function ProbateHub() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader />
+      <UniversalHeader hideAuth />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-16 px-4 text-center">
@@ -61,12 +61,12 @@ export default function ProbateHub() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a href="#find-your-state">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-8">
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8">
               Find Your State Guide
             </Button>
           </a>
           <a href="#get-help">
-            <Button variant="outline" className="border-white text-white hover:bg-white/10 px-8">
+            <Button className="border border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8">
               Get Free Help
             </Button>
           </a>
@@ -136,7 +136,7 @@ export default function ProbateHub() {
           <h2 className="text-3xl font-serif font-bold mb-3">Free Probate & Estate Checklist</h2>
           <p className="text-slate-300 mb-6">Download our 12-step checklist covering everything from death certificates to closing the estate.</p>
           <Link to="/probate-checklist">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-10">
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-10">
               Get the Free Checklist
             </Button>
           </Link>

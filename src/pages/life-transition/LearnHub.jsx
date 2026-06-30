@@ -42,7 +42,7 @@ export default function LearnHub() {
     if (!article) return <div className="min-h-screen flex items-center justify-center text-slate-500">Article not found.</div>;
     return (
       <div className="min-h-screen bg-white">
-        <UniversalHeader />
+        <UniversalHeader hideAuth />
         <SEBreadcrumb crumbs={[{ label: 'Learn', href: '/learn' }, { label: article.title }]} />
         <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">
           <div className="max-w-3xl mx-auto">
@@ -82,7 +82,7 @@ export default function LearnHub() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader />
+      <UniversalHeader hideAuth />
       <SEBreadcrumb crumbs={[{ label: 'Estate Sale University' }]} />
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4 text-center">
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-3">Estate Sale University</h1>

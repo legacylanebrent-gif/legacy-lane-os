@@ -56,7 +56,7 @@ export default function ProviderDirectoryPage({ directoryType: directoryTypeProp
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader />
+      <UniversalHeader hideAuth />
       <SEBreadcrumb crumbs={crumbs} />
 
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">

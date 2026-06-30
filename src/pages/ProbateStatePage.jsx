@@ -43,7 +43,7 @@ export default function ProbateStatePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader />
+      <UniversalHeader hideAuth />
 
       {/* Breadcrumb */}
       <div className="bg-slate-100 px-4 py-2 text-sm text-slate-600">
@@ -146,7 +146,7 @@ export default function ProbateStatePage() {
               </p>
             )}
             <Link to="/probate#get-help">
-              <Button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white">Find an Estate Sale Company in {stateName}</Button>
+              <Button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white">Find an Estate Sale Company in {stateName}</Button>
             </Link>
           </CardContent>
         </Card>

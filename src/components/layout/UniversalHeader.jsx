@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function UniversalHeader({ user, isAuthenticated }) {
+export default function UniversalHeader({ user, isAuthenticated, hideAuth = false }) {
   // Hide the universal header inside the mobile app shell — it has its own header
   if (typeof window !== 'undefined' && window.location.pathname.startsWith('/mobile')) {
     return null;
@@ -48,7 +48,7 @@ export default function UniversalHeader({ user, isAuthenticated }) {
 
           {/* Right Side - User Options */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {isAuthenticated && user ? (
+            {isAuthenticated && user && !hideAuth ? (
               <>
                 <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
                   <Home className="w-5 h-5" />
@@ -206,22 +206,26 @@ export default function UniversalHeader({ user, isAuthenticated }) {
                 <Link to={createPageUrl('EstateSaleFinder')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Search Estate Sales">
                   <Search className="w-5 h-5" />
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="text-white hover:text-orange-400 hover:bg-orange-500/20 text-sm"
-                >
-                  <LogIn className="w-4 h-4 mr-1" />
-                  Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-3"
-                >
-                  Get Started
-                </Button>
+                {!hideAuth && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                      className="text-white hover:text-orange-400 hover:bg-orange-500/20 text-sm"
+                    >
+                      <LogIn className="w-4 h-4 mr-1" />
+                      Sign In
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-3"
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </>
             )}
           </div>

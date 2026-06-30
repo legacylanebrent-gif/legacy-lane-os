@@ -52,7 +52,7 @@ export default function LifeEventCountyPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UniversalHeader />
+      <UniversalHeader hideAuth />
       <SEBreadcrumb crumbs={[
         { label: eventLabel, href: `/${lifeEventSlug}` },
         { label: stateName, href: `/${lifeEventSlug}/${stateSlug}` },
