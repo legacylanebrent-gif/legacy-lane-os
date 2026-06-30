@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import SharedFooter from '@/components/layout/SharedFooter';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-import SEBreadcrumb from './SEBreadcrumb';
 import SEDisclaimer from './SEDisclaimer';
 import SELeadCTA from './SELeadCTA';
 import SEStateSelector from './SEStateSelector';
@@ -45,7 +44,6 @@ export default function SEHubLayout({
   return (
     <div className="min-h-screen bg-white">
       <UniversalHeader />
-      <SEBreadcrumb crumbs={breadcrumbs} />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-14 px-4">
