@@ -50,6 +50,80 @@ Deno.serve(async (req) => {
       .replace('estate_cleanout', 'estate_sale')
       .replace('moving_sale', 'general');
 
+    const TOPIC_CONFIG = {
+      probate: {
+        searchBullets: `- Current small estate threshold (dollar amount) for ${state}
+- Creditor claim period length in ${state}
+- Whether ${state} has a state estate tax or inheritance tax, and the threshold
+- The probate court system name and structure in ${state}
+- Any state-specific homestead protections
+- Executor compensation rules in ${state} (statutory formula vs reasonable)
+- Whether court approval is required to sell real estate in probate`,
+        quickFacts: {
+          "Small Estate Threshold": "$X (confirm current amount with court)",
+          "Creditor Claim Period": "X months",
+          "State Estate Tax": "Yes/No — threshold if applicable",
+          "Probate Court": "Name of court system",
+          "Real Estate Sale Court Approval": "Required/Not required",
+          "Executor Compensation": "Statutory/Reasonable"
+        },
+        titleExample: `Probate in ${state}: Process, Timeline & Costs`,
+        resourceExample: `${state} Probate Court`,
+      },
+      'inherited-property': {
+        searchBullets: `- Property tax reassessment rules on inherited property in ${state}
+- Whether ${state} has state estate or inheritance tax, and the threshold
+- Whether transfer-on-death (TOD) deeds are available in ${state}
+- Any property tax protections/exemptions for family transfers in ${state}
+- State-specific homestead protections that apply to inherited property
+- Stepped-up basis and capital gains rules specific to ${state}`,
+        quickFacts: {
+          "Property Tax Reassessment": "Yes/No on inheritance",
+          "State Estate/Inheritance Tax": "Yes/No — threshold if applicable",
+          "Transfer-on-Death Deeds": "Available/Not available",
+          "Family Transfer Exemption": "Yes/No — details",
+          "Homestead Protection": "Yes/No — details",
+          "Capital Gains on Inherited Property": "Stepped-up basis applies"
+        },
+        titleExample: `Inheriting Property in ${state}: Taxes, Laws & Options`,
+        resourceExample: `${state} Property Tax Assessor`,
+      },
+      'senior-downsizing': {
+        searchBullets: `- Property tax relief programs for seniors in ${state} (freeze, deferral, exemptions)
+- Capital gains exclusion rules for primary residence sales in ${state}
+- Senior housing market characteristics in ${state}
+- State programs that help seniors with housing transitions in ${state}
+- Property tax circuit breaker programs in ${state}`,
+        quickFacts: {
+          "Senior Property Tax Relief": "Freeze/Deferral/Exemption — details",
+          "Capital Gains Exclusion": "$250K/$500K for primary residence",
+          "Property Tax Circuit Breaker": "Yes/No — details",
+          "Senior Housing Market": "State-specific characteristics",
+          "State Transition Programs": "Available/Not available"
+        },
+        titleExample: `Senior Downsizing in ${state}: Taxes, Programs & Options`,
+        resourceExample: `${state} Department of Aging`,
+      },
+      'divorce-property-sale': {
+        searchBullets: `- Whether ${state} is community property or equitable distribution
+- How marital vs separate property is determined in ${state}
+- Capital gains exclusion rules for divorcing couples in ${state}
+- State-specific divorce property division laws
+- Whether ${state} requires court approval to sell marital home during divorce`,
+        quickFacts: {
+          "Property Division System": "Community Property / Equitable Distribution",
+          "Marital vs Separate Property": "State-specific rules",
+          "Court Approval for Sale": "Required/Not required",
+          "Capital Gains Exclusion": "$250K/$500K — special divorce rules",
+          "Spousal Buyout Rules": "State-specific"
+        },
+        titleExample: `Divorce Property Sale in ${state}: Laws & Process`,
+        resourceExample: `${state} Family Law Resources`,
+      },
+    };
+
+    const topicConfig = TOPIC_CONFIG[guide_type] || TOPIC_CONFIG.probate;
+
     const prompt = `Research and create a state-specific supplement for a ${guide_type} guide page for EstateSalen.com.
 
 State: ${state}
@@ -60,34 +134,19 @@ ${guideFocus}
 IMPORTANT: This is a STATE-SPECIFIC supplement that will appear alongside general national content. Do NOT repeat general information that applies to all states. Focus ONLY on what is different, unique, or specific to ${state}.
 
 Use web search to find and verify:
-- Current small estate threshold (dollar amount) for ${state}
-- Creditor claim period length in ${state}
-- Whether ${state} has a state estate tax or inheritance tax, and the threshold
-- Property tax reassessment rules on inherited property in ${state}
-- Whether transfer-on-death deeds are available in ${state}
-- The probate court system name and structure in ${state}
-- Any state-specific homestead protections
-- Executor compensation rules in ${state} (statutory formula vs reasonable)
-- Whether court approval is required to sell real estate in probate
+${topicConfig.searchBullets}
 
 Return a JSON object with these exact keys:
 {
-  "title": "H1 title including state name and guide topic (e.g., 'Probate in ${state}: Process, Timeline & Costs')",
+  "title": "H1 title including state name and guide topic (e.g., '${topicConfig.titleExample}')",
   "seo_title": "SEO title 55-60 chars including state name",
   "seo_description": "Meta description 150-160 chars mentioning ${state} specifically",
   "intro_content": "2-3 sentence intro specifically about ${state}. Mention state-specific details, not generic content.",
-  "main_content": "400-600 word HTML section focused on ${state}-specific differences. Use <h2>, <h3>, <p>, <ul>. Include verified state-specific figures with a note to confirm with local court. Do NOT repeat general probate/process info — only state-specific differences.",
-  "quick_facts_json": {
-    "Small Estate Threshold": "$X (confirm current amount with court)",
-    "Creditor Claim Period": "X months",
-    "State Estate Tax": "Yes/No — threshold if applicable",
-    "Probate Court": "Name of court system",
-    "Real Estate Sale Court Approval": "Required/Not required",
-    "Executor Compensation": "Statutory/Reasonable"
-  },
+  "main_content": "400-600 word HTML section focused on ${state}-specific differences. Use <h2>, <h3>, <p>, <ul>. Include verified state-specific figures with a note to confirm with local court or attorney. Do NOT repeat general info — only state-specific differences.",
+  "quick_facts_json": ${JSON.stringify(topicConfig.quickFacts, null, 2)},
   "official_resource_links_json": [
-    {"label": "${state} Probate Court", "url": "https://..."},
-    {"label": "${state} State Bar - Estate Planning", "url": "https://..."}
+    {"label": "${topicConfig.resourceExample}", "url": "https://..."},
+    {"label": "${state} State Resources", "url": "https://..."}
   ],
   "faq_json": [
     {"question": "state-specific question", "answer": "state-specific answer"},
