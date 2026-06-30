@@ -99,8 +99,11 @@ export default function GuideAIBot({ guideContext }) {
                   <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mb-3">
                     <MessageCircle className="w-6 h-6 text-orange-600" />
                   </div>
-                  <p className="text-slate-700 font-semibold text-sm mb-1">Ask me anything about</p>
-                  <p className="text-slate-500 text-xs mb-4 px-4">{guideContext.title}</p>
+                  <p className="text-slate-800 font-bold text-sm mb-1">Your AI Guide</p>
+                  <p className="text-slate-500 text-xs mb-4 px-4 leading-relaxed">
+                    Get instant answers about{' '}
+                    <span className="font-semibold text-slate-700">{guideContext.title}</span>
+                  </p>
                   <div className="space-y-2">
                     {quickPrompts.map((q, i) => (
                       <button

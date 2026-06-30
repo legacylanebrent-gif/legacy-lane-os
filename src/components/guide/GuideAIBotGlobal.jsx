@@ -24,6 +24,48 @@ const GUIDE_PREFIXES = [
   '/probate-realtors',
 ];
 
+const SLUG_LABELS = {
+  'probate': 'Probate',
+  'pre-probate': 'Pre-Probate Planning',
+  'inherited-property': 'Inherited Property',
+  'senior-downsizing': 'Senior Downsizing',
+  'assisted-living-transition': 'Assisted Living Transition',
+  'divorce-property-sale': 'Divorce Property Sale',
+  'foreclosure-cleanout': 'Foreclosure Cleanout',
+  'estate-cleanout': 'Estate Cleanout',
+  'executor-guide': 'Executor Guide',
+  'trustee-guide': 'Trustee Guide',
+  'heir-guide': 'Heir Guide',
+  'moving-sale': 'Moving Sale',
+  'items': 'Antique & Collectible Items',
+  'learn': 'Estate Sale Learning Hub',
+  'estate-checklist': 'Estate Checklist',
+  'probate-checklist': 'Probate Checklist',
+  'estate-settlement-planner': 'Estate Settlement Planner',
+  'estate-sale-companies': 'Estate Sale Companies',
+  'probate-realtors': 'Probate Realtors',
+};
+
+function prettyName(slug) {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function deriveTopicFromPath(path) {
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length === 0) return null;
+  const baseLabel = SLUG_LABELS[segments[0]];
+  if (!baseLabel) return null;
+  const stateSlug = segments[1];
+  const countySlug = segments[2];
+  if (stateSlug && countySlug) {
+    return `${baseLabel} in ${prettyName(countySlug)}, ${prettyName(stateSlug)}`;
+  }
+  if (stateSlug) {
+    return `${baseLabel} in ${prettyName(stateSlug)}`;
+  }
+  return baseLabel;
+}
+
 export default function GuideAIBotGlobal() {
   const location = useLocation();
   const [guideContext, setGuideContext] = useState(null);
@@ -42,8 +84,10 @@ export default function GuideAIBotGlobal() {
     // Delay to allow page content (including dynamically loaded data) to render
     const timer = setTimeout(() => {
       const h1 = document.querySelector('h1');
+      const pathTopic = deriveTopicFromPath(path);
       const title =
         h1?.textContent?.trim() ||
+        pathTopic ||
         document.title.replace(/\s*[-|]\s*EstateSalen.*$/i, '').trim() ||
         'this guide';
 
