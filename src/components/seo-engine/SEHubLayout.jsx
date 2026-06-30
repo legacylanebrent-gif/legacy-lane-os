@@ -7,7 +7,6 @@ import UniversalHeader from '@/components/layout/UniversalHeader';
 import SEDisclaimer from './SEDisclaimer';
 import SELeadCTA from './SELeadCTA';
 import SEStateSelector from './SEStateSelector';
-import GuideAIBot from '@/components/guide/GuideAIBot';
 
 /**
  * Reusable hub layout for all life event landing pages.
@@ -153,7 +152,6 @@ export default function SEHubLayout({
 
       </div>
       <SharedFooter />
-      <GuideAIBot guideContext={{ title, subtitle, intro }} />
     </div>
   );
 }

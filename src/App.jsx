@@ -19,6 +19,7 @@ import MarketplaceItemDetail from './pages/MarketplaceItemDetail';
 import ScanAndCart from './pages/ScanAndCart';
 import CheckoutStation from './pages/CheckoutStation';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import GuideAIBotGlobal from '@/components/guide/GuideAIBotGlobal';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import SalePipeline from './pages/SalePipeline';
 import ReferralOutreach from './pages/ReferralOutreach';
@@ -455,6 +456,7 @@ function App() {
             <ScrollToTop />
             <NavigationTracker />
             <AuthenticatedApp />
+            <GuideAIBotGlobal />
           </ErrorBoundary>
         </Router>
         <Toaster />
