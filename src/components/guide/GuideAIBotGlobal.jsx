@@ -83,17 +83,27 @@ export default function GuideAIBotGlobal() {
 
     // Delay to allow page content (including dynamically loaded data) to render
     const timer = setTimeout(() => {
-      const h1 = document.querySelector('h1');
       const pathTopic = deriveTopicFromPath(path);
+
+      // Find the first h1 that is NOT part of the site header and does not
+      // contain the site name — header logos/nav can pollute the result.
+      const allH1s = Array.from(document.querySelectorAll('h1'));
+      const contentH1 = allH1s.find(el => {
+        const txt = el.textContent?.trim() || '';
+        if (!txt) return false;
+        if (/estatesalen/i.test(txt)) return false;
+        if (el.closest('header')) return false;
+        return true;
+      });
+
       const title =
-        h1?.textContent?.trim() ||
+        contentH1?.textContent?.trim() ||
         pathTopic ||
-        document.title.replace(/\s*[-|]\s*EstateSalen.*$/i, '').trim() ||
         'this guide';
 
       let intro = '';
-      if (h1) {
-        const section = h1.closest('section');
+      if (contentH1) {
+        const section = contentH1.closest('section');
         const paragraphs = section?.querySelectorAll('p');
         if (paragraphs && paragraphs.length > 0) {
           intro = paragraphs[0].textContent.trim();
@@ -101,7 +111,7 @@ export default function GuideAIBotGlobal() {
       }
 
       setGuideContext({ title, subtitle: '', intro });
-    }, 600);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [location.pathname]);
