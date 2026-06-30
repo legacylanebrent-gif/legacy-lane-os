@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -21,11 +21,33 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function UniversalHeader({ user, isAuthenticated }) {
+export default function UniversalHeader({ user: userProp, isAuthenticated: isAuthProp }) {
+  // Self-fetch auth state when props aren't passed (e.g. on public SEO/guide pages)
+  const [fetchedUser, setFetchedUser] = useState(null);
+  const [fetchedAuth, setFetchedAuth] = useState(false);
+  const propsProvided = userProp !== undefined || isAuthProp !== undefined;
+  const user = propsProvided ? userProp : fetchedUser;
+  const isAuthenticated = propsProvided ? isAuthProp : fetchedAuth;
+
+  useEffect(() => {
+    if (propsProvided) return;
+    let cancelled = false;
+    base44.auth.isAuthenticated().then(authed => {
+      if (cancelled) return;
+      if (authed) {
+        base44.auth.me()
+          .then(u => { if (!cancelled) { setFetchedUser(u); setFetchedAuth(true); } })
+          .catch(() => { if (!cancelled) setFetchedAuth(false); });
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [propsProvided]);
+
   // Hide the universal header inside the mobile app shell — it has its own header
   if (typeof window !== 'undefined' && window.location.pathname.startsWith('/mobile')) {
     return null;
   }
+
   const userInitials = user?.full_name
     ?.split(' ')
     .map(n => n[0])
