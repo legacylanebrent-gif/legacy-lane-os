@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import SharedFooter from '@/components/layout/SharedFooter';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import { formatPhone } from '@/utils/formatPhone';
-import SEBreadcrumb from '@/components/seo-engine/SEBreadcrumb';
 import SEDisclaimer from '@/components/seo-engine/SEDisclaimer';
 import SELeadCTA from '@/components/seo-engine/SELeadCTA';
 import SEStateSelector from '@/components/seo-engine/SEStateSelector';
@@ -48,16 +47,9 @@ export default function ProviderDirectoryPage({ directoryType: directoryTypeProp
       .then(results => { setProviders(results); setLoading(false); });
   }, [stateSlug, countySlug, config.providerType]);
 
-  const crumbs = [
-    { label: config.label, href: `/${directoryType}` },
-    ...(stateSlug ? [{ label: stateName, href: countySlug ? `/${directoryType}/${stateSlug}` : undefined }] : []),
-    ...(countySlug ? [{ label: countyName }] : []),
-  ];
-
   return (
     <div className="min-h-screen bg-white">
       <UniversalHeader />
-      <SEBreadcrumb crumbs={crumbs} />
 
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">
         <div className="max-w-4xl mx-auto">

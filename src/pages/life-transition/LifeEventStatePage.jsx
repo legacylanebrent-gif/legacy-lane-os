@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import SharedFooter from '@/components/layout/SharedFooter';
 import UniversalHeader from '@/components/layout/UniversalHeader';
-import SEBreadcrumb from '@/components/seo-engine/SEBreadcrumb';
 import SEDisclaimer from '@/components/seo-engine/SEDisclaimer';
 import SELeadCTA from '@/components/seo-engine/SELeadCTA';
 import { ChevronRight, ExternalLink, MapPin } from 'lucide-react';
@@ -74,10 +73,6 @@ export default function LifeEventStatePage() {
   return (
     <div className="min-h-screen bg-white">
       <UniversalHeader />
-      <SEBreadcrumb crumbs={[
-        { label: eventLabel, href: `/${lifeEventSlug}` },
-        { label: stateName }
-      ]} />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">

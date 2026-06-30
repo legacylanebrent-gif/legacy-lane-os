@@ -45,15 +45,6 @@ export default function ProbateStatePage() {
     <div className="min-h-screen bg-white">
       <UniversalHeader />
 
-      {/* Breadcrumb */}
-      <div className="bg-slate-100 px-4 py-2 text-sm text-slate-600">
-        <div className="max-w-5xl mx-auto flex items-center gap-1">
-          <Link to="/probate" className="hover:text-amber-600">Probate Hub</Link>
-          <ChevronRight className="w-3 h-3" />
-          <span>{stateName}</span>
-        </div>
-      </div>
-
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-12 px-4">
         <div className="max-w-5xl mx-auto">
