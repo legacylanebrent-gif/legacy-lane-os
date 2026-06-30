@@ -103,25 +103,21 @@ Return a JSON object with these exact keys:
 
 CRITICAL: Only include facts you can verify through web search. For anything you cannot verify, use "Confirm with your local court or licensed attorney" as the value. Never invent specific dollar amounts, deadlines, or legal requirements.`;
 
-    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
+    const llmText = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: prompt + '\n\nReturn ONLY a valid JSON object. No markdown, no code fences, no text before or after. Start with { and end with }.',
       add_context_from_internet: true,
       model: 'gemini_3_flash',
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          seo_title: { type: 'string' },
-          seo_description: { type: 'string' },
-          intro_content: { type: 'string' },
-          main_content: { type: 'string' },
-          quick_facts_json: { type: 'object' },
-          official_resource_links_json: { type: 'array', items: { type: 'object' } },
-          faq_json: { type: 'array', items: { type: 'object' } },
-          schema_json: { type: 'object' },
-        },
-      },
     });
+
+    // Parse the JSON text response — avoids structured schema stripping nested properties
+    let result;
+    try {
+      const cleaned = llmText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      result = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('JSON parse failed, raw response:', llmText.substring(0, 500));
+      throw new Error('Failed to parse LLM response as JSON');
+    }
 
     // Get state abbreviation
     const STATE_ABBRS = {
