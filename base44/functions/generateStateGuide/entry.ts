@@ -120,6 +120,136 @@ Deno.serve(async (req) => {
         titleExample: `Divorce Property Sale in ${state}: Laws & Process`,
         resourceExample: `${state} Family Law Resources`,
       },
+      'executor-guide': {
+        searchBullets: `- Executor compensation rules in ${state} (statutory formula vs reasonable)
+- Whether court approval is required for key executor actions in ${state}
+- Required notices to beneficiaries and creditors in ${state}
+- Probate court system structure and name in ${state}
+- Executor bond requirements in ${state}
+- Whether ${state} allows independent administration (unsupervised probate)`,
+        quickFacts: {
+          "Executor Compensation": "Statutory/Reasonable — details",
+          "Court Approval for Actions": "Required/Not required for most actions",
+          "Beneficiary Notice Requirements": "State-specific rules",
+          "Probate Court System": "Name of court",
+          "Executor Bond": "Required/Waivable — details",
+          "Independent Administration": "Available/Not available"
+        },
+        titleExample: `Executor Guide for ${state}: Probate Duties & Laws`,
+        resourceExample: `${state} Probate Court`,
+      },
+      'trustee-guide': {
+        searchBullets: `- Whether ${state} has adopted the Uniform Trust Code
+- Trustee compensation rules in ${state}
+- Beneficiary notification requirements for trustees in ${state}
+- State estate or inheritance tax on trust assets in ${state}
+- Trustee duties and liability standards in ${state}`,
+        quickFacts: {
+          "Uniform Trust Code": "Adopted/Not adopted",
+          "Trustee Compensation": "Statutory/Reasonable — details",
+          "Beneficiary Notice": "Required/Not required — details",
+          "State Tax on Trust Assets": "Yes/No — details",
+          "Trustee Duty Standards": "State-specific"
+        },
+        titleExample: `Trustee Guide for ${state}: Trust Administration Laws`,
+        resourceExample: `${state} Probate Court`,
+      },
+      'heir-guide': {
+        searchBullets: `- Intestacy laws in ${state} (who inherits when there is no will)
+- Heirship determination process in ${state}
+- Small estate procedures available to heirs in ${state}
+- Whether ${state} has a state inheritance tax and the threshold
+- Spousal share rights under intestacy in ${state}`,
+        quickFacts: {
+          "Intestacy System": "State-specific inheritance order",
+          "Small Estate Procedure": "Available/Not available — threshold",
+          "Spousal Share": "State-specific rules",
+          "Inheritance Tax": "Yes/No — threshold if applicable",
+          "Heirship Determination": "State-specific process"
+        },
+        titleExample: `Heir Rights in ${state}: Inheritance Laws & Process`,
+        resourceExample: `${state} Probate Court`,
+      },
+      'pre-probate': {
+        searchBullets: `- What actions can be taken before probate is opened in ${state}
+- Small estate affidavit threshold in ${state}
+- Whether ${state} allows transfer-on-death deeds for real estate
+- Pre-probate early action items specific to ${state}
+- Whether ${state} has simplified probate procedures for small estates`,
+        quickFacts: {
+          "Small Estate Threshold": "$X (confirm current amount)",
+          "Transfer-on-Death Deeds": "Available/Not available",
+          "Simplified Probate": "Available/Not available",
+          "Pre-Probate Actions": "State-specific early steps",
+          "Small Estate Affidavit": "Available/Not available — threshold"
+        },
+        titleExample: `Pre-Probate Guide for ${state}: Early Actions & Options`,
+        resourceExample: `${state} Probate Court`,
+      },
+      'moving-sale': {
+        searchBullets: `- State-specific tax considerations for selling a home in ${state}
+- Housing market characteristics and trends in ${state}
+- State-specific moving and relocation resources in ${state}
+- Property tax implications of selling in ${state}
+- Capital gains exclusion rules for primary residence in ${state}`,
+        quickFacts: {
+          "Capital Gains Exclusion": "$250K/$500K for primary residence",
+          "Property Tax Implications": "State-specific",
+          "Housing Market": "State-specific characteristics",
+          "State Relocation Resources": "Available/Not available",
+          "Tax Considerations": "State-specific"
+        },
+        titleExample: `Moving Sale Guide for ${state}: Taxes, Market & Resources`,
+        resourceExample: `${state} Housing Resources`,
+      },
+      'assisted-living-transition': {
+        searchBullets: `- Medicaid eligibility rules for long-term care in ${state}
+- State programs that help seniors age in place or transition in ${state}
+- Property tax relief for seniors transitioning in ${state}
+- State-regulated assisted living facility requirements in ${state}
+- Veterans benefits for assisted living in ${state}`,
+        quickFacts: {
+          "Medicaid Long-Term Care": "State-specific eligibility",
+          "Aging in Place Programs": "Available/Not available",
+          "Senior Property Tax Relief": "State-specific",
+          "Assisted Living Regulation": "State-specific requirements",
+          "Veterans Benefits": "State-specific"
+        },
+        titleExample: `Assisted Living Transition in ${state}: Programs & Laws`,
+        resourceExample: `${state} Department of Aging`,
+      },
+      'estate-cleanout': {
+        searchBullets: `- Hazardous waste disposal regulations in ${state}
+- Local donation resources and charities in ${state}
+- State-specific environmental rules for disposing of electronics or chemicals in ${state}
+- Estate sale licensing requirements in ${state} if any
+- State-specific rules for disposing of medications and medical waste`,
+        quickFacts: {
+          "Hazardous Waste Rules": "State-specific regulations",
+          "Electronics Disposal": "State-specific e-waste rules",
+          "Donation Resources": "State-specific charities",
+          "Estate Sale Licensing": "Required/Not required",
+          "Medication Disposal": "State-specific rules"
+        },
+        titleExample: `Estate Cleanout Guide for ${state}: Disposal Laws & Resources`,
+        resourceExample: `${state} Environmental Resources`,
+      },
+      'foreclosure-cleanout': {
+        searchBullets: `- Whether ${state} is judicial or non-judicial foreclosure
+- Tenant rights during foreclosure in ${state}
+- Redemption period length in ${state}
+- Abandonment laws regarding personal property left behind in ${state}
+- Eviction process for foreclosed properties in ${state}`,
+        quickFacts: {
+          "Foreclosure Type": "Judicial/Non-judicial",
+          "Redemption Period": "State-specific length",
+          "Tenant Rights": "State-specific protections",
+          "Personal Property Abandonment": "State-specific rules",
+          "Eviction Process": "State-specific timeline"
+        },
+        titleExample: `Foreclosure Cleanout Guide for ${state}: Laws & Process`,
+        resourceExample: `${state} Housing Resources`,
+      },
     };
 
     const topicConfig = TOPIC_CONFIG[guide_type] || TOPIC_CONFIG.probate;
