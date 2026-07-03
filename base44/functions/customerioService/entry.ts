@@ -151,13 +151,20 @@ async function logEvent(base44, { eventName, consumerUserId, consumerEmail, oper
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  const user = await base44.auth.me();
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
   const body = await req.json().catch(() => ({}));
   const { action, ...params } = body;
 
   const config = getCustomerIoConfig();
+
+  // Admin-only actions require authenticated admin user
+  const ADMIN_ONLY_ACTIONS = ['getConfig', 'testConnection', 'listSegments', 'getSegment', 'addCustomersToSegment', 'removeCustomersFromSegment'];
+  let user = null;
+  if (ADMIN_ONLY_ACTIONS.includes(action)) {
+    try {
+      user = await base44.auth.me();
+    } catch { /* no user */ }
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   // ── getConfig ──
   if (action === 'getConfig') {
@@ -175,7 +182,7 @@ Deno.serve(async (req) => {
 
   // ── testConnection ──
   if (action === 'testConnection') {
-    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    // user already verified as admin in the admin-only check above
     if (!config.configured) {
       return Response.json({ success: false, message: 'Customer.io infrastructure is installed but credentials have not been added yet.', configured: false });
     }

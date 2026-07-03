@@ -3,9 +3,10 @@ import jwt from 'npm:jsonwebtoken@9.0.2';
 
 // ─────────────────────────────────────────────
 // wix-payments-webhook
-// Handles Wix Payments ORDER_APPROVED webhook.
-// When an operator purchases additional email profiles,
-// adds 1,000 to their OperatorEmailQuota.additional_purchased.
+// Handles Wix Payments webhooks:
+//   1. ORDER_APPROVED — additional email profiles purchase OR subscription upgrade
+//   2. SUBSCRIPTION_CANCELED — user/system ended subscription early
+//   3. SUBSCRIPTION_ENDED — subscription completed all billing cycles
 // ─────────────────────────────────────────────
 
 const PROFILES_PER_BLOCK = 1000;
@@ -33,7 +34,9 @@ Deno.serve(async (req) => {
     const event = JSON.parse(rawPayload.data);
     const eventData = JSON.parse(event.data);
 
-    // Step 3: Route by event type
+    const base44 = createClientFromRequest(req);
+
+    // ── ORDER APPROVED ──────────────────────────────────────────
     if (event.eventType === 'wix.ecom.v1.order_approved') {
       const order = eventData.actionEvent?.body?.order;
       if (!order) {
@@ -47,31 +50,231 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      // Find the operator quota record with this pending checkout ID
-      const base44 = createClientFromRequest(req);
+      // Extract subscription IDs from line items (for future cancel/expire matching)
+      const subscriptionIds = [];
+      for (const lineItem of (order.lineItems || [])) {
+        if (lineItem.subscriptionInfo?.id) {
+          subscriptionIds.push(lineItem.subscriptionInfo.id);
+        }
+      }
+
+      // ── Try 1: Additional email profiles purchase ──
       const quotaRecords = await base44.asServiceRole.entities.OperatorEmailQuota.filter({
         pending_checkout_id: checkoutId,
       });
 
-      if (quotaRecords.length === 0) {
-        console.log(`No quota record found for checkoutId: ${checkoutId}`);
+      if (quotaRecords.length > 0) {
+        const quota = quotaRecords[0];
+        await base44.asServiceRole.entities.OperatorEmailQuota.update(quota.id, {
+          additional_purchased: (quota.additional_purchased || 0) + PROFILES_PER_BLOCK,
+          pending_checkout_id: null,
+          last_purchase_at: new Date().toISOString(),
+        });
+        console.log(`[webhook] Added ${PROFILES_PER_BLOCK} profiles to operator ${quota.operator_id}`);
+
+        // Fire CustomerIO event
+        try {
+          await base44.asServiceRole.functions.invoke('customerioService', {
+            action: 'trackEvent',
+            userId: quota.operator_id,
+            eventName: 'purchase.completed',
+            data: { product: 'additional_profiles', quantity: PROFILES_PER_BLOCK, checkout_id: checkoutId },
+          });
+        } catch (e) {
+          console.error('[webhook] CustomerIO track failed:', e.message);
+        }
+
         return new Response('OK', { status: 200 });
       }
 
-      const quota = quotaRecords[0];
-
-      // Add 1,000 additional profiles and clear the pending checkout
-      await base44.asServiceRole.entities.OperatorEmailQuota.update(quota.id, {
-        additional_purchased: quota.additional_purchased + PROFILES_PER_BLOCK,
-        pending_checkout_id: null,
-        last_purchase_at: new Date().toISOString(),
+      // ── Try 2: Subscription upgrade ──
+      const users = await base44.asServiceRole.entities.User.filter({
+        pending_checkout_id: checkoutId,
       });
 
-      console.log(`Added ${PROFILES_PER_BLOCK} profiles to operator ${quota.operator_id}`);
+      if (users.length > 0) {
+        const user = users[0];
+        const pendingUpgrade = user.pending_upgrade || {};
+
+        // Cancel any existing active subscription
+        const existingSubs = await base44.asServiceRole.entities.Subscription.filter({
+          user_id: user.id,
+          status: 'active',
+        });
+        for (const oldSub of existingSubs) {
+          await base44.asServiceRole.entities.Subscription.update(oldSub.id, {
+            status: 'cancelled',
+            end_date: new Date().toISOString(),
+          });
+        }
+
+        // Create new active subscription
+        const now = new Date();
+        const renewalDate = new Date(now);
+        renewalDate.setMonth(renewalDate.getMonth() + 1);
+
+        await base44.asServiceRole.entities.Subscription.create({
+          user_id: user.id,
+          plan_type: pendingUpgrade.target_account_type || 'operator_pro',
+          tier: pendingUpgrade.target_tier || 'pro',
+          price: pendingUpgrade.new_price || 0,
+          billing_period: 'monthly',
+          status: 'active',
+          start_date: now.toISOString(),
+          renewal_date: renewalDate.toISOString(),
+          wix_subscription_id: subscriptionIds[0] || null,
+          wix_checkout_id: checkoutId,
+          package_name: pendingUpgrade.target_package_name || '',
+          account_type: pendingUpgrade.target_account_type || '',
+        });
+
+        // Update user tier and clear pending state
+        await base44.asServiceRole.entities.User.update(user.id, {
+          primary_account_type: pendingUpgrade.target_account_type || user.primary_account_type,
+          subscription_tier: pendingUpgrade.target_tier,
+          subscription_status: 'active',
+          pending_checkout_id: null,
+          pending_upgrade: null,
+        });
+
+        console.log(`[webhook] Activated subscription for user ${user.id}: tier=${pendingUpgrade.target_tier}, package=${pendingUpgrade.target_package_name}`);
+
+        // Fire CustomerIO events: identify + track
+        try {
+          await base44.asServiceRole.functions.invoke('customerioService', {
+            action: 'identifyConsumer',
+            profile: {
+              user_id: user.id,
+              email: user.email,
+              first_name: user.full_name?.split(' ')[0] || '',
+              last_name: user.full_name?.split(' ').slice(1).join(' ') || '',
+              role: pendingUpgrade.target_account_type || user.primary_account_type,
+              subscription_tier: pendingUpgrade.target_tier,
+              subscription_status: 'active',
+              source: 'subscription_upgrade',
+            },
+          });
+
+          await base44.asServiceRole.functions.invoke('customerioService', {
+            action: 'trackEvent',
+            userId: user.id,
+            email: user.email,
+            eventName: 'subscription.activated',
+            data: {
+              tier: pendingUpgrade.target_tier,
+              package_name: pendingUpgrade.target_package_name,
+              price: pendingUpgrade.new_price,
+              pro_rated_charge: pendingUpgrade.pro_rated_charge,
+            },
+          });
+        } catch (e) {
+          console.error('[webhook] CustomerIO sync failed:', e.message);
+        }
+
+        return new Response('OK', { status: 200 });
+      }
+
+      // No matching record found — could be a checkout we didn't create
+      console.log(`[webhook] No matching record found for checkoutId: ${checkoutId}`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── SUBSCRIPTION CANCELED ────────────────────────────────────
+    if (event.eventType === 'wix.ecom.subscription_contracts.v1.subscription_contract_canceled') {
+      const subscriptionContract = eventData.actionEvent?.body?.subscriptionContract;
+      if (!subscriptionContract) {
+        console.error('No subscriptionContract in cancel webhook');
+        return new Response('OK', { status: 200 });
+      }
+
+      const subscriptionId = subscriptionContract.id;
+      const subs = await base44.asServiceRole.entities.Subscription.filter({
+        wix_subscription_id: subscriptionId,
+      });
+
+      if (subs.length > 0) {
+        const sub = subs[0];
+        await base44.asServiceRole.entities.Subscription.update(sub.id, {
+          status: 'cancelled',
+          end_date: new Date().toISOString(),
+        });
+
+        await base44.asServiceRole.entities.User.update(sub.user_id, {
+          subscription_tier: null,
+          subscription_status: 'cancelled',
+        });
+
+        // Fire CustomerIO event
+        try {
+          const users = await base44.asServiceRole.entities.User.filter({ id: sub.user_id });
+          if (users[0]) {
+            await base44.asServiceRole.functions.invoke('customerioService', {
+              action: 'trackEvent',
+              userId: users[0].id,
+              email: users[0].email,
+              eventName: 'subscription.cancelled',
+              data: { reason: 'cancelled_by_system_or_user', previous_tier: sub.tier },
+            });
+          }
+        } catch (e) {
+          console.error('[webhook] CustomerIO track failed:', e.message);
+        }
+
+        console.log(`[webhook] Cancelled subscription ${subscriptionId} for user ${sub.user_id}`);
+      }
+
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── SUBSCRIPTION ENDED (completed all cycles) ──────────────
+    if (event.eventType === 'wix.ecom.subscription_contracts.v1.subscription_contract_expired') {
+      const subscriptionContract = eventData.actionEvent?.body?.subscriptionContract;
+      if (!subscriptionContract) {
+        console.error('No subscriptionContract in expire webhook');
+        return new Response('OK', { status: 200 });
+      }
+
+      const subscriptionId = subscriptionContract.id;
+      const subs = await base44.asServiceRole.entities.Subscription.filter({
+        wix_subscription_id: subscriptionId,
+      });
+
+      if (subs.length > 0) {
+        const sub = subs[0];
+        await base44.asServiceRole.entities.Subscription.update(sub.id, {
+          status: 'expired',
+          end_date: new Date().toISOString(),
+        });
+
+        await base44.asServiceRole.entities.User.update(sub.user_id, {
+          subscription_tier: null,
+          subscription_status: 'expired',
+        });
+
+        // Fire CustomerIO event
+        try {
+          const users = await base44.asServiceRole.entities.User.filter({ id: sub.user_id });
+          if (users[0]) {
+            await base44.asServiceRole.functions.invoke('customerioService', {
+              action: 'trackEvent',
+              userId: users[0].id,
+              email: users[0].email,
+              eventName: 'subscription.expired',
+              data: { previous_tier: sub.tier },
+            });
+          }
+        } catch (e) {
+          console.error('[webhook] CustomerIO track failed:', e.message);
+        }
+
+        console.log(`[webhook] Expired subscription ${subscriptionId} for user ${sub.user_id}`);
+      }
+
       return new Response('OK', { status: 200 });
     }
 
     // Unhandled event type — acknowledge anyway
+    console.log(`[webhook] Unhandled event type: ${event.eventType}`);
     return new Response('OK', { status: 200 });
   } catch (error) {
     console.error('wix-payments-webhook error:', error);

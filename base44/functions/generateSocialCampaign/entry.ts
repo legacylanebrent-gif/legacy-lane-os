@@ -1,41 +1,61 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-import OpenAI from 'npm:openai';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
+// ─────────────────────────────────────────────
+// generateSocialCampaign
+// Generates a complete social media campaign (10 posts) for an estate sale.
+//
+// Modes:
+//   1. Entity automation (EstateSale update → status upcoming/active)
+//      Payload: { event: {...}, data: { ...sale }, changed_fields: [...] }
+//   2. Direct call: { sale_id }
+// ─────────────────────────────────────────────
 
 Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
 
-  const { sale_id } = await req.json();
-  if (!sale_id) return Response.json({ error: 'sale_id required' }, { status: 400 });
+    // Support entity automation payload OR direct call
+    let sale = body?.data || null;
+    const saleId = body?.sale_id || sale?.id || body?.event?.entity_id;
 
-  const sale = await base44.asServiceRole.entities.EstateSale.get(sale_id);
-  if (!sale) return Response.json({ error: 'Sale not found' }, { status: 404 });
+    if (!sale && saleId) {
+      const found = await base44.asServiceRole.entities.EstateSale.filter({ id: saleId });
+      if (!found.length) return Response.json({ error: 'Sale not found' }, { status: 404 });
+      sale = found[0];
+    }
 
-  // Build sale context
-  const addr = sale.property_address || {};
-  const city = addr.city || 'the area';
-  const county = addr.county || city;
-  const state = addr.state || '';
-  const fullAddress = [addr.street, addr.city, addr.state, addr.zip].filter(Boolean).join(', ');
+    if (!sale) return Response.json({ error: 'sale_id or entity data required' }, { status: 400 });
 
-  // Determine sale start datetime
-  const firstDate = sale.sale_dates && sale.sale_dates.length > 0 ? sale.sale_dates[0] : null;
-  const lastDate = sale.sale_dates && sale.sale_dates.length > 0 ? sale.sale_dates[sale.sale_dates.length - 1] : null;
-  const saleStartDatetime = firstDate ? new Date(`${firstDate.date}T${firstDate.start_time || '09:00'}:00`) : null;
-  const saleEndDatetime = lastDate ? new Date(`${lastDate.date}T${lastDate.end_time || '17:00'}:00`) : null;
-  const addressRevealDatetime = saleStartDatetime ? new Date(saleStartDatetime.getTime() - 24 * 60 * 60 * 1000) : null;
+    // Only generate for published sales
+    if (!['upcoming', 'active'].includes(sale.status)) {
+      return Response.json({ skipped: true, reason: `status=${sale.status}` });
+    }
 
-  const now = new Date();
-  const hoursUntilSale = saleStartDatetime ? (saleStartDatetime - now) / 3600000 : 120;
+    const operatorId = sale.operator_id;
+    if (!operatorId) {
+      return Response.json({ error: 'Sale has no operator_id' }, { status: 400 });
+    }
 
-  const photoUrls = (sale.images || []).map(img => typeof img === 'string' ? img : img?.url).filter(Boolean).slice(0, 5);
-  const categories = (sale.categories || []).join(', ') || 'furniture, antiques, collectibles';
-  const featuredItems = (sale.featured_items || []).map(i => i.name || '').filter(Boolean).slice(0, 5).join(', ') || 'quality household items';
+    // Build sale context
+    const addr = sale.property_address || {};
+    const city = addr.city || 'the area';
+    const county = addr.county || city;
+    const state = addr.state || '';
+    const fullAddress = [addr.street, addr.city, addr.state, addr.zip].filter(Boolean).join(', ');
 
-  const systemPrompt = `You are the Legacy Lane OS Estate Sale Social Campaign Agent.
+    const firstDate = sale.sale_dates && sale.sale_dates.length > 0 ? sale.sale_dates[0] : null;
+    const lastDate = sale.sale_dates && sale.sale_dates.length > 0 ? sale.sale_dates[sale.sale_dates.length - 1] : null;
+    const saleStartDatetime = firstDate ? new Date(`${firstDate.date}T${firstDate.start_time || '09:00'}:00`) : null;
+    const saleEndDatetime = lastDate ? new Date(`${lastDate.date}T${lastDate.end_time || '17:00'}:00`) : null;
+    const addressRevealDatetime = saleStartDatetime ? new Date(saleStartDatetime.getTime() - 24 * 60 * 60 * 1000) : null;
+
+    const now = new Date();
+    const photoUrls = (sale.images || []).map(img => typeof img === 'string' ? img : img?.url).filter(Boolean).slice(0, 5);
+    const categories = (sale.categories || []).join(', ') || 'furniture, antiques, collectibles';
+    const featuredItems = (sale.featured_items || []).map(i => i.name || '').filter(Boolean).slice(0, 5).join(', ') || 'quality household items';
+
+    const systemPrompt = `You are the EstateSalen Social Campaign Agent.
 Your job is to create high-performing social media campaigns for Estate Sale Company Owners.
 You write posts designed to drive buyer turnout, create urgency, increase seller trust, and help the Estate Sale Company Owner look professional.
 
@@ -45,7 +65,7 @@ After the address reveal time, you MAY include the full address.
 
 Tone: Professional, exciting, urgent, trustworthy, local, clear.`;
 
-  const userPrompt = `Generate a complete estate sale social media campaign.
+    const userPrompt = `Generate a complete estate sale social media campaign.
 
 SALE DETAILS:
 Sale Title: ${sale.title}
@@ -102,58 +122,85 @@ Return ONLY valid JSON matching this structure:
   ]
 }`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
-    ],
-    response_format: { type: 'json_object' },
-    temperature: 0.8
-  });
-
-  const campaignData = JSON.parse(completion.choices[0].message.content);
-
-  // Save SocialCampaign record
-  const campaign = await base44.asServiceRole.entities.SocialCampaign.create({
-    operator_id: user.id,
-    sale_id: sale_id,
-    campaign_name: campaignData.campaign_name,
-    campaign_type: 'estate_sale_promotion',
-    address_visibility_rule: 'hidden_until_24hr',
-    status: 'generated',
-    generated_by: 'ai_agent',
-    sale_start_datetime: saleStartDatetime ? saleStartDatetime.toISOString() : null,
-    address_reveal_datetime: campaignData.address_reveal_datetime || (addressRevealDatetime ? addressRevealDatetime.toISOString() : null),
-    channels_selected: ['facebook', 'instagram'],
-    campaign_summary: campaignData.campaign_summary
-  });
-
-  // Save SocialPost records
-  const postRecords = [];
-  for (const post of (campaignData.posts || [])) {
-    const record = await base44.asServiceRole.entities.SocialPost.create({
-      campaign_id: campaign.id,
-      operator_id: user.id,
-      sale_id: sale_id,
-      post_type: post.post_type,
-      phase: post.phase,
-      headline: post.selected_headline,
-      headline_options: post.headline_options || [],
-      caption: post.caption,
-      image_prompt: post.image_prompt,
-      suggested_image_style: post.suggested_image_style,
-      address_allowed: post.address_allowed || false,
-      scheduled_datetime: post.scheduled_datetime,
-      channels: post.recommended_channels || ['facebook', 'instagram'],
-      approval_status: 'needs_review',
-      publish_status: 'not_published',
-      cta: post.cta,
-      audience_target: post.audience_target,
-      psychological_trigger: post.psychological_trigger
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: `${systemPrompt}\n\n${userPrompt}`,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          campaign_name: { type: 'string' },
+          campaign_summary: { type: 'string' },
+          address_reveal_datetime: { type: 'string' },
+          posts: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                post_type: { type: 'string' },
+                phase: { type: 'string' },
+                scheduled_datetime: { type: 'string' },
+                address_allowed: { type: 'boolean' },
+                headline_options: { type: 'array', items: { type: 'string' } },
+                selected_headline: { type: 'string' },
+                caption: { type: 'string' },
+                image_prompt: { type: 'string' },
+                suggested_image_style: { type: 'string' },
+                cta: { type: 'string' },
+                audience_target: { type: 'string' },
+                psychological_trigger: { type: 'string' },
+                recommended_channels: { type: 'array', items: { type: 'string' } },
+              },
+            },
+          },
+        },
+      },
     });
-    postRecords.push(record);
-  }
 
-  return Response.json({ success: true, campaign_id: campaign.id, post_count: postRecords.length });
+    const campaignData = result || {};
+
+    // Save SocialCampaign record
+    const campaign = await base44.asServiceRole.entities.SocialCampaign.create({
+      operator_id: operatorId,
+      sale_id: sale.id,
+      campaign_name: campaignData.campaign_name || `${sale.title} Campaign`,
+      campaign_type: 'estate_sale_promotion',
+      address_visibility_rule: 'hidden_until_24hr',
+      status: 'generated',
+      generated_by: 'ai_agent',
+      sale_start_datetime: saleStartDatetime ? saleStartDatetime.toISOString() : null,
+      address_reveal_datetime: campaignData.address_reveal_datetime || (addressRevealDatetime ? addressRevealDatetime.toISOString() : null),
+      channels_selected: ['facebook', 'instagram'],
+      campaign_summary: campaignData.campaign_summary || '',
+    });
+
+    // Save SocialPost records
+    let postCount = 0;
+    for (const post of (campaignData.posts || [])) {
+      await base44.asServiceRole.entities.SocialPost.create({
+        campaign_id: campaign.id,
+        operator_id: operatorId,
+        sale_id: sale.id,
+        post_type: post.post_type,
+        phase: post.phase,
+        headline: post.selected_headline,
+        headline_options: post.headline_options || [],
+        caption: post.caption,
+        image_prompt: post.image_prompt,
+        suggested_image_style: post.suggested_image_style,
+        address_allowed: post.address_allowed || false,
+        scheduled_datetime: post.scheduled_datetime,
+        channels: post.recommended_channels || ['facebook', 'instagram'],
+        approval_status: 'needs_review',
+        publish_status: 'not_published',
+        cta: post.cta,
+        audience_target: post.audience_target,
+        psychological_trigger: post.psychological_trigger,
+      });
+      postCount++;
+    }
+
+    return Response.json({ success: true, campaign_id: campaign.id, post_count: postCount });
+  } catch (error) {
+    console.error('generateSocialCampaign error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });

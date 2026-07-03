@@ -14,7 +14,6 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import OpenAI from 'npm:openai';
 
 function toSlug(str) {
   if (!str) return '';
@@ -27,7 +26,7 @@ function toSlug(str) {
     .replace(/^-+|-+$/g, '');
 }
 
-async function generateAISummary(openai, sale, topItems, categoryBreakdown, totalRevenue) {
+async function generateAISummary(base44, sale, topItems, categoryBreakdown, totalRevenue) {
   const topCategories = Object.entries(categoryBreakdown)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
@@ -50,14 +49,12 @@ Estate Sale Company Owner: ${sale.operator_name || 'Unknown'}
 Write in a factual, archival tone. Mention the location, types of items, and any notable pieces. 
 This will be indexed by search engines as a historical record.`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.4,
-    max_tokens: 300,
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt,
+    response_json_schema: { type: 'object', properties: { summary: { type: 'string' } } },
   });
 
-  return completion.choices[0].message.content.trim();
+  return (result && result.summary) ? result.summary : (typeof result === 'string' ? result : 'Estate sale recap summary unavailable.');
 }
 
 async function markSoldOnKnowledge(base44, itemPricings) {
@@ -121,7 +118,7 @@ Deno.serve(async (req) => {
 
     // Support: entity automation (data = EstateSale) OR direct { sale_id }
     const saleRecord = body?.data || null;
-    const saleId = body?.sale_id || saleRecord?.id;
+    const saleId = body?.sale_id || saleRecord?.id || body?.event?.entity_id;
 
     let sale = saleRecord;
     if (!sale && saleId) {
@@ -138,8 +135,6 @@ Deno.serve(async (req) => {
     if (sale.status !== 'completed') {
       return Response.json({ message: 'Skipped — sale is not completed', status: sale.status });
     }
-
-    const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
 
     // Load all pricing records for this sale
     const pricings = await base44.asServiceRole.entities.SaleItemPricing.filter({ sale_id: sale.id });
@@ -189,7 +184,7 @@ Deno.serve(async (req) => {
       .map(([cat]) => cat);
 
     // Generate AI summary
-    const aiSummary = await generateAISummary(openai, sale, topItems, categoryBreakdown, sale.actual_revenue);
+    const aiSummary = await generateAISummary(base44, sale, topItems, categoryBreakdown, sale.actual_revenue);
 
     // Build slug for this recap
     const city = sale.property_address?.city || '';

@@ -13,7 +13,65 @@
     "use_personal_phone_as_business": {
       "type": "boolean",
       "default": false,
-      "description": "When checked, falls back to the user's personal phone as the business number if no business phone is set."
+      "description": "When checked, falls back to the user's personal phone as business number if no business phone is set."
+    },
+    "pending_checkout_id": {
+      "type": "string",
+      "description": "Wix Payments checkout session ID for an in-progress subscription upgrade. Cleared when the webhook confirms payment."
+    },
+    "pending_upgrade": {
+      "type": "object",
+      "description": "Details of a pending subscription upgrade awaiting payment confirmation.",
+      "properties": {
+        "checkout_id": {
+          "type": "string"
+        },
+        "package_id": {
+          "type": "string"
+        },
+        "target_tier": {
+          "type": "string"
+        },
+        "target_account_type": {
+          "type": "string"
+        },
+        "target_package_name": {
+          "type": "string"
+        },
+        "pro_rated_charge": {
+          "type": "number"
+        },
+        "current_price": {
+          "type": "number"
+        },
+        "new_price": {
+          "type": "number"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "subscription_tier": {
+      "type": "string",
+      "description": "Current subscription tier (starter, growth, professional, elite)"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "expired",
+        "none"
+      ],
+      "default": "none",
+      "description": "Current subscription status"
+    },
+    "consumer_marketing_synced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this user has been synced to ConsumerMarketingProfile and Customer.io"
     }
   }
 }

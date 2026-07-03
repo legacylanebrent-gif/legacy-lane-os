@@ -205,6 +205,7 @@ Deno.serve(async (req) => {
       // Store pending upgrade on the user so the webhook can activate it
       try {
         await base44.auth.updateMe({
+          pending_checkout_id: checkoutId,
           pending_upgrade: {
             checkout_id: checkoutId,
             package_id: package_id,

@@ -23,7 +23,11 @@
         "basic",
         "pro",
         "premium",
-        "enterprise"
+        "enterprise",
+        "starter",
+        "growth",
+        "professional",
+        "elite"
       ]
     },
     "price": {
@@ -43,7 +47,8 @@
         "active",
         "cancelled",
         "paused",
-        "expired"
+        "expired",
+        "pending"
       ],
       "default": "active"
     },
@@ -81,6 +86,22 @@
         "medium",
         "high"
       ]
+    },
+    "wix_subscription_id": {
+      "type": "string",
+      "description": "Wix subscription contract ID from checkout. Used to match subscription canceled/expired webhooks."
+    },
+    "wix_checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID. Used to match the order_approved webhook to this subscription."
+    },
+    "package_name": {
+      "type": "string",
+      "description": "Name of the SubscriptionPackage purchased"
+    },
+    "account_type": {
+      "type": "string",
+      "description": "Account type associated with this subscription (estate_sale_operator, real_estate_agent, etc.)"
     }
   },
   "required": [
