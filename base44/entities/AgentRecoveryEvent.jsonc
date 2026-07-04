@@ -1,0 +1,132 @@
+{
+  "name": "AgentRecoveryEvent",
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "api_failure",
+        "database_failure",
+        "missing_data",
+        "permissions_error",
+        "subscription_failure",
+        "payment_failure",
+        "broken_route",
+        "page_404",
+        "blank_page",
+        "ai_timeout",
+        "automation_failure",
+        "crm_failure",
+        "inventory_failure",
+        "marketplace_failure",
+        "search_failure",
+        "lead_failure",
+        "image_recognition_failure",
+        "pos_failure",
+        "qr_failure",
+        "sync_failure",
+        "react_render_error",
+        "network_error",
+        "other"
+      ],
+      "description": "Type of failure that triggered recovery"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the person who encountered the error"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_role": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Browser session ID for correlation"
+    },
+    "page_url": {
+      "type": "string",
+      "description": "URL where the error occurred"
+    },
+    "page_module": {
+      "type": "string",
+      "description": "Module/component where the error occurred"
+    },
+    "action_attempted": {
+      "type": "string",
+      "description": "What the user was trying to do"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Technical error message"
+    },
+    "error_stack": {
+      "type": "string",
+      "description": "Stack trace if available"
+    },
+    "browser": {
+      "type": "string"
+    },
+    "device": {
+      "type": "string"
+    },
+    "recovery_message_shown": {
+      "type": "string",
+      "description": "Friendly message shown to the user"
+    },
+    "recovery_action_taken": {
+      "type": "string",
+      "enum": [
+        "retry_offered",
+        "navigation_offered",
+        "alternate_action_offered",
+        "auto_retried",
+        "auto_recovered",
+        "escalated_to_admin",
+        "ticket_created",
+        "none"
+      ],
+      "default": "retry_offered"
+    },
+    "assigned_super_agent": {
+      "type": "string",
+      "description": "Super Agent assigned to handle this recovery event"
+    },
+    "launch_issue_id": {
+      "type": "string",
+      "description": "Reference to the LaunchIssue created from this event"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "recovered",
+        "partially_recovered",
+        "escalated",
+        "unresolved"
+      ],
+      "default": "recovered"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "event_type",
+    "severity"
+  ]
+}

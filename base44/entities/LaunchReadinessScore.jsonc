@@ -1,0 +1,93 @@
+{
+  "name": "LaunchReadinessScore",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "public_experience",
+        "consumer_experience",
+        "estate_sale_company_experience",
+        "dealer_experience",
+        "reseller_experience",
+        "vendor_experience",
+        "admin_experience",
+        "inventory",
+        "pos",
+        "marketplace",
+        "crm",
+        "marketing",
+        "subscriptions",
+        "payments",
+        "ai",
+        "super_agents",
+        "seo",
+        "performance",
+        "mobile",
+        "accessibility",
+        "security",
+        "recovery",
+        "analytics",
+        "conversion_optimization",
+        "overall"
+      ],
+      "description": "Audit category being scored"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Readiness score 0-100"
+    },
+    "max_score": {
+      "type": "integer",
+      "default": 100
+    },
+    "items_tested": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of individual items tested in this category"
+    },
+    "items_passed": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of items that passed"
+    },
+    "items_failed": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of items that failed"
+    },
+    "critical_blockers": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of critical launch blockers in this category"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "soft_launch",
+        "invite_only_beta",
+        "internal_qa_only",
+        "not_ready"
+      ],
+      "description": "Launch recommendation for this category"
+    },
+    "audit_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audited_by": {
+      "type": "string",
+      "description": "Agent or system that performed the audit"
+    }
+  },
+  "required": [
+    "category",
+    "score"
+  ]
+}

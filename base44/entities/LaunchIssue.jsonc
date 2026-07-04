@@ -1,0 +1,145 @@
+{
+  "name": "LaunchIssue",
+  "type": "object",
+  "properties": {
+    "issue_title": {
+      "type": "string",
+      "description": "Short title describing the issue"
+    },
+    "issue_description": {
+      "type": "string",
+      "description": "Detailed description of the issue"
+    },
+    "affected_role": {
+      "type": "string",
+      "enum": [
+        "guest",
+        "consumer",
+        "estate_sale_company",
+        "dealer",
+        "dealer_and_operator",
+        "reseller",
+        "cleanout_company",
+        "vendor",
+        "affiliate",
+        "referral_partner",
+        "admin",
+        "all_roles"
+      ],
+      "description": "User role affected by this issue"
+    },
+    "affected_module": {
+      "type": "string",
+      "description": "Platform module affected (e.g. Inventory, POS, Marketplace, CRM, Payments, SEO, Marketing)"
+    },
+    "affected_page": {
+      "type": "string",
+      "description": "Page route or component where the issue occurs"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Severity level of the issue"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "wont_fix",
+        "monitoring"
+      ],
+      "default": "open",
+      "description": "Current status of the issue"
+    },
+    "assigned_super_agent": {
+      "type": "string",
+      "description": "Name of the Super Agent assigned to investigate/resolve"
+    },
+    "assigned_developer": {
+      "type": "string",
+      "description": "Developer assigned to fix the issue"
+    },
+    "is_launch_blocker": {
+      "type": "boolean",
+      "default": false,
+      "description": "Does this issue block public launch?"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "verified_fixed",
+        "verified_persisting",
+        "needs_retest"
+      ],
+      "default": "unverified",
+      "description": "Whether the issue resolution has been verified"
+    },
+    "recovery_event_id": {
+      "type": "string",
+      "description": "Reference to the AgentRecoveryEvent that detected this issue"
+    },
+    "steps_to_reproduce": {
+      "type": "string",
+      "description": "Steps to reproduce the issue"
+    },
+    "suggested_fix": {
+      "type": "string",
+      "description": "Suggested fix or remediation"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Notes on how the issue was resolved"
+    },
+    "estimated_complexity": {
+      "type": "string",
+      "enum": [
+        "trivial",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the person who reported/encountered the issue"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Browser session ID for correlation"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Technical error message if applicable"
+    },
+    "browser": {
+      "type": "string"
+    },
+    "device": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "issue_title",
+    "affected_role",
+    "affected_module",
+    "severity"
+  ]
+}
