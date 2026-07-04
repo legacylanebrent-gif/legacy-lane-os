@@ -10,6 +10,7 @@ import SEOHead from '@/components/seo/SEOHead';
 import SEOBreadcrumb from '@/components/seo/SEOBreadcrumb';
 import ReactMarkdown from 'react-markdown';
 import { format } from 'date-fns';
+import ReviewSection from '@/components/reviews/ReviewSection';
 
 export default function CompanyProfilePage() {
   const [page, setPage] = useState(null);
@@ -123,6 +124,14 @@ export default function CompanyProfilePage() {
               ))}
             </div>
           </section>
+        )}
+
+        {page.entity_id && (
+          <ReviewSection
+            reviewType="company"
+            targetId={page.entity_id}
+            sellerId={page.entity_id}
+          />
         )}
       </div>
       <SharedFooter />

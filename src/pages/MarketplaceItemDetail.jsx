@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MapPin, Phone, Mail, MessageSquare, Clock, TrendingUp, CreditCard, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import ReviewSection from '@/components/reviews/ReviewSection';
 
 export default function MarketplaceItemDetail() {
   const [searchParams] = useSearchParams();
@@ -491,6 +492,15 @@ export default function MarketplaceItemDetail() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Reviews */}
+          <div className="lg:col-span-2">
+            <ReviewSection
+              reviewType="marketplace_item"
+              targetId={itemId}
+              sellerId={item.operator_id}
+            />
           </div>
         </div>
       </div>

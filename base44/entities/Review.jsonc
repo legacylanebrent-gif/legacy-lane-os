@@ -2,8 +2,22 @@
   "name": "Review",
   "type": "object",
   "properties": {
+    "review_type": {
+      "type": "string",
+      "enum": [
+        "marketplace_item",
+        "company"
+      ],
+      "default": "marketplace_item",
+      "description": "Whether this review is for a marketplace item or an estate sale company"
+    },
     "item_id": {
-      "type": "string"
+      "type": "string",
+      "description": "MarketplaceItem ID (when review_type = marketplace_item)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Operator/User ID of the estate sale company being reviewed (when review_type = company)"
     },
     "order_id": {
       "type": "string"
@@ -42,12 +56,19 @@
     "helpful_count": {
       "type": "integer",
       "default": 0
+    },
+    "seller_response": {
+      "type": "string",
+      "description": "Optional public reply from the seller/company"
+    },
+    "seller_response_date": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
-    "item_id",
+    "review_type",
     "reviewer_id",
-    "seller_id",
     "rating"
   ]
 }
