@@ -9,6 +9,9 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const body = await req.json().catch(() => ({}));
+    const checkOnly = body.check_only === true;
+
     const now = new Date();
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
@@ -96,6 +99,18 @@ Deno.serve(async (req) => {
         purchased: purchased,
         purchased_used: purchasedUsed,
         remaining: 0,
+      });
+    }
+
+    // If just checking (no consumption), return current state
+    if (checkOnly) {
+      return Response.json({
+        allowed: true,
+        base_limit: baseLimit,
+        base_used: baseUsed,
+        purchased: purchased,
+        purchased_used: purchasedUsed,
+        remaining: totalRemaining === Infinity ? 999999 : totalRemaining,
       });
     }
 

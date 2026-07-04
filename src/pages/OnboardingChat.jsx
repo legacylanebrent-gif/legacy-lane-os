@@ -105,6 +105,13 @@ export default function OnboardingChat() {
     checkAuth();
   }, []);
 
+  // Sync ConsumerMarketingProfile when onboarding completes
+  useEffect(() => {
+    if (step === 'complete') {
+      base44.functions.invoke('syncConsumerProfile', {}).catch(() => {});
+    }
+  }, [step]);
+
   const checkAuth = async () => {
     try {
       const authed = await base44.auth.isAuthenticated();

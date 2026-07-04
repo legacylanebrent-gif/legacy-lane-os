@@ -11,6 +11,42 @@ const ELITE_TIERS = ['elite'];
 const ADMIN_ROLES = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 const BATCH_SIZE = 20; // concurrent sends per batch
 
+function getCustomerIoConfig() {
+  const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
+  const appApiKey = Deno.env.get('CUSTOMERIO_APP_API_KEY') || '';
+  const fromEmail = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_EMAIL') || '';
+  const fromName = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_NAME') || 'EstateSalen';
+  const configured = enabled && !!appApiKey && !!fromEmail;
+  return { enabled, configured, appApiKey, fromEmail, fromName };
+}
+
+// Send a transactional email via CustomerIO App API
+async function sendCustomerIoEmail({ to, subject, body, fromName, userId }, config) {
+  const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
+  const endpoint = region === 'eu' ? 'https://api-eu.customer.io' : 'https://api.customer.io';
+  const res = await fetch(`${endpoint}/v1/send/email`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.appApiKey}`,
+    },
+    body: JSON.stringify({
+      to,
+      from: config.fromEmail,
+      from_name: fromName || config.fromName,
+      subject,
+      body,
+      identifiers: userId ? { id: userId } : undefined,
+      message_data: { subject },
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`CustomerIO send failed: ${res.status} — ${errText}`);
+  }
+  return { sent: true };
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -112,20 +148,31 @@ Deno.serve(async (req) => {
       const senderName = campaign.sender_name || user.company_name || user.full_name || 'EstateSalen';
       const replyTo = campaign.reply_to_email || '';
 
-      // Send emails in concurrent batches
+      // Send emails in concurrent batches via CustomerIO transactional email
+      const cioConfig = getCustomerIoConfig();
       let sentCount = 0;
       let failedCount = 0;
       for (let i = 0; i < recipientsToSend.length; i += BATCH_SIZE) {
         const batch = recipientsToSend.slice(i, i + BATCH_SIZE);
         const results = await Promise.allSettled(
-          batch.map(recipient =>
-            base44.asServiceRole.integrations.Core.SendEmail({
+          batch.map(recipient => {
+            if (cioConfig.configured) {
+              return sendCustomerIoEmail({
+                to: recipient.email,
+                subject: campaign.email_subject,
+                body: campaign.email_body,
+                fromName: senderName,
+                userId: recipient.user_id,
+              }, cioConfig);
+            }
+            // Fallback to platform SendEmail if CustomerIO not configured
+            return base44.asServiceRole.integrations.Core.SendEmail({
               to: recipient.email,
               subject: campaign.email_subject,
               body: campaign.email_body,
               from_name: senderName,
-            })
-          )
+            });
+          })
         );
         for (const r of results) {
           if (r.status === 'fulfilled') sentCount++;
