@@ -12,7 +12,6 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import OpenAI from 'npm:openai';
 
 function toSlug(str) {
   if (!str) return '';
@@ -42,7 +41,7 @@ function computeDemandScore(metrics) {
   return Math.min(100, Math.round(raw));
 }
 
-async function findOrCreateKnowledgeFromWanted(base44, openai, wanted) {
+async function findOrCreateKnowledgeFromWanted(base44, wanted) {
   // Try to match by brand + category + keywords
   const searchName = [wanted.title, wanted.brand, wanted.category].filter(Boolean).join(' ');
   const normalizedSearch = searchName.toLowerCase().trim();
@@ -87,20 +86,26 @@ Return JSON only:
   "historical_context": "1 sentence context or empty"
 }`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    response_format: { type: 'json_object' },
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.2,
-    max_tokens: 400,
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt,
+    response_json_schema: {
+      type: 'object',
+      properties: {
+        entity_name: { type: 'string' },
+        normalized_name: { type: 'string' },
+        brand: { type: 'string' },
+        category: { type: 'string' },
+        subcategory: { type: 'string' },
+        style: { type: 'string' },
+        material: { type: 'string' },
+        era: { type: 'string' },
+        ai_description: { type: 'string' },
+        historical_context: { type: 'string' },
+      },
+    },
   });
 
-  let normalized = {};
-  try {
-    normalized = JSON.parse(completion.choices[0].message.content);
-  } catch {
-    normalized = { entity_name: wanted.title, normalized_name: normalizedSearch };
-  }
+  const normalized = result || { entity_name: wanted.title, normalized_name: normalizedSearch };
 
   const shortId = Date.now().toString(36);
   const slug = '/items/' + toSlug(normalized.entity_name || wanted.title) + '-' + shortId;
@@ -243,13 +248,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No WantedItem data provided' }, { status: 400 });
     }
 
-    const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
-
     // Stage 8–9: Extract buyer intent into BuyerIntent entity
     await upsertBuyerIntent(base44, wanted);
 
     // Stage 9: Find or create ItemKnowledge match
-    const knowledgeId = await findOrCreateKnowledgeFromWanted(base44, openai, wanted);
+    const knowledgeId = await findOrCreateKnowledgeFromWanted(base44, wanted);
 
     // Stage 7: Update demand signals on knowledge record
     await updateKnowledgeDemand(base44, knowledgeId, wanted);

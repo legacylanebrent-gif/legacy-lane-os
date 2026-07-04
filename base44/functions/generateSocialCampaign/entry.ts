@@ -1,15 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// ─────────────────────────────────────────────
-// generateSocialCampaign
-// Generates a complete social media campaign (10 posts) for an estate sale.
-//
-// Modes:
-//   1. Entity automation (EstateSale update → status upcoming/active)
-//      Payload: { event: {...}, data: { ...sale }, changed_fields: [...] }
-//   2. Direct call: { sale_id }
-// ─────────────────────────────────────────────
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -27,7 +17,6 @@ Deno.serve(async (req) => {
 
     if (!sale) return Response.json({ error: 'sale_id or entity data required' }, { status: 400 });
 
-    // Only generate for published sales
     if (!['upcoming', 'active'].includes(sale.status)) {
       return Response.json({ skipped: true, reason: `status=${sale.status}` });
     }
@@ -37,7 +26,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Sale has no operator_id' }, { status: 400 });
     }
 
-    // Build sale context
     const addr = sale.property_address || {};
     const city = addr.city || 'the area';
     const county = addr.county || city;
@@ -55,17 +43,11 @@ Deno.serve(async (req) => {
     const categories = (sale.categories || []).join(', ') || 'furniture, antiques, collectibles';
     const featuredItems = (sale.featured_items || []).map(i => i.name || '').filter(Boolean).slice(0, 5).join(', ') || 'quality household items';
 
-    const systemPrompt = `You are the EstateSalen Social Campaign Agent.
-Your job is to create high-performing social media campaigns for Estate Sale Company Owners.
-You write posts designed to drive buyer turnout, create urgency, increase seller trust, and help the Estate Sale Company Owner look professional.
+    const prompt = `You are the EstateSalen Social Campaign Agent. Create high-performing social media campaigns for Estate Sale Company Owners. Write posts designed to drive buyer turnout, create urgency, increase seller trust, and help the Estate Sale Company Owner look professional.
 
-CRITICAL RULE: Never reveal the full street address in any post scheduled BEFORE the address reveal time (24 hours before sale start).
-Before the 24-hour mark, use only the city, county, or general area. Replace address with: "Address released 24 hours before doors open."
-After the address reveal time, you MAY include the full address.
+CRITICAL RULE: Never reveal the full street address in any post scheduled BEFORE the address reveal time (24 hours before sale start). Before the 24-hour mark, use only the city, county, or general area. Replace address with: "Address released 24 hours before doors open." After the address reveal time, you MAY include the full address.
 
-Tone: Professional, exciting, urgent, trustworthy, local, clear.`;
-
-    const userPrompt = `Generate a complete estate sale social media campaign.
+Tone: Professional, exciting, urgent, trustworthy, local, clear.
 
 SALE DETAILS:
 Sale Title: ${sale.title}
@@ -95,35 +77,10 @@ REQUIRED POSTS (generate ALL of these):
 9. results - evening after sale ends (address_allowed: false)
 10. seller_lead - 3 days after sale ends (address_allowed: false)
 
-For each post include 10 headline options. Address visibility follows the schedule above.
-If sale is only 1 day, still include day_2 post but mark it optional.
-
-Return ONLY valid JSON matching this structure:
-{
-  "campaign_name": "string",
-  "campaign_summary": "string",
-  "address_reveal_datetime": "ISO string",
-  "posts": [
-    {
-      "post_type": "string",
-      "phase": "string",
-      "scheduled_datetime": "ISO string",
-      "address_allowed": false,
-      "headline_options": ["10 options"],
-      "selected_headline": "string",
-      "caption": "string",
-      "image_prompt": "string",
-      "suggested_image_style": "string",
-      "cta": "string",
-      "audience_target": "string",
-      "psychological_trigger": "string",
-      "recommended_channels": ["facebook", "instagram"]
-    }
-  ]
-}`;
+For each post include 10 headline options. Address visibility follows the schedule above. If sale is only 1 day, still include day_2 post but mark it optional.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `${systemPrompt}\n\n${userPrompt}`,
+      prompt,
       response_json_schema: {
         type: 'object',
         properties: {
@@ -157,7 +114,6 @@ Return ONLY valid JSON matching this structure:
 
     const campaignData = result || {};
 
-    // Save SocialCampaign record
     const campaign = await base44.asServiceRole.entities.SocialCampaign.create({
       operator_id: operatorId,
       sale_id: sale.id,
@@ -172,7 +128,6 @@ Return ONLY valid JSON matching this structure:
       campaign_summary: campaignData.campaign_summary || '',
     });
 
-    // Save SocialPost records
     let postCount = 0;
     for (const post of (campaignData.posts || [])) {
       await base44.asServiceRole.entities.SocialPost.create({

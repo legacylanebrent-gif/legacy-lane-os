@@ -1,9 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import OpenAI from 'npm:openai';
 
-const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
-
-async function resolveCounty(op) {
+async function resolveCounty(base44, op) {
   const city = op.geocoded_city || op.city || '';
   const state = op.state || '';
   const zip = op.geocoded_zip || op.zip_code || '';
@@ -19,17 +16,17 @@ Return a JSON object with exactly this field:
 
 Return valid JSON only, no explanation.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0,
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt,
+    response_json_schema: {
+      type: 'object',
+      properties: {
+        geocoded_county: { type: 'string' },
+      },
+    },
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) return null;
-  const data = JSON.parse(content);
-  return data.geocoded_county || null;
+  return result?.geocoded_county || null;
 }
 
 function extractZipFromUrl(url) {
@@ -101,7 +98,7 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const county = await resolveCounty(op);
+        const county = await resolveCounty(base44, op);
         if (county) {
           await base44.asServiceRole.entities.FutureEstateOperator.update(op.id, {
             geocoded_county: county,

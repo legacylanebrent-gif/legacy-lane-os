@@ -5,8 +5,20 @@ const BASE_URL = 'https://www.estatesalen.com';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const { marketplace_item_id, item_id } = body;
+    const body = await req.json().catch(() => ({}));
+
+    // Support entity automation payload: { event, data: {...MarketplaceItem}, changed_fields }
+    // OR direct call: { marketplace_item_id, item_id }
+    let marketplace_item_id = body?.marketplace_item_id || null;
+    let item_id = body?.item_id || null;
+
+    // If this is an entity automation payload, extract the marketplace item from data
+    if (!marketplace_item_id && !item_id && body?.data) {
+      const mp = body.data;
+      // MarketplaceItem entity has an `item_id` field linking to the Item entity
+      marketplace_item_id = mp.id || null;
+      item_id = mp.item_id || null;
+    }
 
     if (!marketplace_item_id && !item_id) {
       return Response.json({ error: 'marketplace_item_id or item_id required' }, { status: 400 });
