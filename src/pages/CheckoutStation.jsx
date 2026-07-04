@@ -15,6 +15,7 @@ export default function CheckoutStation() {
   const [qrScanner, setQrScanner] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [completing, setCompleting] = useState(false);
+  const [processingOnline, setProcessingOnline] = useState(false);
 
   useEffect(() => {
     loadStaff();
@@ -128,6 +129,29 @@ export default function CheckoutStation() {
       setMessage({ type: 'error', text: 'Failed to complete checkout' });
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const handleOnlinePayment = async () => {
+    if (!currentCart) return;
+
+    try {
+      setProcessingOnline(true);
+      const response = await base44.functions.invoke('create-checkout', {
+        product: 'pos_order',
+        cart_id: currentCart.id,
+      });
+
+      if (response.data?.redirectUrl) {
+        window.location.href = response.data.redirectUrl;
+      } else {
+        setMessage({ type: 'error', text: response.data?.error || 'Failed to start checkout' });
+      }
+    } catch (error) {
+      console.error('Online checkout error:', error);
+      setMessage({ type: 'error', text: 'Failed to start checkout: ' + error.message });
+    } finally {
+      setProcessingOnline(false);
     }
   };
 
@@ -268,7 +292,7 @@ export default function CheckoutStation() {
                 {/* Payment Method */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-900">
-                    Payment Method
+                    Payment Method (Offline)
                   </label>
                   <select
                     value={paymentMethod}
@@ -276,7 +300,7 @@ export default function CheckoutStation() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                   >
                     <option value="cash">Cash</option>
-                    <option value="card">Credit/Debit Card</option>
+                    <option value="card">Credit/Debit Card (manual)</option>
                     <option value="venmo">Venmo</option>
                     <option value="check">Check</option>
                   </select>
@@ -285,11 +309,19 @@ export default function CheckoutStation() {
                 {/* Actions */}
                 <div className="space-y-2">
                   <Button
+                    onClick={handleOnlinePayment}
+                    disabled={processingOnline}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 flex items-center justify-center gap-2"
+                  >
+                    {processingOnline ? 'Redirecting...' : 'Pay Online (Base44 Payments)'}
+                  </Button>
+                  <div className="text-center text-xs text-slate-500">— or —</div>
+                  <Button
                     onClick={completeCheckout}
                     disabled={completing}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-6 text-lg"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg"
                   >
-                    {completing ? 'Processing...' : 'Complete Sale'}
+                    {completing ? 'Processing...' : 'Complete Offline Sale'}
                   </Button>
                   <Button
                     onClick={clearCart}

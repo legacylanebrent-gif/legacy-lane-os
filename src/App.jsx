@@ -165,6 +165,7 @@ import AdminPropstreamAgentEmailDrafts from './pages/AdminPropstreamAgentEmailDr
 import CommunityEvents from './pages/CommunityEvents';
 import CommunityEventSubmit from './pages/CommunityEventSubmit';
 import AdminCommunityEvents from './pages/AdminCommunityEvents';
+import ThankYou from './pages/ThankYou';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -440,6 +441,9 @@ const AuthenticatedApp = () => {
       <Route path="/mobile/companies" element={<MobileAppShell title="Companies"><EstateSaleCompanyDirectory /></MobileAppShell>} />
       <Route path="/mobile/cool-finds" element={<MobileAppShell title="Cool Finds"><CoolFindsBlog /></MobileAppShell>} />
       <Route path="/mobile/packages" element={<MobileAppShell title="Packages"><Pages.OperatorPackages /></MobileAppShell>} />
+      <Route path="/mobile/messages" element={<MobileAppShell title="Messages"><Pages.Messages /></MobileAppShell>} />
+      <Route path="/mobile/notifications" element={<MobileAppShell title="Notifications"><Pages.Notifications /></MobileAppShell>} />
+      <Route path="/ThankYou" element={<ThankYou />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

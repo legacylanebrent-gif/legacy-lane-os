@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { QrCode, ShoppingCart, Trash2, Plus, Minus, Check, AlertCircle } from 'lucide-react';
+import { QrCode, ShoppingCart, Trash2, Plus, Minus, Check, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function ScanAndCart() {
@@ -12,6 +12,8 @@ export default function ScanAndCart() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [sale, setSale] = useState(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [savedCartId, setSavedCartId] = useState(null);
   const scannerRef = useRef(null);
   const [qrScanner, setQrScanner] = useState(null);
 
@@ -126,24 +128,56 @@ export default function ScanAndCart() {
 
       // Find or create cart
       const carts = await base44.entities.Cart.filter({ user_id: user.id });
+      let cartId;
       if (carts.length > 0) {
-        await base44.entities.Cart.update(carts[0].id, {
-          items: cart,
-          total,
-        });
+        await base44.entities.Cart.update(carts[0].id, { items: cart, total });
+        cartId = carts[0].id;
       } else {
-        await base44.entities.Cart.create({
-          user_id: user.id,
-          items: cart,
-          total,
-        });
+        const newCart = await base44.entities.Cart.create({ user_id: user.id, items: cart, total });
+        cartId = newCart.id;
       }
-
-      setMessage({ type: 'success', text: 'Cart saved successfully' });
+      setSavedCartId(cartId);
+      setMessage({ type: 'success', text: 'Cart saved — ready for checkout' });
       setTimeout(() => setMessage(null), 2000);
     } catch (error) {
       console.error('Error saving cart:', error);
       setMessage({ type: 'error', text: 'Failed to save cart' });
+    }
+  };
+
+  const handleOnlineCheckout = async () => {
+    try {
+      // Save cart first if not saved
+      let cartId = savedCartId;
+      if (!cartId) {
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const carts = await base44.entities.Cart.filter({ user_id: user.id });
+        if (carts.length > 0) {
+          await base44.entities.Cart.update(carts[0].id, { items: cart, total });
+          cartId = carts[0].id;
+        } else {
+          const newCart = await base44.entities.Cart.create({ user_id: user.id, items: cart, total });
+          cartId = newCart.id;
+        }
+        setSavedCartId(cartId);
+      }
+
+      setProcessingPayment(true);
+      const response = await base44.functions.invoke('create-checkout', {
+        product: 'pos_order',
+        cart_id: cartId,
+      });
+
+      if (response.data?.redirectUrl) {
+        window.location.href = response.data.redirectUrl;
+      } else {
+        setMessage({ type: 'error', text: response.data?.error || 'Failed to start checkout' });
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      setMessage({ type: 'error', text: 'Failed to start checkout: ' + error.message });
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -309,9 +343,21 @@ export default function ScanAndCart() {
 
                   <Button
                     onClick={saveCart}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold"
+                    variant="outline"
+                    className="w-full border-slate-300"
                   >
-                    Save Cart & Ready for Checkout
+                    Save Cart
+                  </Button>
+                  <Button
+                    onClick={handleOnlineCheckout}
+                    disabled={processingPayment}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold flex items-center justify-center gap-2"
+                  >
+                    {processingPayment ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                    ) : (
+                      <><CreditCard className="w-4 h-4" /> Pay Online (${cartTotal.toFixed(2)})</>
+                    )}
                   </Button>
                 </div>
               </>

@@ -174,6 +174,134 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
+      // ── Try 3: Marketplace item purchase ──
+      const purchases = await base44.asServiceRole.entities.Purchase.filter({
+        pending_checkout_id: checkoutId,
+      });
+
+      if (purchases.length > 0) {
+        const purchase = purchases[0];
+
+        // Update purchase to completed
+        await base44.asServiceRole.entities.Purchase.update(purchase.id, {
+          status: 'COMPLETED',
+          pending_checkout_id: null,
+        });
+
+        // Update marketplace item status to SOLD
+        const miRecords = await base44.asServiceRole.entities.MarketplaceItem.filter({ id: purchase.marketplace_item_id });
+        if (miRecords[0]) {
+          await base44.asServiceRole.entities.MarketplaceItem.update(miRecords[0].id, { status: 'SOLD' });
+        }
+
+        // Update linked Item to sold
+        if (miRecords[0]?.item_id) {
+          const itemRecords = await base44.asServiceRole.entities.Item.filter({ id: miRecords[0].item_id });
+          if (itemRecords[0]) {
+            await base44.asServiceRole.entities.Item.update(itemRecords[0].id, {
+              status: 'sold',
+              sold_date: new Date().toISOString(),
+              buyer_name: purchase.buyer_id,
+              payment_method_used: 'online',
+            });
+          }
+        }
+
+        // Create an order record
+        await base44.asServiceRole.entities.Order.create({
+          order_number: `MKT-${Date.now()}`,
+          buyer_id: purchase.buyer_id,
+          items: [{
+            item_id: purchase.marketplace_item_id,
+            quantity: 1,
+            price: purchase.final_price,
+            seller_id: purchase.seller_id,
+          }],
+          subtotal: purchase.final_price,
+          shipping_cost: purchase.shipping_cost_paid || 0,
+          total: purchase.final_price + (purchase.shipping_cost_paid || 0),
+          status: 'paid',
+          payment_method: 'online',
+          fulfillment_method: purchase.shipping_option_chosen === 'LOCAL_PICKUP' ? 'pickup' : 'shipping',
+          escrow_status: 'held',
+        });
+
+        // Notify the seller
+        try {
+          await base44.asServiceRole.functions.invoke('sendNotification', {
+            user_id: purchase.seller_id,
+            title: 'Item Sold!',
+            message: 'Your marketplace item has been purchased online. Payment received — arrange shipping or pickup.',
+            type: 'sale',
+          });
+        } catch (e) {
+          console.error('[webhook] Seller notification failed:', e.message);
+        }
+
+        // Fire CustomerIO event
+        try {
+          await base44.asServiceRole.functions.invoke('customerioService', {
+            action: 'trackEvent',
+            userId: purchase.buyer_id,
+            eventName: 'purchase.completed',
+            data: { product: 'marketplace_item', item_id: purchase.marketplace_item_id, price: purchase.final_price },
+          });
+        } catch (e) {
+          console.error('[webhook] CustomerIO track failed:', e.message);
+        }
+
+        console.log(`[webhook] Marketplace purchase completed: ${purchase.id}`);
+        return new Response('OK', { status: 200 });
+      }
+
+      // ── Try 4: POS cart checkout ──
+      const cartRecords = await base44.asServiceRole.entities.Cart.filter({
+        pending_checkout_id: checkoutId,
+      });
+
+      if (cartRecords.length > 0) {
+        const cart = cartRecords[0];
+
+        // Fetch buyer name
+        const buyerUsers = await base44.asServiceRole.entities.User.filter({ id: cart.user_id });
+        const buyerName = buyerUsers[0]?.full_name || 'Customer';
+
+        // Create the order from the cart
+        const order = await base44.asServiceRole.entities.Order.create({
+          order_number: `POS-${Date.now()}`,
+          buyer_id: cart.user_id,
+          buyer_name: buyerName,
+          items: cart.items,
+          subtotal: cart.total,
+          total: cart.total,
+          status: 'paid',
+          payment_method: 'online',
+          fulfillment_method: 'pickup',
+          escrow_status: 'released',
+        });
+
+        // Mark items as sold
+        for (const ci of (cart.items || [])) {
+          if (ci.item_id) {
+            const itemRecords = await base44.asServiceRole.entities.Item.filter({ id: ci.item_id });
+            if (itemRecords[0]) {
+              await base44.asServiceRole.entities.Item.update(itemRecords[0].id, {
+                status: 'sold',
+                sold_date: new Date().toISOString(),
+                buyer_name: cart.user_id,
+                payment_method_used: 'online',
+              });
+            }
+          }
+        }
+
+        // Clear the cart
+        await base44.asServiceRole.entities.Cart.delete(cart.id);
+
+        console.log(`[webhook] POS order completed: ${order.id}`);
+        return new Response('OK', { status: 200 });
+      }
+
       // No matching record found — could be a checkout we didn't create
       console.log(`[webhook] No matching record found for checkoutId: ${checkoutId}`);
       return new Response('OK', { status: 200 });

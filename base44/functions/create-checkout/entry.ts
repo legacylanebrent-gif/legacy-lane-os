@@ -231,6 +231,171 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── Product: Marketplace Item Purchase ──
+    if (product === 'marketplace_item') {
+      const { marketplace_item_id } = body;
+      if (!marketplace_item_id) return Response.json({ error: 'Marketplace item ID required' }, { status: 400 });
+
+      // Fetch the marketplace item
+      const miRecords = await base44.asServiceRole.entities.MarketplaceItem.filter({ id: marketplace_item_id });
+      const mi = miRecords[0];
+      if (!mi) return Response.json({ error: 'Marketplace item not found' }, { status: 404 });
+
+      // Fetch linked Item for title/images
+      let itemTitle = 'Marketplace Item';
+      if (mi.item_id) {
+        const items = await base44.asServiceRole.entities.Item.filter({ id: mi.item_id });
+        if (items[0]) itemTitle = items[0].title || itemTitle;
+      }
+
+      const price = mi.price || 0;
+      if (price < 0.50) {
+        return Response.json({ error: 'Price must be at least $0.50' }, { status: 400 });
+      }
+
+      const shippingCost = mi.shipping_option === 'SHIPS_ONLY' || mi.shipping_option === 'BOTH'
+        ? (mi.shipping_cost || 0)
+        : 0;
+
+      const items = [{
+        name: itemTitle,
+        quantity: 1,
+        price: price.toFixed(2),
+      }];
+
+      if (shippingCost > 0) {
+        items.push({
+          name: 'Shipping',
+          quantity: 1,
+          price: shippingCost.toFixed(2),
+        });
+      }
+
+      const checkoutResponse = await fetch(
+        'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': apiKey,
+            'wix-site-id': siteId,
+          },
+          body: JSON.stringify({
+            cart: {
+              items,
+              customerInfo: {
+                email: user.email,
+                firstName: user.full_name?.split(' ')[0] || '',
+                lastName: user.full_name?.split(' ').slice(1).join(' ') || '',
+              },
+            },
+            callbackUrls: {
+              postFlowUrl: `${origin}/MarketplaceItemDetail?id=${marketplace_item_id}`,
+              thankYouPageUrl: `${origin}/ThankYou?type=marketplace&id=${marketplace_item_id}`,
+            },
+          }),
+        }
+      );
+
+      const data = await checkoutResponse.json();
+      if (!checkoutResponse.ok) {
+        console.error('Wix checkout error (marketplace):', JSON.stringify(data));
+        return Response.json({ error: data.message || 'Failed to create checkout session' }, { status: 400 });
+      }
+
+      const checkoutId = data.checkoutSession?.id;
+      const redirectUrl = data.checkoutSession?.redirectUrl;
+
+      if (!checkoutId || !redirectUrl) {
+        return Response.json({ error: 'Invalid checkout response' }, { status: 500 });
+      }
+
+      // Create a pending purchase record that the webhook will complete
+      await base44.asServiceRole.entities.Purchase.create({
+        marketplace_item_id,
+        seller_id: mi.operator_id,
+        buyer_id: user.id,
+        purchase_type: 'FIXED_PRICE',
+        final_price: price,
+        shipping_option_chosen: mi.shipping_option === 'LOCAL_PICKUP_ONLY' ? 'LOCAL_PICKUP' : 'SHIP',
+        shipping_cost_paid: shippingCost,
+        status: 'PENDING_PAYMENT_ONLINE',
+        pending_checkout_id: checkoutId,
+      });
+
+      return Response.json({ success: true, redirectUrl, checkoutId });
+    }
+
+    // ── Product: POS Cart Checkout ──
+    if (product === 'pos_order') {
+      const { cart_id } = body;
+      if (!cart_id) return Response.json({ error: 'Cart ID required' }, { status: 400 });
+
+      // Fetch the cart
+      const carts = await base44.asServiceRole.entities.Cart.filter({ id: cart_id });
+      const cart = carts[0];
+      if (!cart) return Response.json({ error: 'Cart not found' }, { status: 404 });
+      if (!cart.items || cart.items.length === 0) return Response.json({ error: 'Cart is empty' }, { status: 400 });
+
+      const total = cart.total || 0;
+      if (total < 0.50) {
+        return Response.json({ error: 'Total must be at least $0.50' }, { status: 400 });
+      }
+
+      // Build cart items from the saved cart
+      const items = cart.items.map(ci => ({
+        name: ci.item_title || 'Item',
+        quantity: ci.quantity || 1,
+        price: (ci.price || 0).toFixed(2),
+      }));
+
+      const checkoutResponse = await fetch(
+        'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': apiKey,
+            'wix-site-id': siteId,
+          },
+          body: JSON.stringify({
+            cart: {
+              items,
+              customerInfo: {
+                email: user.email,
+                firstName: user.full_name?.split(' ')[0] || '',
+                lastName: user.full_name?.split(' ').slice(1).join(' ') || '',
+              },
+            },
+            callbackUrls: {
+              postFlowUrl: `${origin}/ScanAndCart`,
+              thankYouPageUrl: `${origin}/ThankYou?type=pos`,
+            },
+          }),
+        }
+      );
+
+      const data = await checkoutResponse.json();
+      if (!checkoutResponse.ok) {
+        console.error('Wix checkout error (POS):', JSON.stringify(data));
+        return Response.json({ error: data.message || 'Failed to create checkout session' }, { status: 400 });
+      }
+
+      const checkoutId = data.checkoutSession?.id;
+      const redirectUrl = data.checkoutSession?.redirectUrl;
+
+      if (!checkoutId || !redirectUrl) {
+        return Response.json({ error: 'Invalid checkout response' }, { status: 500 });
+      }
+
+      // Store pending checkout on the cart so the webhook can find it
+      await base44.asServiceRole.entities.Cart.update(cart.id, {
+        pending_checkout_id: checkoutId,
+      });
+
+      return Response.json({ success: true, redirectUrl, checkoutId });
+    }
+
     return Response.json({ error: 'Unknown product' }, { status: 400 });
   } catch (error) {
     console.error('create-checkout error:', error);

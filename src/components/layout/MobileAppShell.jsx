@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import MobileTabBar from '@/components/layout/MobileTabBar';
 import MobileQRCheckIn from '@/components/checkin/MobileQRCheckIn';
@@ -50,7 +49,7 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
           </Link>
           <div className="flex items-center gap-1">
             <MobileQRCheckIn />
-            <Link to={createPageUrl('Messages')} className="relative p-2 text-slate-400 hover:text-slate-600">
+            <Link to="/mobile/messages" className="relative p-2 text-slate-400 hover:text-slate-600">
               <MessageSquare className="w-5 h-5" />
               {unreadMessages > 0 && (
                 <span className="absolute top-0.5 right-0.5 min-w-[15px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">
@@ -58,7 +57,7 @@ export default function MobileAppShell({ children, title, showHeader = true }) {
                 </span>
               )}
             </Link>
-            <Link to={createPageUrl('Notifications')} className="relative p-2 text-slate-400 hover:text-slate-600">
+            <Link to="/mobile/notifications" className="relative p-2 text-slate-400 hover:text-slate-600">
               <Bell className="w-5 h-5" />
               {unreadNotifs > 0 && (
                 <span className="absolute top-0.5 right-0.5 min-w-[15px] h-4 flex items-center justify-center rounded-full bg-orange-600 text-white text-[10px] font-bold px-1 leading-none">

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MapPin, Phone, Mail, MessageSquare, Clock, TrendingUp } from 'lucide-react';
+import { Heart, MapPin, Phone, Mail, MessageSquare, Clock, TrendingUp, CreditCard, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MarketplaceItemDetail() {
@@ -26,6 +26,7 @@ export default function MarketplaceItemDetail() {
   const [bidError, setBidError] = useState('');
   const [bidSuccess, setBidSuccess] = useState('');
   const [submittingBid, setSubmittingBid] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   // Message state
   const [showMessage, setShowMessage] = useState(false);
@@ -193,21 +194,21 @@ export default function MarketplaceItemDetail() {
     }
 
     try {
-      await base44.entities.Purchase.create({
+      setProcessingPayment(true);
+      const response = await base44.functions.invoke('create-checkout', {
+        product: 'marketplace_item',
         marketplace_item_id: itemId,
-        seller_id: item.operator_id,
-        buyer_id: user.id,
-        purchase_type: 'FIXED_PRICE',
-        final_price: item.price,
-        shipping_option_chosen: item.shipping_option === 'SHIPS_ONLY' ? 'SHIP' : 'LOCAL_PICKUP',
-        shipping_cost_paid: item.shipping_option === 'SHIPS_ONLY' ? item.shipping_cost : 0,
-        status: 'PENDING_PAYMENT_OFFLINE',
       });
 
-      alert('Purchase complete! Next steps have been sent to your email. Contact the seller to arrange payment and delivery.');
-      loadData();
+      if (response.data?.redirectUrl) {
+        window.location.href = response.data.redirectUrl;
+      } else {
+        alert('Failed to start checkout: ' + (response.data?.error || 'Unknown error'));
+      }
     } catch (error) {
-      alert('Error completing purchase: ' + error.message);
+      alert('Error starting checkout: ' + error.message);
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -406,12 +407,20 @@ export default function MarketplaceItemDetail() {
                     )}
                   </div>
 
-                  <Button onClick={handleBuyNow} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3">
-                    Add to Cart
+                  <Button
+                    onClick={handleBuyNow}
+                    disabled={processingPayment}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 flex items-center justify-center gap-2"
+                  >
+                    {processingPayment ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                    ) : (
+                      <><CreditCard className="w-5 h-5" /> Buy Now — Pay Online</>
+                    )}
                   </Button>
-                  <Button onClick={handleBuyNow} className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-semibold">
-                    Buy Now
-                  </Button>
+                  <p className="text-xs text-slate-500 text-center">
+                    Secure checkout via Base44 Payments
+                  </p>
                 </>
               )}
 

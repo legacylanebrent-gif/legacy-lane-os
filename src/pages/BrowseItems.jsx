@@ -42,6 +42,7 @@ const SHIPPING_OPTIONS = [
 ];
 
 export default function BrowseItems() {
+  const isMobile = window.location.pathname.startsWith('/mobile');
   const [marketplaceItems, setMarketplaceItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -203,11 +204,11 @@ export default function BrowseItems() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50">
-      <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />
+    <div className={`flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-cyan-50 ${isMobile ? 'pt-0' : ''}`}>
+      {!isMobile && <UniversalHeader user={currentUser} isAuthenticated={isAuthenticated} />}
 
       {/* Page Title + Search Bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-14 z-10">
+      <div className={`bg-white border-b border-slate-200 z-10 ${isMobile ? '' : 'sticky top-14'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -247,7 +248,7 @@ export default function BrowseItems() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={`flex-1 mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'max-w-lg' : 'max-w-7xl'}`}>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Filters */}
           <div className="lg:col-span-1">
@@ -413,7 +414,7 @@ export default function BrowseItems() {
         </div>
       </div>
 
-      <SharedFooter />
+      {!isMobile && <SharedFooter />}
     </div>
   );
 }

@@ -43,12 +43,17 @@
       "type": "string",
       "enum": [
         "PENDING_PAYMENT_OFFLINE",
+        "PENDING_PAYMENT_ONLINE",
         "COMPLETED",
         "PICKUP_SCHEDULED",
         "PICKED_UP"
       ],
       "default": "PENDING_PAYMENT_OFFLINE",
       "description": "Transaction status"
+    },
+    "pending_checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID when online payment is in progress"
     },
     "meeting_time": {
       "type": "string",

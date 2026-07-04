@@ -68,6 +68,10 @@
     "payment_method": {
       "type": "string"
     },
+    "pending_checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID when online payment is in progress"
+    },
     "escrow_status": {
       "type": "string",
       "enum": [

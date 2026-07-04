@@ -13,8 +13,14 @@
           "item_id": {
             "type": "string"
           },
+          "item_title": {
+            "type": "string"
+          },
           "quantity": {
             "type": "integer"
+          },
+          "price": {
+            "type": "number"
           },
           "seller_id": {
             "type": "string"
@@ -29,6 +35,10 @@
     "total": {
       "type": "number",
       "default": 0
+    },
+    "pending_checkout_id": {
+      "type": "string",
+      "description": "Wix checkout session ID when online payment is in progress"
     }
   },
   "required": [
