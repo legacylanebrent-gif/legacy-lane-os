@@ -170,13 +170,25 @@ Deno.serve(async (req) => {
     }
 
     // ── Step 5: Save or update TerritoryLaunch record ──
+    // Preserve multi-assignee arrays from Territory Dashboard if not explicitly overridden
+    let existingRecord = null;
+    if (territory_launch_id) {
+      const byId = await base44.asServiceRole.entities.TerritoryLaunch.filter({ id: territory_launch_id });
+      existingRecord = byId[0];
+    }
+    if (!existingRecord) {
+      const existing = await base44.asServiceRole.entities.TerritoryLaunch.filter({ state_slug, county_slug });
+      existingRecord = existing[0];
+    }
+
     const launchPayload = {
       state,
       state_slug,
       county,
       county_slug,
-      cities_json: cities,
-      zip_codes_json: zip_codes,
+      fips_code: existingRecord?.fips_code || undefined,
+      cities_json: cities.length > 0 ? cities : (existingRecord?.cities_json || []),
+      zip_codes_json: zip_codes.length > 0 ? zip_codes : (existingRecord?.zip_codes_json || []),
       assigned_operator_id,
       assigned_operator_name,
       assigned_agent_id,
@@ -185,24 +197,23 @@ Deno.serve(async (req) => {
       assigned_cleanout_vendor_name,
       assigned_investor_id,
       assigned_investor_name,
+      // Preserve multi-assignee arrays from the Territory Dashboard drawer
+      assigned_operator_ids: existingRecord?.assigned_operator_ids || [],
+      assigned_operator_names: existingRecord?.assigned_operator_names || [],
+      assigned_agent_ids: existingRecord?.assigned_agent_ids || [],
+      assigned_agent_names: existingRecord?.assigned_agent_names || [],
       launch_status,
       pages_created_json: pages_created,
       sitemap_status: 'queued',
       routing_rules_created,
-      notes,
+      notes: notes || existingRecord?.notes || '',
     };
 
     let launch;
-    if (territory_launch_id) {
-      launch = await base44.asServiceRole.entities.TerritoryLaunch.update(territory_launch_id, launchPayload);
+    if (existingRecord) {
+      launch = await base44.asServiceRole.entities.TerritoryLaunch.update(existingRecord.id, launchPayload);
     } else {
-      // Check if already exists
-      const existing = await base44.asServiceRole.entities.TerritoryLaunch.filter({ state_slug, county_slug });
-      if (existing[0]) {
-        launch = await base44.asServiceRole.entities.TerritoryLaunch.update(existing[0].id, launchPayload);
-      } else {
-        launch = await base44.asServiceRole.entities.TerritoryLaunch.create(launchPayload);
-      }
+      launch = await base44.asServiceRole.entities.TerritoryLaunch.create(launchPayload);
     }
 
     return Response.json({

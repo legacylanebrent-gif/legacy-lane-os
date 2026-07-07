@@ -77,6 +77,12 @@ const decodeHtml = (str) => {
   return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 };
 
+// Must match launchTerritory backend function's toSlug() exactly
+const toSlug = (str) => {
+  if (!str) return '';
+  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').trim();
+};
+
 export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved }) {
   const [tlRecord, setTlRecord] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -103,16 +109,30 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
     try {
       // Normalize state for matching — territory.state could be abbreviation or full name
       const stateVal = territory.state;
+      const stateSlug = toSlug(stateVal);
+      const countySlug = toSlug(territory.county) + '-' + stateSlug.substring(0, 2);
 
-      const [tls, ops, allUsers] = await Promise.all([
-        base44.entities.TerritoryLaunch.filter({ county: territory.county, state: stateVal }),
+      // Try slug-based lookup first (matches launchTerritory's convention), fall back to raw values
+      let tls = [];
+      try {
+        tls = await base44.entities.TerritoryLaunch.filter({ state_slug: stateSlug, county_slug: countySlug });
+      } catch (e) { console.warn('slug lookup failed, trying raw:', e); }
+
+      let tl = tls[0] || null;
+
+      if (!tl) {
+        // Fallback: try raw county + state match (for older records)
+        const rawTls = await base44.entities.TerritoryLaunch.filter({ county: territory.county, state: stateVal });
+        tl = rawTls[0] || null;
+      }
+
+      const [ops, allUsers] = await Promise.all([
         // All operators in this state — no claim_status filter needed
         base44.entities.FutureEstateOperator.filter({ state: stateVal }, '-created_date', 300),
         // Get all CRM users — filter by role + state below
         base44.entities.User.list('-created_date', 500),
       ]);
 
-      const tl = tls[0] || null;
       setTlRecord(tl);
 
       // Filter agents: primary_account_type = real_estate_agent AND address.state matches
@@ -179,6 +199,9 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
       const selectedOps = operators.filter(o => form.assigned_operator_ids.includes(o.id));
       const selectedAgs = agents.filter(a => form.assigned_agent_ids.includes(a.id));
 
+      const stateSlug = toSlug(territory.state);
+      const countySlug = toSlug(territory.county) + '-' + stateSlug.substring(0, 2);
+
       const payload = {
         assigned_operator_ids: form.assigned_operator_ids,
         assigned_operator_names: selectedOps.map(o => o._label),
@@ -188,8 +211,8 @@ export default function TerritoryAssignmentDrawer({ territory, onClose, onSaved 
         launch_status: form.launch_status,
         county: territory.county,
         state: territory.state,
-        state_slug: territory.state?.toLowerCase().replace(/\s+/g, '-') || '',
-        county_slug: `${territory.county?.toLowerCase().replace(/\s+/g, '-')}-${territory.state?.toLowerCase()}` || '',
+        state_slug: stateSlug,
+        county_slug: countySlug,
       };
 
       if (tlRecord) {
