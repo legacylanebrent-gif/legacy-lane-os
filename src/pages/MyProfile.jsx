@@ -247,6 +247,10 @@ export default function MyProfile() {
     try {
       const wasPhoneEmpty = !user?.phone && !user?.phone_number;
       await base44.auth.updateMe({ ...form, notification_settings: notifications });
+
+      // Sync local user state so conditional rendering reflects saved changes immediately
+      setUser(prev => ({ ...prev, ...form, notification_settings: notifications }));
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
 
@@ -273,6 +277,8 @@ export default function MyProfile() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setForm(p => ({ ...p, [field]: file_url }));
       await base44.auth.updateMe({ [field]: file_url });
+      // Sync uploaded field to local user state
+      setUser(prev => ({ ...prev, [field]: file_url }));
     } catch (e) { alert('Upload failed'); }
     finally { setUploading(p => ({ ...p, [field]: false })); }
   };
@@ -528,8 +534,8 @@ export default function MyProfile() {
                     onConfirm: async () => {
                       setConfirmModal(p => ({ ...p, open: false }));
                       await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                      setUser(prev => ({ ...prev, previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' }));
                       await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
-                      alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
                     }
                   })}>
                   <Users className="w-4 h-4" /> Upgrade to Agent + operator
@@ -553,8 +559,8 @@ export default function MyProfile() {
                     onConfirm: async () => {
                       setConfirmModal(p => ({ ...p, open: false }));
                       await base44.auth.updateMe({ previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' });
+                      setUser(prev => ({ ...prev, previous_account_type: acct, agent_operator_upgrade_date: new Date().toISOString(), primary_account_type: 'agent_operator' }));
                       await base44.functions.invoke('notifyAdminsOfApplication', { applicant_user_id: user?.id, applicant_name: user?.full_name, applicant_email: user?.email, application_type: 'agent_operator_upgrade', details: `Upgraded from ${acct}` });
-                      alert('✅ Role upgraded! Please refresh the page to see your new combined dashboard.');
                     }
                   })}>
                   <Building2 className="w-4 h-4" /> Upgrade to Agent + Estate Sale Company Owner
