@@ -166,6 +166,7 @@ import CommunityEvents from './pages/CommunityEvents';
 import CommunityEventSubmit from './pages/CommunityEventSubmit';
 import AdminCommunityEvents from './pages/AdminCommunityEvents';
 import ThankYou from './pages/ThankYou';
+import TerritoryMigrationAudit from './pages/TerritoryMigrationAudit';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -444,6 +445,7 @@ const AuthenticatedApp = () => {
       <Route path="/mobile/messages" element={<MobileAppShell title="Messages"><Pages.Messages /></MobileAppShell>} />
       <Route path="/mobile/notifications" element={<MobileAppShell title="Notifications"><Pages.Notifications /></MobileAppShell>} />
       <Route path="/ThankYou" element={<ThankYou />} />
+      <Route path="/TerritoryMigrationAudit" element={<LayoutWrapper currentPageName="TerritoryMigrationAudit"><TerritoryMigrationAudit /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

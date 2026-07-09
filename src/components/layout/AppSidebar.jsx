@@ -117,6 +117,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'NationalCoverageGrid',   label: 'National Coverage',      icon: Globe,           group: 'Admin', subgroup: '🏠 Sales & Territory' },
   { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
   { page: 'AdminHousioSync',        label: 'Housio Territory Sync',  icon: Network,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
+  { page: 'TerritoryMigrationAudit', label: 'Territory Migration Audit', icon: Database,      group: 'Admin', subgroup: '🏠 Sales & Territory' },
 
   // Admin › SEO & Content
   { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',    icon: TrendingUp,      group: 'Admin', subgroup: '🔍 SEO & Content' },

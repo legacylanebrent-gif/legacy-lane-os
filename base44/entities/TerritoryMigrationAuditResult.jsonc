@@ -1,0 +1,312 @@
+{
+  "name": "TerritoryMigrationAuditResult",
+  "type": "object",
+  "properties": {
+    "audit_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the audit was run"
+    },
+    "audited_by": {
+      "type": "string",
+      "description": "User who ran the audit"
+    },
+    "total_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_active_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_inactive_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_micro_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_active_micro_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_inactive_micro_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "territories_with_zero_micros": {
+      "type": "integer",
+      "default": 0
+    },
+    "orphaned_micro_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "duplicate_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "duplicate_micro_territories": {
+      "type": "integer",
+      "default": 0
+    },
+    "micros_missing_geocoding": {
+      "type": "integer",
+      "default": 0
+    },
+    "micros_with_valid_geocoding": {
+      "type": "integer",
+      "default": 0
+    },
+    "records_ready_for_export": {
+      "type": "integer",
+      "default": 0
+    },
+    "records_blocked_from_export": {
+      "type": "integer",
+      "default": 0
+    },
+    "state_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "territory_count": {
+            "type": "integer"
+          },
+          "micro_count": {
+            "type": "integer"
+          },
+          "geocoded_count": {
+            "type": "integer"
+          },
+          "missing_geocoding": {
+            "type": "integer"
+          },
+          "orphaned_micros": {
+            "type": "integer"
+          },
+          "duplicates": {
+            "type": "integer"
+          }
+        }
+      },
+      "default": []
+    },
+    "county_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "territory_count": {
+            "type": "integer"
+          },
+          "micro_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "default": []
+    },
+    "territory_micro_counts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "territory_id": {
+            "type": "string"
+          },
+          "territory_name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "micro_count": {
+            "type": "integer"
+          },
+          "has_micros": {
+            "type": "boolean"
+          }
+        }
+      },
+      "default": []
+    },
+    "missing_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "record_type": {
+            "type": "string",
+            "description": "territory or micro_territory"
+          },
+          "record_id": {
+            "type": "string"
+          },
+          "missing_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default": []
+    },
+    "geocoding_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "micro_territory_id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "issue_type": {
+            "type": "string",
+            "description": "missing_lat, missing_lng, invalid_coords, coords_outside_state, zip_city_mismatch"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "duplicate_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "record_type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string",
+            "description": "The field(s) that are duplicated"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "record_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default": []
+    },
+    "orphaned_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "micro_territory_id": {
+            "type": "string"
+          },
+          "territory_id": {
+            "type": "string",
+            "description": "The parent ID that doesn't exist"
+          },
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "fixes_needed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "export_readiness": {
+      "type": "string",
+      "enum": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "default": "red"
+    },
+    "export_readiness_label": {
+      "type": "string",
+      "description": "Human-readable readiness status"
+    },
+    "ready_for_houszu_export": {
+      "type": "boolean",
+      "default": false
+    },
+    "export_preview": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "territory_id": {
+            "type": "string"
+          },
+          "territory_name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "micro_territory_id": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "ready_for_export": {
+            "type": "boolean"
+          },
+          "block_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "audit_date"
+  ]
+}
