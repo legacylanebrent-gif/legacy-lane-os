@@ -35,6 +35,16 @@
       "type": "integer",
       "default": 0
     },
+    "total_zip_codes": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total ZIP codes across all territories"
+    },
+    "total_cities": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total cities across all micro-territories"
+    },
     "territories_with_zero_micros": {
       "type": "integer",
       "default": 0
@@ -51,6 +61,26 @@
       "type": "integer",
       "default": 0
     },
+    "conflicting_parent_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Micro-territories with multiple conflicting parent territory IDs"
+    },
+    "duplicate_coordinates_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Micro-territories sharing identical lat/lng with another record"
+    },
+    "coords_outside_state_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Micro-territories whose coordinates fall outside their stated state bounding box"
+    },
+    "zip_mismatch_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Territories with ZIP codes that don't match their state's ZIP range"
+    },
     "micros_missing_geocoding": {
       "type": "integer",
       "default": 0
@@ -58,6 +88,26 @@
     "micros_with_valid_geocoding": {
       "type": "integer",
       "default": 0
+    },
+    "geocoding_source_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether geocoding source data is available in the database"
+    },
+    "last_geocoded_date_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether last geocoded timestamp is available in the database"
+    },
+    "polygon_data_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether polygon/boundary data is available"
+    },
+    "territory_type_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether territory type field exists in the data"
     },
     "records_ready_for_export": {
       "type": "integer",
@@ -81,6 +131,9 @@
           "micro_count": {
             "type": "integer"
           },
+          "zip_count": {
+            "type": "integer"
+          },
           "geocoded_count": {
             "type": "integer"
           },
@@ -91,6 +144,9 @@
             "type": "integer"
           },
           "duplicates": {
+            "type": "integer"
+          },
+          "coords_outside_state": {
             "type": "integer"
           }
         }
@@ -112,6 +168,9 @@
             "type": "integer"
           },
           "micro_count": {
+            "type": "integer"
+          },
+          "zip_count": {
             "type": "integer"
           }
         }
@@ -135,10 +194,16 @@
           "county": {
             "type": "string"
           },
+          "zip_count": {
+            "type": "integer"
+          },
           "micro_count": {
             "type": "integer"
           },
           "has_micros": {
+            "type": "boolean"
+          },
+          "is_active": {
             "type": "boolean"
           }
         }
@@ -151,8 +216,7 @@
         "type": "object",
         "properties": {
           "record_type": {
-            "type": "string",
-            "description": "territory or micro_territory"
+            "type": "string"
           },
           "record_id": {
             "type": "string"
@@ -182,8 +246,7 @@
             "type": "string"
           },
           "issue_type": {
-            "type": "string",
-            "description": "missing_lat, missing_lng, invalid_coords, coords_outside_state, zip_city_mismatch"
+            "type": "string"
           },
           "details": {
             "type": "string"
@@ -201,8 +264,7 @@
             "type": "string"
           },
           "key": {
-            "type": "string",
-            "description": "The field(s) that are duplicated"
+            "type": "string"
           },
           "count": {
             "type": "integer"
@@ -226,14 +288,106 @@
             "type": "string"
           },
           "territory_id": {
-            "type": "string",
-            "description": "The parent ID that doesn't exist"
+            "type": "string"
           },
           "state": {
             "type": "string"
           },
           "county": {
             "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "conflicting_parent_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "micro_territory_id": {
+            "type": "string"
+          },
+          "parent_territory_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "state": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "duplicate_coordinate_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "micro_territory_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "default": []
+    },
+    "coords_outside_state_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "micro_territory_id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "expected_range": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "zip_mismatch_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "territory_id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "invalid_zips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -256,8 +410,7 @@
       "default": "red"
     },
     "export_readiness_label": {
-      "type": "string",
-      "description": "Human-readable readiness status"
+      "type": "string"
     },
     "ready_for_houszu_export": {
       "type": "boolean",
@@ -274,16 +427,28 @@
           "territory_name": {
             "type": "string"
           },
+          "territory_type": {
+            "type": "string"
+          },
           "state": {
             "type": "string"
           },
           "county": {
             "type": "string"
           },
+          "city": {
+            "type": "string"
+          },
+          "zip_codes": {
+            "type": "string"
+          },
           "micro_territory_id": {
             "type": "string"
           },
-          "city": {
+          "micro_territory_name": {
+            "type": "string"
+          },
+          "parent_territory_id": {
             "type": "string"
           },
           "latitude": {
@@ -292,8 +457,20 @@
           "longitude": {
             "type": "number"
           },
+          "geocoding_source": {
+            "type": "string"
+          },
+          "last_geocoded_date": {
+            "type": "string"
+          },
           "is_active": {
             "type": "boolean"
+          },
+          "created_date": {
+            "type": "string"
+          },
+          "updated_date": {
+            "type": "string"
           },
           "ready_for_export": {
             "type": "boolean"
