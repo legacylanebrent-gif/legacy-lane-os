@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
   }
 
   const bodyText = await req.text();
-  const webhookSecret = Deno.env.get('CUSTOMERIO_WEBHOOK_SIGNING_SECRET') || '';
+  const webhookSecret = Deno.env.get('CUSTOMERIO_WEBHOOK_KEY') || '';
   const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
 
   // Signature validation
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     }
   } else if (enabled) {
     // Secret not set but enabled — log warning but allow (for initial setup)
-    console.warn('[CustomerIO Webhook] CUSTOMERIO_WEBHOOK_SIGNING_SECRET not set. Consider setting it for security.');
+    console.warn('[CustomerIO Webhook] CUSTOMERIO_WEBHOOK_KEY not set. Consider setting it for security.');
   }
 
   // Parse body

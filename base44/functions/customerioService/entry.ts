@@ -9,9 +9,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 //   CUSTOMERIO_ENABLED=true
 //   CUSTOMERIO_API_MODE=pipelines
 //   CUSTOMERIO_REGION=us
-//   CUSTOMERIO_PIPELINES_WRITE_KEY=
+//   CUSTOMERIO_API_KEY=
 //   CUSTOMERIO_APP_API_KEY=
-//   CUSTOMERIO_WEBHOOK_SIGNING_SECRET=
+//   CUSTOMERIO_WEBHOOK_KEY=
 //   CUSTOMERIO_DEFAULT_FROM_EMAIL=
 //   CUSTOMERIO_DEFAULT_FROM_NAME=
 // ─────────────────────────────────────────────
@@ -20,7 +20,7 @@ function getCustomerIoConfig() {
   const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
   const apiMode = Deno.env.get('CUSTOMERIO_API_MODE') || 'pipelines';
   const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
-  const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '';
+  const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_API_KEY') || '';
   const appApiKey = Deno.env.get('CUSTOMERIO_APP_API_KEY') || '';
   const fromEmail = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_EMAIL') || '';
   const fromName = Deno.env.get('CUSTOMERIO_DEFAULT_FROM_NAME') || 'EstateSalen Alerts';

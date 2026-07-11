@@ -9,7 +9,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 function getCustomerIoConfig() {
   const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
-  const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '';
+  const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_API_KEY') || '';
   const configured = enabled && !!pipelinesWriteKey;
   return { enabled, configured, pipelinesWriteKey };
 }
