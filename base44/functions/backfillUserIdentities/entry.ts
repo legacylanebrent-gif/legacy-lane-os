@@ -6,9 +6,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // masterUserID for all existing EstateSalen users who lack one.
 // ─────────────────────────────────────────────
 
-const IDENTITY_API_URL = Deno.env.get("HOUSZU_IDENTITY_API_URL") || "";
-const IDENTITY_API_KEY = Deno.env.get("HOUSZU_IDENTITY_API_KEY") || "";
-const IDENTITY_WEBHOOK_SECRET = Deno.env.get("HOUSZU_IDENTITY_WEBHOOK_SECRET") || "";
+const HOUSZU_APP_ID = "69d11abfe3a01036002a99a2";
+const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
 
 const CIO_SITE_ID = Deno.env.get("CUSTOMERIO_SITE_ID") || "";
 const CIO_API_KEY = Deno.env.get("CUSTOMERIO_API_KEY") || "";
@@ -34,29 +33,14 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function hmacSign(secret, message) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  return Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function callIdentityAPI(payload) {
-  const signature = await hmacSign(IDENTITY_WEBHOOK_SECRET, JSON.stringify(payload));
-  const body = {
-    ...payload,
-    shared_key: IDENTITY_API_KEY,
-    signature,
-  };
-  const res = await fetch(`${IDENTITY_API_URL}/functions/identityResolve`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const text = await res.text();
-  let response;
-  try { response = JSON.parse(text); } catch { response = { raw: text }; }
-  if (!res.ok) throw new Error(`Identity API error (${res.status}): ${text}`);
-  return response;
+// Call Houszu Central Identity API via cross-app SDK invocation
+async function callIdentityAPI(base44, payload) {
+  const result = await base44.asServiceRole.functions.invoke(
+    "identityResolve",
+    { ...payload, shared_key: HOUSZU_SHARED_KEY },
+    { appId: HOUSZU_APP_ID }
+  );
+  return result;
 }
 
 async function syncToCustomerIO(masterUserID, profile) {
@@ -159,7 +143,7 @@ Deno.serve(async (req) => {
       };
 
       try {
-        const apiResponse = await callIdentityAPI(payload);
+        const apiResponse = await callIdentityAPI(base44, payload);
 
         if (apiResponse.requiresReview) {
           counts.reviewRequired++;
