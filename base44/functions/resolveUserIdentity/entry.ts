@@ -7,8 +7,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Then syncs the resolved identity to Customer.io.
 // ─────────────────────────────────────────────
 
-const HOUSZU_APP_ID = "69d11abfe3a01036002a99a2";
-const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
+const IDENTITY_API_URL = Deno.env.get("HOUSZU_IDENTITY_API_URL") || "";
+const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_IDENTITY_API_KEY") || Deno.env.get("HOUSZU_API_KEY") || Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
 
 // Customer.io Track API config (inlined — functions deploy independently)
 const CIO_SITE_ID = Deno.env.get("CUSTOMERIO_SITE_ID") || "";
@@ -50,15 +50,32 @@ async function hmacSign(secret, message) {
   return Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Call Houszu Central Identity API via cross-app SDK invocation
-// Same pattern as getHouszu_DealDetails, notifyHouszu_CloseDeal, etc.
-async function callIdentityAPI(base44, payload) {
-  const result = await base44.asServiceRole.functions.invoke(
-    "identityResolve",
-    { ...payload, shared_key: HOUSZU_SHARED_KEY },
-    { appId: HOUSZU_APP_ID }
-  );
-  return result;
+// Call Houszu Central Identity API via raw HTTP
+// Auth: x-api-key header with HOUSZU_SHARED_API_KEY (matches Houszu's ATLAS_EXCHANGE_API_KEY)
+async function callIdentityAPI(payload) {
+  const url = `${IDENTITY_API_URL}/functions/identityResolve`;
+  console.log("[Identity] POST", url);
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": HOUSZU_SHARED_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await res.text();
+  console.log("[Identity] Response status:", res.status, "body:", text);
+
+  let response;
+  try { response = JSON.parse(text); } catch { response = { raw: text }; }
+
+  if (!res.ok) {
+    throw new Error(`Identity API error (${res.status}): ${text}`);
+  }
+
+  return response;
 }
 
 // Sync to Customer.io using masterUserID as the identifier
@@ -178,7 +195,7 @@ async function resolveIdentity(base44, { localUserID, localAccountID, email, ema
 
   let apiResponse;
   try {
-    apiResponse = await callIdentityAPI(base44, payload);
+    apiResponse = await callIdentityAPI(payload);
   } catch (err) {
     console.error("[IdentitySync] API call failed:", err.message);
     await base44.asServiceRole.entities.User.update(localUserID, {

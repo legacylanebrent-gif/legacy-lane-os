@@ -6,8 +6,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // masterUserID for all existing EstateSalen users who lack one.
 // ─────────────────────────────────────────────
 
-const HOUSZU_APP_ID = "69d11abfe3a01036002a99a2";
-const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
+const IDENTITY_API_URL = Deno.env.get("HOUSZU_IDENTITY_API_URL") || "";
+const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_IDENTITY_API_KEY") || Deno.env.get("HOUSZU_API_KEY") || Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
 
 const CIO_SITE_ID = Deno.env.get("CUSTOMERIO_SITE_ID") || "";
 const CIO_API_KEY = Deno.env.get("CUSTOMERIO_API_KEY") || "";
@@ -33,14 +33,23 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Call Houszu Central Identity API via cross-app SDK invocation
-async function callIdentityAPI(base44, payload) {
-  const result = await base44.asServiceRole.functions.invoke(
-    "identityResolve",
-    { ...payload, shared_key: HOUSZU_SHARED_KEY },
-    { appId: HOUSZU_APP_ID }
-  );
-  return result;
+// Call Houszu Central Identity API via raw HTTP
+// Auth: x-api-key header with HOUSZU_SHARED_API_KEY (matches Houszu's ATLAS_EXCHANGE_API_KEY)
+async function callIdentityAPI(payload) {
+  const url = `${IDENTITY_API_URL}/functions/identityResolve`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": HOUSZU_SHARED_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+  const text = await res.text();
+  let response;
+  try { response = JSON.parse(text); } catch { response = { raw: text }; }
+  if (!res.ok) throw new Error(`Identity API error (${res.status}): ${text}`);
+  return response;
 }
 
 async function syncToCustomerIO(masterUserID, profile) {
@@ -143,7 +152,7 @@ Deno.serve(async (req) => {
       };
 
       try {
-        const apiResponse = await callIdentityAPI(base44, payload);
+        const apiResponse = await callIdentityAPI(payload);
 
         if (apiResponse.requiresReview) {
           counts.reviewRequired++;
