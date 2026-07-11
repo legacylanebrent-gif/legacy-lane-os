@@ -41,18 +41,16 @@ async function hmacSign(secret, message) {
 }
 
 async function callIdentityAPI(payload) {
-  const payloadStr = JSON.stringify(payload);
-  const signature = await hmacSign(IDENTITY_WEBHOOK_SECRET, payloadStr);
-  const res = await fetch(`${IDENTITY_API_URL}/api/identity/resolve`, {
+  const signature = await hmacSign(IDENTITY_WEBHOOK_SECRET, JSON.stringify(payload));
+  const body = {
+    ...payload,
+    shared_key: IDENTITY_API_KEY,
+    signature,
+  };
+  const res = await fetch(`${IDENTITY_API_URL}/functions/identityResolve`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Identity-API-Key": IDENTITY_API_KEY,
-      "X-Identity-Signature": signature,
-      "X-Identity-Timestamp": payload.timestamp,
-      "X-Identity-Request-ID": payload.requestID,
-    },
-    body: payloadStr,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
   const text = await res.text();
   let response;

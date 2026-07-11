@@ -51,21 +51,21 @@ async function hmacSign(secret, message) {
   return Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Call Houszu Central Identity API: POST /api/identity/resolve
+// Call Houszu Central Identity API: POST /functions/identityResolve
+// Follows same auth pattern as all other Houszu integrations — shared_key in body
 async function callIdentityAPI(payload) {
-  const payloadStr = JSON.stringify(payload);
-  const signature = await hmacSign(IDENTITY_WEBHOOK_SECRET, payloadStr);
+  const signature = await hmacSign(IDENTITY_WEBHOOK_SECRET, JSON.stringify(payload));
 
-  const res = await fetch(`${IDENTITY_API_URL}/api/identity/resolve`, {
+  const body = {
+    ...payload,
+    shared_key: IDENTITY_API_KEY,
+    signature,
+  };
+
+  const res = await fetch(`${IDENTITY_API_URL}/functions/identityResolve`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Identity-API-Key": IDENTITY_API_KEY,
-      "X-Identity-Signature": signature,
-      "X-Identity-Timestamp": payload.timestamp,
-      "X-Identity-Request-ID": payload.requestID,
-    },
-    body: payloadStr,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 
   const responseText = await res.text();
