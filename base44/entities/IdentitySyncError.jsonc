@@ -1,0 +1,52 @@
+{
+  "name": "IdentitySyncError",
+  "type": "object",
+  "properties": {
+    "localUserID": {
+      "type": "string",
+      "description": "EstateSalen local Base44 user ID"
+    },
+    "maskedEmail": {
+      "type": "string",
+      "description": "Masked email for identification without exposing PII"
+    },
+    "failureReason": {
+      "type": "string",
+      "description": "Why identity resolution failed"
+    },
+    "retryCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "firstFailureTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastAttemptTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nextRetryTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolutionStatus": {
+      "type": "string",
+      "enum": [
+        "pending_retry",
+        "resolved",
+        "permanent_failure",
+        "review_required"
+      ],
+      "default": "pending_retry"
+    },
+    "apiResponse": {
+      "type": "object",
+      "description": "Raw API response from the failed attempt"
+    }
+  },
+  "required": [
+    "localUserID",
+    "failureReason"
+  ]
+}

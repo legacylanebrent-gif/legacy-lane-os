@@ -3,80 +3,46 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // ─────────────────────────────────────────────
 // onUserCreated
 // Entity automation: fires when a new User is created.
-// Creates a ConsumerMarketingProfile and fires CustomerIO identify
-// so new users are synced in real-time (not just via scheduled backfill).
+// 1. Creates/updates ConsumerMarketingProfile
+// 2. Calls resolveUserIdentity to obtain masterUserID from Houszu
+// 3. Syncs to Customer.io using masterUserID
 // ─────────────────────────────────────────────
 
-function getCustomerIoConfig() {
-  const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
-  const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_API_KEY') || '';
-  const configured = enabled && !!pipelinesWriteKey;
-  return { enabled, configured, pipelinesWriteKey };
-}
-
-async function cioIdentify(profile, config) {
-  if (!config.configured) return { skipped: true };
-  const payload = {
-    userId: profile.user_id || profile.email,
-    traits: {
-      email: profile.email,
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      role: profile.role || 'consumer',
-      subscription_tier: profile.subscription_tier || 'none',
-      subscription_status: profile.subscription_status || 'none',
-      zip_code: profile.zip_code || '',
-      city: profile.city || '',
-      state: profile.state || '',
-      source: profile.source || 'registration_automation',
-      updated_at: new Date().toISOString(),
-    },
-  };
-  const res = await fetch('https://cdp.customer.io/v1/identify', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`CIO identify failed: ${res.status}`);
-  return { sent: true };
+function normalizeEmail(email) {
+  return email ? email.trim().toLowerCase() : "";
 }
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const config = getCustomerIoConfig();
 
     const body = await req.json().catch(() => ({}));
-    // Entity automation payload: { event: { type, entity_name, entity_id }, data: {...} }
     const userData = body.data;
     if (!userData || !userData.id) {
-      return Response.json({ success: false, reason: 'No user data in payload' });
+      return Response.json({ success: false, reason: "No user data in payload" });
     }
 
-    // Check if profile already exists
+    const normalizedEmail = normalizeEmail(userData.email);
+    const now = new Date().toISOString();
+
+    // ── Step 1: Create/update ConsumerMarketingProfile ──
     const existing = await base44.asServiceRole.entities.ConsumerMarketingProfile.filter({
-      email: userData.email,
+      email: normalizedEmail,
     });
 
     const profileData = {
       user_id: userData.id,
-      email: userData.email,
-      first_name: userData.full_name?.split(' ')[0] || '',
-      last_name: userData.full_name?.split(' ').slice(1).join(' ') || '',
-      zip_code: userData.zip_code || '',
-      city: userData.city || '',
-      state: userData.state || '',
-      role: userData.primary_account_type || 'consumer',
-      subscription_tier: userData.subscription_tier || 'none',
-      subscription_status: userData.subscription_status || 'none',
+      email: normalizedEmail,
+      first_name: userData.full_name?.split(" ")[0] || "",
+      last_name: userData.full_name?.split(" ").slice(1).join(" ") || "",
+      zip_code: userData.zip_code || "",
+      city: userData.city || "",
+      state: userData.state || "",
       global_marketing_opt_in: true,
       estate_sale_alerts_opt_in: true,
       vip_alerts_opt_in: false,
       weekly_digest_opt_in: false,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     };
 
     let profileId;
@@ -86,8 +52,8 @@ Deno.serve(async (req) => {
     } else {
       const created = await base44.asServiceRole.entities.ConsumerMarketingProfile.create({
         ...profileData,
-        source: 'website_signup',
-        created_at: new Date().toISOString(),
+        source: "website_signup",
+        created_at: now,
       });
       profileId = created.id;
     }
@@ -97,21 +63,40 @@ Deno.serve(async (req) => {
       consumer_marketing_synced: true,
     });
 
-    // Fire CustomerIO identify
+    // ── Step 2: Resolve identity via Houszu Central Identity API ──
+    let identityResult = null;
     try {
-      await cioIdentify({
-        user_id: userData.id,
-        email: userData.email,
-        ...profileData,
-        source: 'registration_automation',
-      }, config);
+      identityResult = await base44.asServiceRole.functions.invoke("resolveUserIdentity", {
+        action: "resolve",
+        localUserID: userData.id,
+        emailVerified: true,
+        userData: {
+          id: userData.id,
+          email: normalizedEmail,
+          full_name: userData.full_name,
+          business_phone: userData.business_phone,
+          primary_account_type: userData.primary_account_type,
+          subscription_tier: userData.subscription_tier,
+          subscription_status: userData.subscription_status,
+        },
+      });
     } catch (e) {
-      console.error('[onUserCreated] CIO identify failed:', e.message);
+      console.error("[onUserCreated] Identity resolution failed:", e.message);
+      // Mark as retrying — identity will be resolved by backfill
+      await base44.asServiceRole.entities.User.update(userData.id, {
+        identityResolutionStatus: "retrying",
+        identityLastCheckedAt: now,
+        identitySyncError: e.message,
+      });
     }
 
-    return Response.json({ success: true, profile_id: profileId });
+    return Response.json({
+      success: true,
+      profile_id: profileId,
+      identity: identityResult,
+    });
   } catch (error) {
-    console.error('onUserCreated error:', error);
+    console.error("[onUserCreated] error:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

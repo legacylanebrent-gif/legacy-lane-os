@@ -79,7 +79,12 @@ async function identifyConsumer(profile, config) {
     return { skipped: true, reason: 'no_email' };
   }
 
-  const identifier = email;
+  // Per cross-platform spec: Customer.io must be identified using masterUserID
+  // Falls back to email only during transition (before identity is resolved)
+  const identifier = profile.masterUserID ? profile.masterUserID.toLowerCase() : email;
+  if (!profile.masterUserID) {
+    console.log('[CustomerIO identify] WARNING: No masterUserID — using email as fallback identifier. Identity should be resolved via Houszu.');
+  }
   const phone = normalizePhone(profile.phone);
 
   const attrs = {
@@ -114,6 +119,11 @@ async function identifyConsumer(profile, config) {
     source: profile.source || 'website_signup',
     created_at: profile.created_at || new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    // ── Cross-platform identity attributes ──
+    is_estatesalen_user: true,
+    platforms: ['estatesalen'],
+    estatesalen_local_user_id: profile.user_id || profile.localUserID || '',
+    master_user_id: profile.masterUserID || '',
   };
 
   const url = `${config.baseUrl}/api/v1/customers/${encodeURIComponent(identifier)}`;

@@ -72,6 +72,41 @@
       "type": "boolean",
       "default": false,
       "description": "Whether this user has been synced to ConsumerMarketingProfile and Customer.io"
+    },
+    "masterUserID": {
+      "type": "string",
+      "description": "Permanent cross-platform identity ID issued by Houszu Central Identity Authority. Format: mu_<secure unique identifier>. Stored in lowercase. Not user-editable."
+    },
+    "identityResolutionStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "resolved",
+        "provisional",
+        "review_required",
+        "failed",
+        "retrying"
+      ],
+      "default": "pending",
+      "description": "Status of cross-platform identity resolution with Houszu Central Identity Authority"
+    },
+    "identityResolvedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the masterUserID was successfully resolved"
+    },
+    "identityLastCheckedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time identity resolution was attempted"
+    },
+    "identitySyncError": {
+      "type": "string",
+      "description": "Last error message from identity resolution, if any"
+    },
+    "centralIdentityVersion": {
+      "type": "string",
+      "description": "Version of the central identity schema this record was synced against"
     }
   }
 }

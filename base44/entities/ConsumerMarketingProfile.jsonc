@@ -88,6 +88,22 @@
     "updated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "masterUserID": {
+      "type": "string",
+      "description": "Permanent cross-platform identity ID from Houszu. Used as the Customer.io identifier."
+    },
+    "identityResolutionStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "resolved",
+        "provisional",
+        "review_required",
+        "failed",
+        "retrying"
+      ],
+      "default": "pending"
     }
   },
   "required": [
