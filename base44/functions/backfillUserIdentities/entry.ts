@@ -142,7 +142,8 @@ Deno.serve(async (req) => {
       const requestID = crypto.randomUUID();
       const payload = {
         platform: "estatesalen",
-        localUserID: u.id,
+        email: normalizedEmail,
+        platform_user_id: u.id,
         verifiedEmail: normalizedEmail,
         emailVerified: true,
         firstName: u.full_name?.split(" ")[0] || "",
@@ -165,18 +166,18 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        if (!apiResponse.success || !apiResponse.masterUserID) {
+        const masterUserID = (apiResponse.master_person_id || apiResponse.masterUserID || "").toLowerCase();
+
+        if (!apiResponse.success || !masterUserID) {
           counts.failed++;
           await base44.asServiceRole.entities.User.update(u.id, {
             identityResolutionStatus: "failed",
             identityLastCheckedAt: now,
-            identitySyncError: apiResponse.message || "No masterUserID",
+            identitySyncError: apiResponse.message || "No master_person_id",
           });
           results.push({ localUserID: u.id, status: "failed", message: apiResponse.message });
           continue;
         }
-
-        const masterUserID = apiResponse.masterUserID.toLowerCase();
 
         await base44.asServiceRole.entities.User.update(u.id, {
           masterUserID,
@@ -187,7 +188,7 @@ Deno.serve(async (req) => {
           centralIdentityVersion: "1.0",
         });
 
-        if (apiResponse.isNewGlobalIdentity) {
+        if (apiResponse.created) {
           counts.created++;
         } else {
           counts.matched++;
@@ -223,8 +224,8 @@ Deno.serve(async (req) => {
           localUserID: u.id,
           masterUserID,
           status: "resolved",
-          isNew: apiResponse.isNewGlobalIdentity || false,
-          existingPlatforms: apiResponse.existingPlatforms || [],
+          isNew: apiResponse.created || false,
+          existingPlatforms: apiResponse.platforms || [],
         });
       } catch (err) {
         counts.failed++;

@@ -122,11 +122,12 @@ async function syncToCustomerIO(masterUserID, profile) {
 // Log error to IdentitySyncError entity
 async function logSyncError(base44, { localUserID, email, reason, apiResponse, retryCount }) {
   try {
+    const rc = retryCount || 0;
     const existing = await base44.asServiceRole.entities.IdentitySyncError.filter(
       { localUserID }, "-created_date", 1
     );
     const now = new Date().toISOString();
-    const nextRetry = new Date(Date.now() + (retryCount + 1) * 3600000).toISOString();
+    const nextRetry = new Date(Date.now() + (rc + 1) * 3600000).toISOString();
 
     if (existing.length > 0) {
       await base44.asServiceRole.entities.IdentitySyncError.update(existing[0].id, {
@@ -182,7 +183,8 @@ async function resolveIdentity(base44, { localUserID, localAccountID, email, ema
   const requestID = crypto.randomUUID();
   const payload = {
     platform: "estatesalen",
-    localUserID,
+    email: normalizedEmail,
+    platform_user_id: localUserID,
     localAccountID: localAccountID || null,
     verifiedEmail: normalizedEmail,
     emailVerified: true,
@@ -224,23 +226,23 @@ async function resolveIdentity(base44, { localUserID, localAccountID, email, ema
     return { success: false, status: "review_required", message: apiResponse.message, response: apiResponse };
   }
 
-  if (!apiResponse.success || !apiResponse.masterUserID) {
+  const masterUserID = (apiResponse.master_person_id || apiResponse.masterUserID || "").toLowerCase();
+
+  if (!apiResponse.success || !masterUserID) {
     await base44.asServiceRole.entities.User.update(localUserID, {
       identityResolutionStatus: "failed",
       identityLastCheckedAt: now,
-      identitySyncError: apiResponse.message || "Identity API returned no masterUserID",
+      identitySyncError: apiResponse.message || "Identity API returned no master_person_id",
     });
     await logSyncError(base44, {
       localUserID,
       email: normalizedEmail,
-      reason: apiResponse.message || "No masterUserID returned",
+      reason: apiResponse.message || "No master_person_id returned",
       apiResponse,
       retryCount: 0,
     });
     return { success: false, status: "failed", message: apiResponse.message, response: apiResponse };
   }
-
-  const masterUserID = (apiResponse.masterUserID || "").toLowerCase();
 
   // Update User with resolved identity
   await base44.asServiceRole.entities.User.update(localUserID, {
@@ -299,8 +301,8 @@ async function resolveIdentity(base44, { localUserID, localAccountID, email, ema
     success: true,
     status: "resolved",
     masterUserID,
-    isNewGlobalIdentity: apiResponse.isNewGlobalIdentity || false,
-    existingPlatforms: apiResponse.existingPlatforms || [],
+    isNewGlobalIdentity: apiResponse.created || false,
+    existingPlatforms: apiResponse.platforms || [],
     customerio: cioResult,
   };
 }
