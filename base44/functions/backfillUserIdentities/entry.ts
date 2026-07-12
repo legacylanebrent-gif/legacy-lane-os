@@ -7,7 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // ─────────────────────────────────────────────
 
 const IDENTITY_API_URL = Deno.env.get("HOUSZU_IDENTITY_API_URL") || "";
-const HOUSZU_SHARED_KEY = Deno.env.get("HOUSZU_IDENTITY_API_KEY") || Deno.env.get("HOUSZU_API_KEY") || Deno.env.get("HOUSZU_SHARED_API_KEY") || "";
+const HOUSZU_SHARED_KEY = Deno.env.get("ATLAS_EXCHANGE_API_KEY") || "";
 
 const CIO_SITE_ID = Deno.env.get("CUSTOMERIO_SITE_ID") || "";
 const CIO_API_KEY = Deno.env.get("CUSTOMERIO_API_KEY") || "";
