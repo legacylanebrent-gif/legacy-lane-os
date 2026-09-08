@@ -1,0 +1,44 @@
+{
+  "name": "Blog Posts from Inventory (Every 3 Days)",
+  "description": "Runs every 3 days at 5am ET. Scans all active/upcoming sales and generates blog posts from their inventory. Automatically skips posts that already exist (deduplication by slug). High-confidence posts auto-publish, others save as drafts.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 3,
+      "interval_unit": "days",
+      "interval_anchor": "2026-06-19T11:20:11.804000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "blog_posts_from_inventory_every_3_days",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateInventoryBasedBlogPosts",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "generateInventoryBasedBlogPosts"
+  }
+}

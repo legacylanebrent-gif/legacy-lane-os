@@ -1,0 +1,38 @@
+{
+  "name": "Generate Brand Hub on New Branded Item",
+  "description": "When a new SEOItemProfile is created or updated with a brand_name, trigger brand hub page generation if not already done.",
+  "trigger": {
+    "condition": "${ (.trigger.data.brand_name != null and .trigger.data.brand_name != \"\" and .trigger.data.brand_name != [] and .trigger.data.brand_name != {}) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "SEOItemProfile"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "generate_brand_hub_on_new_branded_item",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateBrandHubPage",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "generateBrandHubPage"
+  }
+}

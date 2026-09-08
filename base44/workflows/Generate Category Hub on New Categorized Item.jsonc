@@ -1,0 +1,38 @@
+{
+  "name": "Generate Category Hub on New Categorized Item",
+  "description": "When a SEOItemProfile is created or updated with a category_name, generate or refresh the category hub page.",
+  "trigger": {
+    "condition": "${ (.trigger.data.category_name != null and .trigger.data.category_name != \"\" and .trigger.data.category_name != [] and .trigger.data.category_name != {}) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "SEOItemProfile"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "generate_category_hub_on_new_categorized_item",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateCategoryHubPage",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "generateCategoryHubPage"
+  }
+}

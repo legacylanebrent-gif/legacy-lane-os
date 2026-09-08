@@ -1,0 +1,37 @@
+{
+  "name": "Moderate Cool Find Story Content",
+  "description": "Automatically scans new story submissions for phone numbers, emails, URLs, and other contact information, removing them before the AI enrichment runs.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CoolFindStory"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "moderate_cool_find_story_content",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "moderateStoryContent",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "moderateStoryContent"
+  }
+}

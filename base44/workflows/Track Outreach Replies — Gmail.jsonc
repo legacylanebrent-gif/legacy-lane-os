@@ -1,0 +1,38 @@
+{
+  "name": "Track Outreach Replies \u2014 Gmail",
+  "description": "Automatically detects incoming replies to outreach emails and updates sequence status to 'replied'. Uses Gmail webhook to monitor new messages in real-time.",
+  "trigger": {
+    "condition": "${ (.trigger.data.has_new_messages == true) }",
+    "config": {
+      "trigger_type": "connector",
+      "events": [
+        "mailbox"
+      ],
+      "integration_type": "gmail",
+      "resource_id": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "track_outreach_replies_gmail",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "trackOutreachReplies",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "trackOutreachReplies"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Generate Cool Find AI Metadata",
+  "description": "Automatically generates rich metadata for new Cool Finds blog submissions using AI \u2014 assigns category, tags, era, object type, SEO fields, enhanced content, and related story recommendations.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CoolFindStory"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "generate_cool_find_ai_metadata",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateCoolFindMetadata",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "generateCoolFindMetadata"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Detect Comment Spam & Toxicity",
+  "description": "Automatically analyzes new Cool Finds blog comments for spam and toxic/negative content using AI, hiding or flagging problematic comments for moderator review.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CoolFindComment"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "detect_comment_spam_toxicity",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "detectCommentSpam",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "detectCommentSpam"
+  }
+}

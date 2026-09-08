@@ -1,0 +1,44 @@
+{
+  "name": "Draft PropStream Agent Congrats Emails (9:30pm)",
+  "description": "Drafts congrats emails for PropStream agent leads imported in the last 12h. Runs 30 min after the 9pm extraction so new leads exist. Stores drafts only \u2014 no auto-send.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 1 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "draft_propstream_agent_congrats_emails_9_30pm",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "draftPropstreamAgentCongratsEmails",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "draftPropstreamAgentCongratsEmails"
+  }
+}

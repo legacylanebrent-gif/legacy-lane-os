@@ -1,0 +1,44 @@
+{
+  "name": "Geocode Scraped Operators Backfill",
+  "description": "Runs every 5 minutes to backfill city-level geocoding for scraped estate sale operators across FutureEstateOperator, EstatesalesOrgOperator, and FutureOperatorLead. Self-stops when all records are geocoded.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 5,
+      "interval_unit": "minutes",
+      "interval_anchor": "2026-06-23T21:43:35.629000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "geocode_scraped_operators_backfill",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "geocodeScrapedOperatorsDriver",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "geocodeScrapedOperatorsDriver"
+  }
+}

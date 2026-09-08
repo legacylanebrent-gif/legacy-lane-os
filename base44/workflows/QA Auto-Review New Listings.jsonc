@@ -1,0 +1,37 @@
+{
+  "name": "QA Auto-Review New Listings",
+  "description": "When a new estate sale is created, QA Agent automatically generates SEO page and schema markup for quality review.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "EstateSale"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "qa_auto_review_new_listings",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateSaleSeoPage",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "generateSaleSeoPage"
+  }
+}

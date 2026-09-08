@@ -1,0 +1,37 @@
+{
+  "name": "CustomerIO Sync \u2014 CheckIn Created",
+  "description": "Fires Customer.io sale_checked_in event when a user checks into a sale.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CheckIn"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "customerio_sync_checkin_created",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncEntityToCustomerIO",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "syncEntityToCustomerIO"
+  }
+}
