@@ -378,7 +378,7 @@ export default function StateOperators() {
                   <MapContainer center={stateCenter} zoom={mapZoom} style={{ height: '380px', width: '100%' }} className="z-0">
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     {mapMarkers.map(op => (
                       <Marker key={op.id} position={[op.lat, op.lng]}>

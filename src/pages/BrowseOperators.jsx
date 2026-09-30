@@ -159,7 +159,7 @@ export default function BrowseOperators() {
             <MapContainer center={[39.8, -98.6]} zoom={4} style={{ height: '420px', width: '100%' }} className="z-0">
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {stateMarkers.map(({ code, center, count }) => (
                 <Marker key={code} position={center}>

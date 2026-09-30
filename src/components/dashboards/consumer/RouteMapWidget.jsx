@@ -125,7 +125,7 @@ export default function RouteMapWidget() {
         <MapContainer center={mapCenter} zoom={11} style={{ height: '240px', width: '100%' }} scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; OpenStreetMap &copy; CARTO'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {routePoints.length >= 2 && (
             <Polyline positions={routePoints} color="#0891b2" weight={3} opacity={0.7} dashArray="6 4" />
