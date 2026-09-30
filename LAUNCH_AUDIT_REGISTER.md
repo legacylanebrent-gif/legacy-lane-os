@@ -131,5 +131,21 @@ Created 4 LaunchIssue records (B5-01…B5-04). Cumulative open: B1-01 (RLS, P0),
 - B2-02: syntax-corrupted source in 20 functions (5 active notification paths).
 - Mobile/print surfaces; consolidated launch verdict + LaunchReadinessScore records.
 
-## Next batches
-- Finish Batch 6; retest B5-02/B6-01 403 paths after republish.
+## Batch 6 completion — comms/consent + corruption remediation (2026-09-30)
+| ID | Item | Finding | Evidence | Status |
+|---|---|---|---|---|
+| B2-02 fix | Syntax corruption | Full esbuild syntax scan of all 380 function files found **49 corrupted files (not 20)** — the earlier mass-replace of the `operator` identifier corrupted more than the initial grep caught. All 49 reverted to valid identifiers; post-scan shows zero syntax errors across the codebase. All 5 active notification paths (notifyContractSigned, notifyItemSold, notifyPaymentReceived, notifySaleStatusChange, sendOperatorSEODigest) now parse clean, so redeploys are safe. | esbuild scan before/after (380 files) | FIXED |
+| B6-01 | Email consent | 43 email-sending functions audited for marketing opt-in enforcement. 3 broad-marketing senders lacked consent checks: sendPersonalizedSaleNotifications, sendOperatorSEODigest, notifyEndedSalesCleanoutOffer (the rest are admin alerts, transactional, or already preference-driven). Shared guard `base44/shared/consentGuard.ts` created and wired into all 3 — suppresses unsubscribed/bounced/complained/suppressed profiles. | source audit of 43 functions + fix | FIXED |
+| — | Mobile/print | Mobile app shell + tab bar + 9 mobile routes wired in App.jsx; PrintSigns auto-print flow functional. | source read | PASS |
+
+## Consolidated launch verdict (Batches 1–6) — 2026-09-30
+**NOT READY for public launch. Invite-only beta / soft launch is viable now.**
+- **Fixed this audit:** B2-02 (49 corrupted functions reverted, redeploy time bomb defused), B5-03 (updateDealStage ownership + whitelist), B2-01 (releasePendingWalletCredits admin guard), B6-01 (consent guard on 3 marketing senders), B1-03 (sitemap /price-guide — stale finding, resolves fine).
+- **Remaining blockers, in priority order:**
+  1. **B1-01 (P0)** — RLS on all 210 entities; any authenticated user (and anonymous on public flows) can read/write sales, leads, wallet, CRM, directory data. Largest item; staged rollout recommended (sensitive entities first: Lead, WalletTransaction, OperatorWallet, Purchase, Order, Subscription, CRM, ConsumerMarketingProfile).
+  2. **B5-02 (P1)** — metaLeadWebhook fail-open until META_LEADGEN_WEBHOOK_SECRET + META_LEADGEN_VERIFY_TOKEN are set and the function republished.
+  3. **B5-01 (P1)** — Meta access token expired (error 190); refresh in Meta Business Manager to restore 6 ad functions.
+  4. **B2-03 / B5-04 (P1 external)** — Houszu identityResolve not deployed on the Houszu app; identity backfill blocked (4 users parked in `retrying`).
+  5. **B1-02 (P1)** — 13 referenced secrets undeclared (Twilio SMS, Meta lead-gen, email verification, OpenAI model names, etc.).
+- **Launch-content gap:** B4-01 — zero published estate sales in production; finder/alerts render empty at launch until operators publish.
+- **Scorecards recorded (LaunchReadinessScore):** security 45/not_ready, comms 85/soft_launch, mobile 85/soft_launch, overall 60/not_ready.
