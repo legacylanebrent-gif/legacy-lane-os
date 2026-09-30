@@ -104,7 +104,19 @@ None created yet in Batch 1 (read-only audit).
 | EstateSaleFinder render (empty state) | PASS |
 | Marketplace browse render (9 items, filters) | PASS |
 
+## Batch 5 — cross-app contracts + referral exchange (2026-09-30)
+| ID | Severity | Contract | Finding | Evidence | Status |
+|---|---|---|---|---|---|
+| B5-01 | **P1** | Meta Ads | META_ACCESS_TOKEN expired (Graph error 190, subcode 463). 6 functions broken: getFacebookCampaigns, syncMetaAdSpend, metaLeadWebhook lead fetch, createMetaCampaignDraft, launchMetaCampaign, syncFutureOperatorCustomAudience. | live Graph probe | FAIL |
+| B5-02 | **P1 security** | Meta Lead Ads | metaLeadWebhook fails OPEN — META_LEADGEN_WEBHOOK_SECRET undeclared, so signature check is skipped entirely (live: unsigned POST → 200). META_LEADGEN_VERIFY_TOKEN also missing → GET verification always 403, webhook can never be registered with Meta. | live probe + source read | FAIL |
+| B5-03 | **P1 security/money** | Referral Exchange | updateDealStage: authenticates but no ownership check — any logged-in user can move any deal to any stage (incl. 'closed' → mints operator AI credits). No stage whitelist. | source read | FAIL |
+| B5-04 | P2 | Houszu Identity | B2-03 persists: identityResolve 404 on Houszu side (service reachable, ping OK, function not deployed). Identity backfill blocked. | live probe | FAIL (needs Houszu deploy) |
+| — | Info | Houszu | Contracts healthy: ping 200 + shared key match; getDealDetails/getAvailableAgents/updateDealStage endpoints live with proper validation errors. | testHouszuConnection | PASS |
+| — | Info | Customer.io | customerioWebhookIngest rejects invalid signatures (401) — signature enforcement works. Valid-path sync not exercised live (would write records). | live probe | PASS (reject path) |
+| — | Info | Referral Exchange | createReferral / requestAgentPartnership / acceptLeadAndGenerateAgreement / requestPartnershipTerminate/Review all 401-gated + arg-validated; processReferralRewards admin-gated. checkLeadCircumvention runs (0 leads). | live probes + source reads | PASS (except B5-03) |
+
+### Batch 5 issue records
+Created 4 LaunchIssue records (B5-01…B5-04). Cumulative open: B1-01 (RLS, P0), B1-02 (secrets), B1-03 (sitemap 404), B1-07 (dup records), B2-01 (admin guards), B2-02 (syntax corruption), B2-03/B5-04 (identity down), B4-01 (zero published sales), B4-02 (callback origin), B5-01…B5-03.
+
 ## Next batches
-- Batch 5: cross-app contracts (Houszu, Customer.io, Meta) + referral exchange.
-- Batch 5: cross-app contracts (Houszu, Customer.io, Meta) + referral exchange.
-- Batch 6: admin, comms/consent, security, mobile/print, consolidated verdict.
+- Batch 6: admin surface, communications/consent, security, mobile/print, consolidated launch verdict.
