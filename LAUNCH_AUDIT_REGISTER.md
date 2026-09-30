@@ -118,5 +118,18 @@ None created yet in Batch 1 (read-only audit).
 ### Batch 5 issue records
 Created 4 LaunchIssue records (B5-01…B5-04). Cumulative open: B1-01 (RLS, P0), B1-02 (secrets), B1-03 (sitemap 404), B1-07 (dup records), B2-01 (admin guards), B2-02 (syntax corruption), B2-03/B5-04 (identity down), B4-01 (zero published sales), B4-02 (callback origin), B5-01…B5-03.
 
+## Batch 6 — remediation + admin/security surface (2026-09-30)
+| ID | Item | Finding | Evidence | Status |
+|---|---|---|---|---|
+| B6-01 | Destructive endpoints (B2-01) | releasePendingWalletCredits ran UNAUTHENTICATED with 200 (money action: releases wallet holds). Admin guard added to source. Other destructive endpoints guarded: removeDuplicateOperators/Connections → 401/500, adminFreezeOperatorWallet → auth exception. | live probes + source reads | FIXED (unauthenticated 403 verifiable after republish) |
+| B5-03 fix | updateDealStage | Ownership check (participant or admin) + 7-stage whitelist deployed. Live-verified: invalid stage → 400. Non-admin 403 path not drivable from builder seat (admin bypass). | live invoke | VERIFIED (whitelist) / deployed (ownership) |
+| B5-02 fix | metaLeadWebhook | Fail-closed signature check in source; deploy gated on META_LEADGEN_WEBHOOK_SECRET + META_LEADGEN_VERIFY_TOKEN (deferred by user). Old fail-open version stays live until secrets set + republish. Probe side-effects (2 fake leads) cleaned up. | platform test gate + probes | BLOCKED on secrets |
+| B1-03 resolved | Sitemap /price-guide | Bare /price-guide now returns 200 ("Price Guide Page") on the published app — finding stale. Issue record marked resolved. | live fetch | RESOLVED |
+
+### Batch 6 remaining scope
+- Comms/consent: SendEmail opt-in enforcement across notification paths.
+- B2-02: syntax-corrupted source in 20 functions (5 active notification paths).
+- Mobile/print surfaces; consolidated launch verdict + LaunchReadinessScore records.
+
 ## Next batches
-- Batch 6: admin surface, communications/consent, security, mobile/print, consolidated launch verdict.
+- Finish Batch 6; retest B5-02/B6-01 403 paths after republish.
