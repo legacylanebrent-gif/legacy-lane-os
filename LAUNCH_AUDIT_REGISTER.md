@@ -68,9 +68,43 @@ None created yet in Batch 1 (read-only audit).
 3. Await Houszu-side fix for identityResolve; then re-run backfillUserIdentities.
 4. Introduce RLS on sensitive entities (Lead, WalletTransaction, OperatorWallet, Purchase, Cart, Order, Subscription, ConsumerMarketingProfile, CRM entities, directories) — owner-or-admin pattern; public reads only where intended.
 
+## Batch 3 — Operator core write path (2026-09-30, final)
+| ID | Severity | Workflow | Finding | Evidence | Status |
+|---|---|---|---|---|---|
+| B3-01 | Info (false alarm resolved) | Automation engine | 85/87 workflows invoke functions with empty args — initially suspected broken. VERIFIED NOT A DEFECT: all 87 carry the `x-base44-migrated-from-automation` compatibility marker, which injects the legacy automation payload (`payload.data`) the functions expect. | workflow grep + live test | PASS |
+| B3-02 | Info | Sale publish SEO + recap | Zero sale-type SEOPage records and zero SaleRecaps in production. Root cause: all current production sales predate the workflow-engine migration. Live E2E test with a REAL operator: sale create → SEO page generated & published (proper slug, schema); status→completed → SaleRecap created with AI summary. Both paths functional NOW. | live E2E test (sale 6abcd9b7) | PASS — optional production backfill of the 4 existing completed sales recommended |
+| B3-03 | Low | Sale publish SEO | generateSaleSeoPage resolves the operator via `User.filter({id: operator_id})`; an invalid/nonexistent operator_id throws HTTP 500 ("Invalid id value") instead of degrading to company=null. Real data always carries valid operator ids; cosmetic robustness gap only. | failed run 1625dc06 + code inspection | MONITOR |
+
+### Batch 3 test register
+| Test | Result |
+|---|---|
+| Sale creation (real operator id) → publish workflow → SEOPage(type=sale) created & published | PASS |
+| Sale status→completed → recap workflow → SaleRecap with AI summary | PASS |
+| Item sold-status write path (earlier Batch 3 run) | PASS |
+| Workflow empty-args sweep vs compatibility layer (87 workflows) | PASS — no defect |
+| Cleanup of all test records (sales, SEO pages, SaleRecaps, test city hubs) | PASS — 0 leftovers verified |
+
+## Batch 4 — shopper discovery + subscriptions & money flows (2026-09-30)
+| ID | Severity | Workflow | Finding | Evidence | Status |
+|---|---|---|---|---|---|
+| B4-01 | **P1 data readiness** | Shopper discovery | ZERO published estate sales in production (3 draft, 4 completed). Finder, map, route planner, sale alerts and sale-digest emails all render an empty state at launch. Operator write path is verified working (Batch 3), so publishing a draft sale flows through — but no launch content exists. | live status query + finder empty-state screenshot | FAIL (data, not code) |
+| B4-02 | Low | Payments | create-checkout builds Wix callbackUrls from the request `Origin` header — caller-controlled and wrong in PWA/preview contexts per platform guidance. Existing WIX_PAYMENTS_* pipe; mons only affects return-link UX, grants are webhook-driven. | code inspection | MONITOR |
+| — | Info | Payments | wix-payments-webhook grant logic verified complete & idempotent (clears pending_checkout_id on grant): email profiles (OperatorEmailQuota), subscription upgrade (User.pending_upgrade), marketplace purchase (Purchase→SOLD+Order+notify), POS cart (Cart→Order). JWT RS256 fail-closed. Registration updated to include SUBSCRIPTION_CANCELED + SUBSCRIPTION_ENDED (was only ORDER_APPROVED — cancel/expire events would never have arrived). | full source read + re-registration | PASS |
+| — | Info | Payments | Function-to-function invoke (webhook → sendNotification / customerioService) VERIFIED working live (getConfig probe) — earlier dead-end does not apply to same-app service-role invokes. | live invoke | PASS |
+| — | Info | Discovery | searchNearbyEstateSales healthy (lat/lng + radius in meters; correct 0 results for empty data). Marketplace browse renders 9 ACTIVE items with filters/prices. Finder empty state clean, no crash. | live function invoke + preview screenshots | PASS |
+
+### Batch 4 test register
+| Test | Result |
+|---|---|
+| Webhook registration coverage (3 event types) | PASS — re-registered, all events confirmed |
+| Webhook grant paths code audit (4 paths, idempotency) | PASS |
+| Same-app function-to-function invoke | PASS |
+| searchNearbyEstateSales live invoke | PASS (0 results — accurate) |
+| Sale status distribution query | PASS — exposed B4-01 |
+| EstateSaleFinder render (empty state) | PASS |
+| Marketplace browse render (9 items, filters) | PASS |
+
 ## Next batches
-- Batch 3: database write audit on operator workflow (sale → inventory → publish).
-- Batch 3: database write audit on operator workflow (sale → inventory → publish).
-- Batch 4: shopper/discovery + subscriptions & money flows.
+- Batch 5: cross-app contracts (Houszu, Customer.io, Meta) + referral exchange.
 - Batch 5: cross-app contracts (Houszu, Customer.io, Meta) + referral exchange.
 - Batch 6: admin, comms/consent, security, mobile/print, consolidated verdict.
