@@ -9,30 +9,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Fetching AR Estate Sale Company Owners...');
-    const Estate Sale Company Owners = await base44.asServiceRole.entities.FutureEstateOperator.filter(
+    console.log('Fetching AR operators...');
+    const operators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       { state: 'AR' },
       '-created_date',
       1000
     );
     
-    console.log(`Total AR Estate Sale Company Owners: ${Estate Sale Company Owners.length}`);
+    console.log(`Total AR operators: ${operators.length}`);
 
     // Group by phone number
     const phoneMap = new Map();
     const toDelete = [];
     
-    for (const Estate Sale Company Owner of Estate Sale Company Owners) {
-      const phone = Estate Sale Company Owner.phone;
+    for (const operator of operators) {
+      const phone = operator.phone;
       
       if (!phone) continue;
       
       if (phoneMap.has(phone)) {
         // Keep the older one (already in map), delete this newer one
-        toDelete.push(Estate Sale Company Owner.id);
-        console.log(`Duplicate: ${Estate Sale Company Owner.company_name} (${phone}) - will delete`);
+        toDelete.push(operator.id);
+        console.log(`Duplicate: ${operator.company_name} (${phone}) - will delete`);
       } else {
-        phoneMap.set(phone, Estate Sale Company Owner);
+        phoneMap.set(phone, operator);
       }
     }
 
@@ -64,9 +64,9 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       state: 'AR',
-      total_operators: Estate Sale Company Owners.length,
+      total_operators: operators.length,
       duplicates_deleted: deleted,
-      remaining: Estate Sale Company Owners.length - deleted
+      remaining: operators.length - deleted
     });
 
   } catch (error) {

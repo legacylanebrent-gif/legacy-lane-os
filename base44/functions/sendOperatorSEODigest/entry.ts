@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { isMarketingEmailAllowed } from '../../shared/consentGuard.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -8,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const Estate Sale Company Owners = await base44.asServiceRole.entities.User.filter(
+    const operators = await base44.asServiceRole.entities.User.filter(
       { primary_account_type: 'estate_sale_operator' },
       '-created_date', 500
     );
@@ -28,9 +29,12 @@ Deno.serve(async (req) => {
     let sent = 0;
     let skipped = 0;
 
-    for (const op of Estate Sale Company Owners) {
+    for (const op of operators) {
       const opSales = salesByOperator[op.id] || [];
       if (opSales.length === 0 || !op.email) { skipped++; continue; }
+
+      // Consent guard: respect operator marketing opt-out / suppression
+      if (!(await isMarketingEmailAllowed(base44, op.id))) { skipped++; continue; }
 
       const totalViews = opSales.reduce((s, sale) => s + (sale.views || 0), 0);
       const totalSaves = opSales.reduce((s, sale) => s + (sale.saves || 0), 0);

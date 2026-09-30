@@ -9,22 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Fetching NJ Estate Sale Company Owners...');
-    const Estate Sale Company Owners = await base44.asServiceRole.entities.FutureEstateOperator.filter(
+    console.log('Fetching NJ operators...');
+    const operators = await base44.asServiceRole.entities.FutureEstateOperator.filter(
       { state: 'NJ' },
       '-created_date',
       1000
     );
     
-    console.log(`Total NJ Estate Sale Company Owners: ${Estate Sale Company Owners.length}`);
+    console.log(`Total NJ operators: ${operators.length}`);
 
     // Group by normalized phone number
     const phoneMap = {};
-    for (const Estate Sale Company Owner of Estate Sale Company Owners) {
-      const phone = Estate Sale Company Owner.phone ? Estate Sale Company Owner.phone.replace(/\D/g, '') : null;
+    for (const operator of operators) {
+      const phone = operator.phone ? operator.phone.replace(/\D/g, '') : null;
       if (!phone || phone.length < 7) continue; // skip no-phone companies entirely
       if (!phoneMap[phone]) phoneMap[phone] = [];
-      phoneMap[phone].push(Estate Sale Company Owner);
+      phoneMap[phone].push(operator);
     }
 
     // Keep the richest record (most populated fields), delete the rest
@@ -68,9 +68,9 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       state: 'NJ',
-      total_operators: Estate Sale Company Owners.length,
+      total_operators: operators.length,
       duplicates_deleted: deleted,
-      remaining: Estate Sale Company Owners.length - deleted
+      remaining: operators.length - deleted
     });
 
   } catch (error) {

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { isMarketingEmailAllowed } from '../../shared/consentGuard.ts';
 
 Deno.serve(async (req) => {
     try {
@@ -83,7 +84,10 @@ Deno.serve(async (req) => {
             });
 
             // ── Send email ──
-            if (operator.email) {
+            const emailAllowed = operator.email
+                ? await isMarketingEmailAllowed(base44, operator.id)
+                : false;
+            if (emailAllowed) {
                 const emailBody = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">

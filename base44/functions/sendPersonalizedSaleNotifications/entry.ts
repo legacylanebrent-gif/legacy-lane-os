@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { isMarketingEmailAllowed } from '../../shared/consentGuard.ts';
 
 Deno.serve(async (req) => {
     try {
@@ -19,6 +20,11 @@ Deno.serve(async (req) => {
         
         if (!user) {
             return Response.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Consent guard: skip users who opted out of marketing or are suppressed
+        if (!(await isMarketingEmailAllowed(base44, user_id))) {
+            return Response.json({ skipped: true, reason: 'email consent not granted' });
         }
 
         // Get new estate sales from last 24 hours
