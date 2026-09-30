@@ -25,6 +25,21 @@ Deno.serve(async (req) => {
     }
 
     const deal = deals[0];
+
+    // Authorization: only a deal participant (operator or agent) or an admin may
+    // change the stage — 'closed' triggers credit issuance, so this is money-adjacent.
+    const isAdmin = user?.role === 'admin' || ['super_admin', 'platform_ops'].includes(user?.primary_account_type);
+    const isParticipant = deal.operator_id === user.id || deal.agent_id === user.id;
+    if (!isAdmin && !isParticipant) {
+      console.warn(`[PIPELINE] Forbidden stage change: user ${user.id} is not a participant of deal ${deal_id}`);
+      return Response.json({ error: 'Forbidden — not a participant of this deal' }, { status: 403 });
+    }
+
+    // Stage whitelist
+    const ALLOWED_STAGES = ['new', 'contacted', 'touring', 'offer_made', 'under_contract', 'closed', 'lost'];
+    if (!ALLOWED_STAGES.includes(new_stage)) {
+      return Response.json({ error: `Invalid stage. Allowed: ${ALLOWED_STAGES.join(', ')}` }, { status: 400 });
+    }
     const oldStage = deal.stage;
     const now = new Date().toISOString();
 

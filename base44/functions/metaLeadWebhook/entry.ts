@@ -37,9 +37,11 @@ Deno.serve(async (req) => {
 
   const rawBody = await req.text();
   const signature = req.headers.get('x-hub-signature-256');
+  // Fail closed: signature is ALWAYS required. Without a configured secret the
+  // webhook must reject rather than accept unsigned payloads.
   const valid = await verifySignature(rawBody, signature);
-  if (!valid && WEBHOOK_SECRET) {
-    console.warn('[metaLeadWebhook] Invalid signature');
+  if (!valid) {
+    console.warn('[metaLeadWebhook] Invalid or missing signature (secret configured: ' + !!WEBHOOK_SECRET + ')');
     return Response.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
