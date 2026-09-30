@@ -42,8 +42,34 @@ Evidence-based audit. Findings are added per batch; every item carries status PA
 ## Cleanup of test artifacts
 None created yet in Batch 1 (read-only audit).
 
+## Batch 2 — identity, roles, data isolation (2026-09-30)
+| ID | Severity | Workflow | Finding | Evidence | Status |
+|---|---|---|---|---|---|
+| B1-01 | **P0 CONFIRMED** | Data isolation | Platform RLS semantics (authoritative): an operation with no rule stays open to EVERYONE — including anonymous visitors. 0/210 entities declare RLS → all sales, leads, wallet, CRM and directory data are readable AND writable by any authenticated user (and anonymous on public flows). | rls capability guide + 0-entity grep | FAIL |
+| B2-01 | P1 | Admin tooling | Destructive maintenance endpoints lack admin guards: `removeDuplicateOperators` and `removeDuplicateConnections` have NO auth check at all; `deleteNJDuplicates` checks login only (no role); `releasePendingWalletCredits` has NO auth. Any authenticated user can mass-delete production operator/connection records or force early wallet-credit release. | code inspection of 5 functions | FAIL |
+| B2-02 | P1 | Notifications & referral engine | 20 functions have syntax-corrupted source from the earlier mass-rename (`const Estate Sale Company Owner = …` — invalid identifier): 15 currently unbootable at source, and 5 ACTIVE paths (notifyContractSigned, notifyItemSold, notifyPaymentReceived, notifySaleStatusChange, generateReferralAgreement) still run only on stale pre-corruption deployments — any redeploy breaks payment/sale-status notifications and referral agreements. Live-tested: deployed versions still respond. | grep of 20 files; test_backend_function × 2 | FAIL (redeploy time bomb) |
+| B2-03 | **P1 cross-app** | Identity resolution | Houszu Central Identity endpoint unreachable: domain URL → 404 "App not found for this domain" (stale domain); app-ID URL (69d11abfe3a01036002a99a2) → 404 "Backend function 'identityResolve' not found or not deployed". Identity resolution fails for ALL users; backfillUserIdentities live run returned failed=4, users parked in `retrying`. Requires fix on the HOUSZU app (function missing/renamed) or the correct new endpoint URL. | live fetch probes + live backfill run | FAIL — external dependency |
+| B1-06 | P2 | Identity | Backfill re-run executed: 4 users processed, 0 resolved — BLOCKED by B2-03. | live backfill run | BLOCKED |
+
+### Batch 2 test register
+| Test | Result |
+|---|---|
+| RLS semantics confirmation (platform docs) | PASS — B1-01 confirmed FAIL |
+| Admin-guard audit of destructive functions (8 sampled) | PASS — 4 unguarded (B2-01) |
+| Corrupted-source sweep across 359 functions | PASS — 20 files (B2-02) |
+| notifyItemSold / notifySaleStatusChange live calls | PASS — deployed versions still boot and respond |
+| backfillUserIdentities live run | PASS — executed; 0 resolved due to B2-03 |
+| Houszu endpoint probes (domain + app-ID URL) | PASS — probes executed; both 404 |
+| Cross-tenant negative test with real non-admin account | NOT RUN — requires inviting a test user (needs a reachable inbox); superseded by authoritative RLS semantics for B1-01 |
+
+### Remediation queued from Batch 2 (fix phase)
+1. Add admin guards to removeDuplicateOperators, removeDuplicateConnections, releasePendingWalletCredits, deleteNJDuplicates.
+2. Repair the 5 corrupted active functions (rename invalid identifiers) so redeploys are safe; repair or archive the 15 dormant ones.
+3. Await Houszu-side fix for identityResolve; then re-run backfillUserIdentities.
+4. Introduce RLS on sensitive entities (Lead, WalletTransaction, OperatorWallet, Purchase, Cart, Order, Subscription, ConsumerMarketingProfile, CRM entities, directories) — owner-or-admin pattern; public reads only where intended.
+
 ## Next batches
-- Batch 2: identity/roles/data isolation — create isolated test account, negative tests on RLS gaps, self-role-escalation, cross-company reads.
+- Batch 3: database write audit on operator workflow (sale → inventory → publish).
 - Batch 3: database write audit on operator workflow (sale → inventory → publish).
 - Batch 4: shopper/discovery + subscriptions & money flows.
 - Batch 5: cross-app contracts (Houszu, Customer.io, Meta) + referral exchange.
