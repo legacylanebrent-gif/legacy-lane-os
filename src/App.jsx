@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -456,6 +457,16 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  // iOS Safari fix: Radix dropdown triggers (profile menu, bell, messages) open on
+  // `pointerdown`, which iOS Safari handles unreliably — first taps get swallowed and
+  // users must tap repeatedly. Keeping a passive pointerdown listener on the body
+  // engages the pointer system once so every subsequent tap registers correctly.
+  // See https://github.com/radix-ui/primitives/issues/2580
+  useEffect(() => {
+    const engagePointerSystem = () => {};
+    document.body.addEventListener('pointerdown', engagePointerSystem, { passive: true });
+    return () => document.body.removeEventListener('pointerdown', engagePointerSystem);
+  }, []);
 
   return (
     <AuthProvider>
