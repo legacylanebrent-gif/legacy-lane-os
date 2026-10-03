@@ -149,3 +149,17 @@ Created 4 LaunchIssue records (B5-01…B5-04). Cumulative open: B1-01 (RLS, P0),
   5. **B1-02 (P1)** — 13 referenced secrets undeclared (Twilio SMS, Meta lead-gen, email verification, OpenAI model names, etc.).
 - **Launch-content gap:** B4-01 — zero published estate sales in production; finder/alerts render empty at launch until operators publish.
 - **Scorecards recorded (LaunchReadinessScore):** security 45/not_ready, comms 85/soft_launch, mobile 85/soft_launch, overall 60/not_ready.
+
+## Remediation log — RLS stage 1 (2026-10-03)
+| Entity | Rules applied |
+|---|---|
+| WalletTransaction, OperatorWallet, Cart, Transaction, IdentitySyncError | Owner (created_by_id or operator_id) or admin; wallet state changes + deletes admin-only |
+| Purchase | Buyer (owner) or seller reads/updates; deletes admin-only |
+| Order | Buyer (owner) or seller-of-an-item reads; updates buyer/admin; deletes admin-only |
+| Subscription, ConsumerMarketingProfile, Contact, Opportunity, Deal | Owner (created_by_id or user/owner/assigned field) or admin; deletes admin-only except CRM (owner or admin) |
+| Lead | Owner, routed professional, or admin reads/updates; create left open (public lead forms, anonymous visitors); deletes owner/admin |
+| Verification | Admin live read on all 12 entities: PASS (records returned, no lockout). Home route renders. Non-admin negative test (cross-user write blocked) NOT verifiable from builder seat — verify with a test user account. |
+
+## Next batches
+- RLS stage 2: remaining user-data entities (EstateSale, Item, MarketplaceItem, directories, notifications, messages, CRM remainder) — ~190 to go.
+- Retest B5-02/B6-01 403 paths after republish.
