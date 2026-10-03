@@ -30,7 +30,40 @@
         "type": "string"
       },
       "default": [],
-      "description": "ScrapedSaleTerritory IDs this Estate Sale Company Owner is active in"
+      "description": "Canonical Houszu micro_territory_id values this Estate Sale Company Owner operates in"
+    },
+    "home_city": {
+      "type": "string",
+      "description": "Home-base city from MasterOperatorDirectory"
+    },
+    "home_state": {
+      "type": "string",
+      "description": "Home-base state abbreviation"
+    },
+    "home_county": {
+      "type": "string",
+      "description": "Home-base county"
+    },
+    "home_lat": {
+      "type": "number",
+      "description": "Home-base latitude for mapping"
+    },
+    "home_lng": {
+      "type": "number",
+      "description": "Home-base longitude for mapping"
+    },
+    "directory_record_id": {
+      "type": "string",
+      "description": "MasterOperatorDirectory record this operator was matched to"
+    },
+    "geo_match_status": {
+      "type": "string",
+      "enum": [
+        "matched",
+        "no_home_base"
+      ],
+      "default": "no_home_base",
+      "description": "Whether a reliable home base could be derived"
     },
     "platform_user_id": {
       "type": "string",

@@ -24,7 +24,34 @@
         "type": "string"
       },
       "default": [],
-      "description": "Array of city/township names in this micro-territory"
+      "description": "Array of city/township names in this micro-territory (legacy string format)"
+    },
+    "cities_geo_json": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "formatted_address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "lat",
+          "lng"
+        ]
+      },
+      "default": [],
+      "description": "Cities with coordinates from Houszu \u2014 used for mapping and geo-matching"
     },
     "synced_at": {
       "type": "string",
