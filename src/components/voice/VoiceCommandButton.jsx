@@ -56,12 +56,19 @@ export default function VoiceCommandButton({ user }) {
     if (sales.length > 0) {
       const sale = matchSale(t, sales);
       if (sale) {
-        if (t.includes('photo') || t.includes('inventory') || t.includes('item')) {
-          navigate(createPageUrl('SaleInventory') + '?saleId=' + sale.id);
-        } else {
-          navigate(createPageUrl('SaleEditor') + '?saleId=' + sale.id);
-        }
-        showStatus(`Opening "${sale.title || sale.property_address?.street || 'sale'}"`);
+        // Specific sale-area commands first, then default to the sale editor
+        const saleActions = [
+          { words: ['photo', 'inventory', 'item'], page: 'SaleInventory', param: 'id' },
+          { words: ['task', 'checklist'], page: 'SaleTasks', param: 'saleId' },
+          { words: ['attendance', 'check in', 'checkin'], page: 'Attendance', param: 'saleId' },
+          { words: ['statistic', 'stats', 'recap'], page: 'SaleStatistics', param: 'saleId' },
+          { words: ['contract'], page: 'SaleContracts', param: 'saleId' },
+        ];
+        const action = saleActions.find(a => a.words.some(w => t.includes(w)));
+        const page = action ? action.page : 'SaleEditor';
+        const param = action ? action.param : 'saleId';
+        navigate(createPageUrl(page) + '?' + param + '=' + sale.id);
+        showStatus(`Opening ${page === 'SaleEditor' ? '' : page + ' for '}"${sale.title || sale.property_address?.street || 'sale'}"`);
         return;
       }
     }
