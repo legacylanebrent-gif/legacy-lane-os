@@ -201,7 +201,7 @@ export default function OnboardingChat() {
       // Directory records don't carry an is_active flag — filtering on it returns 0 for every state
       const results = await base44.entities.FutureEstateOperator.filter({
         state: state
-      }, '-created_date', 500);
+      }, '-created_date', 2000);
       setDirectoryCompanies(results);
     } catch (e) {
       console.error('Directory search failed:', e);
