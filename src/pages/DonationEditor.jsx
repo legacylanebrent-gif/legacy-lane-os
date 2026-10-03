@@ -295,11 +295,11 @@ export default function DonationEditor() {
   // ── EDITOR MODE (new or existing) ──
   return (
     <div className="p-6 lg:p-8 space-y-6 mt-4">
-      <div className="flex items-center gap-3 mt-4">
+      <div className="flex flex-wrap items-center gap-3 mt-4">
         <Button variant="outline" size="sm" onClick={() => navigate('/DonationEditor')}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to List
         </Button>
-        <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 min-w-0 break-words">
           {isNewMode ? 'New Donation Event' : 'Edit Donation Event'}
         </h1>
       </div>

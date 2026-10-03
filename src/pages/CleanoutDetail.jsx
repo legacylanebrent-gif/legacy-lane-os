@@ -192,13 +192,13 @@ export default function CleanoutDetail() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 mt-4">
-      <div className="flex items-center gap-3 mt-4">
+      <div className="flex flex-wrap items-center gap-3 mt-4">
         {isOperator && (
           <Button variant="outline" size="sm" onClick={() => navigate('/CleanoutEditor')}>
             <ArrowLeft className="w-4 h-4 mr-1" /> My Cleanouts
           </Button>
         )}
-        <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 flex-1">{cleanout.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 flex-1 min-w-0 break-words">{cleanout.title}</h1>
         <Badge className={sc.color}>{sc.label}</Badge>
       </div>
 

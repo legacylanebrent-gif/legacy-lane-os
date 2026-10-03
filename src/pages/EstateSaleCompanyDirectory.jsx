@@ -248,12 +248,12 @@ export default function EstateSaleCompanyDirectory() {
             <button onClick={handleBackToStates} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back to All States
             </button>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-lg">{selectedState}</span>
               </div>
-              <div className="flex-1">
-                <h1 className="text-4xl font-serif font-bold text-white">{stateName} Estate Sale Companies</h1>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white break-words">{stateName} Estate Sale Companies</h1>
                 <p className="text-slate-400 text-sm">
                   {loading ? 'Loading...' : `${displayedOperators.length.toLocaleString()} companies in directory`}
                 </p>

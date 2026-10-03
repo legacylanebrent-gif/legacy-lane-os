@@ -82,13 +82,13 @@ export default function MyEarlySignIns() {
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
         <Link to={createPageUrl('Home')} className="text-slate-500 hover:text-slate-800">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-slate-900">My Early Sign-Ins</h1>
-          <p className="text-slate-500 text-sm">Sales you've signed up for early entry</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900">My Early Sign-Ins</h1>
+          <p className="text-slate-500 text-sm break-words">Sales you've signed up for early entry</p>
         </div>
       </div>
 

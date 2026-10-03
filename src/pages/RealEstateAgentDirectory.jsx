@@ -241,12 +241,12 @@ export default function RealEstateAgentDirectory() {
             <button onClick={handleBackToStates} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back to All States
             </button>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-lg">{selectedState}</span>
               </div>
-              <div className="flex-1">
-                <h1 className="text-4xl font-serif font-bold text-white">{stateName} Real Estate Agents</h1>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white break-words">{stateName} Real Estate Agents</h1>
                 <p className="text-slate-400 text-sm">
                   {loading ? 'Loading...' : `${displayedAgents.length.toLocaleString()} agents in directory`}
                 </p>

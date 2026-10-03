@@ -108,13 +108,13 @@ export default function ReferralBatchInvite() {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
         <Link to="/ReferralDashboard" className="text-slate-400 hover:text-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-slate-900">Batch Invite</h1>
-          <p className="text-slate-500 mt-1">Upload a CSV of contacts and send personalized referral invites in one click.</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-4xl font-serif font-bold text-slate-900">Batch Invite</h1>
+          <p className="text-slate-500 mt-1 break-words">Upload a CSV of contacts and send personalized referral invites in one click.</p>
         </div>
       </div>
 

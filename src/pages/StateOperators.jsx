@@ -350,11 +350,11 @@ export default function StateOperators() {
             <ArrowLeft className="w-4 h-4" /> All States
           </button>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-lg">{stateCode}</span>
             </div>
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-white">{stateName}</h1>
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white break-words">{stateName}</h1>
               <p className="text-slate-400 text-sm">
                 {loading ? 'Loading...' : `${operators.length.toLocaleString()} estate sale companies`}
               </p>
