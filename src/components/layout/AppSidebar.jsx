@@ -249,8 +249,16 @@ const ELITE_ONLY_MARKETING_PAGES = new Set(['CampaignBuilder', 'Campaigns', 'Ana
 const ADMIN_ROLES_SIDEBAR = ['super_admin', 'platform_ops', 'admin', 'support_agent', 'marketing_ops', 'data_analyst'];
 
 export default function AppSidebar({ user, currentPageName, allowedPages }) {
-  const [open, setOpen] = useState(true);
+  // Mobile: default the sidebar collapsed so it doesn't cover the page; users open
+  // it via the hamburger button. Desktop keeps it expanded by default.
+  const isMobile = () => window.innerWidth < 1024;
+  const [open, setOpen] = useState(() => !isMobile());
   const [subscriptionTier, setSubscriptionTier] = useState(null);
+
+  // Collapse again after navigating on mobile so the menu doesn't cover the new page
+  useEffect(() => {
+    if (isMobile()) setOpen(false);
+  }, [currentPageName]);
 
   useEffect(() => {
     const fetchTier = async () => {
