@@ -16,7 +16,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   LogIn, LogOut, LayoutDashboard, Bell, ChevronDown,
   Heart, ShoppingBag, Star, QrCode, Receipt, ClipboardList, Navigation, Building2, HelpCircle,
-  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Home, Search,
+  Users, FileText, BarChart2, Send, UserCircle, Target, Sparkles, CalendarDays, Search,
   BookOpen
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -72,9 +72,6 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
           <div className="flex items-center gap-3 sm:gap-4">
             {isAuthenticated && user ? (
               <>
-                <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
-                  <Home className="w-5 h-5" />
-                </Link>
                 <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
                 </Link>
@@ -219,9 +216,6 @@ export default function UniversalHeader({ user: userProp, isAuthenticated: isAut
               </>
             ) : (
               <>
-                <Link to="/" className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Home">
-                  <Home className="w-5 h-5" />
-                </Link>
                 <Link to={createPageUrl('BrowseItems')} className="text-slate-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800" title="Marketplace">
                   <ShoppingBag className="w-5 h-5" />
                 </Link>
