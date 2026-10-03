@@ -140,14 +140,14 @@ export default function Attendance() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(createPageUrl('MySales'))}>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="flex flex-col items-start gap-1 min-w-0">
+          <Button variant="ghost" onClick={() => navigate(createPageUrl('MySales'))} className="text-slate-600 hover:text-slate-900 -ml-2">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Sales
           </Button>
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-slate-900">{sale?.title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-4xl font-serif font-bold text-slate-900 break-words">{sale?.title}</h1>
             <p className="text-slate-600">Attendance Tracking</p>
           </div>
         </div>
