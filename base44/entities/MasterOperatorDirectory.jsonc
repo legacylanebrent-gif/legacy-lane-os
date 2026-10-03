@@ -162,6 +162,23 @@
       "type": "string",
       "description": "EstateSalen User ID of the person who claimed this listing (from FutureEstateOperator)"
     },
+    "territory_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Canonical Houszu micro_territory_id values this company operates in (matched from home-base city/county/coords)"
+    },
+    "territory_match_status": {
+      "type": "string",
+      "enum": [
+        "matched",
+        "unmatched"
+      ],
+      "default": "unmatched",
+      "description": "Whether this directory record was successfully linked to Houszu micro-territories"
+    },
     "enrichment_status": {
       "type": "string",
       "enum": [
