@@ -1,21 +1,32 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const TERRITORIES_API_URL = 'https://api.base44.app/api/apps/697206f0efd7bfde6e06b474/functions/territoriesApi';
+const TERRITORIES_API_URL = 'https://houszuos.base44.app/functions/territoriesApi';
 
-async function housioFetch(action, apiKey) {
-  const res = await fetch(TERRITORIES_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-    body: JSON.stringify({ action, offset: 0, limit: 9999 }),
-  });
-  if (!res.ok) throw new Error(`Housio API error (${action}): ${res.status}`);
-  return res.json();
+// Houszu API pages at max 500/page — loop until has_more is false
+async function housioFetch(operation, apiKey) {
+  const items = [];
+  let offset = 0;
+  while (true) {
+    const res = await fetch(TERRITORIES_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+      body: JSON.stringify({ operation, offset, limit: 500 }),
+    });
+    if (!res.ok) throw new Error(`Houszu API error (${operation}): ${res.status}`);
+    const json = await res.json();
+    const data = json?.data || {};
+    const page = operation === 'micro_list' ? (data.micro_territories || []) : (data.territories || []);
+    items.push(...page);
+    if (!data.has_more || data.next_offset == null || page.length === 0) break;
+    offset = data.next_offset;
+  }
+  return items;
 }
 
-// Normalize cities — API returns either strings or {name: "..."} objects
+// Normalize cities — API returns either strings or {city: "...", lat, lng} objects
 function normalizeCities(cities) {
   if (!Array.isArray(cities)) return [];
-  return cities.map(c => typeof c === 'string' ? c : (c?.name || '')).filter(Boolean);
+  return cities.map(c => typeof c === 'string' ? c : (c?.city || c?.name || '')).filter(Boolean);
 }
 
 // State bounding boxes: [minLat, minLng, maxLat, maxLng]
@@ -82,9 +93,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const apiKey = Deno.env.get('HOUSIO_TERRITORIES_API_KEY');
+    const apiKey = Deno.env.get('HOUSZU_TERRITORIES_API_KEY');
     if (!apiKey) {
-      return Response.json({ error: 'HOUSIO_TERRITORIES_API_KEY not configured' }, { status: 500 });
+      return Response.json({ error: 'HOUSZU_TERRITORIES_API_KEY not configured' }, { status: 500 });
     }
 
     console.log('[territoryMigrationAudit] Starting full audit...');
@@ -95,21 +106,21 @@ Deno.serve(async (req) => {
       housioFetch('micro_list', apiKey),
     ]);
 
-    const territories = (terrData?.territories || []).map(t => ({
+    const territories = (terrData || []).map(t => ({
       territory_id: t.id || t.territory_id || '',
-      name: t.name || t.county || '',
+      name: t.name || (Array.isArray(t.county) ? t.county[0] : t.county) || '',
       state: t.state || '',
       state_name: t.state_name || '',
-      county: t.county || '',
+      county: Array.isArray(t.county) ? (t.county[0] || '') : (t.county || ''),
       county_fips: t.county_fips || '',
       status: t.status || 'ACTIVE',
       zip_codes: t.zip_codes || [],
       synced_at: t.synced_at || null,
     }));
 
-    const microTerritories = (microData?.micro_territories || []).map(mt => ({
+    const microTerritories = (microData || []).map(mt => ({
       micro_territory_id: mt.micro_territory_id || mt.id || '',
-      territory_id: mt.territory_id || '',
+      territory_id: mt.parent_territory_id || mt.territory_id || '',
       name: mt.name || '',
       state: mt.state || '',
       county: mt.county || '',
