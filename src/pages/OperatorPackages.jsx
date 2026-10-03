@@ -116,29 +116,10 @@ export default function OperatorPackages() {
       }
 
       if (pkgId) {
-        const user = await base44.auth.me();
-        
-        // Update user to the selected account type (pre-qualifies them for onboarding)
-        await base44.auth.updateMe({
-          primary_account_type: accountType,
-          selected_package: pkgId,
-          subscription_tier: 'basic'
-        });
-
-        // Create referral if ref code exists
-        if (ref) {
-          try {
-            await base44.functions.invoke('createReferral', { 
-              referralCode: ref 
-            });
-          } catch (refError) {
-            console.error('Error creating referral:', refError);
-          }
-        }
-
-        // Clear params and redirect to dashboard
-        window.history.replaceState({}, '', window.location.pathname);
-        window.location.href = createPageUrl('Dashboard');
+        // Returning from login with a chosen package — run the same flow as a
+        // direct click (trial + checkout for paid plans, dashboard otherwise)
+        const pkg = await base44.entities.SubscriptionPackage.get(pkgId);
+        if (pkg) handleSignUp(pkg);
       }
     } catch (error) {
       console.error('Error processing post-signup:', error);
@@ -463,7 +444,12 @@ export default function OperatorPackages() {
             } else if (isExistingBusinessUser) {
               const userRank = getTierRank(currentUser.subscription_tier);
               const pkgRank = getTierRank(pkgData.tier_level);
-              if (userRank === pkgRank && currentUser.primary_account_type === activeTab) {
+              const isOnTrial = currentUser.subscription_status === 'trial';
+              if (userRank === pkgRank && isOnTrial && currentUser.primary_account_type === activeTab) {
+                // Trial user on their own package — must complete checkout to activate
+                buttonAction = 'upgrade';
+                buttonText = 'Complete Checkout';
+              } else if (userRank === pkgRank && currentUser.primary_account_type === activeTab) {
                 buttonAction = 'current';
                 buttonText = 'Current Plan';
               } else if (userRank > pkgRank) {
