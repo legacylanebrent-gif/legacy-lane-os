@@ -4,7 +4,6 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    console.log('[route-debug] v3 handler entered');
     const {
       lead_id, state, county, zip_code, life_event_type,
       needs_estate_sale, needs_realtor, needs_cleanout, wants_cash_offer,
@@ -43,8 +42,7 @@ Deno.serve(async (req) => {
 
     const assignments = {};
     const routedTo = [];
-    let debugDirCount = 0, debugCandidates = 0, debugClaimed = 0, debugFetchVariant = 'not_reached';
-    debugFetchVariant = `assign=${!!assignments.estate_sale_company_owner} needs=${needs_estate_sale} state=${state || 'null'} county=${county || 'null'}`;
+    let debugDirCount = 0, debugCandidates = 0, debugClaimed = 0;
 
     for (const rule of scoredRules) {
       const type = rule.provider_type;
@@ -84,15 +82,10 @@ Deno.serve(async (req) => {
           console.error('[route] fetch variant failed:', v.name, e.message);
         }
       }
-      debugDirCount = dirCompanies.length;
-      debugFetchVariant = fetchVariant;
       const tierRank = { elite: 3, platinum: 2, basic: 1, unknown: 0 };
       const candidates = dirCompanies.filter(c =>
         countyNorm(c.county) === leadCounty ||
         countyNorm(c.geocoded_county) === leadCounty);
-      debugCandidates = candidates.length;
-      debugClaimed = candidates.filter(c => c.claimed_by_user_id).length;
-
       // ── Paid-subscriber + featured-listing boost ──
       // Highest paid plan first, then featured listings, then scraped tier / activity.
       const claimedUserIds = [...new Set(candidates.map(c => c.claimed_by_user_id).filter(Boolean))];
@@ -248,12 +241,6 @@ Review this lead in the admin dashboard → Lead CRM.
       no_match: noMatch,
       admin_notified: notifyReasons.length > 0,
       notify_reasons: notifyReasons,
-      debug: {
-        dir_companies_fetched: debugDirCount,
-        fetch_variant: debugFetchVariant,
-        county_candidates: debugCandidates,
-        claimed_candidates: debugClaimed,
-      },
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
