@@ -4,6 +4,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
+    console.log('[route-debug] v3 handler entered');
     const {
       lead_id, state, county, zip_code, life_event_type,
       needs_estate_sale, needs_realtor, needs_cleanout, wants_cash_offer,
@@ -42,6 +43,8 @@ Deno.serve(async (req) => {
 
     const assignments = {};
     const routedTo = [];
+    let debugDirCount = 0, debugCandidates = 0, debugClaimed = 0, debugFetchVariant = 'not_reached';
+    debugFetchVariant = `assign=${!!assignments.estate_sale_company_owner} needs=${needs_estate_sale} state=${state || 'null'} county=${county || 'null'}`;
 
     for (const rule of scoredRules) {
       const type = rule.provider_type;
@@ -64,13 +67,65 @@ Deno.serve(async (req) => {
       const countyNorm = (s) => String(s || '').toLowerCase().trim().replace(/\s+county$/i, '');
       const leadCounty = countyNorm(county);
       const leadState = String(state).trim().toUpperCase();
-      const dirCompanies = await base44.asServiceRole.entities.MasterOperatorDirectory.filter({ state: leadState });
+      const fetchVariants = [
+        { name: 'filter_q_only', fn: () => base44.asServiceRole.entities.MasterOperatorDirectory.filter({ state: leadState }) },
+        { name: 'filter_q_sort_limit', fn: () => base44.asServiceRole.entities.MasterOperatorDirectory.filter({ state: leadState }, '-created_date', 2000) },
+        { name: 'list_all', fn: () => base44.asServiceRole.entities.MasterOperatorDirectory.list(undefined, 3000) },
+      ];
+      let dirCompanies = [];
+      let fetchVariant = 'none_succeeded';
+      for (const v of fetchVariants) {
+        try {
+          const r = await v.fn();
+          const arr = Array.isArray(r) ? r : (r.data || []);
+          dirCompanies = v.name === 'list_all' ? arr.filter(c => String(c.state || '').trim().toUpperCase() === leadState) : arr;
+          if (dirCompanies.length > 0) { fetchVariant = v.name; break; }
+        } catch (e) {
+          console.error('[route] fetch variant failed:', v.name, e.message);
+        }
+      }
+      debugDirCount = dirCompanies.length;
+      debugFetchVariant = fetchVariant;
       const tierRank = { elite: 3, platinum: 2, basic: 1, unknown: 0 };
-      directoryMatches = dirCompanies
-        .filter(c =>
-          countyNorm(c.county) === leadCounty ||
-          countyNorm(c.geocoded_county) === leadCounty)
+      const candidates = dirCompanies.filter(c =>
+        countyNorm(c.county) === leadCounty ||
+        countyNorm(c.geocoded_county) === leadCounty);
+      debugCandidates = candidates.length;
+      debugClaimed = candidates.filter(c => c.claimed_by_user_id).length;
+
+      // ── Paid-subscriber + featured-listing boost ──
+      // Highest paid plan first, then featured listings, then scraped tier / activity.
+      const claimedUserIds = [...new Set(candidates.map(c => c.claimed_by_user_id).filter(Boolean))];
+      const activeSubs = claimedUserIds.length
+        ? await base44.asServiceRole.entities.Subscription.filter({ status: 'active' })
+        : [];
+      const bestSubByUser = new Map();
+      for (const s of activeSubs) {
+        if (!claimedUserIds.includes(s.user_id)) continue;
+        const existing = bestSubByUser.get(s.user_id);
+        if (!existing || (s.price || 0) > (existing.price || 0)) bestSubByUser.set(s.user_id, s);
+      }
+      const featuredSales = claimedUserIds.length
+        ? [
+          ...(await base44.asServiceRole.entities.EstateSale.filter({ local_featured: true })),
+          ...(await base44.asServiceRole.entities.EstateSale.filter({ national_featured: true })),
+        ]
+        : [];
+      const featuredCountByOperator = new Map();
+      for (const f of featuredSales) {
+        if (!f.operator_id) continue;
+        featuredCountByOperator.set(f.operator_id, (featuredCountByOperator.get(f.operator_id) || 0) + 1);
+      }
+      for (const c of candidates) {
+        const sub = c.claimed_by_user_id ? bestSubByUser.get(c.claimed_by_user_id) : null;
+        c._paid_price = sub ? (sub.price || 0) : 0;
+        c._sub_plan = sub ? (sub.package_name || sub.plan_type || sub.tier || '') : null;
+        c._featured_count = c.claimed_by_user_id ? (featuredCountByOperator.get(c.claimed_by_user_id) || 0) : 0;
+      }
+      directoryMatches = candidates
         .sort((a, b) =>
+          (b._paid_price || 0) - (a._paid_price || 0) ||
+          (b._featured_count || 0) - (a._featured_count || 0) ||
           (tierRank[b.membership_tier] || 0) - (tierRank[a.membership_tier] || 0) ||
           (b.active_sales_count || 0) - (a.active_sales_count || 0) ||
           (b.sales_posted || 0) - (a.sales_posted || 0))
@@ -107,6 +162,9 @@ Deno.serve(async (req) => {
       county: c.county,
       membership_tier: c.membership_tier,
       active_sales_count: c.active_sales_count,
+      paid_plan: c._sub_plan || null,
+      paid_price: c._paid_price || 0,
+      featured_listing_count: c._featured_count || 0,
     }));
     if (assignments.estate_sale_company_owner) updateData.assigned_operator_id = assignments.estate_sale_company_owner;
     if (assignments.realtor) updateData.assigned_agent_id = assignments.realtor;
@@ -156,10 +214,11 @@ Deno.serve(async (req) => {
         ? routedTo.map(r => `${r.provider_type}: ${r.provider_id}`).join(', ')
         : 'None — needs admin assignment';
 
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: 'admin@estatesalen.com',
-        subject: `[EstateSalen] Lead Alert — ${lead_level?.toUpperCase() || 'NEW'} Lead${noMatch ? ' · No Provider Match' : ''}`,
-        body: `
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: 'admin@estatesalen.com',
+          subject: `[EstateSalen] Lead Alert — ${lead_level?.toUpperCase() || 'NEW'} Lead${noMatch ? ' · No Provider Match' : ''}`,
+          body: `
 A lead requires your attention.
 
 Lead ID: ${lead_id || 'N/A'}
@@ -177,7 +236,10 @@ ${assignmentSummary}
 
 Review this lead in the admin dashboard → Lead CRM.
         `.trim(),
-      });
+        });
+      } catch (emailError) {
+        console.error('[route] admin notification email failed:', emailError.message);
+      }
     }
 
     return Response.json({
@@ -186,6 +248,12 @@ Review this lead in the admin dashboard → Lead CRM.
       no_match: noMatch,
       admin_notified: notifyReasons.length > 0,
       notify_reasons: notifyReasons,
+      debug: {
+        dir_companies_fetched: debugDirCount,
+        fetch_variant: debugFetchVariant,
+        county_candidates: debugCandidates,
+        claimed_candidates: debugClaimed,
+      },
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

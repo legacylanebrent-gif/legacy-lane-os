@@ -169,11 +169,20 @@
           },
           "active_sales_count": {
             "type": "number"
+          },
+          "paid_plan": {
+            "type": "string"
+          },
+          "paid_price": {
+            "type": "number"
+          },
+          "featured_listing_count": {
+            "type": "number"
           }
         }
       },
       "default": [],
-      "description": "Top MasterOperatorDirectory companies matched to this lead's county (no PII)"
+      "description": "Top MasterOperatorDirectory companies matched to this lead's county, ranked paid-first then featured (no PII)"
     },
     "crm_status": {
       "type": "string",
