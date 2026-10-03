@@ -58,6 +58,40 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── 3b. Directory fallback — match estate sale companies by county from MasterOperatorDirectory ──
+    let directoryMatches = [];
+    if (!assignments.estate_sale_company_owner && needs_estate_sale !== false && state && county) {
+      const countyNorm = (s) => String(s || '').toLowerCase().trim().replace(/\s+county$/i, '');
+      const leadCounty = countyNorm(county);
+      const leadState = String(state).trim().toUpperCase();
+      const dirCompanies = await base44.asServiceRole.entities.MasterOperatorDirectory.filter({ state: leadState });
+      const tierRank = { elite: 3, platinum: 2, basic: 1, unknown: 0 };
+      directoryMatches = dirCompanies
+        .filter(c =>
+          countyNorm(c.county) === leadCounty ||
+          countyNorm(c.geocoded_county) === leadCounty)
+        .sort((a, b) =>
+          (tierRank[b.membership_tier] || 0) - (tierRank[a.membership_tier] || 0) ||
+          (b.active_sales_count || 0) - (a.active_sales_count || 0) ||
+          (b.sales_posted || 0) - (a.sales_posted || 0))
+        .slice(0, 5);
+
+      for (const c of directoryMatches) {
+        routedTo.push({
+          provider_id: c.id,
+          provider_type: 'estate_sale_company_owner',
+          rule_id: null,
+          geo_match: 'county',
+          provider_source: 'master_operator_directory',
+        });
+      }
+      // Only assign a platform user if the top directory match has been claimed
+      const top = directoryMatches[0];
+      if (top && top.claimed_by_user_id) {
+        assignments.estate_sale_company_owner = top.claimed_by_user_id;
+      }
+    }
+
     const noMatch = routedTo.length === 0;
 
     // ── 4. Build lead update payload ──
@@ -67,6 +101,13 @@ Deno.serve(async (req) => {
       crm_status: noMatch ? 'new' : 'routed',
     };
 
+    if (directoryMatches.length > 0) updateData.directory_matches = directoryMatches.map(c => ({
+      directory_record_id: c.id,
+      company_name: c.company_name,
+      county: c.county,
+      membership_tier: c.membership_tier,
+      active_sales_count: c.active_sales_count,
+    }));
     if (assignments.estate_sale_company_owner) updateData.assigned_operator_id = assignments.estate_sale_company_owner;
     if (assignments.realtor) updateData.assigned_agent_id = assignments.realtor;
     if (assignments.cleanout_vendor) updateData.assigned_cleanout_vendor_id = assignments.cleanout_vendor;

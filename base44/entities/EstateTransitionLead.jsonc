@@ -138,6 +138,43 @@
     "assigned_investor_id": {
       "type": "string"
     },
+    "routed_to": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Routing assignments \u2014 rule-based providers and/or directory county matches"
+    },
+    "routed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "directory_matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "directory_record_id": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "membership_tier": {
+            "type": "string"
+          },
+          "active_sales_count": {
+            "type": "number"
+          }
+        }
+      },
+      "default": [],
+      "description": "Top MasterOperatorDirectory companies matched to this lead's county (no PII)"
+    },
     "crm_status": {
       "type": "string",
       "enum": [
