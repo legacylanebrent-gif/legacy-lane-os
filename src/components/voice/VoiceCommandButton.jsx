@@ -125,7 +125,7 @@ export default function VoiceCommandButton({ user }) {
     <>
       {/* Status / transcript bubble */}
       {status && (
-        <div className="fixed bottom-[9.5rem] right-6 z-50 max-w-[calc(100%-3rem)] sm:max-w-sm bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
+        <div className="fixed bottom-[9.5rem] right-6 z-50 lg:hidden max-w-[calc(100%-3rem)] sm:max-w-sm bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
           <p className={status.tone === 'error' ? 'text-amber-300' : 'text-white'}>{status.text}</p>
         </div>
       )}
@@ -133,7 +133,7 @@ export default function VoiceCommandButton({ user }) {
       {/* Floating voice button (stacked above the AI Coach button) */}
       <button
         onClick={listening ? () => recognitionRef.current?.stop() : startListening}
-        className={`fixed bottom-24 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-200 hover:scale-105 ${
+        className={`fixed bottom-24 right-6 z-50 lg:hidden flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-200 hover:scale-105 ${
           listening
             ? 'bg-red-600 hover:bg-red-700 text-white'
             : 'bg-slate-800 hover:bg-slate-700 text-orange-400'
