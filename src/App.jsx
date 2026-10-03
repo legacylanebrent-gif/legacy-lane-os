@@ -348,6 +348,7 @@ const AuthenticatedApp = () => {
       <Route path="/blog-post" element={<BlogPost />} />
       <Route path="/companies" element={<CompanyProfilePage />} />
       <Route path="/sale-recap" element={<SaleRecapPage />} />
+      <Route path="/SaleRecap" element={<SaleRecapPage />} />
       <Route path="/price-guide" element={<PriceGuidePage />} />
       <Route path="/wanted" element={<WantedItemsPage />} />
       <Route path="/WeeklyVideoIntelligence" element={<LayoutWrapper currentPageName="WeeklyVideoIntelligence"><WeeklyVideoIntelligence /></LayoutWrapper>} />

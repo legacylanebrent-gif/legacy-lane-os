@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import { Bell, MessageSquare, Calendar, AlertCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function NotificationsDropdown() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function NotificationsDropdown() {
                     markAsRead(notif.id);
                     if (notif.link_to_page) {
                       const url = `/${notif.link_to_page}${notif.link_params ? `?${notif.link_params}` : ''}`;
-                      window.location.href = url;
+                      navigate(url);
                     }
                   }}
                   className={`w-full text-left p-4 hover:bg-slate-50 transition-colors pointer-events-auto touch-manipulation ${

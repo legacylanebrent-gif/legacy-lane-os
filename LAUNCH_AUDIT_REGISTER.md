@@ -160,6 +160,12 @@ Created 4 LaunchIssue records (B5-01…B5-04). Cumulative open: B1-01 (RLS, P0),
 | Lead | Owner, routed professional, or admin reads/updates; create left open (public lead forms, anonymous visitors); deletes owner/admin |
 | Verification | Admin live read on all 12 entities: PASS (records returned, no lockout). Home route renders. Non-admin negative test (cross-user write blocked) NOT verifiable from builder seat — verify with a test user account. |
 
+## Remediation log — notifications page bug (2026-10-03)
+| Item | Finding | Evidence | Status |
+|---|---|---|---|
+| Notification tap → page not opening | Notification bell dropdown navigated to `/SaleRecap` (PascalCase page name convention) but the route registered is `/sale-recap` — tap landed on PageNotFound. Also used a full-page reload (`window.location.href`), breaking the in-app-context preference on mobile. | DB record link_to_page=SaleRecap; live repro → PageNotFound | FIXED: added `/SaleRecap` route alias + dropdown now SPA-navigates |
+| Verified | Bell → dropdown → tap notification → lands on `/SaleRecap?id=…` inside the app, no PageNotFound. The tapped notification was a leftover QA record (its recap was cleaned in Batch 3, so the page showed "recap not found") — stale test notification deleted. | live mobile preview tap-through | PASS |
+
 ## Next batches
 - RLS stage 2: remaining user-data entities (EstateSale, Item, MarketplaceItem, directories, notifications, messages, CRM remainder) — ~190 to go.
 - Retest B5-02/B6-01 403 paths after republish.
