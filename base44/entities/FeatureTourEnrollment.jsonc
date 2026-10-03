@@ -1,0 +1,48 @@
+{
+  "name": "FeatureTourEnrollment",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID of the newly signed-up operator"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address to send the feature tour emails to"
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name for email personalization"
+    },
+    "enrolled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the operator signed up / enrolled in the sequence"
+    },
+    "emails_sent": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of feature-tour emails sent so far (0-10)"
+    },
+    "last_sent_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the most recent feature-tour email sent"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "unsubscribed"
+      ],
+      "default": "active",
+      "description": "Lifecycle of this enrollment"
+    }
+  },
+  "required": [
+    "user_id",
+    "email",
+    "enrolled_at"
+  ]
+}

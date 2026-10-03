@@ -267,6 +267,17 @@ export default function OperatorPackages() {
                 console.error('Error creating referral:', refError);
               }
             }
+
+            // Enroll in the 10-day feature-tour email sequence
+            try {
+              await base44.functions.invoke('enrollFeatureTour', {
+                user_id: user.id,
+                email: user.email,
+                first_name: (user.full_name || '').split(' ')[0]
+              });
+            } catch (tourError) {
+              console.error('Error enrolling in feature tour:', tourError);
+            }
             
             window.location.href = createPageUrl('Dashboard');
           }
