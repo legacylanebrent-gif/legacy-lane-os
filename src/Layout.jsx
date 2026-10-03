@@ -8,6 +8,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import MessagesDropdown from '@/components/messaging/MessagesDropdown';
 import UniversalHeader from '@/components/layout/UniversalHeader';
 import AICoachButton from '@/components/coach/AICoachButton';
+import VoiceCommandButton from '@/components/voice/VoiceCommandButton';
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import { useOperatorOnboarding } from '@/hooks/useOperatorOnboarding';
 import { isProfileComplete, getMissingFields } from '@/components/profile/ProfileCompletionGate';
@@ -169,6 +170,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         )}
         {children}
+        <VoiceCommandButton user={user} />
       </div>
     );
   }
@@ -226,6 +228,7 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Platform-wide AI Coach floating button */}
       <AICoachButton />
+      <VoiceCommandButton user={user} />
     </div>
   );
 }
