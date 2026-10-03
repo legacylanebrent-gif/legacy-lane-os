@@ -6,6 +6,26 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // ── Trial gate: SERP (Google Lens) searches are locked during free trials ──
+    try {
+      const pendingSubs = await base44.asServiceRole.entities.Subscription.filter({
+        user_id: user.id,
+        status: 'pending',
+      });
+      const activeTrial = pendingSubs.find(
+        (s) => s.renewal_date && new Date(s.renewal_date) > new Date()
+      );
+      if (activeTrial || user.subscription_status === 'trial') {
+        return Response.json({
+          error: "Your free trial doesn't include SERP pricing searches. Upgrade to a paid plan to activate them.",
+          requires_upgrade: true,
+          upgrade_url: '/OperatorPackages',
+        }, { status: 403 });
+      }
+    } catch (gateErr) {
+      console.warn('Trial gate check failed, proceeding:', gateErr.message);
+    }
+
     const { image_url, sale_id } = await req.json();
     if (!image_url) return Response.json({ error: 'image_url required' }, { status: 400 });
 

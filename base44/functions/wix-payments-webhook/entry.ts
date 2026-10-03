@@ -108,6 +108,18 @@ Deno.serve(async (req) => {
           });
         }
 
+        // Trial is over once the plan is paid — expire any pending trial subscription
+        const pendingTrialSubs = await base44.asServiceRole.entities.Subscription.filter({
+          user_id: user.id,
+          status: 'pending',
+        });
+        for (const trialSub of pendingTrialSubs) {
+          await base44.asServiceRole.entities.Subscription.update(trialSub.id, {
+            status: 'expired',
+            end_date: new Date().toISOString(),
+          });
+        }
+
         // Create new active subscription
         const now = new Date();
         const renewalDate = new Date(now);

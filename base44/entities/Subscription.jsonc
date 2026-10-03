@@ -7,15 +7,7 @@
     },
     "plan_type": {
       "type": "string",
-      "enum": [
-        "agent_basic",
-        "agent_pro",
-        "operator_basic",
-        "operator_pro",
-        "investor_basic",
-        "investor_pro",
-        "coach_premium"
-      ]
+      "description": "Account type / plan identifier (e.g. estate_sale_operator, agent_operator, collector_dealer)"
     },
     "tier": {
       "type": "string",
@@ -86,6 +78,11 @@
         "medium",
         "high"
       ]
+    },
+    "last_trial_reminder_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last date a daily trial-upgrade reminder email was sent for this trial subscription"
     },
     "wix_subscription_id": {
       "type": "string",

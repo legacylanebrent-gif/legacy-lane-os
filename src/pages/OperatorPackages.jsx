@@ -224,7 +224,9 @@ export default function OperatorPackages() {
                 `You'll keep full access to your current plan until then, and the price difference will be pro-rated on your next billing cycle.`);
           window.location.href = createPageUrl('Dashboard');
         } else {
-          const isUpgrade = isBusinessUser && userRank >= 0 && userRank < pkgRank && pkgData.account_type !== 'biz_in_a_box';
+          // Trial users must go through checkout to activate their plan (SERP stays locked until they pay)
+          const isOnTrial = user.subscription_status === 'trial';
+          const isUpgrade = isBusinessUser && userRank >= 0 && (userRank < pkgRank || isOnTrial) && pkgData.account_type !== 'biz_in_a_box';
 
           if (isUpgrade) {
             // Pro-rated upgrade: create Wix checkout session with pro-rated charge + new subscription
@@ -243,12 +245,36 @@ export default function OperatorPackages() {
               alert('There was an error processing your upgrade. Please try again.');
             }
           } else {
-            // New signup — process immediately
+            // New signup — 14-day free trial (full tier access, SERP locked)
             await base44.auth.updateMe({
               primary_account_type: accountType,
               selected_package: pkg.id,
-              subscription_tier: pkgData.tier_level
+              subscription_tier: pkgData.tier_level,
+              subscription_status: 'trial'
             });
+
+            // Create the 14-day trial subscription record for paid subscription packages
+            const isPaidSubscription = pkgData.pricing_model === 'subscription' && (pkgData.monthly_price || 0) > 0;
+            if (isPaidSubscription) {
+              try {
+                const trialEnd = new Date();
+                trialEnd.setDate(trialEnd.getDate() + 14);
+                await base44.entities.Subscription.create({
+                  user_id: user.id,
+                  plan_type: accountType,
+                  tier: pkgData.tier_level,
+                  price: pkgData.monthly_price,
+                  billing_period: 'monthly',
+                  status: 'pending',
+                  start_date: new Date().toISOString(),
+                  renewal_date: trialEnd.toISOString(),
+                  package_name: pkgData.package_name,
+                  account_type: accountType
+                });
+              } catch (trialError) {
+                console.error('Error creating trial subscription:', trialError);
+              }
+            }
 
             // Create referral if ref exists
             if (ref) {
