@@ -66,11 +66,19 @@ export default function VoiceCommandButton({ user }) {
       }
     }
 
-    // 2. Page / menu navigation: match the longest nav label spoken
+    // 2. Page / menu navigation: match nav label words, ignoring filler words
+    //    like "go to the" — e.g. "go to the sales manager" → "My Sales"
+    const fillerWords = new Set(['go', 'to', 'the', 'open', 'show', 'me', 'please',
+      'take', 'jump', 'navigate', 'page', 'screen', 'a', 'an', 'and', 'on', 'in', 'at', 'of']);
+    const spokenWords = t.split(' ');
     const navMatch = ALL_NAV_ITEMS
-      .map(item => ({ item, label: norm(item.label) }))
-      .filter(({ label }) => t.includes(label))
-      .sort((a, b) => b.label.length - a.label.length)[0];
+      .map(item => {
+        const labelWords = norm(item.label).split(' ').filter(w => !fillerWords.has(w));
+        const matched = labelWords.filter(w => spokenWords.includes(w));
+        return { item, score: matched.length, label: norm(item.label) };
+      })
+      .filter(m => m.score > 0)
+      .sort((a, b) => b.score - a.score || a.label.length - b.label.length)[0];
     if (navMatch) {
       navigate(createPageUrl(navMatch.item.page));
       showStatus(`Opening ${navMatch.item.label}`);
