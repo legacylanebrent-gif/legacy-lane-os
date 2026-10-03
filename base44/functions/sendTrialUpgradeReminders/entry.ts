@@ -10,7 +10,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Vendor/cleanout trials are handled by checkVendorTrialExpirations.
 // ─────────────────────────────────────────────
 
-const APP_URL = 'https://legacy-lane-os-0c72fcc7.base44.app';
+const APP_URL = 'https://estatesalen.com';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function reminderEmailTemplate(fullName, packageName, renewalDate, daysLeft) {
