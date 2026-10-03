@@ -363,6 +363,14 @@
       "default": false,
       "description": "Whether this sale is promoted to all platform users"
     },
+    "sale_team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User IDs of team members assigned to manage this sale"
+    },
     "seo_title": {
       "type": "string",
       "description": "SEO optimized page title"

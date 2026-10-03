@@ -29,6 +29,7 @@ import PdfGenerationModal from '@/components/estate/PdfGenerationModal';
 import BuyoutEventSection from '@/components/estate/BuyoutEventSection';
 import ImageImportModal from '@/components/estate/ImageImportModal';
 import DeepSearchProgressModal from '@/components/estate/DeepSearchProgressModal';
+import SaleTeamSection from '@/components/estate/SaleTeamSection';
 
 const SALE_STATUSES = ['draft', 'upcoming', 'active', 'completed', 'archived'];
 
@@ -121,7 +122,8 @@ export default function SaleEditor() {
     special_notes: '',
     payment_methods: [],
     buyout_config: null,
-    promoted_to_all_users: false
+    promoted_to_all_users: false,
+    sale_team: []
   });
 
   // Keep saleIdRef in sync so auto-save closure has latest value
@@ -186,6 +188,7 @@ export default function SaleEditor() {
           payment_methods: latest.payment_methods,
           buyout_config: latest.sale_type === 'buyout_or_cleanout' ? latest.buyout_config : null,
           promoted_to_all_users: latest.sale_type === 'five_and_under_sale',
+          sale_team: latest.sale_team,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -264,7 +267,8 @@ export default function SaleEditor() {
         payment_methods: saleData.payment_methods || [],
         buyout_config: saleData.buyout_config || null,
         promoted_to_all_users: saleData.promoted_to_all_users || false,
-        national_featured: saleData.national_featured || false
+        national_featured: saleData.national_featured || false,
+        sale_team: saleData.sale_team || []
       });
       setFeaturedNationally(saleData.national_featured || false);
       setFeaturedLocally(saleData.local_featured || false);
@@ -406,6 +410,7 @@ export default function SaleEditor() {
           payment_methods: formData.payment_methods,
           buyout_config: formData.sale_type === 'buyout_or_cleanout' ? formData.buyout_config : null,
           promoted_to_all_users: formData.sale_type === 'five_and_under_sale',
+          sale_team: formData.sale_team,
           national_featured: featuredNationally,
           local_featured: featuredLocally,
         };
@@ -1650,7 +1655,8 @@ Return ONLY the description text, no extra commentary.`
           </CardContent>
         </Card>
 
-        {/* Featured Items */}
+        {/* Featured Items — edit mode only (no photos exist yet when creating) */}
+        {saleId && (
         <Card>
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between mb-4">
@@ -1676,6 +1682,14 @@ Return ONLY the description text, no extra commentary.`
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* Sale Team */}
+        <SaleTeamSection
+          user={user}
+          saleTeam={formData.sale_team}
+          onChange={(saleTeam) => setFormData({ ...formData, sale_team: saleTeam })}
+        />
 
         {/* Sale Clients - Permissions */}
         <Card>
