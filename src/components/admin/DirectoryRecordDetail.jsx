@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
 // Compact label map for the record's fields, grouped for scanning
@@ -63,14 +62,14 @@ export default function DirectoryRecordDetail({ record, onClose }) {
   if (!record) return null;
   return (
     <Dialog open={!!record} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 pr-6">
             <span className="truncate">{record.company_name || 'Untitled record'}</span>
           </DialogTitle>
           <DialogDescription>Full record details</DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-1 max-h-[60vh] pr-3">
+        <div className="overflow-y-auto flex-1 min-h-0 max-h-[65vh] pr-3">
           <div className="space-y-4 pb-4">
             {GROUPS.map(group => {
               const rows = group.fields
@@ -106,7 +105,7 @@ export default function DirectoryRecordDetail({ record, onClose }) {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
