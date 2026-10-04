@@ -89,7 +89,24 @@ export default async function(req) {
       const t2 = Date.now();
       const q = await m.filter({ phone_normalized: { $in: ['0000000000'] } }, undefined, 10);
       const t3 = Date.now();
-      return Response.json({ probe: { load5Ms: t1 - t0, load250Ms: t2 - t1, inQueryMs: t3 - t2, pageLens: [page.length, big.length, q.length] } });
+      // probe delete: load 250 old page, find its dupes, time deleting 10 of them
+      const oldPage = await m.filter({ created_date: { $lt: CUTOFF } }, 'created_date', 250, 0);
+      const phones = new Set();
+      for (const r of oldPage) {
+        const d = (r.phone_normalized || r.phone || '').replace(/\D/g, '');
+        if (d.length >= 7) phones.add(d);
+      }
+      const matched = await m.filter({ phone_normalized: { $in: [...phones] } }, undefined, 2000);
+      const oldIds = new Set(oldPage.map(r => r.id));
+      const dupes = matched.filter(r => !oldIds.has(r.id)).slice(0, 10);
+      const t4 = Date.now();
+      const delTimes = [];
+      for (const d of dupes) {
+        const s = Date.now();
+        try { await m.delete(d.id); } catch (e) { delTimes.push('err:' + e.message); continue; }
+        delTimes.push(Date.now() - s);
+      }
+      return Response.json({ probe: { load5Ms: t1 - t0, load250Ms: t2 - t1, inQueryMs: t3 - t2, pageLens: [page.length, big.length, q.length], oldPageLen: oldPage.length, matchedLen: matched.length, dupesSampled: dupes.length, delTimes, probeMs: Date.now() - t4 } });
     }
 
     if (cursor.phase === 'absorb') {
