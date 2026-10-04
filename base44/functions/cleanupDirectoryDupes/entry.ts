@@ -106,15 +106,25 @@ export default async function(req) {
         dupes.forEach(d => toDelete.push(d.id));
       }
       for (let i = 0; i < keepersToUpdate.length; i += 100) await m.bulkUpdate(keepersToUpdate.slice(i, i + 100));
-      let deleted = 0;
-      for (let i = 0; i < toDelete.length; i += 10) {
-        await Promise.all(toDelete.slice(i, i + 10).map(id => m.delete(id).catch(() => null)));
-        deleted += Math.min(10, toDelete.length - i);
-        if (Date.now() - startedAt > 55000) break;
+      // Count ONLY real delete successes — failed deletes stay in the table and will
+      // be recomputed and retried on the next pass (never counted as progress).
+      let deleted = 0, deleteFailures = 0;
+      for (let i = 0; i < toDelete.length; i += 5) {
+        const results = await Promise.all(
+          toDelete.slice(i, i + 5).map(id => m.delete(id).then(() => true).catch((e) => {
+            console.log(`[cleanupDupes] delete failed for ${id}: ${e?.message || e}`);
+            return false;
+          }))
+        );
+        deleted += results.filter(Boolean).length;
+        deleteFailures += results.filter(r => !r).length;
+        if (Date.now() - startedAt > 50000) break;
       }
       stats.deleted = (stats.deleted || 0) + deleted;
+      stats.deleteFailures = (stats.deleteFailures || 0) + deleteFailures;
+      const remainingInSet = toDelete.length - deleted;
       return Response.json({
-        done: deleted >= toDelete.length,
+        done: remainingInSet <= 0 && deleteFailures === 0,
         stats,
         cursor: { phase: 'bulk', stats }
       });
