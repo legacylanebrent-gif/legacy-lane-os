@@ -198,8 +198,8 @@ export default function OnboardingChat() {
     setDirectoryCompanies([]);
     setCompanySearch('');
     try {
-      // Directory records don't carry an is_active flag — filtering on it returns 0 for every state
-      const results = await base44.entities.FutureEstateOperator.filter({
+      // Master operator directory is the single source of claimable businesses
+      const results = await base44.entities.MasterOperatorDirectory.filter({
         state: state
       }, '-created_date', 2000);
       setDirectoryCompanies(results);
@@ -225,14 +225,14 @@ export default function OnboardingChat() {
       setCompanyName(company.company_name || '');
       setOperatorCity(company.city || '');
       setOperatorState(company.state || '');
-      if (company.zip) setOperatorZip(company.zip);
+      if (company.zip_code) setOperatorZip(company.zip_code);
       setClaimedCompany(company);
       // Also save basic info to user
       await base44.auth.updateMe({
         company_name: company.company_name,
         city: company.city || '',
         state: company.state || '',
-        zip_code: company.zip || '',
+        zip_code: company.zip_code || '',
       });
       // Skip ahead to location + services steps
       setStep('operatorLocation');

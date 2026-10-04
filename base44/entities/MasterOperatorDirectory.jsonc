@@ -73,6 +73,18 @@
     "instagram": {
       "type": "string"
     },
+    "twitter": {
+      "type": "string",
+      "description": "Twitter profile URL (from FutureEstateOperator)"
+    },
+    "youtube": {
+      "type": "string",
+      "description": "YouTube channel URL (from FutureEstateOperator)"
+    },
+    "pinterest": {
+      "type": "string",
+      "description": "Pinterest profile URL (from FutureEstateOperator)"
+    },
     "about_text": {
       "type": "string"
     },
@@ -144,6 +156,144 @@
     "company_id": {
       "type": "string",
       "description": "Estatesales.org company ID"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Estatesales.net profile URL (from FutureEstateOperator)"
+    },
+    "package_type": {
+      "type": "string",
+      "description": "Estatesales.net package/plan type (from FutureEstateOperator)"
+    },
+    "alternate_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Additional emails found during enrichment (from FutureEstateOperator)"
+    },
+    "email_confidence_score": {
+      "type": "number",
+      "description": "Email enrichment confidence 0-100 (from FutureEstateOperator)"
+    },
+    "email_verified_status": {
+      "type": "string",
+      "description": "Email verification result (from FutureEstateOperator)"
+    },
+    "email_source_type": {
+      "type": "string",
+      "description": "Where the email was found (from FutureEstateOperator)"
+    },
+    "email_source_url": {
+      "type": "string",
+      "description": "Page the email was found on (from FutureEstateOperator)"
+    },
+    "email_last_checked": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last email enrichment/verification check (from FutureEstateOperator)"
+    },
+    "enrichment_notes": {
+      "type": "string",
+      "description": "Notes from email enrichment runs (from FutureEstateOperator)"
+    },
+    "do_not_contact": {
+      "type": "boolean",
+      "default": false,
+      "description": "Outreach compliance flag (from FutureEstateOperator)"
+    },
+    "unsubscribe_status": {
+      "type": "string",
+      "description": "Email unsubscribe state (from FutureEstateOperator)"
+    },
+    "outreach_status": {
+      "type": "string",
+      "description": "Outreach pipeline state (from FutureEstateOperator)"
+    },
+    "lead_access_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this operator receives lead opportunities (from FutureEstateOperator)"
+    },
+    "claim_status": {
+      "type": "string",
+      "description": "Claim pipeline state: pending, verified, rejected (from FutureEstateOperator)"
+    },
+    "claim_verification_status": {
+      "type": "string",
+      "description": "Claim verification stage (from FutureEstateOperator)"
+    },
+    "claimed_listing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this listing has been claimed (from FutureEstateOperator)"
+    },
+    "claimed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the listing was claimed (from FutureEstateOperator)"
+    },
+    "claim_contact_name": {
+      "type": "string",
+      "description": "Name of the person who submitted the claim (from FutureEstateOperator)"
+    },
+    "claim_contact_email": {
+      "type": "string",
+      "description": "Email of the claim submitter (from FutureEstateOperator)"
+    },
+    "claim_contact_phone": {
+      "type": "string",
+      "description": "Phone of the claim submitter (from FutureEstateOperator)"
+    },
+    "claim_notes": {
+      "type": "string",
+      "description": "Notes from the claim submission (from FutureEstateOperator)"
+    },
+    "free_trial_started": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a free trial was started via claim (from FutureEstateOperator)"
+    },
+    "free_trial_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Free trial start date (from FutureEstateOperator)"
+    },
+    "free_trial_end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Free trial end date (from FutureEstateOperator)"
+    },
+    "has_facebook": {
+      "type": "boolean",
+      "default": false,
+      "description": "ES.org flag that the company has a Facebook page (from EstatesalesOrgOperator)"
+    },
+    "last_scraped_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last scrape timestamp (from EstatesalesOrgOperator)"
+    },
+    "scrape_status": {
+      "type": "string",
+      "description": "Scrape result status (from EstatesalesOrgOperator)"
+    },
+    "dedup_key": {
+      "type": "string",
+      "description": "Lead deduplication key (from FutureOperatorLead)"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Original source identifier (from FutureOperatorLead)"
+    },
+    "process_status": {
+      "type": "string",
+      "description": "Lead processing status (from FutureOperatorLead)"
+    },
+    "lead_source": {
+      "type": "string",
+      "description": "Where this lead originated (from FutureOperatorLead source)"
     },
     "subscription_status": {
       "type": "string",

@@ -326,7 +326,50 @@ function buildFields(records, existing) {
     meta_custom_audience_id: firstNonEmpty(...allRecs.map(r => r.meta_custom_audience_id)),
     last_synced_at: firstNonEmpty(...allRecs.map(r => r.last_synced_at)),
     tags: firstNonEmpty(...allRecs.map(r => r.tags)) || {},
-    notes: firstNonEmpty(...allRecs.map(r => r.notes))
+    notes: firstNonEmpty(...allRecs.map(r => r.notes)),
+    // ── Full passthrough of source-table fields (master is the working table) ──
+    // Social profiles (FutureEstateOperator)
+    twitter: firstNonEmpty(...allRecs.map(r => r.twitter)),
+    youtube: firstNonEmpty(...allRecs.map(r => r.youtube)),
+    pinterest: firstNonEmpty(...allRecs.map(r => r.pinterest)),
+    // ES.net listing / plan info (FutureEstateOperator)
+    source_url: firstNonEmpty(...allRecs.map(r => r.source_url)),
+    package_type: firstNonEmpty(...allRecs.map(r => r.package_type)),
+    // Email enrichment metadata (FutureEstateOperator)
+    alternate_emails: mergeArrays(...allRecs.map(r => r.alternate_emails)),
+    email_confidence_score: firstNonEmpty(...allRecs.map(r => r.email_confidence_score)),
+    email_verified_status: firstNonEmpty(...allRecs.map(r => r.email_verified_status)),
+    email_source_type: firstNonEmpty(...allRecs.map(r => r.email_source_type)),
+    email_source_url: firstNonEmpty(...allRecs.map(r => r.email_source_url)),
+    email_last_checked: firstNonEmpty(...allRecs.map(r => r.email_last_checked)),
+    enrichment_notes: firstNonEmpty(...allRecs.map(r => r.enrichment_notes)),
+    // Outreach & compliance (FutureEstateOperator)
+    do_not_contact: allRecs.some(r => r.do_not_contact === true),
+    unsubscribe_status: firstNonEmpty(...allRecs.map(r => r.unsubscribe_status)),
+    outreach_status: firstNonEmpty(...allRecs.map(r => r.outreach_status)),
+    lead_access_enabled: allRecs.some(r => r.lead_access_enabled === true),
+    // Claim info (FutureEstateOperator)
+    claim_status: firstNonEmpty(...allRecs.map(r => r.claim_status)),
+    claim_verification_status: firstNonEmpty(...allRecs.map(r => r.claim_verification_status)),
+    claimed_listing: allRecs.some(r => r.claimed_listing === true),
+    claimed_date: firstNonEmpty(...allRecs.map(r => r.claimed_date)),
+    claim_contact_name: firstNonEmpty(...allRecs.map(r => r.claim_contact_name)),
+    claim_contact_email: firstNonEmpty(...allRecs.map(r => r.claim_contact_email)),
+    claim_contact_phone: firstNonEmpty(...allRecs.map(r => r.claim_contact_phone)),
+    claim_notes: firstNonEmpty(...allRecs.map(r => r.claim_notes)),
+    // Trial info (FutureEstateOperator)
+    free_trial_started: allRecs.some(r => r.free_trial_started === true),
+    free_trial_start_date: firstNonEmpty(...allRecs.map(r => r.free_trial_start_date)),
+    free_trial_end_date: firstNonEmpty(...allRecs.map(r => r.free_trial_end_date)),
+    // ES.org scrape metadata (EstatesalesOrgOperator)
+    has_facebook: allRecs.some(r => r.has_facebook === true),
+    last_scraped_at: firstNonEmpty(...allRecs.map(r => r.last_scraped_at)),
+    scrape_status: firstNonEmpty(...allRecs.map(r => r.scrape_status)),
+    // FutureOperatorLead metadata
+    dedup_key: firstNonEmpty(...allRecs.map(r => r.dedup_key)),
+    source_id: firstNonEmpty(...allRecs.map(r => r.source_id)),
+    process_status: firstNonEmpty(...allRecs.map(r => r.process_status)),
+    lead_source: firstNonEmpty(...allRecs.map(r => r.source))
   };
 }
 

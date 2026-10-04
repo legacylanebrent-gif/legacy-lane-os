@@ -22,12 +22,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Too many claim attempts. Please try again later.' }, { status: 429 });
     }
 
-    // Fetch the listing
-    const ops = await base44.asServiceRole.entities.FutureEstateOperator.filter({ id: operator_id });
-    const op = ops[0];
-    if (!op) return Response.json({ error: 'Listing not found' }, { status: 404 });
+    // Master directory is the primary claim source; legacy FutureEstateOperator
+    // record ids are still accepted for older flows.
+    const master = base44.asServiceRole.entities.MasterOperatorDirectory;
+    const feoEntity = base44.asServiceRole.entities.FutureEstateOperator;
 
-    if (op.claimed_listing && op.claim_status === 'verified') {
+    let listing = null;
+    let isMaster = false;
+    const dirRecs = await master.filter({ id: operator_id });
+    if (dirRecs[0]) {
+      listing = dirRecs[0];
+      isMaster = true;
+    } else {
+      const ops = await feoEntity.filter({ id: operator_id });
+      if (ops[0]) listing = ops[0];
+    }
+    if (!listing) return Response.json({ error: 'Listing not found' }, { status: 404 });
+
+    if (listing.claimed_listing && listing.claim_status === 'verified') {
       return Response.json({ error: 'This listing has already been claimed and verified.', already_claimed: true }, { status: 409 });
     }
 
@@ -35,7 +47,7 @@ Deno.serve(async (req) => {
     const isTrial = plan_choice === 'free_trial';
     const trialEnd = isTrial ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() : null;
 
-    await base44.asServiceRole.entities.FutureEstateOperator.update(operator_id, {
+    const claimUpdate = {
       claimed_listing: true,
       claimed_date: now,
       claim_status: 'pending',
@@ -49,20 +61,35 @@ Deno.serve(async (req) => {
       claim_contact_email: contact_email,
       claim_contact_phone: contact_phone || '',
       claim_notes: `Plan: ${plan_choice}. Territories: ${(territories || []).join(', ')}`
-    });
+    };
+
+    if (isMaster) {
+      await master.update(operator_id, claimUpdate);
+      // Mirror the claim onto the underlying ES.net record so both tables stay consistent
+      const feoId = (listing.source_record_ids || {}).FutureEstateOperator;
+      if (feoId) {
+        try {
+          await feoEntity.update(feoId, claimUpdate);
+        } catch (e) {
+          console.error('claim mirror to FutureEstateOperator failed:', e.message);
+        }
+      }
+    } else {
+      await feoEntity.update(operator_id, claimUpdate);
+    }
 
     // Notify admin
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: 'admin@estatesalen.com',
-        subject: `New Business Claim: ${op.company_name} (${op.city}, ${op.state})`,
-        body: `A new claim has been submitted.\n\nCompany: ${op.company_name}\nCity: ${op.city}, ${op.state}\nContact: ${contact_name}\nEmail: ${contact_email}\nPhone: ${contact_phone || 'N/A'}\nPlan: ${plan_choice}\nTerritories: ${(territories || []).join(', ')}`
+        subject: `New Business Claim: ${listing.company_name} (${listing.city}, ${listing.state})`,
+        body: `A new claim has been submitted.\n\nCompany: ${listing.company_name}\nCity: ${listing.city}, ${listing.state}\nContact: ${contact_name}\nEmail: ${contact_email}\nPhone: ${contact_phone || 'N/A'}\nPlan: ${plan_choice}\nTerritories: ${(territories || []).join(', ')}`
       });
     } catch { /* non-blocking */ }
 
     return Response.json({
       success: true,
-      company_name: op.company_name,
+      company_name: listing.company_name,
       plan: plan_choice,
       trial_end: trialEnd,
       message: isTrial
