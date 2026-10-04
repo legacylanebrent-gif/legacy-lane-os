@@ -345,7 +345,7 @@ function buildFields(records, existing) {
     enrichment_notes: firstNonEmpty(...allRecs.map(r => r.enrichment_notes)),
     // Outreach & compliance (FutureEstateOperator)
     do_not_contact: allRecs.some(r => r.do_not_contact === true),
-    unsubscribe_status: firstNonEmpty(...allRecs.map(r => r.unsubscribe_status)),
+    unsubscribe_status: allRecs.some(r => r.unsubscribe_status === true),
     outreach_status: firstNonEmpty(...allRecs.map(r => r.outreach_status)),
     lead_access_enabled: allRecs.some(r => r.lead_access_enabled === true),
     // Claim info (FutureEstateOperator)

@@ -204,7 +204,8 @@
       "description": "Outreach compliance flag (from FutureEstateOperator)"
     },
     "unsubscribe_status": {
-      "type": "string",
+      "type": "boolean",
+      "default": false,
       "description": "Email unsubscribe state (from FutureEstateOperator)"
     },
     "outreach_status": {
