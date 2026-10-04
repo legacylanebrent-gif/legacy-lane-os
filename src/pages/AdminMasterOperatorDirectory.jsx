@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2 } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail } from 'lucide-react';
 
 const PAGE_SIZE = 50;
 
@@ -33,6 +33,8 @@ export default function AdminMasterOperatorDirectory() {
   const [rebuildResult, setRebuildResult] = useState(null);
   const [fixingEncoding, setFixingEncoding] = useState(false);
   const [encodingResult, setEncodingResult] = useState(null);
+  const [batchEnrichRunning, setBatchEnrichRunning] = useState(false);
+  const [batchEnrichProgress, setBatchEnrichProgress] = useState(null);
 
   const loadStats = useCallback(async () => {
     try {
@@ -144,6 +146,52 @@ export default function AdminMasterOperatorDirectory() {
 
   const loadMore = () => loadRecords(skip + PAGE_SIZE);
 
+  // ── Duplicate detection (same shape as phone-dedup on rebuild) ──────────────
+  // Returns ids of records that are duplicates of a "better" record in the
+  // filtered list — richer source wins. Emails should never be added to dupes.
+  const findDuplicateIds = (list) => {
+    const normalizePhone = (r) => {
+      const digits = (r.phone_normalized || r.phone || '').replace(/\D/g, '');
+      return digits.length >= 10 ? 'p:' + digits.slice(-10) : null;
+    };
+    const normalizeNameState = (r) => {
+      const name = (r.company_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return name && r.state ? 'n:' + name + '|' + r.state : null;
+    };
+    const groupMap = new Map();
+    for (const r of list) {
+      const k = normalizePhone(r) || normalizeNameState(r);
+      if (!k) continue;
+      if (!groupMap.has(k)) groupMap.set(k, []);
+      groupMap.get(k).push(r);
+    }
+    const excluded = new Set();
+    for (const group of groupMap.values()) {
+      if (group.length < 2) continue;
+      const sorted = [...group].sort((a, b) => (b.sources?.length || 0) - (a.sources?.length || 0));
+      sorted.slice(1).forEach(r => excluded.add(r.id));
+    }
+    return excluded;
+  };
+
+  // ── Batch Find Emails (same flow as AdminFutureOperators) ───────────────────
+  const handleBatchFindEmails = async () => {
+    const dupIds = findDuplicateIds(records);
+    const targets = records.filter(r => !r.email && !dupIds.has(r.id));
+    if (targets.length === 0) return alert('No eligible companies need emails (duplicates are skipped).');
+    if (!confirm(`Run email finder on ${targets.length} companies? Duplicate records are excluded. This may take a while.`)) return;
+    setBatchEnrichRunning(true);
+    setBatchEnrichProgress({ done: 0, total: targets.length, skippedDupes: dupIds.size });
+    for (let i = 0; i < targets.length; i++) {
+      try { await base44.functions.invoke('enrichCompanyEmail', { company_id: targets[i].id, entity: 'MasterOperatorDirectory' }); } catch (e) {}
+      setBatchEnrichProgress(p => ({ ...p, done: i + 1 }));
+      if (i % 10 === 0) await loadRecords(0); // Refresh UI every 10 records
+    }
+    setBatchEnrichRunning(false);
+    setBatchEnrichProgress(null);
+    await loadRecords(0);
+  };
+
   const handleFixEncoding = async () => {
     setFixingEncoding(true);
     setEncodingResult(null);
@@ -196,6 +244,16 @@ export default function AdminMasterOperatorDirectory() {
           <Button onClick={handleFixEncoding} disabled={fixingEncoding} variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-50">
             {fixingEncoding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Wand2 className="w-4 h-4 mr-2" />}
             {fixingEncoding ? 'Fixing...' : 'Fix Encoding (â€™â†’\' )'}
+          </Button>
+          <Button
+            onClick={handleBatchFindEmails}
+            disabled={batchEnrichRunning}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {batchEnrichRunning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+            {batchEnrichRunning
+              ? `Finding... (${batchEnrichProgress?.done ?? 0}/${batchEnrichProgress?.total ?? 0})`
+              : `Find Emails (${records.filter(r => !r.email && !findDuplicateIds(records).has(r.id)).length})`}
           </Button>
         </div>
       </div>
@@ -360,6 +418,7 @@ export default function AdminMasterOperatorDirectory() {
               <tr>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Company</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Phone</th>
+                <th className="text-left px-4 py-2 font-semibold text-slate-600 w-[280px]">Email</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Sources</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Geocode</th>
@@ -367,9 +426,9 @@ export default function AdminMasterOperatorDirectory() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && records.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-8 text-slate-400">Loading...</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-slate-400">Loading...</td></tr>
               ) : records.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-8 text-slate-400">No records found</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-slate-400">No records found</td></tr>
               ) : records.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2.5">
@@ -379,6 +438,29 @@ export default function AdminMasterOperatorDirectory() {
                   <td className="px-4 py-2.5">
                     {r.phone ? (
                       <span className="flex items-center gap-1 text-slate-600"><Phone className="w-3 h-3" />{r.phone}</span>
+                    ) : <span className="text-slate-300">—</span>}
+                  </td>
+                  <td className="px-4 py-2.5 max-w-[280px]">
+                    {r.email ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <a href={`mailto:${r.email}`} className="hover:underline font-mono text-sm font-medium break-all min-w-0">
+                            {r.email}
+                          </a>
+                          <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
+                        </div>
+                        {r.email_confidence_score != null && (
+                          <span className="text-xs text-slate-400">({r.email_confidence_score}%)</span>
+                        )}
+                        {(r.alternate_emails || []).length > 0 && (r.alternate_emails || []).map((altEmail, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <a href={`mailto:${altEmail}`} className="hover:underline font-mono text-xs text-slate-600 break-all min-w-0">
+                              {altEmail}
+                            </a>
+                            <Badge variant="outline" className="text-xs px-1.5 py-0 flex-shrink-0 text-slate-500">Alt {idx + 1}</Badge>
+                          </div>
+                        ))}
+                      </div>
                     ) : <span className="text-slate-300">—</span>}
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">
