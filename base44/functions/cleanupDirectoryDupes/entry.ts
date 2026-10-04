@@ -39,6 +39,17 @@ function buildKeeperUpdates(keeper, dupes) {
   return updates;
 }
 
+// De-dup the raw read: rate-limited paged fetches can return the same record
+// more than once, which makes union-find group a record with itself.
+function distinctById(records) {
+  const seen = new Set();
+  const out = [];
+  for (const r of records) {
+    if (r && r.id && !seen.has(r.id)) { seen.add(r.id); out.push(r); }
+  }
+  return out;
+}
+
 function unionFindGroups(records) {
   const parent = new Map();
   // correct iterative find with full path compression
@@ -96,7 +107,7 @@ export default async function(req) {
         all = all.concat(page);
         if (page.length < 2000) break;
       }
-      const groups = unionFindGroups(all).filter(g => g.length > 1);
+      const groups = unionFindGroups(distinctById(all)).filter(g => g.length > 1);
       const keepersToUpdate = [];
       const toDelete = [];
       for (const recs of groups) {
@@ -210,11 +221,19 @@ export default async function(req) {
         all = all.concat(page);
         if (page.length < 2000) break;
       }
-      const groups = unionFindGroups(all).filter(g => g.length > 1);
-      const junk = all.filter(r => digitsOf(r).length < 7 && !normName(r.company_name));
+      const dedupedAll = distinctById(all);
+      const groups = unionFindGroups(dedupedAll).filter(g => g.length > 1);
+      const junk = dedupedAll.filter(r => digitsOf(r).length < 7 && !normName(r.company_name));
+      // Diagnostics: show exactly which records are still grouped together
+      const groupDetails = groups.slice(0, 50).map(g => g.map(r => ({
+        id: r.id, name: r.company_name, state: r.state,
+        phone: r.phone, phone_normalized: r.phone_normalized,
+        created: r.created_date
+      })));
       return Response.json({
         done: true,
         cursor: { phase: 'done', oldSkip: 0, stats },
+        groupDetails,
         stats: { ...stats, totalRecords: all.length, remainingDupes: groups.reduce((s, g) => s + g.length - 1, 0), remainingDupGroups: groups.length, junkRecords: junk.length }
       });
     }
