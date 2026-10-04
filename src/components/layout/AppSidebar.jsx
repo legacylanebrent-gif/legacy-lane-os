@@ -24,6 +24,7 @@ import {
 export const ALL_NAV_ITEMS = [
 
   // ── MAIN ────────────────────────────────────────────────────────────────────
+  { page: 'Home',                   label: 'Main Website',           icon: Home,            group: 'Main' },
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
   { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
 
