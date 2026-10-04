@@ -14,8 +14,8 @@ export const ADMIN_LINK_SECTIONS = [
     title: '🖥 Command Center',
     links: [
       { page: 'AdminDashboard', label: 'Admin Dashboard', icon: BarChart2 },
-      { page: 'LaunchCommandCenter', label: '🚨 Launch Command Center', icon: Rocket },
-      { page: 'LaunchAuditCenter', label: '🎯 Launch Audit Center', icon: Target },
+      { page: 'LaunchCommandCenter', label: 'Launch Command Center', icon: Rocket },
+      { page: 'LaunchAuditCenter', label: 'Launch Audit Center', icon: Target },
       { page: 'AdminBuildReport', label: 'Build Report', icon: FileText },
       { page: 'Settings', label: 'Settings', icon: Settings },
       { page: 'ApiKeyManager', label: 'Website API Keys', icon: Globe },
