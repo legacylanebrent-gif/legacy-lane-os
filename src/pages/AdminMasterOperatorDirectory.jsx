@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink, Eye, Pencil, Trash2 } from 'lucide-react';
+import DirectoryRecordDetail from '@/components/admin/DirectoryRecordDetail';
+import DirectoryRecordEdit from '@/components/admin/DirectoryRecordEdit';
 
 const PAGE_SIZE = 50;
 
@@ -37,6 +39,24 @@ export default function AdminMasterOperatorDirectory() {
   const [encodingResult, setEncodingResult] = useState(null);
   const [batchEnrichRunning, setBatchEnrichRunning] = useState(false);
   const [batchEnrichProgress, setBatchEnrichProgress] = useState(null);
+  const [detailRecord, setDetailRecord] = useState(null);
+  const [editRecord, setEditRecord] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDelete = async (r) => {
+    if (!confirm(`Delete "${r.company_name || 'this record'}" from the Master Operator Directory? This cannot be undone.`)) return;
+    setDeletingId(r.id);
+    try {
+      await base44.entities.MasterOperatorDirectory.delete(r.id);
+      setRecords(prev => prev.filter(x => x.id !== r.id));
+      loadStats();
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Delete failed — please try again.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const loadStats = useCallback(async () => {
     try {
@@ -425,13 +445,14 @@ export default function AdminMasterOperatorDirectory() {
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Sources</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Geocode</th>
+                <th className="text-right px-4 py-2 font-semibold text-slate-600 w-[110px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && records.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-slate-400">Loading...</td></tr>
+                <tr><td colSpan={8} className="text-center py-8 text-slate-400">Loading...</td></tr>
               ) : records.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-slate-400">No records found</td></tr>
+                <tr><td colSpan={8} className="text-center py-8 text-slate-400">No records found</td></tr>
               ) : records.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2.5">
@@ -525,6 +546,32 @@ export default function AdminMasterOperatorDirectory() {
                       <Badge variant="outline" className="text-amber-600">Pending</Badge>
                     )}
                   </td>
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => setDetailRecord(r)}
+                        title="Preview full record"
+                        className="p-1.5 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditRecord(r)}
+                        title="Edit record"
+                        className="p-1.5 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(r)}
+                        title="Delete record"
+                        disabled={deletingId === r.id}
+                        className="p-1.5 rounded hover:bg-red-50 text-slate-400 hover:text-red-600 disabled:opacity-50"
+                      >
+                        {deletingId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -537,6 +584,13 @@ export default function AdminMasterOperatorDirectory() {
           <Button variant="outline" onClick={loadMore}>Load More</Button>
         </div>
       )}
+
+      <DirectoryRecordDetail record={detailRecord} onClose={() => setDetailRecord(null)} />
+      <DirectoryRecordEdit
+        record={editRecord}
+        onClose={() => setEditRecord(null)}
+        onSaved={() => loadRecords(0)}
+      />
     </div>
   );
 }
