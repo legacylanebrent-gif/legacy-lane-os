@@ -24,7 +24,9 @@ export default function AdminMasterOperatorDirectory() {
   const [rebuilding, setRebuilding] = useState(false);
   const [search, setSearch] = useState('');
   const [mergeFilter, setMergeFilter] = useState('');
-  const [stateFilter, setStateFilter] = useState('');
+  // Default to a single state on load — a full-directory load is far too slow.
+  const DEFAULT_STATE = 'FL';
+  const [stateFilter, setStateFilter] = useState(DEFAULT_STATE);
   const [geocodeFilter, setGeocodeFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [skip, setSkip] = useState(0);
@@ -359,7 +361,7 @@ export default function AdminMasterOperatorDirectory() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setMergeFilter(''); setStateFilter(''); setGeocodeFilter(''); setSourceFilter(''); }}
+              onClick={() => { setMergeFilter(''); setStateFilter(DEFAULT_STATE); setGeocodeFilter(''); setSourceFilter(''); }}
               className="text-slate-500"
             >
               <X className="w-3.5 h-3.5 mr-1" />Clear Filters
