@@ -39,6 +39,7 @@ export default function AdminMasterOperatorDirectory() {
   const [encodingResult, setEncodingResult] = useState(null);
   const [batchEnrichRunning, setBatchEnrichRunning] = useState(false);
   const [batchEnrichProgress, setBatchEnrichProgress] = useState(null);
+  const [emailTargets, setEmailTargets] = useState(null);
   const [detailRecord, setDetailRecord] = useState(null);
   const [editRecord, setEditRecord] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -173,6 +174,28 @@ export default function AdminMasterOperatorDirectory() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, mergeFilter, stateFilter, geocodeFilter, sourceFilter]);
 
+  // ── Find Emails eligible count (server-side, respects all active filters) ───
+  const loadEmailTargets = useCallback(async () => {
+    try {
+      const res = await base44.functions.invoke('getFindEmailsTargets', {
+        search: search.trim(),
+        merge_status: mergeFilter,
+        state: stateFilter,
+        geocode_status: geocodeFilter,
+        source: sourceFilter
+      });
+      const d = res.data || {};
+      setEmailTargets({ count: d.count ?? 0, targets: d.targets ?? [], skippedDupes: d.skippedDupes ?? 0 });
+    } catch (err) {
+      console.error('Email targets error:', err);
+    }
+  }, [search, mergeFilter, stateFilter, geocodeFilter, sourceFilter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => loadEmailTargets(), 300);
+    return () => clearTimeout(timer);
+  }, [loadEmailTargets]);
+
   const handleRebuild = async () => {
     setRebuilding(true);
     setRebuildResult(null);
@@ -237,22 +260,37 @@ export default function AdminMasterOperatorDirectory() {
     return excluded;
   };
 
-  // ── Batch Find Emails (same flow as AdminFutureOperators) ───────────────────
+  // ── Batch Find Emails (server-side targets: all records matching active filters) ──
   const handleBatchFindEmails = async () => {
-    const dupIds = findDuplicateIds(records);
-    const targets = records.filter(r => !r.email && !dupIds.has(r.id));
+    let targets = [];
+    let skippedDupes = 0;
+    try {
+      const res = await base44.functions.invoke('getFindEmailsTargets', {
+        search: search.trim(),
+        merge_status: mergeFilter,
+        state: stateFilter,
+        geocode_status: geocodeFilter,
+        source: sourceFilter
+      });
+      const d = res.data || {};
+      targets = d.targets || [];
+      skippedDupes = d.skippedDupes || 0;
+    } catch (err) {
+      return alert('Could not load eligible companies — please try again.');
+    }
     if (targets.length === 0) return alert('No eligible companies need emails (duplicates are skipped).');
-    if (!confirm(`Run email finder on ${targets.length} companies? Duplicate records are excluded. This may take a while.`)) return;
+    if (!confirm(`Run email finder on ${targets.length} companies? Duplicate records are excluded (${skippedDupes}). This may take a while.`)) return;
     setBatchEnrichRunning(true);
-    setBatchEnrichProgress({ done: 0, total: targets.length, skippedDupes: dupIds.size });
+    setBatchEnrichProgress({ done: 0, total: targets.length, skippedDupes });
     for (let i = 0; i < targets.length; i++) {
       try { await base44.functions.invoke('enrichCompanyEmail', { company_id: targets[i].id, entity: 'MasterOperatorDirectory' }); } catch (e) {}
       setBatchEnrichProgress(p => ({ ...p, done: i + 1 }));
-      if (i % 10 === 0) await loadRecords(0); // Refresh UI every 10 records
+      if (i % 10 === 0) { await loadRecords(0); await loadEmailTargets(); } // Refresh UI every 10 records
     }
     setBatchEnrichRunning(false);
     setBatchEnrichProgress(null);
     await loadRecords(0);
+    await loadEmailTargets();
   };
 
   const handleFixEncoding = async () => {
@@ -316,7 +354,7 @@ export default function AdminMasterOperatorDirectory() {
             {batchEnrichRunning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
             {batchEnrichRunning
               ? `Finding... (${batchEnrichProgress?.done ?? 0}/${batchEnrichProgress?.total ?? 0})`
-              : `Find Emails (${records.filter(r => !r.email && !findDuplicateIds(records).has(r.id)).length})`}
+              : `Find Emails (${emailTargets?.count ?? 0})`}
           </Button>
         </div>
       </div>
