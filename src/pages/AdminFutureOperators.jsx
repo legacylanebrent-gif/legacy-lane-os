@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -380,94 +381,7 @@ export default function AdminFutureOperators() {
       <Card>
         <CardHeader>
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <Input
-                  placeholder="Search by company, city, state, or phone..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Badge variant="outline" className="text-sm w-fit">
-                {filteredOperators.length} results
-              </Badge>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
-              <div className="flex flex-wrap items-center gap-2 flex-1">
-                <Filter className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                <Select value={stateFilter} onValueChange={setStateFilter}>
-                  <SelectTrigger className="w-full sm:w-32">
-                    <SelectValue placeholder="All States" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px] overflow-y-auto">
-                    {allStates.map(state => (
-                      <SelectItem key={state} value={state}>{state}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {currentUser?.role === 'admin' && (
-                  <Select value={packageFilter} onValueChange={setPackageFilter}>
-                    <SelectTrigger className="w-full sm:w-36">
-                      <SelectValue placeholder="All Packages" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Packages</SelectItem>
-                      {uniquePackages.map(pkg => (
-                        <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                <button
-                  onClick={() => setSortAlpha(p => !p)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
-                    sortAlpha
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
-                  }`}
-                >
-                  🔤 A–Z
-                </button>
-
-                <button
-                  onClick={() => setNewOnlyFilter(p => !p)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
-                    newOnlyFilter
-                      ? 'bg-emerald-500 text-white border-emerald-500'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-emerald-400'
-                  }`}
-                >
-                  🆕 New (14d)
-                </button>
-
-                <Select value={emailFilter} onValueChange={setEmailFilter}>
-                  <SelectTrigger className="w-full sm:w-36">
-                    <SelectValue placeholder="Email: All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Email: All</SelectItem>
-                    <SelectItem value="has">Has Email</SelectItem>
-                    <SelectItem value="missing">Missing Email</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={phoneFilter} onValueChange={setPhoneFilter}>
-                  <SelectTrigger className="w-full sm:w-36">
-                    <SelectValue placeholder="Phone: All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Phone: All</SelectItem>
-                    <SelectItem value="has">Has Phone</SelectItem>
-                    <SelectItem value="missing">Missing Phone</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
+            <div className="flex flex-wrap items-center gap-3">
               <Button 
                 onClick={handleUpdateState}
                 disabled={scrapeRunning}
@@ -489,10 +403,97 @@ export default function AdminFutureOperators() {
               </Button>
 
               {batchEnrichRunning && (
-                <Badge className="bg-blue-100 text-blue-700 self-end">
+                <Badge className="bg-blue-100 text-blue-700">
                   {batchEnrichProgress?.done}/{batchEnrichProgress?.total} processed
                 </Badge>
               )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Input
+                  placeholder="Search by company, city, state, or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Badge variant="outline" className="text-sm w-fit">
+                {filteredOperators.length} results
+              </Badge>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <Filter className="w-4 h-4 text-slate-600 flex-shrink-0" />
+              <Select value={stateFilter} onValueChange={setStateFilter}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="All States" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {allStates.map(state => (
+                    <SelectItem key={state} value={state}>{state}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {currentUser?.role === 'admin' && (
+                <Select value={packageFilter} onValueChange={setPackageFilter}>
+                  <SelectTrigger className="w-full sm:w-36">
+                    <SelectValue placeholder="All Packages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Packages</SelectItem>
+                    {uniquePackages.map(pkg => (
+                      <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <button
+                onClick={() => setSortAlpha(p => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
+                  sortAlpha
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                }`}
+              >
+                🔤 A–Z
+              </button>
+
+              <button
+                onClick={() => setNewOnlyFilter(p => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap ${
+                  newOnlyFilter
+                    ? 'bg-emerald-500 text-white border-emerald-500'
+                    : 'bg-white text-slate-600 border-slate-300 hover:border-emerald-400'
+                }`}
+              >
+                🆕 New (14d)
+              </button>
+
+              <Select value={emailFilter} onValueChange={setEmailFilter}>
+                <SelectTrigger className="w-full sm:w-36">
+                  <SelectValue placeholder="Email: All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Email: All</SelectItem>
+                  <SelectItem value="has">Has Email</SelectItem>
+                  <SelectItem value="missing">Missing Email</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={phoneFilter} onValueChange={setPhoneFilter}>
+                <SelectTrigger className="w-full sm:w-36">
+                  <SelectValue placeholder="Phone: All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Phone: All</SelectItem>
+                  <SelectItem value="has">Has Phone</SelectItem>
+                  <SelectItem value="missing">Missing Phone</SelectItem>
+                </SelectContent>
+              </Select>
               
               {(packageFilter !== 'all' || emailFilter !== 'all' || phoneFilter !== 'all' || newOnlyFilter) && (
                 <Button 
@@ -514,170 +515,151 @@ export default function AdminFutureOperators() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {pagedOperators.map((operator) => (
-              <Card key={operator.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate min-w-0">
-                            {operator.company_name?.replace(/&amp;/g, '&')}
-                          </h3>
+            <div className="overflow-x-auto -mx-2 px-2">
+              <Table className="min-w-[1000px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[240px]">Company</TableHead>
+                    <TableHead className="w-[180px]">Location</TableHead>
+                    <TableHead className="w-[140px]">Phone</TableHead>
+                    <TableHead className="w-[280px]">Email</TableHead>
+                    <TableHead className="w-[180px]">Website</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pagedOperators.map((operator) => (
+                    <TableRow key={operator.id} className="align-top">
+                      <TableCell>
+                        <div className="font-semibold text-slate-900 break-words">
+                          {operator.company_name?.replace(/&amp;/g, '&')}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
                           {isNew(operator) && (
                             <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs">New</Badge>
                           )}
-                          {/* LL OS subscriber badge — visible to everyone */}
                           {operator.ll_os_subscriber && (
                             <Badge className="bg-orange-100 text-orange-700 border border-orange-300 text-xs">
                               LL OS Member
                             </Badge>
                           )}
-                          {/* Scraped EstateSales.net package label — admin only */}
                           {operator.package_type && currentUser?.role === 'admin' && (
                             <Badge className={getPackageColor(operator.package_type) + ' text-xs'} title="EstateSales.net package (admin only)">
                               {operator.package_type}
                             </Badge>
                           )}
                         </div>
-                      </div>
-
-                      <div className="flex gap-2 flex-shrink-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEdit(operator)}
-                          className="border-slate-400 text-slate-700 hover:bg-slate-50"
-                        >
-                          <Pencil className="w-3 h-3 sm:mr-1" />
-                          <span className="hidden sm:inline">Edit</span>
-                        </Button>
-
-                        {operator.source_url && (
-                          <Button variant="outline" size="sm" asChild className="flex-shrink-0">
-                            <a href={operator.source_url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">View Profile</span>
-                            </a>
-                          </Button>
+                        {(operator.facebook || operator.twitter || operator.instagram || operator.youtube || operator.pinterest) && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            {operator.facebook && (
+                              <a href={operator.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">
+                                <Facebook className="w-4 h-4" />
+                              </a>
+                            )}
+                            {operator.twitter && (
+                              <a href={operator.twitter} target="_blank" rel="noopener noreferrer" className="text-sky-500 hover:text-sky-600">
+                                <Twitter className="w-4 h-4" />
+                              </a>
+                            )}
+                            {operator.instagram && (
+                              <a href={operator.instagram} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                                <Instagram className="w-4 h-4" />
+                              </a>
+                            )}
+                            {operator.youtube && (
+                              <a href={operator.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700">
+                                <Youtube className="w-4 h-4" />
+                              </a>
+                            )}
+                          </div>
                         )}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
-                      {(operator.geocoded_city || operator.city) && operator.state && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
-                          <span className="truncate min-w-0">
+                      </TableCell>
+                      <TableCell className="text-sm text-slate-600">
+                        {(operator.geocoded_city || operator.city) && operator.state && (
+                          <div className="break-words">
                             {operator.geocoded_city || operator.city}, {operator.state} {operator.geocoded_zip || operator.zip_code}
                             {operator.geocoded_county && <span className="text-slate-400 ml-1">· {operator.geocoded_county}</span>}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {operator.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                          <a href={`tel:${operator.phone}`} className="hover:underline truncate min-w-0">
+                          </div>
+                        )}
+                        {operator.member_since && (
+                          <div className="text-xs text-slate-400 mt-1">Member since {operator.member_since}</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {operator.phone ? (
+                          <a href={`tel:${operator.phone}`} className="hover:underline whitespace-nowrap">
                             {operator.phone}
                           </a>
-                        </div>
-                      )}
-                      
-                      {operator.website && (
-                        <div className="flex items-center gap-2 col-span-full">
-                          <Globe className="w-4 h-4 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-[280px]">
+                        {operator.email ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <a href={`mailto:${operator.email}`} className="hover:underline font-mono text-sm font-medium break-all min-w-0">
+                                {operator.email}
+                              </a>
+                              <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
+                            </div>
+                            {operator.email_confidence_score != null && (
+                              <span className="text-xs text-slate-400">({operator.email_confidence_score}%)</span>
+                            )}
+                            {operator.alternate_emails?.length > 0 && operator.alternate_emails.map((altEmail, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <a href={`mailto:${altEmail}`} className="hover:underline font-mono text-xs text-slate-600 break-all min-w-0">
+                                  {altEmail}
+                                </a>
+                                <Badge variant="outline" className="text-xs px-1.5 py-0 flex-shrink-0 text-slate-500">Alt {idx + 1}</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {operator.website ? (
                           <a 
                             href={operator.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="hover:underline truncate min-w-0"
+                            className="hover:underline text-sm break-all"
                           >
                             {operator.website.replace(/https?:\/\/(www\.)?/, '')}
                           </a>
-                        </div>
-                      )}
-                      
-                      {operator.member_since && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                          <span className="truncate min-w-0">Member since {operator.member_since}</span>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEdit(operator)}
+                            className="border-slate-400 text-slate-700 hover:bg-slate-50"
+                          >
+                            <Pencil className="w-3 h-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </Button>
 
-                      {operator.email && (
-                        <div className="col-span-full space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            <a href={`mailto:${operator.email}`} className="hover:underline truncate min-w-0 font-mono text-sm font-medium">
-                              {operator.email}
-                            </a>
-                            <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
-                            {operator.email_confidence_score != null && (
-                              <span className="text-xs text-slate-400">({operator.email_confidence_score}%)</span>
-                            )}
-                          </div>
-                          {operator.alternate_emails?.length > 0 && operator.alternate_emails.map((altEmail, idx) => (
-                            <div key={idx} className="flex items-center gap-2 pl-6">
-                              <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                              <a href={`mailto:${altEmail}`} className="hover:underline truncate min-w-0 font-mono text-xs text-slate-600">
-                                {altEmail}
+                          {operator.source_url && (
+                            <Button variant="outline" size="sm" asChild className="flex-shrink-0">
+                              <a href={operator.source_url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-3 h-3 sm:mr-1" />
+                                <span className="hidden sm:inline">View Profile</span>
                               </a>
-                              <Badge variant="outline" className="text-xs px-1.5 py-0 flex-shrink-0 text-slate-500">Alt {idx + 1}</Badge>
-                            </div>
-                          ))}
+                            </Button>
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    {(operator.facebook || operator.twitter || operator.instagram || operator.youtube || operator.pinterest) && (
-                      <div className="flex items-center gap-2 pt-2 border-t">
-                        {operator.facebook && (
-                          <a 
-                            href={operator.facebook} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <Facebook className="w-4 h-4" />
-                          </a>
-                        )}
-                        {operator.twitter && (
-                          <a 
-                            href={operator.twitter} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sky-500 hover:text-sky-600"
-                          >
-                            <Twitter className="w-4 h-4" />
-                          </a>
-                        )}
-                        {operator.instagram && (
-                          <a 
-                            href={operator.instagram} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-pink-600 hover:text-pink-700"
-                          >
-                            <Instagram className="w-4 h-4" />
-                          </a>
-                        )}
-                        {operator.youtube && (
-                          <a 
-                            href={operator.youtube} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Youtube className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
             {/* Pagination */}
             {totalFiltered > 0 && (
