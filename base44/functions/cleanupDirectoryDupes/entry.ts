@@ -87,13 +87,51 @@ export default async function(req) {
     const stats = { ...((body.stats || cursor.stats) || {}) };
     stats.batchesProcessed = (stats.batchesProcessed || 0) + 1;
 
+    if (cursor.phase === 'bulk') {
+      // Recompute all duplicate groups from one full table read each call (read-only loads,
+      // so no pagination-shift issue), then merge keepers and delete dupes within the budget.
+      let all = [];
+      for (let skip = 0; skip < 30000; skip += 2000) {
+        const page = await m.filter({}, '-created_date', 2000, skip);
+        all = all.concat(page);
+        if (page.length < 2000) break;
+      }
+      const groups = unionFindGroups(all).filter(g => g.length > 1);
+      const keepersToUpdate = [];
+      const toDelete = [];
+      for (const recs of groups) {
+        const keeper = pickKeeper(recs);
+        const dupes = recs.filter(r => r.id !== keeper.id);
+        keepersToUpdate.push({ id: keeper.id, ...buildKeeperUpdates(keeper, dupes) });
+        dupes.forEach(d => toDelete.push(d.id));
+      }
+      for (let i = 0; i < keepersToUpdate.length; i += 100) await m.bulkUpdate(keepersToUpdate.slice(i, i + 100));
+      let deleted = 0;
+      for (let i = 0; i < toDelete.length; i += 10) {
+        await Promise.all(toDelete.slice(i, i + 10).map(id => m.delete(id).catch(() => null)));
+        deleted += Math.min(10, toDelete.length - i);
+        if (Date.now() - startedAt > 55000) break;
+      }
+      stats.deleted = (stats.deleted || 0) + deleted;
+      return Response.json({
+        done: deleted >= toDelete.length,
+        stats,
+        cursor: { phase: 'bulk', stats }
+      });
+    }
+
     if (cursor.phase === 'absorb') {
       const PAGE = 100;
-      let oldSkip = cursor.oldSkip || 0;
+      // Keyset pagination on created_date: immune to the offset shift that deletions cause
+      let lastDate = cursor.lastDate || null;
       const pagesDone = [];
       // keep processing pages until the time budget runs out
+      // scanGte (pass 2): page over post-cutoff records (rebuild-created dupes) instead of pre-cutoff originals
+      const scanFilter = cursor.scanGte
+        ? { created_date: { $gte: CUTOFF, ...(lastDate ? { $lt: lastDate } : {}) } }
+        : { created_date: { $lt: CUTOFF, ...(lastDate ? { $lt: lastDate } : {}) } };
       while (Date.now() - startedAt < 25000) {
-        const oldPage = await m.filter({ created_date: { $lt: CUTOFF } }, 'created_date', PAGE, oldSkip);
+        const oldPage = await m.filter(scanFilter, 'created_date', PAGE, 0);
         if (oldPage.length === 0) {
           return Response.json({ done: false, cursor: { phase: 'verify', oldSkip: 0, stats }, stats });
         }
@@ -139,17 +177,17 @@ export default async function(req) {
             done: false,
             pagesDone,
             stats,
-            cursor: { phase: 'absorb', oldSkip, stats }
+            cursor: { phase: 'absorb', scanGte: !!cursor.scanGte, lastDate: oldPage[oldPage.length - 1].created_date, stats }
           });
         }
         pagesDone.push(oldPage.length);
-        oldSkip += PAGE;
+        lastDate = oldPage[oldPage.length - 1].created_date;
       }
       return Response.json({
         done: false,
         pagesDone,
         stats,
-        cursor: { phase: 'absorb', oldSkip, stats }
+        cursor: { phase: 'absorb', scanGte: !!cursor.scanGte, lastDate, stats }
       });
     }
 
