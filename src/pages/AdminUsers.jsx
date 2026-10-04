@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft, ClipboardList, Store } from 'lucide-react';
+import { Search, UserCircle, Mail, Phone, Building2, Calendar, Plus, X, SlidersHorizontal, Edit, Trash2, Check, XCircle, Power, ArrowLeft, ClipboardList, Store, ChevronLeft, ChevronRight } from 'lucide-react';
 import AddUserModal from '@/components/admin/AddUserModal';
 import {
   Table,
@@ -34,6 +34,9 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [subcategories, setSubcategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -48,7 +51,11 @@ export default function AdminUsers() {
 
   useEffect(() => {
     filterUsers();
-  }, [searchQuery, selectedRole, selectedSubcategory, users]);
+  }, [searchQuery, selectedRole, selectedSubcategory, selectedStatus, users]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedRole, selectedSubcategory, selectedStatus, pageSize]);
 
   useEffect(() => {
     setSelectedSubcategory('all');
@@ -138,6 +145,10 @@ export default function AdminUsers() {
       );
     }
 
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(user => (user.account_status || 'active') === selectedStatus);
+    }
+
     setFilteredUsers(filtered);
   };
 
@@ -145,9 +156,15 @@ export default function AdminUsers() {
     setSearchQuery('');
     setSelectedRole('all');
     setSelectedSubcategory('all');
+    setSelectedStatus('all');
   };
 
-  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedSubcategory !== 'all';
+  const hasActiveFilters = searchQuery || selectedRole !== 'all' || selectedSubcategory !== 'all' || selectedStatus !== 'all';
+
+  const totalFiltered = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pagedUsers = filteredUsers.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const getRoleBadgeColor = (role) => {
     const colors = {
@@ -440,7 +457,23 @@ export default function AdminUsers() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Status</Label>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                  <SelectItem value="denied">Denied</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Account Type</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -515,7 +548,7 @@ export default function AdminUsers() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map(user => {
+                  {pagedUsers.map(user => {
                     const initials = user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
                     const status = user.account_status || 'active';
                     const referral = referrals.find(r => r.referred_user_id === user.id);
@@ -612,6 +645,69 @@ export default function AdminUsers() {
                   })}
                 </TableBody>
               </Table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalFiltered > 0 && (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-t border-slate-200">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <span>Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                  <SelectTrigger className="h-8 w-[80px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 25, 50, 100].map(n => (
+                      <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="ml-2">
+                  Showing {((safePage - 1) * pageSize) + 1}–{Math.min(safePage * pageSize, totalFiltered)} of {totalFiltered}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(1)}
+                  disabled={safePage === 1}
+                  className="h-8 px-2"
+                >
+                  First
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="px-3 text-sm text-slate-600">
+                  Page {safePage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(totalPages)}
+                  disabled={safePage === totalPages}
+                  className="h-8 px-2"
+                >
+                  Last
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
