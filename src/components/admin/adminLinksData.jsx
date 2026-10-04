@@ -116,6 +116,23 @@ export const ADMIN_LINK_SECTIONS = [
     ],
   },
   {
+    title: '🚀 Landing Pages',
+    links: [
+      { page: 'LandingPageSaleLeak', label: 'LP: Sale Leak Quiz', icon: Rocket },
+      { page: 'LandingPageProfitLevers', label: 'LP: 5 Profit Levers', icon: Rocket },
+      { page: 'LandingPageScaleReady', label: 'LP: Scale Readiness', icon: Rocket },
+      { page: 'LandingPageCalculator', label: 'LP: Time & Profit Calc', icon: Rocket },
+      { page: 'LandingPageChaosToControl', label: 'LP: Chaos to Control', icon: Rocket },
+      { page: 'LandingPageOfferClose', label: 'LP: Offer & Close', icon: Rocket },
+      { page: 'LandingPageFitFinder', label: 'LP: Fit Finder Quiz', icon: Rocket },
+      { page: 'LandingPageReferralEngine', label: 'LP: Referral Engine', icon: Rocket },
+      { page: 'LandingPageAIPlan', label: 'LP: AI Custom Plan', icon: Rocket },
+      { page: 'LandingPageRetarget', label: 'LP: Retargeting Page', icon: Rocket },
+      { page: 'LandingPageBizInABox', label: 'LP: Own A Division', icon: Rocket },
+      { page: 'LandingPageOneDay', label: 'LP: One Day', icon: Rocket },
+    ],
+  },
+  {
     title: '⚙️ Platform Config',
     links: [
       { page: 'AdminPackages', label: 'Subscription Packages', icon: Package },
