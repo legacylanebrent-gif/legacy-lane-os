@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink } from 'lucide-react';
 
 const PAGE_SIZE = 50;
 
@@ -419,6 +419,7 @@ export default function AdminMasterOperatorDirectory() {
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Company</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Phone</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600 w-[280px]">Email</th>
+                <th className="text-left px-4 py-2 font-semibold text-slate-600">Website</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Sources</th>
                 <th className="text-left px-4 py-2 font-semibold text-slate-600">Geocode</th>
@@ -426,14 +427,33 @@ export default function AdminMasterOperatorDirectory() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && records.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-slate-400">Loading...</td></tr>
+                <tr><td colSpan={7} className="text-center py-8 text-slate-400">Loading...</td></tr>
               ) : records.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-slate-400">No records found</td></tr>
+                <tr><td colSpan={7} className="text-center py-8 text-slate-400">No records found</td></tr>
               ) : records.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2.5">
                     <div className="font-medium text-slate-800 truncate max-w-[200px]">{r.company_name || '—'}</div>
                     {r.owner_name && <div className="text-xs text-slate-400 truncate max-w-[200px]">{r.owner_name}</div>}
+                    {(r.facebook || r.instagram || r.profile_url) && (
+                      <div className="flex items-center gap-2 mt-1.5">
+                        {r.facebook && (
+                          <a href={r.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">
+                            <Facebook className="w-4 h-4" />
+                          </a>
+                        )}
+                        {r.instagram && (
+                          <a href={r.instagram} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                            <Instagram className="w-4 h-4" />
+                          </a>
+                        )}
+                        {r.profile_url && (
+                          <a href={r.profile_url} target="_blank" rel="noopener noreferrer" title="View profile" className="text-slate-400 hover:text-slate-600">
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-2.5">
                     {r.phone ? (
@@ -461,6 +481,18 @@ export default function AdminMasterOperatorDirectory() {
                           </div>
                         ))}
                       </div>
+                    ) : <span className="text-slate-300">—</span>}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {r.website ? (
+                      <a
+                        href={r.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline text-sm break-all"
+                      >
+                        {r.website.replace(/https?:\/\/(www\.)?/, '')}
+                      </a>
                     ) : <span className="text-slate-300">—</span>}
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">
