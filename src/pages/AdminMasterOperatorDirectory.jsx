@@ -305,7 +305,7 @@ export default function AdminMasterOperatorDirectory() {
       while (true) {
         const res = await base44.entities.MasterOperatorDirectory.updateMany(filter, { $set: { enrichment_status: 'not_started' } });
         const d = res?.data || {};
-        total += d.modified_count ?? d.modifiedCount ?? 0;
+        total += d.updated ?? 0;
         if (!d.has_more) break;
       }
       alert(`Reset ${total} failed records to untried — run Find Emails to retry them.`);
