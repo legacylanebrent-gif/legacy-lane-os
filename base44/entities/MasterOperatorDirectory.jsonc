@@ -383,6 +383,10 @@
       ],
       "default": "single_source",
       "description": "Whether this record came from one source or was merged from multiple"
+    },
+    "name_state_key": {
+      "type": "string",
+      "description": "Normalized company name + '|' + normalized state. Cross-source dedup key for phoneless records."
     }
   },
   "required": [

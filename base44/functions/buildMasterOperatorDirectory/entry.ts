@@ -199,6 +199,7 @@ function freshStats() {
     nameStateMatches: 0,
     created: 0,
     updated: 0,
+    skipped: 0,
     subscribersSynced: 0
   };
 }
@@ -222,6 +223,15 @@ function normalizeName(n) {
 function normalizeState(s) {
   if (!s || typeof s !== 'string') return '';
   return s.trim().toLowerCase();
+}
+
+// Cross-source dedup key for phoneless matching: normalized company name + state.
+// Catches name variants like "Legacy Estate Sales" vs "Legacy Estate Sales LLC".
+function nameStateKeyFor(record) {
+  if (!record) return null;
+  const name = normalizeName(record.company_name);
+  const state = normalizeState(record.state || record.base_state || record.source_state);
+  return name ? `${name}|${state}` : null;
 }
 
 function firstNonEmpty(...vals) {
@@ -369,7 +379,9 @@ function buildFields(records, existing) {
     dedup_key: firstNonEmpty(...allRecs.map(r => r.dedup_key)),
     source_id: firstNonEmpty(...allRecs.map(r => r.source_id)),
     process_status: firstNonEmpty(...allRecs.map(r => r.process_status)),
-    lead_source: firstNonEmpty(...allRecs.map(r => r.source))
+    lead_source: firstNonEmpty(...allRecs.map(r => r.source)),
+    // Cross-source dedup key for phoneless matching (normalized name + state)
+    name_state_key: nameStateKeyFor(primary)
   };
 }
 
@@ -433,15 +445,38 @@ async function processBatch(master, batch, sourceName, stats) {
     }
   }
 
+  // ── Query existing master records by name_state_key ──
+  // Covers phoneless records AND phone-bearing records whose phone was never
+  // normalized/matched (e.g. the phoneless copy was created first).
+  const allKeys = new Set();
+  for (const [pk, items] of Object.entries(phoneGroups)) {
+    for (const it of items) { const k = nameStateKeyFor(it.record); if (k) allKeys.add(k); }
+  }
+  for (const key of Object.keys(nameStateGroups)) allKeys.add(key);
+  const keyExistingMap = {}; // name_state_key -> master record
+  if (allKeys.size > 0) {
+    try {
+      const existing = await master.filter({ name_state_key: { $in: [...allKeys] } }, '-created_date', 500, 0);
+      for (const e of existing) {
+        if (e.name_state_key) keyExistingMap[e.name_state_key] = e;
+      }
+    } catch (e) {
+      console.error('name_state_key filter error:', e.message);
+    }
+  }
+
   const toCreate = [];
   const toUpdate = [];
 
   for (const [pk, items] of Object.entries(phoneGroups)) {
-    const existing = phoneExistingMap[pk];
+    const key = nameStateKeyFor(items[0].record);
+    const byPhone = phoneExistingMap[pk];
+    const byKey = !byPhone && key ? keyExistingMap[key] : null;
+    const existing = byPhone || byKey;
     const fields = buildFields(items.map(i => i.record), existing);
     const meta = mergeSourceMeta(items, existing);
     if (existing) {
-      stats.phoneMatches += 1;
+      if (byPhone) stats.phoneMatches += 1; else stats.nameStateMatches += 1;
       stats.updated += 1;
       toUpdate.push({ id: existing.id, ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
     } else {
@@ -450,40 +485,10 @@ async function processBatch(master, batch, sourceName, stats) {
     }
   }
 
-  // ── Name+state groups (phoneless): query existing by company_name, match state ──
-  const nameStateKeys = Object.keys(nameStateGroups);
-  // Collect distinct raw company names to query
-  const distinctNames = [];
-  const seenNames = new Set();
-  for (const key of nameStateKeys) {
-    for (const item of nameStateGroups[key]) {
-      const raw = item.record.company_name;
-      if (raw && !seenNames.has(raw)) { seenNames.add(raw); distinctNames.push(raw); }
-    }
-  }
-  const nameExistingMap = {}; // raw company_name -> [master records]
-  if (distinctNames.length > 0) {
-    try {
-      const existing = await master.filter({ company_name: { $in: distinctNames } }, '-created_date', 500, 0);
-      for (const e of existing) {
-        const raw = e.company_name;
-        if (!nameExistingMap[raw]) nameExistingMap[raw] = [];
-        nameExistingMap[raw].push(e);
-      }
-    } catch (e) {
-      console.error('name filter error:', e.message);
-    }
-  }
-
+  // ── Name+state groups (phoneless): match on normalized name_state_key ──
   for (const [key, items] of Object.entries(nameStateGroups)) {
-    const state = normalizeState(items[0].record.state || items[0].record.base_state || items[0].record.source_state);
-    // Find an existing master record with the same raw name AND same state
-    let existing = null;
-    for (const item of items) {
-      const candidates = nameExistingMap[item.record.company_name] || [];
-      const match = candidates.find(c => normalizeState(c.state) === state);
-      if (match) { existing = match; break; }
-    }
+    // Find an existing master record with the same normalized name+state
+    const existing = keyExistingMap[key] || null;
     const fields = buildFields(items.map(i => i.record), existing);
     const meta = mergeSourceMeta(items, existing);
     if (existing) {
@@ -496,13 +501,8 @@ async function processBatch(master, batch, sourceName, stats) {
     }
   }
 
-  // ── No-name, no-phone records: create as-is ──
-  for (const item of noNameItems) {
-    const fields = buildFields([item.record], null);
-    const meta = mergeSourceMeta([item], null);
-    stats.created += 1;
-    toCreate.push({ ...fields, sources: meta.sources, source_record_ids: meta.source_record_ids, merge_status: meta.merge_status });
-  }
+  // ── No-name, no-phone records: unusable for dedup or display — skip them ──
+  stats.skipped += noNameItems.length;
 
   // ── Persist ──
   if (toCreate.length > 0) {
