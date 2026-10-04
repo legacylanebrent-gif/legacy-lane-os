@@ -8,7 +8,6 @@ const normName = (n) => {
 };
 const normState = (s) => (s || '').toString().trim().toLowerCase();
 const digitsOf = (r) => (r.phone_normalized || r.phone || '').replace(/\D/g, '');
-const richness = (r) => { let s = 0; for (const v of Object.values(r)) if (v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) s++; return s; };
 
 // Merge dupes' non-empty fields into keeper (keeper values win; empty keeper fields filled)
 function buildKeeperUpdates(keeper, dupes) {
@@ -66,8 +65,7 @@ function unionFindGroups(records) {
 function pickKeeper(recs) {
   return [...recs].sort((a, b) =>
     (a.created_date < b.created_date ? -1 : 1) ||
-    ((b.sources || []).length - (a.sources || []).length) ||
-    (richness(b) - richness(a)))[0];
+    ((b.sources || []).length - (a.sources || []).length))[0];
 }
 
 export default async function(req) {
@@ -78,44 +76,24 @@ export default async function(req) {
 
     const m = base44.asServiceRole.entities.MasterOperatorDirectory;
     const body = await req.json().catch(() => ({}));
-    const cursor = body.cursor || { phase: 'crosslink', oldSkip: 0 };
+    const cursor = body.cursor || { phase: 'absorb', oldSkip: 0 };
     const startedAt = Date.now();
-    const stats = { ...(body.stats || cursor.stats || {}), batchesProcessed: ((body.stats || cursor.stats || {}).batchesProcessed || 0) + 1 };
+    const stats = { ...((body.stats || cursor.stats) || {}) };
+    stats.batchesProcessed = (stats.batchesProcessed || 0) + 1;
 
-    if (cursor.phase === 'crosslink') {
-      // Merge old-vs-old duplicates: load all pre-cutoff records, union-find, keep oldest, delete rest
-      let old = [];
-      for (let skip = 0; skip < 20000; skip += 2000) {
-        const page = await m.filter({ created_date: { $lt: CUTOFF } }, '-created_date', 2000, skip);
-        old = old.concat(page);
-        if (page.length < 2000) break;
-      }
-      const groups = unionFindGroups(old).filter(g => g.length > 1);
-      const keepersToUpdate = [];
-      const toDelete = [];
-      for (const recs of groups) {
-        const keeper = pickKeeper(recs);
-        const dupes = recs.filter(r => r.id !== keeper.id);
-        keepersToUpdate.push({ id: keeper.id, ...buildKeeperUpdates(keeper, dupes) });
-        dupes.forEach(d => toDelete.push(d.id));
-      }
-      for (let i = 0; i < keepersToUpdate.length; i += 500) await m.bulkUpdate(keepersToUpdate.slice(i, i + 500));
-      for (let i = 0; i < toDelete.length; i += 10) {
-        await Promise.all(toDelete.slice(i, i + 10).map(id => m.delete(id).catch(() => null)));
-        if (Date.now() - startedAt > 90000) {
-          return Response.json({ done: false, cursor: { phase: 'crosslink', oldSkip: cursor.oldSkip || 0, stats }, stats });
-        }
-      }
-      return Response.json({
-        done: false,
-        cursor: { phase: 'absorb', oldSkip: 0, stats: { ...stats, oldOldDupesDeleted: toDelete.length } },
-        stats: { ...stats, oldOldDupesDeleted: toDelete.length }
-      });
+    if (cursor.phase === 'probe') {
+      const t0 = Date.now();
+      const page = await m.filter({ created_date: { $lt: CUTOFF } }, 'created_date', 5, 0);
+      const t1 = Date.now();
+      const big = await m.filter({ created_date: { $lt: CUTOFF } }, 'created_date', 250, 0);
+      const t2 = Date.now();
+      const q = await m.filter({ phone_normalized: { $in: ['0000000000'] } }, undefined, 10);
+      const t3 = Date.now();
+      return Response.json({ probe: { load5Ms: t1 - t0, load250Ms: t2 - t1, inQueryMs: t3 - t2, pageLens: [page.length, big.length, q.length] } });
     }
 
     if (cursor.phase === 'absorb') {
-      // Absorb rebuild-created duplicates into their original old records, page by page
-      const PAGE = 400;
+      const PAGE = 250;
       const oldSkip = cursor.oldSkip || 0;
       const oldPage = await m.filter({ created_date: { $lt: CUTOFF } }, 'created_date', PAGE, oldSkip);
       if (oldPage.length === 0) {
@@ -137,8 +115,7 @@ export default async function(req) {
         const res = await m.filter({ name_state_key: { $in: [...nskSet] } }, undefined, 2000);
         res.forEach(r => matched.set(r.id, r));
       }
-      const scope = [...oldPage, ...matched.values()];
-      const groups = unionFindGroups(scope).filter(g => g.length > 1);
+      const groups = unionFindGroups([...oldPage, ...matched.values()]).filter(g => g.length > 1);
       const keepersToUpdate = [];
       const toDelete = [];
       for (const recs of groups) {
@@ -154,25 +131,26 @@ export default async function(req) {
       for (let i = 0; i < toDelete.length; i += 10) {
         await Promise.all(toDelete.slice(i, i + 10).map(id => m.delete(id).catch(() => null)));
         deleted += Math.min(10, toDelete.length - i);
-        if (Date.now() - startedAt > 90000) {
+        if (Date.now() - startedAt > 55000) {
+          stats.deleted = (stats.deleted || 0) + deleted;
           return Response.json({
             done: false,
-            cursor: { phase: 'absorb', oldSkip: oldSkip, stats: { ...stats, deleted } },
-            stats: { ...stats, deleted }
+            cursor: { phase: 'absorb', oldSkip: oldSkip, stats },
+            stats
           });
         }
       }
+      stats.deleted = (stats.deleted || 0) + deleted;
       const nextSkip = oldSkip + PAGE;
-      const s = { ...stats, deleted: (stats.deleted || 0) + deleted };
       return Response.json({
         done: false,
-        cursor: { phase: nextSkip >= 20000 ? 'verify' : 'absorb', oldSkip: nextSkip, stats: s },
-        stats: s
+        cursor: { phase: nextSkip >= 20000 ? 'verify' : 'absorb', oldSkip: nextSkip, stats },
+        stats
       });
     }
 
     if (cursor.phase === 'verify') {
-      // Read-only: count any remaining duplicate groups across the whole table
+      // Read-only, paged: count remaining duplicate groups across the whole table
       let all = [];
       for (let skip = 0; skip < 30000; skip += 2000) {
         const page = await m.filter({}, '-created_date', 2000, skip);
