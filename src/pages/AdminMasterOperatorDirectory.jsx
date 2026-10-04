@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink, Eye, Pencil, Trash2, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink, Eye, Pencil, Trash2, ArrowUpDown, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import DirectoryRecordDetail from '@/components/admin/DirectoryRecordDetail';
 import DirectoryRecordEdit from '@/components/admin/DirectoryRecordEdit';
 
@@ -40,6 +40,7 @@ export default function AdminMasterOperatorDirectory() {
   const [batchEnrichRunning, setBatchEnrichRunning] = useState(false);
   const [batchEnrichProgress, setBatchEnrichProgress] = useState(null);
   const [emailTargets, setEmailTargets] = useState(null);
+  const [resettingFailed, setResettingFailed] = useState(false);
   const [detailRecord, setDetailRecord] = useState(null);
   const [editRecord, setEditRecord] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -293,6 +294,29 @@ export default function AdminMasterOperatorDirectory() {
     await loadEmailTargets();
   };
 
+  // ── Reset failed email searches back to untried (so Find Emails retries them) ──
+  const handleResetFailedEnrichment = async () => {
+    const scope = stateFilter ? `state ${stateFilter}` : 'ALL states';
+    if (!confirm(`Reset failed email searches for ${scope} back to untried? After this, run Find Emails to retry them.`)) return;
+    setResettingFailed(true);
+    try {
+      const filter = stateFilter ? { enrichment_status: 'failed', state: stateFilter } : { enrichment_status: 'failed' };
+      let total = 0;
+      while (true) {
+        const res = await base44.entities.MasterOperatorDirectory.updateMany(filter, { $set: { enrichment_status: 'not_started' } });
+        const d = res?.data || {};
+        total += d.modified_count ?? d.modifiedCount ?? 0;
+        if (!d.has_more) break;
+      }
+      alert(`Reset ${total} failed records to untried — run Find Emails to retry them.`);
+    } catch (err) {
+      alert('Reset failed: ' + (err.message || 'unknown error'));
+    } finally {
+      setResettingFailed(false);
+      await loadEmailTargets();
+    }
+  };
+
   const handleFixEncoding = async () => {
     setFixingEncoding(true);
     setEncodingResult(null);
@@ -355,6 +379,15 @@ export default function AdminMasterOperatorDirectory() {
             {batchEnrichRunning
               ? `Finding... (${batchEnrichProgress?.done ?? 0}/${batchEnrichProgress?.total ?? 0})`
               : `Find Emails (${emailTargets?.count ?? 0})`}
+          </Button>
+          <Button
+            onClick={handleResetFailedEnrichment}
+            disabled={resettingFailed}
+            variant="outline"
+            className="border-green-300 text-green-700 hover:bg-green-50"
+          >
+            {resettingFailed ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+            {resettingFailed ? 'Resetting...' : 'Reset Failed'}
           </Button>
         </div>
       </div>
