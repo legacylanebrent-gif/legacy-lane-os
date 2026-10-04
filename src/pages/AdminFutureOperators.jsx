@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Search, Phone, Globe, MapPin, Calendar,
   Facebook, Twitter, Instagram, Youtube, ExternalLink, Filter, Download,
-  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2
+  Mail, Loader2, CheckCircle2, Pencil, Save, X, Trash2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,6 +42,10 @@ export default function AdminFutureOperators() {
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [newOnlyFilter, setNewOnlyFilter] = useState(false);
+  const [emailFilter, setEmailFilter] = useState('all');
+  const [phoneFilter, setPhoneFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [sortAlpha, setSortAlpha] = useState(false);
   const [showScrapeModal, setShowScrapeModal] = useState(false);
   const [selectedScrapeStates, setSelectedScrapeStates] = useState([]);
@@ -172,12 +176,25 @@ export default function AdminFutureOperators() {
     );
     const matchesPackage = packageFilter === 'all' || op.package_type === packageFilter;
     const matchesNew = !newOnlyFilter || isNew(op);
-    
-    return matchesSearch && matchesPackage && matchesNew;
+    const matchesEmail = emailFilter === 'all' ||
+      (emailFilter === 'has' ? !!op.email : !op.email);
+    const matchesPhone = phoneFilter === 'all' ||
+      (phoneFilter === 'has' ? !!op.phone : !op.phone);
+
+    return matchesSearch && matchesPackage && matchesNew && matchesEmail && matchesPhone;
   }).sort((a, b) => {
     if (!sortAlpha) return 0;
     return (a.company_name || '').localeCompare(b.company_name || '');
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, stateFilter, packageFilter, newOnlyFilter, emailFilter, phoneFilter, pageSize]);
+
+  const totalFiltered = filteredOperators.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pagedOperators = filteredOperators.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const uniquePackages = [...new Set(operators.map(op => op.package_type).filter(Boolean))].sort();
 
@@ -378,8 +395,8 @@ export default function AdminFutureOperators() {
               </Badge>
             </div>
             
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex items-center gap-2 flex-1">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 flex-1">
                 <Filter className="w-4 h-4 text-slate-600 flex-shrink-0" />
                 <Select value={stateFilter} onValueChange={setStateFilter}>
                   <SelectTrigger className="w-full sm:w-32">
@@ -427,6 +444,28 @@ export default function AdminFutureOperators() {
                 >
                   🆕 New (14d)
                 </button>
+
+                <Select value={emailFilter} onValueChange={setEmailFilter}>
+                  <SelectTrigger className="w-full sm:w-36">
+                    <SelectValue placeholder="Email: All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Email: All</SelectItem>
+                    <SelectItem value="has">Has Email</SelectItem>
+                    <SelectItem value="missing">Missing Email</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={phoneFilter} onValueChange={setPhoneFilter}>
+                  <SelectTrigger className="w-full sm:w-36">
+                    <SelectValue placeholder="Phone: All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Phone: All</SelectItem>
+                    <SelectItem value="has">Has Phone</SelectItem>
+                    <SelectItem value="missing">Missing Phone</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <Button 
@@ -455,16 +494,19 @@ export default function AdminFutureOperators() {
                 </Badge>
               )}
               
-              {packageFilter !== 'all' && (
+              {(packageFilter !== 'all' || emailFilter !== 'all' || phoneFilter !== 'all' || newOnlyFilter) && (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => {
                     setPackageFilter('all');
+                    setEmailFilter('all');
+                    setPhoneFilter('all');
+                    setNewOnlyFilter(false);
                   }}
                   className="w-full sm:w-auto"
                 >
-                  Clear Filter
+                  Clear Filters
                 </Button>
               )}
             </div>
@@ -472,14 +514,14 @@ export default function AdminFutureOperators() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredOperators.map((operator) => (
+            {pagedOperators.map((operator) => (
               <Card key={operator.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">
+                          <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate min-w-0">
                             {operator.company_name?.replace(/&amp;/g, '&')}
                           </h3>
                           {isNew(operator) && (
@@ -526,7 +568,7 @@ export default function AdminFutureOperators() {
                       {(operator.geocoded_city || operator.city) && operator.state && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-cyan-600 flex-shrink-0" />
-                          <span className="truncate">
+                          <span className="truncate min-w-0">
                             {operator.geocoded_city || operator.city}, {operator.state} {operator.geocoded_zip || operator.zip_code}
                             {operator.geocoded_county && <span className="text-slate-400 ml-1">· {operator.geocoded_county}</span>}
                           </span>
@@ -536,7 +578,7 @@ export default function AdminFutureOperators() {
                       {operator.phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-orange-600 flex-shrink-0" />
-                          <a href={`tel:${operator.phone}`} className="hover:underline truncate">
+                          <a href={`tel:${operator.phone}`} className="hover:underline truncate min-w-0">
                             {operator.phone}
                           </a>
                         </div>
@@ -549,7 +591,7 @@ export default function AdminFutureOperators() {
                             href={operator.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="hover:underline truncate"
+                            className="hover:underline truncate min-w-0"
                           >
                             {operator.website.replace(/https?:\/\/(www\.)?/, '')}
                           </a>
@@ -559,7 +601,7 @@ export default function AdminFutureOperators() {
                       {operator.member_since && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                          <span className="truncate">Member since {operator.member_since}</span>
+                          <span className="truncate min-w-0">Member since {operator.member_since}</span>
                         </div>
                       )}
 
@@ -567,7 +609,7 @@ export default function AdminFutureOperators() {
                         <div className="col-span-full space-y-1">
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            <a href={`mailto:${operator.email}`} className="hover:underline truncate font-mono text-sm font-medium">
+                            <a href={`mailto:${operator.email}`} className="hover:underline truncate min-w-0 font-mono text-sm font-medium">
                               {operator.email}
                             </a>
                             <Badge className="bg-green-100 text-green-700 text-xs px-1.5 py-0 flex-shrink-0">Primary</Badge>
@@ -578,7 +620,7 @@ export default function AdminFutureOperators() {
                           {operator.alternate_emails?.length > 0 && operator.alternate_emails.map((altEmail, idx) => (
                             <div key={idx} className="flex items-center gap-2 pl-6">
                               <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                              <a href={`mailto:${altEmail}`} className="hover:underline truncate font-mono text-xs text-slate-600">
+                              <a href={`mailto:${altEmail}`} className="hover:underline truncate min-w-0 font-mono text-xs text-slate-600">
                                 {altEmail}
                               </a>
                               <Badge variant="outline" className="text-xs px-1.5 py-0 flex-shrink-0 text-slate-500">Alt {idx + 1}</Badge>
@@ -636,6 +678,69 @@ export default function AdminFutureOperators() {
                 </CardContent>
               </Card>
             ))}
+
+            {/* Pagination */}
+            {totalFiltered > 0 && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <span>Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                    <SelectTrigger className="h-8 w-[80px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 25, 50, 100].map(n => (
+                        <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="ml-2">
+                    Showing {((safePage - 1) * pageSize) + 1}–{Math.min(safePage * pageSize, totalFiltered)} of {totalFiltered.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(1)}
+                    disabled={safePage === 1}
+                    className="h-8 px-2"
+                  >
+                    First
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="px-3 text-sm text-slate-600 whitespace-nowrap">
+                    Page {safePage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(totalPages)}
+                    disabled={safePage === totalPages}
+                    className="h-8 px-2"
+                  >
+                    Last
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
