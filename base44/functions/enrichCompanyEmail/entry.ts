@@ -358,6 +358,34 @@ Deno.serve(async (req) => {
 
     await targetEntity.update(company_id, updatePayload);
 
+    // ── Sync found email into MasterOperatorDirectory ─────────────────────────
+    // The directory stores its own copy — keep it in parity with the source
+    // entity so emails found via FutureEstateOperator/FutureOperatorLead show
+    // there too. Only fills directory records that have no email yet.
+    if (entity !== 'MasterOperatorDirectory') {
+      try {
+        const dirEntity = base44.asServiceRole.entities.MasterOperatorDirectory;
+        const digits = (company.phone || company.phone_normalized || '').replace(/\D/g, '');
+        const normName = (company.company_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        let dirRec = null;
+        if (digits.length >= 10) {
+          const byPhone = await dirEntity.filter({ phone_normalized: digits.slice(-10) }, '-created_date', 1);
+          dirRec = byPhone[0] || null;
+        }
+        if (!dirRec && normName && company.state) {
+          const byName = await dirEntity.filter({ company_name: company.company_name, state: company.state }, '-created_date', 5);
+          dirRec = byName.find(d => (d.company_name || '').toLowerCase().replace(/[^a-z0-9]/g, '') === normName) || null;
+        }
+        if (dirRec && !dirRec.email) {
+          await dirEntity.update(dirRec.id, {
+            email: bestEmail,
+            enrichment_status: 'found',
+            email_confidence_score: bestScore,
+          });
+        }
+      } catch (e) { /* non-blocking — sync must never fail the enrichment */ }
+    }
+
     return Response.json({ success: true, email: bestEmail, score: bestScore, status: bestVerifiedStatus, enrichment_status: enrichmentStatus });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
