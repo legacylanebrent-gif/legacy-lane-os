@@ -78,98 +78,11 @@ export const ALL_NAV_ITEMS = [
   { page: 'EstateSaleFinder',       label: 'Find Estate Sales',      icon: MapPin,          group: 'Directory' },
 
   // ══════════════════════════════════════════════════════════════════════
-  // ADMIN — broken into subgroups for easy navigation
+  // ADMIN — single hub page (all admin links consolidated on /AdminLinks)
   // ══════════════════════════════════════════════════════════════════════
 
-  // Admin › Command Center
-  { page: 'AdminDashboard',         label: 'Admin Dashboard',        icon: BarChart2,       group: 'Admin', subgroup: '🖥 Command Center' },
-  { page: 'LaunchCommandCenter',    label: '🚨 Launch Command Center', icon: Rocket,         group: 'Admin', subgroup: '🖥 Command Center' },
-  { page: 'LaunchAuditCenter',      label: '🎯 Launch Audit Center',  icon: Target,          group: 'Admin', subgroup: '🖥 Command Center' },
-  { page: 'AdminBuildReport',       label: 'Build Report',           icon: FileText,        group: 'Admin', subgroup: '🖥 Command Center' },
-  { page: 'Settings',               label: 'Settings',               icon: Settings,        group: 'Admin', subgroup: '🖥 Command Center' },
-  { page: 'ApiKeyManager',          label: 'Website API Keys',       icon: Globe,           group: 'Admin', subgroup: '🖥 Command Center' },
-
-  // Admin › Users & Operators
-  { page: 'AdminUsers',             label: 'All Users',              icon: Users,           group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminFutureOperators',   label: 'EstateSales.net Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminEstatesalesOrg',    label: 'EstateSales.org Ops',    icon: Building2,       group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'FutOperLeads',           label: 'Future Operator Leads',  icon: Merge,           group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminMasterOperatorDirectory', label: 'Master Operator Directory', icon: Database,  group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminRealEstateAgentDirectory', label: 'Real Estate Agent Directory', icon: Database,  group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminAgentApplications', label: 'Agent Applications',     icon: Award,           group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'AdminPageAccess',        label: 'Page Permissions',       icon: Shield,          group: 'Admin', subgroup: '👥 Users & Operators' },
-  { page: 'BizInABox',              label: 'Biz in a Box',           icon: Briefcase,       group: 'Admin', subgroup: '👥 Users & Operators' },
-
-  // Admin › Leads & CRM
-  { page: 'AdminLeads',             label: 'All Leads',              icon: Award,           group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminLeadsWebsite',      label: 'Website Leads',          icon: Globe,           group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminLeadsSocialAds',    label: 'Social Ads Leads',       icon: Share2,          group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminLeadsPropstream',   label: 'Propstream Probate',     icon: Search,          group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'PropstreamREListings',   label: 'PropStream RE Listings', icon: Building2,       group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'PropstreamAgentLeads',   label: 'Agent Leads',            icon: Users,           group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminPropstreamAgentEmailDrafts', label: 'Agent Email Drafts', icon: Mail,            group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminLeadImporter',      label: 'Lead Importer',          icon: Upload,          group: 'Admin', subgroup: '📋 Leads & CRM' },
-  { page: 'AdminCleanoutLeads',     label: 'Cleanout Leads',         icon: Briefcase,       group: 'Admin', subgroup: '📋 Leads & CRM' },
-
-  // Admin › Estate Sales & Territory
-  { page: 'AdminEstateSales',       label: 'All Estate Sales',       icon: Building2,       group: 'Admin', subgroup: '🏠 Sales & Territory' },
-  { page: 'AdminTerritoryDashboard', label: 'Territory Dashboard',   icon: MapPin,          group: 'Admin', subgroup: '🏠 Sales & Territory' },
-  { page: 'NationalCoverageGrid',   label: 'National Coverage',      icon: Globe,           group: 'Admin', subgroup: '🏠 Sales & Territory' },
-  { page: 'ImportedSalesDashboard', label: 'EstateSales.net Scraper', icon: Upload,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
-  { page: 'AdminHousioSync',        label: 'Housio Territory Sync',  icon: Network,         group: 'Admin', subgroup: '🏠 Sales & Territory' },
-  { page: 'TerritoryMigrationAudit', label: 'Territory Migration Audit', icon: Database,      group: 'Admin', subgroup: '🏠 Sales & Territory' },
-
-  // Admin › SEO & Content
-  { page: 'PlatformSEODashboard',   label: 'SEO Dashboard (GSC)',    icon: TrendingUp,      group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'AdminLifeTransitionEngine', label: 'Life Transition Engine', icon: Globe,        group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'AdminProbateEngine',     label: 'Probate SEO Engine',     icon: Scale,           group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'AdminContentEngine',     label: 'Content Engine',         icon: FileText,        group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'AdminPhase12Deploy',     label: 'Phase 12 Deploy (NJ)',   icon: Rocket,          group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'AdminBlogSelector',       label: 'Blog Topic Approval',    icon: FileText,        group: 'Admin', subgroup: '🔍 SEO & Content' },
-  { page: 'WeeklyVideoIntelligence', label: 'Weekly Video Intel',    icon: Film,            group: 'Admin', subgroup: '🔍 SEO & Content' },
-
-  // Admin › Repository & AI
-  { page: 'AdminCentralRepository', label: 'Central Repository',    icon: Database,        group: 'Admin', subgroup: '🤖 Repository & AI' },
-  { page: 'AdminAIOperator',        label: 'Admin AI Operator',      icon: Bot,             group: 'Admin', subgroup: '🤖 Repository & AI' },
-  { page: 'AdminAICredits',         label: 'AI Credit Management',   icon: Zap,             group: 'Admin', subgroup: '🤖 Repository & AI' },
-  { page: 'AutonomousRunsDashboard', label: 'Autonomous Runs',       icon: Brain,           group: 'Admin', subgroup: '🤖 Repository & AI' },
-  { page: 'PricingImport',          label: 'Pricing Import',         icon: BarChart3,       group: 'Admin', subgroup: '🤖 Repository & AI' },
-
-  // Admin › SuperAgents
-  { page: 'SuperAgentCommandCenter', label: 'SuperAgent Command Center', icon: Brain,       group: 'Admin', subgroup: '🧠 SuperAgents' },
-
-  // Admin › Finance & Revenue
-  { page: 'AdminTransactions',      label: 'All Transactions',       icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'ActualRevenue',          label: 'Actual Revenue',         icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'Revenue',                label: 'Revenue Projections',    icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'ComprehensiveRevenue',   label: 'Comprehensive Rev.',     icon: BarChart3,       group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'EstimatedPNL',          label: 'Estimated P&L',          icon: TrendingUp,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'ScalabilityManager',   label: 'Scalability Manager',    icon: Shield,          group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'FutureOperatorsAnalytics', label: 'Future Ops Revenue',   icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'PlatformExpenses',       label: 'Platform Expenses',      icon: Banknote,        group: 'Admin', subgroup: '💰 Finance & Revenue' },
-  { page: 'OperatorPayoutWallet', label: 'Operator Payout Wallet',  icon: DollarSign,      group: 'Admin', subgroup: '💰 Finance & Revenue' },
-
-  // Admin › Marketing & Ads
-  { page: 'AdminCampaigns',         label: 'Campaigns',              icon: Zap,             group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'PlatformAds',            label: 'Platform Ads',           icon: Megaphone,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'AdminAdPlacements',      label: 'Ad Placements',          icon: Megaphone,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'AdminAdvertisingPackages', label: 'Ad Packages',          icon: Package,         group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'PlatformAnalytics',      label: 'Platform Analytics',     icon: BarChart3,       group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'CustomerIODashboard',    label: 'Customer.io Dashboard',  icon: Mail,            group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'CustomerIOReportingCenter', label: 'Email Reporting',     icon: Mail,            group: 'Admin', subgroup: '📣 Marketing & Ads' },
-  { page: 'TerritoryFBManager',     label: 'Territory FB Manager',   icon: Share2,          group: 'Admin', subgroup: '📣 Marketing & Ads' },
-
-  // Admin › Platform Config
-  { page: 'AdminPackages',          label: 'Subscription Packages',  icon: Package,         group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminRewards',           label: 'Rewards & Draws',        icon: Gift,            group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminCourses',           label: 'Courses',                icon: GraduationCap,   group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminTemplates',         label: 'Templates',              icon: FileText,        group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminAutomations',       label: 'Automations',            icon: Zap,             group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminMarketplace',       label: 'Marketplace Items',      icon: ShoppingBag,     group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminVendors',           label: 'Vendor Ads',             icon: Briefcase,       group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminAmazonProducts',    label: 'Amazon Products',        icon: Package,         group: 'Admin', subgroup: '⚙️ Platform Config' },
-  { page: 'AdminTickets',           label: 'Support Tickets',        icon: MessageSquare,   group: 'Admin', subgroup: '⚙️ Platform Config' },
-
+  // Admin — single hub page (all admin links consolidated on /AdminLinks)
+  { page: 'AdminLinks',             label: 'Admin Links',            icon: Shield,          group: 'Admin' },
   // ── LANDING PAGES ────────────────────────────────────────────────────────────
   { page: 'LandingPageSaleLeak',       label: 'LP: Sale Leak Quiz',     icon: Rocket, group: 'Landing Pages' },
   { page: 'LandingPageProfitLevers',   label: 'LP: 5 Profit Levers',    icon: Rocket, group: 'Landing Pages' },
