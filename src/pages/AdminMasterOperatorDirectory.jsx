@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Database, RefreshCw, Search, Phone, MapPin, Building2, Merge, CheckCircle2, AlertCircle, Loader2, Filter, X, Wand2, Mail, Facebook, Instagram, ExternalLink, Eye, Pencil, Trash2, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
 import DirectoryRecordDetail from '@/components/admin/DirectoryRecordDetail';
 import DirectoryRecordEdit from '@/components/admin/DirectoryRecordEdit';
 
@@ -42,6 +42,46 @@ export default function AdminMasterOperatorDirectory() {
   const [detailRecord, setDetailRecord] = useState(null);
   const [editRecord, setEditRecord] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [sortKey, setSortKey] = useState('created_date');
+  const [sortDir, setSortDir] = useState('desc');
+
+  // Sortable columns (client-side over the currently loaded records)
+  const SORT_COLUMNS = {
+    company: { label: 'Company', get: (r) => (r.company_name || '').toLowerCase() },
+    phone: { label: 'Phone', get: (r) => r.phone_normalized || (r.phone || '').replace(/\D/g, '') },
+    email: { label: 'Email', get: (r) => (r.email || '').toLowerCase() },
+    website: { label: 'Website', get: (r) => (r.website || '').toLowerCase() },
+    location: { label: 'Location', get: (r) => ((r.city || '') + (r.state || '')).toLowerCase() },
+    sources: { label: 'Sources', get: (r) => (r.sources || []).length },
+    geocode: { label: 'Geocode', get: (r) => r.geocode_status || 'not_geocoded' },
+  };
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedRecords = useMemo(() => {
+    const col = SORT_COLUMNS[sortKey];
+    if (!col) return records;
+    const sorted = [...records].sort((a, b) => {
+      const va = col.get(a) ?? '';
+      const vb = col.get(b) ?? '';
+      // Empty values always sink to the bottom regardless of direction
+      if (va === '' && vb !== '') return 1;
+      if (vb === '' && va !== '') return -1;
+      let cmp;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb), undefined, { numeric: true });
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    // Keep the empty-sunk order stable on both directions: already handled above
+    return sorted;
+  }, [records, sortKey, sortDir]);
 
   const handleDelete = async (r) => {
     if (!confirm(`Delete "${r.company_name || 'this record'}" from the Master Operator Directory? This cannot be undone.`)) return;
@@ -438,13 +478,27 @@ export default function AdminMasterOperatorDirectory() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Company</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Phone</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600 w-[280px]">Email</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Website</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Location</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Sources</th>
-                <th className="text-left px-4 py-2 font-semibold text-slate-600">Geocode</th>
+                {Object.entries(SORT_COLUMNS).map(([key, col]) => (
+                  <th
+                    key={key}
+                    className={`text-left px-4 py-2 font-semibold text-slate-600 ${key === 'email' ? 'w-[280px]' : ''}`}
+                  >
+                    <button
+                      onClick={() => handleSort(key)}
+                      className={`inline-flex items-center gap-1 hover:text-slate-900 ${sortKey === key ? 'text-orange-700' : ''}`}
+                      title={`Sort by ${col.label}`}
+                    >
+                      {col.label}
+                      {sortKey === key ? (
+                        sortDir === 'asc'
+                          ? <ChevronUp className="w-3.5 h-3.5" />
+                          : <ChevronDown className="w-3.5 h-3.5" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 text-slate-300" />
+                      )}
+                    </button>
+                  </th>
+                ))}
                 <th className="text-right px-4 py-2 font-semibold text-slate-600 w-[110px]">Actions</th>
               </tr>
             </thead>
@@ -453,7 +507,7 @@ export default function AdminMasterOperatorDirectory() {
                 <tr><td colSpan={8} className="text-center py-8 text-slate-400">Loading...</td></tr>
               ) : records.length === 0 ? (
                 <tr><td colSpan={8} className="text-center py-8 text-slate-400">No records found</td></tr>
-              ) : records.map((r) => (
+              ) : sortedRecords.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2.5">
                     <div className="font-medium text-slate-800 truncate max-w-[200px]">{r.company_name || '—'}</div>
