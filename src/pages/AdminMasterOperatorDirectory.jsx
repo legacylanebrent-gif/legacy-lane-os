@@ -109,6 +109,7 @@ export default function AdminMasterOperatorDirectory() {
         geocoded: d.geocoded ?? 0,
         notGeocoded: d.notGeocoded ?? 0,
         states: d.states ?? 0,
+        stateCounts: d.stateCounts ?? {},
         approximate: false
       });
     } catch (err) {
@@ -404,6 +405,14 @@ export default function AdminMasterOperatorDirectory() {
         <StatCard icon={CheckCircle2} label="Geocoded" value={stats?.geocoded ?? '—'} color="text-green-600" />
         <StatCard icon={AlertCircle} label="Not Geocoded" value={stats?.notGeocoded ?? '—'} color="text-amber-600" />
         <StatCard icon={MapPin} label="States" value={stats?.states ?? '—'} color="text-purple-600" />
+        {stateFilter && (
+          <StatCard
+            icon={MapPin}
+            label={`Listings in ${stateFilter}`}
+            value={stats?.stateCounts?.[stateFilter] ?? '—'}
+            color="text-cyan-700"
+          />
+        )}
       </div>
 
       <div className="space-y-3">

@@ -15,6 +15,7 @@ Deno.serve(async (req) => {
     let skip = 0;
     let total = 0, merged = 0, single = 0, geocoded = 0, notGeocoded = 0, failed = 0, skipped = 0;
     const stateSet = new Set();
+    const stateCounts = {};
     let hasMore = true;
 
     while (hasMore) {
@@ -27,7 +28,10 @@ Deno.serve(async (req) => {
         else if (r.geocode_status === 'failed') failed++;
         else if (r.geocode_status === 'skipped') skipped++;
         else notGeocoded++;
-        if (r.state) stateSet.add(r.state);
+        if (r.state) {
+          stateSet.add(r.state);
+          stateCounts[r.state] = (stateCounts[r.state] || 0) + 1;
+        }
       }
       hasMore = batch.length === PAGE;
       skip += PAGE;
@@ -42,6 +46,7 @@ Deno.serve(async (req) => {
       failed,
       skipped,
       states: stateSet.size,
+      stateCounts,
       authenticated: isAuthenticated
     });
   } catch (error) {
