@@ -170,6 +170,7 @@ import ThankYou from './pages/ThankYou';
 import TerritoryMigrationAudit from './pages/TerritoryMigrationAudit';
 import AdminIdentityMonitor from './pages/AdminIdentityMonitor';
 import AdminLinks from './pages/AdminLinks';
+import PunchList from './pages/PunchList';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -323,6 +324,7 @@ const AuthenticatedApp = () => {
       <Route path="/AutonomousRunsDashboard" element={<LayoutWrapper currentPageName="AutonomousRunsDashboard"><AutonomousRunsDashboard /></LayoutWrapper>} />
       <Route path="/AdminDashboard" element={<LayoutWrapper currentPageName="AdminDashboard"><AdminDashboard /></LayoutWrapper>} />
       <Route path="/AdminLinks" element={<LayoutWrapper currentPageName="AdminLinks"><AdminLinks /></LayoutWrapper>} />
+      <Route path="/PunchList" element={<LayoutWrapper currentPageName="PunchList"><PunchList /></LayoutWrapper>} />
       <Route path="/StateOperators" element={<StateOperators />} />
       <Route path="/NationalCoverageGrid" element={<LayoutWrapper currentPageName="NationalCoverageGrid"><NationalCoverageGrid /></LayoutWrapper>} />
       <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />

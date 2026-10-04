@@ -1,5 +1,6 @@
 import {
   BarChart2, Rocket, Target, FileText, Settings, Globe, Users, Building2,
+  ListChecks,
   Merge, Database, Award, Shield, Briefcase, Search, Upload, Mail,
   MapPin, Network, TrendingUp, Scale, Film, Bot, Zap, Brain, BarChart3,
   DollarSign, Banknote, Megaphone, Package, Share2, Gift, GraduationCap,
@@ -13,6 +14,7 @@ export const ADMIN_LINK_SECTIONS = [
   {
     title: '🖥 Command Center',
     links: [
+      { page: 'PunchList', label: 'Punch List', icon: ListChecks },
       { page: 'AdminDashboard', label: 'Admin Dashboard', icon: BarChart2 },
       { page: 'LaunchCommandCenter', label: 'Launch Command Center', icon: Rocket },
       { page: 'LaunchAuditCenter', label: 'Launch Audit Center', icon: Target },

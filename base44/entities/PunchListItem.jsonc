@@ -1,0 +1,72 @@
+{
+  "name": "PunchListItem",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short punch list item title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details of what needs to be built or fixed"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "public_experience",
+        "consumer",
+        "operator",
+        "vendor",
+        "reseller",
+        "agent",
+        "admin",
+        "seo_marketing",
+        "payments",
+        "security",
+        "data",
+        "other"
+      ],
+      "default": "other",
+      "description": "Area of the platform this item belongs to"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Severity / urgency of the item"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "blocked",
+        "wont_fix"
+      ],
+      "default": "open",
+      "description": "Current status of the item"
+    },
+    "is_launch_blocker": {
+      "type": "boolean",
+      "default": false,
+      "description": "Does this item block public launch?"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Who is working on this item"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Notes recorded when the item is resolved"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
