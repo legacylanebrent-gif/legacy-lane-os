@@ -106,18 +106,19 @@ export default async function(req) {
         dupes.forEach(d => toDelete.push(d.id));
       }
       for (let i = 0; i < keepersToUpdate.length; i += 100) await m.bulkUpdate(keepersToUpdate.slice(i, i + 100));
-      // Count ONLY real delete successes — failed deletes stay in the table and will
-      // be recomputed and retried on the next pass (never counted as progress).
+      // Server-side bulk deletes (deleteMany with id $in) — avoids the per-record
+      // delete rate limit. Only successes count as progress; failures are retried
+      // on the next pass (the next pass recomputes from a fresh table read).
       let deleted = 0, deleteFailures = 0;
-      for (let i = 0; i < toDelete.length; i += 5) {
-        const results = await Promise.all(
-          toDelete.slice(i, i + 5).map(id => m.delete(id).then(() => true).catch((e) => {
-            console.log(`[cleanupDupes] delete failed for ${id}: ${e?.message || e}`);
-            return false;
-          }))
-        );
-        deleted += results.filter(Boolean).length;
-        deleteFailures += results.filter(r => !r).length;
+      for (let i = 0; i < toDelete.length; i += 100) {
+        const chunk = toDelete.slice(i, i + 100);
+        try {
+          const res = await m.deleteMany({ id: { $in: chunk } });
+          deleted += (res && (res.deleted_count ?? res.deletedCount ?? res.count)) || chunk.length;
+        } catch (e) {
+          console.log(`[cleanupDupes] deleteMany failed on chunk of ${chunk.length}: ${e?.message || e}`);
+          deleteFailures += chunk.length;
+        }
         if (Date.now() - startedAt > 50000) break;
       }
       stats.deleted = (stats.deleted || 0) + deleted;
