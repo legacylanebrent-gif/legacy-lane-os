@@ -91,6 +91,14 @@ export default async function(req) {
     const user = await base44.auth.me();
     if (!user || user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
+    // EMERGENCY KILL SWITCH: if the flag is set, abort immediately.
+    try {
+      const flags = await base44.asServiceRole.entities.DedupKillSwitch.filter({ stopped: true }, undefined, 1);
+      if (flags.length > 0) {
+        return Response.json({ done: true, stopped: true, message: 'Emergency stop active — dedup paused.' });
+      }
+    } catch { /* flag check is best-effort */ }
+
     const m = base44.asServiceRole.entities.MasterOperatorDirectory;
     const body = await req.json().catch(() => ({}));
     const cursor = body.cursor || { phase: 'absorb', oldSkip: 0 };

@@ -49,6 +49,14 @@ Deno.serve(async (req) => {
       // No user context — background automation, allow
     }
 
+    // EMERGENCY KILL SWITCH: if the flag is set, abort immediately.
+    try {
+      const flags = await base44.asServiceRole.entities.DedupKillSwitch.filter({ stopped: true }, undefined, 1);
+      if (flags.length > 0) {
+        return Response.json({ done: true, stopped: true, message: 'Emergency stop active — rebuild paused.' });
+      }
+    } catch { /* flag check is best-effort */ }
+
     let body = {};
     try { body = await req.json(); } catch (e) { body = {}; }
     const cursor = body.cursor || { phase: 'clear', sourceIndex: 0, skip: 0, clearSkip: 0, stats: freshStats() };

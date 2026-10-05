@@ -1,0 +1,12 @@
+{
+  "name": "DedupKillSwitch",
+  "type": "object",
+  "properties": {
+    "stopped": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, dedup/rebuild functions abort immediately"
+    }
+  },
+  "required": []
+}
