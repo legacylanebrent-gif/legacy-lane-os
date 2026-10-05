@@ -512,15 +512,32 @@ async function processBatch(master, batch, sourceName, stats) {
   // ── No-name, no-phone records: unusable for dedup or display — skip them ──
   stats.skipped += noNameItems.length;
 
-  // ── Persist ──
-  if (toCreate.length > 0) {
-    for (let i = 0; i < toCreate.length; i += 500) {
-      await master.bulkCreate(toCreate.slice(i, i + 500));
+  // ── Persist (deduped: a phone match and a name+state match can converge on
+  // the same existing record, and two groups can target the same new company —
+  // duplicate IDs in bulkUpdate/bulkCreate are rejected by the platform) ──
+  const seenUpdateIds = new Set();
+  const finalUpdates = [];
+  for (const u of toUpdate) {
+    if (seenUpdateIds.has(u.id)) { stats.updated -= 1; continue; }
+    seenUpdateIds.add(u.id);
+    finalUpdates.push(u);
+  }
+  const seenCreateKeys = new Set();
+  const finalCreates = [];
+  for (const c of toCreate) {
+    const k = c.name_state_key || c.phone_normalized || `noname|${c.company_name}`;
+    if (k && seenCreateKeys.has(k)) { stats.created -= 1; stats.skipped += 1; continue; }
+    if (k) seenCreateKeys.add(k);
+    finalCreates.push(c);
+  }
+  if (finalCreates.length > 0) {
+    for (let i = 0; i < finalCreates.length; i += 500) {
+      await master.bulkCreate(finalCreates.slice(i, i + 500));
     }
   }
-  if (toUpdate.length > 0) {
-    for (let i = 0; i < toUpdate.length; i += 500) {
-      await master.bulkUpdate(toUpdate.slice(i, i + 500));
+  if (finalUpdates.length > 0) {
+    for (let i = 0; i < finalUpdates.length; i += 500) {
+      await master.bulkUpdate(finalUpdates.slice(i, i + 500));
     }
   }
 }
