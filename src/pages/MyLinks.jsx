@@ -32,12 +32,13 @@ const prettify = (page) => page.replace(/([A-Z])/g, ' $1').trim();
 
 const ADMIN_SECTION_ORDER = ADMIN_LINK_SECTIONS.map(s => s.title);
 
-// Sort groups: known catalogs first, everything else at the end
+// Sort groups: Main first, then catalog sections, then everything else, Other last
 const groupRank = (group) => {
+  if (group === 'Main') return 0;
   const i = ADMIN_SECTION_ORDER.indexOf(group);
-  if (i >= 0) return i;
+  if (i >= 0) return 100 + i;
   if (group === 'Other') return 999;
-  return 100;
+  return 200;
 };
 
 export default function MyLinks() {
@@ -62,7 +63,7 @@ export default function MyLinks() {
   }, []);
 
   const loadRoleLinks = async (user, role) => {
-    const isAdmin = ADMIN_ROLES.includes(role) || user?.role === 'admin';
+    const isAdmin = ADMIN_ROLES.includes(role);
     if (isAdmin) {
       // Admins see everything — union of the sidebar nav and the admin/operator catalogs
       const all = [...ALL_NAV_ITEMS, ...ADMIN_LINK_SECTIONS.flatMap(s => s.links), ...OPERATOR_LINK_SECTIONS.flatMap(s => s.links)];

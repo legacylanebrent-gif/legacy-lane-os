@@ -114,7 +114,7 @@ export default function Layout({ children, currentPageName }) {
         setAllowedPages(configs[0].allowed_pages || []);
       } else {
         // Fallback minimal set
-        setAllowedPages(['Dashboard', 'MyProfile', 'Notifications', 'MyTickets', 'BrowseItems', 'EstateSaleFinder', 'RewardsCheckins', 'Favorites', 'MyRewards', 'MyReferrals']);
+        setAllowedPages(['Dashboard', 'MyProfile', 'MyLinks', 'Notifications', 'MyTickets', 'BrowseItems', 'EstateSaleFinder', 'RewardsCheckins', 'Favorites', 'MyRewards', 'MyReferrals']);
       }
     } catch (error) {
       console.error('Error loading user/access:', error);
