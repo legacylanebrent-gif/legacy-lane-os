@@ -15,7 +15,7 @@ import {
   ChevronDown, ChevronRight, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
   UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film,
   Scale, Database, AlertTriangle, Target, Search, GitBranch, Mail, Share2,
-  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar, Trash2, Lightbulb, LayoutGrid
+  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar, Trash2, Lightbulb, LayoutGrid, Link2
 } from 'lucide-react';
 
 // ─── Master Nav Item List ─────────────────────────────────────────────────────
@@ -27,6 +27,7 @@ export const ALL_NAV_ITEMS = [
   { page: 'Home',                   label: 'Main Website',           icon: Home,            group: 'Main' },
   { page: 'Dashboard',              label: 'Dashboard',              icon: LayoutDashboard, group: 'Main' },
   { page: 'MyProfile',              label: 'My Profile',             icon: User,            group: 'Main' },
+  { page: 'MyLinks',                label: 'My Links',               icon: Link2,           group: 'Main' },
 
   // ── ESTATE SALES (operator core) ────────────────────────────────────────────
   { page: 'MySales',                label: 'My Sales',               icon: Building2,       group: 'Estate Sales' },
