@@ -1,5 +1,5 @@
 import {
-  BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
+  Home, BookOpen, Calendar, Package, User, BarChart2, Award, GitBranch, DollarSign, Briefcase, Users,
   Trash2, Heart, UserPlus, Warehouse, ShoppingBag, HandCoins,
   Megaphone, Zap, BarChart3, TrendingUp, FileText,
   Sparkles, GraduationCap, Network, MapPin
@@ -10,6 +10,18 @@ import {
 // daily tools plus one "Operator Links" entry pointing at that hub page.
 // ELITE: true pages require an Elite subscription (mirrors the old sidebar gate).
 export const OPERATOR_LINK_SECTIONS = [
+  {
+    title: '⭐ Daily Core',
+    links: [
+      { page: 'Home', label: 'Main Website', icon: Home },
+      { page: 'Dashboard', label: 'Dashboard', icon: BookOpen },
+      { page: 'MySales', label: 'My Sales', icon: Calendar },
+      { page: 'Inventory', label: 'My Inventory', icon: Package },
+      { page: 'CRM', label: 'CRM', icon: User },
+      { page: 'Leads', label: 'Lead Center', icon: Users },
+      { page: 'OperatorMarketingHub', label: 'Marketing Hub', icon: Megaphone },
+    ],
+  },
   {
     title: '🏆 Owner & Agent Hub',
     links: [
