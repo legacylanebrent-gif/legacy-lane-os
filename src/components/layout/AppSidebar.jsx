@@ -15,7 +15,7 @@ import {
   ChevronDown, ChevronRight, LogOut, HandCoins, Zap, Briefcase, Award, Gift, Globe,
   UserPlus, Sparkles, Upload, Warehouse, QrCode, Rocket, Brain, Merge, BarChart2, Film,
   Scale, Database, AlertTriangle, Target, Search, GitBranch, Mail, Share2,
-  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar, Trash2, Lightbulb
+  Wrench, Eye, Building, Network, Banknote, Bot, Image, Calendar, Trash2, Lightbulb, LayoutGrid
 } from 'lucide-react';
 
 // ─── Master Nav Item List ─────────────────────────────────────────────────────
