@@ -19,7 +19,7 @@ export default function Settings() {
     // General
     site_name: 'Legacy Lane OS',
     site_description: 'Comprehensive platform for estate sales, real estate, and marketplace',
-    support_email: 'support@legacylane.com',
+    support_email: 'support@estatesalen.com',
     
     // Financial
     platform_fee_rate: 10,

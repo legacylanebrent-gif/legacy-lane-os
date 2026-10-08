@@ -146,7 +146,7 @@ export default function BizInABox() {
   const included = [
     'Exclusive territory rights in your market',
     'Legacy Lane Estate Sales branding and trademark usage',
-    'Professional email setup (@yourcompany.legacylane.com)',
+    'Professional email setup (@yourcompany.estatesalen.com)',
     'Social media account setup and optimization',
     'Google Business Profile creation and optimization',
     'Initial ad spend credit ($500 for first campaigns)',
@@ -615,7 +615,7 @@ export default function BizInABox() {
             </div>
           </div>
           <p className="text-slate-400 mb-4">
-            Questions? Call us at (888) 555-LEGACY or email <a href="mailto:franchise@legacylane.com" className="text-orange-400 hover:text-orange-300">franchise@legacylane.com</a>
+            Questions? Call us at (888) 555-LEGACY or email <a href="mailto:franchise@estatesalen.com" className="text-orange-400 hover:text-orange-300">franchise@estatesalen.com</a>
           </p>
           <p className="text-slate-500 text-sm">
             © {new Date().getFullYear()} Legacy Lane. All rights reserved.

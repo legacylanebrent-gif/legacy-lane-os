@@ -74,10 +74,10 @@ Deno.serve(async (req) => {
         page_id: META_PAGE_ID,
         link_data: {
           message: creative.primary_text,
-          link: draft.landing_page_url || 'https://legacylaneos.com',
+          link: draft.landing_page_url || 'https://estatesalen.com',
           name: creative.headline,
           description: creative.description,
-          call_to_action: { type: creative.call_to_action || 'LEARN_MORE', value: { link: draft.landing_page_url || 'https://legacylaneos.com' } },
+          call_to_action: { type: creative.call_to_action || 'LEARN_MORE', value: { link: draft.landing_page_url || 'https://estatesalen.com' } },
           ...(creative.image_url ? { picture: creative.image_url } : {}),
         },
       },

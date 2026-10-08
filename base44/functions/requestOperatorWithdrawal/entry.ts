@@ -102,12 +102,12 @@ Deno.serve(async (req) => {
   </p>
 
   <div style="text-align:center;margin:28px 0;">
-    <a href="https://app.legacylane.com/OperatorWalletDashboard" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">View My Wallet</a>
+    <a href="https://estatesalen.com/OperatorWalletDashboard" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">View My Wallet</a>
   </div>
 </td></tr>
 <tr><td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">
   <p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">Legacy Lane OS &nbsp;|&nbsp; Referral Exchange Platform</p>
-  <p style="margin:0;font-size:12px;color:#94a3b8;">This is an automated message. Questions? <a href="mailto:support@legacylane.com" style="color:#f97316;text-decoration:none;">support@legacylane.com</a></p>
+  <p style="margin:0;font-size:12px;color:#94a3b8;">This is an automated message. Questions? <a href="mailto:support@estatesalen.com" style="color:#f97316;text-decoration:none;">support@estatesalen.com</a></p>
 </td></tr>
 </table></td></tr></table>
 </body></html>`;

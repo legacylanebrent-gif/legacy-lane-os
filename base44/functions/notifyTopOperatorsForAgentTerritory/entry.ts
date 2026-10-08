@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
   </table>
 
   <div style="text-align:center;margin:28px 0;">
-    <a href="https://app.legacylane.com/AgentPartnerships" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">Review Agent Request</a>
+    <a href="https://estatesalen.com/AgentPartnerships" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">Review Agent Request</a>
   </div>
 </td></tr>
 <tr><td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">

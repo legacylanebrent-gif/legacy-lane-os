@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
   <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;">Hi ${user.full_name || 'there'},</p>
   <p style="margin:0 0 24px 0;font-size:15px;color:#475569;line-height:1.7;">${message}</p>
   ${link_to_page ? `<div style="text-align:center;margin:28px 0;">
-    <a href="https://app.legacylane.com/${link_to_page}" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">View in Legacy Lane OS</a>
+    <a href="https://estatesalen.com/${link_to_page}" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;">View in EstateSalen</a>
   </div>` : ''}
 </td></tr>
 <tr><td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">

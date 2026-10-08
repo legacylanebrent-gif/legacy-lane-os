@@ -1,5 +1,5 @@
 /**
- * Shared HTML email template helpers for Legacy Lane OS
+ * Shared HTML email template helpers for EstateSalen OS
  * Import inline — no local imports across functions, copy what you need.
  */
 
@@ -20,7 +20,7 @@ export function emailWrapper({ title, preheader = '', bodyContent }) {
         <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);padding:28px 32px;text-align:center;">
-            <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:bold;color:#ffffff;letter-spacing:1px;">Legacy Lane</div>
+            <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:bold;color:#ffffff;letter-spacing:1px;">EstateSalen</div>
             <div style="font-size:12px;color:#f97316;margin-top:4px;letter-spacing:2px;text-transform:uppercase;">OS Platform</div>
           </td>
         </tr>
@@ -35,9 +35,9 @@ export function emailWrapper({ title, preheader = '', bodyContent }) {
         <!-- Footer -->
         <tr>
           <td style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">
-            <p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">Legacy Lane OS &nbsp;|&nbsp; Referral Exchange Platform</p>
+            <p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">EstateSalen OS &nbsp;|&nbsp; Referral Exchange Platform</p>
             <p style="margin:0;font-size:12px;color:#94a3b8;">This is an automated message. Please do not reply directly to this email.<br/>
-            Questions? Contact us at <a href="mailto:support@legacylane.com" style="color:#f97316;text-decoration:none;">support@legacylane.com</a></p>
+            Questions? Contact us at <a href="mailto:support@estatesalen.com" style="color:#f97316;text-decoration:none;">support@estatesalen.com</a></p>
           </td>
         </tr>
 

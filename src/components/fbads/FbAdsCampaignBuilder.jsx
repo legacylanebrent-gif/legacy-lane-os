@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Loader2, Zap, AlertTriangle } from 'lucide-react';
 
 const LANDING_PAGE_OPTIONS = [
-  { label: 'Legacy Lane OS Demo Page', url: 'https://legacylaneos.com/demo' },
-  { label: 'Legacy Lane OS Estate Sale Company Owner Sign-Up', url: 'https://legacylaneos.com/start' },
+  { label: 'Legacy Lane OS Demo Page', url: 'https://estatesalen.com/demo' },
+  { label: 'Legacy Lane OS Estate Sale Company Owner Sign-Up', url: 'https://estatesalen.com/start' },
   { label: 'Landing Page: Offer Close', url: '/LandingPageOfferClose' },
   { label: 'Landing Page: Profit Levers', url: '/LandingPageProfitLevers' },
   { label: 'Landing Page: Fit Finder', url: '/LandingPageFitFinder' },
