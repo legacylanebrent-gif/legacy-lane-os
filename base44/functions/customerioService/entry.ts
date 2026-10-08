@@ -266,7 +266,7 @@ Deno.serve(async (req) => {
     }
 
     // Admin-only actions require authenticated admin user
-    const ADMIN_ONLY_ACTIONS = ['getConfig', 'testConnection', 'listSegments', 'getSegment', 'addCustomersToSegment', 'removeCustomersFromSegment'];
+    const ADMIN_ONLY_ACTIONS = ['getConfig', 'testConnection', 'listSegments', 'getSegment', 'addCustomersToSegment', 'removeCustomersFromSegment', 'sendTestEmail'];
     let user = null;
     if (ADMIN_ONLY_ACTIONS.includes(action)) {
       try {
@@ -478,6 +478,46 @@ Deno.serve(async (req) => {
       });
 
       return Response.json({ success: true, triggerType, customerioEventName, eligible: subscribers.length, sent: sentCount });
+    }
+
+    // ── sendTestEmail (App/Pipelines API — Bearer auth with App API Key) ──
+    if (action === 'sendTestEmail') {
+      if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+      const { to, from, subject, body, html, transactionalMessageId } = params;
+      if (!to) return Response.json({ error: 'Missing to' }, { status: 400 });
+      if (!config.appApiKey) return Response.json({ error: 'CUSTOMERIO_APP_API_KEY not configured' }, { status: 400 });
+      const finalFrom = from || (config.fromEmail ? `${config.fromName} <${config.fromEmail}>` : null);
+      try {
+        const payload = {
+          to,
+          ...(finalFrom ? { from: finalFrom } : {}),
+          ...(subject ? { subject } : {}),
+          ...(body ? { body } : {}),
+        };
+        if (transactionalMessageId) payload.transactional_message_id = Number(transactionalMessageId);
+        const res = await fetch(`${config.appBaseUrl}/v1/send/email`, {
+          method: 'POST',
+          headers: { 'Authorization': appAuthHeader(config), 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const responseText = await res.text();
+        let result;
+        try { result = JSON.parse(responseText); } catch { result = responseText; }
+        if (!res.ok) {
+          return Response.json({ error: `Customer.io sendTestEmail failed: ${res.status} — ${responseText}` }, { status: res.status });
+        }
+        // Track the send for audit
+        await logEvent(base44, {
+          eventName: 'admin.send_test_email',
+          consumerEmail: to,
+          payloadJson: { subject: subject || '(no subject)', from: finalFrom },
+          status: 'sent',
+          providerResponse: result,
+        });
+        return Response.json({ success: true, to, messageId: result?.delivery_id || null, result });
+      } catch (err) {
+        return Response.json({ error: err.message }, { status: 500 });
+      }
     }
 
     // ── listSegments (App API — Bearer auth with App API Key) ──

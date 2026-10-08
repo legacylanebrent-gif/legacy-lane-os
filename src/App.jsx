@@ -67,6 +67,7 @@ import OperatorMarketingHub from './pages/OperatorMarketingHub';
 import OperatorLinks from './pages/OperatorLinks';
 import MyLinks from './pages/MyLinks';
 import CustomerIOReportingCenter from './pages/CustomerIOReportingCenter';
+import CustomerIOEmailTest from './pages/CustomerIOEmailTest';
 import CheckIn from './pages/CheckIn';
 import EarlySignIn from './pages/EarlySignIn';
 import MyEarlySignIns from './pages/MyEarlySignIns';
@@ -310,6 +311,7 @@ const AuthenticatedApp = () => {
       <Route path="/OperatorLinks" element={<LayoutWrapper currentPageName="OperatorLinks"><OperatorLinks /></LayoutWrapper>} />
       <Route path="/MyLinks" element={<LayoutWrapper currentPageName="MyLinks"><MyLinks /></LayoutWrapper>} />
       <Route path="/CustomerIOReportingCenter" element={<LayoutWrapper currentPageName="CustomerIOReportingCenter"><CustomerIOReportingCenter /></LayoutWrapper>} />
+      <Route path="/CustomerIOEmailTest" element={<LayoutWrapper currentPageName="CustomerIOEmailTest"><CustomerIOEmailTest /></LayoutWrapper>} />
       <Route path="/CheckIn" element={<CheckIn />} />
       <Route path="/EarlySignIn" element={<LayoutWrapper currentPageName="EarlySignIn"><EarlySignIn /></LayoutWrapper>} />
       <Route path="/MyEarlySignIns" element={<LayoutWrapper currentPageName="MyEarlySignIns"><MyEarlySignIns /></LayoutWrapper>} />
