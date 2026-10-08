@@ -251,6 +251,9 @@ export default function MyProfile() {
       // Sync local user state so conditional rendering reflects saved changes immediately
       setUser(prev => ({ ...prev, ...form, notification_settings: notifications }));
 
+      // Keep Customer.io profile in sync with profile changes
+      base44.functions.invoke('syncConsumerProfile', {}).catch(e => console.error('Customer.io sync failed:', e));
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
 
