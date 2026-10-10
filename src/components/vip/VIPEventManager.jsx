@@ -128,8 +128,11 @@ Best regards`
             first_name: (invite.name || '').split(' ')[0],
             last_name: (invite.name || '').split(' ').slice(1).join(' '),
           },
+          request_id: `vip-rsvp-${invite.id}`,
           product: { product_id: 'estatesalen', tickets: ticketsAllocated },
-          consent_context: { status: 'opted_in', topic: 'vip_event_participation', channel: 'estatesalen_email', ui_element: 'rsvp_accept_button' },
+          // Phase 7D.1A: no marketing opt-in is presented in the RSVP flow —
+          // consent must stay explicitly absent, never fabricated.
+          consent_context: { status: 'absent' },
         });
       } catch (canonicalErr) {
         console.warn('Canonical activity enqueue failed (non-blocking):', canonicalErr?.message);

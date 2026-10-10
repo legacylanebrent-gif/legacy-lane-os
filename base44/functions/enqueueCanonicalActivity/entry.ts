@@ -80,6 +80,7 @@ export default async function (req) {
 
     const {
       activity_type,
+      request_id: rawRequestId,
       identity: rawIdentity,
       product: rawProduct,
       agent_context: rawAgent,
@@ -142,7 +143,30 @@ export default async function (req) {
       filteredPayload = { rsvp: "accepted", tickets: Math.max(1, Math.min(Number(rawProduct?.tickets) || 1, 20)) };
     }
 
+    // Idempotency: a caller-supplied stable request_id (e.g. vip-rsvp-<invite.id>)
+    // deduplicates retries/double-clicks — the existing record is returned as-is
+    // rather than minting a second logical request.
+    const requestId = cleanStr(rawRequestId, 100);
+    if (requestId) {
+      try {
+        const existing = await base44.asServiceRole.entities.IdentityActivityOutbox.filter({ request_id: requestId });
+        if (existing.length > 0) {
+          return Response.json({
+            success: true,
+            queued: true,
+            idempotent: true,
+            request_id: existing[0].request_id,
+            masterUserID: masterUserID || null,
+            territory_id: territory_context?.territory_id || null,
+          });
+        }
+      } catch (e) {
+        console.error("[enqueueCanonicalActivity] idempotency lookup failed:", e.message);
+      }
+    }
+
     const outboxRecord = await enqueueActivity(base44, {
+      request_id: requestId || undefined,
       masterUserID,
       event_type: activity_type,
       identity_context: identity,

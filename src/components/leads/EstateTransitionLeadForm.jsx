@@ -120,6 +120,7 @@ export default function EstateTransitionLeadForm({
     try {
       await base44.functions.invoke('enqueueCanonicalActivity', {
         activity_type: 'seller_inquiry',
+        request_id: `seller-inquiry-${saved.id}`,
         identity: {
           email: form.email,
           first_name: form.first_name,
