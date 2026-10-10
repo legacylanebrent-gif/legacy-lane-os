@@ -130,6 +130,10 @@ export default async function (req) {
           evidence: {
             captured_at: new Date().toISOString(),
             ui_element: cleanStr(rawConsent.ui_element, 80) || "explicit_checkbox",
+            // Verbatim consent text presented to the user — required by the
+            // Houszu v1.6.0 full consent evidence set when a subscription is sent.
+            consent_text: cleanStr(rawConsent.consent_text, 300),
+            consent_text_version: cleanStr(rawConsent.version, 20) || "v1_2026_10",
           },
         }
       : { status: "absent" };

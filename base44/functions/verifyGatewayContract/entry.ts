@@ -4,6 +4,7 @@ import {
   gatewayHealth,
   getIngestionStatus,
   ingestConsumerActivity,
+  registerOperator,
 } from '../../shared/houszuPartnerClient.ts';
 
 // ─────────────────────────────────────────────────────────────
@@ -45,6 +46,17 @@ export default async function (req) {
       return Response.json({ ok: s.ok, http_status: s.status, body: s.body, error: s.error || null });
     }
 
+    if (op === 'register_operator') {
+      const d = body.data || {};
+      const out = await registerOperator(d);
+      return Response.json({
+        ok: out.ok,
+        http_status: out.status,
+        body: out.body,
+        error: out.error || null,
+      });
+    }
+
     if (op === 'replay') {
       const rec = await base44.asServiceRole.entities.IdentityActivityOutbox.get(body.record_id);
       if (!rec) return Response.json({ error: 'Outbox record not found' }, { status: 404 });
@@ -67,6 +79,7 @@ export default async function (req) {
       http_status: c.status,
       api_version: c.body && c.body.api_version ? c.body.api_version : null,
       contract_version_verified: c.body && c.body.api_version === '1.6.0',
+      raw_contract: c.body || null,
       capabilities: caps ? {
         ingestion_status: caps.ingestion_status === true,
         canonical_event_write: caps.canonical_event_write === true,

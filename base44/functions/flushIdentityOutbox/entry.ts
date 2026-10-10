@@ -114,7 +114,14 @@ export default async function (req) {
       }
       try {
         const re = await outbox.get(ev.id);
-        if (re && re.claim_token === token) return { token, claimedUntil };
+        // Ownership verified AND the record must still be pending — a record
+        // another worker has already sent (released its claim) is never re-sent.
+        if (re && re.claim_token === token && (re.status === "pending" || re.status === "retrying")) {
+          return { token, claimedUntil };
+        }
+        if (re && re.claim_token === token) {
+          await outbox.update(ev.id, { claim_token: null, claimed_until: null });
+        }
       } catch (e) {
         console.error("[flushIdentityOutbox] claim verification failed:", e.message);
       }
@@ -200,10 +207,19 @@ export default async function (req) {
           throw new Error(`gateway_not_live (${res.status || res.error})`);
         } else {
           const gwCode = (res.body && res.body.code) || "";
+          // NON-RETRYABLE gateway validation failures (contract retryable=false,
+          // e.g. INVALID_CONSENT_EVIDENCE, UNKNOWN_EVENT, INVALID_PRODUCT) must
+          // not retry on the backoff schedule — they dead-letter immediately
+          // for admin review, exactly like registry gaps.
+          const gwErr = res.body && res.body.error ? res.body.error : null;
+          if (res.status >= 400 && res.status < 500 && gwErr && gwErr.retryable === false) {
+            throw Object.assign(new Error(`gateway ${res.status} ${gwErr.code || ""}: ${sanitize(gwErr.message || "")}`), { nonRetryable: true });
+          }
           throw new Error(`gateway ${res.status}${gwCode ? " " + gwCode : ""}: ${sanitize(JSON.stringify(res.body || res.error || ""))}`);
         }
       } catch (e) {
-        const giveUp = attempts >= MAX_ATTEMPTS && !String(e.message).includes("gateway_not_live");
+        const giveUp = (e && e.nonRetryable === true) ||
+          (attempts >= MAX_ATTEMPTS && !String(e.message).includes("gateway_not_live"));
         const nextRetry = new Date(
           Date.now() + Math.min(BASE_BACKOFF_MS * attempts, MAX_BACKOFF_MS)
         ).toISOString();

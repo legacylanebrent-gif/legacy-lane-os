@@ -100,21 +100,34 @@ export function buildIngestRequest(rec) {
   }
 
   // Consent: forwarded ONLY when full consent evidence exists. Absent
-  // consent is never fabricated — the key is simply omitted.
+  // consent is never fabricated — the key is simply omitted. Houszu requires
+  // the FULL evidence set for a subscription (topic_key, status, method, text,
+  // text version, context) — a partial set is refused (INVALID_CONSENT_EVIDENCE).
   const cc = rec.consent_context || {};
   if (cc.status && cc.status !== "absent" && cc.topic) {
-    req.consent_context = {
-      topic_key: cc.topic,
-      status: cc.status === "opted_in" ? "subscribed" : "unsubscribed",
-      consent_method: cc.channel || "estatesalen_email",
-      consent_context: (cc.evidence && cc.evidence.ui_element) || "explicit_checkbox",
-    };
+    const consentText = (cc.evidence && cc.evidence.consent_text) || "";
+    if (cc.status !== "opted_in" || consentText) {
+      req.consent_context = {
+        topic_key: cc.topic,
+        status: cc.status === "opted_in" ? "subscribed" : "unsubscribed",
+        consent_method: cc.channel || "estatesalen_email",
+        consent_text: consentText || undefined,
+        consent_text_version: (cc.evidence && cc.evidence.version) || undefined,
+        consent_context: (cc.evidence && cc.evidence.ui_element) || "explicit_checkbox",
+      };
+    }
   }
 
   if (map.events && map.events.length) {
     req.events = map.events.map((e) => ({ event_name: e.event_name, properties: {} }));
   }
   return req;
+}
+
+// Certified EstateSalen-only operator signup sync (contract operation
+// register_operator, partner_scoped ESTATESALEN). Idempotent by operator_id.
+export async function registerOperator(data) {
+  return callDispatcher("register_operator", data, 30000);
 }
 
 // Deliver one outbox record through the certified dispatcher.
