@@ -154,7 +154,11 @@ export default async function (req) {
         // credential-derived on Houszu — never payload-supplied).
         const res = await ingestConsumerActivity(ev);
 
-        if (res.ok && res.body && res.body.success) {
+        // Dispatcher contract: {"ok":true,"api_version":"1.6.0","operation":...,
+        // "data":{"success":true,...}} — success is accepted at the top level
+        // or nested under data.
+        const gwBody = (res.body && res.body.data) ? res.body.data : res.body;
+        if (res.ok && gwBody && (gwBody.success === true || res.body.success === true)) {
           // Accepted by the certified production dispatcher. Reconcile the
           // outbox record against the authoritative Houszu ingestion status
           // (get_ingestion_status) — Houszu's canonical ledger stays
@@ -162,17 +166,18 @@ export default async function (req) {
           let reconciliation = { reconciled: false };
           try {
             const st = await getIngestionStatus(ev.request_id);
-            if (st.ok && st.body) {
+            const stBody = (st.body && st.body.data) ? st.body.data : st.body;
+            if (st.ok && stBody) {
               reconciliation = {
                 reconciled: true,
-                status: st.body.status,
-                person_resolution_status: st.body.person_resolution_status,
-                product_relationship_status: st.body.product_relationship_status,
-                consent_status: st.body.consent_status,
-                territory_status: st.body.territory_status,
-                events: st.body.events,
-                delivery: st.body.delivery,
-                replay_count: st.body.replay_count,
+                status: stBody.status,
+                person_resolution_status: stBody.person_resolution_status,
+                product_relationship_status: stBody.product_relationship_status,
+                consent_status: stBody.consent_status,
+                territory_status: stBody.territory_status,
+                events: stBody.events,
+                delivery: stBody.delivery,
+                replay_count: stBody.replay_count,
               };
             }
           } catch (stErr) {
