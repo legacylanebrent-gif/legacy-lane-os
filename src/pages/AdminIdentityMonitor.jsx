@@ -10,8 +10,11 @@ export default function AdminIdentityMonitor() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [errors, setErrors] = useState([]);
+  const [outboxCounts, setOutboxCounts] = useState(null);
   const [backfillResult, setBackfillResult] = useState(null);
   const [backfillLoading, setBackfillLoading] = useState(false);
+  const [flushResult, setFlushResult] = useState(null);
+  const [flushLoading, setFlushLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -33,6 +36,17 @@ export default function AdminIdentityMonitor() {
         { resolutionStatus: "pending_retry" }, "-created_date", 50
       ).catch(() => []);
       setErrors(errorQueue);
+
+      // Houszu activity outbox queue depth
+      const obStatuses = ["pending", "retrying", "sent", "dead_letter"];
+      const obCounts = await Promise.allSettled(
+        obStatuses.map((s) => base44.entities.IdentityActivityOutbox.count({ status: s }))
+      );
+      const counts = {};
+      obStatuses.forEach((s, i) => {
+        counts[s] = obCounts[i].status === "fulfilled" ? obCounts[i].value : 0;
+      });
+      setOutboxCounts(counts);
     } catch (e) {
       console.error("Load error:", e);
     } finally {
@@ -55,6 +69,19 @@ export default function AdminIdentityMonitor() {
       setBackfillResult({ success: false, error: e.message });
     } finally {
       setBackfillLoading(false);
+    }
+  };
+
+  const runFlush = async () => {
+    setFlushLoading(true);
+    try {
+      const res = await base44.functions.invoke("flushIdentityOutbox", {});
+      setFlushResult(res.data);
+      loadData();
+    } catch (e) {
+      setFlushResult({ success: false, error: e.message });
+    } finally {
+      setFlushLoading(false);
     }
   };
 
@@ -259,6 +286,46 @@ export default function AdminIdentityMonitor() {
           </CardContent>
         </Card>
       )}
+
+      {/* Houszu Activity Outbox (Phase 7D) */}
+      <Card>
+        <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <CardTitle className="text-base">Houszu Activity Outbox — v1.6.0 Ingestion Gateway</CardTitle>
+          <Button size="sm" variant="outline" onClick={runFlush} disabled={flushLoading}>
+            <Zap className="w-3 h-3 mr-1" /> {flushLoading ? "Flushing…" : "Flush Now"}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {flushResult && (
+            <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${flushResult.success ? "border-green-200 bg-green-50 text-green-800" : "border-red-200 bg-red-50 text-red-800"}`}>
+              {flushResult.success
+                ? `Flush: ${flushResult.mode || "done"} — sent ${flushResult.sent || 0}, retrying ${flushResult.retrying || 0}, dead ${flushResult.dead_lettered || 0}${flushResult.message ? ` — ${flushResult.message}` : ""}`
+                : `Flush failed: ${flushResult.error}`}
+            </div>
+          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="rounded-lg border border-slate-200 p-3">
+              <div className="text-xl font-bold text-amber-600">{outboxCounts?.pending ?? "—"}</div>
+              <div className="text-xs text-slate-500">Pending</div>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <div className="text-xl font-bold text-blue-600">{outboxCounts?.retrying ?? "—"}</div>
+              <div className="text-xs text-slate-500">Retrying (backoff)</div>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <div className="text-xl font-bold text-green-600">{outboxCounts?.sent ?? "—"}</div>
+              <div className="text-xs text-slate-500">Sent to Houszu</div>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <div className="text-xl font-bold text-red-600">{outboxCounts?.dead_letter ?? "—"}</div>
+              <div className="text-xs text-slate-500">Dead Letter</div>
+            </div>
+          </div>
+          {outboxCounts && outboxCounts.pending + outboxCounts.retrying + outboxCounts.dead_letter === 0 && (
+            <p className="text-xs text-slate-500 mt-3">Queue is fully drained — no events awaiting the Houszu gateway.</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Recently Resolved */}
       {users.resolved?.length > 0 && (

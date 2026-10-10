@@ -38,11 +38,13 @@
     },
     "global_marketing_opt_in": {
       "type": "boolean",
-      "default": true
+      "default": false,
+      "description": "Global marketing emails \u2014 explicit opt-in only (never default true)"
     },
     "estate_sale_alerts_opt_in": {
       "type": "boolean",
-      "default": true
+      "default": false,
+      "description": "Estate sale listing alerts \u2014 explicit opt-in only (never default true)"
     },
     "vip_alerts_opt_in": {
       "type": "boolean",

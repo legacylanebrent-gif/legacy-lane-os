@@ -1,0 +1,44 @@
+{
+  "name": "Houszu Outbox Flush (Hourly)",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "houszu_outbox_flush_hourly",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "flush_outbox": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "flushIdentityOutbox"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Flush identity outbox",
+            "description": "Send queued Houszu activities"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Drains the IdentityActivityOutbox to the certified Houszu Partner API v1.6.0 consumer-activity ingestion gateway, with retry/backoff and dead-lettering"
+}

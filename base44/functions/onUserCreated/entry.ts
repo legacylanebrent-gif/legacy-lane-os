@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // onUserCreated
@@ -91,6 +92,27 @@ Deno.serve(async (req) => {
         identityLastCheckedAt: now,
         identitySyncError: e.message,
       });
+    }
+
+    // ── Step 3: Enqueue canonical Houszu v1.6.0 activity (durable outbox) ──
+    try {
+      const masterID = identityResult?.masterUserID
+        || identityResult?.data?.masterUserID
+        || identityResult?.resolved?.masterUserID
+        || "";
+      await enqueueActivity(base44, {
+        masterUserID: masterID,
+        localUserID: userData.id,
+        event_type: "consumer_signup",
+        payload: {
+          email_verified: true,
+          primary_account_type: userData.primary_account_type || "consumer",
+          first_name: userData.full_name?.split(" ")[0] || "",
+          signup_source: "website",
+        },
+      });
+    } catch (e) {
+      console.error("[onUserCreated] outbox enqueue failed:", e.message);
     }
 
     return Response.json({
