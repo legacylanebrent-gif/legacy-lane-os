@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // backfillUserIdentities
@@ -52,26 +53,24 @@ async function callIdentityAPI(payload) {
   return response;
 }
 
-async function syncToCustomerIO(masterUserID, profile) {
-  if (!CIO_ENABLED || !CIO_SITE_ID) return { skipped: true };
-  const attrs = {
-    email: profile.email,
-    first_name: profile.firstName || "",
-    last_name: profile.lastName || "",
-    is_estatesalen_user: true,
-    platforms: ["estatesalen"],
-    estatesalen_local_user_id: profile.localUserID || "",
-    estatesalen_role: profile.role || "consumer",
-    source: "estatesalen_backfill",
-    updated_at: new Date().toISOString(),
-  };
-  const res = await fetch(`${CIO_BASE_URL}/api/v1/customers/${encodeURIComponent(masterUserID)}`, {
-    method: "PUT",
-    headers: { "Authorization": cioAuthHeader(), "Content-Type": "application/json" },
-    body: JSON.stringify(attrs),
+// Phase 7D.1A: direct CIO sync RETIRED — canonical outbox enqueue
+async function syncToCustomerIO(base44, masterUserID, profile) {
+  await enqueueActivity(base44, {
+    masterUserID,
+    localUserID: profile.localUserID || "",
+    event_type: "profile_sync",
+    identity_context: {
+      email: profile.email,
+      first_name: profile.firstName || "",
+      last_name: profile.lastName || "",
+    },
+    product_context: { product_id: "estatesalen" },
+    payload: {
+      role: profile.role || "consumer",
+      source: "estatesalen_backfill",
+    },
   });
-  if (!res.ok) throw new Error(`CIO sync failed (${res.status})`);
-  return { sent: true };
+  return { sent: true, mode: "canonical_outbox" };
 }
 
 Deno.serve(async (req) => {
@@ -209,7 +208,7 @@ Deno.serve(async (req) => {
 
         // Sync to Customer.io
         try {
-          await syncToCustomerIO(masterUserID, {
+          await syncToCustomerIO(base44, masterUserID, {
             email: normalizedEmail,
             firstName: u.full_name?.split(" ")[0] || "",
             lastName: u.full_name?.split(" ").slice(1).join(" ") || "",

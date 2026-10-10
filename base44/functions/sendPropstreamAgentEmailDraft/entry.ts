@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // Manual "Send to Customer.io" for a single PropstreamAgentEmailDraft.
 // Admin-only. Sends the composed email to Customer.io (identify + track
@@ -7,32 +8,42 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const EVENT_NAME = 'propstream_agent_new_listing_congrats';
 
-function getCioConfig() {
+function getCioConfig(base44) {
   return {
     enabled: Deno.env.get('CUSTOMERIO_ENABLED') === 'true',
     pipelinesWriteKey: Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '',
+    base44,
   };
 }
 
+// Phase 7D.1A: direct CIO identify RETIRED — canonical outbox enqueue
 async function cioIdentify(userId, email, traits, config) {
-  if (!config.enabled || !config.pipelinesWriteKey) return { skipped: true };
-  const res = await fetch('https://cdp.customer.io/v1/identify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}` },
-    body: JSON.stringify({ userId, traits: { email, ...traits } }),
+  await enqueueActivity(config.base44, {
+    event_type: "profile_sync",
+    identity_context: { email, first_name: traits.first_name || '' },
+    product_context: { product_id: "estatesalen" },
+    payload: { source: 'propstream_agent_lead', agent_name: traits.agent_name || '', city: traits.city || '', state: traits.state || '' },
   });
-  if (!res.ok) throw new Error(`CIO identify failed ${res.status}: ${await res.text()}`);
   return { sent: true };
 }
 
+// Phase 7D.1A: direct CIO track RETIRED — canonical outbox enqueue.
+// Privacy filter: listings array, email subject/body and phone are NEVER forwarded.
 async function cioTrack(userId, email, eventName, data, config) {
-  if (!config.enabled || !config.pipelinesWriteKey) return { skipped: true };
-  const res = await fetch('https://cdp.customer.io/v1/track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}` },
-    body: JSON.stringify({ userId: userId || email, event: eventName, properties: { ...data, triggered_at: new Date().toISOString() } }),
+  await enqueueActivity(config.base44, {
+    event_type: eventName,
+    identity_context: { email },
+    product_context: { product_id: "estatesalen" },
+    payload: {
+      variant: data.variant,
+      agent_name: data.agent_name,
+      listing_count: data.listing_count,
+      primary_city: data.primary_city,
+      state: data.state,
+      matched_operator_name: data.matched_operator_name || '',
+      triggered_at: new Date().toISOString(),
+    },
   });
-  if (!res.ok) throw new Error(`CIO track failed ${res.status}: ${await res.text()}`);
   return { sent: true };
 }
 
@@ -52,7 +63,7 @@ Deno.serve(async (req) => {
     if (!draft) return Response.json({ error: 'Draft not found' }, { status: 404 });
     if (draft.status === 'sent') return Response.json({ error: 'Draft already sent' }, { status: 400 });
 
-    const config = getCioConfig();
+    const config = getCioConfig(base44);
     const userId = `propstream_agent:${draft.agent_email}`;
     const listings = draft.listings || [];
 

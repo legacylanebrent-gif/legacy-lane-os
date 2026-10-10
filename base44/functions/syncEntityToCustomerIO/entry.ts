@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // syncEntityToCustomerIO
@@ -7,25 +8,27 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Inlines Customer.io API calls to avoid function-to-function auth issues.
 // ─────────────────────────────────────────────
 
-function getCustomerIoConfig() {
+function getCustomerIoConfig(base44) {
   const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
   const pipelinesWriteKey = Deno.env.get('CUSTOMERIO_API_KEY') || '';
   const configured = enabled && !!pipelinesWriteKey;
-  return { enabled, configured, pipelinesWriteKey };
+  return { enabled, configured, pipelinesWriteKey, base44 };
 }
 
-// Direct Customer.io Pipelines API: identify a person
+// Phase 7D.1A: direct CIO identify RETIRED — canonical outbox enqueue
 async function cioIdentify(profile, config) {
-  if (!config.configured) {
-    console.log('[CIO SKIPPED] identify — not configured:', profile.email);
-    return { skipped: true };
-  }
-  const payload = {
-    userId: profile.user_id || profile.email,
-    traits: {
+  const masterUserID = await resolveMasterUserID(config.base44, { email: profile.email, userId: profile.user_id });
+  await enqueueActivity(config.base44, {
+    masterUserID,
+    localUserID: profile.user_id || "",
+    event_type: "profile_sync",
+    identity_context: {
       email: profile.email,
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
+    },
+    product_context: { product_id: "estatesalen" },
+    payload: {
       role: profile.role || 'consumer',
       subscription_tier: profile.subscription_tier || 'none',
       subscription_status: profile.subscription_status || 'none',
@@ -33,48 +36,22 @@ async function cioIdentify(profile, config) {
       city: profile.city || '',
       state: profile.state || '',
       source: profile.source || 'entity_sync',
-      updated_at: new Date().toISOString(),
     },
-  };
-  const res = await fetch('https://cdp.customer.io/v1/identify', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-    },
-    body: JSON.stringify(payload),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`CIO identify failed: ${res.status} — ${err}`);
-  }
-  return { sent: true };
+  return { sent: true, mode: 'canonical_outbox' };
 }
 
-// Direct Customer.io Pipelines API: track an event
+// Phase 7D.1A: direct CIO track RETIRED — canonical outbox enqueue
 async function cioTrack({ userId, email, eventName, data }, config) {
-  if (!config.configured) {
-    console.log(`[CIO SKIPPED] track — not configured: ${eventName}`);
-    return { skipped: true };
-  }
-  const payload = {
-    userId: userId || email,
-    event: eventName,
-    properties: { ...data, triggered_at: new Date().toISOString() },
-  };
-  const res = await fetch('https://cdp.customer.io/v1/track', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-    },
-    body: JSON.stringify(payload),
+  const masterUserID = await resolveMasterUserID(config.base44, { email, userId });
+  await enqueueActivity(config.base44, {
+    masterUserID,
+    event_type: eventName,
+    identity_context: { ...(email ? { email } : {}) },
+    product_context: { product_id: "estatesalen" },
+    payload: { ...data },
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`CIO track failed: ${res.status} — ${err}`);
-  }
-  return { sent: true };
+  return { sent: true, mode: 'canonical_outbox', event: eventName };
 }
 
 // Log a marketing event to MarketingEventLog
@@ -113,7 +90,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing event.entity_name or event.type' }, { status: 400 });
     }
 
-    const config = getCustomerIoConfig();
+    const config = getCustomerIoConfig(base44);
     const results = [];
 
     const track = async ({ userId, email, eventName, data: evData, operatorId, saleId }) => {

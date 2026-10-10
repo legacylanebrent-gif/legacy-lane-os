@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // syncConsumerProfile
@@ -70,15 +71,19 @@ Deno.serve(async (req) => {
       consumer_marketing_synced: true,
     });
 
-    // Fire Customer.io identify event
+    // Phase 7D.1A: direct Customer.io identify RETIRED — canonical outbox enqueue
     try {
-      await base44.asServiceRole.functions.invoke('customerioService', {
-        action: 'identifyConsumer',
-        profile: {
-          user_id: targetUser.id,
-          email: targetUser.email,
+      await enqueueActivity(base44, {
+        masterUserID: targetUser.masterUserID || "",
+        localUserID: targetUser.id,
+        event_type: "profile_sync",
+        identity_context: {
+          email: profileData.email,
           first_name: profileData.first_name,
           last_name: profileData.last_name,
+        },
+        product_context: { product_id: "estatesalen" },
+        payload: {
           role: profileData.role,
           subscription_tier: profileData.subscription_tier,
           subscription_status: profileData.subscription_status,
@@ -89,7 +94,7 @@ Deno.serve(async (req) => {
         },
       });
     } catch (e) {
-      console.error('[syncConsumerProfile] CustomerIO identify failed:', e.message);
+      console.error('[syncConsumerProfile] canonical enqueue failed:', e.message);
     }
 
     return Response.json({

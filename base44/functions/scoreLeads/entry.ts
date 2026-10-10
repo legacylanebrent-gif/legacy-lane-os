@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // scoreLeads
@@ -24,28 +25,18 @@ Deno.serve(async (req) => {
       const score = calculateLeadScore(leadData);
       await base44.asServiceRole.entities.Lead.update(entityId, { score });
 
-      // Fire CustomerIO event
+      // Phase 7D.1A: direct CIO track RETIRED — canonical outbox enqueue
       try {
-        const config = {
-          enabled: Deno.env.get('CUSTOMERIO_ENABLED') === 'true',
-          writeKey: Deno.env.get('CUSTOMERIO_PIPELINES_WRITE_KEY') || '',
-        };
-        if (config.enabled && config.writeKey) {
-          await fetch('https://cdp.customer.io/v1/track', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Basic ${btoa(config.writeKey + ':')}`,
-            },
-            body: JSON.stringify({
-              userId: leadData.contact_email || leadData.routed_to || 'unknown',
-              event: 'lead_scored',
-              properties: { score, lead_id: entityId, source: leadData.source },
-            }),
-          });
-        }
+        const masterUserID = await resolveMasterUserID(base44, { email: leadData.contact_email, userId: leadData.routed_to });
+        await enqueueActivity(base44, {
+          masterUserID,
+          event_type: "lead_scored",
+          identity_context: { ...(leadData.contact_email ? { email: String(leadData.contact_email).trim().toLowerCase() } : {}) },
+          product_context: { product_id: "estatesalen" },
+          payload: { score, lead_id: entityId, source: leadData.source },
+        });
       } catch (e) {
-        console.error('[scoreLeads] CustomerIO track failed:', e.message);
+        console.error('[scoreLeads] canonical enqueue failed:', e.message);
       }
 
       return Response.json({ success: true, lead_id: entityId, score });

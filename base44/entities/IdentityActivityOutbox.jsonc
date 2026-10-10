@@ -2,6 +2,20 @@
   "name": "IdentityActivityOutbox",
   "type": "object",
   "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "Idempotency key sent to Houszu \u2014 stable across retries; never regenerated"
+    },
+    "contract_version": {
+      "type": "string",
+      "default": "1.6.0",
+      "description": "Houszu Partner API contract version the payload was built for"
+    },
+    "source_app": {
+      "type": "string",
+      "default": "estatesalen",
+      "description": "Canonical source app identifier"
+    },
     "masterUserID": {
       "type": "string",
       "description": "Canonical Houszu masterUserID (lowercase, mu_ prefix)"
@@ -12,7 +26,27 @@
     },
     "event_type": {
       "type": "string",
-      "description": "Activity type, e.g. consumer_signup, profile_update, vip_signup, seller_inquiry, sale_alert_optin"
+      "description": "Activity type, e.g. consumer_signup, profile_sync, vip_signup, seller_inquiry, lead_scored, sale_created"
+    },
+    "identity_context": {
+      "type": "object",
+      "description": "Canonical identity inputs (email, names, phone) required by the frozen contract"
+    },
+    "product_context": {
+      "type": "object",
+      "description": "Product/relationship context (product_id, relationship_type)"
+    },
+    "agent_context": {
+      "type": "object",
+      "description": "Agent attribution \u2014 present ONLY when legitimately established; never guessed"
+    },
+    "territory_context": {
+      "type": "object",
+      "description": "Canonical territory context \u2014 present ONLY when legitimately resolved"
+    },
+    "consent_context": {
+      "type": "object",
+      "description": "Consent evidence captured at the time of the action (never reconstructed later)"
     },
     "payload": {
       "type": "object",
@@ -27,6 +61,7 @@
       "type": "string",
       "enum": [
         "pending",
+        "sending",
         "sent",
         "retrying",
         "dead_letter"
@@ -52,9 +87,14 @@
       "format": "date-time",
       "description": "Earliest time the flusher should retry this event"
     },
-    "request_id": {
+    "claim_token": {
       "type": "string",
-      "description": "Idempotency key sent to Houszu"
+      "description": "Worker claim token \u2014 prevents overlapping hourly workers from sending the same record"
+    },
+    "claimed_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Claim lease expiry \u2014 expired claims are reclaimable"
     }
   },
   "required": [

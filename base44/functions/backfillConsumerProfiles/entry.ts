@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // backfillConsumerProfiles
@@ -14,14 +15,19 @@ function getCustomerIoConfig() {
   return { enabled, configured, pipelinesWriteKey };
 }
 
-async function cioIdentify(profile, config) {
-  if (!config.configured) return { skipped: true };
-  const payload = {
-    userId: profile.user_id || profile.email,
-    traits: {
+// Phase 7D.1A: direct CIO identify RETIRED — canonical outbox enqueue
+async function cioIdentify(base44, profile, config) {
+  await enqueueActivity(base44, {
+    masterUserID: profile.masterUserID || "",
+    localUserID: profile.user_id || "",
+    event_type: "profile_sync",
+    identity_context: {
       email: profile.email,
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
+    },
+    product_context: { product_id: "estatesalen" },
+    payload: {
       role: profile.role || 'consumer',
       subscription_tier: profile.subscription_tier || 'none',
       subscription_status: profile.subscription_status || 'none',
@@ -29,18 +35,8 @@ async function cioIdentify(profile, config) {
       city: profile.city || '',
       state: profile.state || '',
       source: profile.source || 'backfill_sync',
-      updated_at: new Date().toISOString(),
     },
-  };
-  const res = await fetch('https://cdp.customer.io/v1/identify', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(config.pipelinesWriteKey + ':')}`,
-    },
-    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`CIO identify failed: ${res.status}`);
   return { sent: true };
 }
 
@@ -115,7 +111,7 @@ Deno.serve(async (req) => {
 
         // Fire Customer.io identify directly
         try {
-          await cioIdentify({
+          await cioIdentify(base44, {
             user_id: user.id,
             email: user.email,
             first_name: profileData.first_name,

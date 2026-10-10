@@ -1,4 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
+
+// ─── Phase 7D.1A GUARDRAIL ───
+// Direct Customer.io production writes (consumer/customer profile or event
+// writes) are PROHIBITED. The canonical path is:
+//   EstateSalen → IdentityActivityOutbox → Houszu v1.6.0 gateway → Customer.io
+// Any code path that attempts a direct CIO write must fail loudly, silently
+// blocking unauthorized dual-writes instead of duplicating identity/events.
+const CIO_DIRECT_WRITES_BLOCKED = true;
+function guardDirectCioWrite(op) {
+  if (CIO_DIRECT_WRITES_BLOCKED) {
+    throw new Error(
+      `[CIO GUARDRAIL] Direct Customer.io write ("${op}") is blocked. Route through enqueueActivity → IdentityActivityOutbox → Houszu gateway.`
+    );
+  }
+}
 
 // ─────────────────────────────────────────────
 // Customer.io Service Layer
@@ -16,7 +32,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 //   CUSTOMERIO_DEFAULT_FROM_NAME=
 // ─────────────────────────────────────────────
 
-function getCustomerIoConfig() {
+function getCustomerIoConfig(base44) {
   const enabled = Deno.env.get('CUSTOMERIO_ENABLED') === 'true';
   const region = Deno.env.get('CUSTOMERIO_REGION') || 'us';
   const siteId = Deno.env.get('CUSTOMERIO_SITE_ID') || '';
@@ -29,7 +45,7 @@ function getCustomerIoConfig() {
   const baseUrl = region === 'eu' ? 'https://track-eu.customer.io' : 'https://track.customer.io';
   const appBaseUrl = region === 'eu' ? 'https://api-eu.customer.io' : 'https://api.customer.io';
 
-  return { enabled, configured, region, siteId, apiKey, appApiKey, fromEmail, fromName, baseUrl, appBaseUrl };
+  return { enabled, configured, region, siteId, apiKey, appApiKey, fromEmail, fromName, baseUrl, appBaseUrl, base44 };
 }
 
 function authHeader(config) {
@@ -68,23 +84,14 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
 
 // Identify (create/update) a person in Customer.io via Track API
 // Uses PUT /api/v1/customers/{identifier} — creates the person immediately
+// Phase 7D.1A: direct CIO identify RETIRED — canonical outbox enqueue
 async function identifyConsumer(profile, config) {
-  if (!config.configured) {
-    console.log('[CustomerIO SKIPPED] identifyConsumer — not configured. Would identify:', profile.email);
-    return { skipped: true, reason: 'not_configured' };
-  }
-
   const email = normalizeEmail(profile.email);
   if (!email) {
     return { skipped: true, reason: 'no_email' };
   }
-
-  // Per cross-platform spec: Customer.io must be identified using masterUserID
-  // Falls back to email only during transition (before identity is resolved)
-  const identifier = profile.masterUserID ? profile.masterUserID.toLowerCase() : email;
-  if (!profile.masterUserID) {
-    console.log('[CustomerIO identify] WARNING: No masterUserID — using email as fallback identifier. Identity should be resolved via Houszu.');
-  }
+  const identifier = (profile.masterUserID || '').toLowerCase()
+    || await resolveMasterUserID(config.base44, { email });
   const phone = normalizePhone(profile.phone);
 
   const attrs = {
@@ -101,10 +108,10 @@ async function identifyConsumer(profile, config) {
     city: profile.city || '',
     state: profile.state || '',
     notification_radius_miles: profile.notification_radius_miles || profile.preferred_radius_miles || 25,
-    // ── Notification Preferences ──
-    estate_salen_marketing: profile.estate_salen_marketing ?? true,
-    local_sale_notifications: profile.local_sale_notifications ?? true,
-    company_direct_emails: profile.company_direct_emails ?? true,
+    // ── Notification Preferences (consent defaults: never true by default) ──
+    estate_salen_marketing: profile.estate_salen_marketing ?? false,
+    local_sale_notifications: profile.local_sale_notifications ?? false,
+    company_direct_emails: profile.company_direct_emails ?? false,
     cool_finds_blog_email: profile.cool_finds_blog_email ?? false,
     cool_finds_blog_in_app: profile.cool_finds_blog_in_app ?? false,
     // ── Legacy opt-in flags ──
@@ -126,24 +133,22 @@ async function identifyConsumer(profile, config) {
     master_user_id: profile.masterUserID || '',
   };
 
-  const url = `${config.baseUrl}/api/v1/customers/${encodeURIComponent(identifier)}`;
-  const res = await fetchWithRetry(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': authHeader(config),
-      'Content-Type': 'application/json',
+  // Canonical path: durable outbox → Houszu gateway → Customer.io
+  await enqueueActivity(config.base44, {
+    masterUserID: identifier,
+    localUserID: profile.user_id || profile.localUserID || '',
+    event_type: 'profile_sync',
+    identity_context: {
+      email,
+      first_name: profile.first_name || '',
+      last_name: profile.last_name || '',
+      ...(phone ? { phone } : {}),
     },
-    body: JSON.stringify(attrs),
+    product_context: { product_id: 'estatesalen' },
+    payload: attrs,
   });
 
-  const responseText = res ? await res.text() : '';
-  console.log(`[CustomerIO identify] status=${res?.status} identifier=${identifier} email=${email} response=${responseText}`);
-
-  if (!res || !res.ok) {
-    throw new Error(`Customer.io identify failed (${res?.status}): ${responseText}`);
-  }
-
-  return { sent: true, mode: 'track_api', httpStatus: res.status, identifier, response: responseText || '(empty)' };
+  return { sent: true, mode: 'canonical_outbox', identifier };
 }
 
 // Track an event in Customer.io via Track API
@@ -219,7 +224,7 @@ Deno.serve(async (req) => {
     try { body = JSON.parse(rawBody); } catch { body = {}; }
     const { action, ...params } = body;
 
-    const config = getCustomerIoConfig();
+    const config = getCustomerIoConfig(base44);
 
     // ── Inbound webhook from CustomerIO (signature-verified, no user auth) ──
     const webhookKey = Deno.env.get('CUSTOMERIO_WEBHOOK_KEY');

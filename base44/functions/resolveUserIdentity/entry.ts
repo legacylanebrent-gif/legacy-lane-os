@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { enqueueActivity } from '../../shared/identityActivityOutbox.ts';
 
 // ─────────────────────────────────────────────
 // resolveUserIdentity
@@ -78,45 +79,28 @@ async function callIdentityAPI(payload) {
   return response;
 }
 
-// Sync to Customer.io using masterUserID as the identifier
-async function syncToCustomerIO(masterUserID, profile) {
-  if (!CIO_ENABLED || !CIO_SITE_ID || !CIO_API_KEY) {
-    console.log("[IdentitySync] Customer.io not configured, skipping CIO sync");
-    return { skipped: true };
-  }
-
-  const identifier = masterUserID;
-  const attrs = {
-    email: profile.email,
-    first_name: profile.firstName || "",
-    last_name: profile.lastName || "",
-    is_estatesalen_user: true,
-    platforms: ["estatesalen"],
-    estatesalen_local_user_id: profile.localUserID || "",
-    estatesalen_role: profile.role || "consumer",
-    estatesalen_subscription_tier: profile.subscriptionTier || "none",
-    estatesalen_subscription_status: profile.subscriptionStatus || "none",
-    source: "estatesalen_identity_sync",
-    updated_at: new Date().toISOString(),
-  };
-
-  const res = await fetch(`${CIO_BASE_URL}/api/v1/customers/${encodeURIComponent(identifier)}`, {
-    method: "PUT",
-    headers: {
-      "Authorization": cioAuthHeader(),
-      "Content-Type": "application/json",
+// Phase 7D.1A: direct Customer.io writes RETIRED. The canonical path is
+// EstateSalen → durable outbox → Houszu gateway → Customer.io. This now
+// enqueues a profile_sync activity instead of writing to CIO directly.
+async function syncToCustomerIO(base44, masterUserID, profile) {
+  await enqueueActivity(base44, {
+    masterUserID,
+    localUserID: profile.localUserID || "",
+    event_type: "profile_sync",
+    identity_context: {
+      email: profile.email,
+      first_name: profile.firstName || "",
+      last_name: profile.lastName || "",
     },
-    body: JSON.stringify(attrs),
+    product_context: { product_id: "estatesalen" },
+    payload: {
+      role: profile.role || "consumer",
+      subscription_tier: profile.subscriptionTier || "none",
+      subscription_status: profile.subscriptionStatus || "none",
+      source: "estatesalen_identity_sync",
+    },
   });
-
-  const responseText = await res.text();
-  console.log(`[IdentitySync] CIO identify status=${res.status} identifier=${identifier} response=${responseText}`);
-
-  if (!res.ok) {
-    throw new Error(`Customer.io sync failed (${res.status}): ${responseText}`);
-  }
-
-  return { sent: true, identifier };
+  return { sent: true, mode: "canonical_outbox" };
 }
 
 // Log error to IdentitySyncError entity
@@ -271,7 +255,7 @@ async function resolveIdentity(base44, { localUserID, localAccountID, email, ema
   // Sync to Customer.io using masterUserID as identifier
   let cioResult = null;
   try {
-    cioResult = await syncToCustomerIO(masterUserID, {
+    cioResult = await syncToCustomerIO(base44, masterUserID, {
       email: normalizedEmail,
       firstName,
       lastName,
