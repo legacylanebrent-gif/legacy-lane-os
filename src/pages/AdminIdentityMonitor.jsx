@@ -38,7 +38,7 @@ export default function AdminIdentityMonitor() {
       setErrors(errorQueue);
 
       // Houszu activity outbox queue depth
-      const obStatuses = ["pending", "retrying", "sent", "dead_letter"];
+      const obStatuses = ["pending", "retrying", "sent", "dead_letter", "registry_gap"];
       const obCounts = await Promise.allSettled(
         obStatuses.map((s) => base44.entities.IdentityActivityOutbox.count({ status: s }))
       );
@@ -303,7 +303,7 @@ export default function AdminIdentityMonitor() {
                 : `Flush failed: ${flushResult.error}`}
             </div>
           )}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className="rounded-lg border border-slate-200 p-3">
               <div className="text-xl font-bold text-amber-600">{outboxCounts?.pending ?? "—"}</div>
               <div className="text-xs text-slate-500">Pending</div>
@@ -320,8 +320,12 @@ export default function AdminIdentityMonitor() {
               <div className="text-xl font-bold text-red-600">{outboxCounts?.dead_letter ?? "—"}</div>
               <div className="text-xs text-slate-500">Dead Letter</div>
             </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <div className="text-xl font-bold text-purple-600">{outboxCounts?.registry_gap ?? "—"}</div>
+              <div className="text-xs text-slate-500">Registry Gap (review)</div>
+            </div>
           </div>
-          {outboxCounts && outboxCounts.pending + outboxCounts.retrying + outboxCounts.dead_letter === 0 && (
+          {outboxCounts && outboxCounts.pending + outboxCounts.retrying + outboxCounts.dead_letter + (outboxCounts.registry_gap || 0) === 0 && (
             <p className="text-xs text-slate-500 mt-3">Queue is fully drained — no events awaiting the Houszu gateway.</p>
           )}
         </CardContent>

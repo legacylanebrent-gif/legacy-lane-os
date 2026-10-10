@@ -26,7 +26,11 @@
     },
     "event_type": {
       "type": "string",
-      "description": "Activity type, e.g. consumer_signup, profile_sync, vip_signup, seller_inquiry, lead_scored, sale_created"
+      "description": "Canonical activity type or event from the certified v1.6.0 contract vocabulary (e.g. consumer_signup, profile_sync, vip_signup, seller_inquiry, lead_scored, sale_created)"
+    },
+    "legacy_event_name": {
+      "type": "string",
+      "description": "Original legacy (e.g. Customer.io dotted) event name when it was deterministically mapped or quarantined as a registry gap \u2014 diagnostics only"
     },
     "identity_context": {
       "type": "object",
@@ -50,7 +54,7 @@
     },
     "payload": {
       "type": "object",
-      "description": "Activity payload sent to the Houszu v1.6.0 ingestion gateway"
+      "description": "Activity payload sent to the Houszu v1.6.0 ingestion gateway (empty on registry_gap quarantined records \u2014 raw caller payloads are never stored)"
     },
     "occurred_at": {
       "type": "string",
@@ -64,10 +68,11 @@
         "sending",
         "sent",
         "retrying",
-        "dead_letter"
+        "dead_letter",
+        "registry_gap"
       ],
       "default": "pending",
-      "description": "Delivery state"
+      "description": "Delivery state. registry_gap = quarantined non-deliverable review state (not sent to Houszu, not retried)"
     },
     "attempts": {
       "type": "integer",
@@ -80,7 +85,7 @@
     },
     "last_error": {
       "type": "string",
-      "description": "Last delivery error (sanitized)"
+      "description": "Last delivery error or registry-gap diagnostic (sanitized)"
     },
     "next_retry_at": {
       "type": "string",
@@ -89,12 +94,12 @@
     },
     "claim_token": {
       "type": "string",
-      "description": "Worker claim token \u2014 prevents overlapping hourly workers from sending the same record"
+      "description": "Worker claim token \u2014 prevents overlapping workers from sending the same record"
     },
     "claimed_until": {
       "type": "string",
       "format": "date-time",
-      "description": "Claim lease expiry \u2014 expired claims are reclaimable"
+      "description": "Claim lease expiry \u2014 expired claims are reclaimable (crash recovery)"
     }
   },
   "required": [

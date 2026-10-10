@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { enqueueActivity, resolveMasterUserID } from "../../shared/identityActivityOutbox.ts";
+import { isCanonicalActivityType } from "../../shared/canonicalContract.ts";
 
 // ─────────────────────────────────────────────
 // enqueueCanonicalActivity
@@ -93,9 +94,13 @@ export default async function (req) {
       return Response.json({ error: "A normalized email is required" }, { status: 400 });
     }
 
-    const allowedActivityTypes = ["vip_signup", "seller_inquiry", "consumer_signup", "profile_sync", "company_follow", "lead_scored"];
-    if (!allowedActivityTypes.includes(activity_type)) {
-      return Response.json({ error: "Unknown activity_type" }, { status: 400 });
+    // Validated against the certified Houszu v1.6.0 contract vocabulary
+    // (frozen validation snapshot — see base44/shared/canonicalContract.ts).
+    if (!isCanonicalActivityType(activity_type)) {
+      return Response.json({
+        error: "Unknown activity_type — not in the certified Houszu v1.6.0 canonical vocabulary",
+        classification: "registry_gap",
+      }, { status: 400 });
     }
 
     // Identity (masterUserID) — resolved server-side, never guessed

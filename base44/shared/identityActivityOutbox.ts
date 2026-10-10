@@ -7,6 +7,7 @@
 // Until the Houszu-side gateway endpoint is live, events accumulate safely.
 
 import { secrets } from "base44:runtime";
+import { resolveLegacyEventName } from "./canonicalContract.ts";
 
 export const OUTBOX_CONTRACT_VERSION = "1.6.0";
 export const OUTBOX_SOURCE_APP = "estatesalen";
@@ -53,24 +54,37 @@ export async function enqueueActivity(
   }
 ) {
   try {
+    // Canonical validation (contract metadata — see canonicalContract.ts):
+    // - canonical event/operation name → queued as pending (deliverable)
+    // - legacy name with an approved deterministic mapping → mapped exactly
+    //   once to the existing canonical name; original name kept as diagnostics
+    // - anything else → registry_gap quarantine: NEVER delivered to Houszu,
+    //   never retried, and the raw caller payload is NOT stored (privacy).
+    const resolved = resolveLegacyEventName(event_type);
+    const quarantined = resolved.kind === "registry_gap";
     const record = {
       request_id: request_id || newRequestId(),
       contract_version: OUTBOX_CONTRACT_VERSION,
       source_app: OUTBOX_SOURCE_APP,
       masterUserID: (masterUserID || "").toLowerCase(),
       localUserID: localUserID || "",
-      event_type: event_type || "consumer_activity",
+      event_type: quarantined ? String(event_type || "unknown") : resolved.canonical_name,
+      legacy_event_name:
+        resolved.kind === "mapped" || quarantined ? (resolved.legacy_name || event_type || null) : null,
       identity_context: identity_context || {},
       product_context: product_context || {},
       agent_context: agent_context || null,
       territory_context: territory_context || null,
       consent_context: consent_context || { status: "absent" },
-      payload: payload || {},
+      payload: quarantined ? {} : (payload || {}),
       occurred_at: occurred_at || new Date().toISOString(),
-      status: "pending",
+      status: quarantined ? "registry_gap" : "pending",
       attempts: 0,
       claim_token: null,
       claimed_until: null,
+      last_error: quarantined
+        ? `registry_gap: "${String(event_type || "")}" is not in the certified Houszu v1.6.0 canonical vocabulary (frozen validation snapshot). Quarantined for admin review — not delivered, not retried.`
+        : null,
     };
     return await base44.asServiceRole.entities.IdentityActivityOutbox.create(record);
   } catch (e) {
