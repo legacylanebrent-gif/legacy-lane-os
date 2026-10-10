@@ -1,0 +1,86 @@
+{
+  "name": "IdentityActivityOutbox",
+  "type": "object",
+  "properties": {
+    "masterUserID": {
+      "type": "string",
+      "description": "Canonical Houszu masterUserID (lowercase, mu_ prefix)"
+    },
+    "localUserID": {
+      "type": "string",
+      "description": "EstateSalen local user ID"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Activity type, e.g. consumer_signup, profile_update, vip_signup, seller_inquiry, sale_alert_optin"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Activity payload sent to the Houszu v1.6.0 ingestion gateway"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the activity happened"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "retrying",
+        "dead_letter"
+      ],
+      "default": "pending",
+      "description": "Delivery state"
+    },
+    "attempts": {
+      "type": "integer",
+      "default": 0,
+      "description": "Delivery attempts so far"
+    },
+    "last_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Last delivery error (sanitized)"
+    },
+    "next_retry_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest time the flusher should retry this event"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Idempotency key sent to Houszu"
+    }
+  },
+  "required": [
+    "event_type",
+    "payload"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

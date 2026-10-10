@@ -108,8 +108,8 @@ async function identifyConsumer(profile, config) {
     cool_finds_blog_email: profile.cool_finds_blog_email ?? false,
     cool_finds_blog_in_app: profile.cool_finds_blog_in_app ?? false,
     // ── Legacy opt-in flags ──
-    global_marketing_opt_in: profile.global_marketing_opt_in ?? true,
-    estate_sale_alerts_opt_in: profile.estate_sale_alerts_opt_in ?? true,
+    global_marketing_opt_in: profile.global_marketing_opt_in ?? false,
+    estate_sale_alerts_opt_in: profile.estate_sale_alerts_opt_in ?? false,
     vip_alerts_opt_in: profile.vip_alerts_opt_in ?? false,
     weekly_digest_opt_in: profile.weekly_digest_opt_in ?? false,
     // ── Favorite Companies ──

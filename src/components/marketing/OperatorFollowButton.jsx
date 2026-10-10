@@ -35,7 +35,9 @@ export default function OperatorFollowButton({ operatorId, operatorName, sourceP
         email: u.email,
         first_name: u.full_name?.split(' ')[0] || '',
         last_name: u.full_name?.split(' ').slice(1).join(' ') || '',
-        global_marketing_opt_in: true,
+        // Following a company is explicit consent for that company's sale alerts only —
+        // never global marketing (Phase 7D consent rule).
+        global_marketing_opt_in: false,
         estate_sale_alerts_opt_in: true,
         source: sourcePage === 'operator_page' ? 'operator_page' : 'sale_page',
         created_at: new Date().toISOString(),

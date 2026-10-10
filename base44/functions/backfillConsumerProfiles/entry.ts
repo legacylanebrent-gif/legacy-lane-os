@@ -89,15 +89,17 @@ Deno.serve(async (req) => {
           role: user.primary_account_type || 'consumer',
           subscription_tier: user.subscription_tier || 'none',
           subscription_status: user.subscription_status || 'none',
-          global_marketing_opt_in: true,
-          estate_sale_alerts_opt_in: true,
+          // Consent (Phase 7D): never default marketing opt-ins to true.
+          global_marketing_opt_in: false,
+          estate_sale_alerts_opt_in: false,
           vip_alerts_opt_in: false,
           weekly_digest_opt_in: false,
           updated_at: new Date().toISOString(),
         };
 
         if (existing.length > 0) {
-          await base44.asServiceRole.entities.ConsumerMarketingProfile.update(existing[0].id, profileData);
+          const { global_marketing_opt_in, estate_sale_alerts_opt_in, vip_alerts_opt_in, weekly_digest_opt_in, ...preserveConsent } = profileData;
+          await base44.asServiceRole.entities.ConsumerMarketingProfile.update(existing[0].id, preserveConsent);
         } else {
           await base44.asServiceRole.entities.ConsumerMarketingProfile.create({
             ...profileData,

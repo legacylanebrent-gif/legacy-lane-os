@@ -38,8 +38,10 @@ Deno.serve(async (req) => {
       zip_code: userData.zip_code || "",
       city: userData.city || "",
       state: userData.state || "",
-      global_marketing_opt_in: true,
-      estate_sale_alerts_opt_in: true,
+      // Consent (Phase 7D): marketing opt-ins must NEVER default to true.
+      // On update, preserve the profile's existing opt-in choices entirely.
+      global_marketing_opt_in: false,
+      estate_sale_alerts_opt_in: false,
       vip_alerts_opt_in: false,
       weekly_digest_opt_in: false,
       updated_at: now,
@@ -47,7 +49,8 @@ Deno.serve(async (req) => {
 
     let profileId;
     if (existing.length > 0) {
-      await base44.asServiceRole.entities.ConsumerMarketingProfile.update(existing[0].id, profileData);
+      const { global_marketing_opt_in, estate_sale_alerts_opt_in, vip_alerts_opt_in, weekly_digest_opt_in, ...preserveConsent } = profileData;
+      await base44.asServiceRole.entities.ConsumerMarketingProfile.update(existing[0].id, preserveConsent);
       profileId = existing[0].id;
     } else {
       const created = await base44.asServiceRole.entities.ConsumerMarketingProfile.create({
