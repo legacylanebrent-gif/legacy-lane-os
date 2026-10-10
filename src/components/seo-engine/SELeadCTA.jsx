@@ -48,7 +48,7 @@ export default function SELeadCTA({ sourceUrl = '', sourcePageType = '', default
     e.preventDefault();
     setLoading(true);
     const { score, level } = scoreAndLevel(form);
-    await base44.entities.EstateTransitionLead.create({
+    const saved = await base44.entities.EstateTransitionLead.create({
       ...form,
       life_event_type: lifeEventType,
       lead_score: score,
@@ -57,6 +57,40 @@ export default function SELeadCTA({ sourceUrl = '', sourcePageType = '', default
       source_page_type: sourcePageType,
       crm_status: 'new'
     });
+    // Canonical identity ingestion — durable outbox, no direct Customer.io writes
+    try {
+      await base44.functions.invoke('enqueueCanonicalActivity', {
+        activity_type: 'seller_inquiry',
+        identity: {
+          email: form.email,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone: form.phone,
+        },
+        product: { product_id: 'estatesalen', relationship_type: form.relationship_to_estate },
+        geography: {
+          state: form.state,
+          county: form.county,
+          city: form.city,
+          context: {
+            life_event_type: lifeEventType,
+            relationship_to_estate: form.relationship_to_estate,
+            urgency_level: form.urgency_level,
+            has_real_estate: form.has_real_estate,
+            has_personal_property_to_sell: form.has_personal_property_to_sell,
+            needs_probate_help: form.needs_probate_help,
+            needs_estate_sale: form.needs_estate_sale,
+            needs_cleanout: form.needs_cleanout,
+            needs_realtor: form.needs_realtor,
+            wants_cash_offer: form.wants_cash_offer,
+            needs_attorney_resource: form.needs_attorney_resource,
+          },
+        },
+        consent_context: { status: 'absent' },
+      });
+    } catch (canonicalErr) {
+      console.warn('Canonical activity enqueue failed (non-blocking):', canonicalErr?.message);
+    }
     setSubmitted(true);
     setLoading(false);
   };

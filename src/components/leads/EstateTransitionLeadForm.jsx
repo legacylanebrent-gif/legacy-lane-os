@@ -116,6 +116,41 @@ export default function EstateTransitionLeadForm({
     const saved = await base44.entities.EstateTransitionLead.create(payload);
     setSubmittedLead(saved);
 
+    // Canonical identity ingestion — durable outbox, no direct Customer.io writes
+    try {
+      await base44.functions.invoke('enqueueCanonicalActivity', {
+        activity_type: 'seller_inquiry',
+        identity: {
+          email: form.email,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone: form.phone,
+        },
+        product: { product_id: 'estatesalen', relationship_type: form.relationship_to_estate },
+        geography: {
+          state: form.state,
+          county: form.county,
+          city: form.city,
+          context: {
+            life_event_type: form.life_event_type,
+            relationship_to_estate: form.relationship_to_estate,
+            urgency_level: form.urgency_level,
+            has_real_estate: form.has_real_estate,
+            has_personal_property_to_sell: form.has_personal_property_to_sell,
+            needs_probate_help: form.needs_probate_help,
+            needs_estate_sale: form.needs_estate_sale,
+            needs_cleanout: form.needs_cleanout,
+            needs_realtor: form.needs_realtor,
+            wants_cash_offer: form.wants_cash_offer,
+            needs_attorney_resource: form.needs_attorney_resource,
+          },
+        },
+        consent_context: { status: 'absent' },
+      });
+    } catch (canonicalErr) {
+      console.warn('Canonical activity enqueue failed (non-blocking):', canonicalErr?.message);
+    }
+
     // Route + Email sequence in parallel (automation also fires on create, these are belt-and-suspenders)
     await Promise.all([
       base44.functions.invoke('routeEstateTransitionLead', {

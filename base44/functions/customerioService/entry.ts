@@ -165,32 +165,17 @@ async function trackEvent({ userId, email, eventName, data }, config) {
     return { skipped: true, reason: 'no_identifier' };
   }
 
-  const url = `${config.baseUrl}/api/v1/customers/${encodeURIComponent(identifier)}/events`;
-  const payload = {
-    name: eventName,
-    data: {
-      ...data,
-      triggered_at: new Date().toISOString(),
-    },
-  };
-
-  const res = await fetchWithRetry(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': authHeader(config),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+  // Canonical path: durable outbox → Houszu gateway → Customer.io
+  await enqueueActivity(config.base44, {
+    masterUserID: identifier,
+    localUserID: userId || '',
+    event_type: eventName || 'custom_activity',
+    identity_context: { email: normalizedEmail },
+    product_context: { product_id: 'estatesalen' },
+    payload: { ...(data || {}), triggered_at: new Date().toISOString() },
   });
 
-  const responseText = res ? await res.text() : '';
-  console.log(`[CustomerIO track] status=${res?.status} identifier=${identifier} event=${eventName} response=${responseText}`);
-
-  if (!res || !res.ok) {
-    throw new Error(`Customer.io track event failed (${res?.status}): ${responseText}`);
-  }
-
-  return { sent: true, mode: 'track_api', event: eventName, identifier };
+  return { sent: true, mode: 'canonical_outbox', event: eventName, identifier };
 }
 
 // Helper to log events to the MarketingEventLog entity

@@ -119,6 +119,22 @@ Best regards`
         ticketCodes.push(ticketCode);
       }
 
+      // Canonical identity ingestion — durable outbox, no direct Customer.io writes
+      try {
+        await base44.functions.invoke('enqueueCanonicalActivity', {
+          activity_type: 'vip_signup',
+          identity: {
+            email: invite.email,
+            first_name: (invite.name || '').split(' ')[0],
+            last_name: (invite.name || '').split(' ').slice(1).join(' '),
+          },
+          product: { product_id: 'estatesalen', tickets: ticketsAllocated },
+          consent_context: { status: 'opted_in', topic: 'vip_event_participation', channel: 'estatesalen_email', ui_element: 'rsvp_accept_button' },
+        });
+      } catch (canonicalErr) {
+        console.warn('Canonical activity enqueue failed (non-blocking):', canonicalErr?.message);
+      }
+
       // Send ticket email with all codes
       const ticketList = ticketCodes.map((code, idx) => `Ticket ${idx + 1}: ${code}`).join('\n');
       
