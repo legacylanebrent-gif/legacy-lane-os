@@ -86,3 +86,35 @@ export function resolveLegacyEventName(name) {
     reason: `legacy event "${raw}" has no approved canonical mapping in the certified v1.6.0 contract`,
   };
 }
+
+// ─────────────────────────────────────────────────────────────
+// Dispatcher mapping (certified live Phase 7D.2 gateway contract).
+// Maps each canonical outbox event_type to the ONE dispatcher
+// ingest request shape: a business_action plus (where the certified
+// live contract defines them) canonical registry events.
+// source_app is credential-derived on Houszu and is NEVER
+// payload-supplied; absent contexts are omitted, never fabricated.
+// ─────────────────────────────────────────────────────────────
+export const DISPATCHER_MAPPINGS = {
+  consumer_signup: {
+    business_action: "registration",
+    events: [
+      { event_name: "user_registered", properties: {} },
+      { event_name: "product_joined", properties: {} },
+    ],
+  },
+  profile_sync: { business_action: "profile_sync", events: [] },
+  vip_signup: { business_action: "vip_signup", events: [] },
+  seller_inquiry: { business_action: "seller_inquiry", events: [] },
+  company_follow: { business_action: "company_follow", events: [] },
+  lead_scored: { business_action: "lead_scored", events: [] },
+  sale_created: { business_action: "sale_created", events: [] },
+};
+
+export function getDispatcherMapping(eventType) {
+  const name = String(eventType || "").trim();
+  if (CANONICAL_ACTIVITY_TYPES.includes(name)) {
+    return DISPATCHER_MAPPINGS[name] || null;
+  }
+  return null;
+}

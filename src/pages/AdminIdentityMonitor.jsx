@@ -15,6 +15,7 @@ export default function AdminIdentityMonitor() {
   const [backfillLoading, setBackfillLoading] = useState(false);
   const [flushResult, setFlushResult] = useState(null);
   const [flushLoading, setFlushLoading] = useState(false);
+  const [gatewayStatus, setGatewayStatus] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -47,6 +48,15 @@ export default function AdminIdentityMonitor() {
         counts[s] = obCounts[i].status === "fulfilled" ? obCounts[i].value : 0;
       });
       setOutboxCounts(counts);
+
+      // Gateway credential status — configured yes/no only (never the token)
+      try {
+        const gw = await base44.functions.invoke("verifyGatewayContract", { operation: "health" });
+        const partner = gw?.data?.body?.data?.partner_app || null;
+        setGatewayStatus(gw?.data?.ok ? { configured: true, partner } : { configured: false });
+      } catch {
+        setGatewayStatus({ configured: false });
+      }
     } catch (e) {
       console.error("Load error:", e);
     } finally {
@@ -291,6 +301,11 @@ export default function AdminIdentityMonitor() {
       <Card>
         <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <CardTitle className="text-base">Houszu Activity Outbox — v1.6.0 Ingestion Gateway</CardTitle>
+          <Badge variant={gatewayStatus?.configured ? "default" : "outline"} className="text-xs whitespace-nowrap">
+            {gatewayStatus?.configured
+              ? `Gateway credential: configured${gatewayStatus.partner ? ` (${gatewayStatus.partner})` : ""}`
+              : "Gateway credential: not configured"}
+          </Badge>
           <Button size="sm" variant="outline" onClick={runFlush} disabled={flushLoading}>
             <Zap className="w-3 h-3 mr-1" /> {flushLoading ? "Flushing…" : "Flush Now"}
           </Button>

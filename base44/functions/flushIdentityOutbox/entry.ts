@@ -1,11 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { secrets } from 'base44:runtime';
 import { isCanonicalActivityType } from '../../shared/canonicalContract.ts';
+import { ingestConsumerActivity, getIngestionStatus } from '../../shared/houszuPartnerClient.ts';
 
 // ─────────────────────────────────────────────
 // flushIdentityOutbox
 // Drains the IdentityActivityOutbox to the certified Houszu Partner API
-// v1.6.0 consumer-activity ingestion endpoint.
+// v1.6.0 production dispatcher (Phase 7D.2 gateway activation).
 // - Batch of up to 50 due events per run (pending or retrying with next_retry_at due)
 // - WORKER LEASE: each eligible record is claim-leased (claim_token +
 //   claimed_until) before sending — one record, one active local worker.
@@ -13,11 +13,13 @@ import { isCanonicalActivityType } from '../../shared/canonicalContract.ts';
 //   request_id is never changed.
 // - Exponential backoff (30 min * attempts, capped at 24h); dead_letter after
 //   12 attempts for genuine delivery failures only — the gateway_not_live
-//   deployment condition never dead-letters (records stay retained).
+//   / credential_not_configured deployment condition never dead-letters.
 // - Canonical validation: non-canonical activity names are quarantined as
 //   registry_gap and are never selected for delivery.
-// - When the gateway URL secret is not configured or the endpoint is not yet
-//   live, events stay queued safely and the run reports queue depth.
+// - Delivery + reconciliation go through the ONE shared Partner API client
+//   (base44/shared/houszuPartnerClient.ts): POST dispatcher with
+//   operation=ingest_consumer_activity in the body, then get_ingestion_status
+//   with the SAME request_id (Houszu's canonical ledger stays authoritative).
 // Admin-only; also callable from a scheduled workflow (service-role request).
 // ─────────────────────────────────────────────
 
@@ -30,13 +32,6 @@ function sanitize(text) {
   return String(text || "")
     .replace(/[A-Za-z0-9_-]{24,}/g, "[redacted]")
     .slice(0, 300);
-}
-
-// True when the record has no claim, or its claim lease has expired.
-function claimIsFree(rec, nowMs) {
-  if (!rec.claim_token) return true;
-  const until = rec.claimed_until ? Date.parse(rec.claimed_until) : 0;
-  return !until || until <= nowMs;
 }
 
 export default async function (req) {
@@ -87,18 +82,10 @@ export default async function (req) {
       try { queueCounts[st] = await outbox.count({ status: st }); } catch { queueCounts[st] = null; }
     }
 
-    const gatewayUrl = secrets.get("HOUSZU_PARTNER_API_URL") || "";
-    const partnerToken = secrets.get("HOUSZU_PARTNER_SERVICE_TOKEN") || "";
-
-    if (!gatewayUrl) {
-      return Response.json({
-        success: true,
-        mode: "gateway_not_configured",
-        queued: events.length,
-        queueCounts,
-        message: "Set the HOUSZU_PARTNER_API_URL secret to the certified v1.6.0 ingestion base once Houszu deploys it.",
-      });
-    }
+    // Credential configuration is owned by the ONE shared Partner API client
+    // (base44/shared/houszuPartnerClient.ts) — certified production dispatcher
+    // host/route + Bearer credential. A missing credential surfaces as a
+    // credential_not_configured client result below; records stay retained.
 
     if (events.length === 0) {
       return Response.json({ success: true, mode: "drained", queueCounts, sent: 0 });
@@ -134,15 +121,8 @@ export default async function (req) {
       return null; // another active worker owns this record
     }
 
-    async function releaseClaim(ev) {
-      try {
-        await outbox.update(ev.id, { claim_token: null, claimed_until: null });
-      } catch (e) {
-        console.error("[flushIdentityOutbox] claim release failed:", e.message);
-      }
-    }
-
     const sent = [];
+    const reconciliations = [];
     const retried = [];
     const dead = [];
     const quarantined = [];
@@ -168,26 +148,36 @@ export default async function (req) {
 
       const attempts = (ev.attempts || 0) + 1;
       try {
-        const res = await fetch(`${gatewayUrl.replace(/\/$/, "")}/api/partner/v1/ingest_consumer_activity`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + partnerToken,
-            "x-houszu-shared-key": secrets.get("HOUSZU_SHARED_API_KEY") || "",
-          },
-          body: JSON.stringify({
-            platform: "estatesalen",
-            request_id: ev.request_id,
-            masterUserID: ev.masterUserID,
-            event_type: ev.event_type,
-            occurred_at: ev.occurred_at,
-            activity: ev.payload,
-          }),
-          signal: AbortSignal.timeout(15000),
-        });
-        const text = await res.text();
+        // Delivery through the ONE certified shared Partner API client
+        // (dispatcher convention: POST /functions/savorStylePartnerApi with
+        // operation=ingest_consumer_activity in the body; partner identity is
+        // credential-derived on Houszu — never payload-supplied).
+        const res = await ingestConsumerActivity(ev);
 
-        if (res.ok) {
+        if (res.ok && res.body && res.body.success) {
+          // Accepted by the certified production dispatcher. Reconcile the
+          // outbox record against the authoritative Houszu ingestion status
+          // (get_ingestion_status) — Houszu's canonical ledger stays
+          // authoritative for delivery state.
+          let reconciliation = { reconciled: false };
+          try {
+            const st = await getIngestionStatus(ev.request_id);
+            if (st.ok && st.body) {
+              reconciliation = {
+                reconciled: true,
+                status: st.body.status,
+                person_resolution_status: st.body.person_resolution_status,
+                product_relationship_status: st.body.product_relationship_status,
+                consent_status: st.body.consent_status,
+                territory_status: st.body.territory_status,
+                events: st.body.events,
+                delivery: st.body.delivery,
+                replay_count: st.body.replay_count,
+              };
+            }
+          } catch (stErr) {
+            reconciliation = { reconciled: false, error: "status_read_failed" };
+          }
           // Success — record accepted; release the claim; request_id unchanged.
           await outbox.update(ev.id, {
             status: "sent",
@@ -198,12 +188,14 @@ export default async function (req) {
             claimed_until: null,
           });
           sent.push(ev.id);
-        } else if (res.status === 404 || res.status === 405) {
-          // Endpoint not live yet — safe backoff, not an error spike;
+          reconciliations.push({ request_id: ev.request_id, reconciliation });
+        } else if (res.status === 404 || res.status === 405 || res.error === "credential_not_configured" || res.status === 0) {
+          // Gateway not reachable / credential not configured — safe backoff;
           // never dead-letters (deployment condition, not a delivery failure).
-          throw new Error(`gateway_not_live (${res.status})`);
+          throw new Error(`gateway_not_live (${res.status || res.error})`);
         } else {
-          throw new Error(`gateway ${res.status}: ${sanitize(text)}`);
+          const gwCode = (res.body && res.body.code) || "";
+          throw new Error(`gateway ${res.status}${gwCode ? " " + gwCode : ""}: ${sanitize(JSON.stringify(res.body || res.error || ""))}`);
         }
       } catch (e) {
         const giveUp = attempts >= MAX_ATTEMPTS && !String(e.message).includes("gateway_not_live");
@@ -235,6 +227,7 @@ export default async function (req) {
       registry_gapped: quarantined.length,
       skipped_active_claim: skippedClaimed.length,
       queueCounts,
+      reconciliations,
     });
   } catch (error) {
     console.error("[flushIdentityOutbox] error:", error.message);
