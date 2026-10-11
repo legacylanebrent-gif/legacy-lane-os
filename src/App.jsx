@@ -176,6 +176,7 @@ import AdminIdentityMonitor from './pages/AdminIdentityMonitor';
 import AdminLinks from './pages/AdminLinks';
 import PunchList from './pages/PunchList';
 import SalePublication from './pages/SalePublication';
+import WebsiteRuntimeProbe from './pages/WebsiteRuntimeProbe';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -335,6 +336,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminLinks" element={<LayoutWrapper currentPageName="AdminLinks"><AdminLinks /></LayoutWrapper>} />
       <Route path="/PunchList" element={<LayoutWrapper currentPageName="PunchList"><PunchList /></LayoutWrapper>} />
       <Route path="/SalePublication" element={<LayoutWrapper currentPageName="SalePublication"><SalePublication /></LayoutWrapper>} />
+      <Route path="/website-runtime" element={<WebsiteRuntimeProbe />} />
       <Route path="/StateOperators" element={<StateOperators />} />
       <Route path="/NationalCoverageGrid" element={<LayoutWrapper currentPageName="NationalCoverageGrid"><NationalCoverageGrid /></LayoutWrapper>} />
       <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />

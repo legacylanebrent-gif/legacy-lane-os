@@ -21,6 +21,7 @@ export function computeSourceVersion(sale, items) {
 // internal pricing intelligence).
 function publicImage(img) {
   if (!img) return null;
+  if (typeof img === 'string') return { url: img, name: null, description: null };
   return {
     url: img.url || null,
     name: img.name || null,
@@ -31,7 +32,7 @@ function publicImage(img) {
 // Public-safe item: canonical item ID + approved public fields only.
 // NEVER expose: buyer_name, buyer_contact, payment_method_used, payment_notes,
 // included_in_settlement, internal pricing intelligence, marketplace sync metadata.
-function publicItem(it) {
+export function publicItem(it) {
   return {
     id: it.id,
     title: it.title || null,
@@ -52,7 +53,7 @@ function publicItem(it) {
 // Public-safe sale: operational truth only.
 // NEVER expose: commission fields, revenue, estimated_value, SEO internals,
 // schema_json, views/saves, featured pricing, admin metadata.
-function publicSale(sale) {
+export function publicSale(sale) {
   const addr = sale.property_address || {};
   return {
     id: sale.id,
