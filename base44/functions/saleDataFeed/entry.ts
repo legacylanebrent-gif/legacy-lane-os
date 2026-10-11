@@ -45,6 +45,19 @@ Deno.serve(async (req) => {
   const apiKeyRecord = apiKeys[0];
   const operatorId = apiKeyRecord.operator_id;
 
+  // Canonical EstateSalen company identity (Phase 1) — additive, backward compatible.
+  let companyId = null;
+  let companyName = apiKeyRecord.operator_name || null;
+  try {
+    const companies = await base44.asServiceRole.entities.Company.filter({ primary_contact_user_id: operatorId, status: 'active' });
+    if (companies.length > 0) {
+      companyId = companies[0].id;
+      companyName = companies[0].display_name || companies[0].legal_name;
+    }
+  } catch (e) {
+    console.error('Company lookup failed for feed:', e.message);
+  }
+
   // Fetch all sales for this Estate Sale Company Owner
   const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
 
@@ -61,8 +74,11 @@ Deno.serve(async (req) => {
     generated_at: new Date().toISOString(),
     operator_id: operatorId,
     operator_name: apiKeyRecord.operator_name,
+    company_id: companyId,
+    company_name: companyName,
     sales: sales.map(sale => ({
       id: sale.id,
+      company_id: companyId,
       title: sale.title,
       description: sale.description,
       status: sale.status,

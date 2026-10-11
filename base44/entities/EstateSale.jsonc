@@ -37,6 +37,10 @@
     "operator_name": {
       "type": "string"
     },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company ID owning this sale. Additive in Phase 1 \u2014 legacy operator_id ownership is preserved. Inventory derives company ownership from its sale."
+    },
     "property_address": {
       "type": "object",
       "properties": {

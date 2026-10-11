@@ -1,0 +1,116 @@
+{
+  "name": "Company",
+  "type": "object",
+  "properties": {
+    "legal_name": {
+      "type": "string",
+      "description": "Legal business name (e.g. Legacy Lane Estates LLC). Renaming this never changes the Company ID."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Public display name / DBA (e.g. Legacy Lane). Independent of the Company ID."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "pending",
+        "suspended"
+      ],
+      "default": "active",
+      "description": "Company lifecycle state"
+    },
+    "primary_contact_user_id": {
+      "type": "string",
+      "description": "EstateSalen User ID of the company's primary owner/operator contact"
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "EstateSalen User IDs mapped to this company (operators, admins, staff). Additive \u2014 existing user ownership fields are untouched."
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website_url": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo media reference"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "service_area_notes": {
+      "type": "string",
+      "description": "Free-text service area metadata (structured territories live in OperatorTerritoryProfile)"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "legal_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "data.primary_contact_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.primary_contact_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

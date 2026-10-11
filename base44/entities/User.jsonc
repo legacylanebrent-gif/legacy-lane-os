@@ -2,6 +2,10 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company ID this user belongs to (Phase 1). Additive \u2014 legacy user-owned record relationships are preserved."
+    },
     "business_phone": {
       "type": "string",
       "description": "The primary business phone number."
