@@ -33,22 +33,25 @@ Deno.serve(async (req) => {
 
     const operatorId = apiKeyRecord.operator_id;
 
-    // Canonical EstateSalen company identity (Phase 1) — additive, backward compatible.
-    let companyId = null;
-    let companyName = apiKeyRecord.operator_name || null;
-    try {
-      const companies = await base44.asServiceRole.entities.Company.filter({ primary_contact_user_id: operatorId, status: 'active' });
-      if (companies.length > 0) {
-        companyId = companies[0].id;
-        companyName = companies[0].display_name || companies[0].legal_name;
-      }
-    } catch (e) {
-      console.error('Company lookup failed for push:', e.message);
-    }
-
     // Fetch all sales for this Estate Sale Company Owner
     const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
     const saleIds = sales.map(s => s.id);
+
+    // Canonical EstateSalen company identity (Phase 1) — additive, backward compatible.
+    // Primary source: company_id on the sale records (backfilled). Fallback: Company registry lookup.
+    let companyId = (sales.length > 0 && sales[0].company_id) ? sales[0].company_id : null;
+    let companyName = apiKeyRecord.operator_name || null;
+    if (!companyId) {
+      try {
+        const companies = await base44.asServiceRole.entities.Company.filter({ primary_contact_user_id: operatorId, status: 'active' });
+        if (companies.length > 0) {
+          companyId = companies[0].id;
+          companyName = companies[0].display_name || companies[0].legal_name;
+        }
+      } catch (e) {
+        console.error('Company lookup failed for push:', e.message);
+      }
+    }
 
     let items = [];
     for (const saleId of saleIds) {
