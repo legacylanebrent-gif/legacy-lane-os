@@ -7,6 +7,8 @@
 // (publicationPayload.publicSale / publicItem) — one source of privacy truth.
 import { normalizeHostname } from './websiteTenantService.ts';
 import { computeSourceVersion, publicSale, publicItem } from './publicationPayload.ts';
+import { getTenantSettings, projectPublicSettings } from './websiteSettingsService.ts';
+import { getActivePresentation, projectPublicPresentation } from './websiteSalePresentationService.ts';
 
 // ── Cache (Part 26) ──────────────────────────────────────────────────────────
 // Every cache key carries tenant/domain identity. Never cache by path alone.
@@ -127,7 +129,7 @@ export async function getPublishedSale(service, ctx, publicId) {
   const wanted = String(publicId || '').trim().toLowerCase();
   if (!wanted) return null;
   const sales = await getPublishedSales(service, ctx);
-  const match = sales.find(s => s._raw && ((s._raw.seo_slug || '').toLowerCase() === wanted || s._raw.id === publicId));
+  const match = sales.find(s => s._raw && ((s._raw.seo_slug || '').toLowerCase() === wanted || (s._raw.website_slug || '').toLowerCase() === wanted || s._raw.id === publicId));
   if (!match) return null; // cross-tenant sale identifiers resolve to nothing (Parts 35/36)
   const items = await getCanonicalItems(service, match._raw.id);
   return {
@@ -146,7 +148,7 @@ export async function getPublishedSale(service, ctx, publicId) {
 export function projectPublicSale(sale) {
   const p = publicSale(sale);
   return {
-    public_id: sale.seo_slug || sale.id, // Part 20 — prefer public slug, fall back to opaque id
+    public_id: sale.website_slug || sale.seo_slug || sale.id, // Part 20 — prefer the Company-scoped unique website_slug, fall back to legacy seo_slug, then opaque id
     title: p.title,
     description: p.description,
     status: p.status,
@@ -204,13 +206,114 @@ export function stripInternalFields(entry) {
   return rest;
 }
 
-export function buildPublicWebsiteContext({ ctx, sales }) {
+export function buildPublicWebsiteContext({ ctx, sales, settings, template }) {
   return {
     hostname: ctx.hostname,
     site_name: ctx.tenant.name,
     tenant_slug: ctx.tenant.slug,
     company: buildPublicCompanyContext(ctx.company),
+    template: template || null,
+    settings: settings || null,
     published_sales: (sales || []).map(stripInternalFields),
     generated_at: new Date().toISOString()
+  };
+}
+
+// ── Phase 3D.1 thin runtime projections (Parts 18/19/20/21) ──────────────────
+// Five thin compositions over the CERTIFIED Phase 3C services — no new
+// inventory service, no raw settings exposure, canonical data always wins.
+
+// 1. Tenant/site configuration projection.
+export async function getPublicSettingsForContext(service, ctx) {
+  const settings = await getTenantSettings(service, ctx.tenant.id);
+  return projectPublicSettings(settings, ctx.company);
+}
+
+// Presentation ordering: featured first (featured_order asc), then canonical
+// published order. Presentation NEVER removes a sale from the collection.
+export function orderSalesWithPresentation(entries) {
+  const featured = entries
+    .map((e, i) => ({ e, i }))
+    .filter(x => x.e.presentation && x.e.presentation.featured)
+    .sort((a, b) => {
+      const ao = a.e.presentation.featured_order == null ? 999999 : a.e.presentation.featured_order;
+      const bo = b.e.presentation.featured_order == null ? 999999 : b.e.presentation.featured_order;
+      return ao - bo || a.i - b.i;
+    })
+    .map(x => x.e);
+  const rest = entries.filter(e => !(e.presentation && e.presentation.featured));
+  return [...featured, ...rest];
+}
+
+// 2. Public sale collection (+ optional presentation enhancement).
+export async function listPublicSales(service, ctx) {
+  const sales = await getPublishedSales(service, ctx);
+  const out = [];
+  for (const entry of sales) {
+    const presentation = await getActivePresentation(service, ctx.tenant.id, entry._raw.id);
+    out.push({ ...stripInternalFields(entry), presentation: projectPublicPresentation(presentation) });
+  }
+  return orderSalesWithPresentation(out);
+}
+
+// 3. Public sale detail — canonical wins; presentation contributes only
+// approved website fields (Part 19).
+export async function getPublicSaleDetail(service, ctx, slugOrId) {
+  const result = await getPublishedSale(service, ctx, slugOrId);
+  if (!result) return null;
+  const presentation = await getActivePresentation(service, ctx.tenant.id, result._raw_id);
+  return {
+    _raw_id: result._raw_id,
+    sale: result.sale,
+    presentation: projectPublicPresentation(presentation),
+    inventory: result.inventory,
+    inventory_count: result.inventory.length
+  };
+}
+
+// 4. Public inventory presentation — reuses the CERTIFIED canonical inventory
+// projection via getPublishedSale (Part 20 — no new inventory service).
+export async function getPublicInventory(service, ctx, slugOrId) {
+  const result = await getPublishedSale(service, ctx, slugOrId);
+  if (!result) return null;
+  return {
+    sale: {
+      public_id: result.sale.public_id,
+      title: result.sale.title,
+      status: result.sale.status,
+      sale_dates: result.sale.sale_dates
+    },
+    inventory: result.inventory
+  };
+}
+
+// 5. Public lead/form context (Part 31) — trusted tenant-derived form context.
+export async function getPublicLeadContext(service, ctx) {
+  const settings = await getPublicSettingsForContext(service, ctx);
+  const sales = await getPublishedSales(service, ctx);
+  return {
+    site_name: ctx.tenant.name,
+    display_business_name: settings.display_business_name,
+    contact: settings.contact,
+    lead_types: ['seller_inquiry', 'contact', 'sale_question'],
+    sales: sales.map(s => ({
+      public_id: stripInternalFields(s).public_id,
+      website_slug: s._raw.website_slug || null,
+      title: s._raw.title || null
+    }))
+  };
+}
+
+// Sitemap entries (Part 37): ONLY publication-visible resources + static
+// template paths, for the resolved hostname. Unpublished sales never appear.
+export async function getPublicSitemapEntries(service, ctx) {
+  const sales = await getPublishedSales(service, ctx);
+  return {
+    hostname: ctx.hostname,
+    static_paths: ['/site', '/site/sales', '/site/about', '/site/services', '/site/contact', '/site/faq', '/site/legal'],
+    sales: sales.map(s => ({
+      slug: s._raw.website_slug || stripInternalFields(s).public_id,
+      updated_at: s._raw.updated_date || null
+    }))
   };
 }

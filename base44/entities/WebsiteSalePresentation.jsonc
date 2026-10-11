@@ -1,0 +1,151 @@
+{
+  "name": "WebsiteSalePresentation",
+  "type": "object",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant this presentation belongs to."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant; invariant enforced server-side: sale.company_id MUST equal tenant.company_id."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Sale this presentation enhances. NEVER a second Sale \u2014 canonical data always wins for operational facts."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "MVP: at most ONE active presentation per tenant+sale (enforced server-side)."
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Website featured flag (presentation only \u2014 not the canonical premium_listing)."
+    },
+    "featured_order": {
+      "type": "integer",
+      "description": "Order among featured sales on the website."
+    },
+    "marketing_intro": {
+      "type": "string",
+      "description": "Website marketing intro/highlight copy for the sale."
+    },
+    "display_highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Short display highlight bullets for the website."
+    },
+    "hero_image_url": {
+      "type": "string",
+      "description": "Website hero image selection/override (must be an image already on the canonical Sale or uploaded media)."
+    },
+    "photo_captions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "image_index": {
+            "type": "integer",
+            "description": "Index into the canonical Sale's images array."
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Website-only photo captions keyed by canonical image index."
+    },
+    "presentation_cta_label": {
+      "type": "string",
+      "description": "Sale-specific CTA wording."
+    },
+    "presentation_cta_link": {
+      "type": "string",
+      "description": "Sale-specific CTA link (internal template path or https URL)."
+    },
+    "seo_title": {
+      "type": "string",
+      "description": "Website SEO title override (canonical Sale facts still required)."
+    },
+    "seo_description": {
+      "type": "string",
+      "description": "Website SEO meta description override."
+    },
+    "sort_order": {
+      "type": "integer",
+      "description": "Presentation display ordering metadata."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS. Company remains the membership source of truth."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "sale_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

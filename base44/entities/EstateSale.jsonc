@@ -414,6 +414,10 @@
       ],
       "default": "not_submitted",
       "description": "Google indexing status"
+    },
+    "website_slug": {
+      "type": "string",
+      "description": "Public website URL slug (human-readable, normalized, URL-safe; Company-scoped unique; deterministic initial generation with collision-safe ordinal suffixes). Presentation/routing identity ONLY \u2014 never replaces the canonical Sale ID. Generated server-side."
     }
   },
   "required": [

@@ -1,0 +1,353 @@
+{
+  "name": "WebsiteTenantSettings",
+  "type": "object",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant this configuration belongs to. Ownership chain validated server-side: User \u2192 Company membership \u2192 Company \u2192 WebsiteTenant \u2192 Settings."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant \u2014 never accepted from the client."
+    },
+    "site_title": {
+      "type": "string",
+      "description": "Website title (browser tab / header)."
+    },
+    "display_business_name": {
+      "type": "string",
+      "description": "Website-visible business name override. Company legal identity is never edited here."
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "branding": {
+      "type": "object",
+      "description": "Template branding tokens (logo, favicon, colors, fonts).",
+      "properties": {
+        "logo_url": {
+          "type": "string"
+        },
+        "alternate_logo_url": {
+          "type": "string",
+          "description": "Compact/alternate logo for small surfaces (only when required)."
+        },
+        "favicon_url": {
+          "type": "string"
+        },
+        "primary_color": {
+          "type": "string",
+          "description": "Hex color token for Template #1 primary surfaces."
+        },
+        "secondary_color": {
+          "type": "string"
+        },
+        "accent_color": {
+          "type": "string"
+        },
+        "background_color": {
+          "type": "string"
+        },
+        "text_color": {
+          "type": "string"
+        },
+        "heading_font_family": {
+          "type": "string"
+        },
+        "body_font_family": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "contact": {
+      "type": "object",
+      "description": "Website contact PRESENTATION. Canonical operational contact truth stays on Company.",
+      "properties": {
+        "use_company_phone": {
+          "type": "boolean",
+          "default": true
+        },
+        "phone_display": {
+          "type": "string",
+          "description": "Presentation override used only when use_company_phone is false."
+        },
+        "use_company_email": {
+          "type": "boolean",
+          "default": true
+        },
+        "email_display": {
+          "type": "string",
+          "description": "Presentation override used only when use_company_email is false."
+        },
+        "address_display": {
+          "type": "string",
+          "description": "Website-visible address presentation (e.g. city/state line)."
+        },
+        "contact_cta_label": {
+          "type": "string",
+          "description": "Label for the contact call-to-action."
+        }
+      },
+      "default": {}
+    },
+    "social": {
+      "type": "object",
+      "description": "Structured social profile URLs shown by the template.",
+      "properties": {
+        "facebook": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "youtube": {
+          "type": "string"
+        },
+        "pinterest": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "homepage": {
+      "type": "object",
+      "description": "Homepage hero/introduction configuration (no general page-builder).",
+      "properties": {
+        "hero_headline": {
+          "type": "string"
+        },
+        "hero_subheadline": {
+          "type": "string"
+        },
+        "hero_image_url": {
+          "type": "string"
+        },
+        "intro_copy": {
+          "type": "string"
+        },
+        "cta_label": {
+          "type": "string"
+        },
+        "cta_link": {
+          "type": "string",
+          "description": "Internal template path (e.g. /site/sales) or https URL."
+        }
+      },
+      "default": {}
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string",
+          "description": "About page copy (plain text paragraphs separated by blank lines)."
+        }
+      },
+      "default": {}
+    },
+    "services": {
+      "type": "object",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "cta": {
+      "type": "object",
+      "description": "Reusable operator CTA band configuration.",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "sublabel": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "seo": {
+      "type": "object",
+      "description": "Tenant-level SEO defaults. Canonical URL always derives from the resolved active WebsiteDomain \u2014 never stored or hardcoded.",
+      "properties": {
+        "default_title": {
+          "type": "string"
+        },
+        "default_description": {
+          "type": "string"
+        },
+        "social_image_url": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "faq": {
+      "type": "object",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "legal": {
+      "type": "object",
+      "description": "Presentation copy references for policy/legal pages.",
+      "properties": {
+        "privacy_policy_text": {
+          "type": "string"
+        },
+        "terms_text": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "sale_display": {
+      "type": "object",
+      "description": "Sale display preferences. Never copies operational Sale state.",
+      "properties": {
+        "show_sold_items": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_prices": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "default": {}
+    },
+    "inventory_display": {
+      "type": "object",
+      "description": "Inventory presentation controls for Template #1.",
+      "properties": {
+        "show_prices": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_condition": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "default": {}
+    },
+    "settings_version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Configuration version marker (future draft/publish versioning)."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "MVP: one active configuration per tenant."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS. Company remains the membership source of truth."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

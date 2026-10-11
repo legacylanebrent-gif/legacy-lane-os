@@ -1,0 +1,40 @@
+{
+  "name": "Sale Website Slug on Create",
+  "description": "When a canonical EstateSale is created, assigns its deterministic Company-scoped public website slug (Phase 3D.1). Idempotent; only sets the presentation slug \u2014 never touches operational fields.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "EstateSale"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sale_website_slug_on_create",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "assign_website_slug": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "assignSaleWebsiteSlug",
+            "args": {
+              "sale_id": "${ .trigger.data.id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Assign website slug",
+            "description": "Deterministic Company-scoped website slug for the new sale"
+          }
+        }
+      }
+    ]
+  }
+}

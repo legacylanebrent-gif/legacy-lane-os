@@ -42,6 +42,15 @@
       "default": true,
       "description": "Website-level default for publishing canonical Sales to this website (Phase 3E consumes)."
     },
+    "template_id": {
+      "type": "string",
+      "description": "Platform template binding (e.g. operator_template_1). Validated server-side against the centralized template registry \u2014 templates are platform-controlled code, never tenant-supplied."
+    },
+    "template_version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Template version pinned at binding \u2014 template upgrades stay distinguishable from tenant content."
+    },
     "settings_version": {
       "type": "integer",
       "default": 1,

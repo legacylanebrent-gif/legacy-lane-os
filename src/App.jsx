@@ -177,6 +177,7 @@ import AdminLinks from './pages/AdminLinks';
 import PunchList from './pages/PunchList';
 import SalePublication from './pages/SalePublication';
 import WebsiteRuntimeProbe from './pages/WebsiteRuntimeProbe';
+import OperatorSitePage from './pages/OperatorSitePage';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -337,6 +338,16 @@ const AuthenticatedApp = () => {
       <Route path="/PunchList" element={<LayoutWrapper currentPageName="PunchList"><PunchList /></LayoutWrapper>} />
       <Route path="/SalePublication" element={<LayoutWrapper currentPageName="SalePublication"><SalePublication /></LayoutWrapper>} />
       <Route path="/website-runtime" element={<WebsiteRuntimeProbe />} />
+
+      {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
+      <Route path="/site" element={<OperatorSitePage pageType="home" />} />
+      <Route path="/site/sales" element={<OperatorSitePage pageType="sales" />} />
+      <Route path="/site/sale/:saleSlug" element={<OperatorSitePage pageType="sale_detail" />} />
+      <Route path="/site/about" element={<OperatorSitePage pageType="about" />} />
+      <Route path="/site/services" element={<OperatorSitePage pageType="services" />} />
+      <Route path="/site/contact" element={<OperatorSitePage pageType="contact" />} />
+      <Route path="/site/faq" element={<OperatorSitePage pageType="faq" />} />
+      <Route path="/site/legal" element={<OperatorSitePage pageType="legal" />} />
       <Route path="/StateOperators" element={<StateOperators />} />
       <Route path="/NationalCoverageGrid" element={<LayoutWrapper currentPageName="NationalCoverageGrid"><NationalCoverageGrid /></LayoutWrapper>} />
       <Route path="/TerritoryFBManager" element={<LayoutWrapper currentPageName="TerritoryFBManager"><TerritoryFBManager /></LayoutWrapper>} />
