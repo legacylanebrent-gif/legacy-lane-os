@@ -6,7 +6,7 @@
 // Reuses the CERTIFIED Phase 2 publication privacy allowlists
 // (publicationPayload.publicSale / publicItem) — one source of privacy truth.
 import { normalizeHostname } from './websiteTenantService.ts';
-import { computeSourceVersion, publicSale, publicItem } from './publicationPayload.ts';
+import { computeSourceVersion, publicSale, publicItem, stripMarkdownBody, stripMarkdownText } from './publicationPayload.ts';
 import { getTenantSettings, projectPublicSettings } from './websiteSettingsService.ts';
 import { getActivePresentation, projectPublicPresentation } from './websiteSalePresentationService.ts';
 
@@ -147,10 +147,12 @@ export async function getPublishedSale(service, ctx, publicId) {
 // NEVER: email, phone, street address, notes, membership, status internals.
 export function projectPublicSale(sale) {
   const p = publicSale(sale);
+  const metaDesc = stripMarkdownText(p.description);
   return {
     public_id: sale.website_slug || sale.seo_slug || sale.id, // Part 20 — prefer the Company-scoped unique website_slug, fall back to legacy seo_slug, then opaque id
     title: p.title,
-    description: p.description,
+    description: stripMarkdownBody(p.description),
+    meta_description: metaDesc ? metaDesc.slice(0, 300) : null,
     status: p.status,
     sale_type: p.sale_type,
     sale_dates: p.sale_dates,
@@ -308,9 +310,12 @@ export async function getPublicLeadContext(service, ctx) {
 // template paths, for the resolved hostname. Unpublished sales never appear.
 export async function getPublicSitemapEntries(service, ctx) {
   const sales = await getPublishedSales(service, ctx);
+  // FAQ is an optional page — never advertised when the tenant has no FAQ content.
+  const settings = await getTenantSettings(service, ctx.tenant.id);
+  const faqLive = !!(((settings && settings.faq && settings.faq.items) || []).length);
   return {
     hostname: ctx.hostname,
-    static_paths: ['/site', '/site/sales', '/site/about', '/site/services', '/site/contact', '/site/faq', '/site/legal'],
+    static_paths: ['/site', '/site/sales', '/site/about', '/site/services', '/site/contact', ...(faqLive ? ['/site/faq'] : []), '/site/legal'],
     sales: sales.map(s => ({
       slug: s._raw.website_slug || stripInternalFields(s).public_id,
       updated_at: s._raw.updated_date || null

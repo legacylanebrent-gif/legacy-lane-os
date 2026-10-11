@@ -9,7 +9,8 @@ const MESSAGES = {
   sale_not_found: { icon: SearchX, title: 'Sale not found', body: 'This sale is not available on this website.' },
   no_sales: { icon: SearchX, title: 'No upcoming sales', body: 'Check back soon — new sales are announced regularly.' },
   no_inventory: { icon: SearchX, title: 'No items listed yet', body: 'Photos and items will appear as they are prepared.' },
-  unknown_template: { icon: AlertCircle, title: 'Site configuration error', body: 'Please contact the site owner.' }
+  unknown_template: { icon: AlertCircle, title: 'Site configuration error', body: 'Please contact the site owner.' },
+  page_not_available: { icon: Globe, title: 'Page not available', body: 'This page is not published on this website.' }
 };
 
 export default function TemplateErrorState({ kind }) {

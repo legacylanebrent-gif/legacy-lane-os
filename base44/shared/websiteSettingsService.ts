@@ -22,6 +22,7 @@ export function defaultPublicSettings(company) {
     cta: { label: null, sublabel: null, link: null },
     seo: { default_title: null, default_description: null, social_image_url: null },
     faq: { headline: null, items: [] },
+    testimonials: { headline: null, items: [] },
     legal: { privacy_policy_text: null, terms_text: null },
     sale_display: { show_sold_items: true, show_prices: true },
     inventory_display: { show_prices: true, show_condition: true },
@@ -45,6 +46,7 @@ export function projectPublicSettings(settings, company) {
   const b = settings.branding || {}, c = settings.contact || {}, so = settings.social || {},
     h = settings.homepage || {}, ab = settings.about || {}, sv = settings.services || {},
     ct = settings.cta || {}, seo = settings.seo || {}, faq = settings.faq || {},
+    ts = settings.testimonials || {},
     lg = settings.legal || {}, sd = settings.sale_display || {}, idp = settings.inventory_display || {};
   const companyPhone = company ? (company.phone || null) : null;
   const companyEmail = company ? (company.email || null) : null;
@@ -91,6 +93,12 @@ export function projectPublicSettings(settings, company) {
         question: qa && qa.question || null, answer: qa && qa.answer || null
       }))
     },
+    testimonials: {
+      headline: ts.headline || null,
+      items: (Array.isArray(ts.items) ? ts.items : []).slice(0, 20).map(t => ({
+        quote: t && t.quote || null, name: t && t.name || null, context: t && t.context || null
+      }))
+    },
     legal: { privacy_policy_text: lg.privacy_policy_text || null, terms_text: lg.terms_text || null },
     sale_display: { show_sold_items: sd.show_sold_items !== false, show_prices: sd.show_prices !== false },
     inventory_display: { show_prices: idp.show_prices !== false, show_condition: idp.show_condition !== false },
@@ -120,6 +128,7 @@ const SUB_KEYS = {
   cta: ['label', 'sublabel', 'link'],
   seo: ['default_title', 'default_description', 'social_image_url'],
   faq: ['headline', 'items'],
+  testimonials: ['headline', 'items'],
   legal: ['privacy_policy_text', 'terms_text'],
   sale_display: ['show_sold_items', 'show_prices'],
   inventory_display: ['show_prices', 'show_condition']
@@ -145,6 +154,7 @@ export function sanitizeSettingsPayload(payload) {
         cleaned.items = v.items.slice(0, 50).map(it => {
           const o = it && typeof it === 'object' ? it : {};
           if (k === 'services') return { title: str(o.title) || '', description: str(o.description) || '' };
+          if (k === 'testimonials') return { quote: str(o.quote) || '', name: str(o.name) || '', context: str(o.context) || '' };
           return { question: str(o.question) || '', answer: str(o.answer) || '' };
         });
       }

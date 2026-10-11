@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { sitePath } from '@/templates/siteLinks';
 import SaleCard from './SaleCard.jsx';
+import TestimonialsSection from './TestimonialsSection.jsx';
 
 export default function Template1Home({ website }) {
   const settings = website.settings || {};
@@ -70,6 +71,8 @@ export default function Template1Home({ website }) {
           <Link to={sitePath(website.hostname, '/site/services')} className="inline-block mt-3 text-sm font-medium hover:underline" style={{ color: 'var(--t1-primary)' }}>All services</Link>
         </section>
       )}
+
+      <TestimonialsSection settings={settings} />
 
       {settings.cta && settings.cta.label && (
         <section className="rounded-xl p-8 text-center" style={{ background: 'var(--t1-primary)', color: '#fff' }}>

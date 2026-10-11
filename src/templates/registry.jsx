@@ -16,7 +16,7 @@ export const TEMPLATES = {
     // Settings categories this template consumes (mirrors WebsiteTenantSettings).
     settingsCategories: [
       'identity', 'branding', 'contact', 'social', 'homepage', 'about',
-      'services', 'cta', 'seo', 'faq', 'legal', 'sale_display', 'inventory_display'
+      'services', 'cta', 'seo', 'faq', 'testimonials', 'legal', 'sale_display', 'inventory_display'
     ],
     pages: ['home', 'sales', 'sale_detail', 'about', 'services', 'contact', 'faq', 'legal']
   }

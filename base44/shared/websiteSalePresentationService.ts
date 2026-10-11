@@ -3,13 +3,16 @@
 // Canonical Sale data always wins for operational facts; presentation
 // contributes only approved website fields. Never an operational authority.
 
+import { stripMarkdownText } from './publicationPayload.ts';
+
 export function projectPublicPresentation(p) {
   if (!p) return null;
   return {
     featured: !!p.featured,
     featured_order: typeof p.featured_order === 'number' ? p.featured_order : null,
-    marketing_intro: p.marketing_intro || null,
-    display_highlights: Array.isArray(p.display_highlights) ? p.display_highlights.slice(0, 20) : [],
+    marketing_intro: stripMarkdownText(p.marketing_intro) || null,
+    display_highlights: (Array.isArray(p.display_highlights) ? p.display_highlights.slice(0, 20) : [])
+      .map(h => stripMarkdownText(h) || null),
     hero_image_url: p.hero_image_url || null,
     photo_captions: (Array.isArray(p.photo_captions) ? p.photo_captions : []).map(c => ({
       image_index: c && Number.isInteger(c.image_index) ? c.image_index : null,
@@ -17,8 +20,8 @@ export function projectPublicPresentation(p) {
     })),
     presentation_cta_label: p.presentation_cta_label || null,
     presentation_cta_link: p.presentation_cta_link || null,
-    seo_title: p.seo_title || null,
-    seo_description: p.seo_description || null,
+    seo_title: stripMarkdownText(p.seo_title) || null,
+    seo_description: stripMarkdownText(p.seo_description) || null,
     sort_order: typeof p.sort_order === 'number' ? p.sort_order : null
   };
 }

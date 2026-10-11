@@ -50,6 +50,30 @@ export function publicItem(it) {
   };
 }
 
+// Phase 3D.3 — markdown-safe public text. Canonical descriptions may contain
+// presentation markdown (**bold**, [links], headings, code). Meta/SEO
+// projections must never leak raw markup.
+export function stripMarkdownBody(text) {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/`{1,3}([^`]*)`{1,3}/g, '$1')
+    .replace(/^[ \t]*[-*+][ \t]+/gm, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Single-line variant for title/meta/OG/structured-data fields.
+export function stripMarkdownText(text) {
+  if (typeof text !== 'string') return null;
+  const out = stripMarkdownBody(text).replace(/\s+/g, ' ').trim();
+  return out || null;
+}
+
 // Public-safe sale: operational truth only.
 // NEVER expose: commission fields, revenue, estimated_value, SEO internals,
 // schema_json, views/saves, featured pricing, admin metadata.

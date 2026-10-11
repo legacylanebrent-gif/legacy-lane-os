@@ -87,7 +87,7 @@ export default function OperatorSitePage({ pageType }) {
     if (pageType === 'sale_detail' && state.detail && state.detail.sale) {
       const p = state.detail.presentation || {};
       title = p.seo_title || `${state.detail.sale.title} | ${siteLabel}`;
-      description = p.seo_description || (state.detail.sale.description ? String(state.detail.sale.description).slice(0, 160) : description);
+      description = p.seo_description || state.detail.sale.meta_description || description;
       image = p.hero_image_url || image;
     }
     document.title = title;

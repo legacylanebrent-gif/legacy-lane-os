@@ -179,6 +179,35 @@
       },
       "default": {}
     },
+    "testimonials": {
+      "type": "object",
+      "description": "Website testimonials (presentation-only social proof). Reusable, tenant-configured; template renders nothing when empty.",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "quote": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "context": {
+                "type": "string",
+                "description": "Optional attribution context (e.g. role, service used)."
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
     "cta": {
       "type": "object",
       "description": "Reusable operator CTA band configuration.",
