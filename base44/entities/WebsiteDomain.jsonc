@@ -1,0 +1,138 @@
+{
+  "name": "WebsiteDomain",
+  "type": "object",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant this domain belongs to. Ownership chain validated server-side: User \u2192 Company membership \u2192 Company \u2192 WebsiteTenant \u2192 WebsiteDomain."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant \u2014 never accepted from the client."
+    },
+    "hostname": {
+      "type": "string",
+      "description": "Canonical normalized hostname (lowercase, no protocol/path/port/trailing dot). Globally unique across all website tenants \u2014 enforced server-side with post-create arbitration."
+    },
+    "domain_type": {
+      "type": "string",
+      "enum": [
+        "platform_subdomain",
+        "custom_domain"
+      ],
+      "description": "platform_subdomain = EstateSalen-hosted (<slug>.<sites host>); custom_domain = operator-owned domain."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "reserved",
+        "verification_pending",
+        "verified",
+        "provisioning",
+        "active",
+        "error",
+        "disconnected"
+      ],
+      "default": "reserved",
+      "description": "Domain lifecycle. Never faked to active \u2014 DNS/SSL provisioning is a later phase."
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "At most ONE primary non-disconnected domain per tenant \u2014 enforced server-side."
+    },
+    "verification_token": {
+      "type": "string",
+      "description": "System-generated secure random token for future DNS verification (custom domains only). Never user-selectable; never derived from tenant/company IDs. Rotation supported by regeneration."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "User ID or 'system' for automated verification (audit)."
+    },
+    "status_reason": {
+      "type": "string",
+      "description": "Reason recorded for error/disconnected states."
+    },
+    "last_checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS. Company remains the membership source of truth."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "hostname",
+    "domain_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

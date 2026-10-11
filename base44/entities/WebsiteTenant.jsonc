@@ -1,0 +1,138 @@
+{
+  "name": "WebsiteTenant",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company that owns this website tenant. IMMUTABLE after creation \u2014 a tenant may never silently move between Companies; changes only through explicit platform-admin migration tooling."
+    },
+    "name": {
+      "type": "string",
+      "description": "Operator-facing website name (e.g. Legacy Lane Estate Sales). Editable by authorized company members."
+    },
+    "slug": {
+      "type": "string",
+      "description": "Normalized lowercase URL-safe identifier, globally unique across the operator website namespace (case-insensitive). IMMUTABLE after activation \u2014 routing and domains depend on it. Enforced server-side at provisioning."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "setup",
+        "active",
+        "suspended",
+        "archived"
+      ],
+      "default": "setup",
+      "description": "Lifecycle state. Transitions validated server-side: setup\u2192active, active\u2192suspended, suspended\u2192active, setup/active/suspended\u2192archived. Never deleted as lifecycle."
+    },
+    "destination_id": {
+      "type": "string",
+      "description": "Association foundation to an operator_website Destination (publication delivery target). Server-side invariant: Destination.company_id MUST equal WebsiteTenant.company_id. Never auto-created through tenant CRUD."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of Company.member_user_ids, written by the provisioning service only. Company remains the single source of membership truth \u2014 this array enables RLS and is never a second membership model."
+    },
+    "auto_publish_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Website-level default for publishing canonical Sales to this website (Phase 3E consumes)."
+    },
+    "settings_version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Published settings version marker for future draft/publish versioning."
+    },
+    "entitlement_tier": {
+      "type": "string",
+      "description": "Diagnostic snapshot of the subscription tier at provisioning. NOT authoritative \u2014 entitlement is always re-evaluated server-side from the canonical Subscription."
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Caller-supplied replay key. Repeated provisioning with the same key returns the existing tenant."
+    },
+    "activated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "suspended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "suspended_by": {
+      "type": "string",
+      "description": "User ID that suspended the tenant (audit)."
+    },
+    "archived_by": {
+      "type": "string",
+      "description": "User ID that archived the tenant (audit)."
+    },
+    "status_reason": {
+      "type": "string",
+      "description": "Reason recorded for the latest lifecycle transition (e.g. payment failure)."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "name",
+    "slug",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

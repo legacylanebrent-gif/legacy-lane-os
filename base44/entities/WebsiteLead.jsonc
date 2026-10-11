@@ -1,0 +1,152 @@
+{
+  "name": "WebsiteLead",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company attribution. DERIVED server-side from the website tenant \u2014 never accepted from the client."
+    },
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant attribution. Invariant enforced server-side: tenant.company_id MUST equal company_id."
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Optional canonical EstateSale attribution. Invariant enforced server-side: sale.company_id MUST equal tenant.company_id."
+    },
+    "lead_type": {
+      "type": "string",
+      "enum": [
+        "seller_inquiry",
+        "contact",
+        "vip_signup",
+        "sale_question",
+        "consultation_request"
+      ],
+      "description": "Controlled website lead vocabulary."
+    },
+    "contact_first_name": {
+      "type": "string"
+    },
+    "contact_last_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "operator_website",
+      "description": "Attribution source. Future outbox events carry this verbatim."
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Page/URL the submission came from."
+    },
+    "referrer": {
+      "type": "string",
+      "description": "HTTP referrer or campaign referrer, captured at submission."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_review",
+        "contacted",
+        "qualified",
+        "closed_won",
+        "closed_lost",
+        "spam"
+      ],
+      "default": "new"
+    },
+    "marketing_opt_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "EXPLICIT marketing consent \u2014 never inferred from form submission."
+    },
+    "vip_opt_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "EXPLICIT VIP/email-list consent \u2014 never inferred from form submission."
+    },
+    "sms_opt_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "EXPLICIT SMS consent \u2014 never inferred; reserved for future use."
+    },
+    "consent_captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp consent evidence was captured (any explicit opt-in)."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS. Company remains the membership source of truth."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "website_tenant_id",
+    "lead_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
