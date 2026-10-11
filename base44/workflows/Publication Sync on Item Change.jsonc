@@ -1,0 +1,41 @@
+{
+  "name": "Publication Sync on Item Change",
+  "description": "When inventory linked to a sale changes (including sold status), republishes the sale's existing Publications. Fail closed: only sales that already have a publication are affected.",
+  "trigger": {
+    "condition": "${ .trigger.data.estate_sale_id != null }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "Item"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "publication_sync_on_item_change",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_publications": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncSalePublications",
+            "args": {
+              "sale_id": "${ .trigger.data.estate_sale_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync publications",
+            "description": "Republish sale after inventory change"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "name": "Publication",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company owning the published resource"
+    },
+    "sale_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Sale being published"
+    },
+    "destination_id": {
+      "type": "string",
+      "description": "Destination this publication relationship points to"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending",
+        "published",
+        "update_pending",
+        "failed",
+        "unpublished",
+        "suspended"
+      ],
+      "default": "pending",
+      "description": "Publication lifecycle. pending = relationship exists, awaiting delivery; published = delivered; update_pending = canonical changed since last success; failed = last delivery failed"
+    },
+    "external_reference": {
+      "type": "string",
+      "description": "Destination-side presentation reference (for operator_website destinations: os_<canonical sale id>)"
+    },
+    "adopted": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the publication adopted an existing destination-side presentation record instead of creating a new one"
+    },
+    "source_version": {
+      "type": "string",
+      "description": "Deterministic canonical version marker (sale updated_at + inventory signature) at last attempt \u2014 used for currentness detection"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "unpublished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_success_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Sanitized last delivery error (no secrets, no raw payloads)"
+    },
+    "error_category": {
+      "type": "string",
+      "description": "Failure category (not_configured, retryable_delivery, permanent_delivery)"
+    },
+    "attempts": {
+      "type": "integer",
+      "default": 0
+    },
+    "delivery_mode": {
+      "type": "string",
+      "description": "Last delivery mode used by the adapter (webhook, none)"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "sale_id",
+    "destination_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

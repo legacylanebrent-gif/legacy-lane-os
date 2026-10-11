@@ -1,0 +1,86 @@
+{
+  "name": "Destination",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company that owns this destination. Required for private/operator destinations."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable destination name (e.g. Legacy Lane Sales Website)"
+    },
+    "destination_type": {
+      "type": "string",
+      "default": "operator_website",
+      "description": "Extensible destination type. Current: operator_website. Reserved for future: estatesalen_marketplace, houszu, social, email, sms, partner_feed, external_marketplace."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "suspended",
+        "retired"
+      ],
+      "default": "active",
+      "description": "Destination lifecycle. Publishing fails closed unless status is active."
+    },
+    "external_identifier": {
+      "type": "string",
+      "description": "Destination's own identifier for this connection (non-secret)"
+    },
+    "configuration": {
+      "type": "object",
+      "default": {},
+      "description": "Non-secret configuration (webhook_url, auth_secret_name reference, presentation defaults). NEVER store raw secret values here \u2014 auth_secret_name references a platform secret resolved server-side by the adapter."
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "sale_details",
+        "inventory",
+        "media",
+        "pricing",
+        "sold_status",
+        "cancellation",
+        "completion"
+      ],
+      "description": "What this destination supports (e.g. sale_details, inventory, media, pricing, sold_status, cancellation, completion, lead_writeback, analytics_writeback)"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "name",
+    "destination_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
