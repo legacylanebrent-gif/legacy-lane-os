@@ -120,6 +120,9 @@ export async function publishSaleToDestination(base44, saleId, destinationId) {
     updates.last_success_at = now;
     updates.last_error = null;
     updates.error_category = null;
+    if (result.receiver) {
+      updates.notes = JSON.stringify({ receiver_ack: result.receiver, ack_at: now });
+    }
   } else if (result.mode === 'none') {
     // Receiver endpoint not configured yet — publication relationship exists,
     // delivery pending destination-side configuration. Retryable by re-publish.

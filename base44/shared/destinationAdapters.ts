@@ -56,7 +56,47 @@ async function operatorWebsiteAdapter({ destination, payload }) {
       body: JSON.stringify(envelope),
       signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS)
     });
-    if (res.ok) return { delivered: true, mode: 'webhook', retryable: false, detail: 'delivered' };
+    if (res.ok) {
+      // Capture a sanitized receiver acknowledgment (counts + provenance) —
+      // known keys only, no payloads, no secrets.
+      let receiver = null;
+      try {
+        const body = await res.json();
+        if (body && typeof body === 'object' && !body.error) {
+          const it = (body.items && typeof body.items === 'object') ? body.items : {};
+          receiver = {
+            status: body.status || null,
+            external_reference: body.external_reference || (body.publication && body.publication.external_reference) || null,
+            source_version: body.source_version || null,
+            adopted: typeof body.adopted === 'boolean' ? body.adopted : null,
+            items: {
+              received: typeof it.received === 'number' ? it.received : (typeof it.total === 'number' ? it.total : null),
+              processed: typeof it.processed === 'number' ? it.processed : null,
+              mapped: typeof it.mapped === 'number' ? it.mapped : null,
+              created: typeof it.created === 'number' ? it.created : null,
+              updated: typeof it.updated === 'number' ? it.updated : null,
+              unmapped: typeof it.unmapped === 'number' ? it.unmapped : null,
+              duplicated: typeof it.duplicated === 'number' ? it.duplicated : null,
+              persistence_failures: typeof it.persistence_failures === 'number' ? it.persistence_failures : null
+            },
+            presentation: (body.presentation && typeof body.presentation === 'object') ? {
+              id: body.presentation.id || null,
+              count: typeof body.presentation.count === 'number' ? body.presentation.count : null,
+              duplicated_sales: typeof body.presentation.duplicated_sales === 'number' ? body.presentation.duplicated_sales : null,
+              publication_managed: typeof body.presentation.publication_managed === 'boolean' ? body.presentation.publication_managed : null,
+              provenance_stamped: typeof body.presentation.provenance_stamped === 'boolean' ? body.presentation.provenance_stamped : null,
+              publication_id: body.presentation.publication_id || null,
+              estatesalen_company_id: body.presentation.estatesalen_company_id || null,
+              destination_id: body.presentation.destination_id || null,
+              source_version: body.presentation.source_version || null
+            } : null,
+            condition_errors: typeof body.condition_errors === 'number' ? body.condition_errors : null,
+            media_errors: typeof body.media_errors === 'number' ? body.media_errors : null
+          };
+        }
+      } catch (e) { /* non-JSON success body */ }
+      return { delivered: true, mode: 'webhook', retryable: false, detail: 'delivered', receiver };
+    }
     // Sanitized receiver diagnostic: error code/message only — no payloads, no secrets.
     let receiverDetail = '';
     try {
