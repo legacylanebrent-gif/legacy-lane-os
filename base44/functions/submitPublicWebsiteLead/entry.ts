@@ -91,21 +91,31 @@ export default async function(req) {
       member_user_ids: ctx.tenant.member_user_ids || []
     });
 
-    // Part 34 — durable event via the existing outbox architecture. Canonical
-    // vocabulary names deliver; anything else quarantines as registry_gap for
-    // admin review (never delivered, never retried, payload stripped). No
-    // direct Customer.io writes anywhere in this path.
+    // Part 34 — durable event via the existing outbox architecture. No direct
+    // Customer.io writes anywhere in this path.
+    //
+    // Phase 3D.4 (Parts 7/8) — canonical lead event mapping. The certified
+    // Houszu v1.6.0 vocabulary is FROZEN and contains NO generic 'website_lead'
+    // event (that name quarantined as registry_gap). Rather than inventing
+    // semantically equivalent events, every supported website lead maps to the
+    // ONE canonical inquiry event ('seller_inquiry') with the exact
+    // WebsiteLead.lead_type preserved as relationship_type in product_context
+    // (and in the payload) so downstream marketing can distinguish. No new
+    // vocabulary entries, no registry gaps, consent untouched (Part 9).
+    //   seller_inquiry  → seller_inquiry (relationship_type: seller_inquiry)
+    //   contact         → seller_inquiry (relationship_type: contact)
+    //   sale_question   → seller_inquiry (relationship_type: sale_question, product_id: <sale>)
     const masterUserID = await resolveMasterUserID(base44, { email });
     await enqueueActivity(base44, {
       masterUserID,
-      event_type: leadType === 'seller_inquiry' ? 'seller_inquiry' : 'website_lead',
+      event_type: 'seller_inquiry',
       identity_context: {
         email,
         first_name: created.contact_first_name,
         last_name: created.contact_last_name,
         phone: created.contact_phone
       },
-      product_context: sale ? { product_id: sale.id, relationship_type: 'sale_question' } : {},
+      product_context: sale ? { product_id: sale.id, relationship_type: leadType } : { relationship_type: leadType },
       consent_context: {
         marketing,
         sms,

@@ -32,6 +32,7 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { resolveCredentialCompany } from '../../shared/legacyFeedScope.ts';
 
 Deno.serve(async (req) => {
   const headers = {
@@ -67,6 +68,14 @@ Deno.serve(async (req) => {
   const apiKeyRecord = apiKeys[0];
   const operatorId = apiKeyRecord.operator_id;
 
+  // Phase 3D.4 isolation repair (Part 5): receiver writes are COMPANY-scoped —
+  // the credential can only touch Sales/Items belonging to its own Company.
+  const companyRes = await resolveCredentialCompany(base44, apiKeyRecord);
+  if (!companyRes.ok) {
+    return Response.json({ error: 'Unauthorized: no authoritative Company resolvable from this credential' }, { status: 403, headers });
+  }
+  const companyId = companyRes.company_id;
+
   // Handle events
   if (event === 'item_status_update' || event === 'item_sold') {
     if (!item_id) {
@@ -83,7 +92,7 @@ Deno.serve(async (req) => {
 
     // Confirm the item belongs to a sale owned by this Estate Sale Company Owner
     if (item.estate_sale_id) {
-      const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: item.estate_sale_id, operator_id: operatorId });
+      const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: item.estate_sale_id, company_id: companyId });
       if (sales.length === 0) {
         return Response.json({ error: 'Unauthorized: item does not belong to your Estate Sale Company Owner account' }, { status: 403, headers });
       }
@@ -126,7 +135,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing sale_fields object' }, { status: 400, headers });
     }
 
-    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id, operator_id: operatorId });
+    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id, company_id: companyId });
     if (sales.length === 0) {
       return Response.json({ error: 'Sale not found or unauthorized' }, { status: 404, headers });
     }
@@ -173,7 +182,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing sale_id' }, { status: 400, headers });
     }
 
-    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id, operator_id: operatorId });
+    const sales = await base44.asServiceRole.entities.EstateSale.filter({ id: sale_id, company_id: companyId });
     if (sales.length === 0) {
       return Response.json({ error: 'Sale not found or unauthorized' }, { status: 404, headers });
     }

@@ -7,6 +7,7 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
+import LegacyRouteRedirect from './lib/LegacyRouteRedirect';
 import SalePricingTool from './pages/SalePricingTool';
 import ApiKeyManager from './pages/ApiKeyManager';
 import ManageTeam from './pages/ManageTeam';
@@ -477,7 +478,7 @@ const AuthenticatedApp = () => {
       <Route path="/ThankYou" element={<ThankYou />} />
       <Route path="/TerritoryMigrationAudit" element={<LayoutWrapper currentPageName="TerritoryMigrationAudit"><TerritoryMigrationAudit /></LayoutWrapper>} />
       <Route path="/AdminIdentityMonitor" element={<LayoutWrapper currentPageName="AdminIdentityMonitor"><AdminIdentityMonitor /></LayoutWrapper>} />
-      <Route path="*" element={<PageNotFound />} />
+      <Route path="*" element={<LegacyRouteRedirect />} />
     </Routes>
   );
 };

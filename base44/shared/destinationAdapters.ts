@@ -11,6 +11,17 @@ const DELIVERY_TIMEOUT_MS = 10000;
 // raw secret values are never stored in the Destination record.
 async function operatorWebsiteAdapter({ destination, payload }) {
   const cfg = destination.configuration || {};
+
+  // Phase 3D.4 cutover pre-flight (Parts 12/13/14): an explicit delivery-mode
+  // flag switches a destination WITH a registered receiver to runtime-served
+  // publishing — Publication lifecycle stays canonical, external webhook
+  // delivery becomes unnecessary for website rendering. Fully reversible:
+  // clearing the flag restores webhook coexistence delivery (rollback-safe).
+  // NOT activated on production destinations until the actual cutover.
+  if (cfg.delivery_mode === 'runtime_served') {
+    return { delivered: true, mode: 'runtime', retryable: false, detail: 'runtime_served_flag' };
+  }
+
   const url = cfg.webhook_url;
   if (!url) {
     // Runtime-served operator website (Phase 3D): the multi-tenant runtime reads

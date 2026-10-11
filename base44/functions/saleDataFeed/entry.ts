@@ -8,6 +8,7 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { resolveCredentialCompany } from '../../shared/legacyFeedScope.ts';
 
 Deno.serve(async (req) => {
   // Allow CORS so external websites can call this
@@ -45,24 +46,21 @@ Deno.serve(async (req) => {
   const apiKeyRecord = apiKeys[0];
   const operatorId = apiKeyRecord.operator_id;
 
-  // Fetch all sales for this Estate Sale Company Owner
-  const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
-
-  // Canonical EstateSalen company identity (Phase 1) — additive, backward compatible.
-  // Primary source: company_id on the sale records (backfilled). Fallback: Company registry lookup.
-  let companyId = (sales.length > 0 && sales[0].company_id) ? sales[0].company_id : null;
-  let companyName = apiKeyRecord.operator_name || null;
-  if (!companyId) {
-    try {
-      const companies = await base44.asServiceRole.entities.Company.filter({ primary_contact_user_id: operatorId, status: 'active' });
-      if (companies.length > 0) {
-        companyId = companies[0].id;
-        companyName = companies[0].display_name || companies[0].legal_name;
-      }
-    } catch (e) {
-      console.error('Company lookup failed for feed:', e.message);
-    }
+  // Phase 3D.4 isolation repair (Parts 1/2/4): the feed is COMPANY-scoped, not
+  // operator-scoped. An operator may own Sales across multiple Companies;
+  // selecting by operator_id leaked cross-Company data. The authenticated
+  // credential resolves ONE authoritative Company. Client-supplied fields
+  // (including any company_id) are never read — credential ownership wins.
+  const companyRes = await resolveCredentialCompany(base44, apiKeyRecord);
+  if (!companyRes.ok) {
+    console.error(`[saleDataFeed] company resolution denied (${companyRes.reason})`);
+    return Response.json({ error: 'Feed is Company-scoped: no authoritative Company resolvable from this credential', reason: companyRes.reason }, { status: 403, headers: corsHeaders });
   }
+  const companyId = companyRes.company_id;
+  const companyName = companyRes.company_name;
+
+  // Sales belonging to the authenticated Company ONLY — never operator-wide.
+  const sales = await base44.asServiceRole.entities.EstateSale.filter({ company_id: companyId });
 
   // Fetch all inventory items for this Estate Sale Company Owner's sales
   const saleIds = sales.map(s => s.id);

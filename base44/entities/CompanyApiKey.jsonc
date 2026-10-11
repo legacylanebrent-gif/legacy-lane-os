@@ -6,6 +6,10 @@
       "type": "string",
       "description": "User ID of the Estate Sale Company Owner"
     },
+    "company_id": {
+      "type": "string",
+      "description": "EXPLICIT credential\u2192Company binding (Phase 3D.4 isolation repair). When set, this is the ONLY Company the credential can act on \u2014 bridge paths select Sales by this company_id, never by operator_id alone."
+    },
     "operator_name": {
       "type": "string"
     },

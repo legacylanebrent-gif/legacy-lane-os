@@ -9,6 +9,7 @@
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { resolveCredentialCompany } from '../../shared/legacyFeedScope.ts';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -33,25 +34,19 @@ Deno.serve(async (req) => {
 
     const operatorId = apiKeyRecord.operator_id;
 
-    // Fetch all sales for this Estate Sale Company Owner
-    const sales = await base44.asServiceRole.entities.EstateSale.filter({ operator_id: operatorId });
-    const saleIds = sales.map(s => s.id);
-
-    // Canonical EstateSalen company identity (Phase 1) — additive, backward compatible.
-    // Primary source: company_id on the sale records (backfilled). Fallback: Company registry lookup.
-    let companyId = (sales.length > 0 && sales[0].company_id) ? sales[0].company_id : null;
-    let companyName = apiKeyRecord.operator_name || null;
-    if (!companyId) {
-      try {
-        const companies = await base44.asServiceRole.entities.Company.filter({ primary_contact_user_id: operatorId, status: 'active' });
-        if (companies.length > 0) {
-          companyId = companies[0].id;
-          companyName = companies[0].display_name || companies[0].legal_name;
-        }
-      } catch (e) {
-        console.error('Company lookup failed for push:', e.message);
-      }
+    // Phase 3D.4 isolation repair (Part 5): push is COMPANY-scoped like the feed.
+    const companyRes = await resolveCredentialCompany(base44, apiKeyRecord);
+    if (!companyRes.ok) {
+      console.error(`[pushSaleDataWebhook] company resolution denied for ${operatorId} (${companyRes.reason})`);
+      results.push({ operator_id: operatorId, status: 'skipped', reason: companyRes.reason });
+      continue;
     }
+    const companyId = companyRes.company_id;
+    const companyName = companyRes.company_name;
+
+    // Sales belonging to the authenticated Company ONLY.
+    const sales = await base44.asServiceRole.entities.EstateSale.filter({ company_id: companyId });
+    const saleIds = sales.map(s => s.id);
 
     let items = [];
     for (const saleId of saleIds) {
