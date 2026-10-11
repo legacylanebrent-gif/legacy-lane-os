@@ -106,10 +106,10 @@ export default function OperatorSitePage({ pageType }) {
     );
   }
 
-  if (!state.website) {
+  if (!state.website || (pageType === 'sale_detail' && !state.detail && state.error)) {
     return (
       <div className="min-h-screen bg-white">
-        <TemplateErrorState kind={state.error || 'unavailable'} />
+        <TemplateErrorState kind={state.error === 'sale_not_found' ? 'sale_not_found' : (state.error || 'unavailable')} />
       </div>
     );
   }

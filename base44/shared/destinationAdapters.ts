@@ -13,9 +13,11 @@ async function operatorWebsiteAdapter({ destination, payload }) {
   const cfg = destination.configuration || {};
   const url = cfg.webhook_url;
   if (!url) {
-    // No receiver endpoint registered yet — relationship may exist, delivery awaits
-    // destination-side configuration. Not an error; not retried until configured.
-    return { delivered: false, mode: 'none', retryable: false, detail: 'no_delivery_endpoint_configured' };
+    // Runtime-served operator website (Phase 3D): the multi-tenant runtime reads
+    // canonical data directly, so a destination with no external receiver IS
+    // runtime-served — publish is a no-op success, never a delivery failure.
+    // Destinations WITH a registered receiver keep the webhook contract above.
+    return { delivered: true, mode: 'runtime', retryable: false, detail: 'runtime_served_no_receiver' };
   }
 
   const headers = {
