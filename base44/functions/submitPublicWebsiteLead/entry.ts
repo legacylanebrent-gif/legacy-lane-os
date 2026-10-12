@@ -107,6 +107,17 @@ export default async function(req) {
     const contactMethod = CONTACT_METHODS.includes(body.preferred_contact_method)
       ? body.preferred_contact_method : 'any';
 
+    // Part 18/40 — replay-safe capture: the same request_id resubmitted
+    // (network retry, double-tap) returns the original lead — never a duplicate.
+    const requestId = str(body.request_id, 100);
+    if (requestId) {
+      const dupPage = await service.entities.WebsiteLead.filter(
+        { website_tenant_id: ctx.tenant.id, request_id: requestId }, { limit: 1 });
+      if ((dupPage.items || dupPage).length > 0) {
+        return Response.json({ ok: true, lead_id: (dupPage.items || dupPage)[0].id, replayed: true });
+      }
+    }
+
     const created = await service.entities.WebsiteLead.create({
       company_id: ctx.company.id,        // derived server-side from the tenant
       website_tenant_id: ctx.tenant.id,  // derived server-side from the hostname

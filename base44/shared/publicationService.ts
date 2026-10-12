@@ -42,14 +42,15 @@ export async function authorizeSaleActor(base44, user, sale) {
   return { allowed: false, reason: 'not_authorized_for_company' };
 }
 
-async function resolvePublication(base44, saleId, destinationId, companyId) {
-  const existing = page(await base44.asServiceRole.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 50, sort: 'created_date' }));
+async function resolvePublication(base44Client, saleId, destinationId, companyId) {
+  const base44 = srOf(base44Client);
+  const existing = page(await base44.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 50, sort: 'created_date' }));
   if (existing.length > 0) {
     // Collapse any duplicates created by concurrent races — keep the oldest.
     const primary = existing[0];
     if (existing.length > 1) {
       for (const extra of existing.slice(1)) {
-        await base44.asServiceRole.entities.Publication.delete(extra.id);
+        await base44.entities.Publication.delete(extra.id);
       }
     }
     return primary;
@@ -57,7 +58,7 @@ async function resolvePublication(base44, saleId, destinationId, companyId) {
   // operator_website destinations use the established LLS presentation convention:
   // the destination-side record id is os_<canonical sale id>. Adopting, not creating.
   const externalReference = `os_${saleId}`;
-  const created = await base44.asServiceRole.entities.Publication.create({
+  const created = await base44.entities.Publication.create({
     company_id: companyId,
     sale_id: saleId,
     destination_id: destinationId,
@@ -67,17 +68,18 @@ async function resolvePublication(base44, saleId, destinationId, companyId) {
     attempts: 0
   });
   // Concurrency safety net: if a parallel request created one first, keep the oldest.
-  const after = page(await base44.asServiceRole.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 50, sort: 'created_date' }));
+  const after = page(await base44.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 50, sort: 'created_date' }));
   if (after.length > 1) {
     for (const extra of after.slice(1)) {
-      if (extra.id !== created.id) await base44.asServiceRole.entities.Publication.delete(extra.id);
+      if (extra.id !== created.id) await base44.entities.Publication.delete(extra.id);
     }
   }
   return after.length > 0 ? after[0] : created;
 }
 
 // Core publish. Returns {ok, publication?, delivery?, error?, http?}.
-export async function publishSaleToDestination(base44, saleId, destinationId) {
+export async function publishSaleToDestination(base44Client, saleId, destinationId) {
+  const base44 = srOf(base44Client);
   const sale = await getOrThrow(base44, 'EstateSale', saleId);
   if (!sale) return { ok: false, error: 'sale_not_found', http: 404 };
 
@@ -98,7 +100,7 @@ export async function publishSaleToDestination(base44, saleId, destinationId) {
   const company = await getOrThrow(base44, 'Company', saleCompanyId);
   const publication = await resolvePublication(base44, saleId, destinationId, saleCompanyId);
 
-  const items = page(await base44.asServiceRole.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'title', 'description', 'category', 'subcategory', 'brand', 'condition', 'price', 'sold_price', 'status', 'featured', 'images', 'updated_date'] }));
+  const items = page(await base44.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'title', 'description', 'category', 'subcategory', 'brand', 'condition', 'price', 'sold_price', 'status', 'featured', 'images', 'updated_date'] }));
   const sourceVersion = computeSourceVersion(sale, items);
 
   const adapter = getDestinationAdapter(destination.destination_type);
@@ -143,22 +145,23 @@ export async function publishSaleToDestination(base44, saleId, destinationId) {
   }
   updates.status = newStatus;
 
-  const updated = await base44.asServiceRole.entities.Publication.update(publication.id, updates);
+  const updated = await base44.entities.Publication.update(publication.id, updates);
   return { ok: true, publication: updated, delivery: result };
 }
 
 // Explicit publication-level unpublish. Never deletes the canonical Sale.
-export async function unpublishSaleFromDestination(base44, saleId, destinationId) {
+export async function unpublishSaleFromDestination(base44Client, saleId, destinationId) {
+  const base44 = srOf(base44Client);
   const sale = await getOrThrow(base44, 'EstateSale', saleId);
   if (!sale) return { ok: false, error: 'sale_not_found', http: 404 };
   const destination = await getOrThrow(base44, 'Destination', destinationId);
   if (!destination) return { ok: false, error: 'destination_not_found', http: 404 };
 
-  const existing = page(await base44.asServiceRole.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 1 }));
+  const existing = page(await base44.entities.Publication.filter({ sale_id: saleId, destination_id: destinationId }, { limit: 1 }));
   if (existing.length === 0) return { ok: false, error: 'publication_not_found', http: 404 };
   let publication = existing[0];
 
-  const items = page(await base44.asServiceRole.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'title', 'description', 'category', 'subcategory', 'brand', 'condition', 'price', 'sold_price', 'status', 'featured', 'images', 'updated_date'] }));
+  const items = page(await base44.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'title', 'description', 'category', 'subcategory', 'brand', 'condition', 'price', 'sold_price', 'status', 'featured', 'images', 'updated_date'] }));
   const company = await getOrThrow(base44, 'Company', sale.company_id);
 
   // Best-effort notification of unpublish to the destination.
@@ -170,7 +173,7 @@ export async function unpublishSaleFromDestination(base44, saleId, destinationId
   }
 
   const now = new Date().toISOString();
-  publication = await base44.asServiceRole.entities.Publication.update(publication.id, {
+  publication = await base44.entities.Publication.update(publication.id, {
     status: 'unpublished',
     unpublished_at: now,
     last_attempt_at: now,
@@ -183,8 +186,9 @@ export async function unpublishSaleFromDestination(base44, saleId, destinationId
 // Change propagation: republish existing publications for a sale whose canonical
 // data changed since the last success. Never creates publications on its own —
 // a sale with no publication is a no-op (fail closed).
-export async function syncSalePublications(base44, saleId) {
-  const publications = page(await base44.asServiceRole.entities.Publication.filter({ sale_id: saleId }, { limit: 100 }));
+export async function syncSalePublications(base44Client, saleId) {
+  const base44 = srOf(base44Client);
+  const publications = page(await base44.entities.Publication.filter({ sale_id: saleId }, { limit: 100 }));
   if (publications.length === 0) return [];
 
   const results = [];
@@ -198,7 +202,7 @@ export async function syncSalePublications(base44, saleId) {
       results.push({ publication_id: p.id, action: 'skipped', reason: 'sale_not_found' });
       continue;
     }
-    const items = page(await base44.asServiceRole.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'updated_date', 'status'] }));
+    const items = page(await base44.entities.Item.filter({ estate_sale_id: saleId }, { limit: 2000, fields: ['id', 'updated_date', 'status'] }));
     const currentVersion = computeSourceVersion(sale, items);
 
     if (currentVersion === p.source_version && p.status === 'published') {
@@ -207,7 +211,7 @@ export async function syncSalePublications(base44, saleId) {
     }
     // Mark update_needed, then republish safely.
     if (p.status !== 'update_pending') {
-      await base44.asServiceRole.entities.Publication.update(p.id, { status: 'update_pending' });
+      await base44.entities.Publication.update(p.id, { status: 'update_pending' });
     }
     const r = await publishSaleToDestination(base44, saleId, p.destination_id);
     results.push({
