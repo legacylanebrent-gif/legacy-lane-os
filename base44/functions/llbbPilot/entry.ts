@@ -583,11 +583,9 @@ async function aggregate(service) {
     const sc = pilotScorecard(p, { publication_health: ctx.publication_health, health: ctx.health, custom_domains: ctx.customDomains });
     rows.push({ ...row, scorecard_categories: sc.categories });
   }
-  const invited = rows.filter(r => (r.id && true) && r.stage !== 'CANDIDATE').length;
-  const accepted = rows.filter(r => (rowHas(r, 'invitation_accepted'))).length;
-  const setupDone = rows.filter(r => rowHas(r, 'setup_completed') || rowHas(r, 'submitted_for_review')).length;
-  const publishedRows = rows.filter(r => ['PLATFORM_SITE_LIVE', 'CUSTOM_DOMAIN_PENDING', 'CUSTOM_DOMAIN_LIVE', 'FIRST_SALE_PUBLISHED', 'FIRST_LEAD_RECEIVED', 'REVIEW_30_DAY', 'PILOT_COMPLETE'].includes(r.stage));
-  const durations = rows.map(r => r.setup_timing.total.hours).filter(v => v != null).sort((a, b) => a - b);
+  const has = (p, key) => (p.milestones || []).some(m => m.key === key);
+  const inPublishedStages = (p) => ['PLATFORM_SITE_LIVE', 'CUSTOM_DOMAIN_PENDING', 'CUSTOM_DOMAIN_LIVE', 'FIRST_SALE_PUBLISHED', 'FIRST_LEAD_RECEIVED', 'REVIEW_30_DAY', 'PILOT_COMPLETE'].includes(p.stage);
+  const durations = real.map(p => computeSetupTiming(p.milestones).total.hours).filter(v => v != null).sort((a, b) => a - b);
   const median = durations.length ? (durations.length % 2 ? durations[(durations.length - 1) / 2] : (durations[durations.length / 2 - 1] + durations[durations.length / 2]) / 2) : null;
   const frictionCounts = {};
   for (const p of pilots) for (const f of (p.friction_events || [])) frictionCounts[f.kind] = (frictionCounts[f.kind] || 0) + 1;
@@ -596,24 +594,22 @@ async function aggregate(service) {
   return Response.json({
     ok: true,
     summary: {
-      operators_invited: invited,
-      accepted, setup_completed: setupDone,
-      published: publishedRows.length,
+      operators_invited: real.filter(p => p.stage !== 'CANDIDATE' && p.stage !== 'APPROVED_FOR_PILOT').length,
+      accepted: real.filter(p => has(p, 'invitation_accepted')).length,
+      setup_completed: real.filter(p => has(p, 'setup_completed') || has(p, 'submitted_for_review')).length,
+      published: real.filter(p => inPublishedStages(p)).length,
       custom_domains: rows.filter(r => r.domain_status === 'connected').length,
-      first_sales: rows.filter(r => rowHas(r, 'first_sale_published')).length,
-      seller_leads: rows.filter(r => rowHas(r, 'first_seller_lead')).length,
-      buyer_signups: rows.filter(r => rowHas(r, 'first_buyer_signup')).length,
+      first_sales: real.filter(p => has(p, 'first_sale_published')).length,
+      seller_leads: real.filter(p => has(p, 'first_seller_lead')).length,
+      buyer_signups: real.filter(p => has(p, 'first_buyer_signup')).length,
       median_setup_days: median,
-      admin_interventions: rows.reduce((n, r) => n + (r.id ? (rowInterventions(r)) : 0), 0),
+      admin_interventions: real.reduce((n, p) => n + (p.interventions || []).length, 0),
       top_friction: topFriction,
       health_issues: rows.filter(r => r.health === 'warning' || r.health === 'fail').length
     },
     rows, decision
   });
 }
-
-function rowHas(row, key) { return ((row.setup_timing || {}).segments || {}) && false || false; }
-function rowInterventions(row) { return 0; }
 
 // ═══════════════ PART 50 — SYNTHETIC CLEANUP (exact IDs) ═══════════════
 async function cleanupSynthetic(service, user, body) {
