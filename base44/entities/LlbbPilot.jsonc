@@ -1,0 +1,347 @@
+{
+  "name": "LlbbPilot",
+  "type": "object",
+  "description": "Phase 5A \u2014 Controlled Pilot Program record. Pilot stages are a SEPARATE model from the WebsiteTenant technical lifecycle and product workflow_status: pilot metadata never overrides certified lifecycle rules. Written ONLY through the llbbPilot server seam (platform-admin only, except tenant-member operator signals).",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Canonical EstateSalen Company approved for pilot. Snapshot of eligibility lives on this record; the Company itself is never modified."
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Display snapshot at approval time (diagnostics only \u2014 Company remains the truth)."
+    },
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant launched for this pilot. Attached ONLY after the certified LLBB provisioning flow completed \u2014 never created by pilot tooling."
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "APPROVED_FOR_PILOT",
+        "WEBSITE_CREATED",
+        "OPERATOR_INVITED",
+        "SETUP_IN_PROGRESS",
+        "READY_FOR_REVIEW",
+        "CHANGES_REQUESTED",
+        "APPROVED",
+        "PLATFORM_SITE_LIVE",
+        "CUSTOM_DOMAIN_PENDING",
+        "CUSTOM_DOMAIN_LIVE",
+        "FIRST_SALE_PUBLISHED",
+        "FIRST_LEAD_RECEIVED",
+        "REVIEW_30_DAY",
+        "PILOT_COMPLETE"
+      ],
+      "default": "CANDIDATE",
+      "description": "Pilot program stage (Part 3) \u2014 SEPARATE from WebsiteTenant.status and workflow_status. Advanced by milestones through the llbbPilot seam; never derived from tenant state silently."
+    },
+    "management_mode": {
+      "type": "string",
+      "enum": [
+        "admin_managed",
+        "client_managed",
+        "collaborative"
+      ],
+      "default": "collaborative",
+      "description": "Part 7 \u2014 who manages setup during the pilot. Recommended default for early pilots: collaborative. Pilot-only preference, not a permanent product default."
+    },
+    "assigned_admin_user_id": {
+      "type": "string",
+      "description": "EstateSalen platform admin assigned to shepherd this pilot (Part 4 eligibility)."
+    },
+    "assigned_admin_name": {
+      "type": "string"
+    },
+    "invited_email": {
+      "type": "string",
+      "description": "Operator contact email for the invitation preview/send (Parts 5/8)."
+    },
+    "invited_display_name": {
+      "type": "string"
+    },
+    "eligibility_snapshot": {
+      "type": "object",
+      "default": {},
+      "description": "Part 4 \u2014 eligibility checks captured at Approve For Pilot (checks array with ok/detail, approver, timestamp)."
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean",
+            "default": false
+          },
+          "done_at": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 28 \u2014 per-pilot launch checklist (company/entitlement verified \u2192 30-day review complete)."
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Parts 11/12 \u2014 workflow-timing milestones (invitation sent/accepted, setup started, AI draft, first preview/edit, submitted, approved, published, domain, first sale/lead/signup, 24h/7d/30d checks). Workflow timing only \u2014 never invasive monitoring."
+    },
+    "setup_choice": {
+      "type": "string",
+      "enum": [
+        "ai_build",
+        "self_custom",
+        "none"
+      ],
+      "default": "none",
+      "description": "Part 10 \u2014 operator's setup path choice (Build My Website For Me vs I'll customize it myself), tracked for pilot analytics."
+    },
+    "friction_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolved": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 13 \u2014 meaningful friction events (AI failure, save failure, readiness blocker, invitation expired, review rejected, domain verification failed, form health failure, publication/runtime failure, step abandoned). Normal optional omissions are never recorded as failures."
+    },
+    "interventions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 14 \u2014 admin assistance events by category (account, business info, branding, content, media, services, sales, domain, seo, lead forms, other)."
+    },
+    "pilot_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "type": "string"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 15 \u2014 internal admin pilot notes. Never rendered on any public website; admin-only entity RLS."
+    },
+    "operator_feedback": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 16 \u2014 private structured operator feedback (draft difficulty rating, publication satisfaction survey). Never public reviews."
+    },
+    "feature_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "bucket": {
+            "type": "string",
+            "enum": [
+              "launch_blocker",
+              "high_value",
+              "nice_to_have",
+              "future"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Part 42 \u2014 pilot-sourced feature requests, captured and categorized only. Never auto-built during the pilot."
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "24h | 7d | 30d"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "warn",
+              "fail"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "default": []
+            }
+          }
+        },
+        "default": []
+      },
+      "default": [],
+      "description": "Parts 36/37/38 \u2014 24-hour, 7-day and 30-day milestone check records with itemized results."
+    },
+    "review_30d": {
+      "type": "object",
+      "default": {},
+      "description": "Part 38 \u2014 30-day review outcome (recommendation: pass | pass_with_improvements | extend_pilot | fail, plus summary)."
+    },
+    "synthetic_ids": {
+      "type": "object",
+      "default": {},
+      "description": "Part 50 \u2014 exact IDs of every record created during the Phase 5A synthetic pilot run (company, tenant, destination, domain, settings, publications, sale, items, leads, profiles, events, invitation). Cleanup deletes ONLY these."
+    },
+    "is_synthetic": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for Phase 5A synthetic certification pilots (synthetic Company A). Excluded from real pilot reporting; removed by cleanup."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "stage"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
