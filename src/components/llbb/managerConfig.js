@@ -58,6 +58,7 @@ export const MANAGER_NAV = [
   { key: 'gallery', label: 'Gallery' },
   { key: 'contact_social', label: 'Contact & Social' },
   { key: 'estate_sales', label: 'Estate Sales' },
+  { key: 'leads', label: 'Leads' },
   { key: 'faq', label: 'FAQ' },
   { key: 'policies', label: 'Policies' },
   { key: 'seo', label: 'SEO' },

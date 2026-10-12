@@ -54,6 +54,14 @@
       "type": "boolean",
       "default": false
     },
+    "interest_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Phase 4C buyer signup interests from the controlled website vocabulary (furniture, jewelry, vintage, coins, tools, vehicles, art, collectibles, designer, electronics, household, other). Buyer preference LIVES HERE \u2014 the canonical buyer profile; no parallel buyer database."
+    },
     "last_synced_to_customerio_at": {
       "type": "string",
       "format": "date-time"

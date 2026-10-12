@@ -27,6 +27,8 @@ import FaqEditor from '@/components/llbb/FaqEditor';
 import PoliciesEditor from '@/components/llbb/PoliciesEditor';
 import NavigationFooterEditor from '@/components/llbb/NavigationFooterEditor';
 import LivePreviewRail from '@/components/llbb/LivePreviewRail';
+import LeadsPanel from '@/components/llbb/LeadsPanel';
+import EstateSalesPanel from '@/components/llbb/EstateSalesPanel';
 import { MANAGER_NAV, WORKFLOW_LABELS, WORKFLOW_BADGE, MANAGEMENT_MODE_LABELS } from '@/components/llbb/managerConfig';
 import { ArrowLeft, Eye, UserPlus, Loader2, Globe, Link2, LayoutList, PanelRightClose, PanelRightOpen, CheckCircle2 } from 'lucide-react';
 
@@ -59,28 +61,6 @@ function DomainPanel({ ov }) {
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function EstateSalesPanel({ ov }) {
-  return (
-    <div className="bg-white rounded-lg border border-slate-200 max-w-2xl">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <div className="font-heading font-bold text-slate-900 flex items-center gap-2"><LayoutList className="w-4 h-4" /> Estate Sales</div>
-        <div className="text-sm text-slate-500 mt-0.5">Canonical EstateSalen Sales publish to this website automatically — no copies, no receiver.</div>
-      </div>
-      <div className="p-5 grid grid-cols-3 gap-3 text-center">
-        {[['Published', ov.publication_health.published], ['Pending Update', ov.publication_health.update_pending], ['Failed', ov.publication_health.failed]].map(([k, v]) => (
-          <div key={k} className="rounded-lg bg-slate-50 border border-slate-100 p-3">
-            <div className="text-xl font-bold text-slate-900">{v}</div>
-            <div className="text-xs text-slate-500">{k}</div>
-          </div>
-        ))}
-      </div>
-      <div className="px-5 py-3 border-t border-slate-100 text-xs text-slate-400">
-        Auto-publish is {ov.tenant.auto_publish_enabled ? 'enabled' : 'disabled'}. Full per-sale management arrives in Phase 4C.
-      </div>
     </div>
   );
 }
@@ -150,7 +130,8 @@ export default function WebsiteManager() {
       case 'policies': return <PoliciesEditor websiteTenantId={tenantId} settings={settings} onSaved={onSaved} />;
       case 'navigation': return <NavigationFooterEditor websiteTenantId={tenantId} settings={settings} onSaved={onSaved} />;
       case 'seo': return <SettingsSectionEditor websiteTenantId={tenantId} panel="seo" settings={settings} onSaved={onSaved} />;
-      case 'estate_sales': return <EstateSalesPanel ov={ov} />;
+      case 'estate_sales': return <EstateSalesPanel websiteTenantId={tenantId} onNavigate={setTab} />;
+      case 'leads': return <LeadsPanel websiteTenantId={tenantId} />;
       case 'domain': return <DomainPanel ov={ov} />;
       case 'preview': return <ManagerPreviewPanel websiteTenantId={tenantId} />;
       default: return <StudioOverview ov={ov} settings={settings} onNavigate={setTab} />;

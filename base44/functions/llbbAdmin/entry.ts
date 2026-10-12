@@ -33,6 +33,10 @@ import {
   getPublicLeadContext,
   buildPublicWebsiteContext
 } from '../../shared/websiteRuntimeService.ts';
+import {
+  publishSaleToDestination,
+  unpublishSaleFromDestination
+} from '../../shared/publicationService.ts';
 
 function jerr(code, message, status) {
   return Response.json({ error: { code, message: message || code } }, { status: status || 400 });
@@ -60,7 +64,14 @@ export default async function(req) {
     if (action === 'slug_check') return await slugCheck(service, body);
     if (action === 'workflow') return await workflow(service, user, body);
     if (action === 'set_manager') return await setManager(service, body);
-    return jerr('unknown_action', 'Supported actions: portfolio, overview, company_search, slug_check, workflow, set_manager, site_preview', 400);
+    // Phase 4C — Estate Sales management + Leads dashboard.
+    if (action === 'sales_list') return await salesList(service, body);
+    if (action === 'set_publish_policy') return await setPublishPolicy(service, body);
+    if (action === 'publish_sale') return await salePublishAction(service, body, 'publish');
+    if (action === 'unpublish_sale') return await salePublishAction(service, body, 'unpublish');
+    if (action === 'leads_list') return await leadsList(service, body);
+    if (action === 'lead_detail') return await leadDetail(service, user, body);
+    return jerr('unknown_action', 'Supported actions: portfolio, overview, company_search, slug_check, workflow, set_manager, site_preview, sales_list, set_publish_policy, publish_sale, unpublish_sale, leads_list, lead_detail', 400);
   } catch (error) {
     console.error('llbbAdmin error:', error && error.message);
     return jerr('internal_error', 'Unexpected error', 500);
@@ -341,6 +352,220 @@ async function setManager(service, body) {
   }
   const updated = await service.entities.WebsiteTenant.update(tenant.id, { setup_manager_user_id: managerId });
   return Response.json({ ok: true, tenant: updated });
+}
+
+// ── Phase 4C — Estate Sales (Part 2) ──────────────────────────────────────────
+// Canonical sales of the tenant's Company joined with THIS tenant's
+// Publication state. Never a second sale editor — operational editing routes
+// to canonical EstateSalen Sale management (the manager links out).
+function pageOf(res) {
+  return (res && res.items) ? res.items : (res || []);
+}
+
+async function salesList(service, body) {
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);
+  const company = await service.entities.Company.get(tenant.company_id).catch(() => null);
+  if (!company) return jerr('company_not_found', 'Company not found', 404);
+
+  const salePage = await service.entities.EstateSale.filter(
+    { company_id: tenant.company_id }, { limit: 500, sort: '-updated_date' });
+  const sales = pageOf(salePage);
+
+  const tPubs = tenant.destination_id
+    ? pageOf(await service.entities.Publication.filter({ destination_id: tenant.destination_id }, { limit: 1000 }))
+    : [];
+  const pubBySale = {};
+  for (const p of tPubs) if (!pubBySale[p.sale_id]) pubBySale[p.sale_id] = p; // oldest = canonical relationship
+
+  // Presentation-owned featured state (never the canonical premium_listing).
+  const presPage = await service.entities.WebsiteSalePresentation.filter(
+    { website_tenant_id: tenant.id }, { limit: 500 });
+  const presBySale = {};
+  for (const pr of pageOf(presPage)) presBySale[pr.sale_id] = pr;
+
+  // Inventory counts server-side (never load full inventory into the manager).
+  const ids = sales.map(s => s.id);
+  const counts = {};
+  if (ids.length > 0) {
+    const agg = await service.entities.Item.aggregate(
+      { query: { estate_sale_id: { $in: ids } }, groupBy: 'estate_sale_id' }).catch(() => ({ rows: [] }));
+    for (const r of (agg.rows || [])) counts[r.estate_sale_id] = r.count;
+  }
+
+  const platformDomain = pageOf(await service.entities.WebsiteDomain.filter({ website_tenant_id: tenant.id }, { limit: 20 }))
+    .find(d => d.domain_type === 'platform_subdomain' && d.status !== 'disconnected') || null;
+  const siteBase = platformDomain ? `https://${platformDomain.hostname}` : null;
+
+  const rows = sales.map(s => {
+    const pub = pubBySale[s.id] || null;
+    const pres = presBySale[s.id] || null;
+    const visible = !!(pub && pub.status === 'published' && tenant.status === 'active' && s.status !== 'draft' && s.status !== 'archived');
+    const thumbs = s.image_thumbnails || {};
+    const thumbnail = (Object.values(thumbs)[0]) || ((s.images || [])[0] || {}).url || null;
+    const attention = [];
+    if (pub && (pub.status === 'failed' || pub.status === 'update_pending')) attention.push(pub.status);
+    if (pub && pub.status === 'published' && (s.status === 'draft' || s.status === 'archived')) attention.push('hidden_by_lifecycle');
+    return {
+      id: s.id,
+      title: s.title,
+      thumbnail,
+      dates: s.sale_dates || [],
+      status: s.status,
+      inventory_count: counts[s.id] || 0,
+      publication: pub ? { id: pub.id, status: pub.status, published_at: pub.published_at, last_success_at: pub.last_success_at, last_error: pub.last_error, error_category: pub.error_category } : null,
+      visible,
+      website_url: visible && siteBase ? `${siteBase}/site/sale/${s.website_slug || s.id}` : null,
+      featured: !!(pres && pres.featured),
+      updated_date: s.updated_date || null,
+      attention
+    };
+  });
+
+  return Response.json({
+    ok: true,
+    auto_publish_enabled: tenant.auto_publish_enabled !== false,
+    destination: tenant.destination_id || null,
+    platform_hostname: siteBase,
+    sales: rows
+  });
+}
+
+// Publication policy (Part 3) — explicit LLBB tenant preference.
+async function setPublishPolicy(service, body) {
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);
+  if (tenant.created_via !== 'llbb') return jerr('not_llbb_tenant', 'Publication policy is only configurable on Business Builder websites', 403);
+  if (typeof body.auto_publish_enabled !== 'boolean') return jerr('invalid_policy', 'auto_publish_enabled must be a boolean', 400);
+  const updated = await service.entities.WebsiteTenant.update(tenant.id, { auto_publish_enabled: body.auto_publish_enabled });
+  return Response.json({ ok: true, auto_publish_enabled: updated.auto_publish_enabled });
+}
+
+// Publish / unpublish through the CERTIFIED publication service — the manager
+// never mutates Publications directly (Part 12, publication never bypassed).
+async function salePublishAction(service, body, kind) {
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);
+  if (!tenant.destination_id) return jerr('destination_required', 'This website has no destination attached', 400);
+  const sale = await service.entities.EstateSale.get(body.sale_id || '').catch(() => null);
+  if (!sale) return jerr('sale_not_found', 'Sale not found', 404);
+  if (sale.company_id !== tenant.company_id) return jerr('company_mismatch', 'Sale does not belong to this website company', 403);
+  const r = kind === 'publish'
+    ? await publishSaleToDestination(service, sale.id, tenant.destination_id)
+    : await unpublishSaleFromDestination(service, sale.id, tenant.destination_id);
+  if (!r.ok) return jerr(r.error, `Cannot ${kind} sale`, r.http || 400);
+  return Response.json({ ok: true, publication: r.publication });
+}
+
+// ── Phase 4C — Leads dashboard (Parts 27/28/29) ───────────────────────────────
+async function leadsList(service, body) {
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);
+  const leadPage = await service.entities.WebsiteLead.filter(
+    { website_tenant_id: tenant.id }, { limit: 300, sort: '-created_date' });
+  const leads = pageOf(leadPage);
+
+  const now = Date.now();
+  const DAY = 24 * 3600 * 1000;
+  const within = (days) => leads.filter(l => l.created_date && (now - new Date(l.created_date).getTime()) <= days * DAY).length;
+  const byType = {};
+  for (const l of leads) byType[l.lead_type] = (byType[l.lead_type] || 0) + 1;
+
+  // Sale titles for sale-attributed leads (labels only, canonical data).
+  const saleIds = [...new Set(leads.map(l => l.sale_id).filter(Boolean))];
+  const saleTitles = {};
+  for (const sid of saleIds) {
+    const s = await service.entities.EstateSale.get(sid).catch(() => null);
+    if (s) saleTitles[sid] = s.title;
+  }
+
+  return Response.json({
+    ok: true,
+    summary: {
+      today: within(1),
+      this_week: within(7),
+      this_month: within(30),
+      total: leads.length,
+      by_type: byType
+    },
+    recent: leads.slice(0, 100).map(l => ({
+      id: l.id,
+      lead_type: l.lead_type,
+      service_requested: l.service_requested || null,
+      name: [l.contact_first_name, l.contact_last_name].filter(Boolean).join(' ') || null,
+      email: l.contact_email || null,
+      phone: l.contact_phone || null,
+      city: (l.property_info || {}).city || null,
+      created_date: l.created_date || null,
+      source_url: l.source_url || null,
+      sale_id: l.sale_id || null,
+      sale_title: l.sale_id ? (saleTitles[l.sale_id] || null) : null,
+      preferred_contact_method: l.preferred_contact_method || 'any',
+      status: l.status || 'new'
+    }))
+  });
+}
+
+// Lead detail — company isolation enforced by tenant membership on the record.
+async function leadDetail(service, user, body) {
+  const lead = await service.entities.WebsiteLead.get(body.lead_id || '').catch(() => null);
+  if (!lead) return jerr('lead_not_found', 'Lead not found', 404);
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant || lead.website_tenant_id !== tenant.id) {
+    return jerr('forbidden', 'Lead does not belong to this website', 403); // cross-tenant isolation
+  }
+  const access = assertTenantAccess(user, tenant);
+  if (!access.ok) return Response.json({ error: access.error }, { status: access.error.status || 403 });
+
+  // Private seller photos: signed URLs only, short-lived, tenant-scoped seam.
+  const photos = [];
+  for (const uri of (lead.photo_file_uris || []).slice(0, 8)) {
+    try {
+      const r = await base44_asSigned(service, uri);
+      photos.push({ uri, signed_url: r });
+    } catch (e) {
+      photos.push({ uri, signed_url: null });
+    }
+  }
+
+  let saleTitle = null;
+  if (lead.sale_id) {
+    const s = await service.entities.EstateSale.get(lead.sale_id).catch(() => null);
+    if (s && s.company_id === tenant.company_id) saleTitle = s.title; // canonical attribution only
+  }
+
+  return Response.json({
+    ok: true,
+    lead: {
+      id: lead.id,
+      lead_type: lead.lead_type,
+      service_requested: lead.service_requested || null,
+      timeline: lead.timeline || null,
+      property_info: lead.property_info || {},
+      preferred_contact_method: lead.preferred_contact_method || 'any',
+      contact_first_name: lead.contact_first_name,
+      contact_last_name: lead.contact_last_name,
+      contact_email: lead.contact_email,
+      contact_phone: lead.contact_phone,
+      message: lead.message,
+      status: lead.status,
+      marketing_opt_in: !!lead.marketing_opt_in,
+      vip_opt_in: !!lead.vip_opt_in,
+      sms_opt_in: !!lead.sms_opt_in,
+      consent_captured_at: lead.consent_captured_at || null,
+      source_url: lead.source_url || null,
+      referrer: lead.referrer || null,
+      created_date: lead.created_date || null,
+      sale_id: lead.sale_id || null,
+      sale_title: saleTitle,
+      photos
+    }
+  });
+}
+
+async function base44_asSigned(service, uri) {
+  const r = await service.integrations.Core.CreateFileSignedUrl({ file_uri: uri, expires_in: 3600 });
+  return r && r.signed_url ? r.signed_url : null;
 }
 
 // ── Authenticated draft preview (Part 5) ──────────────────────────────────────

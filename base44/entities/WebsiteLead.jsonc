@@ -23,7 +23,66 @@
         "sale_question",
         "consultation_request"
       ],
-      "description": "Controlled website lead vocabulary."
+      "description": "Controlled website lead vocabulary. No parallel lead entities \u2014 structured detail lives in these fields (Phase 4C)."
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Caller-supplied replay key for safe idempotent resubmission (Phase 4C). Duplicate-safe lead capture; no duplicate leads on network retry."
+    },
+    "service_requested": {
+      "type": "string",
+      "description": "Phase 4C seller funnel selection: estate_sale, downsizing, cleanout, probate_estate, moving, consignment, real_estate, valuation, not_sure, other. Validated server-side against the controlled vocabulary."
+    },
+    "property_info": {
+      "type": "object",
+      "description": "Phase 4C guided seller property capture (public-safe, seller-supplied). Never derived from canonical Sale data.",
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "property_type": {
+          "type": "string"
+        },
+        "approx_size": {
+          "type": "string"
+        },
+        "occupancy": {
+          "type": "string"
+        },
+        "situation": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "timeline": {
+      "type": "string",
+      "description": "Phase 4C seller timeline: asap, within_30_days, 1_to_3_months, 3_plus_months, researching."
+    },
+    "preferred_contact_method": {
+      "type": "string",
+      "enum": [
+        "any",
+        "email",
+        "phone",
+        "text"
+      ],
+      "default": "any",
+      "description": "How the seller prefers to be contacted."
+    },
+    "photo_file_uris": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "PRIVATE storage URIs of optional seller-uploaded property/item photos (Phase 4C). Never in the public Website Media Library; access only via signed URLs through the tenant-scoped admin seam."
     },
     "contact_first_name": {
       "type": "string"

@@ -3,10 +3,11 @@
 // model. Canonical data wins for every operational fact (Part 19).
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Car, Info, Star, CheckCircle2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { CalendarDays, MapPin, Car, Info, Star, CheckCircle2, ArrowLeft, AlertCircle, BellRing, ScrollText } from 'lucide-react';
 import { sitePath } from '@/templates/siteLinks';
 import TemplateErrorState from './TemplateErrorState.jsx';
 import LeadForm from './LeadForm.jsx';
+import SaleActions from './SaleActions.jsx';
 import { formatSaleDates } from './SaleCard.jsx';
 
 export default function Template1SaleDetail({ website, detail }) {
@@ -34,6 +35,12 @@ export default function Template1SaleDetail({ website, detail }) {
       <Link to={sitePath(website.hostname, '/site/sales')} className="inline-flex items-center gap-1 text-sm font-medium mb-4 hover:underline" style={{ color: 'var(--t1-primary)' }}>
         <ArrowLeft className="w-4 h-4" aria-hidden="true" /> All sales
       </Link>
+
+      {sale.status === 'completed' && (
+        <div className="rounded-lg px-4 py-3 mb-5 text-sm font-semibold flex items-center gap-2" style={{ background: 'var(--t1-bg)', color: 'var(--t1-text)' }} role="status">
+          <CheckCircle2 className="w-4 h-4" aria-hidden="true" /> This sale has concluded — thank you to everyone who came out.
+        </div>
+      )}
 
       {hero && (
         <figure className="rounded-xl overflow-hidden mb-6">
@@ -83,6 +90,29 @@ export default function Template1SaleDetail({ website, detail }) {
         <div className="mt-6 max-w-lg">
           <LeadForm leadType="sale_question" sales={[]} fixedSale={sale} hostname={website.hostname} />
         </div>
+      )}
+
+      <SaleActions sale={sale} hostname={website.hostname} />
+
+      <Link to={sitePath(website.hostname, '/site/contact') + '#buyer-alerts'}
+        className="mt-6 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium hover:opacity-90"
+        style={{ background: 'var(--t1-bg)', color: 'var(--t1-text)' }}>
+        <BellRing className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--t1-primary)' }} aria-hidden="true" />
+        Never miss a sale like this — get alerts about upcoming sales.
+      </Link>
+
+      {(((settings.policies || {}).items) || []).filter(p => p && p.visible !== false && p.body).length > 0 && (
+        <section className="mt-8" aria-labelledby="t1-sale-policies">
+          <h2 id="t1-sale-policies" className="text-xl font-bold mb-3 flex items-center gap-2"><ScrollText className="w-4 h-4" style={{ color: 'var(--t1-primary)' }} aria-hidden="true" /> Sale Policies</h2>
+          <div className="divide-y rounded-lg border" style={{ borderColor: 'var(--t1-primary)' }}>
+            {settings.policies.items.filter(p => p && p.visible !== false && p.body).map((p, i) => (
+              <details key={i} className="px-4 py-3">
+                <summary className="cursor-pointer text-sm font-medium">{p.title || 'Policy'}</summary>
+                <p className="mt-2 text-sm opacity-80 whitespace-pre-line">{p.body}</p>
+              </details>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="mt-10" aria-labelledby="t1-inventory-heading">

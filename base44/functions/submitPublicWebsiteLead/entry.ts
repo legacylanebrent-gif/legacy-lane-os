@@ -1,21 +1,50 @@
-// PUBLIC website lead ingestion seam (Phase 3D.1 — Parts 30-34).
-// Phase 3B kept the public seam closed; the certified 3C runtime now provides
-// the trusted tenant-resolution boundary, so this function opens it SAFELY:
-//   request hostname → WebsiteTenant → Company  (clients NEVER supply
-//   company_id / website_tenant_id — always derived server-side)
-//   sale attribution resolved ONLY among publication-visible sales of the
-//   hostname-resolved Company (cross-tenant attribution impossible)
-//   consent is EXPLICIT only — form submission never implies consent
-//   events go to the durable IdentityActivityOutbox — NO direct Customer.io
-//   writes (guarded by existing architecture)
+// PUBLIC website lead ingestion seam (Phase 3D.1 + Phase 4C extensions).
+// Phase 4C: canonical WebsiteLead gains STRUCTURED seller-funnel fields
+// (service_requested, property_info, timeline, preferred_contact_method) and
+// PRIVATE seller photo URIs — still ONE canonical lead entity, no parallel
+// lead entities. Attribution, consent discipline and outbox behavior unchanged.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveWebsiteTenant, getPublishedSales } from '../../shared/websiteRuntimeService.ts';
 import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
 
 const MVP_LEAD_TYPES = ['seller_inquiry', 'contact', 'sale_question'];
+const SERVICES = ['estate_sale', 'downsizing', 'cleanout', 'probate_estate', 'moving', 'consignment', 'real_estate', 'valuation', 'not_sure', 'other'];
+const TIMELINES = ['asap', 'within_30_days', '1_to_3_months', '3_plus_months', 'researching'];
+const CONTACT_METHODS = ['any', 'email', 'phone', 'text'];
+const MAX_PHOTOS = 8;
+const URI_MAX = 512;
 
 function err(code, message, status) {
   return Response.json({ error: { code, message: message || code } }, { status: status || 400 });
+}
+
+const str = (v, max) => {
+  const s = String(v == null ? '' : v).trim();
+  return s ? s.slice(0, max || 200) : null;
+};
+
+// Public-safe structured seller capture (Part 15/16) — validated server-side.
+function sanitizePropertyInfo(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  return {
+    city: str(raw.city, 100),
+    state: str(raw.state, 50),
+    zip: str(raw.zip, 20),
+    property_type: str(raw.property_type, 60),
+    approx_size: str(raw.approx_size, 60),
+    occupancy: str(raw.occupancy, 40),
+    situation: str(raw.situation, 2000)
+  };
+}
+
+// Seller photos were uploaded by the form to PRIVATE storage via
+// UploadPrivateFile. Only private-storage URIs are accepted; public URLs are
+// rejected so private inquiry photos can never leak into public rendering.
+function sanitizePhotoUris(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(u => typeof u === 'string' && u.length > 0 && u.length <= URI_MAX && !/^https?:\/\//i.test(u))
+    .slice(0, MAX_PHOTOS);
 }
 
 export default async function(req) {
@@ -43,7 +72,7 @@ export default async function(req) {
 
     // Part 32 — sale attribution resolved ONLY within the hostname-resolved
     // Company's publication-visible sales. A cross-tenant identifier resolves
-    // to nothing.
+    // to nothing; forged Sale IDs cannot attach to another Company.
     let sale = null;
     if (leadType === 'sale_question' || body.sale) {
       const wanted = String(body.sale || '').trim().toLowerCase();
@@ -65,27 +94,41 @@ export default async function(req) {
     if (!message) return err('message_required', 'A message is required', 400);
 
     // Part 33 — explicit consent only, recorded verbatim. NEVER inferred from
-    // form submission.
+    // form submission. Marketing/SMS flags are independent of the inquiry.
     const marketing = body.marketing_opt_in === true;
     const sms = body.sms_opt_in === true;
     const anyConsent = marketing || sms;
+
+    // Phase 4C structured fields — controlled vocabulary, server-validated.
+    const serviceRequested = body.service_requested == null ? null
+      : (SERVICES.includes(body.service_requested) ? body.service_requested : 'other');
+    const timeline = body.timeline == null ? null
+      : (TIMELINES.includes(body.timeline) ? body.timeline : null);
+    const contactMethod = CONTACT_METHODS.includes(body.preferred_contact_method)
+      ? body.preferred_contact_method : 'any';
 
     const created = await service.entities.WebsiteLead.create({
       company_id: ctx.company.id,        // derived server-side from the tenant
       website_tenant_id: ctx.tenant.id,  // derived server-side from the hostname
       sale_id: sale ? sale.id : null,
       lead_type: leadType,
-      contact_first_name: String(body.contact_first_name || '').trim() || null,
-      contact_last_name: String(body.contact_last_name || '').trim() || null,
+      request_id: str(body.request_id, 100),
+      service_requested: serviceRequested,
+      property_info: sanitizePropertyInfo(body.property_info),
+      timeline,
+      preferred_contact_method: contactMethod,
+      photo_file_uris: sanitizePhotoUris(body.photo_file_uris),
+      contact_first_name: str(body.contact_first_name, 100),
+      contact_last_name: str(body.contact_last_name, 100),
       contact_email: email,
-      contact_phone: String(body.contact_phone || '').trim() || null,
-      message,
+      contact_phone: str(body.contact_phone, 40),
+      message: message.slice(0, 5000),
       source: 'operator_website',
-      source_url: String(body.source_url || '').trim() || null,
-      referrer: String(body.referrer || '').trim() || null,
+      source_url: str(body.source_url, 500),
+      referrer: str(body.referrer, 500),
       status: 'new',
       marketing_opt_in: marketing,
-      vip_opt_in: false, // NO VIP expansion in Phase 3D.1
+      vip_opt_in: false,
       sms_opt_in: sms,
       consent_captured_at: anyConsent ? new Date().toISOString() : null,
       member_user_ids: ctx.tenant.member_user_ids || []
@@ -94,19 +137,13 @@ export default async function(req) {
     // Part 34 — durable event via the existing outbox architecture. No direct
     // Customer.io writes anywhere in this path.
     //
-    // Phase 3D.4 (Parts 7/8) — canonical lead event mapping. The certified
-    // Houszu v1.6.0 vocabulary is FROZEN and contains NO generic 'website_lead'
-    // event (that name quarantined as registry_gap). Rather than inventing
-    // semantically equivalent events, every supported website lead maps to the
-    // ONE canonical inquiry event ('seller_inquiry') with the exact
-    // WebsiteLead.lead_type preserved as relationship_type in product_context
-    // (and in the payload) so downstream marketing can distinguish. No new
-    // vocabulary entries, no registry gaps, consent untouched (Part 9).
-    //   seller_inquiry  → seller_inquiry (relationship_type: seller_inquiry)
-    //   contact         → seller_inquiry (relationship_type: contact)
-    //   sale_question   → seller_inquiry (relationship_type: sale_question, product_id: <sale>)
+    // Canonical lead event mapping (Phase 3D.4): every supported website lead
+    // maps to the ONE canonical inquiry event ('seller_inquiry') with the
+    // exact WebsiteLead.lead_type preserved as relationship_type so downstream
+    // marketing can distinguish. No new vocabulary entries, no registry gaps.
     const masterUserID = await resolveMasterUserID(base44, { email });
     await enqueueActivity(base44, {
+      request_id: str(body.request_id, 100) || undefined,
       masterUserID,
       event_type: 'seller_inquiry',
       identity_context: {
@@ -115,7 +152,9 @@ export default async function(req) {
         last_name: created.contact_last_name,
         phone: created.contact_phone
       },
-      product_context: sale ? { product_id: sale.id, relationship_type: leadType } : { relationship_type: leadType },
+      product_context: sale
+        ? { product_id: sale.id, relationship_type: leadType }
+        : { relationship_type: leadType, service_requested: serviceRequested },
       consent_context: {
         marketing,
         sms,
@@ -127,6 +166,9 @@ export default async function(req) {
         website_tenant_id: ctx.tenant.id,
         sale_id: sale ? sale.id : null,
         lead_type: leadType,
+        service_requested: serviceRequested,
+        timeline,
+        property_city: (created.property_info || {}).city || null,
         source: 'operator_website',
         source_url: created.source_url,
         lead_record_id: created.id

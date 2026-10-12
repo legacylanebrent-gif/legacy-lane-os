@@ -1,6 +1,6 @@
 {
   "name": "Publication Sync on Sale Change",
-  "description": "When a canonical EstateSale changes, republishes its existing Publications to their destinations (marks update_pending, then safe idempotent republish). Never creates publications.",
+  "description": "When a canonical EstateSale changes: (1) LLBB auto-publish \u2014 creates/updates the canonical Publication for eligible Business Builder runtime-served websites (auto-publish policy; never receiver-based destinations); (2) change propagation \u2014 republishes existing Publications to their destinations (marks update_pending, then safe idempotent republish). Never creates publications outside the auto-publish policy.",
   "trigger": {
     "condition": null,
     "config": {
@@ -16,10 +16,26 @@
     "document": {
       "dsl": "1.0.0",
       "name": "publication_sync_on_sale_change",
-      "version": "1.0",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [
+      {
+        "auto_publish": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoPublishSales",
+            "args": {
+              "sale_id": "${ .trigger.data.id }"
+            }
+          },
+          "then": "sync_publications",
+          "x-base44": {
+            "title": "LLBB auto-publish",
+            "description": "Publish eligible sales to Business Builder websites"
+          }
+        }
+      },
       {
         "sync_publications": {
           "call": "invoke_backend_function",

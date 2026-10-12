@@ -103,6 +103,12 @@ export async function getPublishedSales(service, ctx) {
   const hit = cacheGet(cacheKey);
   if (hit && hit.fingerprint === fingerprint) return hit.sales;
 
+  // Phase 4C lifecycle policy (Parts 5/35/36): on LLBB websites a canonical
+  // Sale that is draft, archived (cancelled) or address-less/internal is never
+  // publicly rendered — even when a stale publication exists. Legacy tenants
+  // (pre-LLBB, e.g. production Legacy Lane) keep their certified behavior.
+  const llbbLifecycle = ctx.tenant.created_via === 'llbb';
+
   const sales = [];
   for (const pub of pubs) {
     if (pub.company_id !== ctx.tenant.company_id) {
@@ -113,6 +119,10 @@ export async function getPublishedSales(service, ctx) {
     if (!sale || sale.company_id !== ctx.tenant.company_id) {
       console.error(`[websiteRuntime] cross-company sale on published publication ${pub.id} — skipped`);
       continue; // fail closed per-record
+    }
+    if (llbbLifecycle && (sale.status === 'draft' || sale.status === 'archived')) {
+      console.log(`[websiteRuntime] llbb lifecycle policy: hidden ${sale.status} sale on publication ${pub.id}`);
+      continue; // cancelled/archived sales must never appear active
     }
     const items = await getCanonicalItems(service, sale.id);
     sales.push({
