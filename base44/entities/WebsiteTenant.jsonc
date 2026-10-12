@@ -23,7 +23,49 @@
         "archived"
       ],
       "default": "setup",
-      "description": "Lifecycle state. Transitions validated server-side: setup\u2192active, active\u2192suspended, suspended\u2192active, setup/active/suspended\u2192archived. Never deleted as lifecycle."
+      "description": "TECHNICAL lifecycle state. Transitions validated server-side: setup\u2192active, active\u2192suspended, suspended\u2192active, setup/active/suspended\u2192archived. Never deleted as lifecycle. Product workflow lives in workflow_status \u2014 one source of truth per concern."
+    },
+    "workflow_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "setup_in_progress",
+        "ready_for_review",
+        "changes_requested",
+        "approved",
+        "live",
+        "suspended",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "LLBB product workflow state (Phase 4A). Maps to technical status: draft/setup_in_progress/ready_for_review/changes_requested/approved \u2192 'setup'; live \u2192 'active'; suspended \u2192 'suspended'; archived \u2192 'archived'. Transitions validated server-side in llbbAdmin; going live requires readiness blockers clear."
+    },
+    "management_mode": {
+      "type": "string",
+      "enum": [
+        "admin_managed",
+        "client_managed",
+        "collaborative"
+      ],
+      "default": "admin_managed",
+      "description": "Who manages website configuration: ADMIN MANAGED, CLIENT MANAGED, COLLABORATIVE. Controls workflow/UI access only \u2014 NEVER bypasses server authorization."
+    },
+    "setup_manager_user_id": {
+      "type": "string",
+      "description": "EstateSalen user responsible for driving this website's setup (admin-assigned)."
+    },
+    "created_via": {
+      "type": "string",
+      "description": "Provisioning origin (e.g. 'llbb' for Business Builder launches; absent/legacy for pre-LLBB tenants). LLBB workflow actions are restricted to llbb tenants."
+    },
+    "workflow_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last product workflow transition timestamp (audit)."
+    },
+    "workflow_updated_by": {
+      "type": "string",
+      "description": "User ID of the last workflow transition actor (audit)."
     },
     "destination_id": {
       "type": "string",
@@ -40,7 +82,7 @@
     "auto_publish_enabled": {
       "type": "boolean",
       "default": true,
-      "description": "Website-level default for publishing canonical Sales to this website (Phase 3E consumes)."
+      "description": "Website-level default for publishing canonical Sales to this website."
     },
     "template_id": {
       "type": "string",
@@ -62,7 +104,7 @@
     },
     "idempotency_key": {
       "type": "string",
-      "description": "Caller-supplied replay key. Repeated provisioning with the same key returns the existing tenant."
+      "description": "Caller-supplied replay key. Repeated provisioning with the same key returns the existing tenant. Idempotent replay resolves BEFORE capacity enforcement (Phase 3B invariant)."
     },
     "activated_at": {
       "type": "string",
