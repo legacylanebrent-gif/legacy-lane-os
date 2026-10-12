@@ -171,7 +171,9 @@ async function approve(service, user, body) {
     eligibility_snapshot: { checks: el.checks, approved_by: user.id, approved_at: new Date().toISOString(), tier: el.ent.tier || null },
     checklist: PILOT_CHECKLIST.filter(i => i.auto).map(i => ({ key: i.key, label: i.label, done: i.key === 'company_verified' || i.key === 'entitlement_verified', done_at: (i.key === 'company_verified' || i.key === 'entitlement_verified') ? new Date().toISOString() : null })),
     milestones: [],
-    setup_choice: 'none'
+    setup_choice: 'none',
+    is_synthetic: body.is_synthetic === true,
+    notes: body.notes || null
   });
   return Response.json({ ok: true, pilot });
 }
@@ -577,20 +579,23 @@ async function aggregate(service) {
   const pilots = pageOf(await service.entities.LlbbPilot.filter({}, { limit: 500 }));
   const real = pilots.filter(p => !p.is_synthetic);
   const rows = [];
+  const goNoGoRows = [];
   for (const p of real) {
     const ctx = await tenantCtx(service, p);
     const row = rowFor(p, ctx);
     const sc = pilotScorecard(p, { publication_health: ctx.publication_health, health: ctx.health, custom_domains: ctx.customDomains });
-    rows.push({ ...row, scorecard_categories: sc.categories });
+    row.scorecard_categories = sc.categories;
+    rows.push(row);
+    goNoGoRows.push({ ...p, scorecard_categories: sc.categories });
   }
   const has = (p, key) => (p.milestones || []).some(m => m.key === key);
   const inPublishedStages = (p) => ['PLATFORM_SITE_LIVE', 'CUSTOM_DOMAIN_PENDING', 'CUSTOM_DOMAIN_LIVE', 'FIRST_SALE_PUBLISHED', 'FIRST_LEAD_RECEIVED', 'REVIEW_30_DAY', 'PILOT_COMPLETE'].includes(p.stage);
   const durations = real.map(p => computeSetupTiming(p.milestones).total.hours).filter(v => v != null).sort((a, b) => a - b);
   const median = durations.length ? (durations.length % 2 ? durations[(durations.length - 1) / 2] : (durations[durations.length / 2 - 1] + durations[durations.length / 2]) / 2) : null;
   const frictionCounts = {};
-  for (const p of pilots) for (const f of (p.friction_events || [])) frictionCounts[f.kind] = (frictionCounts[f.kind] || 0) + 1;
+  for (const p of real) for (const f of (p.friction_events || [])) frictionCounts[f.kind] = (frictionCounts[f.kind] || 0) + 1;
   const topFriction = Object.entries(frictionCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([kind, count]) => ({ kind, count }));
-  const decision = goNoGo(rows);
+  const decision = goNoGo(goNoGoRows);
   return Response.json({
     ok: true,
     summary: {

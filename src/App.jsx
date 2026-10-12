@@ -183,6 +183,7 @@ import AdminBusinessBuilder from './pages/AdminBusinessBuilder';
 import WebsiteManager from './pages/WebsiteManager';
 import ClientWebsiteManager from './pages/ClientWebsiteManager';
 import WebsiteInviteAccept from './pages/WebsiteInviteAccept';
+import PilotLaunchCenter from './pages/PilotLaunchCenter';
 
 // Life Transition SEO Engine — Phase 2
 import ProbateHubV2 from './pages/life-transition/ProbateHubV2';
@@ -347,6 +348,7 @@ const AuthenticatedApp = () => {
       <Route path="/WebsiteManager" element={<LayoutWrapper currentPageName="WebsiteManager"><WebsiteManager /></LayoutWrapper>} />
       <Route path="/ClientWebsiteManager" element={<LayoutWrapper currentPageName="ClientWebsiteManager"><ClientWebsiteManager /></LayoutWrapper>} />
       <Route path="/website-invite" element={<WebsiteInviteAccept />} />
+      <Route path="/PilotLaunchCenter" element={<LayoutWrapper currentPageName="PilotLaunchCenter"><PilotLaunchCenter /></LayoutWrapper>} />
 
       {/* ── Operator Website Template #1 (Phase 3D.1) ── */}
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />

@@ -34,6 +34,7 @@ import LeadsPanel from '@/components/llbb/LeadsPanel';
 import EstateSalesPanel from '@/components/llbb/EstateSalesPanel';
 import AnalyticsPanel from '@/components/llbb/AnalyticsPanel';
 import SiteHealthPanel from '@/components/llbb/SiteHealthPanel';
+import OperatorPilotPanel from '@/components/pilot/OperatorPilotPanel';
 import { CLIENT_NAV, WORKFLOW_LABELS, WORKFLOW_BADGE } from '@/components/llbb/managerConfig';
 import { Eye, Loader2, Link2, Globe, PanelRightClose, PanelRightOpen, CheckCircle2, Lock } from 'lucide-react';
 
@@ -62,7 +63,14 @@ export default function ClientWebsiteManager() {
     }
     setLoading(false);
   };
+  const [inPilot, setInPilot] = useState(false);
   useEffect(() => { load(); }, [tenantId]); // eslint-disable-line
+  useEffect(() => {
+    if (!data || !data.website || !data.website.id) return;
+    base44.functions.invoke('llbbPilot', { action: 'operator_status', website_tenant_id: data.website.id })
+      .then(res => setInPilot(!!(res.data && res.data.pilot)))
+      .catch(() => setInPilot(false));
+  }, [data]);
 
   const setTab = (t) => {
     const p = new URLSearchParams(searchParams);
@@ -130,12 +138,16 @@ export default function ClientWebsiteManager() {
       case 'health': return <SiteHealthPanel websiteTenantId={w.id} clientMode />;
       case 'domain': return <ClientDomainPanel domains={data.domains} />;
       case 'preview': return <ManagerPreviewPanel websiteTenantId={w.id} />;
+      case 'pilot': return <OperatorPilotPanel websiteTenantId={w.id} />;
       case 'team': return <AccessPanel websiteTenantId={w.id} isOwnerOrAdmin={data.role.owner || data.role.admin} onChanged={onSaved} />;
       default: return <ClientOverview data={data} onNavigate={setTab} onSaved={onSaved} />;
     }
   };
 
-  const navItems = CLIENT_NAV.filter(n => n.key !== 'team' || data.role.owner || data.role.admin);
+  const navItems = [
+    ...CLIENT_NAV.filter(n => n.key !== 'team' || data.role.owner || data.role.admin),
+    ...(inPilot ? [{ key: 'pilot', label: 'Pilot Feedback' }] : [])
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
