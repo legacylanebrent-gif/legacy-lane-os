@@ -1,13 +1,14 @@
 // Template #1 static/content pages (Phase 4B — Parts 10/12/16/17/18/19/24).
 // About (mission/owner/team), Services (dedicated-page links), Contact
-// (hours, socials, service area, consultation CTA), FAQ (visible items),
-// Legal + structured Policies. All copy from tenant settings; the contact
-// page renders the seller inquiry form. No operator identity hardcoding.
+// (hours, socials, service area, guided seller funnel + buyer alerts),
+// FAQ (visible items), Legal + structured Policies. All copy from tenant
+// settings; no operator identity hardcoding.
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { sitePath } from '@/templates/siteLinks';
-import LeadForm from './LeadForm.jsx';
+import SellerInquiryForm from './SellerInquiryForm.jsx';
+import BuyerSignupForm from './BuyerSignupForm.jsx';
 import IconBadge from './IconBadge.jsx';
 
 function Paragraphs({ text }) {
@@ -85,47 +86,53 @@ export default function Template1StaticPage({ pageType, website, leadContext }) 
   if (pageType === 'contact') {
     const biz = settings.business || {};
     return (
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <h1 className="text-3xl font-bold mb-4">Contact {businessName}</h1>
-          <div className="space-y-3 text-sm">
-            {contact.phone && <p className="flex items-center gap-2"><Phone className="w-4 h-4 opacity-70" aria-hidden="true" /><a href={`tel:${contact.phone}`} className="hover:underline">{contact.phone}</a></p>}
-            {contact.sms_number && <p className="flex items-center gap-2"><Phone className="w-4 h-4 opacity-70" aria-hidden="true" />Text: <a href={`sms:${contact.sms_number}`} className="hover:underline">{contact.sms_number}</a></p>}
-            {contact.email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 opacity-70" aria-hidden="true" /><a href={`mailto:${contact.email}`} className="hover:underline">{contact.email}</a></p>}
-            {contact.inquiry_email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 opacity-70" aria-hidden="true" />Inquiries: <a href={`mailto:${contact.inquiry_email}`} className="hover:underline">{contact.inquiry_email}</a></p>}
-            {contact.show_address !== false && (contact.address_display || contact.mailing_address) && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 opacity-70" aria-hidden="true" />{contact.address_display || contact.mailing_address}</p>}
-            {contact.business_hours && (
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 opacity-70 mt-0.5" aria-hidden="true" />
-                <div>{contact.business_hours.split(/\n/).map((l, i) => <div key={i}>{l}</div>)}</div>
+      <div>
+        <div className="grid gap-8 md:grid-cols-2">
+          <div>
+            <h1 className="text-3xl font-bold mb-4">Contact {businessName}</h1>
+            <div className="space-y-3 text-sm">
+              {contact.phone && <p className="flex items-center gap-2"><Phone className="w-4 h-4 opacity-70" aria-hidden="true" /><a href={`tel:${contact.phone}`} className="hover:underline">{contact.phone}</a></p>}
+              {contact.sms_number && <p className="flex items-center gap-2"><Phone className="w-4 h-4 opacity-70" aria-hidden="true" />Text: <a href={`sms:${contact.sms_number}`} className="hover:underline">{contact.sms_number}</a></p>}
+              {contact.email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 opacity-70" aria-hidden="true" /><a href={`mailto:${contact.email}`} className="hover:underline">{contact.email}</a></p>}
+              {contact.inquiry_email && <p className="flex items-center gap-2"><Mail className="w-4 h-4 opacity-70" aria-hidden="true" />Inquiries: <a href={`mailto:${contact.inquiry_email}`} className="hover:underline">{contact.inquiry_email}</a></p>}
+              {contact.show_address !== false && (contact.address_display || contact.mailing_address) && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 opacity-70" aria-hidden="true" />{contact.address_display || contact.mailing_address}</p>}
+              {contact.business_hours && (
+                <div className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 opacity-70 mt-0.5" aria-hidden="true" />
+                  <div>{contact.business_hours.split(/\n/).map((l, i) => <div key={i}>{l}</div>)}</div>
+                </div>
+              )}
+            </div>
+            {(biz.primary_city || (biz.cities_served || []).length > 0) && (
+              <div className="mt-5">
+                <h2 className="text-sm font-semibold uppercase tracking-wide opacity-70 mb-1">Service Area</h2>
+                <p className="text-sm opacity-85">
+                  {[
+                    biz.primary_city && `Based in ${biz.primary_city}`,
+                    (biz.cities_served || []).length > 0 && biz.cities_served.slice(0, 10).join(', ')
+                  ].filter(Boolean).join(' · ')}
+                </p>
               </div>
             )}
+            {socials.length > 0 && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {socials.map(([k, url]) => (
+                  <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="text-sm border rounded-md px-3 py-1.5 hover:underline capitalize" style={{ borderColor: 'var(--t1-primary)', color: 'var(--t1-primary)' }}>{k}</a>
+                ))}
+              </div>
+            )}
+            {contact.contact_cta_label && (
+              <p className="mt-5 text-sm font-semibold" style={{ color: 'var(--t1-primary)' }}>{contact.contact_cta_label}</p>
+            )}
           </div>
-          {(biz.primary_city || (biz.cities_served || []).length > 0) && (
-            <div className="mt-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide opacity-70 mb-1">Service Area</h2>
-              <p className="text-sm opacity-85">
-                {[
-                  biz.primary_city && `Based in ${biz.primary_city}`,
-                  (biz.cities_served || []).length > 0 && biz.cities_served.slice(0, 10).join(', ')
-                ].filter(Boolean).join(' · ')}
-              </p>
-            </div>
-          )}
-          {socials.length > 0 && (
-            <div className="mt-5 flex flex-wrap gap-2">
-              {socials.map(([k, url]) => (
-                <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="text-sm border rounded-md px-3 py-1.5 hover:underline capitalize" style={{ borderColor: 'var(--t1-primary)', color: 'var(--t1-primary)' }}>{k}</a>
-              ))}
-            </div>
-          )}
-          {contact.contact_cta_label && (
-            <p className="mt-5 text-sm font-semibold" style={{ color: 'var(--t1-primary)' }}>{contact.contact_cta_label}</p>
-          )}
+          <div className="max-w-xl">
+            <h2 className="text-xl font-semibold mb-1">Need an Estate Sale?</h2>
+            <p className="text-sm opacity-80 mb-3">Tell us what you need — it takes about two minutes.</p>
+            <SellerInquiryForm hostname={website.hostname} />
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Request a Consultation</h2>
-          <LeadForm leadType="seller_inquiry" sales={[]} hostname={website.hostname} />
+        <div id="buyer-alerts" className="mt-10 max-w-xl rounded-xl p-6" style={{ background: 'var(--t1-bg)' }}>
+          <BuyerSignupForm hostname={website.hostname} />
         </div>
       </div>
     );

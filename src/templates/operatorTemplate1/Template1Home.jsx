@@ -88,7 +88,9 @@ export default function Template1Home({ website }) {
   const settings = website.settings || {};
   const h = settings.homepage || {};
   const services = (((settings.services || {}).items) || []).filter(it => it.show_on_homepage !== false);
-  const sales = website.published_sales || [];
+  // Homepage: current & upcoming only — completed sales belong on the
+  // sales page's Recently Completed archive (Phase 4C, Part 13).
+  const sales = (website.published_sales || []).filter(s => s.status !== 'completed');
   const why = settings.why_choose_us || {};
   const how = settings.how_it_works || {};
   const trust = settings.trust || {};
@@ -124,7 +126,21 @@ export default function Template1Home({ website }) {
           <Link to={sitePath(website.hostname, '/site/sales')} className="text-sm font-medium hover:underline" style={{ color: 'var(--t1-primary)' }}>All sales</Link>
         </div>
         {sales.length === 0 ? (
-          <p className="opacity-70 text-sm">No upcoming sales right now — check back soon.</p>
+          <div className="rounded-lg border p-6 text-center" style={{ borderColor: 'var(--t1-primary)' }}>
+            <p className="font-semibold text-lg">No Upcoming Sales Right Now</p>
+            <p className="text-sm opacity-80 mt-1">Join our sale alerts to hear about the next one.</p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <Link to={sitePath(website.hostname, '/site/contact') + '#buyer-alerts'}
+                className="px-4 py-2 rounded-md font-semibold text-white hover:opacity-90 text-sm" style={{ background: 'var(--t1-primary)' }}>
+                Get Sale Alerts
+              </Link>
+              <Link to={sitePath(website.hostname, '/site/contact')}
+                className="px-4 py-2 rounded-md font-semibold border hover:opacity-90 text-sm"
+                style={{ borderColor: 'var(--t1-primary)', color: 'var(--t1-primary)' }}>
+                Planning an estate sale? Contact us.
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {sales.slice(0, 3).map(s => <SaleCard key={s.public_id} sale={s} hostname={website.hostname} />)}

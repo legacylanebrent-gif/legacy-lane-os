@@ -21,6 +21,18 @@ function setMeta(key, content, attr = 'name') {
   el.setAttribute('content', content);
 }
 
+function injectJsonLd(id, data) {
+  const scriptId = `t1-jsonld-${id}`;
+  let el = document.getElementById(scriptId);
+  if (!el) {
+    el = document.createElement('script');
+    el.setAttribute('type', 'application/ld+json');
+    el.id = scriptId;
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+}
+
 function setCanonical(href) {
   let el = document.head.querySelector('link[rel="canonical"]');
   if (!el) {
@@ -100,6 +112,52 @@ export default function OperatorSitePage({ pageType }) {
     setMeta('og:description', description || '', 'property');
     setMeta('og:image', image, 'property');
     setCanonical(`https://${host}${window.location.pathname}`);
+
+    // Structured data (Phase 4C, Part 34): Organization on the home page;
+    // Event + BreadcrumbList on sale detail — public projection data only.
+    if (pageType === 'home') {
+      injectJsonLd('org', {
+        '@context': 'https://schema.org', '@type': 'Organization',
+        name: siteLabel, url: `https://${host}/site`,
+        ...(image ? { logo: image } : {})
+      });
+    } else if (pageType === 'sale_detail' && state.detail && state.detail.sale) {
+      const sale = state.detail.sale;
+      const addr = sale.address || {};
+      const dates = Array.isArray(sale.sale_dates) ? sale.sale_dates.filter(d => d && d.date) : [];
+      const first = dates[0] || {};
+      const start = first.date ? `${first.date}T${first.start_time || '09:00:00'}` : null;
+      const end = first.date ? `${first.date}T${first.end_time || '17:00:00'}` : null;
+      const canonical = `https://${host}/site/sale/${sale.public_id}`;
+      injectJsonLd('org', { '@context': 'https://schema.org', '@type': 'Organization', name: siteLabel, url: `https://${host}/site` });
+      if (start) {
+        injectJsonLd('event', {
+          '@context': 'https://schema.org', '@type': 'Event',
+          name: sale.title,
+          description: sale.meta_description || sale.description || undefined,
+          image: image || undefined,
+          startDate: start,
+          endDate: end || undefined,
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          location: {
+            '@type': 'Place',
+            name: addr.formatted_address || [addr.city, addr.state].filter(Boolean).join(', ') || undefined,
+            address: { '@type': 'PostalAddress', streetAddress: addr.street, addressLocality: addr.city, addressRegion: addr.state, postalCode: addr.zip }
+          },
+          organizer: { '@type': 'Organization', name: siteLabel },
+          url: canonical
+        });
+      }
+      injectJsonLd('crumb', {
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `https://${host}/site` },
+          { '@type': 'ListItem', position: 2, name: 'Estate Sales', item: `https://${host}/site/sales` },
+          { '@type': 'ListItem', position: 3, name: sale.title, item: canonical }
+        ]
+      });
+    }
   }, [state.website, state.detail, pageType]);
 
   if (state.loading) {
