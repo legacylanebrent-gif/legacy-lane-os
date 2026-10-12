@@ -1,5 +1,5 @@
-// LLBB Website Manager configuration — navigation, panel registry, editor
-// field definitions (Phase 4A). Subsequent phases plug in here.
+// LLBB Website Manager configuration (Phase 4B). Section editors are
+// dedicated components; only the SEO panel remains on the generic editor.
 export const WORKFLOW_LABELS = {
   draft: 'Draft',
   setup_in_progress: 'Setup In Progress',
@@ -58,113 +58,26 @@ export const MANAGER_NAV = [
   { key: 'gallery', label: 'Gallery' },
   { key: 'contact_social', label: 'Contact & Social' },
   { key: 'estate_sales', label: 'Estate Sales' },
-  { key: 'seo', label: 'SEO' },
+  { key: 'faq', label: 'FAQ' },
   { key: 'policies', label: 'Policies' },
+  { key: 'seo', label: 'SEO' },
+  { key: 'navigation', label: 'Navigation & Footer' },
   { key: 'domain', label: 'Domain' },
   { key: 'preview', label: 'Preview' }
 ];
 
-// Generic settings editor registry — one reusable editor powers every
-// settings-backed panel. sections=null fields sit at the settings root.
+// Readiness section key → studio nav tab (Overview deep links, Part 2).
+export const READINESS_SECTION_TABS = {
+  business: 'business', homepage: 'homepage', contact: 'contact_social',
+  runtime: 'domain', services: 'services', seo: 'seo', branding: 'branding',
+  about: 'about', testimonials: 'testimonials', gallery: 'gallery',
+  social: 'contact_social', faq: 'faq', legal: 'policies', domain: 'domain',
+  sales_integration: 'estate_sales', content_quality: 'homepage'
+};
+
+// Generic settings editor registry — SEO only in Phase 4B; every other panel
+// has a dedicated structured editor.
 export const EDITOR_PANELS = {
-  business: {
-    title: 'Business Identity',
-    description: 'Shown across the website title bar, header and footer. Canonical Company data is seeded automatically; edits here are website presentation only.',
-    groups: [
-      { section: null, fields: [
-        { key: 'site_title', label: 'Site Title', type: 'text' },
-        { key: 'display_business_name', label: 'Business Name on Website', type: 'text', required: true },
-        { key: 'tagline', label: 'Tagline', type: 'text' }
-      ] }
-    ]
-  },
-  branding: {
-    title: 'Branding',
-    description: 'Logo, colors and fonts used by the website template.',
-    groups: [
-      { section: 'branding', fields: [
-        { key: 'logo_url', label: 'Logo URL', type: 'text', placeholder: 'https://…' },
-        { key: 'primary_color', label: 'Primary Color', type: 'color' },
-        { key: 'secondary_color', label: 'Secondary Color', type: 'color' },
-        { key: 'accent_color', label: 'Accent Color', type: 'color' },
-        { key: 'background_color', label: 'Background Color', type: 'color' },
-        { key: 'text_color', label: 'Text Color', type: 'color' },
-        { key: 'heading_font_family', label: 'Heading Font', type: 'text' },
-        { key: 'body_font_family', label: 'Body Font', type: 'text' }
-      ] }
-    ]
-  },
-  homepage: {
-    title: 'Homepage',
-    description: 'Hero and introduction shown on the website home page.',
-    groups: [
-      { section: 'homepage', fields: [
-        { key: 'hero_headline', label: 'Hero Headline', type: 'text', required: true },
-        { key: 'hero_subheadline', label: 'Hero Subheadline', type: 'textarea', required: true },
-        { key: 'hero_image_url', label: 'Hero Image URL', type: 'text', placeholder: 'https://…' },
-        { key: 'intro_copy', label: 'Intro Copy', type: 'textarea' },
-        { key: 'cta_label', label: 'CTA Label', type: 'text' },
-        { key: 'cta_link', label: 'CTA Link', type: 'text', placeholder: '/site/sales or https://…' }
-      ] }
-    ]
-  },
-  about: {
-    title: 'About',
-    description: 'About page headline and copy (blank-line separated paragraphs).',
-    groups: [
-      { section: 'about', fields: [
-        { key: 'headline', label: 'Headline', type: 'text' },
-        { key: 'body', label: 'Body', type: 'textarea', rows: 8 }
-      ] }
-    ]
-  },
-  services: {
-    title: 'Services',
-    description: 'Services shown on the website services page.',
-    groups: [
-      { section: 'services', fields: [
-        { key: 'headline', label: 'Headline', type: 'text' },
-        { key: 'intro', label: 'Intro', type: 'textarea' }
-      ], itemFields: [
-        { key: 'title', label: 'Service Title', type: 'text' },
-        { key: 'description', label: 'Description', type: 'textarea' }
-      ] }
-    ]
-  },
-  testimonials: {
-    title: 'Testimonials',
-    description: 'Client testimonials shown on the website.',
-    groups: [
-      { section: 'testimonials', fields: [
-        { key: 'headline', label: 'Headline', type: 'text' }
-      ], itemFields: [
-        { key: 'quote', label: 'Quote', type: 'textarea' },
-        { key: 'name', label: 'Name', type: 'text' },
-        { key: 'context', label: 'Context', type: 'text' }
-      ] }
-    ]
-  },
-  contact_social: {
-    title: 'Contact & Social',
-    description: 'Contact presentation and social profile links.',
-    groups: [
-      { section: 'contact', fields: [
-        { key: 'use_company_phone', label: 'Use Company Phone', type: 'bool' },
-        { key: 'phone_display', label: 'Phone Override (when not using company phone)', type: 'text' },
-        { key: 'use_company_email', label: 'Use Company Email', type: 'bool' },
-        { key: 'email_display', label: 'Email Override (when not using company email)', type: 'text' },
-        { key: 'address_display', label: 'Address Display', type: 'text', placeholder: 'City, State' },
-        { key: 'contact_cta_label', label: 'Contact CTA Label', type: 'text' }
-      ] },
-      { section: 'social', fields: [
-        { key: 'facebook', label: 'Facebook URL', type: 'text' },
-        { key: 'instagram', label: 'Instagram URL', type: 'text' },
-        { key: 'twitter', label: 'X / Twitter URL', type: 'text' },
-        { key: 'youtube', label: 'YouTube URL', type: 'text' },
-        { key: 'pinterest', label: 'Pinterest URL', type: 'text' }
-      ] }
-    ]
-  },
   seo: {
     title: 'SEO',
     description: 'Default SEO title, description and social image.',
@@ -173,16 +86,6 @@ export const EDITOR_PANELS = {
         { key: 'default_title', label: 'Default Title', type: 'text' },
         { key: 'default_description', label: 'Default Description', type: 'textarea' },
         { key: 'social_image_url', label: 'Social Image URL', type: 'text' }
-      ] }
-    ]
-  },
-  policies: {
-    title: 'Policies',
-    description: 'Privacy policy and terms copy shown on the website legal page.',
-    groups: [
-      { section: 'legal', fields: [
-        { key: 'privacy_policy_text', label: 'Privacy Policy', type: 'textarea', rows: 8 },
-        { key: 'terms_text', label: 'Terms of Service', type: 'textarea', rows: 8 }
       ] }
     ]
   }
