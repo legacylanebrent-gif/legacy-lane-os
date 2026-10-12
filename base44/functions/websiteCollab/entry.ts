@@ -79,6 +79,22 @@ async function applyWorkflow(service, tenant, user, to, extraPatch) {
   return { tenant: updated };
 }
 
+// Same-state review refresh (Part 27): the submission metadata (version, round,
+// timestamp) is re-stamped without a workflow transition — the state is already
+// ready_for_review, only the reviewed snapshot moved.
+async function refreshSubmittedReview(service, tenant, user, settingsVersion, newRound) {
+  const now = new Date().toISOString();
+  const updated = await service.entities.WebsiteTenant.update(tenant.id, {
+    review_submitted_at: now,
+    review_submitted_by: user ? user.id : 'system',
+    review_version: settingsVersion,
+    review_round: newRound,
+    workflow_updated_at: now,
+    workflow_updated_by: user ? user.id : 'system'
+  });
+  return { tenant: updated };
+}
+
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -514,7 +530,16 @@ async function submitForReview(service, user, tenant, company, body) {
   }
 
   const workflow = tenant.workflow_status || inferWorkflowFromTechnical(tenant.status);
-  if (workflow === 'ready_for_review') return jerr('already_submitted', 'This website is already waiting for review', 409);
+  if (workflow === 'ready_for_review') {
+    // Part 27 freshness: a save AFTER submission makes the reviewed version
+    // stale — allow a refresh-resubmission so the admin reviews the current
+    // version. Identical version = genuine duplicate click, refused.
+    const settingsVersion = (settingsRow && settingsRow.settings_version) || 1;
+    const submittedVersion = tenant.review_version || null;
+    if (submittedVersion !== null && settingsVersion <= submittedVersion) {
+      return jerr('already_submitted', 'This website is already waiting for review', 409);
+    }
+  }
   if (workflow === 'approved') return jerr('already_approved', 'This website is already approved', 409);
   if (['live', 'suspended', 'archived'].includes(workflow)) {
     return jerr('invalid_state', 'This website is past the review stage', 409);
@@ -543,12 +568,16 @@ async function submitForReview(service, user, tenant, company, body) {
     await logActivity(service, tenant, { actorUser: user, role: user.role === 'admin' ? 'admin' : 'client', action: 'setup_started' });
   }
   const settingsVersion = (settingsRow && settingsRow.settings_version) || 1;
-  const step2 = await applyWorkflow(service, tenant, user, 'ready_for_review', {
-    review_submitted_at: now,
-    review_submitted_by: user.id,
-    review_version: settingsVersion,
-    review_round: round + 1
-  });
+  // Freshness refresh: already in ready_for_review but the reviewed version is
+  // stale — refresh in place (same-state re-submission) instead of a transition.
+  const step2 = workflow === 'ready_for_review'
+    ? await refreshSubmittedReview(service, tenant, user, settingsVersion, round + 1)
+    : await applyWorkflow(service, tenant, user, 'ready_for_review', {
+        review_submitted_at: now,
+        review_submitted_by: user.id,
+        review_version: settingsVersion,
+        review_round: round + 1
+      });
   if (step2.error) return jerr(step2.error.code, step2.error.message, step2.error.status);
   const finalTenant = step2.tenant;
 

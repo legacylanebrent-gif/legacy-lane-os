@@ -71,8 +71,9 @@ export async function notifyUsers(service, userIds, { title, message, linkPage, 
 }
 
 export async function notifyPlatformAdmins(service, payload) {
-  const page = await service.entities.User.filter({ role: 'admin' }, { limit: 100 });
-  const admins = (page.items || page).map(u => u.id);
+  // NOTE: the built-in User entity does not support the options/page form —
+  // plain filter returns the record array directly.
+  const admins = (await service.entities.User.filter({ role: 'admin' })).map(u => u.id);
   await notifyUsers(service, admins, payload);
 }
 
