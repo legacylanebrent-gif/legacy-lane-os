@@ -33,6 +33,7 @@ export default async function(req) {
       case 'regenerate_section': return await regenerateSection(base44, service, user, body);
       case 'edit_tool': return await editTool(base44, service, user, body);
       case 'apply_starter': return await applyStarter(base44, service, user, body);
+      case 'confirm_facts': return await confirmFacts(base44, service, user, body);
       case 'versions': return await versions(service, user, body);
       case 'restore_version': return await restoreVersion(base44, service, user, body);
       default: return jerr('unknown_action', 'Unknown action', 400);
@@ -287,6 +288,28 @@ async function applyStarter(base44, service, user, body) {
   const draft = starterDraft(input, library);
   const applied = await applyDraft(base44, service, user, tenant, settings, draft, input, library, 'starter');
   return Response.json({ status: 'ready', source: 'starter_content', applied_sections: applied.sections, version_id: applied.versionId });
+}
+
+// ── FACTUAL INPUTS CONFIRMATION (Part 36) — human, recorded, timestamped ─────
+async function confirmFacts(base44, service, user, body) {
+  const ctx = await loadContext(service, user, body.website_tenant_id);
+  if (ctx.error) return ctx.error;
+  const { tenant, settings } = ctx;
+  if (!settings) return jerr('no_settings', 'Generate content first', 400);
+  const prov = (settings.ai_provenance && typeof settings.ai_provenance === 'object')
+    ? { ...settings.ai_provenance } : {};
+  prov.factual_confirmation = {
+    confirmed: true, confirmed_at: new Date().toISOString(), confirmed_by: user.id
+  };
+  await service.entities.WebsiteTenantSettings.update(settings.id, {
+    ai_provenance: prov, last_saved_section: 'ai_facts', last_saved_by: user.id
+  });
+  await logActivity(service, tenant, {
+    actorUser: user, role: user.role === 'admin' ? 'admin' : 'client',
+    action: 'ai_facts_confirmed', section: 'ai_build',
+    detail: 'Confirmed the facts used in the AI draft'
+  });
+  return Response.json({ status: 'ready' });
 }
 
 // ── VERSION HISTORY + RESTORE (Parts 25/57) ──────────────────────────────────

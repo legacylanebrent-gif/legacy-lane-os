@@ -38,6 +38,7 @@ export const ALERT_LABELS = {
 // internals (Destination/Publication/runtime/API keys are never exposed).
 export const CLIENT_NAV = [
   { key: 'overview', label: 'Overview' },
+  { key: 'ai_build', label: 'AI Build' },
   { key: 'review', label: 'Review Notes' },
   { key: 'business', label: 'Business' },
   { key: 'branding', label: 'Branding' },
@@ -86,6 +87,7 @@ export const MANAGEMENT_MODE_LABELS = {
 
 export const MANAGER_NAV = [
   { key: 'overview', label: 'Overview' },
+  { key: 'ai_build', label: 'AI Build' },
   { key: 'review', label: 'Review' },
   { key: 'business', label: 'Business' },
   { key: 'branding', label: 'Branding' },

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import AiCopyTools from '@/components/llbb/AiCopyTools';
 import { Loader2, Upload } from 'lucide-react';
 
 export default function AboutEditor({ websiteTenantId, settings, onSaved }) {
@@ -37,12 +38,18 @@ export default function AboutEditor({ websiteTenantId, settings, onSaved }) {
     <div className="space-y-4">
       <SectionCard title="About Page" description="Company story, mission and introductions. Nothing is required — empty sections simply don't render.">
         <Field label="Headline"><Input value={a.headline} onChange={(e) => set('headline', e.target.value)} placeholder={`About the business`} /></Field>
-        <Field label="Company Story" hint="Paragraphs separated by blank lines."><Textarea rows={6} value={a.body} onChange={(e) => set('body', e.target.value)} /></Field>
+        <Field label="Company Story" hint="Paragraphs separated by blank lines.">
+          <Textarea rows={6} value={a.body} onChange={(e) => set('body', e.target.value)} />
+          <AiCopyTools websiteTenantId={websiteTenantId} value={a.body} onApply={(t) => set('body', t)} />
+        </Field>
         <Field label="Mission"><Textarea rows={3} value={a.mission} onChange={(e) => set('mission', e.target.value)} /></Field>
       </SectionCard>
 
       <SectionCard title="Owner Introduction">
-        <Field label="Owner Bio"><Textarea rows={4} value={a.owner_bio} onChange={(e) => set('owner_bio', e.target.value)} /></Field>
+        <Field label="Owner Bio">
+          <Textarea rows={4} value={a.owner_bio} onChange={(e) => set('owner_bio', e.target.value)} />
+          <AiCopyTools websiteTenantId={websiteTenantId} value={a.owner_bio} onApply={(t) => set('owner_bio', t)} />
+        </Field>
         <div className="flex items-center gap-3">
           {a.owner_photo_url && <img src={a.owner_photo_url} alt="Owner" className="w-14 h-14 rounded object-cover" />}
           <label className="cursor-pointer">

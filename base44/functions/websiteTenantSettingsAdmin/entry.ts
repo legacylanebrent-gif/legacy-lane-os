@@ -44,6 +44,23 @@ export default async function(req) {
       patch.last_saved_by = user.id;
       const existing = await getTenantSettings(service, tenant.id);
 
+      // Phase 4F (Part 24) — human-edit protection: manual saves of AI-written
+      // sections stamp provenance so AI regeneration warns before overwriting
+      // operator edits. Never applied to a setting the AI never touched.
+      const sectionKey = typeof body.section === 'string' ? body.section : null;
+      const stampable = sectionKey && ['homepage', 'about', 'services', 'faq', 'seo'].includes(sectionKey)
+        ? (sectionKey === 'homepage' ? ['homepage', 'why_choose_us', 'how_it_works', 'cta'] : [sectionKey])
+        : [];
+      if (stampable.length && existing && existing.ai_provenance && typeof existing.ai_provenance === 'object') {
+        const prov = { ...existing.ai_provenance };
+        prov.sections = { ...(prov.sections || {}) };
+        const nowIso = new Date().toISOString();
+        for (const k of stampable) {
+          if (prov.sections[k]) prov.sections[k] = { ...prov.sections[k], origin: 'human', human_edited_at: nowIso };
+        }
+        patch.ai_provenance = prov;
+      }
+
       // Part 15 — stale concurrent-edit protection. The client sends the
       // updated_date it loaded; a mismatch means someone else saved in between.
       const expected = typeof body.expected_updated_at === 'string' ? body.expected_updated_at : null;

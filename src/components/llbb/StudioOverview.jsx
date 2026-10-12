@@ -4,9 +4,10 @@
 // setup manager. Optional items never block readiness.
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, AlertTriangle, Circle, AlertCircle, ShieldAlert, ArrowRight } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Circle, AlertCircle, ShieldAlert, ArrowRight, Sparkles } from 'lucide-react';
 import { READINESS_SECTION_TABS, WORKFLOW_BADGE, WORKFLOW_LABELS, MANAGEMENT_MODE_LABELS } from '@/components/llbb/managerConfig';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const ICONS = {
   complete: <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />,
@@ -44,6 +45,26 @@ export default function StudioOverview({ ov, settings, onNavigate }) {
 
   return (
     <div className="space-y-4 max-w-3xl">
+      {/* Phase 4F — AI content assist card */}
+      <div className="bg-white rounded-lg border border-cyan-200 overflow-hidden">
+        <div className="px-5 py-4 flex flex-wrap items-center gap-3">
+          <Sparkles className="w-5 h-5 text-cyan-700 flex-shrink-0" />
+          <div className="flex-1 min-w-[200px]">
+            <div className="text-sm font-semibold text-slate-900">
+              {settings && settings.ai_provenance && settings.ai_provenance.generated_at ? 'AI content assist' : 'Build My Website For Me'}
+            </div>
+            <p className="text-xs text-slate-500">
+              {settings && settings.ai_provenance && settings.ai_provenance.generated_at
+                ? 'Your AI-assisted draft is in. Regenerate sections, restore versions or edit everything by hand.'
+                : 'Answer a few short questions and AI writes a professional first draft for you to review — nothing is published automatically.'}
+            </p>
+          </div>
+          <Button size="sm" className="bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => onNavigate('ai_build')}>
+            {settings && settings.ai_provenance && settings.ai_provenance.generated_at ? 'Open AI Build' : 'Build My Website For Me'}
+          </Button>
+        </div>
+      </div>
+
       {/* Headline card */}
       <div className="bg-white rounded-lg border border-slate-200">
         <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">

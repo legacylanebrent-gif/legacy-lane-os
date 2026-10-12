@@ -15,6 +15,7 @@ import ActivityHistoryPanel from '@/components/llbb/ActivityHistoryPanel';
 import SettingsSectionEditor from '@/components/llbb/SettingsSectionEditor';
 import ManagerPreviewPanel from '@/components/llbb/ManagerPreviewPanel';
 import ClientOverview from '@/components/llbb/ClientOverview';
+import AiWebsiteBuilderPanel from '@/components/llbb/AiWebsiteBuilderPanel';
 import AccessPanel from '@/components/llbb/AccessPanel';
 import ClientDomainPanel from '@/components/llbb/ClientDomainPanel';
 import BusinessEditor from '@/components/llbb/BusinessEditor';
@@ -89,6 +90,7 @@ export default function ClientWebsiteManager() {
   const editor = () => {
     switch (tab) {
       case 'overview': return <ClientOverview data={data} onNavigate={setTab} onSaved={onSaved} />;
+      case 'ai_build': return <AiWebsiteBuilderPanel websiteTenantId={w.id} settings={settings} company={data.company} onSaved={onSaved} onNavigate={setTab} />;
       case 'review': return (
         <div className="space-y-5">
           {data.review.submitted_at && (

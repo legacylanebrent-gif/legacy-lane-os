@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import SectionRegistryListRenderer, { SectionRegistryList } from '@/components/llbb/SectionRegistryList';
+import AiCopyTools from '@/components/llbb/AiCopyTools';
 import { Wand2 } from 'lucide-react';
 
 const SECTION_LABELS = {
@@ -51,7 +52,10 @@ export default function HomepageEditor({ websiteTenantId, settings, onSaved }) {
     <div className="space-y-4">
       <SectionCard title="Hero" description="The first thing visitors see. Headline and subheadline are required before launch.">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Headline" required><Input value={h.hero_headline} onChange={(e) => setH(s => ({ ...s, hero_headline: e.target.value }))} /></Field>
+          <Field label="Headline" required>
+            <Input value={h.hero_headline} onChange={(e) => setH(s => ({ ...s, hero_headline: e.target.value }))} />
+            <AiCopyTools websiteTenantId={websiteTenantId} value={h.hero_headline} onApply={(t) => setH(s => ({ ...s, hero_headline: t }))} />
+          </Field>
           <Field label="Layout" hint="Preview reflects the layout after save.">
             <Select value={h.hero_layout} onValueChange={(v) => setH(s => ({ ...s, hero_layout: v }))}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
@@ -62,7 +66,10 @@ export default function HomepageEditor({ websiteTenantId, settings, onSaved }) {
             <p className="text-xs text-slate-400 mt-1">{(HERO_LAYOUTS.find(l => l.key === h.hero_layout) || {}).description}</p>
           </Field>
         </div>
-        <Field label="Subheadline" required><Textarea rows={2} value={h.hero_subheadline} onChange={(e) => setH(s => ({ ...s, hero_subheadline: e.target.value }))} /></Field>
+        <Field label="Subheadline" required>
+          <Textarea rows={2} value={h.hero_subheadline} onChange={(e) => setH(s => ({ ...s, hero_subheadline: e.target.value }))} />
+          <AiCopyTools websiteTenantId={websiteTenantId} value={h.hero_subheadline} onApply={(t) => setH(s => ({ ...s, hero_subheadline: t }))} />
+        </Field>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Primary CTA Text"><Input value={h.cta_label} onChange={(e) => setH(s => ({ ...s, cta_label: e.target.value }))} placeholder="View Our Sales" /></Field>
           <Field label="Primary CTA Link" hint="Controlled paths (e.g. /site/sales) or a https link"><Input value={h.cta_link} onChange={(e) => setH(s => ({ ...s, cta_link: e.target.value }))} /></Field>
@@ -77,7 +84,10 @@ export default function HomepageEditor({ websiteTenantId, settings, onSaved }) {
       </SectionCard>
 
       <SectionCard title="Trust / Introduction" description="A short paragraph under the hero.">
-        <Field label="Intro Copy"><Textarea rows={4} value={h.intro_copy} onChange={(e) => setH(s => ({ ...s, intro_copy: e.target.value }))} /></Field>
+        <Field label="Intro Copy">
+          <Textarea rows={4} value={h.intro_copy} onChange={(e) => setH(s => ({ ...s, intro_copy: e.target.value }))} />
+          <AiCopyTools websiteTenantId={websiteTenantId} value={h.intro_copy} onApply={(t) => setH(s => ({ ...s, intro_copy: t }))} />
+        </Field>
       </SectionCard>
 
       <SectionCard title="Why Choose Us" description="3–6 value points. Only points you write appear — nothing is claimed automatically.">

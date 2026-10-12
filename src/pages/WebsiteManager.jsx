@@ -17,6 +17,7 @@ import InviteClientModal from '@/components/llbb/InviteClientModal';
 import SettingsSectionEditor from '@/components/llbb/SettingsSectionEditor';
 import ManagerPreviewPanel from '@/components/llbb/ManagerPreviewPanel';
 import StudioOverview from '@/components/llbb/StudioOverview';
+import AiWebsiteBuilderPanel from '@/components/llbb/AiWebsiteBuilderPanel';
 import BusinessEditor from '@/components/llbb/BusinessEditor';
 import BrandingStudio from '@/components/llbb/BrandingStudio';
 import MediaLibraryPanel from '@/components/llbb/MediaLibraryPanel';
@@ -104,6 +105,7 @@ export default function WebsiteManager() {
   const editor = () => {
     switch (tab) {
       case 'overview': return <StudioOverview ov={ov} settings={settings} onNavigate={setTab} />;
+      case 'ai_build': return <AiWebsiteBuilderPanel websiteTenantId={tenantId} settings={settings} company={ov.company} onSaved={onSaved} onNavigate={setTab} />;
       case 'business': return <BusinessEditor websiteTenantId={tenantId} settings={settings} company={ov.company} onSaved={onSaved} />;
       case 'branding': return <BrandingStudio websiteTenantId={tenantId} settings={settings} onSaved={onSaved} />;
       case 'media': return <MediaLibraryPanel websiteTenantId={tenantId} settings={settings} onSaved={onSaved} />;
