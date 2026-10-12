@@ -581,9 +581,40 @@
         },
         "social_image_url": {
           "type": "string"
+        },
+        "search_visibility": {
+          "type": "string",
+          "enum": [
+            "index",
+            "noindex"
+          ],
+          "default": "index",
+          "description": "Phase 4E \u2014 search engine visibility policy. 'index' (default) allows search engines to index the LIVE website; 'noindex' opts the whole website out of search indexing. The included EstateSalen subdomain is always a valid, indexable identity."
         }
       },
       "default": {}
+    },
+    "page_seo": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Page SEO title override."
+          },
+          "description": {
+            "type": "string",
+            "description": "Page meta description override."
+          },
+          "social_image_url": {
+            "type": "string",
+            "description": "Page social share image override."
+          }
+        }
+      },
+      "description": "Phase 4E (Parts 21/22) \u2014 per-page presentation SEO overrides keyed by the platform page vocabulary (home, estate_sales, sale_detail, services, service_detail, about, gallery, faq, contact). Blanks fall back to deterministic safe defaults. Never arbitrary head markup."
     },
     "faq": {
       "type": "object",

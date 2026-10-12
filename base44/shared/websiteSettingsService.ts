@@ -29,7 +29,8 @@ export function defaultPublicSettings(company) {
     services: { headline: null, intro: null, items: [] },
     gallery: { headline: null, intro: null, items: [] },
     cta: { label: null, sublabel: null, link: null },
-    seo: { default_title: null, default_description: null, social_image_url: null },
+    seo: { default_title: null, default_description: null, social_image_url: null, search_visibility: 'index' },
+    page_seo: {},
     faq: { headline: null, items: [] },
     testimonials: { headline: null, items: [] },
     policies: { items: [] },
@@ -71,6 +72,25 @@ const cleanStrArray = (arr) => (Array.isArray(arr) ? arr.filter(x => typeof x ==
 // member_user_ids, internal record ids, or any Company operational internals.
 // Contact presentation is operator-authored display copy; Company values flow
 // through ONLY when the operator explicitly opted in (use_company_*).
+const PAGE_SEO_KEYS = ['home', 'estate_sales', 'sale_detail', 'services', 'service_detail', 'about', 'gallery', 'faq', 'contact'];
+
+// Phase 4E — validated per-page SEO overrides (title/description/social image).
+function projectPageSeo(raw) {
+  const out = {};
+  const src = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+  for (const key of PAGE_SEO_KEYS) {
+    const v = src[key];
+    if (!v || typeof v !== 'object' || Array.isArray(v)) continue;
+    const entry = {
+      title: cleanStr(v.title, 200),
+      description: cleanStr(v.description, 500),
+      social_image_url: httpsUrl(v.social_image_url)
+    };
+    if (entry.title || entry.description || entry.social_image_url) out[key] = entry;
+  }
+  return out;
+}
+
 export function projectPublicSettings(settings, company) {
   if (!settings) return defaultPublicSettings(company);
   const b = settings.branding || {}, c = settings.contact || {}, so = settings.social || {},
@@ -215,8 +235,12 @@ export function projectPublicSettings(settings, company) {
     cta: { label: cleanStr(ct.label, 200), sublabel: cleanStr(ct.sublabel, 500), link: safeLink(ct.link) },
     seo: {
       default_title: cleanStr(seo.default_title, 200), default_description: cleanStr(seo.default_description, 500),
-      social_image_url: httpsUrl(seo.social_image_url)
+      social_image_url: httpsUrl(seo.social_image_url),
+      // Phase 4E — search visibility policy (index is the safe default).
+      search_visibility: seo.search_visibility === 'noindex' ? 'noindex' : 'index'
     },
+    // Phase 4E (Parts 21/22) — per-page presentation SEO overrides.
+    page_seo: projectPageSeo(settings.page_seo),
     faq: { headline: cleanStr(faq.headline, 200), items: faqItems },
     testimonials: { headline: cleanStr(ts.headline, 200), items: testimonialItems },
     policies: {
@@ -278,7 +302,7 @@ const SUB_KEYS = {
   services: ['headline', 'intro', 'items'],
   gallery: ['headline', 'intro', 'items'],
   cta: ['label', 'sublabel', 'link'],
-  seo: ['default_title', 'default_description', 'social_image_url'],
+  seo: ['default_title', 'default_description', 'social_image_url', 'search_visibility'],
   faq: ['headline', 'items'],
   testimonials: ['headline', 'items'],
   policies: ['items'],
@@ -288,7 +312,7 @@ const SUB_KEYS = {
   sale_display: ['show_sold_items', 'show_prices'],
   inventory_display: ['show_prices', 'show_condition']
 };
-const TOP_KEYS = ['site_title', 'display_business_name', 'tagline', ...Object.keys(SUB_KEYS), 'settings_version', 'notes'];
+const TOP_KEYS = ['site_title', 'display_business_name', 'tagline', ...Object.keys(SUB_KEYS), 'page_seo', 'settings_version', 'notes'];
 const str = v => (typeof v === 'string' ? v.slice(0, 20000) : undefined);
 const hexColor = v => (typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v.trim()) ? v.trim() : undefined);
 const iconVal = v => (ICON_KEYS.includes(v) ? v : undefined);
@@ -418,6 +442,10 @@ export function sanitizeSettingsPayload(payload) {
       out[k] = cleaned;
     } else if (k === 'settings_version') {
       if (Number.isInteger(payload[k])) out[k] = payload[k];
+    } else if (k === 'page_seo') {
+      // Phase 4E — structured per-page SEO overrides.
+      const v = payload[k];
+      if (v && typeof v === 'object' && !Array.isArray(v)) out[k] = projectPageSeo(v);
     } else {
       const s = str(payload[k]);
       if (s !== undefined) out[k] = s;

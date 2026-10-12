@@ -6,6 +6,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveWebsiteTenant, getPublishedSales } from '../../shared/websiteRuntimeService.ts';
 import { enqueueActivity, resolveMasterUserID } from '../../shared/identityActivityOutbox.ts';
+import { emitLeadFunnelEvent } from '../../shared/websiteEventEmit.ts';
 
 const MVP_LEAD_TYPES = ['seller_inquiry', 'contact', 'sale_question'];
 const SERVICES = ['estate_sale', 'downsizing', 'cleanout', 'probate_estate', 'moving', 'consignment', 'real_estate', 'valuation', 'not_sure', 'other'];
@@ -186,6 +187,8 @@ export default async function(req) {
       }
     });
 
+    // Phase 4E (Parts 32/35) — canonical lead ⇄ analytics linkage.
+    await emitLeadFunnelEvent(service, ctx, 'seller_lead', { page: created.source_url || null });
     return Response.json({ ok: true, lead_id: created.id });
   } catch (error) {
     console.error('submitPublicWebsiteLead error:', error && error.message);

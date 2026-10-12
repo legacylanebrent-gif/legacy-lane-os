@@ -40,6 +40,8 @@ import {
 
 // jerr + pageOf come from the shared collab module (Phase 4D extraction).
 import { jerr, pageOf } from '../../shared/websiteCollabShared.ts';
+import { runLaunchChecks } from '../../shared/websitePublishShared.ts';
+import { clearWebsiteRuntimeCache } from '../../shared/websiteRuntimeService.ts';
 
 export default async function(req) {
   try {
@@ -62,6 +64,7 @@ export default async function(req) {
     if (action === 'company_search') return await companySearch(service, body);
     if (action === 'slug_check') return await slugCheck(service, body);
     if (action === 'workflow') return await workflow(service, user, body);
+    if (action === 'publish_preflight') return await publishPreflight(service, user, body);
     if (action === 'set_manager') return await setManager(service, body);
     // Phase 4C — Estate Sales management + Leads dashboard.
     if (action === 'sales_list') return await salesList(service, body);
@@ -319,28 +322,57 @@ async function workflow(service, user, body) {
     if (desiredTechnical === 'archived') { patch.archived_at = now; patch.archived_by = user.id; }
   }
 
-  // Launch gate: explicit readiness blockers must be clear before LIVE.
+  // Phase 4E (Parts 2/3) — the launch gate ALWAYS reruns the EXTENDED publish
+  // checks at publish time; stale readiness state is never trusted blindly.
   if (to === 'live') {
-    const company = await service.entities.Company.get(tenant.company_id).catch(() => null);
-    const domPage = await service.entities.WebsiteDomain.filter({ website_tenant_id: tenant.id }, { limit: 50 });
-    const domains = domPage.items || domPage;
-    const destination = tenant.destination_id ? await service.entities.Destination.get(tenant.destination_id).catch(() => null) : null;
-    const p = await service.entities.WebsiteTenantSettings.filter({ website_tenant_id: tenant.id, is_active: true }, { limit: 5, sort: 'created_date' });
-    const settingsRow = (p.items || p)[0] || null;
-    const readiness = computeReadiness({ tenant, settings: projectPublicSettings(settingsRow, company), destination, domains });
-    if (readiness.blockers.length > 0) {
+    const checks = await runLaunchChecks(service, tenant);
+    if (!checks.ok) {
       return Response.json({
         error: {
           code: 'launch_blockers',
-          message: 'Launch blocked — required setup sections incomplete',
-          blockers: readiness.blockers.map(b => ({ key: b.key, label: b.label, reason: b.reason }))
+          message: 'Publish blocked — required checks did not pass',
+          blockers: checks.blockers
         }
       }, { status: 409 });
     }
   }
 
   const updated = await service.entities.WebsiteTenant.update(tenant.id, patch);
+
+  // Phase 4E (Part 4) — the included platform hostname becomes a first-class
+  // production address on successful publication (runtime cache is cleared so
+  // the live state propagates immediately).
+  if (to === 'live') {
+    const domPage = await service.entities.WebsiteDomain.filter(
+      { website_tenant_id: tenant.id, domain_type: 'platform_subdomain' }, { limit: 5 });
+    for (const d of (domPage.items || domPage)) {
+      if (d.status !== 'active') {
+        await service.entities.WebsiteDomain.update(d.id, {
+          status: 'active',
+          verification_status: 'verified',
+          verified_at: d.verified_at || new Date().toISOString(),
+          verified_by: d.verified_by || 'system:publish',
+          status_reason: 'platform_host_live'
+        }).catch(() => {});
+      }
+    }
+    clearWebsiteRuntimeCache();
+  }
   return Response.json({ ok: true, tenant: updated });
+}
+
+// Phase 4E (Part 3) — publish-time preflight for the confirmation UI. Runs the
+// SAME extended checks without changing any state.
+async function publishPreflight(service, user, body) {
+  const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
+  if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);
+  if (user.role !== 'admin' && tenant.created_via !== 'llbb') {
+    return jerr('not_llbb_tenant', 'Publish control is only available for Business Builder websites', 403);
+  }
+  const access = assertTenantAccess(user, tenant);
+  if (access.error) return Response.json({ error: access.error }, { status: access.status || 403 });
+  const checks = await runLaunchChecks(service, tenant);
+  return Response.json({ ok: true, can_publish: checks.ok, checks: checks.checks, blockers: checks.blockers });
 }
 
 // ── Setup manager assignment ──────────────────────────────────────────────────

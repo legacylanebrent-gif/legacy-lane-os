@@ -7,7 +7,7 @@
 // runtime endpoint provides the tenant-safe sitemap.xml and robots directives
 // for each resolved operator hostname.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { resolveWebsiteTenant, getPublicSitemapEntries } from '../../shared/websiteRuntimeService.ts';
+import { resolveWebsiteTenant, getPublicSitemapEntries, getPrimaryHostname } from '../../shared/websiteRuntimeService.ts';
 
 export default async function(req) {
   try {
@@ -32,7 +32,8 @@ export default async function(req) {
     }
 
     const entries = await getPublicSitemapEntries(service, ctx);
-    const origin = `https://${ctx.hostname}`;
+    // Phase 4E (Part 23) — sitemap URLs always use the PRIMARY public hostname.
+    const origin = `https://${await getPrimaryHostname(service, ctx.tenant.id, ctx.hostname)}`;
     const urls = [
       ...entries.static_paths.map(p => `${origin}${p}`),
       ...entries.sales.map(s => `${origin}/site/sale/${s.slug}`)

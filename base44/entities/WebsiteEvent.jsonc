@@ -1,0 +1,110 @@
+{
+  "name": "WebsiteEvent",
+  "type": "object",
+  "description": "Phase 4E (Parts 30-33) \u2014 tenant-safe website analytics events. Written ONLY through the trackWebsiteEvent server seam (attribution derived from hostname resolution \u2014 never client-supplied tenant/company ids) and the canonical lead funnel (seller_lead / buyer_signup). NO personal information: pseudonymous session hash only, referrer reduced to origin host. Marketing (Customer.io) and analytics are separate concerns.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant attribution \u2014 derived server-side from hostname resolution."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company \u2014 derived server-side from the resolved tenant."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "sale_view",
+        "inventory_view",
+        "seller_cta_click",
+        "seller_lead",
+        "buyer_signup",
+        "phone_click",
+        "email_click",
+        "directions_click",
+        "share_click",
+        "calendar_add"
+      ],
+      "description": "Controlled analytics vocabulary (Part 32)."
+    },
+    "hostname": {
+      "type": "string",
+      "description": "Resolved public hostname the event occurred on."
+    },
+    "page": {
+      "type": "string",
+      "description": "Page path (e.g. /site, /site/sale/<slug>). Path only \u2014 no query strings."
+    },
+    "sale_public_id": {
+      "type": "string",
+      "description": "Public sale identifier when the event is sale-scoped (joined to canonical Sales in analytics reads)."
+    },
+    "item_public_id": {
+      "type": "string",
+      "description": "Public inventory item identifier when item-scoped."
+    },
+    "referrer": {
+      "type": "string",
+      "description": "Referrer reduced to ORIGIN HOST only (privacy, Part 31). Empty for direct traffic."
+    },
+    "utm_source": {
+      "type": "string"
+    },
+    "utm_medium": {
+      "type": "string"
+    },
+    "utm_campaign": {
+      "type": "string"
+    },
+    "session_hash": {
+      "type": "string",
+      "description": "Pseudonymous per-browser session identifier (client-generated random id). Never an email, name, IP or device fingerprint."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "event_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -231,6 +231,16 @@ export function buildPublicWebsiteContext({ ctx, sales, settings, template }) {
   };
 }
 
+// Phase 4E (Parts 15/23) — primary public hostname for canonical URLs. The
+// tenant's chosen primary domain wins; the included platform subdomain is the
+// fallback. Preview hosts never influence the canonical identity.
+export async function getPrimaryHostname(service, tenantId, fallbackHost) {
+  const page = await service.entities.WebsiteDomain.filter({ website_tenant_id: tenantId }, { limit: 25 });
+  const list = (page.items || page).filter(d => d.status !== 'disconnected');
+  const primary = list.find(d => d.is_primary) || list.find(d => d.domain_type === 'platform_subdomain');
+  return primary ? primary.hostname : fallbackHost;
+}
+
 // ── Phase 3D.1 thin runtime projections (Parts 18/19/20/21) ──────────────────
 // Five thin compositions over the CERTIFIED Phase 3C services — no new
 // inventory service, no raw settings exposure, canonical data always wins.

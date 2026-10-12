@@ -68,9 +68,12 @@ export default async function(req) {
     const settings = await getPublicSettingsForContext(service, ctx);
     const template = { id: ctx.tenant.template_id || null, version: ctx.tenant.template_version || 1 };
     const sales = await listPublicSales(service, ctx);
+    // Phase 4E (Part 23) — canonical identity uses the PRIMARY public hostname.
+    const { getPrimaryHostname } = await import('../../shared/websiteRuntimeService.ts');
+    const primary_hostname = await getPrimaryHostname(service, ctx.tenant.id, ctx.hostname);
     return Response.json({
       ok: true,
-      website: buildPublicWebsiteContext({ ctx, sales, settings, template })
+      website: { ...buildPublicWebsiteContext({ ctx, sales, settings, template }), primary_hostname }
     });
   } catch (error) {
     console.error('websiteRuntime error:', error && error.message);
