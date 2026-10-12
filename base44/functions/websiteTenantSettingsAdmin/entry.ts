@@ -29,6 +29,9 @@ export default async function(req) {
 
     if (body.action === 'update') {
       const patch = sanitizeSettingsPayload(body.settings || {});
+      // Change attribution (Part 4B/27): which section and who saved last.
+      patch.last_saved_section = typeof body.section === 'string' && body.section.length <= 50 ? body.section : undefined;
+      patch.last_saved_by = user.id;
       const existing = await getTenantSettings(service, tenant.id);
       let saved;
       if (existing) {
