@@ -53,6 +53,8 @@ export const CLIENT_NAV = [
   { key: 'policies', label: 'Policies' },
   { key: 'seo', label: 'SEO' },
   { key: 'domain', label: 'Domain' },
+  { key: 'analytics', label: 'Traffic' },
+  { key: 'health', label: 'Site Health' },
   { key: 'preview', label: 'Preview' },
   { key: 'team', label: 'Team' }
 ];
@@ -100,6 +102,8 @@ export const MANAGER_NAV = [
   { key: 'seo', label: 'SEO' },
   { key: 'navigation', label: 'Navigation & Footer' },
   { key: 'domain', label: 'Domain' },
+  { key: 'analytics', label: 'Analytics' },
+  { key: 'health', label: 'Site Health' },
   { key: 'preview', label: 'Preview' }
 ];
 

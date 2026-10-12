@@ -32,6 +32,9 @@ import NavigationFooterEditor from '@/components/llbb/NavigationFooterEditor';
 import LivePreviewRail from '@/components/llbb/LivePreviewRail';
 import LeadsPanel from '@/components/llbb/LeadsPanel';
 import EstateSalesPanel from '@/components/llbb/EstateSalesPanel';
+import AnalyticsPanel from '@/components/llbb/AnalyticsPanel';
+import SiteHealthPanel from '@/components/llbb/SiteHealthPanel';
+import DomainsManagerPanel from '@/components/llbb/DomainsManagerPanel';
 import { MANAGER_NAV, WORKFLOW_LABELS, WORKFLOW_BADGE, MANAGEMENT_MODE_LABELS } from '@/components/llbb/managerConfig';
 import { ArrowLeft, Eye, UserPlus, Loader2, Globe, Link2, LayoutList, PanelRightClose, PanelRightOpen, CheckCircle2 } from 'lucide-react';
 
@@ -46,27 +49,7 @@ function ComingPanel({ label }) {
   );
 }
 
-function DomainPanel({ ov }) {
-  return (
-    <div className="bg-white rounded-lg border border-slate-200 max-w-2xl">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <div className="font-heading font-bold text-slate-900 flex items-center gap-2"><Globe className="w-4 h-4" /> Domains</div>
-        <div className="text-sm text-slate-500 mt-0.5">Platform hostname is included. Custom domains are configured by platform admins in a later phase.</div>
-      </div>
-      <ul className="divide-y divide-slate-100">
-        {ov.domains.map(d => (
-          <li key={d.id} className="px-5 py-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-medium text-slate-900 truncate flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5 text-slate-400" />{d.hostname}</div>
-              <div className="text-xs text-slate-500">{d.domain_type === 'platform_subdomain' ? 'Platform hostname (included)' : 'Custom domain'}</div>
-            </div>
-            <Badge className={d.status === 'active' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}>{d.status}</Badge>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+// Phase 4E — domain management moved to DomainsManagerPanel (full DNS seam).
 
 export default function WebsiteManager() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -136,7 +119,9 @@ export default function WebsiteManager() {
       case 'seo': return <SettingsSectionEditor websiteTenantId={tenantId} panel="seo" settings={settings} onSaved={onSaved} />;
       case 'estate_sales': return <EstateSalesPanel websiteTenantId={tenantId} onNavigate={setTab} />;
       case 'leads': return <LeadsPanel websiteTenantId={tenantId} />;
-      case 'domain': return <DomainPanel ov={ov} />;
+      case 'analytics': return <AnalyticsPanel websiteTenantId={tenantId} />;
+      case 'health': return <SiteHealthPanel websiteTenantId={tenantId} />;
+      case 'domain': return <DomainsManagerPanel websiteTenantId={tenantId} domains={ov.domains} includedHostname={(ov.domains || []).find(d => d.domain_type === 'platform_subdomain')?.hostname} />;
       case 'review': return <ReviewCenterPanel ov={ov} onNavigate={setTab} onSaved={onSaved} />;
       case 'preview': return <ManagerPreviewPanel websiteTenantId={tenantId} />;
       default: return <StudioOverview ov={ov} settings={settings} onNavigate={setTab} />;

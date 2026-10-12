@@ -20,6 +20,22 @@ export default function WorkflowActions({ overview, onDone, primary }) {
 
   const go = async (to) => {
     setBusy(to); setError(null);
+    // Phase 4E (Part 3) — publishing always runs the publish preflight first:
+    // the same extended checks the server enforces, shown BEFORE the attempt.
+    if (to === 'live') {
+      try {
+        const pre = await base44.functions.invoke('llbbAdmin', { action: 'publish_preflight', website_tenant_id: overview.tenant.id });
+        if (pre.data && pre.data.can_publish === false) {
+          setError(`Publish blocked: ${pre.data.blockers.map(b => b.label).join(', ')}`);
+          setBusy(null);
+          return;
+        }
+      } catch (e) {
+        setError('Could not run the publish preflight.');
+        setBusy(null);
+        return;
+      }
+    }
     try {
       await base44.functions.invoke('llbbAdmin', { action: 'workflow', website_tenant_id: overview.tenant.id, to });
       if (onDone) await onDone();

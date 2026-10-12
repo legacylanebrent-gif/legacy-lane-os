@@ -31,6 +31,8 @@ import NavigationFooterEditor from '@/components/llbb/NavigationFooterEditor';
 import LivePreviewRail from '@/components/llbb/LivePreviewRail';
 import LeadsPanel from '@/components/llbb/LeadsPanel';
 import EstateSalesPanel from '@/components/llbb/EstateSalesPanel';
+import AnalyticsPanel from '@/components/llbb/AnalyticsPanel';
+import SiteHealthPanel from '@/components/llbb/SiteHealthPanel';
 import { CLIENT_NAV, WORKFLOW_LABELS, WORKFLOW_BADGE } from '@/components/llbb/managerConfig';
 import { Eye, Loader2, Link2, Globe, PanelRightClose, PanelRightOpen, CheckCircle2, Lock } from 'lucide-react';
 
@@ -122,6 +124,8 @@ export default function ClientWebsiteManager() {
       case 'seo': return <SettingsSectionEditor websiteTenantId={w.id} panel="seo" settings={settings} onSaved={onSaved} />;
       case 'estate_sales': return <EstateSalesPanel websiteTenantId={w.id} clientMode />;
       case 'leads': return <LeadsPanel websiteTenantId={w.id} clientMode />;
+      case 'analytics': return <AnalyticsPanel websiteTenantId={w.id} clientMode />;
+      case 'health': return <SiteHealthPanel websiteTenantId={w.id} clientMode />;
       case 'domain': return <ClientDomainPanel domains={data.domains} />;
       case 'preview': return <ManagerPreviewPanel websiteTenantId={w.id} />;
       case 'team': return <AccessPanel websiteTenantId={w.id} isOwnerOrAdmin={data.role.owner || data.role.admin} onChanged={onSaved} />;
