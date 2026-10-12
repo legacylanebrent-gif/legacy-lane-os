@@ -106,6 +106,7 @@ export function ItemListEditor({ items, onChange, fields, addLabel = 'Add Item',
           )}
           <div className="grid sm:grid-cols-2 gap-3">
             {fields.map(f => {
+              if (f.type === 'thumb') return null; // rendered by the thumbnail block above
               if (f.type === 'bool') {
                 return (
                   <div key={f.key} className={`flex items-center justify-between gap-3 ${f.full ? 'sm:col-span-2' : ''}`}>
