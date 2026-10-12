@@ -1,0 +1,73 @@
+<mjml>
+  <mj-head>
+    <mj-title>Your website is ready to finish — {{website_name}}</mj-title>
+    <mj-preview>{{invited_by_name}} invited you to complete your new website.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Arial, Helvetica, sans-serif" />
+      <mj-section background-color="#ffffff" padding="0 36px" />
+      <mj-text color="#0f172a" font-size="15px" line-height="1.6" padding="0" />
+      <mj-button background-color="#06b6d4" border-radius="6px" font-weight="700" color="#000000" inner-padding="14px 28px" align="left" />
+      <mj-class name="h" font-family="Georgia, 'Times New Roman', serif" font-weight="700" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f8fafc">
+    <mj-section background-color="#06b6d4" padding="18px 36px">
+      <mj-column>
+        <mj-image src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69471382fc72e5b50c72fcc7/4988b3f54_logo.png" alt="EstateSalen" align="left" width="120px" padding="0" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="36px 36px 8px">
+      <mj-column>
+        <mj-text mj-class="h" font-size="30px" line-height="1.15" color="#0f172a">Your website has already been created.</mj-text>
+        <mj-text font-size="15px" color="#64748b" padding-top="8px">Let's finish it together.</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="8px 36px 0">
+      <mj-column>
+        <mj-text font-size="15px" line-height="1.7">
+          {{first_name}}, {{invited_by_name}} set up a new website for <strong>{{company_name}}</strong> on EstateSalen and invited you to finish it. Most of the work is already done — you just review, polish and approve what's there.
+        </mj-text>
+        <mj-text font-size="15px" line-height="1.7" padding-top="12px">
+          <strong>Your website:</strong> {{website_name}}<br />
+          <strong>Company:</strong> {{company_name}}<br />
+          <strong>Invited by:</strong> {{invited_by_name}}
+        </mj-text>
+        <mj-text font-size="15px" line-height="1.7" padding-top="12px">
+          When you continue, you'll be able to:
+        </mj-text>
+        <mj-text font-size="15px" line-height="1.7" color="#0f172a">
+          &#8226; Confirm your business information<br />
+          &#8226; Add your logo and colors<br />
+          &#8226; Review your services and homepage<br />
+          &#8226; Preview the website and submit it for review
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="24px 36px 8px">
+      <mj-column>
+        <mj-button href="{{invite_url}}" background-color="#06b6d4" color="#000000" border-radius="6px" font-size="16px" font-weight="700" inner-padding="16px 32px">
+          COMPLETE MY WEBSITE
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="8px 36px 24px">
+      <mj-column>
+        <mj-text font-size="12px" color="#64748b" line-height="1.6">
+          This secure link is personal to you and expires on {{expires_at}}. If the button doesn't work, copy this address into your browser:<br />{{invite_url}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8fafc" border-top="1px solid #e5e7eb" padding="18px 36px">
+      <mj-column>
+        <mj-text font-size="12px" color="#64748b" line-height="1.6">
+          &copy; {{app_name}} &middot; You received this email because you were invited to finish a website for {{company_name}}.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

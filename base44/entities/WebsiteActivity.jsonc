@@ -1,0 +1,90 @@
+{
+  "name": "WebsiteActivity",
+  "type": "object",
+  "description": "Phase 4D \u2014 lightweight per-tenant website activity history (meaningful actions only: invites, section saves, review transitions, media changes, lifecycle). Not a keystroke log. Written only through server seams; tenant-isolated reads.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant the activity belongs to. All reads are tenant-scoped \u2014 never cross-tenant."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant."
+    },
+    "actor_user_id": {
+      "type": "string",
+      "description": "EstateSalen user who performed the action ('system' for automated)."
+    },
+    "actor_display": {
+      "type": "string",
+      "description": "Actor display name at the time of the action."
+    },
+    "actor_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "client",
+        "system"
+      ],
+      "default": "client",
+      "description": "Platform admin, authorized company user, or system."
+    },
+    "action": {
+      "type": "string",
+      "description": "Controlled action key (website_created, client_invited, invitation_accepted, section_updated, review_submitted, changes_requested, review_approved, media_added, media_removed, access_revoked, management_mode_changed, review_note_added, review_note_resolved)."
+    },
+    "section": {
+      "type": "string",
+      "description": "Setup section / object context when applicable (e.g. business, branding, homepage)."
+    },
+    "detail": {
+      "type": "string",
+      "description": "Short human-readable detail (sanitized, no secrets, no raw payloads)."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "action"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

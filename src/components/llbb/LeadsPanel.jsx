@@ -30,7 +30,11 @@ const STATUS_BADGE = {
   spam: 'bg-red-100 text-red-700 border border-red-200'
 };
 
-export default function LeadsPanel({ websiteTenantId }) {
+// clientMode (Phase 4D): the same Company-scoped lead view served through the
+// client-safe websiteCollab seam — website leads belong to the company's
+// website managers, never to another company.
+export default function LeadsPanel({ websiteTenantId, clientMode }) {
+  const seam = clientMode ? 'websiteCollab' : 'llbbAdmin';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
@@ -39,13 +43,13 @@ export default function LeadsPanel({ websiteTenantId }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await base44.functions.invoke('llbbAdmin', { action: 'leads_list', website_tenant_id: websiteTenantId });
+      const res = await base44.functions.invoke(seam, { action: 'leads_list', website_tenant_id: websiteTenantId });
       setData(res.data);
     } catch (e) {
       toast({ title: 'Could not load leads', variant: 'destructive' });
     }
     setLoading(false);
-  }, [websiteTenantId]);
+  }, [websiteTenantId, seam]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -54,7 +58,7 @@ export default function LeadsPanel({ websiteTenantId }) {
     setDetail(null);
     setDetailLoading(true);
     try {
-      const res = await base44.functions.invoke('llbbAdmin', { action: 'lead_detail', website_tenant_id: websiteTenantId, lead_id: id });
+      const res = await base44.functions.invoke(seam, { action: 'lead_detail', website_tenant_id: websiteTenantId, lead_id: id });
       setDetail(res.data.lead);
     } catch (e) {
       toast({ title: 'Could not load lead details', variant: 'destructive' });

@@ -15,21 +15,42 @@ import IconBadge from '@/templates/operatorTemplate1/IconBadge';
 import { Loader2, Plus, Trash2, Save, ArrowUp, ArrowDown, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 // ── Truthful save hook (Part 26): never shows Saved before persistence —───
+// Phase 4D (Part 15): records the settings updated_date as it was when the
+// editor opened (baseline fetched once on mount) and sends it with every
+// save — a mismatch yields the server's stale_edit 409 and a reload prompt.
 export function useSectionSaver(websiteTenantId, onSaved) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
+  const baseline = React.useRef(null);
+  React.useEffect(() => {
+    let alive = true;
+    base44.functions.invoke('websiteTenantSettingsAdmin', {
+      action: 'get', website_tenant_id: websiteTenantId
+    }).then((res) => {
+      if (alive && res.data && res.data.settings && res.data.settings.updated_date) {
+        baseline.current = res.data.settings.updated_date;
+      }
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, [websiteTenantId]);
   const save = async (patch, section) => {
     setSaving(true); setSaved(false); setError(null);
     try {
-      await base44.functions.invoke('websiteTenantSettingsAdmin', {
-        action: 'update', website_tenant_id: websiteTenantId, settings: patch, section
+      const res = await base44.functions.invoke('websiteTenantSettingsAdmin', {
+        action: 'update', website_tenant_id: websiteTenantId, settings: patch, section,
+        expected_updated_at: baseline.current
       });
+      if (res.data && res.data.settings && res.data.settings.updated_date) {
+        baseline.current = res.data.settings.updated_date;
+      }
       setSaved(true); setSaving(false);
       if (onSaved) onSaved();
       return true;
     } catch (e) {
-      setError('Error saving — click Save to retry.');
+      const code = e.response && e.response.data && e.response.data.error && e.response.data.error.code;
+      if (code === 'stale_edit') setError('This section changed since you opened it. Reload before saving.');
+      else setError('Error saving — click Save to retry.');
       setSaving(false);
       return false;
     }

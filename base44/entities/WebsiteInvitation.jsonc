@@ -1,0 +1,120 @@
+{
+  "name": "WebsiteInvitation",
+  "type": "object",
+  "description": "Phase 4D \u2014 single-purpose, expiring, Company+WebsiteTenant-bound client invitation. The raw token is NEVER stored: only its SHA-256 hash. Created and consumed exclusively through the websiteCollab server seam; client CRUD is admin-only by RLS.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant the invitation grants website-management access to. Ownership chain validated server-side: User \u2192 Company membership \u2192 Company \u2192 WebsiteTenant \u2192 Invitation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant \u2014 never accepted from the client. Invariant: invitation can never bind to a Company the tenant does not belong to."
+    },
+    "email": {
+      "type": "string",
+      "description": "Normalized lowercase invited email. On acceptance the authenticated user's email must match exactly (email-bound invitation)."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Invited person's name for the email and records."
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "website_manager"
+      ],
+      "default": "website_manager",
+      "description": "Capability granted on acceptance: website_manage. NOT a platform role and NOT operational Sale authority."
+    },
+    "invited_by_user_id": {
+      "type": "string",
+      "description": "EstateSalen admin who sent the invitation (audit)."
+    },
+    "management_mode_at_invite": {
+      "type": "string",
+      "description": "Tenant management_mode snapshot at invite time (diagnostics)."
+    },
+    "token_hash": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the single-use invitation token. The raw token is returned exactly once to the inviting admin and never stored."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "revoked",
+        "expired",
+        "canceled"
+      ],
+      "default": "pending",
+      "description": "Invitation lifecycle. Expired is stamped lazily on read/accept when expires_at has passed."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Acceptance deadline. Expired invitations fail closed."
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "accepted_by_user_id": {
+      "type": "string",
+      "description": "EstateSalen user that accepted (must equal the invited email)."
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the canonical SendEmail delivery succeeded (false \u2192 inviting admin can share the link manually)."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "email",
+    "token_hash",
+    "invited_by_user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

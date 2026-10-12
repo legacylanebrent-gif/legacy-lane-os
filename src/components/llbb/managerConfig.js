@@ -28,7 +28,42 @@ export const ALERT_LABELS = {
   domain_action_required: 'Domain Action Required',
   setup_incomplete: 'Setup Incomplete',
   publication_problem: 'Publication Problem',
-  site_suspended: 'Site Suspended'
+  site_suspended: 'Site Suspended',
+  invitation_expired: 'Invitation Expired',
+  setup_stalled: 'Setup Stalled',
+  ready_to_publish: 'Ready to Publish'
+};
+
+// Client Website Manager navigation (Part 8) — simplified, no technical
+// internals (Destination/Publication/runtime/API keys are never exposed).
+export const CLIENT_NAV = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'review', label: 'Review Notes' },
+  { key: 'business', label: 'Business' },
+  { key: 'branding', label: 'Branding' },
+  { key: 'homepage', label: 'Homepage' },
+  { key: 'about', label: 'About' },
+  { key: 'services', label: 'Services' },
+  { key: 'testimonials', label: 'Testimonials' },
+  { key: 'gallery', label: 'Gallery' },
+  { key: 'contact_social', label: 'Contact & Social' },
+  { key: 'estate_sales', label: 'Estate Sales' },
+  { key: 'leads', label: 'Website Leads' },
+  { key: 'faq', label: 'FAQ' },
+  { key: 'policies', label: 'Policies' },
+  { key: 'seo', label: 'SEO' },
+  { key: 'domain', label: 'Domain' },
+  { key: 'preview', label: 'Preview' },
+  { key: 'team', label: 'Team' }
+];
+
+// Readiness section key → client nav tab (client overview deep links).
+export const CLIENT_SECTION_TABS = {
+  business: 'business', homepage: 'homepage', contact: 'contact_social',
+  services: 'services', seo: 'seo', branding: 'branding', about: 'about',
+  testimonials: 'testimonials', gallery: 'gallery', social: 'contact_social',
+  faq: 'faq', legal: 'policies', domain: 'domain', sales_integration: 'estate_sales',
+  content_quality: 'homepage'
 };
 
 export const TRANSITION_LABELS = {
@@ -49,6 +84,7 @@ export const MANAGEMENT_MODE_LABELS = {
 
 export const MANAGER_NAV = [
   { key: 'overview', label: 'Overview' },
+  { key: 'review', label: 'Review' },
   { key: 'business', label: 'Business' },
   { key: 'branding', label: 'Branding' },
   { key: 'homepage', label: 'Homepage' },

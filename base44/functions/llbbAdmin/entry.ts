@@ -38,9 +38,8 @@ import {
   unpublishSaleFromDestination
 } from '../../shared/publicationService.ts';
 
-function jerr(code, message, status) {
-  return Response.json({ error: { code, message: message || code } }, { status: status || 400 });
-}
+// jerr + pageOf come from the shared collab module (Phase 4D extraction).
+import { jerr, pageOf } from '../../shared/websiteCollabShared.ts';
 
 export default async function(req) {
   try {
@@ -299,6 +298,11 @@ async function workflow(service, user, body) {
   }
   const from = tenant.workflow_status || inferWorkflowFromTechnical(tenant.status);
   const to = body.to;
+  // Phase 4D — review-gated transitions run EXCLUSIVELY through the
+  // websiteCollab review seam (readiness + freshness + note enforcement).
+  if (to === 'ready_for_review') return jerr('use_review_seam', 'Submit for review through the review seam (readiness enforced)', 409);
+  if (to === 'approved') return jerr('use_review_seam', 'Approval runs through the review seam (checks + freshness enforced)', 409);
+  if (to === 'changes_requested') return jerr('use_review_seam', 'Request changes through the review seam (a review note is required)', 409);
   const check = validateWorkflowTransition(from, to);
   if (!check.ok) return jerr(check.reason, `Cannot move ${from} → ${to}`, 409);
 
@@ -358,10 +362,7 @@ async function setManager(service, body) {
 // Canonical sales of the tenant's Company joined with THIS tenant's
 // Publication state. Never a second sale editor — operational editing routes
 // to canonical EstateSalen Sale management (the manager links out).
-function pageOf(res) {
-  return (res && res.items) ? res.items : (res || []);
-}
-
+// (pageOf is imported from the shared collab module.)
 async function salesList(service, body) {
   const tenant = await service.entities.WebsiteTenant.get(body.website_tenant_id || '').catch(() => null);
   if (!tenant) return jerr('tenant_not_found', 'Website tenant not found', 404);

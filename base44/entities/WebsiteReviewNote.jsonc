@@ -1,0 +1,117 @@
+{
+  "name": "WebsiteReviewNote",
+  "type": "object",
+  "description": "Phase 4D \u2014 lightweight review communication between the platform admin and the client, scoped to one WebsiteTenant. Notes are general or section-associated; OPEN/RESOLVED lifecycle with response + resolution history. Written only through the websiteCollab server seam.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant the note belongs to. No cross-tenant visibility."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant."
+    },
+    "section": {
+      "type": "string",
+      "description": "Optional setup section the note targets (e.g. branding, services)."
+    },
+    "author_user_id": {
+      "type": "string",
+      "description": "EstateSalen user who wrote the note."
+    },
+    "author_display": {
+      "type": "string",
+      "description": "Author display name at write time."
+    },
+    "author_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "client"
+      ],
+      "default": "admin",
+      "description": "Admin-authored = change request / reviewer feedback. Client-authored = response or question."
+    },
+    "body": {
+      "type": "string",
+      "description": "The note text (plain, client-safe copy)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "resolved"
+      ],
+      "default": "open",
+      "description": "OPEN while awaiting action; RESOLVED once addressed. Resolved notes leave the default view but remain auditable."
+    },
+    "resolved_by_user_id": {
+      "type": "string",
+      "description": "User that resolved the note."
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_text": {
+      "type": "string",
+      "description": "Latest reply (client answer or admin clarification)."
+    },
+    "response_by_user_id": {
+      "type": "string"
+    },
+    "response_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_round": {
+      "type": "integer",
+      "description": "Review round the note belongs to (distinguishes original submission vs change request vs resubmission)."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "body"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

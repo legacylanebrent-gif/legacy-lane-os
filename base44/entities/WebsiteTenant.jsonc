@@ -38,7 +38,7 @@
         "archived"
       ],
       "default": "draft",
-      "description": "LLBB product workflow state (Phase 4A). Maps to technical status: draft/setup_in_progress/ready_for_review/changes_requested/approved \u2192 'setup'; live \u2192 'active'; suspended \u2192 'suspended'; archived \u2192 'archived'. Transitions validated server-side in llbbAdmin; going live requires readiness blockers clear."
+      "description": "LLBB product workflow state (Phase 4A). Maps to technical status: draft/setup_in_progress/ready_for_review/changes_requested/approved \u2192 'setup'; live \u2192 'active'; suspended \u2192 'suspended'; archived \u2192 'archived'. Transitions validated server-side in llbbAdmin; ready_for_review/changes_requested/approved transitions run exclusively through the Phase 4D review seam (readiness + freshness enforced); going live requires readiness blockers clear."
     },
     "management_mode": {
       "type": "string",
@@ -66,6 +66,54 @@
     "workflow_updated_by": {
       "type": "string",
       "description": "User ID of the last workflow transition actor (audit)."
+    },
+    "website_manager_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Phase 4D \u2014 per-tenant delegated website managers (the website_manage capability, written ONLY by the server seam: invitation acceptance, admin grant, owner revocation). Company membership is always additionally required; an empty list falls back to legacy-compatible tenant-member access. Never a second identity or membership model."
+    },
+    "review_submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Phase 4D \u2014 most recent SUBMIT FOR REVIEW timestamp (original or resubmission)."
+    },
+    "review_submitted_by": {
+      "type": "string",
+      "description": "User ID of the last review submission actor (audit)."
+    },
+    "review_version": {
+      "type": "integer",
+      "description": "Phase 4D \u2014 settings_version snapshotted at the last submission. Approval is refused when the current settings_version exceeds it (review needs refresh)."
+    },
+    "review_round": {
+      "type": "integer",
+      "default": 0,
+      "description": "Phase 4D \u2014 incremented on every submission so original, change request and resubmission are distinguishable."
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Phase 4D \u2014 approval timestamp (approval \u2260 publication)."
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Platform admin that approved (audit)."
+    },
+    "approved_version": {
+      "type": "integer",
+      "description": "Phase 4D \u2014 settings_version snapshotted at approval (the reviewed-and-accepted version)."
+    },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Phase 4D \u2014 last meaningful setup activity (section save, review action, invite). Drives stalled-setup detection in the admin attention center."
+    },
+    "last_activity_by": {
+      "type": "string",
+      "description": "User ID of the last meaningful activity actor."
     },
     "destination_id": {
       "type": "string",

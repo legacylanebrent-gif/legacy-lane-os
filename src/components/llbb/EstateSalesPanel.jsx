@@ -34,7 +34,11 @@ function fmtDates(dates) {
   return isNaN(d) ? dates[0].date : d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export default function EstateSalesPanel({ websiteTenantId, onNavigate }) {
+// clientMode (Phase 4D): reads go through the client-safe websiteCollab seam
+// and publish/unpublish + the policy switch are hidden — publication actions
+// and operational Sale authority remain platform-admin / canonical powers.
+export default function EstateSalesPanel({ websiteTenantId, onNavigate, clientMode }) {
+  const seam = clientMode ? 'websiteCollab' : 'llbbAdmin';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
@@ -42,13 +46,13 @@ export default function EstateSalesPanel({ websiteTenantId, onNavigate }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await base44.functions.invoke('llbbAdmin', { action: 'sales_list', website_tenant_id: websiteTenantId });
+      const res = await base44.functions.invoke(seam, { action: 'sales_list', website_tenant_id: websiteTenantId });
       setData(res.data);
     } catch (e) {
       toast({ title: 'Could not load estate sales', variant: 'destructive' });
     }
     setLoading(false);
-  }, [websiteTenantId]);
+  }, [websiteTenantId, seam]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -86,8 +90,8 @@ export default function EstateSalesPanel({ websiteTenantId, onNavigate }) {
 
   return (
     <div className="space-y-5">
-      {/* Publication policy (Part 3) */}
-      <div className="bg-white rounded-lg border border-slate-200 p-5">
+      {/* Publication policy (Part 3) — platform-admin only in client mode */}
+      {!clientMode && (<div className="bg-white rounded-lg border border-slate-200 p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="max-w-xl">
             <div className="font-heading font-bold text-slate-900 flex items-center gap-2"><LayoutList className="w-4 h-4" /> Publication Policy</div>
@@ -101,7 +105,7 @@ export default function EstateSalesPanel({ websiteTenantId, onNavigate }) {
             <Switch checked={!!data.auto_publish_enabled} onCheckedChange={setPolicy} disabled={policyBusy} aria-label="Auto-publish eligible sales" />
           </div>
         </div>
-      </div>
+      </div>)}
 
       {/* Sales table */}
       <div className="bg-white rounded-lg border border-slate-200">
@@ -168,11 +172,11 @@ export default function EstateSalesPanel({ websiteTenantId, onNavigate }) {
                         <Button variant="ghost" size="sm" asChild>
                           <Link to={`/SaleEditor?saleId=${s.id}`}><Settings2 className="w-3.5 h-3.5 mr-1" /> Manage</Link>
                         </Button>
-                        {s.publication && s.publication.status === 'published' ? (
+                        {!clientMode && (s.publication && s.publication.status === 'published' ? (
                           <Button variant="outline" size="sm" disabled={busyId === s.id} onClick={() => publishAction(s, 'unpublish')}>Unpublish</Button>
                         ) : (
                           <Button variant="outline" size="sm" disabled={busyId === s.id || s.status === 'draft' || s.status === 'archived'} onClick={() => publishAction(s, 'publish')}>Publish</Button>
-                        )}
+                        ))}
                       </div>
                     </td>
                   </tr>

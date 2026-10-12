@@ -7,6 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import {
   assertSettingsAccess, getTenantSettings, sanitizeSettingsPayload, projectPublicSettings
 } from '../../shared/websiteSettingsService.ts';
+import { assertWebsiteManagement, logActivity, jerr } from '../../shared/websiteCollabShared.ts';
 
 export default async function(req) {
   try {
@@ -21,6 +22,15 @@ export default async function(req) {
     const access = assertSettingsAccess(user, tenant);
     if (!access.ok) return Response.json({ error: access.error.code }, { status: access.error.status });
 
+    // Phase 4D — writes additionally require website-management capability and
+    // respect the management mode (admin_managed tenants are read-only for
+    // ungranted members). Reads stay tenant-member level.
+    if (body.action === 'update') {
+      const company = await service.entities.Company.get(tenant.company_id).catch(() => null);
+      const manage = assertWebsiteManagement(user, tenant, company);
+      if (!manage.ok) return Response.json({ error: manage.error.code }, { status: manage.error.status || 403 });
+    }
+
     if (body.action === 'get') {
       const settings = await getTenantSettings(service, tenant.id);
       const company = await service.entities.Company.get(tenant.company_id).catch(() => null);
@@ -33,11 +43,21 @@ export default async function(req) {
       patch.last_saved_section = typeof body.section === 'string' && body.section.length <= 50 ? body.section : undefined;
       patch.last_saved_by = user.id;
       const existing = await getTenantSettings(service, tenant.id);
+
+      // Part 15 — stale concurrent-edit protection. The client sends the
+      // updated_date it loaded; a mismatch means someone else saved in between.
+      const expected = typeof body.expected_updated_at === 'string' ? body.expected_updated_at : null;
+      if (existing && expected && existing.updated_date && existing.updated_date !== expected) {
+        return Response.json({
+          error: { code: 'stale_edit', message: 'This section changed since you opened it. Reload before saving.' },
+          current_updated_at: existing.updated_date
+        }, { status: 409 });
+      }
+
       let saved;
       if (existing) {
-        const version = Number.isInteger(patch.settings_version)
-          ? patch.settings_version
-          : (existing.settings_version || 1);
+        // settings_version is server-owned (Phase 4D): every save advances it.
+        const version = (existing.settings_version || 1) + 1;
         saved = await service.entities.WebsiteTenantSettings.update(existing.id, { ...patch, settings_version: version });
       } else {
         saved = await service.entities.WebsiteTenantSettings.create({
@@ -54,6 +74,16 @@ export default async function(req) {
         for (const r of rows) {
           if (r.id !== saved.id) await service.entities.WebsiteTenantSettings.update(r.id, { is_active: false }).catch(() => {});
         }
+      }
+      // Part 16 — meaningful-action activity history (section saves only;
+      // never per-keystroke).
+      if (body.section) {
+        await logActivity(service, tenant, {
+          actorUser: user,
+          role: user.role === 'admin' ? 'admin' : 'client',
+          action: 'section_updated',
+          section: String(body.section).slice(0, 60)
+        });
       }
       return Response.json({ ok: true, settings: saved });
     }

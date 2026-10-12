@@ -10,6 +10,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { assertTenantAccess } from '../../shared/websiteTenantService.ts';
 import { MEDIA_CATEGORIES } from '../../shared/websiteSettingsService.ts';
+import { assertWebsiteManagement, logActivity } from '../../shared/websiteCollabShared.ts';
 
 const MAX_MEDIA_PER_TENANT = 200;
 
@@ -35,6 +36,14 @@ export default async function(req) {
 
     const Media = service.entities.WebsiteTenantMedia;
     const action = body.action || 'list';
+
+    // Phase 4D — media MUTATIONS require website-management capability; reads
+    // stay tenant-member level (Part 9 permission matrix).
+    if (action !== 'list') {
+      const company = await service.entities.Company.get(tenant.company_id).catch(() => null);
+      const manage = assertWebsiteManagement(user, tenant, company);
+      if (!manage.ok) return Response.json({ error: manage.error.code }, { status: manage.error.status || 403 });
+    }
 
     if (action === 'list') {
       const page = await Media.filter({ website_tenant_id: tenant.id }, { limit: 300, sort: 'sort_order' });
@@ -64,6 +73,7 @@ export default async function(req) {
         sort_order: Number.isInteger(body.sort_order) ? body.sort_order : 0,
         member_user_ids: tenant.member_user_ids || []
       });
+      await logActivity(service, tenant, { actorUser: user, role: user.role === 'admin' ? 'admin' : 'client', action: 'media_added', section: created.category, detail: created.file_name || created.url });
       return Response.json({ ok: true, media: { id: created.id, url: created.url, category: created.category } });
     }
 
@@ -91,6 +101,7 @@ export default async function(req) {
       const m = await loadOwned(body.id);
       if (!m) return jerr('media_not_found', 'Media not found for this website', 404);
       await Media.delete(m.id);
+      await logActivity(service, tenant, { actorUser: user, role: user.role === 'admin' ? 'admin' : 'client', action: 'media_removed', section: m.category, detail: m.file_name || m.url });
       return Response.json({ ok: true });
     }
 
