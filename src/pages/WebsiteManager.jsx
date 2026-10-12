@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ReadinessPanel from '@/components/llbb/ReadinessPanel';
 import WorkflowActions from '@/components/llbb/WorkflowActions';
+import ReviewActions from '@/components/llbb/ReviewActions';
+import ReviewCenterPanel from '@/components/llbb/ReviewCenterPanel';
+import InviteClientModal from '@/components/llbb/InviteClientModal';
 import SettingsSectionEditor from '@/components/llbb/SettingsSectionEditor';
 import ManagerPreviewPanel from '@/components/llbb/ManagerPreviewPanel';
 import StudioOverview from '@/components/llbb/StudioOverview';
@@ -77,6 +80,7 @@ export default function WebsiteManager() {
   const [railNonce, setRailNonce] = useState(0);
   const [lastSavedAt, setLastSavedAt] = useState(null);
   const [mobileTab, setMobileTab] = useState('edit');
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const load = async () => {
     if (!tenantId) { setError('No website selected.'); setLoading(false); return; }
@@ -133,6 +137,7 @@ export default function WebsiteManager() {
       case 'estate_sales': return <EstateSalesPanel websiteTenantId={tenantId} onNavigate={setTab} />;
       case 'leads': return <LeadsPanel websiteTenantId={tenantId} />;
       case 'domain': return <DomainPanel ov={ov} />;
+      case 'review': return <ReviewCenterPanel ov={ov} onNavigate={setTab} onSaved={onSaved} />;
       case 'preview': return <ManagerPreviewPanel websiteTenantId={tenantId} />;
       default: return <StudioOverview ov={ov} settings={settings} onNavigate={setTab} />;
     }
@@ -150,8 +155,9 @@ export default function WebsiteManager() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setTab('media')} className="hidden lg:inline-flex">Media Library</Button>
           <Button variant="outline" size="sm" onClick={() => { setTab('preview'); }}><Eye className="w-4 h-4 mr-1.5" /> Preview Website</Button>
-          <Button size="sm" variant="ghost" disabled title="Client invitations arrive in Phase 4D"><UserPlus className="w-4 h-4 mr-1.5" /> Invite Client</Button>
+          <Button size="sm" variant="outline" onClick={() => setInviteOpen(true)}><UserPlus className="w-4 h-4 mr-1.5" /> Invite Client</Button>
           <WorkflowActions overview={ov} onDone={load} primary />
+          <ReviewActions overview={ov} onDone={load} />
           <Button variant="ghost" size="sm" className="hidden lg:inline-flex" onClick={() => setRailOpen(o => !o)} aria-label={railOpen ? 'Collapse preview' : 'Expand preview'}>
             {railOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
           </Button>
@@ -198,6 +204,15 @@ export default function WebsiteManager() {
           <LivePreviewRail websiteTenantId={tenantId} nonce={railNonce} />
         </div>
       )}
+
+      <InviteClientModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        tenantId={tenantId}
+        companyName={(ov.company && ov.company.display_name) || ov.company.legal_name}
+        websiteName={ov.tenant.name}
+        onInvited={load}
+      />
     </div>
   );
 }

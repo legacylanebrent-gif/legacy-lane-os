@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LaunchWizard from '@/components/llbb/LaunchWizard';
 import { WORKFLOW_LABELS, WORKFLOW_BADGE, ALERT_LABELS, MANAGEMENT_MODE_LABELS } from '@/components/llbb/managerConfig';
+import AdminAttentionCenter from '@/components/llbb/AdminAttentionCenter';
 import { Rocket, Search, ExternalLink, Eye, AlertTriangle, Loader2, LayoutTemplate, Globe, Settings2 } from 'lucide-react';
 
 const SUMMARY_CHIPS = [
@@ -83,6 +84,10 @@ export default function AdminBusinessBuilder() {
           <Rocket className="w-4 h-4 mr-2" /> Launch New Website
         </Button>
       </div>
+
+      {/* Phase 4D — Attention Center: everything waiting on a human */}
+      <AdminAttentionCenter onOpen={(tenantId) => window.location.assign(`/WebsiteManager?tenant=${tenantId}`)} />
+
 
       {/* Summary chips */}
       <div className="flex flex-wrap gap-2">

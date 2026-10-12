@@ -11,7 +11,12 @@ export default function WorkflowActions({ overview, onDone, primary }) {
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState(null);
   const list = (overview && overview.allowed_transitions) || [];
-  const main = list.filter(t => t !== 'archived')[0];
+  // Phase 4D — review-gated transitions (ready_for_review / approved /
+  // changes_requested) run exclusively through the ReviewActions seam, which
+  // enforces readiness, review notes and staleness. They never render here.
+  const REVIEW_SEAM_TRANSITIONS = ['ready_for_review', 'approved', 'changes_requested'];
+  const filtered = list.filter(t => !REVIEW_SEAM_TRANSITIONS.includes(t));
+  const main = filtered.filter(t => t !== 'archived')[0];
 
   const go = async (to) => {
     setBusy(to); setError(null);
