@@ -6,7 +6,8 @@
 // AI service never fails the website — tenants remain valid and the operator
 // can retry, continue manually, or apply starter content (Parts 40-44).
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { assertTenantAccess, getTenantSettings } from '../../shared/websiteTenantService.ts';
+import { assertTenantAccess } from '../../shared/websiteTenantService.ts';
+import { getTenantSettings } from '../../shared/websiteSettingsService.ts';
 import { logActivity, jerr } from '../../shared/websiteCollabShared.ts';
 import {
   SERVICE_VOCAB, TONES, PALETTES, buildGenerationInput, buildPrompt, OUTPUT_SCHEMA,
@@ -272,8 +273,6 @@ async function editTool(base44, service, user, body) {
   }
   const proposed = proposal && typeof proposal.text === 'string' ? proposal.text.trim().slice(0, 20000) : null;
   if (!proposed) return Response.json({ status: 'failed', fallback_options: ['keep_current'] });
-  // Never propose a rewrite that lengthens toward banned claims.
-  const { validateDraftSafeCheck } = { validateDraftSafeCheck: null };
   return Response.json({ status: 'ready', proposal: proposed });
 }
 
