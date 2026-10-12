@@ -259,10 +259,10 @@
                 "type": "boolean",
                 "default": true
               }
-            }
-          },
-          "default": [],
-          "description": "Controlled homepage section visibility/order. Keys come from the platform section registry \u2014 never arbitrary content."
+            },
+            "default": [],
+            "description": "Controlled homepage section visibility/order. Keys come from the platform section registry \u2014 never arbitrary content."
+          }
         }
       },
       "default": {}
@@ -784,6 +784,11 @@
       "type": "boolean",
       "default": true,
       "description": "MVP: one active configuration per tenant."
+    },
+    "ai_provenance": {
+      "type": "object",
+      "default": {},
+      "description": "Phase 4F \u2014 AI-assist provenance (presentation layer only, never canonical truth). Tracks which content sections were AI-generated vs library vs human-edited, generation timestamps, content-library versions used, and the factual-inputs confirmation state (Part 36). Never shown as technical detail in client UI."
     },
     "member_user_ids": {
       "type": "array",

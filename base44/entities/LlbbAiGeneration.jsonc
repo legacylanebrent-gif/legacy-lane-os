@@ -1,0 +1,118 @@
+{
+  "name": "LlbbAiGeneration",
+  "type": "object",
+  "description": "Phase 4F \u2014 AI website content generation record. Truthful status lifecycle (preparing/generating/ready/failed), request-id idempotency, structured input allowlist (NEVER leads, seller data, private inventory notes, payment data or secrets), validated output, and provenance. Written only by the llbbAiBuilder server seam.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant the generation belongs to. Tenant isolation: one company's inputs/outputs are never visible in another's generation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company \u2014 derived server-side from the tenant."
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Caller-supplied idempotency key. Repeated clicks resolve to the same record \u2014 no conflicting generation jobs."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "preparing",
+        "generating",
+        "ready",
+        "failed"
+      ],
+      "default": "preparing",
+      "description": "Truthful generation status. Success is recorded only after validated persistence."
+    },
+    "target": {
+      "type": "string",
+      "description": "'full_draft' or 'section:<key>'."
+    },
+    "input_config": {
+      "type": "object",
+      "description": "Allowlisted structured input actually sent to the AI (business facts, selected services, tone, story, library keys). No contact values, no leads, no private data."
+    },
+    "output": {
+      "type": "object",
+      "description": "Validated structured content output (post schema + claims validation)."
+    },
+    "rejected_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Output fields replaced with library/neutral defaults because they failed claims or schema validation."
+    },
+    "content_library_version": {
+      "type": "string",
+      "description": "Library module versions used as baseline (e.g. svc_estate_sales@1)."
+    },
+    "model": {
+      "type": "string",
+      "description": "AI model/mechanism label (provenance only)."
+    },
+    "attempts": {
+      "type": "integer",
+      "default": 1,
+      "description": "Generation attempts on this record."
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Sanitized error when status is failed (no secrets, no raw payloads)."
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the validated output was applied to tenant settings."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "request_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

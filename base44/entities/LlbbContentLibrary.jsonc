@@ -1,0 +1,109 @@
+{
+  "name": "LlbbContentLibrary",
+  "type": "object",
+  "description": "Phase 4F \u2014 LLBB platform-maintained professional starter content modules. NOT tenant operational data: adopting a module COPIES its copy into tenant settings; later library updates never rewrite adopted tenant content. Managed by platform admins only.",
+  "properties": {
+    "content_key": {
+      "type": "string",
+      "description": "Stable module key (e.g. svc_estate_sales, faq_basics). Key stays stable across versions."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "service_content",
+        "seller_prep",
+        "what_to_expect",
+        "estate_sale_process",
+        "buyer_info",
+        "faq",
+        "trust",
+        "cta",
+        "seo",
+        "about",
+        "homepage"
+      ],
+      "description": "Controlled content category."
+    },
+    "title": {
+      "type": "string",
+      "description": "Module title / subject."
+    },
+    "short_copy": {
+      "type": "string",
+      "description": "Short professionally written copy (one to two sentences)."
+    },
+    "long_copy": {
+      "type": "string",
+      "description": "Long professionally written copy (paragraph(s))."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Structured module payload where copy is not prose (e.g. FAQ items list)."
+    },
+    "tone": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tone compatibility keys (warm, professional, modern, elegant, friendly, bold). Empty = all tones."
+    },
+    "service_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Service vocabulary keys this module supports (empty = general)."
+    },
+    "jurisdiction_sensitive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Content touches legal-adjacent topics (probate/real estate) \u2014 must remain educational and general."
+    },
+    "template_placement": {
+      "type": "string",
+      "description": "Where the module is used (services_page, homepage_services, faq_page, cta_band, seo_meta, about_page)."
+    },
+    "version": {
+      "type": "integer",
+      "default": 1,
+      "description": "Module version. Improvements create a new version \u2014 adopted tenant content is never auto-updated."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Rollback switch \u2014 inactive modules are excluded from new generations."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "content_key",
+    "category",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

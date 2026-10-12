@@ -1,0 +1,87 @@
+{
+  "name": "LlbbSettingsVersion",
+  "type": "object",
+  "description": "Phase 4F \u2014 lightweight website PRESENTATION version history for undo/recovery (homepage, about, services, SEO, branding sections). Never operational Sale/Inventory copies. Written only by the llbbAiBuilder server seam before overwrites and restores.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant the version snapshot belongs to."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company \u2014 derived server-side from the tenant."
+    },
+    "section": {
+      "type": "string",
+      "description": "Presentation section(s) captured (e.g. ai_build, about, homepage, seo, branding)."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for the version."
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "ai_generation",
+        "human_edit",
+        "restore"
+      ],
+      "default": "ai_generation",
+      "description": "What preceded the snapshot (the state being preserved)."
+    },
+    "settings_version": {
+      "type": "integer",
+      "description": "WebsiteTenantSettings.settings_version at capture time."
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "The captured presentation values (allowlisted sections only)."
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS."
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "section",
+    "snapshot"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
