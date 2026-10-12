@@ -11,9 +11,16 @@ function page(res) {
   return (res && res.items) ? res.items : (res || []);
 }
 
+// Accepts either the full client or an already-service-role client
+// (e.g. from backend functions that pass base44.asServiceRole straight
+// through) — resolves the service-role surface either way.
+function srOf(base44) {
+  return (base44 && base44.asServiceRole) ? base44.asServiceRole : base44;
+}
+
 async function getOrThrow(base44, entity, id) {
   try {
-    return await base44.asServiceRole.entities[entity].get(id);
+    return await srOf(base44).entities[entity].get(id);
   } catch (e) {
     return null;
   }
