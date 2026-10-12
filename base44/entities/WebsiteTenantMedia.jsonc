@@ -1,0 +1,114 @@
+{
+  "name": "WebsiteTenantMedia",
+  "type": "object",
+  "description": "Tenant-scoped website presentation media library (Phase 4B). NOT canonical Sale/Inventory imagery \u2014 those are referenced in place, never copied. Records are created/updated/deleted ONLY through the websiteMediaAdmin seam (authorization chain: User \u2192 Company membership \u2192 Company \u2192 WebsiteTenant); client CRUD is admin-only by RLS.",
+  "properties": {
+    "website_tenant_id": {
+      "type": "string",
+      "description": "WebsiteTenant this media belongs to. Invariant enforced server-side at creation."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Canonical Company. DERIVED server-side from the tenant \u2014 never accepted from the client."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "logo",
+        "hero",
+        "company",
+        "owner_team",
+        "services",
+        "gallery",
+        "testimonials",
+        "other"
+      ],
+      "description": "Presentation category from the controlled media vocabulary."
+    },
+    "url": {
+      "type": "string",
+      "description": "Public storage URL of the uploaded image (website rendering requires public storage; access to the LIBRARY is tenant-isolated)."
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "caption": {
+      "type": "string"
+    },
+    "alt_text": {
+      "type": "string"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Archived/hidden assets stay in the library but are excluded from gallery-style surfaces."
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0
+    },
+    "member_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "READ-SCOPE PROJECTION of the tenant's Company membership for RLS. Company remains the membership source of truth."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "website_tenant_id",
+    "company_id",
+    "category",
+    "url"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.member_user_ids": {
+            "$in": [
+              "{{user.id}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

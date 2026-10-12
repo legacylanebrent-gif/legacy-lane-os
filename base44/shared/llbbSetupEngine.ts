@@ -1,16 +1,74 @@
-// LLBB Setup Progress / Website Readiness engine (Phase 4A).
+// LLBB Setup Progress / Website Readiness engine (Phase 4A + 4B Part 28/29).
 // Meaningful setup SECTIONS with weights — explicitly NOT a
 // fields-populated percentage. Optional sections can never block launch;
 // blocking sections are the explicit launch gate (enforced in llbbAdmin
 // workflow 'live' transitions).
 // Status vocabulary: complete | incomplete | warning | optional | blocking.
-//   complete   — section done (contributes weight)
-//   incomplete — required for a meaningful site, not done (contributes 0)
-//   blocking   — incomplete AND a launch blocker
-//   warning    — partially configured
-//   optional   — absence is acceptable by design
+// Phase 4B: REQUIRED / RECOMMENDED / OPTIONAL classification is expressed by
+// the blocking / weighted / optional flags (Overview groups on them), and
+// obvious template placeholders become human-readable launch blockers.
 
 const has = (v) => v !== null && v !== undefined && String(v).trim() !== '';
+
+// ── Part 29 — placeholder detection ──────────────────────────────────────────
+// Scans website PRESENTATION copy only. Canonical Sale descriptions are never
+// scanned as website-template placeholders.
+const PLACEHOLDER_PATTERNS = [
+  { re: /lorem ipsum/i, label: 'Lorem ipsum placeholder text' },
+  { re: /^your company$/i, label: '"Your Company" placeholder' },
+  { re: /^company name$/i, label: '"Company Name" placeholder' },
+  { re: /^sample (testimonial|text|service|question)/i, label: '"Sample" placeholder' },
+  { re: /^example (text|testimonial|service|question)/i, label: '"Example" placeholder' },
+  { re: /\(555\) ?555-?5555|555-0123|555-0100|555-555-5555/, label: 'Placeholder phone number' },
+  { re: /^(your(email|phone|name)|name@|email@)/i, label: 'Placeholder contact details' },
+  { re: /\bsynthetic certification content\b/i, label: 'Synthetic certification content' },
+  { re: /^coming soon$/i, label: '"Coming soon" placeholder' }
+];
+
+function collectTexts(settings) {
+  const s = settings || {};
+  const out = [];
+  const add = (section, label, v) => { if (has(v)) out.push({ section, label, value: String(v) }); };
+  add('identity', 'Business name', s.display_business_name);
+  add('identity', 'Tagline', s.tagline);
+  const c = s.contact || {};
+  add('contact', 'Phone', c.phone); add('contact', 'Email', c.email);
+  add('contact', 'Address', c.address_display); add('contact', 'Business hours', c.business_hours);
+  const h = s.homepage || {};
+  add('homepage', 'Hero headline', h.hero_headline); add('homepage', 'Hero subheadline', h.hero_subheadline);
+  add('homepage', 'Intro copy', h.intro_copy); add('homepage', 'CTA label', h.cta_label);
+  const ab = s.about || {};
+  add('about', 'Headline', ab.headline); add('about', 'Body', ab.body); add('about', 'Mission', ab.mission);
+  add('about', 'Owner bio', ab.owner_bio); add('about', 'Team intro', ab.team_intro);
+  for (const it of (ab.team_members || [])) { add('about', 'Team member name', it && it.name); add('about', 'Team member bio', it && it.bio); }
+  const biz = s.business || {};
+  add('business', 'Short description', biz.short_description); add('business', 'Long description', biz.long_description);
+  add('business', 'Owner name', biz.owner_name); add('business', 'Service area notes', biz.service_area_notes);
+  for (const it of ((s.services || {}).items || [])) { add('services', 'Service title', it && it.title); add('services', 'Service description', it && it.description); }
+  for (const it of ((s.why_choose_us || {}).items || [])) { add('why_choose_us', 'Value point title', it && it.title); add('why_choose_us', 'Value point description', it && it.description); }
+  for (const it of ((s.how_it_works || {}).steps || [])) { add('how_it_works', 'Step title', it && it.title); add('how_it_works', 'Step description', it && it.description); }
+  for (const it of ((s.trust || {}).items || [])) { add('trust', 'Trust indicator', it && it.label); }
+  for (const it of ((s.testimonials || {}).items || [])) { add('testimonials', 'Testimonial', it && it.quote); }
+  for (const it of ((s.faq || {}).items || [])) { add('faq', 'FAQ question', it && it.question); add('faq', 'FAQ answer', it && it.answer); }
+  for (const it of ((s.gallery || {}).items || [])) { add('gallery', 'Gallery caption', it && it.caption); }
+  for (const it of ((s.policies || {}).items || [])) { add('policies', 'Policy body', it && it.body); }
+  add('footer', 'Footer description', (s.footer || {}).description);
+  return out;
+}
+
+export function detectPlaceholders(settings) {
+  const found = [];
+  for (const t of collectTexts(settings)) {
+    for (const p of PLACEHOLDER_PATTERNS) {
+      if (p.re.test(t.value)) {
+        found.push({ section: t.section, label: t.label, where: t.label, detail: `${t.label} in "${t.section}" appears to be placeholder content.` });
+        break; // one flag per text value
+      }
+    }
+    if (found.length >= 8) break;
+  }
+  return found;
+}
 
 export function computeReadiness({ tenant, settings, destination, domains }) {
   const s = settings || {};
@@ -63,16 +121,18 @@ export function computeReadiness({ tenant, settings, destination, domains }) {
       !destOk ? 'Website destination is not attached or not active.' : 'Platform hostname is missing.');
   }
 
-  // Services (non-blocking).
-  if (Array.isArray(services.items) && services.items.length > 0) {
-    push('services', 'Services', 10, false, false, 'complete', `${services.items.length} service(s) listed.`);
-  } else if (has(services.headline) || has(services.intro)) {
-    push('services', 'Services', 10, false, false, 'warning', 'Services section started but no service items yet.');
+  // Services (recommended — at least one enabled service).
+  const enabledServices = (Array.isArray(services.items) ? services.items : [])
+    .filter(it => it && it.enabled !== false);
+  if (enabledServices.length > 0) {
+    push('services', 'Services', 10, false, false, 'complete', `${enabledServices.length} service(s) enabled.`);
+  } else if (has(services.headline) || has(services.intro) || (services.items || []).length > 0) {
+    push('services', 'Services', 10, false, false, 'warning', 'Services section started but no enabled service items yet.');
   } else {
     push('services', 'Services', 10, false, false, 'incomplete', 'No services configured yet.');
   }
 
-  // SEO baseline (non-blocking).
+  // SEO baseline (recommended).
   if (has(seo.default_title) && has(seo.default_description)) {
     push('seo', 'SEO Baseline', 10, false, false, 'complete', 'Default title and description set.');
   } else if (has(seo.default_title) || has(seo.default_description)) {
@@ -81,13 +141,13 @@ export function computeReadiness({ tenant, settings, destination, domains }) {
     push('seo', 'SEO Baseline', 10, false, false, 'incomplete', 'No default SEO title/description yet.');
   }
 
-  // Branding (non-blocking).
-  if (has(branding.logo_url) || has(branding.primary_color)) {
+  // Branding (recommended — safe defaults exist without it).
+  if (has(branding.logo_url) || has(branding.primary_color) || has(branding.design_preset)) {
     push('branding', 'Branding', 10, false, false, 'complete', 'Brand identity present.');
   } else if (Object.values(branding).some(has)) {
     push('branding', 'Branding', 10, false, false, 'warning', 'Branding partially configured.');
   } else {
-    push('branding', 'Branding', 10, false, false, 'incomplete', 'No logo or brand colors yet.');
+    push('branding', 'Branding', 10, false, false, 'incomplete', 'No logo or brand colors yet — the template default design will be used.');
   }
 
   // About (optional).
@@ -99,9 +159,23 @@ export function computeReadiness({ tenant, settings, destination, domains }) {
     push('testimonials', 'Testimonials', 5, false, true, 'complete', `${testimonials.items.length} testimonial(s).`);
   } else push('testimonials', 'Testimonials', 5, false, true, 'optional', 'Optional — no testimonials yet.');
 
+  // Gallery (optional).
+  const galleryItems = ((s.gallery || {}).items) || [];
+  if (galleryItems.length > 0) push('gallery', 'Gallery', 5, false, true, 'complete', `${galleryItems.length} gallery item(s).`);
+  else push('gallery', 'Gallery', 5, false, true, 'optional', 'Optional — no gallery yet.');
+
+  // Social (optional).
+  const socials = Object.values(s.social || {}).filter(has);
+  if (socials.length > 0) push('social', 'Social Links', 0, false, true, 'complete', `${socials.length} social profile(s) linked.`);
+  else push('social', 'Social Links', 0, false, true, 'optional', 'Optional — no social links yet.');
+
+  // FAQ (optional).
+  if (((s.faq || {}).items || []).length > 0) push('faq', 'FAQ', 0, false, true, 'complete', 'FAQ page active.');
+  else push('faq', 'FAQ', 0, false, true, 'optional', 'Optional — no FAQ yet.');
+
   // Policies (optional).
-  if (has(legal.privacy_policy_text) || has(legal.terms_text)) {
-    push('legal', 'Policies', 5, false, true, 'complete', 'Legal copy present.');
+  if (has(legal.privacy_policy_text) || has(legal.terms_text) || ((s.policies || {}).items || []).length > 0) {
+    push('legal', 'Policies', 5, false, true, 'complete', 'Policy copy present.');
   } else push('legal', 'Policies', 5, false, true, 'optional', 'Optional — no privacy/terms copy yet.');
 
   // Custom domain (optional — platform hostname is always included).
@@ -114,6 +188,13 @@ export function computeReadiness({ tenant, settings, destination, domains }) {
     push('sales_integration', 'Estate Sales', 5, false, true, 'complete', 'Canonical sales publish automatically.');
   } else push('sales_integration', 'Estate Sales', 5, false, true, 'optional', 'Optional — sales publishing not enabled.');
 
+  // Part 29 — placeholder content becomes a human-readable blocker.
+  const placeholders = detectPlaceholders(s);
+  if (placeholders.length > 0) {
+    push('content_quality', 'Content Quality', 0, true, false, 'blocking',
+      `Placeholder content detected — ${placeholders.slice(0, 3).map(p => p.label).join('; ')}${placeholders.length > 3 ? ` (+${placeholders.length - 3} more)` : ''}.`);
+  }
+
   const totalWeight = sections.reduce((a, x) => a + x.weight, 0);
   const doneWeight = sections.filter((x) => x.status === 'complete').reduce((a, x) => a + x.weight, 0);
   const percent = totalWeight > 0 ? Math.round((doneWeight / totalWeight) * 100) : 0;
@@ -123,6 +204,7 @@ export function computeReadiness({ tenant, settings, destination, domains }) {
     percent,
     sections,
     blockers,
+    placeholders,
     launch_ready: blockers.length === 0
   };
 }

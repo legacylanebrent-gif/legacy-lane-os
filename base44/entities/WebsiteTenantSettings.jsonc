@@ -23,7 +23,7 @@
     },
     "branding": {
       "type": "object",
-      "description": "Template branding tokens (logo, favicon, colors, fonts).",
+      "description": "Template branding tokens (logo, favicon, colors, fonts, design preset).",
       "properties": {
         "logo_url": {
           "type": "string"
@@ -56,6 +56,10 @@
         },
         "body_font_family": {
           "type": "string"
+        },
+        "design_preset": {
+          "type": "string",
+          "description": "Name of the applied safe design preset (classic/modern/elegant/bold). Presets write controlled branding tokens; they never create separate templates."
         }
       },
       "default": {}
@@ -72,6 +76,10 @@
           "type": "string",
           "description": "Presentation override used only when use_company_phone is false."
         },
+        "sms_number": {
+          "type": "string",
+          "description": "Optional text/SMS number shown when different from the public phone."
+        },
         "use_company_email": {
           "type": "boolean",
           "default": true
@@ -80,9 +88,26 @@
           "type": "string",
           "description": "Presentation override used only when use_company_email is false."
         },
+        "inquiry_email": {
+          "type": "string",
+          "description": "Optional dedicated inquiries address displayed for leads."
+        },
+        "mailing_address": {
+          "type": "string",
+          "description": "Mailing address presentation when different from the business address."
+        },
         "address_display": {
           "type": "string",
           "description": "Website-visible address presentation (e.g. city/state line)."
+        },
+        "show_address": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the physical address line renders publicly."
+        },
+        "business_hours": {
+          "type": "string",
+          "description": "Business hours presentation, one line per entry."
         },
         "contact_cta_label": {
           "type": "string",
@@ -93,7 +118,7 @@
     },
     "social": {
       "type": "object",
-      "description": "Structured social profile URLs shown by the template.",
+      "description": "Structured social profile URLs shown by the template. https URLs only.",
       "properties": {
         "facebook": {
           "type": "string"
@@ -109,13 +134,80 @@
         },
         "pinterest": {
           "type": "string"
+        },
+        "tiktok": {
+          "type": "string"
+        },
+        "linkedin": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "business": {
+      "type": "object",
+      "description": "Website business profile PRESENTATION. Seeds from canonical Company but never writes back to it.",
+      "properties": {
+        "short_description": {
+          "type": "string"
+        },
+        "long_description": {
+          "type": "string"
+        },
+        "year_founded": {
+          "type": "string"
+        },
+        "years_experience": {
+          "type": "string"
+        },
+        "owner_name": {
+          "type": "string"
+        },
+        "business_type_label": {
+          "type": "string",
+          "description": "Public descriptor (e.g. Estate Sale Company)."
+        },
+        "primary_city": {
+          "type": "string"
+        },
+        "primary_county": {
+          "type": "string"
+        },
+        "counties_served": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "cities_served": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "states_served": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "service_area_notes": {
+          "type": "string"
+        },
+        "show_address": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether a full street address renders on public pages."
         }
       },
       "default": {}
     },
     "homepage": {
       "type": "object",
-      "description": "Homepage hero/introduction configuration (no general page-builder).",
+      "description": "Homepage hero, introduction, CTA and controlled section configuration (no general page-builder).",
       "properties": {
         "hero_headline": {
           "type": "string"
@@ -126,6 +218,16 @@
         "hero_image_url": {
           "type": "string"
         },
+        "hero_layout": {
+          "type": "string",
+          "enum": [
+            "overlay",
+            "centered",
+            "text_left",
+            "full_background"
+          ],
+          "description": "Curated hero layout variant. Null/overlay preserves the certified Template #1 rendering."
+        },
         "intro_copy": {
           "type": "string"
         },
@@ -135,6 +237,118 @@
         "cta_link": {
           "type": "string",
           "description": "Internal template path (e.g. /site/sales) or https URL."
+        },
+        "secondary_cta_text": {
+          "type": "string"
+        },
+        "secondary_cta_link": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": [],
+          "description": "Controlled homepage section visibility/order. Keys come from the platform section registry \u2014 never arbitrary content."
+        }
+      },
+      "default": {}
+    },
+    "why_choose_us": {
+      "type": "object",
+      "description": "Structured trust/value points for the homepage. Only explicit operator-entered claims render.",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Key from the platform-approved icon library."
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "how_it_works": {
+      "type": "object",
+      "description": "Structured process section \u2014 operator-defined steps, never a hardcoded process.",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "trust": {
+      "type": "object",
+      "description": "Structured credentials/trust indicators. Only explicit operator-entered data renders \u2014 never inferred or invented.",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          },
+          "default": []
         }
       },
       "default": {}
@@ -148,12 +362,49 @@
         "body": {
           "type": "string",
           "description": "About page copy (plain text paragraphs separated by blank lines)."
+        },
+        "mission": {
+          "type": "string"
+        },
+        "owner_bio": {
+          "type": "string"
+        },
+        "owner_photo_url": {
+          "type": "string"
+        },
+        "team_intro": {
+          "type": "string"
+        },
+        "team_photo_url": {
+          "type": "string"
+        },
+        "team_members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "photo_url": {
+                "type": "string"
+              },
+              "bio": {
+                "type": "string"
+              }
+            }
+          },
+          "default": []
         }
       },
       "default": {}
     },
     "services": {
       "type": "object",
+      "description": "Services library. Starter services are platform-provided presets; custom services are operator-defined. Template renders only enabled services.",
       "properties": {
         "headline": {
           "type": "string"
@@ -171,6 +422,44 @@
               },
               "description": {
                 "type": "string"
+              },
+              "long_description": {
+                "type": "string",
+                "description": "Dedicated service page overview copy."
+              },
+              "icon": {
+                "type": "string",
+                "description": "Key from the platform-approved icon library."
+              },
+              "image_url": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "show_on_homepage": {
+                "type": "boolean",
+                "default": true
+              },
+              "dedicated_page": {
+                "type": "boolean",
+                "default": false,
+                "description": "When true (with an seo_slug) Template #1 renders a structured service detail page."
+              },
+              "seo_slug": {
+                "type": "string",
+                "description": "URL slug for the dedicated service page, normalized server-side."
+              },
+              "cta_label": {
+                "type": "string"
+              },
+              "cta_link": {
+                "type": "string"
+              },
+              "library_key": {
+                "type": "string",
+                "description": "Starter-library key this service came from (diagnostics only)."
               }
             }
           },
@@ -181,7 +470,7 @@
     },
     "testimonials": {
       "type": "object",
-      "description": "Website testimonials (presentation-only social proof). Reusable, tenant-configured; template renders nothing when empty.",
+      "description": "Website testimonials (presentation-only social proof). Template renders nothing when empty.",
       "properties": {
         "headline": {
           "type": "string"
@@ -197,9 +486,65 @@
               "name": {
                 "type": "string"
               },
+              "location": {
+                "type": "string"
+              },
               "context": {
                 "type": "string",
                 "description": "Optional attribution context (e.g. role, service used)."
+              },
+              "photo_url": {
+                "type": "string"
+              },
+              "featured": {
+                "type": "boolean",
+                "default": false
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "gallery": {
+      "type": "object",
+      "description": "Tenant presentation gallery \u2014 separate from canonical Estate Sale inventory.",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "image_url": {
+                "type": "string"
+              },
+              "media_id": {
+                "type": "string",
+                "description": "Optional reference to a WebsiteTenantMedia record."
+              },
+              "caption": {
+                "type": "string"
+              },
+              "alt_text": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
               }
             }
           },
@@ -210,7 +555,7 @@
     },
     "cta": {
       "type": "object",
-      "description": "Reusable operator CTA band configuration.",
+      "description": "Reusable seller CTA band configuration (canonical lead funnel connects in Phase 4C).",
       "properties": {
         "label": {
           "type": "string"
@@ -256,10 +601,94 @@
               },
               "answer": {
                 "type": "string"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
               }
             }
           },
           "default": []
+        }
+      },
+      "default": {}
+    },
+    "policies": {
+      "type": "object",
+      "description": "Structured tenant-level policies. Canonical Sale-specific policies always take precedence over these defaults.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "navigation": {
+      "type": "object",
+      "description": "Header navigation manager. Paths are constrained to the platform-controlled template route allowlist \u2014 never arbitrary URLs.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string",
+                "description": "Controlled template path from the navigation allowlist."
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "footer": {
+      "type": "object",
+      "description": "Footer presentation configuration.",
+      "properties": {
+        "logo_url": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "copyright_name": {
+          "type": "string"
+        },
+        "show_powered_by": {
+          "type": "boolean",
+          "default": true,
+          "description": "EstateSalen-powered attribution."
         }
       },
       "default": {}
@@ -311,6 +740,14 @@
       "type": "integer",
       "default": 1,
       "description": "Configuration version marker (future draft/publish versioning)."
+    },
+    "last_saved_section": {
+      "type": "string",
+      "description": "Section key of the most recent editor save (change attribution, Part 4B/27)."
+    },
+    "last_saved_by": {
+      "type": "string",
+      "description": "User ID of the most recent editor save actor (change attribution)."
     },
     "is_active": {
       "type": "boolean",
