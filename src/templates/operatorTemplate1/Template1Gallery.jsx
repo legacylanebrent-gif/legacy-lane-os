@@ -3,6 +3,7 @@
 // items only, grouped by category when multiple categories exist. Renders
 // nothing when empty (the route is not published without content).
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { sitePath } from '@/templates/siteLinks';
 import TemplateErrorState from './TemplateErrorState.jsx';
 
