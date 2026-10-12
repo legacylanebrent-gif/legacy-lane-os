@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertTriangle, ShieldCheck, History, RotateCcw, Loader2, ArrowRight, Sparkles, Pencil, Lock, Undo2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ShieldCheck, History, RotateCcw, Loader2, ArrowRight, Sparkles, Pencil, Lock, Undo2, Eye } from 'lucide-react';
 
 const AI_SECTIONS = [
   { key: 'hero', label: 'Hero & Homepage', tab: 'homepage' },
@@ -100,6 +100,10 @@ export default function AiBuildResult({ websiteTenantId, settings, result, onSav
               {result.rejected_fields.length} item{result.rejected_fields.length === 1 ? '' : 's'} fell back to safe starter copy
             </Badge>
           )}
+        </div>
+        <div className="px-5 py-3 border-b border-slate-100 bg-white flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => onNavigate('preview')}><Eye className="w-3.5 h-3.5" /> Preview Website</Button>
+          <Button variant="ghost" size="sm" className="text-cyan-700" onClick={() => onNavigate('overview')}>Continue Setup <ArrowRight className="w-3.5 h-3.5" /></Button>
         </div>
         <div className="p-5 grid sm:grid-cols-2 gap-3">
           {AI_SECTIONS.map(s => (

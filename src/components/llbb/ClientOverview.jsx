@@ -43,7 +43,7 @@ export default function ClientOverview({ data, onNavigate, onSaved }) {
       <GuidedOnboarding
         open={!tourDone && workflow !== 'live'}
         websiteName={w.name}
-        onStart={() => { closeTour(); onNavigate('business'); }}
+        onStart={() => { closeTour(); onNavigate('setup_method'); }}
         onSkip={closeTour}
       />
 
@@ -67,6 +67,11 @@ export default function ClientOverview({ data, onNavigate, onSaved }) {
             </Button>
           )}
           <Button variant="outline" onClick={() => onNavigate('preview')}><Eye className="w-4 h-4 mr-1.5" /> Preview Website</Button>
+          {(workflow === 'draft' || workflow === 'setup_in_progress' || workflow === 'changes_requested') && (
+            <button type="button" onClick={() => onNavigate('setup_method')} className="text-sm text-cyan-700 hover:underline">
+              Change setup method
+            </button>
+          )}
           <ReviewActions overview={{ website: w, workflow_status: workflow }} role="client" onDone={onSaved} />
         </div>
       </div>

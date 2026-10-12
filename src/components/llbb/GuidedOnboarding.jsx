@@ -1,20 +1,11 @@
-// Phase 4D (Part 12) — concise guided orientation on the client's first
-// visit. No long tutorial: one screen, Start Setup or Skip Tour, remembered
-// per website in localStorage.
+// Phase 4D (Part 12) — welcome modal, Pilot #1 P1 repair.
+// Communicates: framework is already created, choose how to finish it.
+// NO manual 7-step checklist — the next screen (Setup Method) presents the
+// certified Phase 4F AI-first choice. Choice is remembered per website.
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { PartyPopper, ArrowRight } from 'lucide-react';
-
-const STEPS = [
-  'Confirm your business information',
-  'Add your branding — logo and colors',
-  'Customize your homepage',
-  'Select your services',
-  'Add your contact information',
-  'Preview your website',
-  'Submit it for review'
-];
+import { PartyPopper, ArrowRight, Zap, Wrench } from 'lucide-react';
 
 export default function GuidedOnboarding({ open, websiteName, onStart, onSkip }) {
   return (
@@ -23,20 +14,28 @@ export default function GuidedOnboarding({ open, websiteName, onStart, onSkip })
         <div className="text-center">
           <PartyPopper className="w-10 h-10 text-cyan-600 mx-auto mb-3" />
           <div className="font-heading text-xl font-bold text-slate-900">Welcome to your new website</div>
-          <p className="text-sm text-slate-500 mt-1">We've already created your website{websiteName ? ` — ${websiteName}` : ''}. Just finish these steps together:</p>
+          <p className="text-sm text-slate-500 mt-1">We've already created your website framework{websiteName ? ` — ${websiteName}` : ''}. Choose how you'd like to finish it.</p>
         </div>
-        <ol className="space-y-2 my-4">
-          {STEPS.map((s, i) => (
-            <li key={i} className="flex items-center gap-3 text-sm text-slate-700">
-              <span className="w-6 h-6 rounded-full bg-cyan-100 text-cyan-800 text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
-              {s}
-            </li>
-          ))}
-        </ol>
+        <div className="space-y-2.5 my-4">
+          <div className="flex items-start gap-3 rounded-lg border border-cyan-200 bg-cyan-50 p-3 text-left">
+            <Zap className="w-4 h-4 text-cyan-700 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wide text-cyan-800">Fastest</div>
+              <div className="text-sm text-slate-700">Let EstateSalen build your starting website for you.</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 text-left">
+            <Wrench className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Manual</div>
+              <div className="text-sm text-slate-700">Customize each section yourself.</div>
+            </div>
+          </div>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 justify-end">
-          <Button variant="ghost" onClick={onSkip}>Skip Tour</Button>
+          <Button variant="ghost" onClick={onSkip}>I'll look around first</Button>
           <Button onClick={onStart} className="bg-cyan-600 hover:bg-cyan-700 text-white">
-            Start Setup <ArrowRight className="w-4 h-4 ml-1.5" />
+            Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>
         </div>
       </DialogContent>
