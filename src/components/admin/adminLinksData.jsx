@@ -21,6 +21,7 @@ export const ADMIN_LINK_SECTIONS = [
       { page: 'AdminBuildReport', label: 'Build Report', icon: FileText },
       { page: 'Settings', label: 'Settings', icon: Settings },
       { page: 'ApiKeyManager', label: 'Website API Keys', icon: Globe },
+      { page: 'AdminBusinessBuilder', label: 'Legacy Lane Business Builder', icon: Rocket },
     ],
   },
   {
