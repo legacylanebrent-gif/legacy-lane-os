@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { useSectionSaver, SaveBar, SectionCard, Field, NAV_DEFAULT_ITEMS } from '@/components/llbb/editorKit';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';

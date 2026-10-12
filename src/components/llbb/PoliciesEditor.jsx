@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { useSectionSaver, SaveBar, SectionCard, Field, ItemListEditor } from '@/components/llbb/editorKit';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
 const POLICY_TEMPLATES = [
   ['sale_terms', 'Sale Terms'], ['payment', 'Accepted Payment Methods'], ['pickup', 'Pickup'],
