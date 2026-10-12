@@ -1,4 +1,4 @@
-// Centralized TEMPLATE REGISTRY (Phase 3D.1 — Parts 5/6/7).
+// Centralized TEMPLATE REGISTRY (Phase 3D.1 + Phase 4B pages).
 // Templates are PLATFORM-CONTROLLED code — never tenant-supplied. Tenant
 // binding stores only an id + version that resolve HERE. No tenant-specific
 // code branches anywhere; future Template #2 registers as a new entry without
@@ -15,10 +15,12 @@ export const TEMPLATES = {
     component: Template1,
     // Settings categories this template consumes (mirrors WebsiteTenantSettings).
     settingsCategories: [
-      'identity', 'branding', 'contact', 'social', 'homepage', 'about',
-      'services', 'cta', 'seo', 'faq', 'testimonials', 'legal', 'sale_display', 'inventory_display'
+      'identity', 'branding', 'contact', 'social', 'business', 'homepage',
+      'why_choose_us', 'how_it_works', 'trust', 'about', 'services', 'gallery',
+      'cta', 'seo', 'faq', 'testimonials', 'policies', 'navigation', 'footer',
+      'legal', 'sale_display', 'inventory_display'
     ],
-    pages: ['home', 'sales', 'sale_detail', 'about', 'services', 'contact', 'faq', 'legal']
+    pages: ['home', 'sales', 'sale_detail', 'service_detail', 'about', 'services', 'contact', 'faq', 'gallery', 'legal']
   }
 };
 

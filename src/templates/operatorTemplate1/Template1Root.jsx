@@ -1,21 +1,28 @@
 // Template #1 root — maps a page type to the Template #1 page component.
 // Pure dispatch: receives already-fetched, tenant-safe view models.
+// Phase 4B: dedicated service pages + gallery pages.
 import React from 'react';
 import Template1Shell from './Template1Shell.jsx';
 import Template1Home from './Template1Home.jsx';
 import Template1Sales from './Template1Sales.jsx';
 import Template1SaleDetail from './Template1SaleDetail.jsx';
 import Template1StaticPage from './Template1StaticPage.jsx';
+import Template1ServiceDetail from './Template1ServiceDetail.jsx';
+import Template1Gallery from './Template1Gallery.jsx';
 import TemplateErrorState from './TemplateErrorState.jsx';
 
 export default function Template1({ pageType, website, detail, leadContext }) {
   const settings = website.settings || {};
   const shellProps = { settings, siteName: website.site_name, hostname: website.hostname, company: website.company };
+  const faqLive = ((((settings.faq || {}).items) || []).filter(qa => qa && qa.visible !== false)).length > 0;
+  const galleryLive = ((((settings.gallery || {}).items) || []).filter(it => it && it.visible !== false && it.image_url)).length > 0;
   let content = null;
   if (pageType === 'home') content = <Template1Home website={website} />;
   else if (pageType === 'sales') content = <Template1Sales website={website} />;
   else if (pageType === 'sale_detail') content = <Template1SaleDetail website={website} detail={detail} />;
-  else if (pageType === 'faq' && !(((settings.faq || {}).items) || []).length) {
+  else if (pageType === 'service_detail') content = <Template1ServiceDetail website={website} serviceSlug={detail && detail.service_slug} />;
+  else if (pageType === 'gallery') content = galleryLive ? <Template1Gallery website={website} /> : <TemplateErrorState kind="page_not_available" />;
+  else if (pageType === 'faq' && !faqLive) {
     // Optional page with no content is not published (Phase 3D.3) — never a
     // stub "coming soon" page.
     content = <TemplateErrorState kind="page_not_available" />;

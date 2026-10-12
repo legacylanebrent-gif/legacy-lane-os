@@ -58,6 +58,10 @@ export default function OperatorSitePage({ pageType }) {
         } else if (pageType === 'contact') {
           const lc = await base44.functions.invoke('websiteRuntime', { hostname, action: 'lead_context' });
           if (!cancelled) setState({ loading: false, website: site.website, leadContext: (lc.data && lc.data.lead_context) || null });
+        } else if (pageType === 'service_detail') {
+          // Dedicated service pages are pure tenant-settings content — no
+          // canonical data access, no extra runtime call (Phase 4B, Part 13).
+          if (!cancelled) setState({ loading: false, website: site.website, detail: { service_slug: params.serviceSlug } });
         } else {
           if (!cancelled) setState({ loading: false, website: site.website });
         }

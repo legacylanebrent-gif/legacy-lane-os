@@ -348,6 +348,8 @@ const AuthenticatedApp = () => {
       <Route path="/site" element={<OperatorSitePage pageType="home" />} />
       <Route path="/site/sales" element={<OperatorSitePage pageType="sales" />} />
       <Route path="/site/sale/:saleSlug" element={<OperatorSitePage pageType="sale_detail" />} />
+      <Route path="/site/services/:serviceSlug" element={<OperatorSitePage pageType="service_detail" />} />
+      <Route path="/site/gallery" element={<OperatorSitePage pageType="gallery" />} />
       <Route path="/site/about" element={<OperatorSitePage pageType="about" />} />
       <Route path="/site/services" element={<OperatorSitePage pageType="services" />} />
       <Route path="/site/contact" element={<OperatorSitePage pageType="contact" />} />

@@ -313,9 +313,10 @@ export async function getPublicSitemapEntries(service, ctx) {
   // FAQ is an optional page — never advertised when the tenant has no FAQ content.
   const settings = await getTenantSettings(service, ctx.tenant.id);
   const faqLive = !!(((settings && settings.faq && settings.faq.items) || []).length);
+  const galleryLive = !!(((settings && settings.gallery && settings.gallery.items) || []).length);
   return {
     hostname: ctx.hostname,
-    static_paths: ['/site', '/site/sales', '/site/about', '/site/services', '/site/contact', ...(faqLive ? ['/site/faq'] : []), '/site/legal'],
+    static_paths: ['/site', '/site/sales', '/site/about', '/site/services', '/site/contact', ...(faqLive ? ['/site/faq'] : []), ...(galleryLive ? ['/site/gallery'] : []), '/site/legal'],
     sales: sales.map(s => ({
       slug: s._raw.website_slug || stripInternalFields(s).public_id,
       updated_at: s._raw.updated_date || null
