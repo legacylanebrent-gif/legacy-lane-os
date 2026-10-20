@@ -164,10 +164,11 @@ export default function SaleConversionPipeline() {
     if (selectedDeal?.id === dealId) setSelectedDeal(prev => ({ ...prev, stage: newStage }));
   };
 
-  const handleLinkSale = async (dealId, saleId) => {
+  const handleLinkSale = async (dealId, saleId, dealRecord) => {
     const sale = sales.find(s => s.id === saleId);
     if (!sale) return;
-    const deal = deals.find(d => d.id === dealId);
+    // Prefer the live deal record from the open detail modal — the deals array may be stale mid-edit.
+    const deal = dealRecord || deals.find(d => d.id === dealId);
     const newStage = SALE_STATUS_TO_STAGE[sale.status];
     const updateData = { estate_sale_id: saleId };
     if (newStage) updateData.stage = newStage;
@@ -553,7 +554,7 @@ Include 18-24 tasks covering every stage. Order them chronologically by due_date
               editingTaskId={editingTaskId}
               setEditingTaskId={setEditingTaskId}
               sales={sales}
-              onLinkSale={(saleId) => handleLinkSale(selectedDeal.id, saleId)}
+              onLinkSale={(saleId) => handleLinkSale(selectedDeal.id, saleId, selectedDeal)}
               onUnlinkSale={() => handleUnlinkSale(selectedDeal.id)}
             />
           </DialogContent>
